@@ -70,11 +70,7 @@ ERROR awkward_sort(
   std::vector<int64_t> index(length);
   std::iota(index.begin(), index.end(), int64_t{0});
 
-  // Bin loop is embarrassingly parallel: each segment of `index` is sorted
-  // independently. `dynamic` schedule helps when bin sizes are uneven.
-  #ifdef _OPENMP
-  #pragma omp parallel for if(offsetslength > 1024) schedule(dynamic, 64)
-  #endif
+  // Each segment of `index` is sorted independently.
   for (int64_t i = 0; i < offsetslength - 1; i++) {
     // Clamp against `length` so malformed offsets cannot index past the end
     // of `index` (well-formed offsets satisfy offsets[last] <= length).

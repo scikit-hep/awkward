@@ -68,12 +68,7 @@ ERROR awkward_argsort(
   bool stable) {
   std::iota(toptr, toptr + length, int64_t{0});
 
-  // Bin loop is embarrassingly parallel: each segment of `toptr` is sorted
-  // independently. The `if(...)` clause keeps the parallel region inert for
-  // tiny outputs where thread-startup would dominate.
-  #ifdef _OPENMP
-  #pragma omp parallel for if(offsetslength > 1024) schedule(dynamic, 64)
-  #endif
+  // Each segment of `toptr` is sorted independently.
   for (int64_t i = 0; i < offsetslength - 1; i++) {
     // Clamp against `length` so malformed offsets cannot index past the end
     // of `toptr` (well-formed offsets satisfy offsets[last] <= length).

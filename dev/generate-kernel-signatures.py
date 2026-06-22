@@ -120,27 +120,12 @@ cuda_kernels_impl = [
     "awkward_UnionArray_simplify",
     # "awkward_UnionArray_simplify_one",
     "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
-    # "awkward_reduce_count_64",
-    # "awkward_reduce_max",
-    # "awkward_reduce_max_complex",
-    # "awkward_reduce_min",
-    # "awkward_reduce_min_complex",
-    # "awkward_reduce_argmin",
-    # "awkward_reduce_argmin_complex",
-    # "awkward_reduce_argmax",
-    # "awkward_reduce_argmax_complex",
-    # "awkward_reduce_sum",
-    # "awkward_reduce_sum_bool",
-    # "awkward_reduce_sum_bool_complex",
-    # "awkward_reduce_sum_complex",
-    # "awkward_reduce_sum_int32_bool_64",
-    # "awkward_reduce_sum_int64_bool_64",
-    # "awkward_reduce_prod",
-    # "awkward_reduce_prod_bool",
-    # "awkward_reduce_prod_bool_complex",
-    # "awkward_reduce_prod_complex",
-    # "awkward_reduce_countnonzero",
-    # "awkward_reduce_countnonzero_complex",
+    # The awkward_reduce_* value reducers (sum/prod/min/max/argmin/argmax/
+    # count/countnonzero and their bool/complex variants) have no compiled
+    # CUDA kernel: the CUDA backend dispatches them to the cuda.cccl-based
+    # helpers in awkward._connect.cuda._compute. Their signature-table entries
+    # are emitted as None (this kernel name is absent from cuda_kernels_impl),
+    # which routes CupyBackend.__getitem__ to the CudaComputeKernel path.
     "awkward_sorting_ranges",
     "awkward_sorting_ranges_length",
 ]
