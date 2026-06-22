@@ -7,13 +7,13 @@
 
 template <typename C>
 ERROR awkward_ListArray_combinations(
-  int64_t** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
+  int64_t** __restrict__ tocarry,
+  int64_t* __restrict__ toindex,
+  int64_t* __restrict__ fromindex,
   int64_t n,
   bool replacement,
-  const C* starts,
-  const C* stops,
+  const C* __restrict__ starts,
+  const C* __restrict__ stops,
   int64_t length) {
   for (int64_t j = 0;  j < n;  j++) {
     toindex[j] = 0;

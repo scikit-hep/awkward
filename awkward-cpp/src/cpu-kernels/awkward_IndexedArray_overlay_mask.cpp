@@ -6,9 +6,9 @@
 
 template <typename C, typename M, typename TO>
 ERROR awkward_IndexedArray_overlay_mask(
-  TO* toindex,
-  const M* mask,
-  const C* fromindex,
+  TO* __restrict__ toindex,
+  const M* __restrict__ mask,
+  const C* __restrict__ fromindex,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     M m = mask[i];

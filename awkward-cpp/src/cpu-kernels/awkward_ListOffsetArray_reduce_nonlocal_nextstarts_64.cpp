@@ -12,8 +12,8 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
-  int64_t* nextstarts,
-  const int64_t* nextparents,
+  int64_t* __restrict__ nextstarts,
+  const int64_t* __restrict__ nextparents,
   int64_t nextlen) {
   int64_t lastnextparent = -1;
   for (int64_t i = 0;  i < nextlen;  i++) {

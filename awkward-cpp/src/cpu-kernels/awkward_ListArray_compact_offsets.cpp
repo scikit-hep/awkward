@@ -6,9 +6,9 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_compact_offsets(
-  T* tooffsets,
-  const C* fromstarts,
-  const C* fromstops,
+  T* __restrict__ tooffsets,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t length) {
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {

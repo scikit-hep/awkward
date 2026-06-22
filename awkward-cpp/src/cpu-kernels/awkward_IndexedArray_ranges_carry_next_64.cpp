@@ -6,11 +6,11 @@
 
 template <typename T>
 ERROR awkward_IndexedArray_ranges_carry_next_64(
-  const T* index,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
+  const T* __restrict__ index,
+  const int64_t* __restrict__ fromstarts,
+  const int64_t* __restrict__ fromstops,
   int64_t length,
-  int64_t* tocarry) {
+  int64_t* __restrict__ tocarry) {
   int64_t k = 0;
   int64_t stride = 0;
   for (int64_t i = 0; i < length; i++) {

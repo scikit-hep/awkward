@@ -6,9 +6,9 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_next_at(
-  T* tocarry,
-  const C* fromstarts,
-  const C* fromstops,
+  T* __restrict__ tocarry,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lenstarts,
   int64_t at) {
   for (int64_t i = 0;  i < lenstarts;  i++) {

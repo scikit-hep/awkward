@@ -6,9 +6,9 @@
 
 template <typename T>
 ERROR awkward_ListOffsetArray_drop_none_indexes(
-  T* tooffsets,
-  const T* noneindexes,
-  const T* fromoffsets,
+  T* __restrict__ tooffsets,
+  const T* __restrict__ noneindexes,
+  const T* __restrict__ fromoffsets,
   int64_t length_offsets,
   int64_t length_indexes) {
   T nr_of_nones = 0;

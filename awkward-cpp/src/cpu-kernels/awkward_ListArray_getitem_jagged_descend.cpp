@@ -6,12 +6,12 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_jagged_descend(
-  T* tooffsets,
-  const T* slicestarts,
-  const T* slicestops,
+  T* __restrict__ tooffsets,
+  const T* __restrict__ slicestarts,
+  const T* __restrict__ slicestops,
   int64_t sliceouterlen,
-  const C* fromstarts,
-  const C* fromstops) {
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops) {
   if (sliceouterlen == 0) {
     tooffsets[0] = 0;
   }

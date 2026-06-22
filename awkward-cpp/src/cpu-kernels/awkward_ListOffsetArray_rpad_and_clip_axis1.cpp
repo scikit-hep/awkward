@@ -6,8 +6,8 @@
 
 template <typename T, typename C>
 ERROR awkward_ListOffsetArray_rpad_and_clip_axis1(
-  T* toindex,
-  const C* fromoffsets,
+  T* __restrict__ toindex,
+  const C* __restrict__ fromoffsets,
   int64_t length,
   int64_t target) {
   for (int64_t i = 0; i < length; i++) {

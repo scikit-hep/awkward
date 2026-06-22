@@ -6,11 +6,11 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_broadcast_tooffsets(
-  T* tocarry,
-  const T* fromoffsets,
+  T* __restrict__ tocarry,
+  const T* __restrict__ fromoffsets,
   int64_t offsetslength,
-  const C* fromstarts,
-  const C* fromstops,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {

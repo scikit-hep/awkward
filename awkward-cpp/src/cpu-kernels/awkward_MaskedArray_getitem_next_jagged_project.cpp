@@ -6,11 +6,11 @@
 
 template <typename T>
 ERROR awkward_MaskedArray_getitem_next_jagged_project(
-  T* index,
-  int64_t* starts_in,
-  int64_t* stops_in,
-  int64_t* starts_out,
-  int64_t* stops_out,
+  T* __restrict__ index,
+  int64_t* __restrict__ starts_in,
+  int64_t* __restrict__ stops_in,
+  int64_t* __restrict__ starts_out,
+  int64_t* __restrict__ stops_out,
   int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0; i < length; ++i) {

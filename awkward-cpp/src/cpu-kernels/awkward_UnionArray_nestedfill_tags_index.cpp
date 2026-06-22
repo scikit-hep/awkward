@@ -6,11 +6,11 @@
 
 template <typename T, typename I, typename C>
 ERROR awkward_UnionArray_nestedfill_tags_index(
-  T* totags,
-  I* toindex,
-  C* tmpstarts,
+  T* __restrict__ totags,
+  I* __restrict__ toindex,
+  C* __restrict__ tmpstarts,
   T tag,
-  const C* fromcounts,
+  const C* __restrict__ fromcounts,
   int64_t length) {
   I k = 0;
   for (int64_t i = 0;  i < length;  i++) {

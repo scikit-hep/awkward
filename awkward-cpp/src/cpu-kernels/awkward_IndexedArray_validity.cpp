@@ -6,7 +6,7 @@
 
 template <typename C>
 ERROR awkward_IndexedArray_validity(
-  const C* index,
+  const C* __restrict__ index,
   int64_t length,
   int64_t lencontent,
   bool isoption) {

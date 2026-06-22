@@ -5,11 +5,11 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_NumpyArray_reduce_adjust_starts_shifts_64(
-  int64_t* toptr,
+  int64_t* __restrict__ toptr,
   int64_t outlength,
   const int64_t* /* offsets */,   // unused: see note in adjust_starts_64
-  const int64_t* starts,
-  const int64_t* shifts) {
+  const int64_t* __restrict__ starts,
+  const int64_t* __restrict__ shifts) {
   // See `awkward_NumpyArray_reduce_adjust_starts_64` for the rationale.
   // `parents[toptr[k]] == k` by construction of argmin/argmax, so we use k
   // directly to look up the bin's start.

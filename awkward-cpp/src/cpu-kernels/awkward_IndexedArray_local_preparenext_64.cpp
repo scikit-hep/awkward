@@ -5,10 +5,10 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_IndexedArray_local_preparenext_64(
-    int64_t* tocarry,
+    int64_t* __restrict__ tocarry,
     const int64_t* /* starts */,   // used in CUDA kernels
-    const int64_t* offsets,
-    const int64_t* nextoffsets,
+    const int64_t* __restrict__ offsets,
+    const int64_t* __restrict__ nextoffsets,
     int64_t outlength) {
   // For each outer bin, walk the elements assigned to that bin and pair them
   // up with the surviving inner elements in nextoffsets[bin..bin+1). Outer

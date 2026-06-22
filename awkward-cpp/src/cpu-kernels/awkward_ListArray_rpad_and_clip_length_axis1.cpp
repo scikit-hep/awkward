@@ -6,9 +6,9 @@
 
 template <typename C>
 ERROR awkward_ListArray_rpad_and_clip_length_axis1(
-  int64_t* tomin,
-  const C* fromstarts,
-  const C* fromstops,
+  int64_t* __restrict__ tomin,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t target,
   int64_t lenstarts) {
   int64_t length = 0;

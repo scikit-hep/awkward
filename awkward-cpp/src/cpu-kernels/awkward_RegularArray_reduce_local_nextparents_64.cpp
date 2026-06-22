@@ -12,7 +12,7 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_RegularArray_reduce_local_nextparents_64(
-    int64_t* nextparents,
+    int64_t* __restrict__ nextparents,
     int64_t size,
     int64_t length) {
   int64_t k = 0;

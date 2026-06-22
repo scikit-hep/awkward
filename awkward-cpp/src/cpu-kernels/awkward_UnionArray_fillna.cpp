@@ -6,8 +6,8 @@
 
 template <typename T, typename C>
 ERROR awkward_UnionArray_fillna(
-  T* toindex,
-  const C* fromindex,
+  T* __restrict__ toindex,
+  const C* __restrict__ fromindex,
   int64_t length) {
   for (int64_t i = 0; i < length; i++)
   {

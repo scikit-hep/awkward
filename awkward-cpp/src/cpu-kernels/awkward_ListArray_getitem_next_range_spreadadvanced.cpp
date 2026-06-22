@@ -6,9 +6,9 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_next_range_spreadadvanced(
-  T* toadvanced,
-  const T* fromadvanced,
-  const C* fromoffsets,
+  T* __restrict__ toadvanced,
+  const T* __restrict__ fromadvanced,
+  const C* __restrict__ fromoffsets,
   int64_t lenstarts) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
     C count = fromoffsets[i + 1] - fromoffsets[i];

@@ -6,11 +6,11 @@
 
 template <typename T>
 ERROR awkward_NumpyArray_subrange_equal(
-  T* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
+  T* __restrict__ tmpptr,
+  const int64_t* __restrict__ fromstarts,
+  const int64_t* __restrict__ fromstops,
   int64_t length,
-  bool* toequal) {
+  bool* __restrict__ toequal) {
 
   bool differ = true;
   int64_t leftlen;

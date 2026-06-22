@@ -5,10 +5,10 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_NumpyArray_reduce_adjust_starts_64(
-  int64_t* toptr,
+  int64_t* __restrict__ toptr,
   int64_t outlength,
   const int64_t* offsets,   // unused: see note below
-  const int64_t* starts) {
+  const int64_t* __restrict__ starts) {
   // For output bin k, toptr[k] is the argmin/argmax result — i.e. the index
   // (within the flat input) of the chosen element. By construction that
   // element belongs to bin k, so the bin lookup `parents[toptr[k]]` would

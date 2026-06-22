@@ -6,15 +6,15 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_jagged_apply(
-  T* tooffsets,
-  T* tocarry,
-  const T* slicestarts,
-  const T* slicestops,
+  T* __restrict__ tooffsets,
+  T* __restrict__ tocarry,
+  const T* __restrict__ slicestarts,
+  const T* __restrict__ slicestops,
   int64_t sliceouterlen,
-  const T* sliceindex,
+  const T* __restrict__ sliceindex,
   int64_t sliceinnerlen,
-  const C* fromstarts,
-  const C* fromstops,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t contentlen) {
   int64_t k = 0;
   for (int64_t i = 0;  i < sliceouterlen;  i++) {

@@ -6,11 +6,11 @@
 
 template <typename T, typename C>
 ERROR awkward_ListArray_rpad_axis1(
-  T* toindex,
-  const C* fromstarts,
-  const C* fromstops,
-  C* tostarts,
-  C* tostops,
+  T* __restrict__ toindex,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
+  C* __restrict__ tostarts,
+  C* __restrict__ tostops,
   int64_t target,
   int64_t length) {
   int64_t offset = 0;

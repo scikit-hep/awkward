@@ -6,10 +6,10 @@
 
 template <typename T>
 ERROR awkward_unique_offsets(
-  T* tooffsets,
+  T* __restrict__ tooffsets,
   int64_t length,
-  const int64_t* fromoffsets,
-  const int64_t* starts,
+  const int64_t* __restrict__ fromoffsets,
+  const int64_t* __restrict__ starts,
   int64_t startslength) {
   int64_t j = 0;
   for (int64_t i = 0;  i < length;  i++) {

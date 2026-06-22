@@ -6,10 +6,10 @@
 
 template <typename T, typename C>
 ERROR awkward_ListOffsetArray_flatten_offsets(
-  T* tooffsets,
-  const C* outeroffsets,
+  T* __restrict__ tooffsets,
+  const C* __restrict__ outeroffsets,
   int64_t outeroffsetslen,
-  const T* inneroffsets) {
+  const T* __restrict__ inneroffsets) {
   for (int64_t i = 0;  i < outeroffsetslen;  i++) {
     tooffsets[i] =
       inneroffsets[outeroffsets[i]];

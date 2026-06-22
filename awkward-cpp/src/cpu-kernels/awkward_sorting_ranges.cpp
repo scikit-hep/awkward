@@ -13,9 +13,9 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_sorting_ranges(
-  int64_t* toindex,
+  int64_t* __restrict__ toindex,
   int64_t tolength,
-  const int64_t* parents,
+  const int64_t* __restrict__ parents,
   int64_t parentslength) {
 
   int64_t j = 0;

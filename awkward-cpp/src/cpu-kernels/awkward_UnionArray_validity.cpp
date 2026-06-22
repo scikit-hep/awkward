@@ -6,11 +6,11 @@
 
 template <typename T, typename I>
 ERROR awkward_UnionArray_validity(
-  const T* tags,
-  const I* index,
+  const T* __restrict__ tags,
+  const I* __restrict__ index,
   int64_t length,
   int64_t numcontents,
-  const int64_t* lencontents) {
+  const int64_t* __restrict__ lencontents) {
   for (int64_t i = 0;  i < length;  i++) {
     T tag = tags[i];
     I idx = index[i];

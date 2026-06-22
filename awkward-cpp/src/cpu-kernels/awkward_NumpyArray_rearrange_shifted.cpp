@@ -7,13 +7,13 @@
 template <typename FROM, typename TO>
 ERROR
 awkward_NumpyArray_rearrange_shifted(
-  TO* toptr,
-  const FROM* fromshifts,
+  TO* __restrict__ toptr,
+  const FROM* __restrict__ fromshifts,
   int64_t length,
-  const FROM* fromoffsets,
+  const FROM* __restrict__ fromoffsets,
   int64_t outlength,
-  const FROM* fromparents,
-  const FROM* fromstarts) {
+  const FROM* __restrict__ fromparents,
+  const FROM* __restrict__ fromstarts) {
   // Phase 1: convert per-bin sorted positions into absolute positions by
   // adding fromoffsets[bin] to each element in bin's range. Walk bin-major.
   int64_t k = 0;
@@ -39,13 +39,13 @@ awkward_NumpyArray_rearrange_shifted(
 }
 ERROR
 awkward_NumpyArray_rearrange_shifted_toint64_fromint64(
-  int64_t* toptr,
-  const int64_t* fromshifts,
+  int64_t* __restrict__ toptr,
+  const int64_t* __restrict__ fromshifts,
   int64_t length,
-  const int64_t* fromoffsets,
+  const int64_t* __restrict__ fromoffsets,
   int64_t outlength,
-  const int64_t* fromparents,
-  const int64_t* fromstarts) {
+  const int64_t* __restrict__ fromparents,
+  const int64_t* __restrict__ fromstarts) {
   return awkward_NumpyArray_rearrange_shifted<int64_t, int64_t>(
       toptr, fromshifts, length, fromoffsets, outlength, fromparents, fromstarts);
 }

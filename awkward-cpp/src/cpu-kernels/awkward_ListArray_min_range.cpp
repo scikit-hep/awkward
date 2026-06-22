@@ -6,9 +6,9 @@
 
 template <typename C>
 ERROR awkward_ListArray_min_range(
-  int64_t* tomin,
-  const C* fromstarts,
-  const C* fromstops,
+  int64_t* __restrict__ tomin,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lenstarts) {
   int64_t shorter = fromstops[0] - fromstarts[0];
   for (int64_t i = 1;  i < lenstarts;  i++) {

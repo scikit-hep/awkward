@@ -8,9 +8,9 @@
 
 template <typename OUT, typename IN>
 ERROR awkward_reduce_prod_complex(
-  OUT* toptr,
-  const IN* fromptr,
-  const int64_t* offsets,
+  OUT* __restrict__ toptr,
+  const IN* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
   for (int64_t bin = 0; bin < outlength; bin++) {
     OUT a = static_cast<OUT>(1);

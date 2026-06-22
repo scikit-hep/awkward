@@ -6,8 +6,8 @@
 
 template <typename C>
 ERROR awkward_ListArray_getitem_next_range_counts(
-  int64_t* total,
-  const C* fromoffsets,
+  int64_t* __restrict__ total,
+  const C* __restrict__ fromoffsets,
   int64_t lenstarts) {
   *total = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {

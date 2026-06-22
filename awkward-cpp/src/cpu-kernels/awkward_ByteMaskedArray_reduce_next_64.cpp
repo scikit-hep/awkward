@@ -5,11 +5,11 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ByteMaskedArray_reduce_next_64(
-  int64_t* nextcarry,
+  int64_t* __restrict__ nextcarry,
   int64_t* nextoffsets,   // length outlength + 1
-  int64_t* outindex,
-  const int8_t* mask,
-  const int64_t* offsets,
+  int64_t* __restrict__ outindex,
+  const int8_t* __restrict__ mask,
+  const int64_t* __restrict__ offsets,
   int64_t outlength,
   bool validwhen) {
   int64_t k = 0;

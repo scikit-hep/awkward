@@ -6,11 +6,11 @@
 
 template <typename T>
 ERROR awkward_IndexedArray_reduce_next_64(
-  int64_t* nextcarry,
+  int64_t* __restrict__ nextcarry,
   int64_t* nextoffsets,   // length outlength + 1
-  int64_t* outindex,
-  const T* index,
-  const int64_t* offsets,
+  int64_t* __restrict__ outindex,
+  const T* __restrict__ index,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
   int64_t k = 0;
   nextoffsets[0] = 0;

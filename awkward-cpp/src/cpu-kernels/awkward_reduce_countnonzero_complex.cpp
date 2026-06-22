@@ -6,9 +6,9 @@
 
 template <typename IN>
 ERROR awkward_reduce_countnonzero_complex(
-  int64_t* toptr,
-  const IN* fromptr,
-  const int64_t* offsets,
+  int64_t* __restrict__ toptr,
+  const IN* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
   for (int64_t bin = 0; bin < outlength; bin++) {
     int64_t c = 0;

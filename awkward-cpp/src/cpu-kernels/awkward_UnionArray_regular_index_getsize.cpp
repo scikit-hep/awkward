@@ -6,8 +6,8 @@
 
 template <typename C>
 ERROR awkward_UnionArray_regular_index_getsize(
-  int64_t* size,
-  const C* fromtags,
+  int64_t* __restrict__ size,
+  const C* __restrict__ fromtags,
   int64_t length) {
   *size = 0;
   for (int64_t i = 0;  i < length;  i++) {

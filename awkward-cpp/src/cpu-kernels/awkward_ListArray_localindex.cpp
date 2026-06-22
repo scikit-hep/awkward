@@ -6,8 +6,8 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_localindex(
-  T* toindex,
-  const C* offsets,
+  T* __restrict__ toindex,
+  const C* __restrict__ offsets,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     int64_t start = (int64_t)offsets[i];

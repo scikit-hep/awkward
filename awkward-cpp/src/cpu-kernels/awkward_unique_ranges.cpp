@@ -6,10 +6,10 @@
 
 template <typename T>
 ERROR awkward_unique_ranges(
-  T* toptr,
-  const int64_t* fromoffsets,
+  T* __restrict__ toptr,
+  const int64_t* __restrict__ fromoffsets,
   int64_t offsetslength,
-  int64_t* tooffsets) {
+  int64_t* __restrict__ tooffsets) {
   int64_t m = 0;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     tooffsets[i] = m;

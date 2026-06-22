@@ -6,12 +6,12 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_combinations_length(
-  int64_t* totallen,
-  T* tooffsets,
+  int64_t* __restrict__ totallen,
+  T* __restrict__ tooffsets,
   int64_t n,
   bool replacement,
-  const C* starts,
-  const C* stops,
+  const C* __restrict__ starts,
+  const C* __restrict__ stops,
   int64_t length) {
   *totallen = 0;
   tooffsets[0] = 0;

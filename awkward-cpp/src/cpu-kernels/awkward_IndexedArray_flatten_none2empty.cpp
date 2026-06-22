@@ -6,10 +6,10 @@
 
 template <typename T, typename C>
 ERROR awkward_IndexedArray_flatten_none2empty(
-  T* outoffsets,
-  const C* outindex,
+  T* __restrict__ outoffsets,
+  const C* __restrict__ outindex,
   int64_t outindexlength,
-  const T* offsets,
+  const T* __restrict__ offsets,
   int64_t offsetslength) {
   outoffsets[0] = offsets[0];
   int64_t k = 1;

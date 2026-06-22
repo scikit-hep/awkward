@@ -5,9 +5,9 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_RecordArray_reduce_nonlocal_outoffsets_64(
-  int64_t* outoffsets,
-  int64_t* outcarry,
-  const int64_t* parents,
+  int64_t* __restrict__ outoffsets,
+  int64_t* __restrict__ outcarry,
+  const int64_t* __restrict__ parents,
   int64_t lenparents,
   int64_t outlength) {
   int64_t i = 0;

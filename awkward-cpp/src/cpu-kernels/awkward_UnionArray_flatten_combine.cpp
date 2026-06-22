@@ -10,13 +10,13 @@ template <typename FROMTAGS,
           typename TOINDEX,
           typename T>
 ERROR awkward_UnionArray_flatten_combine(
-  TOTAGS* totags,
-  TOINDEX* toindex,
-  T* tooffsets,
-  const FROMTAGS* fromtags,
-  const FROMINDEX* fromindex,
+  TOTAGS* __restrict__ totags,
+  TOINDEX* __restrict__ toindex,
+  T* __restrict__ tooffsets,
+  const FROMTAGS* __restrict__ fromtags,
+  const FROMINDEX* __restrict__ fromindex,
   int64_t length,
-  T** offsetsraws) {
+  T** __restrict__ offsetsraws) {
   tooffsets[0] = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {

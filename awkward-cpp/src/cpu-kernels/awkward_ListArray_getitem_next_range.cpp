@@ -7,10 +7,10 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_next_range(
-  C* tooffsets,
-  T* tocarry,
-  const C* fromstarts,
-  const C* fromstops,
+  C* __restrict__ tooffsets,
+  T* __restrict__ tocarry,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lenstarts,
   int64_t start,
   int64_t stop,

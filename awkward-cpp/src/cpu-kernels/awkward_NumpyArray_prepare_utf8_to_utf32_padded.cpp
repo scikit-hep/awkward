@@ -8,10 +8,10 @@
 
 template <typename T>
 ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded(
-  const uint8_t *fromptr,
-  const T *fromoffsets,
+  const uint8_t* __restrict__ fromptr,
+  const T* __restrict__ fromoffsets,
   int64_t offsetslength,
-  int64_t *outmaxcodepoints) {
+  int64_t* __restrict__ outmaxcodepoints) {
 
   *outmaxcodepoints = 0;
   int64_t i_code_unit = fromoffsets[0];

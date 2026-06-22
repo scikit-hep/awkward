@@ -6,9 +6,9 @@
 
 template <typename IN>
 ERROR awkward_reduce_prod_bool_complex(
-  bool* toptr,
-  const IN* fromptr,
-  const int64_t* offsets,
+  bool* __restrict__ toptr,
+  const IN* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
   for (int64_t bin = 0; bin < outlength; bin++) {
     bool all_nonzero = true;

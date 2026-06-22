@@ -5,8 +5,8 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(
-  int8_t* toptr,
-  const int64_t* offsets,
+  int8_t* __restrict__ toptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
 
   for (int64_t i = 0; i < outlength; i++) {

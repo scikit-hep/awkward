@@ -7,9 +7,9 @@
 
 template <typename C>
 ERROR awkward_ListArray_getitem_next_range_carrylength(
-  int64_t* carrylength,
-  const C* fromstarts,
-  const C* fromstops,
+  int64_t* __restrict__ carrylength,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lenstarts,
   int64_t start,
   int64_t stop,

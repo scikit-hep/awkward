@@ -5,9 +5,9 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
-  int64_t* nummissing,
-  int64_t* missing,
-  int64_t* nextshifts,
+  int64_t* __restrict__ nummissing,
+  int64_t* __restrict__ missing,
+  int64_t* __restrict__ nextshifts,
   const int64_t* offsets,         // per-row sub-list offsets
   int64_t /* length */,           // implied by outer_offsets[outlength]
   const int64_t* /* starts */,    // unused now; first-of-bin detected via outer_offsets
@@ -15,7 +15,7 @@ ERROR awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
   int64_t outlength,
   int64_t maxcount,
   int64_t nextlen,
-  const int64_t* nextcarry) {
+  const int64_t* __restrict__ nextcarry) {
   // For each outer bin, reset the per-column "missing-so-far" counters at
   // the start, then walk rows in that bin. Each row whose sub-list is shorter
   // than maxcount contributes to nummissing[col] for col in [count, maxcount).

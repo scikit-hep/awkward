@@ -6,11 +6,11 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_next_array(
-  T* tocarry,
-  T* toadvanced,
-  const C* fromstarts,
-  const C* fromstops,
-  const T* fromarray,
+  T* __restrict__ tocarry,
+  T* __restrict__ toadvanced,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
+  const T* __restrict__ fromarray,
   int64_t lenstarts,
   int64_t lenarray,
   int64_t lencontent) {

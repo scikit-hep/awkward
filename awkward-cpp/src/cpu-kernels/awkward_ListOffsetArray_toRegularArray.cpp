@@ -6,8 +6,8 @@
 
 template <typename C>
 ERROR awkward_ListOffsetArray_toRegularArray(
-  int64_t* size,
-  const C* fromoffsets,
+  int64_t* __restrict__ size,
+  const C* __restrict__ fromoffsets,
   int64_t offsetslength) {
   *size = -1;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {

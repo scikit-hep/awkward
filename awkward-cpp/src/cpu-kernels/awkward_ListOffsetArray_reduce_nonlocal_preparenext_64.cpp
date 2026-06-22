@@ -5,11 +5,11 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
-  int64_t* nextcarry,
+  int64_t* __restrict__ nextcarry,
   int64_t* nextoffsets,         // length outlength * maxcount + 1
   int64_t /* nextlen */,        // unused; kept in signature for caller compatibility
-  int64_t* maxnextparents,
-  int64_t* distincts,
+  int64_t* __restrict__ maxnextparents,
+  int64_t* __restrict__ distincts,
   int64_t distinctslen,         // outlength * maxcount
   int64_t* /* offsetscopy */,   // workspace; unused in bin-major layout
   const int64_t* offsets,       // per-row sub-list offsets, length+1 entries

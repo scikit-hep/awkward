@@ -5,9 +5,9 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_reduce_sum_int32_bool_64(
-  int32_t* toptr,
-  const bool* fromptr,
-  const int64_t* offsets,
+  int32_t* __restrict__ toptr,
+  const bool* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
   for (int64_t bin = 0; bin < outlength; bin++) {
     int32_t acc = 0;

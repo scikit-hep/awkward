@@ -6,9 +6,9 @@
 
 template <typename OUT, typename IN>
 ERROR awkward_reduce_min_complex(
-  OUT* toptr,
-  const IN* fromptr,
-  const int64_t* offsets,
+  OUT* __restrict__ toptr,
+  const IN* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength,
   OUT identity) {
   for (int64_t bin = 0; bin < outlength; bin++) {

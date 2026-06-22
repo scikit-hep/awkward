@@ -6,11 +6,11 @@
 
 template <typename FROMTAGS, typename FROMINDEX, typename T>
 ERROR awkward_UnionArray_flatten_length(
-  int64_t* total_length,
-  const FROMTAGS* fromtags,
-  const FROMINDEX* fromindex,
+  int64_t* __restrict__ total_length,
+  const FROMTAGS* __restrict__ fromtags,
+  const FROMINDEX* __restrict__ fromindex,
   int64_t length,
-  T** offsetsraws) {
+  T** __restrict__ offsetsraws) {
   *total_length = 0;
   for (int64_t i = 0;  i < length;  i++) {
     int64_t tag = (int64_t)fromtags[i];

@@ -6,10 +6,10 @@
 
 template <typename C, typename I>
 ERROR awkward_UnionArray_regular_index(
-  I* toindex,
-  I* current,
+  I* __restrict__ toindex,
+  I* __restrict__ current,
   int64_t size,
-  const C* fromtags,
+  const C* __restrict__ fromtags,
   int64_t length) {
   for (int64_t k = 0;  k < size;  k++) {
     current[k] = 0;

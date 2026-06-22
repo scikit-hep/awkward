@@ -6,8 +6,8 @@
 
 template <typename T, typename C>
 ERROR awkward_ListOffsetArray_rpad_axis1(
-  T* toindex,
-  const C* fromoffsets,
+  T* __restrict__ toindex,
+  const C* __restrict__ fromoffsets,
   int64_t fromlength,
   int64_t target) {
   int64_t count = 0;

@@ -7,11 +7,11 @@
 
 template <typename T, typename C>
 ERROR awkward_NumpyArray_pad_zero_to_length(
-  const T* fromptr,
-  const C* fromoffsets,
+  const T* __restrict__ fromptr,
+  const C* __restrict__ fromoffsets,
   int64_t offsetslength,
   int64_t target,
-  T* toptr) {
+  T* __restrict__ toptr) {
   int64_t l_to_char = 0;
 
   for (int64_t k_sublist = 0; k_sublist < offsetslength - 1; k_sublist++) {

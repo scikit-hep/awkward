@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64(
-  int64_t* nextshifts,
-  const T* index,
+  int64_t* __restrict__ nextshifts,
+  const T* __restrict__ index,
   int64_t length) {
   int64_t nullsum = 0;
   int64_t k = 0;

@@ -6,8 +6,8 @@
 
 template <typename C>
 ERROR awkward_IndexedArray_numnull(
-  int64_t* numnull,
-  const C* fromindex,
+  int64_t* __restrict__ numnull,
+  const C* __restrict__ fromindex,
   int64_t lenindex) {
   *numnull = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {

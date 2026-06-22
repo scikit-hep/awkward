@@ -6,12 +6,12 @@
 
 template <typename FROM, typename TO>
 ERROR awkward_ListArray_fill(
-  TO* tostarts,
+  TO* __restrict__ tostarts,
   int64_t tostartsoffset,
-  TO* tostops,
+  TO* __restrict__ tostops,
   int64_t tostopsoffset,
-  const FROM* fromstarts,
-  const FROM* fromstops,
+  const FROM* __restrict__ fromstarts,
+  const FROM* __restrict__ fromstops,
   int64_t length,
   int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {

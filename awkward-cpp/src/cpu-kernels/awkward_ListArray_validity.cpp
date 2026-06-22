@@ -6,8 +6,8 @@
 
 template <typename C>
 ERROR awkward_ListArray_validity(
-  const C* starts,
-  const C* stops,
+  const C* __restrict__ starts,
+  const C* __restrict__ stops,
   int64_t length,
   int64_t lencontent) {
   for (int64_t i = 0;  i < length;  i++) {

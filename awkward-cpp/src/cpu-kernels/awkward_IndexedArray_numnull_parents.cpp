@@ -6,9 +6,9 @@
 
 template <typename C>
 ERROR awkward_IndexedArray_numnull_parents(
-  int64_t* numnull,
-  int64_t* tolength,
-  const C* fromindex,
+  int64_t* __restrict__ numnull,
+  int64_t* __restrict__ tolength,
+  const C* __restrict__ fromindex,
   int64_t lenindex) {
   *tolength = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {

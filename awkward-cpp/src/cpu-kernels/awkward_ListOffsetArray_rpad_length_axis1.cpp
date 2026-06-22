@@ -6,11 +6,11 @@
 
 template <typename C>
 ERROR awkward_ListOffsetArray_rpad_length_axis1(
-  C* tooffsets,
-  const C* fromoffsets,
+  C* __restrict__ tooffsets,
+  const C* __restrict__ fromoffsets,
   int64_t fromlength,
   int64_t target,
-  int64_t* tolength) {
+  int64_t* __restrict__ tolength) {
   int64_t length = 0;
   tooffsets[0] = 0;
   for (int64_t i = 0; i < fromlength; i++) {

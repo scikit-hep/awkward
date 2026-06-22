@@ -13,8 +13,8 @@
 
 template <typename C>
 ERROR awkward_ListOffsetArray_reduce_local_nextparents_64(
-  C* nextparents,
-  const C* offsets,
+  C* __restrict__ nextparents,
+  const C* __restrict__ offsets,
   int64_t length,
   int64_t nextparents_length) {
   int64_t initialoffset = (int64_t)(offsets[0]);

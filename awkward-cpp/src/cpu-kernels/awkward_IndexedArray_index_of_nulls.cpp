@@ -6,11 +6,11 @@
 
 template <typename C>
 ERROR awkward_IndexedArray_index_of_nulls(
-  int64_t* toindex,
-  const C* fromindex,
-  const int64_t* offsets,
+  int64_t* __restrict__ toindex,
+  const C* __restrict__ fromindex,
+  const int64_t* __restrict__ offsets,
   int64_t outlength,
-  const int64_t* starts) {
+  const int64_t* __restrict__ starts) {
   int64_t j = 0;
   for (int64_t bin = 0; bin < outlength; bin++) {
     int64_t start = starts[bin];

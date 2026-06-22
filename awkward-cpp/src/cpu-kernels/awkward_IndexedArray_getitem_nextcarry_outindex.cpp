@@ -6,9 +6,9 @@
 
 template <typename C, typename T>
 ERROR awkward_IndexedArray_getitem_nextcarry_outindex(
-  T* tocarry,
-  C* toindex,
-  const C* fromindex,
+  T* __restrict__ tocarry,
+  C* __restrict__ toindex,
+  const C* __restrict__ fromindex,
   int64_t lenindex,
   int64_t lencontent) {
   int64_t k = 0;

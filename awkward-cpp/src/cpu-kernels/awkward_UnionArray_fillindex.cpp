@@ -6,9 +6,9 @@
 
 template <typename FROM, typename TO>
 ERROR awkward_UnionArray_fillindex(
-  TO* toindex,
+  TO* __restrict__ toindex,
   int64_t toindexoffset,
-  const FROM* fromindex,
+  const FROM* __restrict__ fromindex,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
     toindex[toindexoffset + i] = (TO)fromindex[i];

@@ -6,10 +6,10 @@
 
 template <typename T, typename C, typename I>
 ERROR awkward_UnionArray_project(
-  int64_t* lenout,
-  T* tocarry,
-  const C* fromtags,
-  const I* fromindex,
+  int64_t* __restrict__ lenout,
+  T* __restrict__ tocarry,
+  const C* __restrict__ fromtags,
+  const I* __restrict__ fromindex,
   int64_t length,
   int64_t which) {
   *lenout = 0;

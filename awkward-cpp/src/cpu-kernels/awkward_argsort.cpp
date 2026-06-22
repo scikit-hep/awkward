@@ -59,10 +59,10 @@ bool argsort_order_descending(T l, T r)
 
 template <typename T, typename U>
 ERROR awkward_argsort(
-  int64_t* toptr,
-  const T* fromptr,
+  int64_t* __restrict__ toptr,
+  const T* __restrict__ fromptr,
   int64_t length,
-  const U* offsets,
+  const U* __restrict__ offsets,
   int64_t offsetslength,
   bool ascending,
   bool stable) {

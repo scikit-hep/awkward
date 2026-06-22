@@ -60,10 +60,10 @@ bool sort_order_descending(T l, T r)
 
 template <typename T>
 ERROR awkward_sort(
-  T* toptr,
-  const T* fromptr,
+  T* __restrict__ toptr,
+  const T* __restrict__ fromptr,
   int64_t length,
-  const int64_t* offsets,
+  const int64_t* __restrict__ offsets,
   int64_t offsetslength,
   bool ascending,
   bool stable) {

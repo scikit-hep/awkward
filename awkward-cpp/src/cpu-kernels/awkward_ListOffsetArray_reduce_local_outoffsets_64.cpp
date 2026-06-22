@@ -12,8 +12,8 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ListOffsetArray_reduce_local_outoffsets_64(
-  int64_t* outoffsets,
-  const int64_t* parents,
+  int64_t* __restrict__ outoffsets,
+  const int64_t* __restrict__ parents,
   int64_t lenparents,
   int64_t outlength) {
   int64_t k = 0;

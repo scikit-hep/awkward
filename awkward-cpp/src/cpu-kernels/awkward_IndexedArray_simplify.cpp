@@ -6,10 +6,10 @@
 
 template <typename OUT, typename IN, typename TO>
 ERROR awkward_IndexedArray_simplify(
-  TO* toindex,
-  const OUT* outerindex,
+  TO* __restrict__ toindex,
+  const OUT* __restrict__ outerindex,
   int64_t outerlength,
-  const IN* innerindex,
+  const IN* __restrict__ innerindex,
   int64_t innerlength) {
   for (int64_t i = 0;  i < outerlength;  i++) {
     OUT j = outerindex[i];
