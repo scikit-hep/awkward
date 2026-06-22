@@ -6,7 +6,8 @@
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
 [![Python 3.10‒3.14](https://img.shields.io/badge/python-3.10%E2%80%923.14-blue)](https://www.python.org)
 [![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/test.yml)
+[![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/ci.yml)
+[![Property Tests](https://github.com/scikit-hep/awkward/actions/workflows/property-tests.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/property-tests.yml)
 
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
