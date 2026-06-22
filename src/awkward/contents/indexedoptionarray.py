@@ -285,7 +285,22 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             carry[too_negative] = -1
         carry = ak.index.Index(carry)
 
-        if self._content.length is not unknown_length and self._content.length == 0:
+        if (
+            self._content.length is not unknown_length
+            and self._content.length == 0
+            and carry.length is not unknown_length
+            and carry.length != 0
+        ):
+            # The content is empty but the mask is not, so the (clamped) carry
+            # only references the missing values that we are about to mask out.
+            # We need a length-one dummy content for those carry entries to point
+            # at; an EmptyArray has no such representation, so the conversion is
+            # genuinely impossible.
+            if self._content.is_unknown:
+                raise ValueError(
+                    "cannot convert an IndexedOptionArray with an EmptyArray "
+                    "content and length > 0 to a ByteMaskedArray"
+                )
             content = self._content.form.length_one_array(backend=self._backend)._carry(
                 carry, False
             )

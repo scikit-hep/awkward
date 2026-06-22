@@ -116,6 +116,7 @@ jobs:
             src/awkward/_connect/cuda/**
             src/awkward/_kernels.py
             tests-cuda/**
+            tests/properties/**
       - name: Set a flag for running the GPU tests
         if: steps.changed-gpu-files.outputs.added_modified_renamed != '[]'
         id: gpu-changes
