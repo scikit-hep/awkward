@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os.path
+import threading
 
 import fsspec
 import numpy as np
@@ -852,7 +853,7 @@ def test_unionarray(tmp_path, through, extensionarray):
 @pytest.fixture()
 def generate_datafiles(tmp_path):
     fs = fsspec.filesystem("file")
-    data1 = ak.from_iter([[1, 2, 3], [4, 5]])
+    data1 = ak.from_iter([[1, 2, 3], [4, 5]], attrs={"property": "value"})
     data2 = data1 + 1
     md1 = ak.to_parquet(data1, os.path.join(tmp_path, "data1.parq"))
     md2 = ak.to_parquet(data2, os.path.join(tmp_path, "data2.parq"))
@@ -920,3 +921,25 @@ def test_select(with_global_metadata):
 
     with pytest.raises(ValueError):
         ak.metadata_from_parquet(with_global_metadata, row_groups=[4])
+
+
+def test_awkward_attr_serialisation(generate_datafiles):
+    path, _mdlist, _fs = generate_datafiles
+    assert ak.from_parquet(f"{path}/data1.parq").attrs == {"property": "value"}
+
+
+def test_pandas_attr_serialisation(generate_datafiles):
+
+    pd = pytest.importorskip("pandas", "2.1.0")
+
+    path, _mdlist, _fs = generate_datafiles
+
+    df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
+    df.attrs = {"property": "value", 1: 2}
+    # Under pytest-run-parallel this test body runs concurrently on multiple
+    # threads sharing one tmp_path, so use a per-thread filename to avoid one
+    # thread reading the file while another is still writing it.
+    filename = f"{path}/data3-{threading.get_ident()}.parq"
+    df.to_parquet(filename)
+
+    assert ak.from_parquet(filename).attrs == {"property": "value", "1": 2}
