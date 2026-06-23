@@ -20,7 +20,9 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def flatten(array, axis: int | str | None = 1, *, highlevel=True, behavior=None, attrs=None):
+def flatten(
+    array, axis: int | str | None = 1, *, highlevel=True, behavior=None, attrs=None
+):
     """Returns an array with one or all levels of nesting removed.
 
     Args:
