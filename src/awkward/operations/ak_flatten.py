@@ -10,6 +10,7 @@ from awkward._namedaxis import (
     _named_axis_to_positional_axis,
     _remove_named_axis,
 )
+from awkward._typing import Any, Mapping
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 
@@ -17,7 +18,6 @@ __all__ = ("flatten",)
 
 np = NumpyMetadata.instance()
 
-from awkward._typing import Any, Mapping
 
 
 @high_level_function()
