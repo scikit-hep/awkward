@@ -782,31 +782,27 @@ def awkward_reduce_countnonzero_complex(
     # (real/imag interleaved). Re-view into complex dtype for reduction.
 
     complex_dtype = infer_complex_dtype(input_data.dtype)
-
     input_complex = input_data.view(complex_dtype)
 
-    index_dtype = normalize_index_dtype(offsets_data.dtype)
+    # Vectorised CuPy map (mirrors awkward_reduce_sum_bool_complex): a fresh
+    # `segment_reduce_countnonzero` closure each call leaked `result` via
+    # unary_transform's op-identity-keyed cache. Count non-zero elements per
+    # segment = segmented PLUS over the {0, 1} map (a complex value is non-zero
+    # iff its real or imaginary part is non-zero). segmented_reduce caches on
+    # the compiled signature, not op identity, so nothing accumulates per call.
+    mapped = (input_complex != 0).astype(result.dtype)
+
     start_o, end_o = make_segment_views(offsets_data)
+    h_init = np.asarray(0, dtype=result.dtype)
 
-    def segment_reduce_countnonzero(segment_id):
-        start_idx = start_o[segment_id]
-        end_idx = end_o[segment_id]
-
-        count = 0
-
-        for i in range(start_idx, end_idx):
-            if input_complex[i] != complex_dtype(0):
-                count += 1
-
-        return count
-
-    segment_ids = CountingIterator(index_dtype(0))
-
-    unary_transform(
-        d_in=segment_ids,
+    segmented_reduce(
+        d_in=mapped,
         d_out=result,
-        op=segment_reduce_countnonzero,
-        num_items=outlength,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=h_init,
     )
 
 
