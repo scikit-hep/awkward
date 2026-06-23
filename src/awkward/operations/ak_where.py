@@ -14,10 +14,19 @@ __all__ = ("where",)
 
 np = NumpyMetadata.instance()
 
+from awkward._typing import Any, Mapping
+
 
 @ak._connect.numpy.implements("where")
 @high_level_function()
-def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs=None):
+def where(
+    condition: Any,
+    *args: Any,
+    mergebool: bool = True,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
     """
     Args:
         condition: Array-like data (anything #ak.to_layout recognizes) of booleans.

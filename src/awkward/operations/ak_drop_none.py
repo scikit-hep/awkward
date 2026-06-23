@@ -17,9 +17,18 @@ __all__ = ("drop_none",)
 
 np = NumpyMetadata.instance()
 
+from awkward._typing import Any, Mapping
+
 
 @high_level_function()
-def drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None):
+def drop_none(
+    array: Any,
+    axis: int | str | None = None,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
     """
     Args:
         array: Data in which to remove Nones.

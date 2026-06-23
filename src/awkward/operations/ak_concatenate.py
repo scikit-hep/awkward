@@ -30,12 +30,20 @@ __all__ = ("concatenate",)
 
 np = NumpyMetadata.instance()
 
+from awkward._typing import Any, Mapping
+
 
 @ak._connect.numpy.implements("concatenate")
 @high_level_function()
 def concatenate(
-    arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None, attrs=None
-):
+    arrays: Any,
+    axis: int | str | None = 0,
+    *,
+    mergebool: bool = True,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
     """Returns an array with the given arrays concatenated along an axis.
 
     Args:

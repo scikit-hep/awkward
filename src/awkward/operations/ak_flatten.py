@@ -18,11 +18,18 @@ __all__ = ("flatten",)
 
 np = NumpyMetadata.instance()
 
+from awkward._typing import Any, Mapping
+
 
 @high_level_function()
 def flatten(
-    array, axis: int | str | None = 1, *, highlevel=True, behavior=None, attrs=None
-):
+    array: Any,
+    axis: int | str | None = 1,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
     """Returns an array with one or all levels of nesting removed.
 
     Args:

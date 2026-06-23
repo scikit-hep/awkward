@@ -18,9 +18,18 @@ __all__ = ("is_none",)
 
 np = NumpyMetadata.instance()
 
+from awkward._typing import Any, Mapping
+
 
 @high_level_function()
-def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
+def is_none(
+    array: Any,
+    axis: int | str | None = 0,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
     """
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
