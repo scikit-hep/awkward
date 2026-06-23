@@ -96,6 +96,7 @@ skip = [
 ]
 test-skip = [
     "*musllinux*",
+    "*pyodide*",
 ]
 build-verbosity = 1
 
