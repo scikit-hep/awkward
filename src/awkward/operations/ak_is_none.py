@@ -10,6 +10,7 @@ from awkward._namedaxis import (
     _keep_named_axis_up_to,
     _named_axis_to_positional_axis,
 )
+from awkward._typing import Any, Mapping
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
 from awkward.errors import AxisError
@@ -18,7 +19,6 @@ __all__ = ("is_none",)
 
 np = NumpyMetadata.instance()
 
-from awkward._typing import Any, Mapping
 
 
 @high_level_function()
