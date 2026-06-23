@@ -8,13 +8,12 @@ import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
-from awkward._typing import Any, Mapping
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Any, Mapping
 
 __all__ = ("where",)
 
 np = NumpyMetadata.instance()
-
 
 
 @ak._connect.numpy.implements("where")

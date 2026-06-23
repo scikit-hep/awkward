@@ -17,12 +17,11 @@ from awkward._namedaxis import (
     _named_axis_to_positional_axis,
     _unify_named_axis,
 )
-from awkward._typing import Any, Mapping
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import regularize_axis
-from awkward._typing import Sequence
+from awkward._typing import Any, Mapping, Sequence
 from awkward.contents import Content
 from awkward.operations.ak_fill_none import fill_none
 from awkward.types.numpytype import primitive_to_dtype
@@ -30,7 +29,6 @@ from awkward.types.numpytype import primitive_to_dtype
 __all__ = ("concatenate",)
 
 np = NumpyMetadata.instance()
-
 
 
 @ak._connect.numpy.implements("concatenate")
