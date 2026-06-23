@@ -12,8 +12,10 @@ from cuda.compute import (
     ZipIterator,
     inclusive_scan,
     reduce_into,
-    segmented_reduce,
     unary_transform,
+)
+from cuda.compute import (
+    segmented_reduce as _segmented_reduce_raw,
 )
 from numba import cuda
 
@@ -57,6 +59,29 @@ def make_segment_views(offsets):
     Returns (starts, stops) views for segmented operations.
     """
     return offsets[:-1], offsets[1:]
+
+
+def segmented_reduce(*, max_segment_size=None, **kwargs):
+    """Thin wrapper over ``cuda.compute.segmented_reduce`` that supplies the
+    ``max_segment_size`` hint (number of elements in the largest segment) when a
+    caller doesn't pass one. cuda.compute uses it to dispatch to the
+    block/warp/thread implementation, which removes the segmented-reduce
+    slowness that originally motivated the ``unary_transform`` workarounds.
+
+    The hint only affects performance, never the result. It's derived from the
+    array-backed offset views; if a caller passes iterators (no cheap max), we
+    leave it ``None`` and let cuda.compute choose.
+    """
+    if max_segment_size is None:
+        n = kwargs.get("num_segments", 0)
+        start = kwargs.get("start_offsets_in")
+        stop = kwargs.get("end_offsets_in")
+        if n and start is not None and stop is not None:
+            try:
+                max_segment_size = int((stop[:n] - start[:n]).max())
+            except (TypeError, AttributeError, ValueError):
+                max_segment_size = None
+    return _segmented_reduce_raw(**kwargs, max_segment_size=max_segment_size)
 
 
 def normalize_index_dtype(dtype):
