@@ -129,6 +129,9 @@ addopts = [
     "--strict-config",
 ]
 xfail_strict = true
+markers = [
+    "cuda: marks tests that require a CUDA-capable GPU",
+]
 filterwarnings = [
     "error",
     "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning",
@@ -326,3 +329,4 @@ isort.required-imports = ["from __future__ import annotations"]
 
 [tool.uv]
 exclude-newer = "7 days"
+exclude-newer-package = { awkward_cpp = false }
