@@ -127,7 +127,6 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ListOffsetArray_rpad_length_axis1",
         "awkward_MaskedArray_getitem_next_jagged_project",
         "awkward_NumpyArray_rearrange_shifted",
-        "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
         # "awkward_reduce_count_64",
         # "awkward_reduce_sum",
         # "awkward_reduce_sum_bool",
