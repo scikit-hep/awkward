@@ -1205,8 +1205,6 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _to_backend_array(self, allow_missing, backend):
-        if self.fields is None:
-            return backend.nplike.empty(self.length, dtype=[])
         contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(f"cannot convert {self} into np.ndarray")

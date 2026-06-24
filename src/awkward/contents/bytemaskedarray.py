@@ -987,7 +987,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
                 raise ValueError(
                     "reduce_next with unbranching depth > negaxis is only "
                     "expected to return RegularArray or ListOffsetArray64; "
-                    "instead, it returned " + out
+                    f"instead, it returned {type(out).__name__}"
                 )
 
             outoffsets = ak.index.Index64.empty(

@@ -1212,7 +1212,7 @@ class NumpyArray(NumpyMeta, Content):
                 return f"at {path} ({type(self)!r}): shape[{i}] < 0"
         for i, stride in enumerate(self.strides):
             if stride is not unknown_length and stride % self.dtype.itemsize != 0:
-                return f"at {path} ({type(self)!r}): shape[{i}] % itemsize != 0"
+                return f"at {path} ({type(self)!r}): strides[{i}] % itemsize != 0"
         return ""
 
     def _pad_none(self, target, axis, depth, clip):

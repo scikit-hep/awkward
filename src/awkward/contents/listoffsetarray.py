@@ -118,10 +118,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
     """
 
     def __init__(self, offsets, content, *, parameters=None):
-        if not isinstance(offsets, Index) and offsets.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not (
+            isinstance(offsets, Index)
+            and offsets.dtype
+            in (
+                np.dtype(np.int32),
+                np.dtype(np.uint32),
+                np.dtype(np.int64),
+            )
         ):
             raise TypeError(
                 f"{type(self).__name__} 'offsets' must be an Index with dtype in (int32, uint32, int64), "
@@ -486,132 +490,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             return nextcontent._getitem_next(nexthead, nexttail, advanced)
 
         elif isinstance(head, slice):
-            nexthead, nexttail = ak._slicing.head_tail(tail)
-            lenstarts = self._offsets.length - 1
-            start, stop, step = head.start, head.stop, head.step
-
-            step = 1 if step is None else step
-            start = ak._util.kSliceNone if start is None else start
-            stop = ak._util.kSliceNone if stop is None else stop
-
-            carrylength = Index64.empty(1, self._backend.nplike)
-            assert (
-                carrylength.nplike is self._backend.nplike
-                and self.starts.nplike is self._backend.nplike
-                and self.stops.nplike is self._backend.nplike
+            # This branch is equivalent to ListArray's; delegate to avoid
+            # duplicating the kernel logic (which referenced ``self._starts``,
+            # an attribute that only ListArray has).
+            listarray = ak.contents.ListArray(
+                self.starts, self.stops, self._content, parameters=self._parameters
             )
-            self._maybe_index_error(
-                self._backend[
-                    "awkward_ListArray_getitem_next_range_carrylength",
-                    carrylength.dtype.type,
-                    self.starts.dtype.type,
-                    self.stops.dtype.type,
-                ](
-                    carrylength.data,
-                    self.starts.data,
-                    self.stops.data,
-                    lenstarts,
-                    start,
-                    stop,
-                    step,
-                ),
-                slicer=head,
-            )
-
-            if self._starts.dtype == "int64":
-                nextoffsets = Index64.empty(lenstarts + 1, nplike=self._backend.nplike)
-            elif self._starts.dtype == "int32":
-                nextoffsets = ak.index.Index32.empty(
-                    lenstarts + 1, nplike=self._backend.nplike
-                )
-            elif self._starts.dtype == "uint32":
-                nextoffsets = ak.index.IndexU32.empty(
-                    lenstarts + 1, nplike=self._backend.nplike
-                )
-            nextcarry = Index64.empty(carrylength[0], self._backend.nplike)
-
-            assert (
-                nextoffsets.nplike is self._backend.nplike
-                and nextcarry.nplike is self._backend.nplike
-                and self.starts.nplike is self._backend.nplike
-                and self.stops.nplike is self._backend.nplike
-            )
-            self._maybe_index_error(
-                self._backend[
-                    "awkward_ListArray_getitem_next_range",
-                    nextoffsets.dtype.type,
-                    nextcarry.dtype.type,
-                    self.starts.dtype.type,
-                    self.stops.dtype.type,
-                ](
-                    nextoffsets.data,
-                    nextcarry.data,
-                    self.starts.data,
-                    self.stops.data,
-                    lenstarts,
-                    start,
-                    stop,
-                    step,
-                ),
-                slicer=head,
-            )
-
-            nextcontent = self._content._carry(nextcarry, True)
-
-            if advanced is None or (
-                advanced.length is not unknown_length and advanced.length == 0
-            ):
-                return ak.contents.ListOffsetArray(
-                    nextoffsets,
-                    nextcontent._getitem_next(nexthead, nexttail, advanced),
-                    parameters=self._parameters,
-                )
-
-            else:
-                total = Index64.empty(1, self._backend.nplike)
-                assert (
-                    total.nplike is self._backend.nplike
-                    and nextoffsets.nplike is self._backend.nplike
-                )
-                self._maybe_index_error(
-                    self._backend[
-                        "awkward_ListArray_getitem_next_range_counts",
-                        total.dtype.type,
-                        nextoffsets.dtype.type,
-                    ](
-                        total.data,
-                        nextoffsets.data,
-                        lenstarts,
-                    ),
-                    slicer=head,
-                )
-
-                nextadvanced = Index64.empty(total[0], self._backend.nplike)
-                assert (
-                    nextadvanced.nplike is self._backend.nplike
-                    and advanced.nplike is self._backend.nplike
-                    and nextoffsets.nplike is self._backend.nplike
-                )
-                self._maybe_index_error(
-                    self._backend[
-                        "awkward_ListArray_getitem_next_range_spreadadvanced",
-                        nextadvanced.dtype.type,
-                        advanced.dtype.type,
-                        nextoffsets.dtype.type,
-                    ](
-                        nextadvanced.data,
-                        advanced.data,
-                        nextoffsets.data,
-                        lenstarts,
-                    ),
-                    slicer=head,
-                )
-
-                return ak.contents.ListOffsetArray(
-                    nextoffsets,
-                    nextcontent._getitem_next(nexthead, nexttail, nextadvanced),
-                    parameters=self._parameters,
-                )
+            return listarray._getitem_next(head, tail, advanced)
 
         elif isinstance(head, str):
             return self._getitem_next_field(head, tail, advanced)
@@ -626,88 +511,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             return self._getitem_next_ellipsis(tail, advanced)
 
         elif isinstance(head, Index64):
-            nexthead, nexttail = ak._slicing.head_tail(tail)
-            flathead = self._backend.nplike.reshape(
-                self._backend.nplike.asarray(head.data), (-1,)
+            # This branch is equivalent to ListArray's; delegate to avoid
+            # duplicating the kernel logic (which referenced ``self._starts``,
+            # an attribute that only ListArray has).
+            listarray = ak.contents.ListArray(
+                self.starts, self.stops, self._content, parameters=self._parameters
             )
-            lenstarts = self.starts.length
-            regular_flathead = Index64(flathead)
-            if advanced is None or (
-                advanced.length is not unknown_length and advanced.length == 0
-            ):
-                nextcarry = Index64.empty(
-                    lenstarts * flathead.length, self._backend.nplike
-                )
-                nextadvanced = Index64.empty(
-                    lenstarts * flathead.length, self._backend.nplike
-                )
-                assert (
-                    nextcarry.nplike is self._backend.nplike
-                    and nextadvanced.nplike is self._backend.nplike
-                    and regular_flathead.nplike is self._backend.nplike
-                )
-                self._maybe_index_error(
-                    self._backend[
-                        "awkward_ListArray_getitem_next_array",
-                        nextcarry.dtype.type,
-                        nextadvanced.dtype.type,
-                        regular_flathead.dtype.type,
-                    ](
-                        nextcarry.data,
-                        nextadvanced.data,
-                        self.starts.data,
-                        self.stops.data,
-                        regular_flathead.data,
-                        lenstarts,
-                        regular_flathead.length,
-                        self._content.length,
-                    ),
-                    slicer=head,
-                )
-                nextcontent = self._content._carry(nextcarry, True)
-
-                out = nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
-                if advanced is None:
-                    return ak._slicing.getitem_next_array_wrap(
-                        out, head.metadata.get("shape", (head.length,), self.length)
-                    )
-                else:
-                    return out
-
-            else:
-                nextcarry = Index64.empty(self.length, self._backend.nplike)
-                nextadvanced = Index64.empty(self.length, self._backend.nplike)
-                assert (
-                    nextcarry.nplike is self._backend.nplike
-                    and nextadvanced.nplike is self._backend.nplike
-                    and self.starts.nplike is self._backend.nplike
-                    and self.stops.nplike is self._backend.nplike
-                    and regular_flathead.nplike is self._backend.nplike
-                    and advanced.nplike is self._backend.nplike
-                )
-                self._maybe_index_error(
-                    self._backend[
-                        "awkward_ListArray_getitem_next_array_advanced",
-                        nextcarry.dtype.type,
-                        nextadvanced.dtype.type,
-                        self.starts.dtype.type,
-                        self.stops.dtype.type,
-                        regular_flathead.dtype.type,
-                        advanced.dtype.type,
-                    ](
-                        nextcarry.data,
-                        nextadvanced.data,
-                        self.starts.data,
-                        self.stops.data,
-                        regular_flathead.data,
-                        advanced.data,
-                        lenstarts,
-                        self._content.length,
-                    ),
-                    slicer=head,
-                )
-                nextcontent = self._content._carry(nextcarry, True)
-                return nextcontent._getitem_next(nexthead, nexttail, nextadvanced)
+            return listarray._getitem_next(head, tail, advanced)
 
         elif isinstance(head, ak.contents.ListOffsetArray):
             listarray = ak.contents.ListArray(
@@ -955,7 +765,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
     def _unique(self, negaxis, starts, parents, offsets, outlength):
-        if self._offsets.length - 1 == 0:
+        if self._offsets.length is not unknown_length and self._offsets.length - 1 == 0:
             return self
 
         branch, depth = self.branch_depth
@@ -999,7 +809,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 negaxis - 1,
                 nextstarts,
                 nextparents,
-                maxnextparents[0] + 1,
+                maxnextparents + 1,
             )
 
             outcarry = Index64.empty(nextcarry.length, self._backend.nplike)
@@ -2085,7 +1895,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
         cont = self._content._to_cudf(cudf, None, len(self._content))
         if mask is not None:
-            m = np._module.packbits(mask, bitorder="little")
+            m = cupy._module.packbits(mask, bitorder="little")
             if m.nbytes % 64:
                 m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
             m = cudf.core.buffer.as_buffer(cupy.asarray(m))

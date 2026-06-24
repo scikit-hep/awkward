@@ -1363,7 +1363,7 @@ class RegularArray(RegularMeta[Content], Content):
             # ShapeItem is a defined type, but some nplikes don't map onto the entire space; e.g.
             # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes
             # they both be the same "known-shape-ness".
-            assert self._backend.nplike.known_data == self._backend.nplike.known_data
+            assert self._backend.nplike.known_data == backend.nplike.known_data
             return self._backend.nplike.reshape(
                 out[
                     : self._backend.nplike.shape_item_as_index(self.length * self._size)
@@ -1404,7 +1404,7 @@ class RegularArray(RegularMeta[Content], Content):
                 self.length,
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent._raw(*maybe_materialize(numpy))),
+                    pyarrow.py_buffer(*maybe_materialize(akcontent._raw(numpy))),
                 ],
             )
 
