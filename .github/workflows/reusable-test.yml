@@ -216,7 +216,7 @@ jobs:
           create-args: >-
             python=3.13
             pandas>=0.24
-            cccl-python
+            cccl-python>=1.0.2
             cupy>=14
             cuda-version=${{ matrix.cuda-version }}
             cxx-compiler

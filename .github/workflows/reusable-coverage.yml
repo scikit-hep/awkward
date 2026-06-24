@@ -56,7 +56,7 @@ jobs:
             -c rapidsai
             python=${{ env.PYTHON_VERSION }}
             pandas>=0.24.0
-            cccl-python
+            cccl-python>=1.0.2
             cupy>=14
             cuda-version=13
             cuda-toolkit

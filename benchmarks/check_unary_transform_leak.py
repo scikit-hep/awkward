@@ -2,22 +2,17 @@
 
 Repeatedly runs a `unary_transform`-backed reducer (`ak.argmax(axis=1)`),
 drains the awkward CUDA error/context queue after each call, and records the
-CuPy memory-pool usage. If a newer cuda.cccl has fixed the op-identity-keyed
-cache leak, used-bytes plateaus; if it still leaks, it grows ~linearly with
-iterations.
+CuPy memory-pool usage. If cuda.cccl is leak-free, used-bytes plateaus; if it
+regresses, it grows ~linearly with iterations. (cuda-cccl >= 1.0.2 is required
+and fixes the original leak; this is kept as a regression check.)
 
-By default the in-awkward workaround (clear_compute_cache) is DISABLED so this
-measures cuda.cccl's own behaviour. Pass --with-workaround to measure with it on.
-
-    python benchmarks/check_unary_transform_leak.py            # tests upstream
+    python benchmarks/check_unary_transform_leak.py
     python benchmarks/check_unary_transform_leak.py --iters 500
-    python benchmarks/check_unary_transform_leak.py --with-workaround
 """
 
 from __future__ import annotations
 
 import argparse
-import os
 
 
 def main() -> None:
@@ -25,17 +20,7 @@ def main() -> None:
     ap.add_argument("--iters", type=int, default=200)
     ap.add_argument("--n-lists", type=int, default=200_000)
     ap.add_argument("--avg-len", type=int, default=50)
-    ap.add_argument(
-        "--with-workaround",
-        action="store_true",
-        help="keep awkward's clear_compute_cache on (default: off, to test cuda.cccl)",
-    )
     args = ap.parse_args()
-
-    # Must be set before awkward is imported.
-    os.environ["AWKWARD_CUDA_CLEAR_COMPUTE_CACHE"] = (
-        "1" if args.with_workaround else "0"
-    )
 
     import cupy as cp
     import numpy as np
@@ -54,10 +39,11 @@ def main() -> None:
                 continue
         return "cuda.cccl=?"
 
-    print("awkward", ak.__version__, "|", _ver("cuda-cccl", "cuda-compute", "cuda"))
     print(
-        "workaround (clear_compute_cache):",
-        "ON" if args.with_workaround else "OFF",
+        "awkward",
+        ak.__version__,
+        "|",
+        _ver("cuda-cccl", "cuda-compute", "cuda"),
         flush=True,
     )
 
