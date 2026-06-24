@@ -92,6 +92,8 @@ class CupyBackend(Backend):
         - awkward_reduce_sum_complex
         - awkward_index_rpad_and_clip_axis1
         - awkward_reduce_max_complex
+        - awkward_IndexedArray_fill
+        - awkward_IndexedArray_fill_count
         """
         return kernel_name in (
             "awkward_sort",
@@ -110,6 +112,8 @@ class CupyBackend(Backend):
             "awkward_missing_repeat",
             "awkward_index_rpad_and_clip_axis0",
             "awkward_index_rpad_and_clip_axis1",
+            "awkward_IndexedArray_fill",
+            "awkward_IndexedArray_fill_count",
         )
 
     def _get_cuda_compute_impl(self, kernel_name: str):
@@ -171,6 +175,12 @@ class CupyBackend(Backend):
 
         if kernel_name == "awkward_index_rpad_and_clip_axis1":
             return cuda_compute.awkward_index_rpad_and_clip_axis1
+
+        if kernel_name == "awkward_IndexedArray_fill":
+            return cuda_compute.awkward_IndexedArray_fill
+
+        if kernel_name == "awkward_IndexedArray_fill_count":
+            return cuda_compute.awkward_IndexedArray_fill_count
 
         return None
 
