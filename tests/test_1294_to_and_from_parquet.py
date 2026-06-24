@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os.path
+import threading
 
 import fsspec
 import numpy as np
@@ -935,6 +936,10 @@ def test_pandas_attr_serialisation(generate_datafiles):
 
     df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
     df.attrs = {"property": "value", 1: 2}
-    df.to_parquet(f"{path}/data3.parq")
+    # Under pytest-run-parallel this test body runs concurrently on multiple
+    # threads sharing one tmp_path, so use a per-thread filename to avoid one
+    # thread reading the file while another is still writing it.
+    filename = f"{path}/data3-{threading.get_ident()}.parq"
+    df.to_parquet(filename)
 
-    assert ak.from_parquet(f"{path}/data3.parq").attrs == {"property": "value", "1": 2}
+    assert ak.from_parquet(filename).attrs == {"property": "value", "1": 2}
