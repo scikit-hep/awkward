@@ -105,7 +105,7 @@ UV_ONLY_BINARY = "cmake,numpy"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-win*"
-repair-wheel-command = ""
+repair-wheel-command = "delvewheel repair -w {dest_dir} -v --ignore-existing {wheel}"
 
 [[tool.cibuildwheel.overrides]]
 select = "*pyodide*"
