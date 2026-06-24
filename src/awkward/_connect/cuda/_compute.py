@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+import os
 
 from cuda.compute import (
     CountingIterator,
@@ -12,10 +13,12 @@ from cuda.compute import (
     ZipIterator,
     inclusive_scan,
     reduce_into,
-    unary_transform,
 )
 from cuda.compute import (
     segmented_reduce as _segmented_reduce_raw,
+)
+from cuda.compute import (
+    unary_transform as _unary_transform_raw,
 )
 from numba import cuda
 
@@ -82,6 +85,72 @@ def segmented_reduce(*, max_segment_size=None, **kwargs):
             except (TypeError, AttributeError, ValueError):
                 max_segment_size = None
     return _segmented_reduce_raw(**kwargs, max_segment_size=max_segment_size)
+
+
+def clear_compute_cache():
+    """Best-effort release of cuda.compute's build-result cache.
+
+    The one-shot ``unary_transform`` keys its cache on the op object's identity,
+    so a fresh closure per call never hits: the cache grows without bound and
+    pins a device buffer per entry that ``synchronize_cuda()`` can't free (see
+    PR #4056 / test_4056_cuda_kernel_memory). Calling this after each
+    ``unary_transform`` bounds the cache to a single live entry.
+
+    Defensive by design: clears every functools-cached callable it can find in
+    ``cuda.compute`` (and its ``algorithms`` submodule) plus every dict in the
+    dedicated ``cuda.compute._caching`` module, and is a safe no-op if
+    cuda.compute isn't importable or its internals change shape.
+    """
+    try:
+        import cuda.compute as _cc
+    except Exception:
+        return
+
+    caching_mod = getattr(_cc, "_caching", None)
+    targets = [_cc]
+    for mod in (caching_mod, getattr(_cc, "algorithms", None)):
+        if mod is not None:
+            targets.append(mod)
+
+    for mod in targets:
+        for name in dir(mod):
+            try:
+                obj = getattr(mod, name)
+            except Exception:
+                continue
+            clearer = getattr(obj, "cache_clear", None)  # functools.lru_cache/cache
+            if callable(clearer):
+                try:
+                    clearer()
+                except Exception:
+                    pass
+            elif (
+                mod is caching_mod
+                and isinstance(obj, dict)
+                and not name.startswith("__")
+            ):
+                try:
+                    obj.clear()
+                except Exception:
+                    pass
+
+
+def unary_transform(*args, **kwargs):
+    """``cuda.compute.unary_transform`` wrapper that releases the build-result
+    cache after the call (see :func:`clear_compute_cache`), so the
+    op-identity-keyed cache can't accumulate pinned device buffers across calls
+    (PR #4056). The reduction path uses the non-leaking ``segmented_reduce`` and
+    is deliberately not cleared here, so pure-reduction workloads keep their
+    (bounded, signature-keyed) build cache.
+    """
+    try:
+        return _unary_transform_raw(*args, **kwargs)
+    finally:
+        # Set AWKWARD_CUDA_CLEAR_COMPUTE_CACHE=0 to disable the workaround — e.g.
+        # to verify whether a newer cuda.cccl has fixed the unary_transform leak
+        # upstream (with clearing on, the workaround would mask it).
+        if os.environ.get("AWKWARD_CUDA_CLEAR_COMPUTE_CACHE", "1") != "0":
+            clear_compute_cache()
 
 
 def normalize_index_dtype(dtype):
