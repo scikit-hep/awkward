@@ -10,11 +10,11 @@
 namespace awkward {
   const BuilderPtr
   OptionBuilder::fromnulls(const BuilderOptions& options,
-                           int64_t nullcount,
+                           std::int64_t nullcount,
                            const BuilderPtr& content) {
     return std::make_shared<OptionBuilder>(
       options,
-      GrowableBuffer<int64_t>::full(options,
+      GrowableBuffer<std::int64_t>::full(options,
                                     -1,
                                     nullcount),
      content);
@@ -24,12 +24,12 @@ namespace awkward {
   OptionBuilder::fromvalids(const BuilderOptions& options,
                             const BuilderPtr& content) {
     return std::make_shared<OptionBuilder>(options,
-                                           GrowableBuffer<int64_t>::arange(options, content->length()),
+                                           GrowableBuffer<std::int64_t>::arange(options, content->length()),
                                            content);
   }
 
   OptionBuilder::OptionBuilder(const BuilderOptions&,
-                               GrowableBuffer<int64_t> index,
+                               GrowableBuffer<std::int64_t> index,
                                const BuilderPtr content)
     : index_(std::move(index))
       , content_(content) { }
@@ -40,23 +40,23 @@ namespace awkward {
   };
 
   const std::string
-  OptionBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  OptionBuilder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-index",
-      (int64_t)index_.length() * (int64_t)sizeof(int64_t));
+      (std::int64_t)index_.length() * (std::int64_t)sizeof(std::int64_t));
 
-    index_.concatenate(reinterpret_cast<int64_t*>(ptr));
+    index_.concatenate(reinterpret_cast<std::int64_t*>(ptr));
 
     return "{\"class\": \"IndexedOptionArray\", \"index\": \"i64\", \"content\": "
            + content_.get()->to_buffers(container, form_key_id) + ", \"form_key\": \""
            + form_key.str() + "\"}";
   }
 
-  int64_t
+  std::int64_t
   OptionBuilder::length() const {
-    return (int64_t)index_.length();
+    return (std::int64_t)index_.length();
   }
 
   void
@@ -84,7 +84,7 @@ namespace awkward {
   const BuilderPtr
   OptionBuilder::boolean(bool x) {
     if (!content_.get()->active()) {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       maybeupdate(content_.get()->boolean(x));
       index_.append(length);
     }
@@ -95,9 +95,9 @@ namespace awkward {
   }
 
   const BuilderPtr
-  OptionBuilder::integer(int64_t x) {
+  OptionBuilder::integer(std::int64_t x) {
     if (!content_.get()->active()) {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       maybeupdate(content_.get()->integer(x));
       index_.append(length);
     }
@@ -110,7 +110,7 @@ namespace awkward {
   const BuilderPtr
   OptionBuilder::real(double x) {
     if (!content_.get()->active()) {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       maybeupdate(content_.get()->real(x));
       index_.append(length);
     }
@@ -123,7 +123,7 @@ namespace awkward {
   const BuilderPtr
   OptionBuilder::complex(std::complex<double> x) {
     if (!content_.get()->active()) {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       maybeupdate(content_.get()->complex(x));
       index_.append(length);
     }
@@ -134,9 +134,9 @@ namespace awkward {
   }
 
   const BuilderPtr
-  OptionBuilder::datetime(int64_t x, const std::string& unit) {
+  OptionBuilder::datetime(std::int64_t x, const std::string& unit) {
     if (!content_.get()->active()) {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       maybeupdate(content_.get()->datetime(x, unit));
       index_.append(length);
     }
@@ -147,9 +147,9 @@ namespace awkward {
   }
 
   const BuilderPtr
-  OptionBuilder::timedelta(int64_t x, const std::string& unit) {
+  OptionBuilder::timedelta(std::int64_t x, const std::string& unit) {
     if (!content_.get()->active()) {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       maybeupdate(content_.get()->timedelta(x, unit));
       index_.append(length);
     }
@@ -160,9 +160,9 @@ namespace awkward {
   }
 
   const BuilderPtr
-  OptionBuilder::string(const char* x, int64_t length, const char* encoding) {
+  OptionBuilder::string(const char* x, std::int64_t length, const char* encoding) {
     if (!content_.get()->active()) {
-      int64_t len = content_.get()->length();
+      std::int64_t len = content_.get()->length();
       maybeupdate(content_.get()->string(x, length, encoding));
       index_.append(len);
     }
@@ -191,7 +191,7 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       content_.get()->endlist();
       if (length != content_.get()->length()) {
         index_.append(length);
@@ -201,7 +201,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  OptionBuilder::begintuple(int64_t numfields) {
+  OptionBuilder::begintuple(std::int64_t numfields) {
     if (!content_.get()->active()) {
       maybeupdate(content_.get()->begintuple(numfields));
     }
@@ -212,7 +212,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  OptionBuilder::index(int64_t index) {
+  OptionBuilder::index(std::int64_t index) {
     if (!content_.get()->active()) {
       throw std::invalid_argument(
         std::string("called 'index' without 'begin_tuple' at the same level before it")
@@ -232,7 +232,7 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       content_.get()->endtuple();
       if (length != content_.get()->length()) {
         index_.append(length);
@@ -272,7 +272,7 @@ namespace awkward {
                     "before it") + FILENAME(__LINE__));
     }
     else {
-      int64_t length = content_.get()->length();
+      std::int64_t length = content_.get()->length();
       content_.get()->endrecord();
       if (length != content_.get()->length()) {
         index_.append(length);

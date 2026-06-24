@@ -15,14 +15,14 @@
 namespace awkward {
   const BuilderPtr
   DatetimeBuilder::fromempty(const BuilderOptions& options, const std::string& units) {
-    GrowableBuffer<int64_t> content = GrowableBuffer<int64_t>::empty(options);
+    GrowableBuffer<std::int64_t> content = GrowableBuffer<std::int64_t>::empty(options);
     return std::make_shared<DatetimeBuilder>(options,
                                              std::move(content),
                                              units);
   }
 
   DatetimeBuilder::DatetimeBuilder(const BuilderOptions& options,
-                                   GrowableBuffer<int64_t> content,
+                                   GrowableBuffer<std::int64_t> content,
                                    const std::string& units)
       : options_(options)
       , content_(std::move(content))
@@ -34,14 +34,14 @@ namespace awkward {
   };
 
   const std::string
-  DatetimeBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  DatetimeBuilder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     content_.concatenate(
-      reinterpret_cast<int64_t*>(
+      reinterpret_cast<std::int64_t*>(
         container.empty_buffer(form_key.str() + "-data",
-        (int64_t)content_.length() * (int64_t)sizeof(int64_t))));
+        (std::int64_t)content_.length() * (std::int64_t)sizeof(std::int64_t))));
 
     std::string primitive(units_);
 
@@ -64,9 +64,9 @@ namespace awkward {
     }
   }
 
-  int64_t
+  std::int64_t
   DatetimeBuilder::length() const {
-    return (int64_t)content_.length();
+    return (std::int64_t)content_.length();
   }
 
   void
@@ -94,7 +94,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  DatetimeBuilder::integer(int64_t x) {
+  DatetimeBuilder::integer(std::int64_t x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->integer(x);
     return out;
@@ -115,7 +115,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  DatetimeBuilder::datetime(int64_t x, const std::string& unit) {
+  DatetimeBuilder::datetime(std::int64_t x, const std::string& unit) {
     if (unit == units_) {
       content_.append(x);
       return nullptr;
@@ -128,7 +128,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  DatetimeBuilder::timedelta(int64_t x, const std::string& unit) {
+  DatetimeBuilder::timedelta(std::int64_t x, const std::string& unit) {
     if (unit == units_) {
       content_.append(x);
       return nullptr;
@@ -141,7 +141,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  DatetimeBuilder::string(const char* x, int64_t length, const char* encoding) {
+  DatetimeBuilder::string(const char* x, std::int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return out;
@@ -162,14 +162,14 @@ namespace awkward {
   }
 
   const BuilderPtr
-  DatetimeBuilder::begintuple(int64_t numfields) {
+  DatetimeBuilder::begintuple(std::int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return out;
   }
 
   const BuilderPtr
-  DatetimeBuilder::index(int64_t /* index */) {
+  DatetimeBuilder::index(std::int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));

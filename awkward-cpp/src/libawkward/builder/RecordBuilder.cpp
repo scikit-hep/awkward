@@ -32,10 +32,10 @@ namespace awkward {
                                const std::vector<const char*>& pointers,
                                const std::string& name,
                                const char* nameptr,
-                               int64_t length,
+                               std::int64_t length,
                                bool begun,
-                               int64_t nextindex,
-                               int64_t nexttotry)
+                               std::int64_t nextindex,
+                               std::int64_t nexttotry)
       : options_(options)
       , contents_(contents)
       , keys_(keys)
@@ -46,7 +46,7 @@ namespace awkward {
       , begun_(begun)
       , nextindex_(nextindex)
       , nexttotry_(nexttotry)
-      , keys_size_((int64_t)keys.size()) { }
+      , keys_size_((std::int64_t)keys.size()) { }
 
   const std::string
   RecordBuilder::name() const {
@@ -86,7 +86,7 @@ namespace awkward {
     return out.str();
   }
 
-  int64_t
+  std::int64_t
   RecordBuilder::length() const {
     return length_;
   }
@@ -145,17 +145,17 @@ namespace awkward {
         std::string("called 'boolean' immediately after 'begin_record'; "
                     "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->boolean(x));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->boolean(x));
     }
     else {
-      contents_[(size_t)nextindex_].get()->boolean(x);
+      contents_[(std::size_t)nextindex_].get()->boolean(x);
     }
     return nullptr;
   }
 
   const BuilderPtr
-  RecordBuilder::integer(int64_t x) {
+  RecordBuilder::integer(std::int64_t x) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
@@ -166,11 +166,11 @@ namespace awkward {
         std::string("called 'integer' immediately after 'begin_record'; "
                     "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->integer(x));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->integer(x));
     }
     else {
-      contents_[(size_t)nextindex_].get()->integer(x);
+      contents_[(std::size_t)nextindex_].get()->integer(x);
     }
     return nullptr;
   }
@@ -187,11 +187,11 @@ namespace awkward {
         std::string("called 'real' immediately after 'begin_record'; "
                     "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->real(x));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->real(x));
     }
     else {
-      contents_[(size_t)nextindex_].get()->real(x);
+      contents_[(std::size_t)nextindex_].get()->real(x);
     }
     return nullptr;
   }
@@ -208,17 +208,17 @@ namespace awkward {
         std::string("called 'complex' immediately after 'begin_record'; "
                     "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->complex(x));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->complex(x));
     }
     else {
-      contents_[(size_t)nextindex_].get()->complex(x);
+      contents_[(std::size_t)nextindex_].get()->complex(x);
     }
     return nullptr;
   }
 
   const BuilderPtr
-  RecordBuilder::datetime(int64_t x, const std::string& unit) {
+  RecordBuilder::datetime(std::int64_t x, const std::string& unit) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->datetime(x, unit);
@@ -229,17 +229,17 @@ namespace awkward {
         std::string("called 'datetime' immediately after 'begin_record'; "
                     "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->datetime(x, unit));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->datetime(x, unit));
     }
     else {
-      contents_[(size_t)nextindex_].get()->datetime(x, unit);
+      contents_[(std::size_t)nextindex_].get()->datetime(x, unit);
     }
     return nullptr;
   }
 
   const BuilderPtr
-  RecordBuilder::timedelta(int64_t x, const std::string& unit) {
+  RecordBuilder::timedelta(std::int64_t x, const std::string& unit) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->timedelta(x, unit);
@@ -250,17 +250,17 @@ namespace awkward {
         std::string("called 'timedelta' immediately after 'begin_record'; "
                     "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->timedelta(x, unit));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->timedelta(x, unit));
     }
     else {
-      contents_[(size_t)nextindex_].get()->timedelta(x, unit);
+      contents_[(std::size_t)nextindex_].get()->timedelta(x, unit);
     }
     return nullptr;
   }
 
   const BuilderPtr
-  RecordBuilder::string(const char* x, int64_t length, const char* encoding) {
+  RecordBuilder::string(const char* x, std::int64_t length, const char* encoding) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
@@ -271,14 +271,14 @@ namespace awkward {
         std::string("called 'string' immediately after 'begin_record'; "
                     "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->string(x,
+                  contents_[(std::size_t)nextindex_].get()->string(x,
                                                               length,
                                                               encoding));
     }
     else {
-      contents_[(size_t)nextindex_].get()->string(x, length, encoding);
+      contents_[(std::size_t)nextindex_].get()->string(x, length, encoding);
     }
     return nullptr;
   }
@@ -295,12 +295,12 @@ namespace awkward {
         std::string("called 'begin_list' immediately after 'begin_record'; "
                     "needs 'index' or 'end_record'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->beginlist());
+                  contents_[(std::size_t)nextindex_].get()->beginlist());
     }
     else {
-      contents_[(size_t)nextindex_].get()->beginlist();
+      contents_[(std::size_t)nextindex_].get()->beginlist();
     }
     return shared_from_this();
   }
@@ -319,13 +319,13 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      contents_[(size_t)nextindex_].get()->endlist();
+      contents_[(std::size_t)nextindex_].get()->endlist();
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  RecordBuilder::begintuple(int64_t numfields) {
+  RecordBuilder::begintuple(std::int64_t numfields) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->begintuple(numfields);
@@ -337,18 +337,18 @@ namespace awkward {
                     "needs 'field_fast', 'field_check', or 'end_record'")
         + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->begintuple(numfields));
+                  contents_[(std::size_t)nextindex_].get()->begintuple(numfields));
     }
     else {
-      contents_[(size_t)nextindex_].get()->begintuple(numfields);
+      contents_[(std::size_t)nextindex_].get()->begintuple(numfields);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  RecordBuilder::index(int64_t index) {
+  RecordBuilder::index(std::int64_t index) {
     if (!begun_) {
       throw std::invalid_argument(
         std::string("called 'index' without 'begin_tuple' at the same level before it")
@@ -361,7 +361,7 @@ namespace awkward {
                     "and then 'begin_tuple'") + FILENAME(__LINE__));
     }
     else {
-      contents_[(size_t)nextindex_].get()->index(index);
+      contents_[(std::size_t)nextindex_].get()->index(index);
     }
     return shared_from_this();
   }
@@ -380,7 +380,7 @@ namespace awkward {
                     "and then 'begin_tuple'") + FILENAME(__LINE__));
     }
     else {
-      contents_[(size_t)nextindex_].get()->endtuple();
+      contents_[(std::size_t)nextindex_].get()->endtuple();
     }
     return shared_from_this();
   }
@@ -423,13 +423,13 @@ namespace awkward {
                     "needs 'field_fast', 'field_check', or 'end_record'")
         + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->beginrecord(name,
-                                                                   check));
+                  contents_[(std::size_t)nextindex_].get()->beginrecord(name,
+                                                                       check));
     }
     else {
-      contents_[(size_t)nextindex_].get()->beginrecord(name, check);
+      contents_[(std::size_t)nextindex_].get()->beginrecord(name, check);
     }
     return shared_from_this();
   }
@@ -452,8 +452,8 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
-             !contents_[(size_t)nextindex_].get()->active()) {
-      int64_t i = nexttotry_;
+             !contents_[(std::size_t)nextindex_].get()->active()) {
+      std::int64_t i = nexttotry_;
       do {
         if (i >= keys_size_) {
           i = 0;
@@ -461,17 +461,17 @@ namespace awkward {
             break;
           }
         }
-        if (pointers_[(size_t)i] == key) {
+        if (pointers_[(std::size_t)i] == key) {
           nextindex_ = i;
           nexttotry_ = i + 1;
           return;
         }
         // If we have yet to see this field with `field_fast`, rebuild the pointer
-        else if (pointers_[(size_t)i] == nullptr) {
-           if (keys_[(size_t)i].compare(key) == 0) {
+        else if (pointers_[(std::size_t)i] == nullptr) {
+           if (keys_[(std::size_t)i].compare(key) == 0) {
               nextindex_ = i;
               nexttotry_ = i + 1;
-              pointers_[(size_t)i] = key;
+              pointers_[(std::size_t)i] = key;
               return;
             }
         }
@@ -494,7 +494,7 @@ namespace awkward {
       return;
     }
     else {
-      contents_[(size_t)nextindex_].get()->field(key, false);
+      contents_[(std::size_t)nextindex_].get()->field(key, false);
       return;
     }
   }
@@ -540,7 +540,7 @@ namespace awkward {
       return;
     }
     else {
-      contents_[(size_t)nextindex_].get()->field(key, true);
+      contents_[(std::size_t)nextindex_].get()->field(key, true);
       return;
     }
   }
@@ -553,10 +553,10 @@ namespace awkward {
                     "before it") + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
-             !contents_[(size_t)nextindex_].get()->active()) {
-      for (size_t i = 0;  i < contents_.size();  i++) {
+             !contents_[(std::size_t)nextindex_].get()->active()) {
+      for (std::size_t i = 0;  i < contents_.size();  i++) {
         if (contents_[i].get()->length() == length_) {
-          maybeupdate((int64_t)i, contents_[i].get()->null());
+          maybeupdate((std::int64_t)i, contents_[i].get()->null());
         }
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(
@@ -568,15 +568,15 @@ namespace awkward {
       begun_ = false;
     }
     else {
-      contents_[(size_t)nextindex_].get()->endrecord();
+      contents_[(std::size_t)nextindex_].get()->endrecord();
     }
     return nullptr;
   }
 
   void
-  RecordBuilder::maybeupdate(int64_t i, const BuilderPtr tmp) {
-    if (tmp  &&  tmp.get() != contents_[(size_t)i].get()) {
-      contents_[(size_t)i] = std::move(tmp);
+  RecordBuilder::maybeupdate(std::int64_t i, const BuilderPtr tmp) {
+    if (tmp  &&  tmp.get() != contents_[(std::size_t)i].get()) {
+      contents_[(std::size_t)i] = std::move(tmp);
     }
   }
 }

@@ -62,7 +62,7 @@ jobs:
             cuda-toolkit
             cxx-compiler
             numba-cuda
-            root=6.36.06
+            root
             pipx
 
       - name: Generate build files

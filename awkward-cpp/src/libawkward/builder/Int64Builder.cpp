@@ -23,7 +23,7 @@ namespace awkward {
       : options_(options)
       , buffer_(std::move(buffer)) { }
 
-  GrowableBuffer<int64_t>
+  GrowableBuffer<std::int64_t>
   Int64Builder::buffer() {
     // FIXME: swap with an empty buffer!
     return std::move(buffer_);
@@ -35,22 +35,22 @@ namespace awkward {
   };
 
   const std::string
-  Int64Builder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  Int64Builder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     buffer_.concatenate(
-      reinterpret_cast<int64_t*>(
+      reinterpret_cast<std::int64_t*>(
         container.empty_buffer(form_key.str() + "-data",
-        (int64_t)buffer_.length() * (int64_t)sizeof(int64_t))));
+        (std::int64_t)buffer_.length() * (std::int64_t)sizeof(std::int64_t))));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"int64\", \"form_key\": \""
            + form_key.str() + "\"}";
   }
 
-  int64_t
+  std::int64_t
   Int64Builder::length() const {
-    return (int64_t)buffer_.length();
+    return (std::int64_t)buffer_.length();
   }
 
   void
@@ -78,7 +78,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  Int64Builder::integer(int64_t x) {
+  Int64Builder::integer(std::int64_t x) {
     buffer_.append(x);
     return nullptr;
   }
@@ -98,21 +98,21 @@ namespace awkward {
   }
 
   const BuilderPtr
-  Int64Builder::datetime(int64_t x, const std::string& unit) {
+  Int64Builder::datetime(std::int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::timedelta(int64_t x, const std::string& unit) {
+  Int64Builder::timedelta(std::int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::string(const char* x, int64_t length, const char* encoding) {
+  Int64Builder::string(const char* x, std::int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return out;
@@ -133,14 +133,14 @@ namespace awkward {
   }
 
   const BuilderPtr
-  Int64Builder::begintuple(int64_t numfields) {
+  Int64Builder::begintuple(std::int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return out;
   }
 
   const BuilderPtr
-  Int64Builder::index(int64_t /* index */) {
+  Int64Builder::index(std::int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));
