@@ -1123,22 +1123,13 @@ class RecordArray(RecordMeta[Content], Content):
             contents = []
             for content in self._contents:
                 contents.append(content._pad_none(target, axis, depth, clip))
-            if len(contents) == 0:
-                return ak.contents.RecordArray(
-                    contents,
-                    self._fields,
-                    self.length,
-                    parameters=self._parameters,
-                    backend=self._backend,
-                )
-            else:
-                return ak.contents.RecordArray(
-                    contents,
-                    self._fields,
-                    self.length,
-                    parameters=self._parameters,
-                    backend=self._backend,
-                )
+            return ak.contents.RecordArray(
+                contents,
+                self._fields,
+                self.length,
+                parameters=self._parameters,
+                backend=self._backend,
+            )
 
     def _to_arrow(
         self,

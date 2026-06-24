@@ -743,50 +743,11 @@ class IndexedArray(IndexedMeta[Content], Content):
         else:
             return self.project()._local_index(axis, depth)
 
-    def _unique_index(self, index, sorted=True):
-        next = ak.index.Index64.zeros(self.length, nplike=self._backend.nplike)
-        length = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
-
-        if not sorted:
-            next = self._index
-            offsets = ak.index.Index64.empty(2, self._backend.nplike)
-            offsets[0] = 0
-            offsets[1] = next.length
-            assert (
-                next.nplike is self._backend.nplike
-                and offsets.nplike is self._backend.nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_sort",
-                    next.dtype.type,
-                    next.dtype.type,
-                    offsets.dtype.type,
-                ](
-                    next.data,
-                    next.data,
-                    offsets[1],
-                    offsets.data,
-                    2,
-                    offsets[1],
-                    True,
-                    False,
-                )
-            )
-
-        assert (
-            self._index.nplike is self._backend.nplike
-            and next.nplike is self._backend.nplike
-            and length.nplike is self._backend.nplike
-        )
-
-        next = ak.index.Index64(
-            self._backend.nplike.unique_values(self._index),
+    def _unique_index(self):
+        return ak.index.Index64(
+            self._backend.nplike.unique_values(self._index.data),
             nplike=self._backend.nplike,
         )
-        length[0] = next.data.size
-
-        return next[0 : length[0]]
 
     def _numbers_to_type(self, name, including_unknown):
         return ak.contents.IndexedArray(
@@ -799,7 +760,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
-        nextindex = self._unique_index(self._index)
+        nextindex = self._unique_index()
 
         if len(nextindex) != len(self._index):
             return False
@@ -1114,11 +1075,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         lateral_context: Mapping[str, Any] | None,
         options: ApplyActionOptions,
     ) -> Content | None:
-        if (
-            self._backend.nplike.known_data
-            and self._backend.nplike.known_data
-            and self._index.length != 0
-        ):
+        if self._backend.nplike.known_data and self._index.length != 0:
             npindex = self._index.data
             indexmin = self._backend.nplike.min(npindex)
             indexmax = self._backend.nplike.max(npindex)
