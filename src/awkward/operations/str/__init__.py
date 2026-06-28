@@ -15,6 +15,7 @@ from awkward.operations.str.akstr_center import *
 # https://arrow.apache.org/docs/python/api/compute.html#containment-tests
 from awkward.operations.str.akstr_count_substring import *
 from awkward.operations.str.akstr_count_substring_regex import *
+from awkward.operations.str.akstr_distinct_counts import *
 from awkward.operations.str.akstr_ends_with import *
 
 # string component extraction
@@ -81,6 +82,7 @@ from awkward.operations.str.akstr_title import *
 from awkward.operations.str.akstr_to_categorical import *
 from awkward.operations.str.akstr_trim import *
 from awkward.operations.str.akstr_trim_whitespace import *
+from awkward.operations.str.akstr_uniques import *
 from awkward.operations.str.akstr_upper import *
 
 __all__ = [k for k in locals() if not k.startswith("akstr_")]

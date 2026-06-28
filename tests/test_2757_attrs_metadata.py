@@ -115,6 +115,8 @@ def test_single_arg_ops(func):
         ak.str.rtrim_whitespace,
         ak.str.trim_whitespace,
         ak.str.split_whitespace,
+        ak.str.uniques,
+        ak.str.distinct_counts,
     ],
 )
 def test_string_operations_unary(func):
