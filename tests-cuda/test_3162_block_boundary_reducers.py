@@ -240,41 +240,26 @@ def test_block_boundary_count_nonzero():
 
 
 def test_block_boundary_prod():
-    primes = [x for x in range(2, 30000) if all(x % n != 0 for n in range(2, x))]
-    content = ak.contents.NumpyArray(primes)
-    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
-    res_flat_cuda = ak.prod(cuda_content, -1, highlevel=False)
-    res_flat_cpu = ak.prod(content, -1, highlevel=False)
-
-    np.testing.assert_allclose(
-        cp.asnumpy(cp.array(res_flat_cuda)), np.array(res_flat_cpu), rtol=1e-14
-    )
-
-    offsets = ak.index.Index64(np.array([0, 1, 2261, 2262], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets, content)
-    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
-
-    res_seg_cuda = ak.prod(cuda_depth1, -1, highlevel=False)
-    res_seg_cpu = ak.prod(depth1, -1, highlevel=False)
-
-    np.testing.assert_allclose(
-        np.array(to_list(res_seg_cuda)), np.array(to_list(res_seg_cpu)), rtol=1e-14
-    )
-
-    del cuda_content, cuda_depth1
-    cp.get_default_memory_pool().free_all_blocks()
-
-
-def test_block_boundary_prod_bool():
-    rng = np.random.default_rng(seed=42)
-    array = rng.integers(2, size=3000, dtype=bool)
+    # The product of thousands of primes overflows int64 by tens of thousands
+    # of bits, which turns this into a test of modular wraparound rather than
+    # of `prod`. Instead, build an array that is mostly 1s with a few distinct
+    # small prime factors placed exactly on the 1024/2048 thread-block
+    # boundaries. The products then stay tiny and exact (so `==` is the right
+    # assertion), while still stressing reductions that span block boundaries:
+    # if a factor on a boundary were dropped or double-counted, the product
+    # would change detectably.
+    array = np.ones(3000, dtype=np.int64)
+    factors = {0: 2, 1023: 3, 1024: 5, 2047: 7, 2048: 11, 2999: 13}
+    for position, value in factors.items():
+        array[position] = value
     content = ak.contents.NumpyArray(array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
 
     res_flat_cuda = ak.prod(cuda_content, -1, highlevel=False)
     res_flat_cpu = ak.prod(content, -1, highlevel=False)
 
-    assert int(res_flat_cuda) == int(res_flat_cpu)
+    # 2 * 3 * 5 * 7 * 11 * 13 == 30030, well within int64.
+    assert int(res_flat_cuda) == int(res_flat_cpu) == 30030
 
     offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets, content)
@@ -283,7 +268,45 @@ def test_block_boundary_prod_bool():
     res_seg_cuda = ak.prod(cuda_depth1, -1, highlevel=False)
     res_seg_cpu = ak.prod(depth1, -1, highlevel=False)
 
+    # bin 0 = [0, 1)       -> 2
+    # bin 1 = [1, 2998)    -> 3 * 5 * 7 * 11 = 1155 (spans both block boundaries)
+    # bin 2 = [2998, 3000) -> 13
+    assert to_list(res_seg_cuda) == to_list(res_seg_cpu) == [2, 1155, 13]
+
+    del cuda_content, cuda_depth1
+    cp.get_default_memory_pool().free_all_blocks()
+
+
+def test_block_boundary_prod_bool():
+    # A random bool array almost always contains a False, so its product is
+    # ~always 0 and the test degenerates to 0 == 0. Instead make it
+    # deterministic and boundary-sensitive: start all-True and drop a single
+    # False exactly on a thread-block boundary. Only the bin containing it may
+    # collapse to 0, so a kernel that dropped or misplaced the boundary element
+    # would change the result.
+    array = np.ones(3000, dtype=bool)
+    array[2048] = False  # first element of the third block, inside bin 1
+    content = ak.contents.NumpyArray(array)
+    cuda_content = ak.to_backend(content, "cuda", highlevel=False)
+
+    res_flat_cuda = ak.prod(cuda_content, -1, highlevel=False)
+    res_flat_cpu = ak.prod(content, -1, highlevel=False)
+
+    # A single False makes the whole product False.
+    assert int(res_flat_cuda) == int(res_flat_cpu) == 0
+
+    offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
+    depth1 = ak.contents.ListOffsetArray(offsets, content)
+    cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
+
+    res_seg_cuda = ak.prod(cuda_depth1, -1, highlevel=False)
+    res_seg_cpu = ak.prod(depth1, -1, highlevel=False)
+
+    # bin 0 = [0, 1)       -> True
+    # bin 1 = [1, 2998)    -> False (contains the boundary False at index 2048)
+    # bin 2 = [2998, 3000) -> True
     np.testing.assert_array_equal(ak.to_numpy(res_seg_cuda), ak.to_numpy(res_seg_cpu))
+    assert to_list(res_seg_cpu) == [1, 0, 1]
 
     del cuda_content, cuda_depth1
     cp.get_default_memory_pool().free_all_blocks()
