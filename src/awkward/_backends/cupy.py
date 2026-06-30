@@ -146,6 +146,16 @@ class CupyBackend(Backend):
             "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
             "awkward_BitMaskedArray_to_IndexedOptionArray",
             "awkward_BitMaskedArray_to_ByteMaskedArray",
+            "awkward_UnionArray_fillindex",
+            "awkward_UnionArray_fillindex_count",
+            "awkward_UnionArray_fillna",
+            "awkward_UnionArray_filltags",
+            "awkward_UnionArray_filltags_const",
+            "awkward_UnionArray_project",
+            "awkward_UnionArray_regular_index",
+            "awkward_UnionArray_regular_index_getsize",
+            "awkward_UnionArray_simplify",
+            "awkward_UnionArray_validity",
         )
 
     # ---------------------------------------------------------
@@ -236,6 +246,16 @@ class CupyBackend(Backend):
             "awkward_ByteMaskedArray_getitem_nextcarry_outindex": cuda_compute.awkward_ByteMaskedArray_getitem_nextcarry_outindex,
             "awkward_BitMaskedArray_to_IndexedOptionArray": cuda_compute.awkward_BitMaskedArray_to_IndexedOptionArray,
             "awkward_BitMaskedArray_to_ByteMaskedArray": cuda_compute.awkward_BitMaskedArray_to_ByteMaskedArray,
+            "awkward_UnionArray_fillindex": cuda_compute.awkward_UnionArray_fillindex,
+            "awkward_UnionArray_fillindex_count": cuda_compute.awkward_UnionArray_fillindex_count,
+            "awkward_UnionArray_fillna": cuda_compute.awkward_UnionArray_fillna,
+            "awkward_UnionArray_filltags": cuda_compute.awkward_UnionArray_filltags,
+            "awkward_UnionArray_filltags_const": cuda_compute.awkward_UnionArray_filltags_const,
+            "awkward_UnionArray_project": cuda_compute.awkward_UnionArray_project,
+            "awkward_UnionArray_regular_index": cuda_compute.awkward_UnionArray_regular_index,
+            "awkward_UnionArray_regular_index_getsize": cuda_compute.awkward_UnionArray_regular_index_getsize,
+            "awkward_UnionArray_simplify": cuda_compute.awkward_UnionArray_simplify,
+            "awkward_UnionArray_validity": cuda_compute.awkward_UnionArray_validity,
         }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
