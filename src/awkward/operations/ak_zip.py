@@ -31,6 +31,14 @@ def zip(
 ):
     """Combines arrays into records or tuples, broadcasting them together.
 
+    If the `arrays` have nested structure, they are broadcasted with one
+    another to form the records or tuples as deeply as possible, though this
+    can be limited by `depth_limit`.
+
+    This operation may be thought of as the opposite of projection in
+    #ak.Array.__getitem__, which extracts fields one at a time, or #ak.unzip,
+    which extracts them all in one call.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -55,15 +63,8 @@ def zip(
             high-level.
 
     Returns:
-        An array of records (or tuples) whose fields (or slots) are the `arrays`,
-        combined into a single structure. If the `arrays` have
-        nested structure, they are broadcasted with one another to form the
-        records or tuples as deeply as possible, though this can be limited by
-        `depth_limit`.
-
-        This operation may be thought of as the opposite of projection in
-        #ak.Array.__getitem__, which extracts fields one at a time, or
-        #ak.unzip, which extracts them all in one call.
+        An array of records (or tuples) whose fields (or slots) are the
+        `arrays`, combined into a single structure.
 
     Examples:
         Consider the following arrays, `one` and `two`.
