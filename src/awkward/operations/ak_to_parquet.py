@@ -52,7 +52,7 @@ def to_parquet(
     If the `array` does not contain records at top-level, the Arrow table will consist
     of one field whose name is `""` iff. `extensionarray` is False.
 
-    If `extensionarray` is True`, use a custom Arrow extension to store this array.
+    If `extensionarray` is True, use a custom Arrow extension to store this array.
     Otherwise, generic Arrow arrays are used, and if the `array` does not
     contain records at top-level, the Arrow table will consist of one field whose
     name is `""`. See #ak.to_arrow_table for more details.
