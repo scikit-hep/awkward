@@ -12,14 +12,14 @@ __all__ = ("from_torch",)
 def from_torch(array):
     """Converts a PyTorch Tensor into an Awkward Array.
 
+    If `array` contains any other data types the function raises an error.
+
     Args:
         array: (PyTorch Tensor):
             Tensor to convert into an Awkward Array.
 
     Returns:
         An #ak.Array built from the given PyTorch tensor.
-
-        If `array` contains any other data types the function raises an error.
     """
 
     # Dispatch

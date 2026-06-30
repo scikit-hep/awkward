@@ -21,6 +21,16 @@ def from_numpy(
 ):
     """Converts a NumPy array into an Awkward Array.
 
+    The resulting layout can only involve the following #ak.contents.Content types:
+
+    * #ak.contents.NumpyArray
+    * #ak.contents.ByteMaskedArray or #ak.contents.UnmaskedArray if the
+      `array` is an np.ma.MaskedArray.
+    * #ak.contents.RegularArray if `regulararray=True`.
+    * #ak.contents.RecordArray if `recordarray=True`.
+
+    See also #ak.to_numpy and #ak.from_cupy.
+
     Args:
         array (np.ndarray): The NumPy array to convert into an Awkward Array.
             This array can be a np.ma.MaskedArray.
@@ -43,16 +53,6 @@ def from_numpy(
 
     Returns:
         An #ak.Array built from the given NumPy array.
-
-        The resulting layout can only involve the following #ak.contents.Content types:
-
-        * #ak.contents.NumpyArray
-        * #ak.contents.ByteMaskedArray or #ak.contents.UnmaskedArray if the
-          `array` is an np.ma.MaskedArray.
-        * #ak.contents.RegularArray if `regulararray=True`.
-        * #ak.contents.RecordArray if `recordarray=True`.
-
-        See also #ak.to_numpy and #ak.from_cupy.
     """
     return wrap_layout(
         from_arraylib(

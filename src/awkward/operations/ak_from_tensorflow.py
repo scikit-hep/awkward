@@ -14,14 +14,14 @@ __all__ = ("from_tensorflow",)
 def from_tensorflow(array):
     """Converts a TensorFlow Tensor into an Awkward Array.
 
+    If `array` contains any other data types the function raises an error.
+
     Args:
         array: (TensorFlow Tensor):
             Tensor to convert into an Awkward Array.
 
     Returns:
         An #ak.Array built from the given TensorFlow Tensor.
-
-        If `array` contains any other data types the function raises an error.
     """
 
     # Dispatch

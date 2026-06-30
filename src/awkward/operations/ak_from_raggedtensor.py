@@ -14,14 +14,14 @@ __all__ = ("from_raggedtensor",)
 def from_raggedtensor(array):
     """Converts a TensorFlow RaggedTensor into an Awkward Array.
 
+    If `array` contains any other data types the function raises an error.
+
     Args:
         array: (`tensorflow.RaggedTensor`):
             RaggedTensor to convert into an  Awkward Array.
 
     Returns:
         An #ak.Array built from the given TensorFlow RaggedTensor.
-
-        If `array` contains any other data types the function raises an error.
     """
 
     # Dispatch

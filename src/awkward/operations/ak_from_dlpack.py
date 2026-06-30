@@ -25,6 +25,12 @@ def from_dlpack(
 ):
     """Converts a DLPack-aware array into an Awkward Array.
 
+    The resulting layout may involve the following #ak.contents.Content types
+    (only):
+
+    * #ak.contents.NumpyArray
+    * #ak.contents.RegularArray if `regulararray=True`.
+
     Args:
         array (cp.ndarray): The DLPack-supporting array to convert into an
             Awkward Array.
@@ -44,12 +50,6 @@ def from_dlpack(
 
     Returns:
         An #ak.Array built from the given DLPack-aware array.
-
-        The resulting layout may involve the following #ak.contents.Content types
-        (only):
-
-        * #ak.contents.NumpyArray
-        * #ak.contents.RegularArray if `regulararray=True`.
     """
     try:
         dlpack_info_func = array.__dlpack_device__
