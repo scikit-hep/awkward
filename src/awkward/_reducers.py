@@ -41,8 +41,7 @@ class Reducer(Protocol):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -85,32 +84,31 @@ class KernelReducer(Reducer):
 
 def apply_positional_corrections(
     reduced: ak.contents.NumpyArray,
-    parents: ak.index.Index | ak.index.ZeroIndex,
-    offsets: ak.index.Index | ak.index.EmptyIndex,
+    offsets: ak.index.Index,
     starts: ak.index.Index,
     shifts: ak.index.Index | None,
 ):
     if shifts is None:
         assert (
-            parents.nplike is reduced.backend.nplike
+            offsets.nplike is reduced.backend.nplike
             and starts.nplike is reduced.backend.nplike
         )
         reduced.backend.maybe_kernel_error(
             reduced.backend[
                 "awkward_NumpyArray_reduce_adjust_starts_64",
                 reduced.dtype.type,
-                parents.dtype.type,
+                offsets.dtype.type,
                 starts.dtype.type,
             ](
                 reduced.data,
                 reduced.length,
-                parents.data,
+                offsets.data,
                 starts.data,
             )
         )
     else:
         assert (
-            parents.nplike is reduced.backend.nplike
+            offsets.nplike is reduced.backend.nplike
             and starts.nplike is reduced.backend.nplike
             and shifts.nplike is reduced.backend.nplike
         )
@@ -118,13 +116,13 @@ def apply_positional_corrections(
             reduced._backend[
                 "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
                 reduced.dtype.type,
-                parents.dtype.type,
+                offsets.dtype.type,
                 starts.dtype.type,
                 shifts.dtype.type,
             ](
                 reduced.data,
                 reduced.length,
-                parents.data,
+                offsets.data,
                 starts.data,
                 shifts.data,
             )
@@ -147,56 +145,48 @@ class ArgMin(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
         if array.dtype.type in (np.complex128, np.complex64):
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_argmin_complex",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
         else:
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_argmin",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                     starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     starts.data,
                     outlength,
                 )
             )
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
-        apply_positional_corrections(result_array, parents, offsets, starts, shifts)
+        apply_positional_corrections(result_array, offsets, starts, shifts)
         return result_array
 
 
@@ -216,56 +206,48 @@ class ArgMax(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
         if array.dtype.type in (np.complex128, np.complex64):
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_argmax_complex",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
         else:
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_argmax",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
-                    starts.dtype.type,
                     offsets.dtype.type,
+                    starts.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     starts.data,
                     outlength,
                 )
             )
         result_array = ak.contents.NumpyArray(result, backend=array.backend)
-        apply_positional_corrections(result_array, parents, offsets, starts, shifts)
+        apply_positional_corrections(result_array, offsets, starts, shifts)
         return result_array
 
 
@@ -277,22 +259,20 @@ class Count(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
-        assert parents.nplike is array.backend.nplike
+        assert offsets.nplike is array.backend.nplike
         array.backend.maybe_kernel_error(
             array.backend[
-                "awkward_reduce_count_64", result.dtype.type, parents.dtype.type
+                "awkward_reduce_count_64", result.dtype.type, offsets.dtype.type
             ](
                 result,
-                parents.data,
-                parents.length,
+                offsets.data,
                 outlength,
             )
         )
@@ -307,46 +287,42 @@ class CountNonzero(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
 
         result = array.backend.nplike.empty(outlength, dtype=np.int64)
         if np.issubdtype(array.dtype, np.complexfloating):
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_countnonzero_complex",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
-                    parents.length,
+                    offsets.data,
                     outlength,
                 )
             )
         else:
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_countnonzero",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
+                    offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
-                    parents.length,
+                    offsets.data,
                     outlength,
                 )
             )
@@ -364,8 +340,7 @@ class Sum(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -374,45 +349,38 @@ class Sum(KernelReducer):
         if array.dtype.kind == "M":
             raise ValueError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
 
-        # Boolean kernels are special; the result is _not_ a boolean
         if array.dtype == np.bool_:
             result = array.backend.nplike.empty(
                 self._length_for_kernel(array.dtype.type, outlength),
                 dtype=self._promote_integer_rank(np.bool_),
             )
             if result.dtype in (np.int64, np.uint64):
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_sum_int64_bool_64",
                         np.int64,
                         array.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         array.data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                     )
                 )
             elif result.dtype in (np.int32, np.uint32):
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_sum_int32_bool_64",
                         np.int32,
                         array.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         array.data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                     )
                 )
@@ -420,45 +388,38 @@ class Sum(KernelReducer):
                 raise NotImplementedError
             return ak.contents.NumpyArray(result, backend=array.backend)
         else:
-            # View array data in kernel-supported dtype
             kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
             result = array.backend.nplike.empty(
                 self._length_for_kernel(array.dtype.type, outlength),
                 dtype=self._promote_integer_rank(kernel_array_data.dtype),
             )
             if array.dtype.type in (np.complex128, np.complex64):
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_sum_complex",
                         result.dtype.type,
                         kernel_array_data.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                     )
                 )
             else:
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_sum",
                         result.dtype.type,
                         kernel_array_data.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                     )
                 )
@@ -473,8 +434,7 @@ class AxisNoneSum(Sum):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        _parents: ak.index.Index | ak.index.ZeroIndex,
-        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _offsets: ak.index.Index,
         _starts: ak.index.Index,
         _shifts: ak.index.Index | None,
         _outlength: ShapeItem,
@@ -499,8 +459,7 @@ class Prod(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -509,27 +468,22 @@ class Prod(KernelReducer):
         if array.dtype.kind.upper() == "M":
             raise ValueError(f"cannot compute the product (ak.prod) of {array.dtype!r}")
 
-        # Boolean kernels are special; the result is _not_ a boolean
         if array.dtype == np.bool_:
             result = array.backend.nplike.empty(
                 outlength,
-                # This kernel, unlike sum, returns bools!
                 dtype=np.bool_,
             )
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_prod_bool",
                     result.dtype.type,
                     array.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     array.data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
@@ -540,45 +494,38 @@ class Prod(KernelReducer):
                 backend=array.backend,
             )
         else:
-            # View array data in kernel-supported dtype
             kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
             result = array.backend.nplike.empty(
                 self._length_for_kernel(array.dtype.type, outlength),
                 dtype=self._promote_integer_rank(kernel_array_data.dtype),
             )
             if array.dtype.type in (np.complex128, np.complex64):
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_prod_complex",
                         result.dtype.type,
                         kernel_array_data.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                     )
                 )
             else:
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_prod",
                         result.dtype.type,
                         kernel_array_data.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                     )
                 )
@@ -597,50 +544,42 @@ class Any(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.bool_)
 
         if array.dtype.type in (np.complex128, np.complex64):
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_sum_bool_complex",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
         else:
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_sum_bool",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
@@ -655,50 +594,42 @@ class All(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
     ) -> ak.contents.NumpyArray:
         assert isinstance(array, ak.contents.NumpyArray)
-        # View array data in kernel-supported dtype
         kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
         result = array.backend.nplike.empty(outlength, dtype=np.bool_)
 
         if array.dtype.type in (np.complex128, np.complex64):
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_prod_bool_complex",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
         else:
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_prod_bool",
                     result.dtype.type,
                     kernel_array_data.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     kernel_array_data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
@@ -746,8 +677,7 @@ class Min(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -755,65 +685,55 @@ class Min(KernelReducer):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype == np.bool_:
             result = array.backend.nplike.empty(outlength, dtype=np.bool_)
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_prod_bool",
                     result.dtype.type,
                     array.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     array.data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
             return ak.contents.NumpyArray(result, backend=array.backend)
         else:
-            # View array data in kernel-supported dtype
             kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
             result = array.backend.nplike.empty(
                 self._length_for_kernel(array.dtype.type, outlength),
                 dtype=kernel_array_data.dtype,
             )
             if array.dtype.type in (np.complex128, np.complex64):
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_min_complex",
                         result.dtype.type,
                         kernel_array_data.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                         self._identity_for(result.dtype),
                     )
                 )
             else:
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_min",
                         result.dtype.type,
                         kernel_array_data.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                         self._identity_for(result.dtype),
                     )
@@ -827,8 +747,7 @@ class AxisNoneMin(Min):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        _parents: ak.index.Index | ak.index.ZeroIndex,
-        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _offsets: ak.index.Index,
         _starts: ak.index.Index,
         _shifts: ak.index.Index | None,
         _outlength: ShapeItem,
@@ -896,8 +815,7 @@ class Max(KernelReducer):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        parents: ak.index.Index | ak.index.ZeroIndex,
-        offsets: ak.index.Index | ak.index.EmptyIndex,
+        offsets: ak.index.Index,
         starts: ak.index.Index,
         shifts: ak.index.Index | None,
         outlength: ShapeItem,
@@ -905,65 +823,55 @@ class Max(KernelReducer):
         assert isinstance(array, ak.contents.NumpyArray)
         if array.dtype == np.bool_:
             result = array.backend.nplike.empty(outlength, dtype=np.bool_)
-            assert parents.nplike is array.backend.nplike
+            assert offsets.nplike is array.backend.nplike
             array.backend.maybe_kernel_error(
                 array.backend[
                     "awkward_reduce_sum_bool",
                     result.dtype.type,
                     array.dtype.type,
-                    parents.dtype.type,
                     offsets.dtype.type,
                 ](
                     result,
                     array.data,
-                    parents.data,
                     offsets.data,
-                    parents.length,
                     outlength,
                 )
             )
             return ak.contents.NumpyArray(result, backend=array.backend)
         else:
-            # View array data in kernel-supported dtype
             kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
             result = array.backend.nplike.empty(
                 self._length_for_kernel(array.dtype.type, outlength),
                 dtype=kernel_array_data.dtype,
             )
             if array.dtype.type in (np.complex128, np.complex64):
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_max_complex",
                         result.dtype.type,
                         kernel_array_data.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                         self._identity_for(result.dtype),
                     )
                 )
             else:
-                assert parents.nplike is array.backend.nplike
+                assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
                         "awkward_reduce_max",
                         result.dtype.type,
                         kernel_array_data.dtype.type,
-                        parents.dtype.type,
                         offsets.dtype.type,
                     ](
                         result,
                         kernel_array_data,
-                        parents.data,
                         offsets.data,
-                        parents.length,
                         outlength,
                         self._identity_for(result.dtype),
                     )
@@ -977,8 +885,7 @@ class AxisNoneMax(Max):
     def apply(
         self,
         array: ak.contents.NumpyArray,
-        _parents: ak.index.Index | ak.index.ZeroIndex,
-        _offsets: ak.index.Index | ak.index.EmptyIndex,
+        _offsets: ak.index.Index,
         _starts: ak.index.Index,
         _shifts: ak.index.Index | None,
         _outlength: ShapeItem,
