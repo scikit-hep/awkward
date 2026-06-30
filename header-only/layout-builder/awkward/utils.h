@@ -18,24 +18,12 @@
 
 namespace awkward {
 
-  // FIXME:
-  // The following helper variable templates are part of C++17,
-  // define it ourselves until we switch to it
-  template< class T >
-  constexpr bool is_integral_v = std::is_integral<T>::value;
-
-  template< class T >
-  constexpr bool is_signed_v = std::is_signed<T>::value;
-
-  template< class T, class U >
-  constexpr bool is_same_v = std::is_same<T, U>::value;
-
   /// @brief Returns the name of a primitive type as a string.
   template <typename T>
   inline const std::string
   type_to_name() {
-    if (is_integral_v<T>) {
-      if (is_signed_v<T>) {
+    if (std::is_integral_v<T>) {
+      if (std::is_signed_v<T>) {
         if (sizeof(T) == 1) {
           return "int8";
         }
@@ -64,16 +52,16 @@ namespace awkward {
         }
       }
     }
-    else if (is_same_v<T, float>) {
+    else if (std::is_same_v<T, float>) {
       return "float32";
     }
-    else if (is_same_v<T, double>) {
+    else if (std::is_same_v<T, double>) {
       return "float64";
     }
-    else if (is_same_v<T, std::complex<float>>) {
+    else if (std::is_same_v<T, std::complex<float>>) {
       return "complex64";
     }
-    else if (is_same_v<T, std::complex<double>>) {
+    else if (std::is_same_v<T, std::complex<double>>) {
       return "complex128";
     }
 
@@ -150,20 +138,10 @@ namespace awkward {
   template <typename, typename = void>
   constexpr bool is_iterable{};
 
-  // FIXME:
-  // std::void_t is part of C++17, define it ourselves until we switch to it
-  template <typename...>
-  struct voider {
-    using type = void;
-  };
-
-  template <typename... T>
-  using void_t = typename voider<T...>::type;
-
   template <typename T>
   constexpr bool is_iterable<T,
-                             void_t<decltype(std::declval<T>().begin()),
-                                    decltype(std::declval<T>().end())>> = true;
+                             std::void_t<decltype(std::declval<T>().begin()),
+                                         decltype(std::declval<T>().end())>> = true;
 
   template <typename Test, template <typename...> class Ref>
   struct is_specialization : std::false_type {};

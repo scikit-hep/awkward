@@ -1,0 +1,18 @@
+# Configuration for GitHub's automatically generated release notes
+# ("Generate release notes" button / the generate-notes REST API).
+# https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+#
+# The type/* labels are applied automatically from the conventional-commit
+# type in each PR title by .github/workflows/pr-type-label.yml.
+changelog:
+  categories:
+    - title: New features
+      labels:
+        - type/feat
+    - title: Bug-fixes and performance
+      labels:
+        - type/fix
+        - type/perf
+    - title: Other
+      labels:
+        - "*"
