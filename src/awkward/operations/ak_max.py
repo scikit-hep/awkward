@@ -34,6 +34,20 @@ def max(
 ):
     """Returns the maximum value over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    identity of maximization is `-inf` if floating-point or the smallest integer
+    value if applied to integers. This identity is usually masked: the maximum
+    of an empty list is None, unless `mask_identity=False`. This operation is
+    the same as NumPy's
+    [amax](https://docs.scipy.org/doc/numpy/reference/generated/numpy.amax.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+
+    See also #ak.nanmax.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -64,20 +78,7 @@ def max(
             high-level.
 
     Returns:
-        The maximum value in each group of elements from `array` (many
-        types supported, including all Awkward Arrays and Records). The identity
-        of maximization is `-inf` if floating-point or the smallest integer value
-        if applied to integers. This identity is usually masked: the maximum of
-        an empty list is None, unless `mask_identity=False`.
-        This operation is the same as NumPy's
-        [amax](https://docs.scipy.org/doc/numpy/reference/generated/numpy.amax.html)
-        if all lists at a given dimension have the same length and no None values,
-        but it generalizes to cases where they do not.
-
-        See #ak.sum for a more complete description of nested list and missing
-        value (None) handling in reducers.
-
-        See also #ak.nanmax.
+        The maximum value in each group of elements from `array`.
     """
     # Dispatch
     yield (array,)
@@ -109,6 +110,14 @@ def nanmax(
 ):
     """Returns the maximum value, treating NaN values as missing.
 
+    Equivalent to::
+
+        ak.max(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.max.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -134,14 +143,6 @@ def nanmax(
 
     Returns:
         Like #ak.max, but treating NaN ("not a number") values as missing.
-
-        Equivalent to::
-
-            ak.max(ak.nan_to_none(array))
-
-        with all other arguments unchanged.
-
-        See also #ak.max.
     """
     # Dispatch
     yield (array,)

@@ -36,6 +36,20 @@ def softmax(
 ):
     """Computes the softmax over the innermost level of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation is
+    not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the softmax is calculated as::
+
+        np.exp(x) / ak.sum(np.exp(x))
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
     Args:
         x: The data on which to compute the softmax (anything #ak.to_layout recognizes).
         axis (None or int or str): The dimension over which the softmax is
@@ -64,20 +78,7 @@ def softmax(
             high-level.
 
     Returns:
-        The softmax in each group of elements from `x` (many
-        types supported, including all Awkward Arrays and Records). The grouping
-        is performed the same way as for reducers, though this operation is not a
-        reducer and has no identity.
-
-        This function has no NumPy equivalent.
-
-        Passing all arguments to the reducers, the softmax is calculated as::
-
-            np.exp(x) / ak.sum(np.exp(x))
-
-        See #ak.sum for a complete description of handling nested lists and
-        missing values (None) in reducers, and #ak.mean for an example with another
-        non-reducer.
+        The softmax in each group of elements from `x`.
     """
     # Dispatch
     yield (x,)

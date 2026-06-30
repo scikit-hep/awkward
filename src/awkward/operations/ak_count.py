@@ -32,6 +32,9 @@ def count(
 ):
     """Counts an array's elements over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    identity of counting is `0` and it is usually not masked.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -58,9 +61,7 @@ def count(
             high-level.
 
     Returns:
-        The number of elements of `array` (many types supported, including all
-        Awkward Arrays and Records). The identity of counting is `0` and it is
-        usually not masked.
+        The number of elements of `array`.
 
     Examples:
         This function has no analog in NumPy because counting values in a

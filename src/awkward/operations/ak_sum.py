@@ -33,6 +33,13 @@ def sum(
 ):
     """Sums an array's elements over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    identity of addition is `0` and it is usually not masked. This operation is
+    the same as NumPy's
+    [sum](https://docs.scipy.org/doc/numpy/reference/generated/numpy.sum.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -59,12 +66,7 @@ def sum(
             high-level.
 
     Returns:
-        The sum over `array` (many types supported, including all Awkward Arrays
-        and Records). The identity of addition is `0` and it is usually not
-        masked. This operation is the same as NumPy's
-        [sum](https://docs.scipy.org/doc/numpy/reference/generated/numpy.sum.html)
-        if all lists at a given dimension have the same length and no None values,
-        but it generalizes to cases where they do not.
+        The sum over `array`.
 
     Examples:
         For example, consider this `array`, in which all lists at a given dimension
@@ -236,6 +238,14 @@ def nansum(
 ):
     """Sums an array's elements, treating NaN values as missing.
 
+    Equivalent to::
+
+        ak.sum(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.sum.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -263,14 +273,6 @@ def nansum(
 
     Returns:
         Like #ak.sum, but treating NaN ("not a number") values as missing.
-
-        Equivalent to::
-
-            ak.sum(ak.nan_to_none(array))
-
-        with all other arguments unchanged.
-
-        See also #ak.sum.
     """
     # Dispatch
     yield (array,)
