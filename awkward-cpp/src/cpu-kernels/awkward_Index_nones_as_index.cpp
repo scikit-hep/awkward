@@ -6,7 +6,7 @@
 
 template <typename T>
 ERROR awkward_Index_nones_as_index(
-  T* toindex,
+  T* __restrict__ toindex,
   int64_t length) {
   int64_t n_non_null = 0;
   // Assuming that `toindex` comprises of unique, contiguous integers (or -1), and is zero-based
@@ -23,7 +23,7 @@ ERROR awkward_Index_nones_as_index(
   return success();
 }
 ERROR awkward_Index_nones_as_index_64(
-  int64_t* toindex,
+  int64_t* __restrict__ toindex,
   int64_t length) {
   return awkward_Index_nones_as_index<int64_t>(
     toindex,

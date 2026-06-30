@@ -28,7 +28,7 @@ jobs:
     name: Build C++ WASM
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         submodules: true
         persist-credentials: false
@@ -36,7 +36,7 @@ jobs:
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures --tests
 
-    - uses: pypa/cibuildwheel@8d2b08b68458a16aeb24b64e68a09ab1c8e82084 # v3.4.1
+    - uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v4.1.0
       with:
         package-dir: awkward-cpp
       env:
@@ -60,7 +60,7 @@ jobs:
         # Ensure conda env is activated
         shell: "bash -l {0}"
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         submodules: true
         persist-credentials: false
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Build Python
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         submodules: true
         persist-credentials: false
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: Execute cppyy notebook
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         submodules: true
         persist-credentials: false
@@ -189,7 +189,7 @@ jobs:
     env:
         DOCS_CANONICAL_VERSION: main
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         persist-credentials: false
 
@@ -313,7 +313,7 @@ jobs:
       name: docs
       url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Configure AWS credentials

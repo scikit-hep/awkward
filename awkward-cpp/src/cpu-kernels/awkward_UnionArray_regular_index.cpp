@@ -6,10 +6,10 @@
 
 template <typename C, typename I>
 ERROR awkward_UnionArray_regular_index(
-  I* toindex,
-  I* current,
+  I* __restrict__ toindex,
+  I* __restrict__ current,
   int64_t size,
-  const C* fromtags,
+  const C* __restrict__ fromtags,
   int64_t length) {
   for (int64_t k = 0;  k < size;  k++) {
     current[k] = 0;
@@ -21,81 +21,15 @@ ERROR awkward_UnionArray_regular_index(
   }
   return success();
 }
-ERROR awkward_UnionArray64_32_regular_index(
-  int32_t* toindex,
-  int32_t* current,
-  int64_t size,
-  const int64_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int64_t, int32_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
-ERROR awkward_UnionArray64_U32_regular_index(
-  uint32_t* toindex,
-  uint32_t* current,
-  int64_t size,
-  const int64_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int64_t, uint32_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
-ERROR awkward_UnionArray64_64_regular_index(
-  int64_t* toindex,
-  int64_t* current,
-  int64_t size,
-  const int64_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int64_t, int64_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
-ERROR awkward_UnionArray8_32_regular_index(
-  int32_t* toindex,
-  int32_t* current,
-  int64_t size,
-  const int8_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int8_t, int32_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
-ERROR awkward_UnionArray8_U32_regular_index(
-  uint32_t* toindex,
-  uint32_t* current,
-  int64_t size,
-  const int8_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int8_t, uint32_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
-ERROR awkward_UnionArray8_64_regular_index(
-  int64_t* toindex,
-  int64_t* current,
-  int64_t size,
-  const int8_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index<int8_t, int64_t>(
-    toindex,
-    current,
-    size,
-    fromtags,
-    length);
-}
+
+#define WRAPPER(FUNC, C, I) \
+  ERROR FUNC(I* toindex, I* current, int64_t size, const C* fromtags, int64_t length) { \
+    return awkward_UnionArray_regular_index<C, I>(toindex, current, size, fromtags, length); \
+  }
+
+WRAPPER(awkward_UnionArray64_32_regular_index, int64_t, int32_t)
+WRAPPER(awkward_UnionArray64_U32_regular_index, int64_t, uint32_t)
+WRAPPER(awkward_UnionArray64_64_regular_index, int64_t, int64_t)
+WRAPPER(awkward_UnionArray8_32_regular_index, int8_t, int32_t)
+WRAPPER(awkward_UnionArray8_U32_regular_index, int8_t, uint32_t)
+WRAPPER(awkward_UnionArray8_64_regular_index, int8_t, int64_t)
