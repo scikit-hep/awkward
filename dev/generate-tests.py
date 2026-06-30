@@ -34,6 +34,7 @@ CUDA_COMPUTE_KERNELS = {
     "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_numvalid",
     "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_UnionArray_validity",
 }
 
 try:
