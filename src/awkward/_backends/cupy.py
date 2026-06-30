@@ -146,6 +146,17 @@ class CupyBackend(Backend):
             "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
             "awkward_BitMaskedArray_to_IndexedOptionArray",
             "awkward_BitMaskedArray_to_ByteMaskedArray",
+            "awkward_ListOffsetArray_drop_none_indexes",
+            "awkward_ListOffsetArray_flatten_offsets",
+            "awkward_ListOffsetArray_rpad_axis1",
+            "awkward_NumpyArray_rearrange_shifted",
+            "awkward_ByteMaskedArray_reduce_next_64",
+            "awkward_NumpyArray_reduce_adjust_starts_64",
+            "awkward_RegularArray_reduce_nonlocal_preparenext_64",
+            "awkward_IndexedArray_fill",
+            "awkward_IndexedArray_fill_count",
+            "awkward_IndexedArray_index_of_nulls",
+            "awkward_IndexedArray_local_preparenext_64",
         )
 
     # ---------------------------------------------------------
@@ -236,6 +247,17 @@ class CupyBackend(Backend):
             "awkward_ByteMaskedArray_getitem_nextcarry_outindex": cuda_compute.awkward_ByteMaskedArray_getitem_nextcarry_outindex,
             "awkward_BitMaskedArray_to_IndexedOptionArray": cuda_compute.awkward_BitMaskedArray_to_IndexedOptionArray,
             "awkward_BitMaskedArray_to_ByteMaskedArray": cuda_compute.awkward_BitMaskedArray_to_ByteMaskedArray,
+            "awkward_ListOffsetArray_drop_none_indexes": cuda_compute.awkward_ListOffsetArray_drop_none_indexes,
+            "awkward_ListOffsetArray_flatten_offsets": cuda_compute.awkward_ListOffsetArray_flatten_offsets,
+            "awkward_ListOffsetArray_rpad_axis1": cuda_compute.awkward_ListOffsetArray_rpad_axis1,
+            "awkward_NumpyArray_rearrange_shifted": cuda_compute.awkward_NumpyArray_rearrange_shifted,
+            "awkward_ByteMaskedArray_reduce_next_64": cuda_compute.awkward_ByteMaskedArray_reduce_next_64,
+            "awkward_NumpyArray_reduce_adjust_starts_64": cuda_compute.awkward_NumpyArray_reduce_adjust_starts_64,
+            "awkward_RegularArray_reduce_nonlocal_preparenext_64": cuda_compute.awkward_RegularArray_reduce_nonlocal_preparenext_64,
+            "awkward_IndexedArray_fill": cuda_compute.awkward_IndexedArray_fill,
+            "awkward_IndexedArray_fill_count": cuda_compute.awkward_IndexedArray_fill_count,
+            "awkward_IndexedArray_index_of_nulls": cuda_compute.awkward_IndexedArray_index_of_nulls,
+            "awkward_IndexedArray_local_preparenext_64": cuda_compute.awkward_IndexedArray_local_preparenext_64,
         }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:

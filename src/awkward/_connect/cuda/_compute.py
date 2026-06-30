@@ -3389,3 +3389,325 @@ def awkward_BitMaskedArray_to_ByteMaskedArray(
         op=_make_fill(frombitmask, validwhen, lsb_order, out_dtype),
         num_items=n_elements,
     )
+
+
+# Adjusts a sorted carry array in-place so that positions are expressed
+# relative to the start of each outer bin (used after sorting with shifts).
+#
+# Phase 1 (bin-major): for each bin b, add fromoffsets[b] to every element
+#   toptr[fromoffsets[b] .. fromoffsets[b+1])  (makes positions absolute)
+# Phase 2 (per-shift): for each i in [0, length):
+#   parent = fromparents[i];  start = fromstarts[parent]
+#   toptr[i] += fromshifts[toptr[i]] - start
+#   (applies shift correction and subtracts the bin's start to make relative)
+#
+# Example: outlength=2, fromoffsets=[0,3,5], toptr=[2,0,1, 1,0]
+#   Phase 1: toptr[0:3] += 0 → [2,0,1]; toptr[3:5] += 3 → [4,3]  →  [2,0,1,4,3]
+#   Phase 2 (length=5): fromshifts and fromstarts adjust each element
+def awkward_NumpyArray_rearrange_shifted(
+    toptr, fromshifts, length, fromoffsets, outlength, fromparents, fromstarts
+):
+    if outlength == 0:
+        return
+    total = int(fromoffsets[outlength])
+    n = total if total > length else length
+    if n == 0:
+        return
+
+    # Slice to stable shapes so the closure captures only CuPy arrays.
+    # cuda.compute keys closures on (dtype, shape) for arrays — value equality,
+    # stable across calls. Python int scalars use id() — unstable for large ints,
+    # causing recompilation every call.
+    # total   → fromoffsets_v[-1]         (one broadcast-cached global read)
+    # outlength → fromoffsets_v.shape[0]-1 (Numba struct field, register-level)
+    # length  → fromparents_v.shape[0]    (Numba struct field, register-level)
+    # n_iters → eliminated; while loop terminates naturally
+    fromoffsets_v = fromoffsets[: outlength + 1]
+    fromparents_v = fromparents[:length]
+
+    def rearrange(i):
+        total_val = fromoffsets_v[fromoffsets_v.shape[0] - np.int64(1)]
+        if i < total_val:
+            lo = np.int64(0)
+            hi = fromoffsets_v.shape[0] - np.int64(1)
+            while lo < hi:
+                mid = lo + ((hi - lo + np.int64(1)) >> np.int64(1))
+                if fromoffsets_v[mid] <= i:
+                    lo = mid
+                else:
+                    hi = mid - np.int64(1)
+            abs_pos = toptr[i] + fromoffsets_v[lo]
+        else:
+            abs_pos = toptr[i]
+        if i < fromparents_v.shape[0]:
+            toptr[i] = abs_pos + fromshifts[abs_pos] - fromstarts[fromparents_v[i]]
+        else:
+            toptr[i] = abs_pos
+        return np.int64(0)
+
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=DiscardIterator(),
+        op=rearrange,
+        num_items=n,
+    )
+
+
+# For each bin b in [0, outlength) and each i in [offsets[b], offsets[b+1]):
+#   if (mask[i] != 0) == validwhen (i.e. element is valid):
+#     nextcarry[k] = i,  outindex[i] = k,  k++
+#   else:
+#     outindex[i] = -1
+#   nextoffsets[b+1] = number of valid elements in [0, offsets[b+1])
+#
+# Example: mask=[1,0,1,1], offsets=[0,2,4], outlength=2, validwhen=True
+#   valid=[T,F,T,T], cumvalid=[0,1,1,2,3]
+#   nextcarry=[0,2,3], outindex=[0,-1,1,2], nextoffsets=[0,1,3]
+def awkward_ByteMaskedArray_reduce_next_64(
+    nextcarry, nextoffsets, outindex, mask, offsets, outlength, validwhen
+):
+    nextoffsets[0] = 0
+    if outlength == 0:
+        return
+    total = int(offsets[outlength])
+    if total == 0:
+        nextoffsets[1 : outlength + 1] = 0
+        return
+
+    out_dtype = nextcarry.dtype
+    valid = ((mask[:total] != 0) == validwhen).astype(out_dtype)
+    scan = cp.empty(total, dtype=out_dtype)
+    inclusive_scan(
+        d_in=valid,
+        d_out=scan,
+        op=OpKind.PLUS,
+        init_value=None,
+        num_items=total,
+    )
+
+    def fill_outindex(i):
+        if (mask[i] != 0) == validwhen:
+            k = scan[i] - 1
+            nextcarry[k] = out_dtype.type(i)
+            return k
+        return out_dtype.type(-1)
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype.type(0)),
+        d_out=outindex[:total],
+        op=fill_outindex,
+        num_items=total,
+    )
+
+    off_dtype = offsets.dtype.type
+
+    def fill_nextoffsets(j):
+        stop = offsets[j + 1]
+        nextoffsets[j + 1] = out_dtype.type(0) if stop == 0 else scan[stop - 1]
+        return off_dtype(0)
+
+    unary_transform(
+        d_in=CountingIterator(off_dtype(0)),
+        d_out=DiscardIterator(),
+        op=fill_nextoffsets,
+        num_items=outlength,
+    )
+
+
+# Adjusts in-place argmin/argmax results from absolute to row-relative form.
+# For each k in [0, outlength): if toptr[k] >= 0: toptr[k] -= starts[k]
+# (offsets argument is accepted for API symmetry but unused)
+#
+# Example: toptr=[3,5,-1], starts=[2,4,0], outlength=3
+#   toptr = [1, 1, -1]
+def awkward_NumpyArray_reduce_adjust_starts_64(toptr, outlength, offsets, starts):
+    if outlength == 0:
+        return
+
+    out_dtype = toptr.dtype.type
+
+    def adjust(i):
+        v = toptr[i]
+        if v >= 0:
+            toptr[i] = v - starts[i]
+        return out_dtype(0)
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype(0)),
+        d_out=DiscardIterator(),
+        op=adjust,
+        num_items=outlength,
+    )
+
+
+# Builds nextcarry/nextoffsets for a nonlocal reduction over a RegularArray.
+# Iterates bin-major then column-major: for each bin b in [0, outlength) and
+# column j in [0, size), one entry per row i in [offsets[b], offsets[b+1]):
+#   nextcarry[k] = i * size + j,  nextoffsets[b*size+j+1] = k+1
+#
+# Example: offsets=[0,2,4], size=2, length=4, outlength=2
+#   bin=0,j=0: rows 0,1 → nextcarry[0]=0*2+0=0, [1]=1*2+0=2
+#   bin=0,j=1: rows 0,1 → nextcarry[2]=0*2+1=1, [3]=1*2+1=3
+#   bin=1,j=0: rows 2,3 → nextcarry[4]=2*2+0=4, [5]=3*2+0=6
+#   bin=1,j=1: rows 2,3 → nextcarry[6]=2*2+1=5, [7]=3*2+1=7
+#   nextoffsets=[0,2,4,6,8]
+def awkward_RegularArray_reduce_nonlocal_preparenext_64(
+    nextcarry, nextoffsets, offsets, size, length, outlength
+):
+    nextoffsets[0] = 0
+    if outlength == 0 or size == 0:
+        return
+    per_bin_counts = (offsets[1 : outlength + 1] - offsets[:outlength]).astype(cp.int64)
+    per_nextbin_counts = cp.repeat(per_bin_counts, size)
+    cp.cumsum(per_nextbin_counts, out=nextoffsets[1 : outlength * size + 1])
+    if length == 0:
+        return
+    total_out = int(nextoffsets[outlength * size])
+    if total_out == 0:
+        return
+    n_nextbins = outlength * size
+    # Only CuPy arrays in the closure → cache keyed by (dtype, shape) with
+    # value equality, not id() of Python int scalars.
+    # nextoffsets_v is kept for its shape (gives sz = n_nextbins // outlength);
+    # its data is never read inside fill_nextcarry.
+    nextoffsets_v = nextoffsets[:n_nextbins]
+    offsets_v = offsets[: outlength + 1].astype(cp.int64)
+
+    def fill_nextcarry(k):
+        # sz and outlength from array shapes — register-level, no GPU reads.
+        sz = nextoffsets_v.shape[0] // (offsets_v.shape[0] - np.int64(1))
+        # Binary search over offsets_v (outlength elements) instead of
+        # nextoffsets_v (outlength*size elements): O(log outlength) vs
+        # O(log(outlength*size)), and offsets_v is size* smaller so it
+        # fits in L1 cache more easily.
+        # Find largest b such that offsets_v[b]*sz <= k.
+        lo = np.int64(0)
+        hi = offsets_v.shape[0] - np.int64(2)
+        while lo < hi:
+            mid = lo + ((hi - lo + np.int64(1)) >> np.int64(1))
+            if offsets_v[mid] * sz <= k:
+                lo = mid
+            else:
+                hi = mid - np.int64(1)
+        b = lo
+        count_b = offsets_v[b + np.int64(1)] - offsets_v[b]
+        off = k - offsets_v[b] * sz
+        j = off // count_b
+        row_in_bin = off - j * count_b
+        return (offsets_v[b] + row_in_bin) * sz + j
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=nextcarry[:total_out],
+        op=fill_nextcarry,
+        num_items=total_out,
+    )
+
+
+# Copies fromindex[0:length] into toindex at toindexoffset, adding base to
+# non-negative values and mapping negatives to -1.
+# toindex[toindexoffset + i] = fromindex[i] < 0 ? -1 : fromindex[i] + base
+#
+# Example: fromindex=[1,-1,3], toindexoffset=2, base=10
+#   toindex[2:5] = [11, -1, 13]
+def awkward_IndexedArray_fill(toindex, toindexoffset, fromindex, length, base):
+    if length == 0:
+        return
+
+    out_dtype = toindex.dtype.type
+
+    def fill(i):
+        x = fromindex[i]
+        return out_dtype(-1) if x < 0 else out_dtype(x + base)
+
+    unary_transform(
+        d_in=CountingIterator(out_dtype(0)),
+        d_out=toindex[toindexoffset : toindexoffset + length],
+        op=fill,
+        num_items=length,
+    )
+
+
+# Fills toindex[toindexoffset : toindexoffset+length] with base, base+1, ..., base+length-1.
+#
+# Example: toindexoffset=3, length=4, base=10
+#   toindex[3:7] = [10, 11, 12, 13]
+def awkward_IndexedArray_fill_count(toindex, toindexoffset, length, base):
+    if length == 0:
+        return
+    dtype = toindex.dtype.type
+    # CountingIterator(dtype(base)) generates base, base+1, ...; _make_widening_cast
+    # gives a stable cached identity-cast op so cuda.compute reuses the compiled kernel.
+    unary_transform(
+        d_in=CountingIterator(dtype(base)),
+        d_out=toindex[toindexoffset : toindexoffset + length],
+        op=_make_widening_cast(dtype, dtype),
+        num_items=length,
+    )
+
+
+# Collects row-relative positions of null (negative) entries in fromindex,
+# binned by offsets. For each bin b and each i in [offsets[b], offsets[b+1]):
+#   if fromindex[i] < 0: toindex[j++] = i - starts[b]
+#
+# Example: fromindex=[0,-1,2,-1,3], offsets=[0,3,5], starts=[0,0], outlength=2
+#   bin 0: i=0 (ok), i=1 (null→0-0=0), i=2 (ok)
+#   bin 1: i=3 (null→3-0=3), i=4 (ok)
+#   toindex = [0, 3]  (j=2)
+def awkward_IndexedArray_index_of_nulls(toindex, fromindex, offsets, outlength, starts):
+    if outlength == 0:
+        return
+    total = int(offsets[outlength])
+    if total == 0:
+        return
+    null_mask = fromindex[:total] < 0
+    n_nulls = int(cp.sum(null_mask))
+    if n_nulls == 0:
+        return
+    null_positions = cp.where(null_mask)[0].astype(cp.int64)
+    bin_ids = cp.searchsorted(offsets[1 : outlength + 1], null_positions, side="right")
+    toindex[:n_nulls] = (null_positions - starts[bin_ids]).astype(
+        toindex.dtype, copy=False
+    )
+
+
+# Maps each outer element to its paired inner position, or -1 if no inner
+# element remains for that row. For each bin b and outer element i in
+# [offsets[b], offsets[b+1]), the j-th element (j = i - offsets[b]) gets:
+#   tocarry[i] = nextoffsets[b] + j  if nextoffsets[b] + j < nextoffsets[b+1]
+#   tocarry[i] = -1                   otherwise
+# (starts is accepted for API compatibility but unused)
+#
+# Example: offsets=[0,3,5], nextoffsets=[0,2,4], outlength=2
+#   bin 0: i=0→j=0: inner=0+0=0 <2 ✓; i=1→j=1: inner=0+1=1 <2 ✓; i=2→j=2: 0+2=2 ≥2 →-1
+#   bin 1: i=3→j=0: inner=2+0=2 <4 ✓; i=4→j=1: inner=2+1=3 <4 ✓
+#   tocarry = [0, 1, -1, 2, 3]
+def awkward_IndexedArray_local_preparenext_64(
+    tocarry, starts, offsets, nextoffsets, outlength
+):
+    if outlength == 0:
+        return
+    total = int(offsets[outlength])
+    if total == 0:
+        return
+
+    n_iters = outlength.bit_length()
+
+    def fill(i):
+        lo = 0
+        hi = outlength
+        for _ in range(n_iters):
+            mid = (lo + hi) >> 1
+            if offsets[mid + 1] <= i:
+                lo = mid + 1
+            else:
+                hi = mid
+        inner_pos = nextoffsets[lo] + i - offsets[lo]
+        return inner_pos if inner_pos < nextoffsets[lo + 1] else -1
+
+    unary_transform(
+        d_in=CountingIterator(cp.int64(0)),
+        d_out=tocarry[:total],
+        op=fill,
+        num_items=total,
+    )
