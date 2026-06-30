@@ -29,6 +29,23 @@ def full_like(
 ):
     """Returns an array with the same structure as the input, filled with a given value.
 
+    This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
+
+    Although it's possible to produce an array of `fill_value` with the
+    structure of an `array` using #ak.broadcast_arrays:
+
+    >>> array = ak.Array([[1, 2, 3], [], [4, 5]])
+    >>> ak.broadcast_arrays(array, 1)
+    [<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>,
+     <Array [[1, 1, 1], [], [1, 1]] type='3 * var * int64'>]
+    >>> ak.broadcast_arrays(array, 1.0)
+    [<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>,
+     <Array [[1, 1, 1], [], [1, 1]] type='3 * var * float64'>]
+
+    Such a technique takes its type from the scalar (`1` or `1.0`), rather than
+    the array. This function gets all types from the array, which might not be
+    the same in all parts of the structure.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         fill_value: Value to fill the new array with.
@@ -46,23 +63,6 @@ def full_like(
     Returns:
         An array with the same structure as `array`, with every value replaced
         by `fill_value`.
-
-        This is the equivalent of NumPy's `np.full_like` for Awkward Arrays.
-
-        Although it's possible to produce an array of `fill_value` with the
-        structure of an `array` using #ak.broadcast_arrays:
-
-        >>> array = ak.Array([[1, 2, 3], [], [4, 5]])
-        >>> ak.broadcast_arrays(array, 1)
-        [<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>,
-         <Array [[1, 1, 1], [], [1, 1]] type='3 * var * int64'>]
-        >>> ak.broadcast_arrays(array, 1.0)
-        [<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>,
-         <Array [[1, 1, 1], [], [1, 1]] type='3 * var * float64'>]
-
-        Such a technique takes its type from the scalar (`1` or `1.0`), rather than
-        the array. This function gets all types from the array, which might not be
-        the same in all parts of the structure.
 
     Examples:
         Here is an extreme example:
