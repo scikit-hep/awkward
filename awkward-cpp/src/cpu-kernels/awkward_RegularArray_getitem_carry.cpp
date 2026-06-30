@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_RegularArray_getitem_carry(
-  T* tocarry,
-  const T* fromcarry,
+  T* __restrict__ tocarry,
+  const T* __restrict__ fromcarry,
   int64_t lencarry,
   int64_t size) {
   for (int64_t i = 0;  i < lencarry;  i++) {
@@ -18,8 +18,8 @@ ERROR awkward_RegularArray_getitem_carry(
   return success();
 }
 ERROR awkward_RegularArray_getitem_carry_64(
-  int64_t* tocarry,
-  const int64_t* fromcarry,
+  int64_t* __restrict__ tocarry,
+  const int64_t* __restrict__ fromcarry,
   int64_t lencarry,
   int64_t size) {
   return awkward_RegularArray_getitem_carry<int64_t>(

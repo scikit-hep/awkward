@@ -26,7 +26,8 @@ def zip_no_broadcast(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Combines arrays into a collection of records or tuples without broadcasting.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -42,23 +43,25 @@ def zip_no_broadcast(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Combines `arrays` into a single structure as the fields of a collection
-    of records or the slots of a collection of tuples.
+    Returns:
+        Combines `arrays` into a single structure as the fields of a collection
+        of records or the slots of a collection of tuples.
 
-    Caution: unlike #ak.zip this function will _not_ broadcast the arrays together.
-    During typetracing, it assumes that the given arrays have already the same layouts and lengths.
+        Caution: unlike #ak.zip this function will _not_ broadcast the arrays together.
+        During typetracing, it assumes that the given arrays have already the same layouts and lengths.
 
-    This operation may be thought of as the opposite of projection in
-    #ak.Array.__getitem__, which extracts fields one at a time, or
-    #ak.unzip, which extracts them all in one call.
+        This operation may be thought of as the opposite of projection in
+        #ak.Array.__getitem__, which extracts fields one at a time, or
+        #ak.unzip, which extracts them all in one call.
 
-    Consider the following arrays, `one` and `two`.
+    Examples:
+        Consider the following arrays, `one` and `two`.
 
         >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
         >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
 
-    Zipping them together using a dict creates a collection of records with
-    the same nesting structure as `one` and `two`.
+        Zipping them together using a dict creates a collection of records with
+        the same nesting structure as `one` and `two`.
 
         >>> ak.zip_no_broadcast({"x": one, "y": two}).show()
         [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
@@ -66,7 +69,7 @@ def zip_no_broadcast(
          [{x: 4.4, y: 'd'}],
          []]
 
-    Doing so with a list creates tuples, whose fields are not named.
+        Doing so with a list creates tuples, whose fields are not named.
 
         >>> ak.zip_no_broadcast([one, two]).show()
         [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
@@ -74,7 +77,7 @@ def zip_no_broadcast(
          [(4.4, 'd')],
          []]
 
-    See also #ak.zip and #ak.unzip.
+        See also #ak.zip and #ak.unzip.
     """
     # Dispatch
     if isinstance(arrays, Mapping):

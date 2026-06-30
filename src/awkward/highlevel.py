@@ -356,7 +356,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         self._layout = layout
         self._behavior = behavior
-        self._attrs = attrs
+        self._attrs = None if attrs is None else Attrs(attrs)
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
@@ -1717,7 +1717,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     container,
                     highlevel=False,
                     buffer_key="{form_key}-{attribute}",
-                    byteorder="<",
+                    byteorder=ak._util.native_byteorder,
                 )
                 for i, part_length in enumerate(length)
             ]
@@ -1732,7 +1732,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 container,
                 highlevel=False,
                 buffer_key="{form_key}-{attribute}",
-                byteorder="<",
+                byteorder=ak._util.native_byteorder,
             )
         self._layout = layout
         self._behavior = behavior
@@ -1904,7 +1904,7 @@ class Record(NDArrayOperatorsMixin):
 
         self._layout = layout
         self._behavior = behavior
-        self._attrs = attrs
+        self._attrs = None if attrs is None else Attrs(attrs)
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
@@ -2556,7 +2556,7 @@ class Record(NDArrayOperatorsMixin):
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
         layout = ak.record.Record(layout, at)
         self._layout = layout
@@ -2718,9 +2718,12 @@ class ArrayBuilder(Sized):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
 
+        if attrs is not None and not isinstance(attrs, Mapping):
+            raise TypeError("attrs must be None or a mapping")
+
         self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
         self._behavior = behavior
-        self._attrs = attrs
+        self._attrs = None if attrs is None else Attrs(attrs)
 
     @classmethod
     def _wrap(cls, layout, behavior=None, attrs=None):
@@ -2741,7 +2744,7 @@ class ArrayBuilder(Sized):
         out = cls.__new__(cls)
         out._layout = layout
         out._behavior = behavior
-        out._attrs = attrs
+        out._attrs = None if attrs is None else Attrs(attrs)
         return out
 
     @property

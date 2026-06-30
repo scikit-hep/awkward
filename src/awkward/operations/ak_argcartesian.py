@@ -25,7 +25,8 @@ def argcartesian(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the Cartesian product of arrays, returning integer indexes.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -57,16 +58,18 @@ def argcartesian(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes a Cartesian product (i.e. cross product) of data from a set of
-    `arrays`, like #ak.cartesian, but returning integer indexes for
-    #ak.Array.__getitem__.
+    Returns:
+        Computes a Cartesian product (i.e. cross product) of data from a set of
+        `arrays`, like #ak.cartesian, but returning integer indexes for
+        #ak.Array.__getitem__.
 
-    For example, the Cartesian product of
+    Examples:
+        For example, the Cartesian product of
 
         >>> one = ak.Array([1.1, 2.2, 3.3])
         >>> two = ak.Array(["a", "b"])
 
-    is
+        is
 
         >>> ak.cartesian([one, two], axis=0).show()
         [(1.1, 'a'),
@@ -76,7 +79,7 @@ def argcartesian(
          (3.3, 'a'),
          (3.3, 'b')]
 
-    But with argcartesian, only the indexes are returned.
+        But with argcartesian, only the indexes are returned.
 
         >>> ak.argcartesian([one, two], axis=0).show()
         [(0, 0),
@@ -86,8 +89,8 @@ def argcartesian(
          (2, 0),
          (2, 1)]
 
-    These are the indexes that can select the items that go into the actual
-    Cartesian product.
+        These are the indexes that can select the items that go into the actual
+        Cartesian product.
 
         >>> one_index, two_index = ak.unzip(ak.argcartesian([one, two], axis=0))
         >>> one[one_index]
@@ -95,8 +98,8 @@ def argcartesian(
         >>> two[two_index]
         <Array ['a', 'b', 'a', 'b', 'a', 'b'] type='6 * string'>
 
-    All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
-    so see the #ak.cartesian documentation for a more complete description.
+        All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
+        so see the #ak.cartesian documentation for a more complete description.
     """
     # Dispatch
     if isinstance(arrays, Mapping):
