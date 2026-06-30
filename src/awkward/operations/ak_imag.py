@@ -17,6 +17,8 @@ np = NumpyMetadata.instance()
 def imag(val, highlevel=True, behavior=None, attrs=None):
     """Returns the imaginary components of the given array elements.
 
+    If the arrays have complex elements, the returned arrays are floats.
+
     Args:
         val : array_like
             Input array.
@@ -29,8 +31,6 @@ def imag(val, highlevel=True, behavior=None, attrs=None):
 
     Returns:
         The imaginary components of the given array elements.
-
-        If the arrays have complex elements, the returned arrays are floats.
     """
     # Dispatch
     yield (val,)
