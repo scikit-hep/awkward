@@ -32,6 +32,13 @@ def almost_equal(
 ):
     """Returns True if two arrays are equal within the given tolerances and options.
 
+    The relative difference (`rtol * abs(b)`) and the absolute difference
+    `atol` are added together to compare against the absolute difference
+    between `left` and `right`.
+
+    TypeTracer arrays are not supported, as there is very little information
+    to be compared.
+
     Args:
         left: Array-like data (anything #ak.to_layout recognizes).
         right: Array-like data (anything #ak.to_layout recognizes).
@@ -47,13 +54,6 @@ def almost_equal(
     Returns:
         True if the two array-like arguments are equal within the given options
         and tolerances, False otherwise.
-
-        The relative difference (`rtol * abs(b)`) and the absolute difference `atol`
-        are added together to compare against the absolute difference between `left`
-        and `right`.
-
-        TypeTracer arrays are not supported, as there is very little information to
-        be compared.
     """
     # Dispatch
     yield left, right

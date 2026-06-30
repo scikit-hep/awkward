@@ -23,6 +23,197 @@ np = NumpyMetadata.instance()
 def enforce_type(array, type, *, highlevel=True, behavior=None, attrs=None):
     """Returns an array whose structure is modified to match the given type.
 
+    In addition to preserving the existing type and/or changing parameters,
+
+    - #ak.types.OptionType can be added
+
+      >>> a = ak.Array([1, 2, 3])
+      >>> a.type.show()
+      3 * int64
+      >>> b = ak.enforce_type(a, "?int64")
+      >>> b.type.show()
+      3 * ?int64
+
+      or removed (if there are no missing values)
+
+      >>> a = ak.Array([1, 2, 3, None])
+      >>> b = a[:-1]
+      >>> b.type.show()
+      3 * ?int64
+      >>> c = ak.enforce_type(b, "int64")
+      >>> c.type.show()
+      3 * int64
+
+    - #ak.types.UnionType can
+
+      * grow to include new variant types,
+
+      >>> a = ak.Array([{'x': 1}, 2.0])
+      >>> a.type.show()
+      2 * union[
+          {
+              x: int64
+          },
+          float64
+      ]
+      >>> b = ak.enforce_type(a, "union[{x: int64}, float64, string]")
+      >>> b.type.show()
+      2 * union[
+      {
+          x: float32
+      },
+          float64,
+          string
+      ]
+
+      * convert to a single type,
+
+      >>> a = ak.concatenate([
+      ...   ak.Array([{'x': 1}, {'x': 2}]),
+      ...   ak.Array([{'x': True, "y": None}, {'x': False, "y": None}])
+      ... ])
+      >>> a.type.show()
+      4 * union[
+          {
+              x: int64
+          },
+          {
+              x: bool,
+              y: ?unknown
+          }
+      ]
+      >>> b = ak.enforce_type(a, "{x: float64}")
+      >>> b.type.show()
+      4 * {
+          x: float64
+      }
+
+      * project to a single type (if conversion to a single type is not possible, and the union contains no values for this type),
+
+      >>> a = ak.concatenate([
+      ...   ak.Array([{'x': 1}, {'x': 2}]),
+      ...   ak.Array([{'x': "yes", "y": None}, {'x': "no", "y": None}])
+      ... ])
+      >>> b = a[:2]
+      >>> b.type.show()
+      2 * union[
+          {
+              x: int64
+          },
+          {
+              x: string,
+              y: ?unknown
+          }
+      ]
+      >>> c = ak.enforce_type(b, "{x: int64}")
+      >>> c.type.show()
+      2 * {
+          x: int64
+      }
+
+      * change type in a single variant.
+
+      >>> a = ak.Array([{'x': 1}, 2.0])
+      >>> a.type.show()
+      2 * union[
+          {
+              x: int64
+          },
+          float64
+      ]
+      >>> b = ak.enforce_type(a, "union[{x: float32}, float64]")
+      >>> b.type.show()
+      2 * union[
+      {
+          x: float32
+      },
+          float64
+      ]
+
+      Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
+
+    - #ak.types.RecordType can
+
+      * grow to include new optional fields / slots,
+
+      >>> a = ak.Array([{'x': 1}])
+      >>> a.type.show()
+      1 * {
+          x: int64
+      }
+      >>> b = ak.enforce_type(a, "{x: int64, y: ?float32}")
+      >>> b.type.show()
+      1 * {
+          x: int64,
+          y: ?float32
+      }
+
+      * shrink to drop existing fields / slots.
+
+      >>> a = ak.Array([{'x': 1, 'y': 1j+3}])
+      >>> a.type.show()
+      1 * {
+          x: int64,
+          y: complex128
+      }
+      >>> b = ak.enforce_type(a, "{x: int64}")
+      >>> b.type.show()
+      1 * {
+          x: int64
+      }
+
+      A #ak.types.RecordType may only be converted to another #ak.types.RecordType if it is of the same flavour, i.e.
+      tuples can be converted to tuples, or records to records. Where a new field/slot is added to a #ak.types.RecordType,
+      it must be an #ak.types.OptionType. For tuples, slots may only be added to the end of the tuple
+    - #ak.types.RegularType can convert to a #ak.types.ListType
+
+      >>> a = ak.to_regular([[1, 2, 3], [4, 5, 6]])
+      >>> a.type.show()
+      2 * 3 * int64
+      >>> b = ak.enforce_type(a, "var * int64")
+      >>> b.type.show()
+      2 * var * int64
+
+    - #ak.types.ListType can convert to a #ak.types.RegularType
+
+      >>> a = ak.Array([[1, 2, 3], [4, 5, 6]])
+      >>> a.type.show()
+      2 * var * int64
+      >>> b = ak.enforce_type(a, "3 * int64")
+      >>> b.type.show()
+      2 * 3 * int64
+
+    - #ak.types.NumpyType can change primitive
+
+      >>> a = ak.Array([1, 2, 3])
+      >>> a.type.show()
+      3 * int64
+      >>> b = ak.enforce_type(a, "float32")
+      >>> b.type.show()
+      3 * float32
+
+    - #ak.types.UnknownType can be converted to any other type
+
+      >>> a = ak.Array([])
+      >>> a.type.show()
+      0 * unknown
+      >>> b = ak.enforce_type(a, "float32")
+      >>> b.type.show()
+      0 * float32
+
+      and can be converted to from any other type.
+
+      >>> a = ak.Array([1, 2, 3])
+      >>> a.type.show()
+      3 * int64
+      >>> b = ak.enforce_type(a, "?unknown")
+      >>> b.type.show()
+      3 * ?unknown
+
+    The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
+    given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
+    to a regular type, it will fail.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         type (#ak.types.Type, or str): The type that `array` will be enforced to.
@@ -35,197 +226,6 @@ def enforce_type(array, type, *, highlevel=True, behavior=None, attrs=None):
 
     Returns:
         An array whose structure is modified to match the given type.
-
-        In addition to preserving the existing type and/or changing parameters,
-
-        - #ak.types.OptionType can be added
-
-          >>> a = ak.Array([1, 2, 3])
-          >>> a.type.show()
-          3 * int64
-          >>> b = ak.enforce_type(a, "?int64")
-          >>> b.type.show()
-          3 * ?int64
-
-          or removed (if there are no missing values)
-
-          >>> a = ak.Array([1, 2, 3, None])
-          >>> b = a[:-1]
-          >>> b.type.show()
-          3 * ?int64
-          >>> c = ak.enforce_type(b, "int64")
-          >>> c.type.show()
-          3 * int64
-
-        - #ak.types.UnionType can
-
-          * grow to include new variant types,
-
-          >>> a = ak.Array([{'x': 1}, 2.0])
-          >>> a.type.show()
-          2 * union[
-              {
-                  x: int64
-              },
-              float64
-          ]
-          >>> b = ak.enforce_type(a, "union[{x: int64}, float64, string]")
-          >>> b.type.show()
-          2 * union[
-          {
-              x: float32
-          },
-              float64,
-              string
-          ]
-
-          * convert to a single type,
-
-          >>> a = ak.concatenate([
-          ...   ak.Array([{'x': 1}, {'x': 2}]),
-          ...   ak.Array([{'x': True, "y": None}, {'x': False, "y": None}])
-          ... ])
-          >>> a.type.show()
-          4 * union[
-              {
-                  x: int64
-              },
-              {
-                  x: bool,
-                  y: ?unknown
-              }
-          ]
-          >>> b = ak.enforce_type(a, "{x: float64}")
-          >>> b.type.show()
-          4 * {
-              x: float64
-          }
-
-          * project to a single type (if conversion to a single type is not possible, and the union contains no values for this type),
-
-          >>> a = ak.concatenate([
-          ...   ak.Array([{'x': 1}, {'x': 2}]),
-          ...   ak.Array([{'x': "yes", "y": None}, {'x': "no", "y": None}])
-          ... ])
-          >>> b = a[:2]
-          >>> b.type.show()
-          2 * union[
-              {
-                  x: int64
-              },
-              {
-                  x: string,
-                  y: ?unknown
-              }
-          ]
-          >>> c = ak.enforce_type(b, "{x: int64}")
-          >>> c.type.show()
-          2 * {
-              x: int64
-          }
-
-          * change type in a single variant.
-
-          >>> a = ak.Array([{'x': 1}, 2.0])
-          >>> a.type.show()
-          2 * union[
-              {
-                  x: int64
-              },
-              float64
-          ]
-          >>> b = ak.enforce_type(a, "union[{x: float32}, float64]")
-          >>> b.type.show()
-          2 * union[
-          {
-              x: float32
-          },
-              float64
-          ]
-
-          Due to these rules, changes to more than one variant of a union must be performed with multiple calls to #ak.enforce_type
-
-        - #ak.types.RecordType can
-
-          * grow to include new optional fields / slots,
-
-          >>> a = ak.Array([{'x': 1}])
-          >>> a.type.show()
-          1 * {
-              x: int64
-          }
-          >>> b = ak.enforce_type(a, "{x: int64, y: ?float32}")
-          >>> b.type.show()
-          1 * {
-              x: int64,
-              y: ?float32
-          }
-
-          * shrink to drop existing fields / slots.
-
-          >>> a = ak.Array([{'x': 1, 'y': 1j+3}])
-          >>> a.type.show()
-          1 * {
-              x: int64,
-              y: complex128
-          }
-          >>> b = ak.enforce_type(a, "{x: int64}")
-          >>> b.type.show()
-          1 * {
-              x: int64
-          }
-
-          A #ak.types.RecordType may only be converted to another #ak.types.RecordType if it is of the same flavour, i.e.
-          tuples can be converted to tuples, or records to records. Where a new field/slot is added to a #ak.types.RecordType,
-          it must be an #ak.types.OptionType. For tuples, slots may only be added to the end of the tuple
-        - #ak.types.RegularType can convert to a #ak.types.ListType
-
-          >>> a = ak.to_regular([[1, 2, 3], [4, 5, 6]])
-          >>> a.type.show()
-          2 * 3 * int64
-          >>> b = ak.enforce_type(a, "var * int64")
-          >>> b.type.show()
-          2 * var * int64
-
-        - #ak.types.ListType can convert to a #ak.types.RegularType
-
-          >>> a = ak.Array([[1, 2, 3], [4, 5, 6]])
-          >>> a.type.show()
-          2 * var * int64
-          >>> b = ak.enforce_type(a, "3 * int64")
-          >>> b.type.show()
-          2 * 3 * int64
-
-        - #ak.types.NumpyType can change primitive
-
-          >>> a = ak.Array([1, 2, 3])
-          >>> a.type.show()
-          3 * int64
-          >>> b = ak.enforce_type(a, "float32")
-          >>> b.type.show()
-          3 * float32
-
-        - #ak.types.UnknownType can be converted to any other type
-
-          >>> a = ak.Array([])
-          >>> a.type.show()
-          0 * unknown
-          >>> b = ak.enforce_type(a, "float32")
-          >>> b.type.show()
-          0 * float32
-
-          and can be converted to from any other type.
-
-          >>> a = ak.Array([1, 2, 3])
-          >>> a.type.show()
-          3 * int64
-          >>> b = ak.enforce_type(a, "?unknown")
-          >>> b.type.show()
-          3 * ?unknown
-
-        The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
-        given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
-        to a regular type, it will fail.
     """
     # Dispatch
     yield (array,)
