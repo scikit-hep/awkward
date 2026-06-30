@@ -24,8 +24,7 @@ def merge_option_of_records(
 ):
     """Simplifies options of records into records of options.
 
-    An equivalent array with the option pushed inside the record (a record of
-    options), e.g.
+    For example, this turns
 
     >>> array = ak.Array([None, {"a": 1}, {"a": 2}])
 

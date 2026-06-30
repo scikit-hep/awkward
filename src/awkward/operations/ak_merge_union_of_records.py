@@ -25,8 +25,7 @@ def merge_union_of_records(
 ):
     """Simplifies unions of records into records of options.
 
-    An equivalent array with the union of records merged into a single record of
-    options, e.g.
+    For example, this turns
 
     >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}]))
     >>> array
