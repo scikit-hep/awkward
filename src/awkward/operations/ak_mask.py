@@ -19,6 +19,15 @@ np = NumpyMetadata.instance()
 def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None, attrs=None):
     """Returns an array with elements replaced by None where a mask condition fails.
 
+    An array for which::
+
+        output[i] = array[i] if mask[i] == valid_when else None
+
+    Unlike filtering data with #ak.Array.__getitem__, this `output` has the
+    same length as the original `array` and can therefore be used in
+    calculations with it, such as
+    [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html).
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         mask (array of booleans): The mask that overlays elements in the
@@ -34,14 +43,7 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None, attrs=N
             high-level.
 
     Returns:
-        An array for which::
-
-            output[i] = array[i] if mask[i] == valid_when else None
-
-        Unlike filtering data with #ak.Array.__getitem__, this `output` has the
-        same length as the original `array` and can therefore be used in
-        calculations with it, such as
-        [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html).
+        An array with elements replaced by None where the mask condition fails.
 
     Examples:
         For example, with
