@@ -659,7 +659,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     def _unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
-        out = self.to_IndexedOptionArray64()._unique(
+        return self.to_IndexedOptionArray64()._unique(
             negaxis, starts, offsets, outlength
         )
 
