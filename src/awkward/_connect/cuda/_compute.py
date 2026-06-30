@@ -3389,3 +3389,401 @@ def awkward_BitMaskedArray_to_ByteMaskedArray(
         op=_make_fill(frombitmask, validwhen, lsb_order, out_dtype),
         num_items=n_elements,
     )
+
+
+# Copies `length` values from fromindex into toindex starting at toindexoffset,
+# casting to toindex's dtype.
+#
+# Example: fromindex=[10, 20, 30], toindexoffset=2, length=3
+#   toindex[2:5] = [10, 20, 30]
+def awkward_UnionArray_fillindex(toindex, toindexoffset, fromindex, length):
+    if length == 0:
+        return
+
+    def fill_idx(i):
+        return toindex.dtype.type(fromindex[i])
+
+    unary_transform(
+        d_in=CountingIterator(fromindex.dtype.type(0)),
+        d_out=toindex[toindexoffset : toindexoffset + length],
+        op=fill_idx,
+        num_items=length,
+    )
+
+
+# Fills toindex[toindexoffset + i] = i for i in [0, length).
+#
+# Example: toindexoffset=3, length=4
+#   toindex[3:7] = [0, 1, 2, 3]
+def awkward_UnionArray_fillindex_count(toindex, toindexoffset, length):
+    if length == 0:
+        return
+    unary_transform(
+        d_in=CountingIterator(toindex.dtype.type(0)),
+        d_out=toindex[toindexoffset : toindexoffset + length],
+        op=lambda i: i,
+        num_items=length,
+    )
+
+
+# Copies fromindex to toindex, replacing negative values with 0.
+# toindex[i] = fromindex[i] if fromindex[i] >= 0 else 0
+#
+# Example: fromindex=[-1, 3, -2, 7], length=4
+#   toindex = [0, 3, 0, 7]
+def awkward_UnionArray_fillna(toindex, fromindex, length):
+    if length == 0:
+        return
+
+    def fill(x):
+        return x if x >= toindex.dtype.type(0) else toindex.dtype.type(0)
+
+    unary_transform(
+        d_in=fromindex[:length],
+        d_out=toindex[:length],
+        op=fill,
+        num_items=length,
+    )
+
+
+# Copies fromtags to totags at totagsoffset, adding base to each value.
+# totags[totagsoffset + i] = fromtags[i] + base
+#
+# Example: fromtags=[0, 1, 0], totagsoffset=2, base=5, length=3
+#   totags[2:5] = [5, 6, 5]
+def awkward_UnionArray_filltags(totags, totagsoffset, fromtags, length, base):
+    if length == 0:
+        return
+
+    def fill_tag(i):
+        return totags.dtype.type(fromtags[i] + base)
+
+    unary_transform(
+        d_in=CountingIterator(fromtags.dtype.type(0)),
+        d_out=totags[totagsoffset : totagsoffset + length],
+        op=fill_tag,
+        num_items=length,
+    )
+
+
+# Fills totags[totagsoffset + i] = base for i in [0, length).
+#
+# Example: totagsoffset=1, length=3, base=2
+#   totags[1:4] = [2, 2, 2]
+def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
+    if length == 0:
+        return
+
+    def fill_const(i):
+        return totags.dtype.type(base)
+
+    unary_transform(
+        d_in=CountingIterator(totags.dtype.type(0)),
+        d_out=totags[totagsoffset : totagsoffset + length],
+        op=fill_const,
+        num_items=length,
+    )
+
+
+# THIS KERNEL IS NOT USED (just for archive)
+# Computes the total number of output elements when flattening a UnionArray.
+# For each element i: adds offsetsraws[fromtags[i]][fromindex[i]+1]
+#                              - offsetsraws[fromtags[i]][fromindex[i]]
+# to the total.  offsetsraws is a Python list of per-content offset GPU arrays.
+# Stores the result in total_length[0].
+#
+# Example: fromtags=[0,1,0], fromindex=[0,0,1], length=3
+#   offsetsraws[0]=[0,3,5], offsetsraws[1]=[0,2]
+#   sizes: [3-0, 2-0, 5-3] = [3, 2, 2] → total_length[0] = 7
+def awkward_UnionArray_flatten_length(
+    total_length, fromtags, fromindex, length, offsetsraws
+):
+    if length == 0:
+        total_length[0] = 0
+        return
+    tags = fromtags[:length]
+    idxs = fromindex[:length]
+
+    type_starts = cp.array(
+        [0]
+        + [sum(len(o) for o in offsetsraws[: k + 1]) for k in range(len(offsetsraws))],
+        dtype=cp.int64,
+    )
+    all_offsets = cp.concatenate(offsetsraws)
+
+    flat_idx = type_starts[tags] + idxs
+    sizes = all_offsets[flat_idx + 1] - all_offsets[flat_idx]
+    total_length[0] = int(cp.sum(sizes))
+
+
+# THIS KERNEL IS NOT USED (just for archive)
+# Flattens a UnionArray, combining all sublists into a flat output.
+# Writes tooffsets (length+1), totags (total_length), and toindex (total_length).
+# offsetsraws is a Python list of per-content offset GPU arrays.
+#
+# For each element i:
+#   tag = fromtags[i], idx = fromindex[i]
+#   start = offsetsraws[tag][idx], stop = offsetsraws[tag][idx+1]
+#   tooffsets[i+1] = tooffsets[i] + (stop - start)
+#   for j in [start, stop): totags[k] = tag, toindex[k] = j
+#
+# Example: fromtags=[0,1], fromindex=[0,0], offsetsraws[0]=[0,3], offsetsraws[1]=[0,2]
+#   tooffsets=[0,3,5], totags=[0,0,0,1,1], toindex=[0,1,2,0,1]
+def awkward_UnionArray_flatten_combine(
+    totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws
+):
+    tooffsets[0] = 0
+    if length == 0:
+        return
+    if len(offsetsraws) == 2:
+        offsets0, offsets1 = offsetsraws[0], offsetsraws[1]
+
+        # Phase 1: compute per-element sublist sizes → inclusive scan → tooffsets
+        sizes = cp.empty(length, dtype=tooffsets.dtype)
+
+        def compute_size(i):
+            j = fromindex.dtype.type(fromindex[i])
+            if fromtags[i] == fromtags.dtype.type(0):
+                return offsets0.dtype.type(offsets0[j + 1] - offsets0[j])
+            return offsets1.dtype.type(offsets1[j + 1] - offsets1[j])
+
+        unary_transform(
+            d_in=CountingIterator(fromindex.dtype.type(0)),
+            d_out=sizes,
+            op=compute_size,
+            num_items=length,
+        )
+        inclusive_scan(
+            d_in=sizes,
+            d_out=tooffsets[1 : length + 1],
+            op=OpKind.PLUS,
+            init_value=None,
+            num_items=length,
+        )
+
+        total_len = int(tooffsets[length])
+        if total_len == 0:
+            return
+
+        # Phase 2: binary-search each output position back to its parent row,
+        # then write totags/toindex — no flat_pos or parent_ids temporaries
+        def fill_out(q):
+            lo = tooffsets.dtype.type(0)
+            hi = tooffsets.dtype.type(length - 1)
+            while lo < hi:
+                mid = (lo + hi + tooffsets.dtype.type(1)) >> tooffsets.dtype.type(1)
+                if tooffsets[mid] <= q:
+                    lo = mid
+                else:
+                    hi = mid - tooffsets.dtype.type(1)
+            i = lo
+            j = fromindex.dtype.type(fromindex[i])
+            local_offset = q - tooffsets[i]
+            totags[q] = fromtags[i]
+            if fromtags[i] == fromtags.dtype.type(0):
+                toindex[q] = offsets0.dtype.type(offsets0[j]) + local_offset
+            else:
+                toindex[q] = offsets1.dtype.type(offsets1[j]) + local_offset
+            return tooffsets.dtype.type(0)
+
+        unary_transform(
+            d_in=CountingIterator(tooffsets.dtype.type(0)),
+            d_out=DiscardIterator(),
+            op=fill_out,
+            num_items=total_len,
+        )
+    else:
+        tags = fromtags[:length]
+        idxs = fromindex[:length]
+        sizes = cp.zeros(length, dtype=tooffsets.dtype)
+        global_start = cp.zeros(length, dtype=tooffsets.dtype)
+        for k, offsets_k in enumerate(offsetsraws):
+            pos = cp.where(tags == k)[0]
+            if pos.size > 0:
+                local_idxs = idxs[pos]
+                starts = offsets_k[local_idxs]
+                sizes[pos] = offsets_k[local_idxs + 1] - starts
+                global_start[pos] = starts
+        inclusive_scan(
+            d_in=sizes,
+            d_out=tooffsets[1 : length + 1],
+            op=OpKind.PLUS,
+            init_value=None,
+            num_items=length,
+        )
+        total_len = int(tooffsets[length])
+        if total_len == 0:
+            return
+        flat_pos = cp.arange(total_len, dtype=tooffsets.dtype)
+        parent_ids = (
+            cp.searchsorted(tooffsets[: length + 1], flat_pos, side="right") - 1
+        )
+        totags[:total_len] = tags[parent_ids].astype(totags.dtype, copy=False)
+        toindex[:total_len] = (
+            global_start[parent_ids] + flat_pos - tooffsets[parent_ids]
+        ).astype(toindex.dtype, copy=False)
+
+
+# Filters fromindex by fromtags == which, scattering matching entries compactly
+# into tocarry, and writing the count into lenout[0].
+#
+# Example: fromtags=[0,1,0,1,0], fromindex=[10,20,30,40,50], length=5, which=0
+#   tocarry = [10, 30, 50],  lenout[0] = 3
+def awkward_UnionArray_project(lenout, tocarry, fromtags, fromindex, length, which):
+    if length == 0:
+        lenout[0] = 0
+        return
+    positions = cp.where(fromtags[:length] == which)[0]
+    count = positions.size
+    lenout[0] = count
+    if count > 0:
+        tocarry[:count] = fromindex[:length][positions].astype(
+            tocarry.dtype, copy=False
+        )
+
+
+# This implementation uses a for loop.
+# Since the size of Union array is usually small, I hope this implementation is performant enough.
+#
+# For each element i,
+# toindex[i] = how many elements with the same tag appeared before position i
+# current[k] = total count of elements with tag k.
+#
+# Example: fromtags=[0,1,0,2,1], size=3, length=5
+#   Imagine you have a mixed list of apples and oranges, tagged by type:
+#   tags: [ apple(0),  orange(1),  apple(0),  banana(2),  orange(1)]
+#   Then for each item, its position within its own type will be:
+#   toindex:  [  0,      0,       1,      0,       2   ]
+#              1st      1st      2nd     1st      2nd
+#              apple   orange   apple   banana   orange
+# toindex = [0, 0, 1, 0, 1]
+# current = [2, 2, 1]
+def awkward_UnionArray_regular_index(toindex, current, size, fromtags, length):
+    current[:] = current.dtype.type(0)
+    if length == 0:
+        return
+    tags = fromtags[:length]
+    for k in range(size):
+        positions = cp.where(tags == k)[0]
+        n = positions.size
+        if n > 0:
+            toindex[positions] = cp.arange(n, dtype=toindex.dtype)
+        current[k] = toindex.dtype.type(n)
+
+
+# Computes size = max(fromtags[0..length-1]) + 1, i.e. the number of distinct
+# tag values needed to index into a per-content array.
+#
+# Example: fromtags=[0,2,1,2], length=4
+#   size[0] = 3
+def awkward_UnionArray_regular_index_getsize(size, fromtags, length):
+    if length == 0:
+        size[0] = 1
+        return
+    size[0] = cp.maximum(cp.max(fromtags[:length]) + 1, 1)
+
+
+# Merges an outer UnionArray (outertags, outerindex) with an inner one
+# (innertags, innerindex) for a specific (outerwhich, innerwhich) pair.
+# Where outertags[i] == outerwhich and innertags[outerindex[i]] == innerwhich,
+# writes totags[i] = towhich and toindex[i] = innerindex[outerindex[i]] + base.
+# Other positions in totags/toindex are left unchanged.
+#
+# Example: outertags=[1,0,1], outerindex=[0,0,1], outerwhich=1
+#          innertags=[0,1], innerindex=[5,7], innerwhich=1, towhich=2, base=10
+#   i=0: outertags[0]=1==outerwhich → j=0, innertags[0]=0≠innerwhich → skip
+#   i=2: outertags[2]=1==outerwhich → j=1, innertags[1]=1==innerwhich
+#     totags[2]=2, toindex[2]=7+10=17
+def awkward_UnionArray_simplify(
+    totags,
+    toindex,
+    outertags,
+    outerindex,
+    innertags,
+    innerindex,
+    towhich,
+    innerwhich,
+    outerwhich,
+    length,
+    base,
+):
+    if length == 0:
+        return
+
+    def transform(i):
+        if outertags[i] == outertags.dtype.type(outerwhich):
+            j = outerindex.dtype.type(outerindex[i])
+            if innertags[j] == innertags.dtype.type(innerwhich):
+                totags[i] = towhich
+                toindex[i] = innerindex[j] + base
+        return outerindex.dtype.type(0)
+
+    unary_transform(
+        d_in=CountingIterator(outerindex.dtype.type(0)),
+        d_out=DiscardIterator(),
+        op=transform,
+        num_items=length,
+    )
+
+
+# Validates a UnionArray: checks tags[i] >= 0, index[i] >= 0,
+# tags[i] < numcontents, and index[i] < lencontents[tags[i]] for all i.
+# lencontents is a GPU array of length numcontents.
+# Raises ValueError at the first failing element.
+#
+# Example: tags=[0,1], index=[2,5], numcontents=2, lencontents=[3,4]
+#   index[1]=5 >= lencontents[1]=4 → raises ValueError
+def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
+    if length == 0:
+        return
+    # operations on bools are not supported now inside numba closures
+    err_flags = cp.empty(length, dtype=cp.int8)
+
+    def check(i):
+        ti = tags.dtype.type(tags[i])
+        idxi = index.dtype.type(index[i])
+        if ti < tags.dtype.type(0) or ti >= tags.dtype.type(numcontents):
+            return cp.int8(1)
+        if idxi < index.dtype.type(0) or idxi >= index.dtype.type(lencontents[ti]):
+            return cp.int8(1)
+        return cp.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(index.dtype.type(0)),
+        d_out=err_flags,
+        op=check,
+        num_items=length,
+    )
+    any_err = cp.empty(1, dtype=cp.int8)
+    reduce_into(
+        d_in=err_flags,
+        d_out=any_err,
+        op=OpKind.MAXIMUM,
+        h_init=np.zeros(1, dtype=np.int8),
+        num_items=length,
+    )
+    if any_err[0] == 0:
+        return
+    # Error path: find the first failing element for error message
+    lc = cp.asarray(lencontents[:numcontents], dtype=cp.int64)
+    t = tags[:length].astype(cp.int64)
+    idx = index[:length].astype(cp.int64, copy=False)
+    bad_tag = (t < 0) | (t >= numcontents)
+    if cp.any(bad_tag):
+        i = int(cp.argmax(bad_tag))
+        if int(t[i]) < 0:
+            raise ValueError(
+                "tags[i] < 0 in compiled CUDA code (awkward_UnionArray_validity)"
+            )
+        raise ValueError(
+            "tags[i] >= len(contents) in compiled CUDA code (awkward_UnionArray_validity)"
+        )
+    bad_idx = (idx < 0) | (idx >= lc[t])
+    i = int(cp.argmax(bad_idx))
+    if int(idx[i]) < 0:
+        raise ValueError(
+            "index[i] < 0 in compiled CUDA code (awkward_UnionArray_validity)"
+        )
+    raise ValueError(
+        "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
+    )
