@@ -12,7 +12,6 @@ from cuda.compute import (
     ZipIterator,
     inclusive_scan,
     reduce_into,
-    segmented_reduce,
     select,
     unary_transform,
 )
