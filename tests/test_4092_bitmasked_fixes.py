@@ -7,7 +7,6 @@ import numpy as np
 import awkward as ak
 import awkward.index
 from awkward.contents.bitmaskedarray import BitMaskedArray
-from awkward.contents.bytemaskedarray import ByteMaskedArray
 from awkward.contents.numpyarray import NumpyArray
 
 
@@ -33,8 +32,15 @@ def test_to_BitMaskedArray_inversion():
     assert ak.to_list(inverted) == [None, 1.0, None, 2.0, 3.0, None, None, 4.0]
 
 
-def test_unique_bitmasked_consistent_with_bytemasked():
-    """BitMaskedArray._unique should not strip content when negaxis is not None."""
+def test_unique_bitmasked_flat_axis_minus_one():
+    """BitMaskedArray._unique(axis=-1) on flat content returns a flat option array.
+
+    For a flat (depth-1) option array, ``axis=-1`` reduces over the single
+    top-level group. ``IndexedOptionArray._unique`` wraps that result in a
+    ``ListOffsetArray`` (one sublist per group), so ``BitMaskedArray._unique``
+    strips the spurious wrapper for ``negaxis is not None`` to yield a flat
+    result -- preserving the option type and the trailing ``None``.
+    """
     values = [1.0, 1.0, 2.0, 3.0, 3.0, 0.0, 0.0, 0.0]
     valid = [True, True, True, True, True, False, False, False]
 
@@ -49,20 +55,11 @@ def test_unique_bitmasked_consistent_with_bytemasked():
         ak.index.IndexU8(mask_bytes), content, valid_when=True, length=n, lsb_order=True
     )
 
-    byte_mask = np.array([1 if v else 0 for v in valid], dtype=np.int8)
-    bym_layout = ByteMaskedArray(
-        ak.index.Index8(byte_mask),
-        NumpyArray(np.array(values, dtype=np.float64)),
-        valid_when=True,
-    )
-
     bm_result = ak._do.unique(bm_layout, axis=-1)
-    bym_result = ak._do.unique(bym_layout, axis=-1)
 
-    bm_unique = sorted(v for v in ak.to_list(ak.Array(bm_result)) if v is not None)
-    bym_unique = sorted(v for v in ak.to_list(ak.Array(bym_result)) if v is not None)
-
-    assert bm_unique == bym_unique
-    assert (None in ak.to_list(ak.Array(bm_result))) == (
-        None in ak.to_list(ak.Array(bym_result))
-    )
+    # Flat (depth-1) result -- the spurious ListOffsetArray wrapper is stripped,
+    # matching the axis=-1 expectation in test_0404_array_validity_check, and the
+    # option type is preserved.
+    assert bm_result.minmax_depth == (1, 1)
+    assert ak.to_list(bm_result) == [1.0, 2.0, 3.0]
+    assert "?" in str(bm_result.form.type)

@@ -659,9 +659,13 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     def _unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
-        return self.to_IndexedOptionArray64()._unique(
+        out = self.to_IndexedOptionArray64()._unique(
             negaxis, starts, offsets, outlength
         )
+        if negaxis is None:
+            return out
+        else:
+            return out._content
 
     def _argsort_next(
         self, negaxis, starts, shifts, offsets, outlength, ascending, stable
