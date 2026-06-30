@@ -17,6 +17,8 @@ np = NumpyMetadata.instance()
 def real(array, highlevel=True, behavior=None, attrs=None):
     """Returns the real components of the given array elements.
 
+    If the arrays have complex elements, the returned arrays are floats.
+
     Args:
         array : array_like
             Input array.
@@ -29,8 +31,6 @@ def real(array, highlevel=True, behavior=None, attrs=None):
 
     Returns:
         The real components of the given array elements.
-
-        If the arrays have complex elements, the returned arrays are floats.
     """
     # Dispatch
     yield (array,)

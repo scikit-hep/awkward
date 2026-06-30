@@ -29,6 +29,9 @@ def isclose(
 ):
     """Returns a boolean array of element-wise approximate-equality between two arrays.
 
+    Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
+    for Awkward Arrays.
+
     Args:
         a: Array-like data (anything #ak.to_layout recognizes).
         b: Array-like data (anything #ak.to_layout recognizes).
@@ -44,9 +47,8 @@ def isclose(
             high-level.
 
     Returns:
-        An array of booleans, True where `a` and `b` are approximately equal within
-        the given tolerances. Implements [np.isclose](https://numpy.org/doc/stable/reference/generated/numpy.isclose.html)
-        for Awkward Arrays.
+        An array of booleans, True where `a` and `b` are approximately equal
+        within the given tolerances.
     """
     # Dispatch
     yield a, b
