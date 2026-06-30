@@ -5,8 +5,8 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ByteMaskedArray_numnull(
-  int64_t* numnull,
-  const int8_t* mask,
+  int64_t* __restrict__ numnull,
+  const int8_t* __restrict__ mask,
   int64_t length,
   bool validwhen) {
   *numnull = 0;
