@@ -25,6 +25,26 @@ def merge_union_of_records(
 ):
     """Simplifies unions of records into records of options.
 
+    An equivalent array with the union of records merged into a single record of
+    options, e.g.
+
+    >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}]))
+    >>> array
+    <Array [{a: 1}, {b: 2}] type='2 * union[{a: int64}, {b: int64}]'>
+
+    into records of options, i.e.
+
+    >>> ak.merge_union_of_records(array)
+    <Array [{a: 1, b: None}, {a: None, ...}] type='2 * {a: ?int64, b: ?int64}'>
+
+    Missing records are preserved in the result, e.g.
+
+    >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}, None]))
+    >>> array
+    <Array [{a: 1}, {b: 2}, None] type='3 * union[{a: int64}, ?{b: int64}]'>
+    >>> ak.merge_union_of_records(array)
+    <Array [{a: 1, b: None}, {...}, None] type='3 * ?{a: ?int64, b: ?int64}'>
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied.
@@ -44,25 +64,8 @@ def merge_union_of_records(
             high-level.
 
     Returns:
-        An equivalent array with the union of records merged into a single record of
-        options, e.g.
-
-        >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}]))
-        >>> array
-        <Array [{a: 1}, {b: 2}] type='2 * union[{a: int64}, {b: int64}]'>
-
-        into records of options, i.e.
-
-        >>> ak.merge_union_of_records(array)
-        <Array [{a: 1, b: None}, {a: None, ...}] type='2 * {a: ?int64, b: ?int64}'>
-
-        Missing records are preserved in the result, e.g.
-
-        >>> array = ak.concatenate(([{"a": 1}], [{"b": 2}, None]))
-        >>> array
-        <Array [{a: 1}, {b: 2}, None] type='3 * union[{a: int64}, ?{b: int64}]'>
-        >>> ak.merge_union_of_records(array)
-        <Array [{a: 1, b: None}, {...}, None] type='3 * ?{a: ?int64, b: ?int64}'>
+        An equivalent array with the union of records merged into a single record
+        of options.
     """
     # Dispatch
     yield (array,)

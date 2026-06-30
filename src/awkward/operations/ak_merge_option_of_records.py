@@ -24,6 +24,16 @@ def merge_option_of_records(
 ):
     """Simplifies options of records into records of options.
 
+    An equivalent array with the option pushed inside the record (a record of
+    options), e.g.
+
+    >>> array = ak.Array([None, {"a": 1}, {"a": 2}])
+
+    into records of options, i.e.
+
+    >>> ak.merge_option_of_records(array)
+    <Array [{a: None}, {a: 1}, {a: 2}] type='3 * {a: ?int64}'>
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied.
@@ -44,14 +54,7 @@ def merge_option_of_records(
 
     Returns:
         An equivalent array with the option pushed inside the record (a record of
-        options), e.g.
-
-        >>> array = ak.Array([None, {"a": 1}, {"a": 2}])
-
-        into records of options, i.e.
-
-        >>> ak.merge_option_of_records(array)
-        <Array [{a: None}, {a: 1}, {a: 2}] type='3 * {a: ?int64}'>
+        options).
     """
     # Dispatch
     yield (array,)

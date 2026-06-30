@@ -18,19 +18,19 @@ np = NumpyMetadata.instance()
 def copy(array):
     """Returns a deep copy of the array (no memory shared with original).
 
+    This is identical to `np.copy` and `copy.deepcopy`.
+
+    It's only useful to explicitly copy an array if you're going to change it
+    in-place. This doesn't come up often because Awkward Arrays are immutable.
+    That is to say, the Awkward Array library doesn't have any operations that
+    change an array in-place, but the data in the array might be owned by
+    another library that can change it in-place.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
         A deep copy of the array (no memory shared with original).
-
-        This is identical to `np.copy` and `copy.deepcopy`.
-
-        It's only useful to explicitly copy an array if you're going to change it
-        in-place. This doesn't come up often because Awkward Arrays are immutable.
-        That is to say, the Awkward Array library doesn't have any operations that
-        change an array in-place, but the data in the array might be owned by another
-        library that can change it in-place.
 
     Examples:
         For example, if the array comes from NumPy:

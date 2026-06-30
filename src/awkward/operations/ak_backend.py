@@ -12,23 +12,25 @@ __all__ = ("backend",)
 def backend(*arrays):
     """Returns the name of the backend used by the given arrays.
 
+    This name may be
+
+    * `"cpu"` for arrays backed by NumPy;
+    * `"cuda"` for arrays backed by CuPy;
+    * `"jax"` for arrays backed by JAX;
+    * `"typetracer"` for arrays without any data;
+    * None if the objects are not Awkward, NumPy, JAX, CuPy, or typetracer
+      arrays (e.g. Python numbers, booleans, strings).
+
+    If there are multiple, compatible backends (e.g. NumPy & typetracer)
+    amongst the given arrays, the coercible backend is returned.
+
+    See #ak.to_backend.
+
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
-        The name of the backend used by `arrays`. This name may be
-
-        * `"cpu"` for arrays backed by NumPy;
-        * `"cuda"` for arrays backed by CuPy;
-        * `"jax"` for arrays backed by JAX;
-        * `"typetracer"` for arrays without any data;
-        * None if the objects are not Awkward, NumPy, JAX, CuPy, or typetracer arrays (e.g.
-          Python numbers, booleans, strings).
-
-        If there are multiple, compatible backends (e.g. NumPy & typetracer) amongst the given arrays, the
-        coercible backend is returned.
-
-        See #ak.to_backend.
+        The name of the backend used by `arrays`.
     """
     # Dispatch
     yield arrays

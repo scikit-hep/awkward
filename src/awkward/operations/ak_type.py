@@ -21,6 +21,14 @@ np = NumpyMetadata.instance()
 def type(array, *, behavior=None):
     """Returns the high-level type of an array as a Type object.
 
+    The high-level type ignores layout differences like #ak.contents.ListArray
+    versus #ak.contents.ListOffsetArray, but not differences like
+    "regular-sized lists" (i.e. #ak.contents.RegularArray) versus
+    "variable-sized lists" (i.e. #ak.contents.ListArray and similar).
+
+    Types are rendered as [Datashape](https://datashape.readthedocs.io/)
+    strings, which makes the same distinctions.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         behavior (None or dict): Custom #ak.behavior for the output type, if
@@ -29,15 +37,6 @@ def type(array, *, behavior=None):
     Returns:
         The high-level type of an `array` (many types supported, including all
         Awkward Arrays and Records) as #ak.types.Type objects.
-
-        The high-level type ignores layout differences like
-        #ak.contents.ListArray versus #ak.contents.ListOffsetArray, but
-        not differences like "regular-sized lists" (i.e.
-        #ak.contents.RegularArray) versus "variable-sized lists" (i.e.
-        #ak.contents.ListArray and similar).
-
-        Types are rendered as [Datashape](https://datashape.readthedocs.io/)
-        strings, which makes the same distinctions.
 
     Examples:
         For example,

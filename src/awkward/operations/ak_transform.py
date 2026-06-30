@@ -44,6 +44,9 @@ def transform(
 ):
     """Applies a transformation function to every node of one or more arrays.
 
+    This is a public interface to the infrastructure that is used to implement
+    most Awkward Array operations. As such, it's very powerful, but low-level.
+
     Args:
         transformation (callable): Function to apply to each node of the array.
             See below for details.
@@ -100,9 +103,6 @@ def transform(
         The array (or arrays) obtained by applying `transformation` to every node —
         either a transformed copy, or data extracted from a walk over the arrays'
         low-level layout nodes.
-
-        This is a public interface to the infrastructure that is used to implement most
-        Awkward Array operations. As such, it's very powerful, but low-level.
 
     Examples:
         Here is a "hello world" example:

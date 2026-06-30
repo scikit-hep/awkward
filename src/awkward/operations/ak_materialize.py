@@ -17,6 +17,9 @@ def materialize(
 ):
     """Materializes any virtual buffers in the array.
 
+    If the input array is not an #ak.Array or an #ak.contents.Content, an
+    error will be raised.
+
     Args:
         array : Array-like data (either an #ak.Array or an #ak.contents.Content).
             An array that may contain virtual buffers to be materialized.
@@ -28,11 +31,10 @@ def materialize(
             high-level.
 
     Returns:
-        An array with the same data as the input and all virtual buffers materialized.
-        If the input array is not an #ak.Array or an #ak.contents.Content,
-        an error will be raised.
-        The buffers of the returned array are no longer `VirtualNDArray` objects even if there were any.
-        They will become one of `numpy.ndarray`, `cupy.ndarray`, or `jax.numpy.ndarray` objects,
+        An array with the same data as the input and all virtual buffers
+        materialized. The buffers of the returned array are no longer
+        `VirtualNDArray` objects even if there were any. They will become one
+        of `numpy.ndarray`, `cupy.ndarray`, or `jax.numpy.ndarray` objects,
         depending on the array's backend.
     """
     # Dispatch
