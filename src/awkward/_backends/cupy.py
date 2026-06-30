@@ -154,6 +154,16 @@ class CupyBackend(Backend):
             "awkward_IndexedArray_fill_count",
             "awkward_IndexedArray_index_of_nulls",
             "awkward_IndexedArray_local_preparenext_64",
+            "awkward_UnionArray_fillindex",
+            "awkward_UnionArray_fillindex_count",
+            "awkward_UnionArray_fillna",
+            "awkward_UnionArray_filltags",
+            "awkward_UnionArray_filltags_const",
+            "awkward_UnionArray_project",
+            "awkward_UnionArray_regular_index",
+            "awkward_UnionArray_regular_index_getsize",
+            "awkward_UnionArray_simplify",
+            "awkward_UnionArray_validity",
         )
 
     # ---------------------------------------------------------
@@ -252,6 +262,16 @@ class CupyBackend(Backend):
             "awkward_IndexedArray_fill_count": cuda_compute.awkward_IndexedArray_fill_count,
             "awkward_IndexedArray_index_of_nulls": cuda_compute.awkward_IndexedArray_index_of_nulls,
             "awkward_IndexedArray_local_preparenext_64": cuda_compute.awkward_IndexedArray_local_preparenext_64,
+            "awkward_UnionArray_fillindex": cuda_compute.awkward_UnionArray_fillindex,
+            "awkward_UnionArray_fillindex_count": cuda_compute.awkward_UnionArray_fillindex_count,
+            "awkward_UnionArray_fillna": cuda_compute.awkward_UnionArray_fillna,
+            "awkward_UnionArray_filltags": cuda_compute.awkward_UnionArray_filltags,
+            "awkward_UnionArray_filltags_const": cuda_compute.awkward_UnionArray_filltags_const,
+            "awkward_UnionArray_project": cuda_compute.awkward_UnionArray_project,
+            "awkward_UnionArray_regular_index": cuda_compute.awkward_UnionArray_regular_index,
+            "awkward_UnionArray_regular_index_getsize": cuda_compute.awkward_UnionArray_regular_index_getsize,
+            "awkward_UnionArray_simplify": cuda_compute.awkward_UnionArray_simplify,
+            "awkward_UnionArray_validity": cuda_compute.awkward_UnionArray_validity,
         }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
