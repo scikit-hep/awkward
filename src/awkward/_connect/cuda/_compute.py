@@ -10,7 +10,6 @@ from cuda.compute import (
     OpKind,
     TransformIterator,
     ZipIterator,
-    gpu_struct,
     inclusive_scan,
     reduce_into,
     unary_transform,
