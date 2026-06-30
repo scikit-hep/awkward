@@ -27,6 +27,17 @@ def to_safetensors(
 ):
     """Writes an Awkward Array to a safetensors file.
 
+    If `container` is provided, it is populated with the raw buffer bytes.
+
+    Ref: https://huggingface.co/docs/safetensors/.
+
+    This function converts the provided Awkward Array (or array-like object) into raw
+    buffers via `ak.to_buffers` and stores them in the safetensors format. Buffer names
+    are generated from `buffer_key` and `form_key` templates, allowing downstream
+    compatibility or layout reuse.
+    The resulting safetensors file includes metadata containing the Awkward `form` and
+    array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         destination (path-like): Name of the output file, file path, or
@@ -51,17 +62,7 @@ def to_safetensors(
 
     Returns:
         None. The contents of `array` are written to `destination` in the
-        safetensors format. If `container` is provided, it is populated with the
-        raw buffer bytes.
-
-        Ref: https://huggingface.co/docs/safetensors/.
-
-        This function converts the provided Awkward Array (or array-like object) into raw
-        buffers via `ak.to_buffers` and stores them in the safetensors format. Buffer names
-        are generated from `buffer_key` and `form_key` templates, allowing downstream
-        compatibility or layout reuse.
-        The resulting safetensors file includes metadata containing the Awkward `form` and
-        array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
+        safetensors format.
 
     Examples:
         >>> import awkward as ak

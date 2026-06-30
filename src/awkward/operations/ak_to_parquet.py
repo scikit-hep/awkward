@@ -55,6 +55,21 @@ def to_parquet(
     Transient attrs (those whose keys start with `"@"`) are not written, just as
     they are not written when pickling.
 
+    If the `array` does not contain records at top-level, the Arrow table will consist
+    of one field whose name is `""` iff. `extensionarray` is False.
+
+    If `extensionarray` is True`, use a custom Arrow extension to store this array.
+    Otherwise, generic Arrow arrays are used, and if the `array` does not
+    contain records at top-level, the Arrow table will consist of one field whose
+    name is `""`. See #ak.to_arrow_table for more details.
+
+    Parquet files can maintain the distinction between "option-type but no elements are
+    missing" and "not option-type" at all levels, including the top level. However,
+    there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
+    Be aware of these type distinctions when passing data through Arrow or Parquet.
+
+    See also #ak.to_arrow, which is used as an intermediate step.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         destination (path-like): Name of the output file, file path, or
@@ -163,21 +178,6 @@ def to_parquet(
 
     Returns:
         A `pyarrow._parquet.FileMetaData` describing the written Parquet file.
-
-        If the `array` does not contain records at top-level, the Arrow table will consist
-        of one field whose name is `""` iff. `extensionarray` is False.
-
-        If `extensionarray` is True`, use a custom Arrow extension to store this array.
-        Otherwise, generic Arrow arrays are used, and if the `array` does not
-        contain records at top-level, the Arrow table will consist of one field whose
-        name is `""`. See #ak.to_arrow_table for more details.
-
-        Parquet files can maintain the distinction between "option-type but no elements are
-        missing" and "not option-type" at all levels, including the top level. However,
-        there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
-        Be aware of these type distinctions when passing data through Arrow or Parquet.
-
-        See also #ak.to_arrow, which is used as an intermediate step.
 
     Examples:
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])

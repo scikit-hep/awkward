@@ -16,6 +16,28 @@ np = NumpyMetadata.instance()
 def to_backend(array, backend, *, highlevel=True, behavior=None, attrs=None):
     """Returns an array on a different backend (kernel set).
 
+    Any components that are already in the desired backend are viewed,
+    rather than copied, so this operation can be an inexpensive way to ensure
+    that an array is ready for a particular library.
+
+    To use `"cuda"`, the `cupy` package must be installed, either with::
+
+        pip install cupy
+
+    or::
+
+        conda install -c conda-forge cupy
+
+    To use `"jax"`, the `jax` package must be installed, either with::
+
+        pip install jax
+
+    or::
+
+        conda install -c conda-forge jax
+
+    See #ak.kernels.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         backend (`"cpu"`, `"cuda"`, `"jax"`, or `"typetracer"`): If `"cpu"`, the array structure is
@@ -33,28 +55,6 @@ def to_backend(array, backend, *, highlevel=True, behavior=None, attrs=None):
     Returns:
         An array with the same data as the input, moved to the requested backend
         (kernel set).
-
-        Any components that are already in the desired backend are viewed,
-        rather than copied, so this operation can be an inexpensive way to ensure
-        that an array is ready for a particular library.
-
-        To use `"cuda"`, the `cupy` package must be installed, either with::
-
-            pip install cupy
-
-        or::
-
-            conda install -c conda-forge cupy
-
-        To use `"jax"`, the `jax` package must be installed, either with::
-
-            pip install jax
-
-        or::
-
-            conda install -c conda-forge jax
-
-        See #ak.kernels.
     """
     # Dispatch
     yield (array,)

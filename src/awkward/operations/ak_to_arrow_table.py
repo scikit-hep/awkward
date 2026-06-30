@@ -28,6 +28,19 @@ def to_arrow_table(
 ):
     """Converts an Awkward Array into an Apache Arrow table.
 
+    This produces arrays of type `pyarrow.Table`. If you want an Arrow array,
+    see #ak.to_arrow.
+
+    This function always preserves the values of a dataset; i.e. the Python objects
+    returned by #ak.to_list are identical to the Python objects returned by Arrow's
+    `to_pylist` method. With `extensionarray=True`, this function also preserves the
+    data type (high-level #ak.types.Type, though not the low-level #ak.forms.Form),
+    even through Parquet, making Parquet a good way to save Awkward Arrays for later
+    use. If any third-party tools don't recognize Arrow's extension arrays, set this
+    option to False for plain Arrow arrays.
+
+    See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         list_to32 (bool): If True, convert Awkward lists into 32-bit Arrow lists
@@ -59,19 +72,6 @@ def to_arrow_table(
 
     Returns:
         An Apache Arrow table (`pyarrow.Table`) with the same data as `array`.
-
-        This produces arrays of type `pyarrow.Table`. If you want an Arrow array,
-        see #ak.to_arrow.
-
-        This function always preserves the values of a dataset; i.e. the Python objects
-        returned by #ak.to_list are identical to the Python objects returned by Arrow's
-        `to_pylist` method. With `extensionarray=True`, this function also preserves the
-        data type (high-level #ak.types.Type, though not the low-level #ak.forms.Form),
-        even through Parquet, making Parquet a good way to save Awkward Arrays for later
-        use. If any third-party tools don't recognize Arrow's extension arrays, set this
-        option to False for plain Arrow arrays.
-
-        See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
     """
     # Dispatch
     yield (array,)
