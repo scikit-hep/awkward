@@ -24,6 +24,21 @@ if(CMAKE_CXX_COMPILER_ID MATCHES AppleClang AND CMAKE_CXX_COMPILER_VERSION VERSI
   set(CMAKE_LINKER_TYPE APPLE_CLASSIC)
 endif()
 
+# Optional: compile with -O2 instead of the default Release -O3. The flag is appended after the
+# build-type flags, so the trailing -O2 overrides the earlier -O3 (GCC/Clang honour the last -O on
+# the command line). Useful for checking that optimisation level doesn't change kernel results, and
+# for faster builds. Enable with: python -m pip install -v ./awkward-cpp -C
+# cmake.define.AWKWARD_O2=ON
+option(AWKWARD_O2 "Compile with -O2 instead of the default -O3" OFF)
+if(AWKWARD_O2)
+  if(MSVC)
+    add_compile_options(/O2)
+  else()
+    add_compile_options(-O2)
+  endif()
+  message(STATUS "AWKWARD_O2 enabled: compiling with -O2 (overrides the default -O3)")
+endif()
+
 # Check for header-only libraries
 if(NOT (EXISTS "header-only" AND EXISTS "include/awkward/kernels.h"))
   message(

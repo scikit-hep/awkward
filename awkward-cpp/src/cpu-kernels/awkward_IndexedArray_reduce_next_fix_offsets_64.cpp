@@ -5,8 +5,8 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_IndexedArray_reduce_next_fix_offsets_64(
-  int64_t* outoffsets,
-  const int64_t* starts,
+  int64_t* __restrict__ outoffsets,
+  const int64_t* __restrict__ starts,
   int64_t startslength,
   int64_t outindexlength) {
   for (int64_t i = 0;  i < startslength;  i++) {
