@@ -26,6 +26,17 @@ def to_dataframe(
 ):
     """Converts an Awkward Array into a pandas DataFrame.
 
+    The resulting DataFrame(s) contains no Awkward structures.
+
+    #ak.Array structures can't be losslessly converted into a single
+    DataFrame; different fields in a record structure might have different
+    nested list lengths, but a DataFrame can have only one index.
+
+    If `how` is None, this function always returns a list of DataFrames (even
+    if it contains only one DataFrame); otherwise `how` is passed to
+    [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html)
+    to merge them into a single DataFrame with the associated loss of data.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         how (None or str): Passed to
@@ -39,17 +50,7 @@ def to_dataframe(
 
     Returns:
         A Pandas [MultiIndex](https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html)
-        DataFrame holding the data of `array`. The resulting DataFrame(s) contains no
-        Awkward structures.
-
-        #ak.Array structures can't be losslessly converted into a single DataFrame;
-        different fields in a record structure might have different nested list
-        lengths, but a DataFrame can have only one index.
-
-        If `how` is None, this function always returns a list of DataFrames (even
-        if it contains only one DataFrame); otherwise `how` is passed to
-        [pd.merge](https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html)
-        to merge them into a single DataFrame with the associated loss of data.
+        DataFrame holding the data of `array`.
 
     Examples:
         In the following example, nested lists are converted into MultiIndex rows.

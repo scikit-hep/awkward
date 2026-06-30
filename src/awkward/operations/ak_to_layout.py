@@ -41,6 +41,10 @@ def to_layout(
 ):
     """Converts data into a low-level layout object.
 
+    This function is usually used to sanitize inputs for other functions; it
+    would rarely be used in a data analysis because #ak.contents.Content and
+    #ak.record.Record are lower-level than #ak.Array.
+
     Args:
         array: Array-like data. May be a high level #ak.Array, #ak.Record (if `allow_record`),
             #ak.ArrayBuilder, or low-level #ak.contents.Content, #ak.record.Record (if `allow_record`),
@@ -68,10 +72,6 @@ def to_layout(
 
     Returns:
         A low-level #ak.contents.Content (or scalar) holding the data of `array`.
-
-        This function is usually used to sanitize inputs for other functions; it
-        would rarely be used in a data analysis because #ak.contents.Content and
-        #ak.record.Record are lower-level than #ak.Array.
     """
     # Dispatch
     yield (array,)
