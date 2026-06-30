@@ -33,6 +33,13 @@ def from_parquet(
 ):
     """Reads data from a local or remote Parquet file or collection of files.
 
+    The data are eagerly (not lazily) read and must fit into memory. Use
+    `columns` and/or `row_groups` to select and filter manageable subsets of
+    the data, and use #ak.metadata_from_parquet to find column names and the
+    range of row groups that a dataset has.
+
+    See also #ak.to_parquet, #ak.metadata_from_parquet.
+
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
             May contain glob patterns.
@@ -61,13 +68,6 @@ def from_parquet(
 
     Returns:
         An #ak.Array read from the given local or remote Parquet file(s).
-
-        The data are eagerly (not lazily) read and must fit into memory. Use `columns`
-        and/or `row_groups` to select and filter manageable subsets of the data, and
-        use #ak.metadata_from_parquet to find column names and the range of row groups
-        that a dataset has.
-
-        See also #ak.to_parquet, #ak.metadata_from_parquet.
     """
 
     parquet_columns, subform, actual_paths, fs, subrg, _row_counts, _meta, _uuid = (

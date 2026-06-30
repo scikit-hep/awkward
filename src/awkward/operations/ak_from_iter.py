@@ -28,6 +28,29 @@ def from_iter(
 ):
     """Converts Python data into an Awkward Array.
 
+    Any heterogeneous and deeply nested Python data can be converted, but the
+    output will never have regular-typed array lengths. Internally, this
+    function uses `ak::ArrayBuilder` (see the high-level #ak.ArrayBuilder
+    documentation for a more complete description).
+
+    The following Python types are supported.
+
+    * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
+    * int, including `np.integer`: converted into #ak.contents.NumpyArray.
+    * float, including `np.floating`: converted into #ak.contents.NumpyArray.
+    * bytes: converted into #ak.contents.ListOffsetArray with parameter
+      `"__array__"` equal to `"bytestring"` (unencoded bytes).
+    * str: converted into #ak.contents.ListOffsetArray with parameter
+      `"__array__"` equal to `"string"` (UTF-8 encoded string).
+    * tuple: converted into #ak.contents.RecordArray without field names
+      (i.e. homogeneously typed, uniform sized tuples).
+    * dict: converted into #ak.contents.RecordArray with field names
+      (i.e. homogeneously typed records with the same sets of fields).
+    * iterable, including np.ndarray: converted into
+      #ak.contents.ListOffsetArray.
+
+    See also #ak.to_list.
+
     Args:
         iterable (Python iterable): Data to convert into an Awkward Array.
         allow_record (bool): If True, the outermost element may be a record
@@ -45,29 +68,6 @@ def from_iter(
 
     Returns:
         An #ak.Array built from the given Python data.
-
-        Any heterogeneous and deeply nested Python data can be converted, but the output
-        will never have regular-typed array lengths. Internally, this function uses
-        `ak::ArrayBuilder` (see the high-level #ak.ArrayBuilder documentation for a
-        more complete description).
-
-        The following Python types are supported.
-
-        * bool, including `np.bool_`: converted into #ak.contents.NumpyArray.
-        * int, including `np.integer`: converted into #ak.contents.NumpyArray.
-        * float, including `np.floating`: converted into #ak.contents.NumpyArray.
-        * bytes: converted into #ak.contents.ListOffsetArray with parameter
-          `"__array__"` equal to `"bytestring"` (unencoded bytes).
-        * str: converted into #ak.contents.ListOffsetArray with parameter
-          `"__array__"` equal to `"string"` (UTF-8 encoded string).
-        * tuple: converted into #ak.contents.RecordArray without field names
-          (i.e. homogeneously typed, uniform sized tuples).
-        * dict: converted into #ak.contents.RecordArray with field names
-          (i.e. homogeneously typed records with the same sets of fields).
-        * iterable, including np.ndarray: converted into
-          #ak.contents.ListOffsetArray.
-
-        See also #ak.to_list.
     """
     return _impl(iterable, highlevel, behavior, allow_record, initial, resize, attrs)
 
