@@ -34,6 +34,20 @@ def min(
 ):
     """Returns the minimum value over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    identity of minimization is `inf` if floating-point or the largest integer
+    value if applied to integers. This identity is usually masked: the minimum
+    of an empty list is None, unless `mask_identity=False`. This operation is
+    the same as NumPy's
+    [amin](https://docs.scipy.org/doc/numpy/reference/generated/numpy.amin.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+
+    See also #ak.nanmin.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -64,20 +78,7 @@ def min(
             high-level.
 
     Returns:
-        The minimum value in each group of elements from `array` (many
-        types supported, including all Awkward Arrays and Records). The identity
-        of minimization is `inf` if floating-point or the largest integer value
-        if applied to integers. This identity is usually masked: the minimum of
-        an empty list is None, unless `mask_identity=False`.
-        This operation is the same as NumPy's
-        [amin](https://docs.scipy.org/doc/numpy/reference/generated/numpy.amin.html)
-        if all lists at a given dimension have the same length and no None values,
-        but it generalizes to cases where they do not.
-
-        See #ak.sum for a more complete description of nested list and missing
-        value (None) handling in reducers.
-
-        See also #ak.nanmin.
+        The minimum value in each group of elements from `array`.
     """
     # Dispatch
     yield (array,)
@@ -109,6 +110,14 @@ def nanmin(
 ):
     """Returns the minimum value, treating NaN values as missing.
 
+    Equivalent to::
+
+        ak.min(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.min.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -134,14 +143,6 @@ def nanmin(
 
     Returns:
         Like #ak.min, but treating NaN ("not a number") values as missing.
-
-        Equivalent to::
-
-            ak.min(ak.nan_to_none(array))
-
-        with all other arguments unchanged.
-
-        See also #ak.min.
     """
     # Dispatch
     yield (array,)

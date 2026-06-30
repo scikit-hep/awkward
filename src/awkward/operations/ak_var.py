@@ -40,6 +40,30 @@ def var(
 ):
     """Computes the variance over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation is
+    not a reducer and has no identity. It is the same as NumPy's
+    [var](https://docs.scipy.org/doc/numpy/reference/generated/numpy.var.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    Passing all arguments to the reducers, the variance is calculated as::
+
+        ak.sum((x - ak.mean(x))**2 * weight) / ak.sum(weight)
+
+    If `ddof` is not zero, the above is further corrected by a factor of::
+
+        ak.sum(weight) / (ak.sum(weight) - ddof)
+
+    Even without `ddof`, #ak.var differs from #ak.moment with `n=2` because
+    the mean is subtracted from all points before summing their squares.
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
+    See also #ak.nanvar.
+
     Args:
         x: The data on which to compute the variance (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -74,30 +98,7 @@ def var(
             high-level.
 
     Returns:
-        The variance in each group of elements from `x` (many
-        types supported, including all Awkward Arrays and Records). The grouping
-        is performed the same way as for reducers, though this operation is not a
-        reducer and has no identity. It is the same as NumPy's
-        [var](https://docs.scipy.org/doc/numpy/reference/generated/numpy.var.html)
-        if all lists at a given dimension have the same length and no None values,
-        but it generalizes to cases where they do not.
-
-        Passing all arguments to the reducers, the variance is calculated as::
-
-            ak.sum((x - ak.mean(x))**2 * weight) / ak.sum(weight)
-
-        If `ddof` is not zero, the above is further corrected by a factor of::
-
-            ak.sum(weight) / (ak.sum(weight) - ddof)
-
-        Even without `ddof`, #ak.var differs from #ak.moment with `n=2` because
-        the mean is subtracted from all points before summing their squares.
-
-        See #ak.sum for a complete description of handling nested lists and
-        missing values (None) in reducers, and #ak.mean for an example with another
-        non-reducer.
-
-        See also #ak.nanvar.
+        The variance in each group of elements from `x`.
     """
     # Dispatch
     yield x, weight
@@ -122,6 +123,14 @@ def nanvar(
     attrs=None,
 ):
     """Computes the variance, treating NaN values as missing.
+
+    Equivalent to::
+
+        ak.var(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.var.
 
     Args:
         x: The data on which to compute the variance (anything #ak.to_layout recognizes).
@@ -158,14 +167,6 @@ def nanvar(
 
     Returns:
         Like #ak.var, but treating NaN ("not a number") values as missing.
-
-        Equivalent to::
-
-            ak.var(ak.nan_to_none(array))
-
-        with all other arguments unchanged.
-
-        See also #ak.var.
     """
     # Dispatch
     yield x, weight

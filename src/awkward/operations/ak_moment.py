@@ -37,6 +37,23 @@ def moment(
 ):
     """Computes the `n`th moment over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation is
+    not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the moment is calculated as::
+
+        ak.sum(x**n * weight) / ak.sum(weight)
+
+    The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
+    mean (the `n=1` moment).
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
     Args:
         x: The data on which to compute the moment (anything #ak.to_layout recognizes).
         n (int): The choice of moment: `0` is a sum of weights, `1` is
@@ -70,23 +87,7 @@ def moment(
             high-level.
 
     Returns:
-        The `n`th moment in each group of elements from `x` (many
-        types supported, including all Awkward Arrays and Records). The grouping
-        is performed the same way as for reducers, though this operation is not a
-        reducer and has no identity.
-
-        This function has no NumPy equivalent.
-
-        Passing all arguments to the reducers, the moment is calculated as::
-
-            ak.sum(x**n * weight) / ak.sum(weight)
-
-        The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
-        mean (the `n=1` moment).
-
-        See #ak.sum for a complete description of handling nested lists and
-        missing values (None) in reducers, and #ak.mean for an example with another
-        non-reducer.
+        The `n`th moment in each group of elements from `x`.
     """
     # Dispatch
     yield x, weight

@@ -37,6 +37,13 @@ def ptp(
 ):
     """Returns the range of values over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    range of an empty list is None, unless `mask_identity=False`, in which case
+    it is 0. This operation is the same as NumPy's
+    [ptp](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ptp.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -57,13 +64,7 @@ def ptp(
             results in the operation's identity of 0.
 
     Returns:
-        The range of values in each group of elements from `array` (many
-        types supported, including all Awkward Arrays and Records). The range of
-        an empty list is None, unless `mask_identity=False`, in which case it is 0.
-        This operation is the same as NumPy's
-        [ptp](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ptp.html)
-        if all lists at a given dimension have the same length and no None values,
-        but it generalizes to cases where they do not.
+        The range of values in each group of elements from `array`.
 
     Examples:
         For example, with

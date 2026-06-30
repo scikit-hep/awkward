@@ -33,6 +33,24 @@ def argmin(
 ):
     """Returns the index of the minimum value over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    identity of minimization would be infinity, but argmin must return the
+    position of the minimum element, which has no value for empty lists.
+    Therefore, the identity should be masked: the argmin of an empty list is
+    None. If `mask_identity=False`, the result would be `-1`, which is distinct
+    from all valid index positions, but care should be taken that it is not
+    misinterpreted as "the last element of the list."
+
+    This operation is the same as NumPy's
+    [argmin](https://docs.scipy.org/doc/numpy/reference/generated/numpy.argmin.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+
+    See also #ak.nanargmin.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -60,23 +78,7 @@ def argmin(
 
     Returns:
         The index position of the minimum value in each group of elements
-        from `array` (many types supported, including all Awkward Arrays and
-        Records). The identity of minimization would be infinity, but argmin
-        must return the position of the minimum element, which has no value for
-        empty lists. Therefore, the identity should be masked: the argmin of
-        an empty list is None. If `mask_identity=False`, the result would be `-1`,
-        which is distinct from all valid index positions, but care should be taken
-        that it is not misinterpreted as "the last element of the list."
-
-        This operation is the same as NumPy's
-        [argmin](https://docs.scipy.org/doc/numpy/reference/generated/numpy.argmin.html)
-        if all lists at a given dimension have the same length and no None values,
-        but it generalizes to cases where they do not.
-
-        See #ak.sum for a more complete description of nested list and missing
-        value (None) handling in reducers.
-
-        See also #ak.nanargmin.
+        from `array`.
     """
     # Dispatch
     yield (array,)
@@ -97,6 +99,14 @@ def nanargmin(
     attrs=None,
 ):
     """Returns the index of the minimum value, treating NaN values as missing.
+
+    Equivalent to::
+
+        ak.argmin(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.argmin.
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -122,14 +132,6 @@ def nanargmin(
 
     Returns:
         Like #ak.argmin, but treating NaN ("not a number") values as missing.
-
-        Equivalent to::
-
-            ak.argmin(ak.nan_to_none(array))
-
-        with all other arguments unchanged.
-
-        See also #ak.argmin.
     """
     # Dispatch
     yield (array,)

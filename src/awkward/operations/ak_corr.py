@@ -35,6 +35,22 @@ def corr(
 ):
     """Computes the correlation of x and y over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records, which
+    must be broadcastable to each other. The grouping is performed the same way
+    as for reducers, though this operation is not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the correlation is calculated as::
+
+        ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight)
+            / np.sqrt(ak.sum((x - ak.mean(x))**2))
+            / np.sqrt(ak.sum((y - ak.mean(y))**2))
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
     Args:
         x: One coordinate to use in the correlation (anything #ak.to_layout recognizes).
         y: The other coordinate to use in the correlation (anything #ak.to_layout recognizes).
@@ -67,22 +83,7 @@ def corr(
             high-level.
 
     Returns:
-        The correlation of `x` and `y` (many types supported, including
-        all Awkward Arrays and Records, must be broadcastable to each other).
-        The grouping is performed the same way as for reducers, though this
-        operation is not a reducer and has no identity.
-
-        This function has no NumPy equivalent.
-
-        Passing all arguments to the reducers, the correlation is calculated as::
-
-            ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight)
-                / np.sqrt(ak.sum((x - ak.mean(x))**2))
-                / np.sqrt(ak.sum((y - ak.mean(y))**2))
-
-        See #ak.sum for a complete description of handling nested lists and
-        missing values (None) in reducers, and #ak.mean for an example with another
-        non-reducer.
+        The correlation of `x` and `y`.
     """
     # Dispatch
     yield x, y, weight

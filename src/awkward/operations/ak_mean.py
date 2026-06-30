@@ -39,6 +39,17 @@ def mean(
 ):
     """Computes the mean over one or all levels of nesting.
 
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation is
+    not a reducer and has no identity. It is the same as NumPy's
+    [mean](https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    Passing all arguments to the reducers, the mean is calculated as::
+
+        ak.sum(x*weight) / ak.sum(weight)
+
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -70,17 +81,7 @@ def mean(
             high-level.
 
     Returns:
-        The mean in each group of elements from `x` (many
-        types supported, including all Awkward Arrays and Records). The grouping
-        is performed the same way as for reducers, though this operation is not a
-        reducer and has no identity. It is the same as NumPy's
-        [mean](https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html)
-        if all lists at a given dimension have the same length and no None values,
-        but it generalizes to cases where they do not.
-
-        Passing all arguments to the reducers, the mean is calculated as::
-
-            ak.sum(x*weight) / ak.sum(weight)
+        The mean in each group of elements from `x`.
 
     Examples:
         For example, with an `array` like
@@ -133,6 +134,14 @@ def nanmean(
 ):
     """Computes the mean, treating NaN values as missing.
 
+    Equivalent to::
+
+        ak.mean(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.mean.
+
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -165,14 +174,6 @@ def nanmean(
 
     Returns:
         Like #ak.mean, but treating NaN ("not a number") values as missing.
-
-        Equivalent to::
-
-            ak.mean(ak.nan_to_none(array))
-
-        with all other arguments unchanged.
-
-        See also #ak.mean.
     """
     # Dispatch
     yield x, weight
