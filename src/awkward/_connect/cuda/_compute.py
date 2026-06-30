@@ -3421,11 +3421,11 @@ def awkward_NumpyArray_rearrange_shifted(
     # total   → fromoffsets_v[-1]         (one broadcast-cached global read)
     # outlength → fromoffsets_v.shape[0]-1 (Numba struct field, register-level)
     # length  → fromparents_v.shape[0]    (Numba struct field, register-level)
-    # n_iters → eliminated; while loop terminates naturally
     fromoffsets_v = fromoffsets[: outlength + 1]
     fromparents_v = fromparents[:length]
 
     def rearrange(i):
+        # Phase 1: convert local sorted position → absolute flat index
         total_val = fromoffsets_v[fromoffsets_v.shape[0] - np.int64(1)]
         if i < total_val:
             lo = np.int64(0)
@@ -3439,6 +3439,7 @@ def awkward_NumpyArray_rearrange_shifted(
             abs_pos = toptr[i] + fromoffsets_v[lo]
         else:
             abs_pos = toptr[i]
+        # Phase 2: apply shift correction, subtract bin start → back to relative
         if i < fromparents_v.shape[0]:
             toptr[i] = abs_pos + fromshifts[abs_pos] - fromstarts[fromparents_v[i]]
         else:
@@ -3514,12 +3515,14 @@ def awkward_ByteMaskedArray_reduce_next_64(
     )
 
 
-# Adjusts in-place argmin/argmax results from absolute to row-relative form.
-# For each k in [0, outlength): if toptr[k] >= 0: toptr[k] -= starts[k]
-# (offsets argument is accepted for API symmetry but unused)
+# Converts global flat indices from argmin/argmax into local within-list indices.
+# After argmin/argmax, toptr[i] holds the flat index of the winning element across all
+# lists. Subtracting starts[i] (the offset where list i begins) makes it relative
+# to that list. Negative values (empty-list sentinels) are left untouched.
 #
-# Example: toptr=[3,5,-1], starts=[2,4,0], outlength=3
-#   toptr = [1, 1, -1]
+# Example: flat=[10,20,30,40,50], lists=[[10,20,30],[40,50]], starts=[0,3]
+#   argmin reduction gives toptr=[0, 3]  (global flat indices)
+#   after adjust:          toptr=[0, 0]  (local indices within each list)
 def awkward_NumpyArray_reduce_adjust_starts_64(toptr, outlength, offsets, starts):
     if outlength == 0:
         return
@@ -3546,18 +3549,30 @@ def awkward_NumpyArray_reduce_adjust_starts_64(toptr, outlength, offsets, starts
 #   nextcarry[k] = i * size + j,  nextoffsets[b*size+j+1] = k+1
 #
 # Example: offsets=[0,2,4], size=2, length=4, outlength=2
-#   bin=0,j=0: rows 0,1 → nextcarry[0]=0*2+0=0, [1]=1*2+0=2
-#   bin=0,j=1: rows 0,1 → nextcarry[2]=0*2+1=1, [3]=1*2+1=3
-#   bin=1,j=0: rows 2,3 → nextcarry[4]=2*2+0=4, [5]=3*2+0=6
-#   bin=1,j=1: rows 2,3 → nextcarry[6]=2*2+1=5, [7]=3*2+1=7
-#   nextoffsets=[0,2,4,6,8]
+#   Input — a ListOffsetArray of a RegularArray (2 bins, 2 columns per row):
+#     [              # bin 0 (rows 0-1)
+#       [a, b],      # row 0
+#       [c, d],      # row 1
+#     ],
+#     [              # bin 1 (rows 2-3)
+#       [e, f],      # row 2
+#       [g, h],      # row 3
+#     ]
+#   Goal — reduce within each bin, column-by-column:
+#     [[a+c, b+d],   # bin 0
+#      [e+g, f+h]]   # bin 1
+#   Output:
+#     nextcarry   = [0,2, 1,3, 4,6, 5,7]  (flat indices, grouped by (bin,col))
+#     nextoffsets = [0, 2, 4, 6, 8]
 def awkward_RegularArray_reduce_nonlocal_preparenext_64(
     nextcarry, nextoffsets, offsets, size, length, outlength
 ):
     nextoffsets[0] = 0
     if outlength == 0 or size == 0:
         return
-    per_bin_counts = (offsets[1 : outlength + 1] - offsets[:outlength]).astype(cp.int64)
+    per_bin_counts = (offsets[1 : outlength + 1] - offsets[:outlength]).astype(
+        nextoffsets.dtype
+    )
     per_nextbin_counts = cp.repeat(per_bin_counts, size)
     cp.cumsum(per_nextbin_counts, out=nextoffsets[1 : outlength * size + 1])
     if length == 0:
@@ -3566,20 +3581,16 @@ def awkward_RegularArray_reduce_nonlocal_preparenext_64(
     if total_out == 0:
         return
     n_nextbins = outlength * size
-    # Only CuPy arrays in the closure → cache keyed by (dtype, shape) with
-    # value equality, not id() of Python int scalars.
+    # Only CuPy arrays in the closure → cache keyed by (dtype, shape)
     # nextoffsets_v is kept for its shape (gives sz = n_nextbins // outlength);
     # its data is never read inside fill_nextcarry.
     nextoffsets_v = nextoffsets[:n_nextbins]
-    offsets_v = offsets[: outlength + 1].astype(cp.int64)
+    offsets_v = offsets[: outlength + 1].astype(nextcarry.dtype)
 
     def fill_nextcarry(k):
         # sz and outlength from array shapes — register-level, no GPU reads.
         sz = nextoffsets_v.shape[0] // (offsets_v.shape[0] - np.int64(1))
-        # Binary search over offsets_v (outlength elements) instead of
-        # nextoffsets_v (outlength*size elements): O(log outlength) vs
-        # O(log(outlength*size)), and offsets_v is size* smaller so it
-        # fits in L1 cache more easily.
+        # Binary search over offsets_v (outlength elements)
         # Find largest b such that offsets_v[b]*sz <= k.
         lo = np.int64(0)
         hi = offsets_v.shape[0] - np.int64(2)
@@ -3646,14 +3657,18 @@ def awkward_IndexedArray_fill_count(toindex, toindexoffset, length, base):
     )
 
 
-# Collects row-relative positions of null (negative) entries in fromindex,
-# binned by offsets. For each bin b and each i in [offsets[b], offsets[b+1]):
-#   if fromindex[i] < 0: toindex[j++] = i - starts[b]
+# Finds the within-list position of each null in an IndexedOptionArray.
+# fromindex uses negative values to represent None; offsets/starts define bin
+# boundaries. For each null, binary-searches offsets to find its bin, then
+# subtracts starts[bin] to convert the flat position to a local index.
+# Answers: "at what position within each list does a null appear?"
+# Used to propagate null positions through reductions on option-typed arrays.
 #
-# Example: fromindex=[0,-1,2,-1,3], offsets=[0,3,5], starts=[0,0], outlength=2
-#   bin 0: i=0 (ok), i=1 (null→0-0=0), i=2 (ok)
-#   bin 1: i=3 (null→3-0=3), i=4 (ok)
-#   toindex = [0, 3]  (j=2)
+# Example: fromindex=[0,-1,2,-1,4], offsets=[0,3,5], starts=[0,3]
+#   nulls at flat positions 1 and 3
+#   pos 1 → bin 0 → local = 1 - 0 = 1
+#   pos 3 → bin 1 → local = 3 - 3 = 0
+#   toindex = [1, 0]
 def awkward_IndexedArray_index_of_nulls(toindex, fromindex, offsets, outlength, starts):
     if outlength == 0:
         return
@@ -3664,7 +3679,7 @@ def awkward_IndexedArray_index_of_nulls(toindex, fromindex, offsets, outlength, 
     n_nulls = int(cp.sum(null_mask))
     if n_nulls == 0:
         return
-    null_positions = cp.where(null_mask)[0].astype(cp.int64)
+    null_positions = cp.where(null_mask)[0]
     bin_ids = cp.searchsorted(offsets[1 : outlength + 1], null_positions, side="right")
     toindex[:n_nulls] = (null_positions - starts[bin_ids]).astype(
         toindex.dtype, copy=False
