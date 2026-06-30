@@ -15,14 +15,15 @@ np = NumpyMetadata.instance()
 def to_torch(array):
     """Converts an Awkward Array into a PyTorch Tensor, if possible.
 
+    If `array` contains any other data types (RecordArray for example) the
+    function raises a TypeError.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
         A PyTorch tensor with the same data as `array`, if the conversion is
         possible.
-
-        If `array` contains any other data types (RecordArray for example) the function raises a TypeError.
     """
 
     # Dispatch
