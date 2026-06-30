@@ -15,6 +15,21 @@ np = NumpyMetadata.instance()
 def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
     """Packs an array's inner structure and materializes its virtual buffers.
 
+    - #ak.contents.NumpyArray becomes C-contiguous (if it isn't already)
+    - #ak.contents.RegularArray trims unreachable content
+    - #ak.contents.ListArray becomes #ak.contents.ListOffsetArray, making all list data contiguous
+    - #ak.contents.ListOffsetArray starts at `offsets[0] == 0`, trimming unreachable content
+    - #ak.contents.RecordArray trims unreachable contents
+    - #ak.contents.IndexedArray gets projected
+    - #ak.contents.IndexedOptionArray remains an #ak.contents.IndexedOptionArray (with simplified `index`)
+      if it contains records, becomes #ak.contents.ByteMaskedArray otherwise
+    - #ak.contents.ByteMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
+      stays a #ak.contents.ByteMaskedArray otherwise
+    - #ak.contents.BitMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
+      stays a #ak.contents.BitMaskedArray otherwise
+    - #ak.contents.UnionArray gets projected contents
+    - #ak.record.Record becomes a record over a single-item #ak.contents.RecordArray
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -26,22 +41,7 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
 
     Returns:
         An array with the same type and values as the input,
-        with all virtual buffers materialized (see #ak.materialize) and inner structures packed:
-
-        - #ak.contents.NumpyArray becomes C-contiguous (if it isn't already)
-        - #ak.contents.RegularArray trims unreachable content
-        - #ak.contents.ListArray becomes #ak.contents.ListOffsetArray, making all list data contiguous
-        - #ak.contents.ListOffsetArray starts at `offsets[0] == 0`, trimming unreachable content
-        - #ak.contents.RecordArray trims unreachable contents
-        - #ak.contents.IndexedArray gets projected
-        - #ak.contents.IndexedOptionArray remains an #ak.contents.IndexedOptionArray (with simplified `index`)
-          if it contains records, becomes #ak.contents.ByteMaskedArray otherwise
-        - #ak.contents.ByteMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
-          stays a #ak.contents.ByteMaskedArray otherwise
-        - #ak.contents.BitMaskedArray becomes an #ak.contents.IndexedOptionArray if it contains records,
-          stays a #ak.contents.BitMaskedArray otherwise
-        - #ak.contents.UnionArray gets projected contents
-        - #ak.record.Record becomes a record over a single-item #ak.contents.RecordArray
+        with all virtual buffers materialized (see #ak.materialize) and inner structures packed.
 
     Examples:
         >>> a = ak.Array([[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]])

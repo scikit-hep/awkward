@@ -25,6 +25,15 @@ def to_buffers(
 ):
     """Decomposes an Awkward Array into a Form, length, and memory buffers.
 
+    This function returns a 3-tuple::
+
+        (form, length, container)
+
+    where the `form` is a #ak.forms.Form (whose string representation is JSON),
+    the `length` is an integer (`len(array)`), and the `container` is either
+    the MutableMapping you passed in or a new dict containing the buffers (as
+    NumPy arrays).
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         container (None or MutableMapping): The str \u2192 NumPy arrays (or
@@ -61,15 +70,6 @@ def to_buffers(
         A 3-tuple `(form, length, container)` decomposed from `array`,
         so that data can be losslessly written to file formats and storage devices
         that only map names to binary blobs (such as a filesystem directory).
-
-        This function returns a 3-tuple::
-
-            (form, length, container)
-
-        where the `form` is a #ak.forms.Form (whose string representation is JSON),
-        the `length` is an integer (`len(array)`), and the `container` is either
-        the MutableMapping you passed in or a new dict containing the buffers (as
-        NumPy arrays).
 
     Examples:
         These are also the first three arguments of #ak.from_buffers, so a full
