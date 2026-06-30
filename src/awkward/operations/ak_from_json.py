@@ -44,6 +44,24 @@ def from_json(
 ):
     """Reads JSON from a string, bytes, file, or URL into an Awkward Array.
 
+    There are a few different dichotomies in JSON-reading; all of the
+    combinations are supported:
+
+    * Reading from in-memory str/bytes, on-disk or over-network file, or an
+      arbitrary Python object with a `read(num_bytes)` method.
+    * Reading a single JSON document or a sequence of line-delimited documents.
+    * Unknown schema (slow and general) or with a provided JSONSchema (fast, but
+      not all possible cases are supported).
+    * Conversion of strings representing not-a-number, plus and minus infinity
+      into the appropriate floating-point numbers.
+    * Conversion of records with a real and imaginary part into complex numbers.
+
+    Non-JSON features not allowed, including literals for not-a-number or
+    infinite numbers; they must be quoted strings for `nan_string`,
+    `posinf_string`, and `neginf_string` to recognize. The document or
+    line-delimited documents must adhere to the strict
+    [JSON schema](https://www.json.org/).
+
     Args:
         source (bytes/str, pathlib.Path, or file-like object): Data source of the
             JSON-formatted string(s). If bytes/str, the string is parsed. If a
@@ -84,23 +102,6 @@ def from_json(
 
     Returns:
         An #ak.Array read from the given JSON (string, bytes, file, or URL).
-
-        There are a few different dichotomies in JSON-reading; all of the combinations
-        are supported:
-
-        * Reading from in-memory str/bytes, on-disk or over-network file, or an
-          arbitrary Python object with a `read(num_bytes)` method.
-        * Reading a single JSON document or a sequence of line-delimited documents.
-        * Unknown schema (slow and general) or with a provided JSONSchema (fast, but
-          not all possible cases are supported).
-        * Conversion of strings representing not-a-number, plus and minus infinity
-          into the appropriate floating-point numbers.
-        * Conversion of records with a real and imaginary part into complex numbers.
-
-        Non-JSON features not allowed, including literals for not-a-number or infinite
-        numbers; they must be quoted strings for `nan_string`, `posinf_string`, and
-        `neginf_string` to recognize. The document or line-delimited documents must
-        adhere to the strict [JSON schema](https://www.json.org/).
 
     Examples:
         Sources

@@ -27,6 +27,17 @@ def from_safetensors(
 ):
     """Reads a safetensors file as an Awkward Array.
 
+    Ref: https://huggingface.co/docs/safetensors/.
+
+    This function reads data serialized in the safetensors format and
+    reconstructs an Awkward Array (or low-level layout) from it. Buffers in the
+    safetensors file are mapped to Awkward buffers according to the
+    `buffer_key` template, and optional behavior or attributes can be attached
+    to the returned array.
+
+    The safetensors file **must contain** `form` and `length` entries in its
+    metadata, which define the structure and length of the reconstructed array.
+
     Args:
         source (path-like): Name of the input file, file path, or
             remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
@@ -50,16 +61,6 @@ def from_safetensors(
     Returns:
         ak.Array or ak.layout.Content: An Awkward Array (or layout) reconstructed
         from the safetensors buffers.
-
-        Ref: https://huggingface.co/docs/safetensors/.
-
-        This function reads data serialized in the safetensors format and reconstructs
-        an Awkward Array (or low-level layout) from it. Buffers in the safetensors file
-        are mapped to Awkward buffers according to the `buffer_key` template, and
-        optional behavior or attributes can be attached to the returned array.
-
-        The safetensors file **must contain** `form` and `length` entries in its
-        metadata, which define the structure and length of the reconstructed array.
 
     Examples:
         >>> import awkward as ak

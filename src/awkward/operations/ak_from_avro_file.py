@@ -25,6 +25,10 @@ def from_avro_file(
 ):
     """Reads an Avro file as an Awkward Array.
 
+    Internally this function uses AwkwardForth DSL. The function recursively
+    parses the Avro schema, generates Awkward form and Forth code for that
+    specific Avro file and then reads it.
+
     Args:
         file (path-like or file-like object): Avro file to be read as Awkward Array.
         limit_entries (int): The number of rows of the Avro file to be read into the Awkward Array.
@@ -38,9 +42,6 @@ def from_avro_file(
 
     Returns:
         An #ak.Array read from the given Avro file.
-
-        Internally this function uses AwkwardForth DSL. The function recursively parses the Avro schema, generates
-        Awkward form and Forth code for that specific Avro file and then reads it.
     """
     import awkward._connect.avro
 
