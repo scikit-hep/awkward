@@ -26,6 +26,13 @@ def zeros_like(
 ):
     """Returns an array with the same structure as the input, filled with zeros.
 
+    This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
+
+    See #ak.full_like for details, and see also #ak.ones_like.
+
+    (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
+    are immutable.)
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         dtype (None or NumPy dtype): Overrides the data type of the result.
@@ -42,13 +49,6 @@ def zeros_like(
     Returns:
         An array with the same structure as `array`, with every value replaced
         by zero.
-
-        This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
-
-        See #ak.full_like for details, and see also #ak.ones_like.
-
-        (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
-        are immutable.)
     """
     # Dispatch
     yield (array,)
