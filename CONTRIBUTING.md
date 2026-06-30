@@ -316,7 +316,7 @@ To make an `awkward-cpp` release:
 #### `awkward` releases
 To make an `awkward` release:
 1. A commit to `main` should increase the version number in `pyproject.toml`
-2. A new GitHub release must be published.
+2. A new GitHub release must be published. "Generate release notes" produces categorized notes automatically: a workflow labels each PR `type/<type>` from its conventional-commit title, and `.github/release.yml` groups those labels into sections.
 3. A `docs/switcher.json` entry must be added for new minor/major versions.
 
 Pushes that modify `docs/switcher.json` on `main` will automatically be synchronised with AWS.

@@ -12,11 +12,11 @@
 // This function relies on std::sort to do the right
 // thing with std::strings
 ERROR awkward_NumpyArray_sort_asstrings_uint8(
-    uint8_t* toptr,
-    const uint8_t* fromptr,
-    const int64_t* offsets,
+    uint8_t* __restrict__ toptr,
+    const uint8_t* __restrict__ fromptr,
+    const int64_t* __restrict__ offsets,
     int64_t offsetslength,
-    int64_t* outoffsets,
+    int64_t* __restrict__ outoffsets,
     bool ascending,
     bool stable) {
 
