@@ -11,7 +11,7 @@ project(
 include(GNUInstallDirs)
 
 # Build tests?
-option(BUILD_TESTS OFF)
+option(BUILD_TESTS "Build the header-only tests" OFF)
 
 # Add aliases for `add_subdirectory`
 set(NAMESPACE "awkward::")

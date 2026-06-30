@@ -1,0 +1,88 @@
+name: Property Tests
+
+on:
+  schedule:
+    - cron: '34 3 * * *'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Leverage reproducible builds by setting a constant SOURCE_DATE_EPOCH
+  # This will ensure that the hash of the awkward-cpp directory remains
+  # constant for unchanged files, meaning that it can be used for caching
+  SOURCE_DATE_EPOCH: "1668811211"
+
+jobs:
+  property-tests:
+    name: Run Property Tests
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Python 3.14
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.14'
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: awkward-cpp/dist
+          key: ${{ github.job }}-ubuntu-latest-3.14-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w awkward-cpp
+
+      - name: Find built wheel
+        uses: tj-actions/glob@2deae40528141fc53131606d56b4e4ce2a486b29 # v22.0.2
+        id: find-wheel
+        with:
+          files: |
+            awkward-cpp/dist/*.whl
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
+          -r requirements-test-full.txt
+        shell: bash
+        env:
+          STEPS_FIND_WHEEL_OUTPUTS_PATHS: ${{ steps.find-wheel.outputs.paths }}
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Run property-based tests
+        run: python -m pytest -vv -rs tests/properties --hypothesis-show-statistics
+        env:
+          HYPOTHESIS_PROFILE: nightly
+
+      - name: Run property-based tests in multiple threads
+        if: ${{ !cancelled() }}
+        run: |
+          python -m pip install 'pytest-run-parallel>=0.8.2'
+          python -m pytest -vv -rs tests/properties --parallel-threads 4
+        env:
+          HYPOTHESIS_PROFILE: default

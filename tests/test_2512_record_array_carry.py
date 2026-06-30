@@ -62,6 +62,15 @@ def test_axis_0():
         highlevel=False,
     )
 
+    # The offsets-pipeline migration of `awkward_ListOffsetArray_reduce_nonlocal_preparenext_64`
+    # iterates `(outer_bin, col, row)` rather than the parents-era `(round, row)`,
+    # producing a structurally different — but semantically equivalent — layout
+    # for the carried inner records: bin-major (locally column-major within each
+    # outer bin) instead of globally column-major. The IndexedOptionArray.index
+    # is therefore monotonic, and the underlying RecordArray contents are
+    # interleaved per outer bin rather than across all rows. Both representations
+    # describe the same set of picked records; only the structural permutation
+    # differs.
     expected_result = ak.contents.ListArray(
         ak.index.Index64([0]),
         ak.index.Index64([2]),
@@ -69,15 +78,15 @@ def test_axis_0():
             ak.index.Index64([0, 3]),
             ak.index.Index64([3, 6]),
             ak.contents.IndexedOptionArray(
-                ak.index.Index64([1, 5, 9, 3, 7, 10]),
+                ak.index.Index64([1, 3, 5, 7, 9, 10]),
                 ak.contents.RecordArray(
                     [
                         ak.contents.NumpyArray(
-                            np.array([0, 6, 3, 9, 1, 7, 4, 10, 2, 8, 5], dtype=np.int64)
+                            np.array([0, 6, 1, 7, 2, 8, 3, 9, 4, 10, 5], dtype=np.int64)
                         ),
                         ak.contents.NumpyArray(
                             np.array(
-                                [0, 1, 6, 18, 2, 14, 8, 20, 4, 16, 10],
+                                [0, 1, 2, 14, 4, 16, 6, 18, 8, 20, 10],
                                 dtype=np.float64,
                             )
                         ),
@@ -134,20 +143,22 @@ def test_axis_1():
         highlevel=False,
     )
 
+    # See the note in test_axis_0 about the structural difference between the
+    # parents-era and offsets-pipeline carry layouts.
     expected_result = ak.contents.RegularArray(
         ak.contents.ListArray(
             ak.index.Index64([0, 3]),
             ak.index.Index64([3, 6]),
             ak.contents.IndexedOptionArray(
-                ak.index.Index64([1, 5, 9, 3, 7, 10]),
+                ak.index.Index64([1, 3, 5, 7, 9, 10]),
                 ak.contents.RecordArray(
                     [
                         ak.contents.NumpyArray(
-                            np.array([0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8], dtype=np.int64)
+                            np.array([0, 3, 1, 4, 2, 5, 6, 9, 7, 10, 8], dtype=np.int64)
                         ),
                         ak.contents.NumpyArray(
                             np.array(
-                                [0, 6, 1, 18, 2, 8, 14, 20, 4, 10, 16],
+                                [0, 6, 2, 8, 4, 10, 1, 18, 14, 20, 16],
                                 dtype=np.float64,
                             )
                         ),

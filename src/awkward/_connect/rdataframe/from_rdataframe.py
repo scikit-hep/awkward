@@ -231,16 +231,16 @@ def from_rdataframe(
             length = cpp_buffers_self.to_char_buffers[builder_type](builder)
 
             if col == "rdfentry_":
-                index[col] = ak.from_buffers(
+                _tmp = ak.from_buffers(
                     form,
                     length,
                     buffers,
                     byteorder=ak._util.native_byteorder,
-                    highlevel=highlevel,
+                    highlevel=True,
                     behavior=behavior,
                 )
                 index[col] = ak.index.Index64(
-                    index[col].layout.to_backend_array(
+                    _tmp.layout.to_backend_array(
                         allow_missing=True, backend=NumpyBackend.instance()
                     )
                 )
@@ -250,7 +250,7 @@ def from_rdataframe(
                     length,
                     buffers,
                     byteorder=ak._util.native_byteorder,
-                    highlevel=highlevel,
+                    highlevel=True,
                     behavior=behavior,
                 )
 
@@ -258,7 +258,7 @@ def from_rdataframe(
         if len(index["rdfentry_"]) < len(value):
             contents[key] = wrap_layout(
                 ak.contents.IndexedArray(index["rdfentry_"], value),
-                highlevel=highlevel,
+                highlevel=True,
                 behavior=behavior,
             )
         else:
@@ -267,7 +267,7 @@ def from_rdataframe(
     out = ak.zip(
         contents,
         depth_limit=1,
-        highlevel=highlevel,
+        highlevel=True,
         behavior=behavior,
         with_name=with_name,
     )
@@ -276,8 +276,8 @@ def from_rdataframe(
         sorted = ak.index.Index64(index["rdfentry_"].data.argsort())
         out = wrap_layout(
             ak.contents.IndexedArray(sorted, out.layout),
-            highlevel=highlevel,
+            highlevel=True,
             behavior=behavior,
         )
 
-    return out
+    return wrap_layout(out.layout, highlevel=highlevel, behavior=behavior)

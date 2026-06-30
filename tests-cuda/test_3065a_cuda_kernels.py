@@ -1260,7 +1260,7 @@ layouts = [
         ],
     ),
 ]
-cuda_layouts = ak.to_backend(layouts, "cuda", highlevel=False)
+cuda_layouts = [ak.to_backend(layout, "cuda", highlevel=False) for layout in layouts]
 
 
 @pytest.mark.parametrize("left", cuda_layouts)
