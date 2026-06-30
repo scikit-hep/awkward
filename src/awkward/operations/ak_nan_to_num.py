@@ -30,6 +30,9 @@ def nan_to_num(
 ):
     """Replaces NaN and infinite values with finite numbers in floating-point arrays.
 
+    See also #ak.nan_to_none to convert NaN to None, i.e. missing values with
+    option-type.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         copy (bool): Ignored (Awkward Arrays are immutable).
@@ -50,8 +53,6 @@ def nan_to_num(
         finite values, following
         [np.nan_to_num](https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html)
         for Awkward Arrays.
-
-        See also #ak.nan_to_none to convert NaN to None, i.e. missing values with option-type.
     """
     # Dispatch
     yield (array,)

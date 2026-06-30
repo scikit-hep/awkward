@@ -23,6 +23,8 @@ def nan_to_none(
 ):
     """Converts NaN values in floating-point arrays to None.
 
+    See also #ak.nan_to_num to convert NaN or infinity to specified values.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -33,10 +35,8 @@ def nan_to_none(
             high-level.
 
     Returns:
-        An array with NaN ("not a number") converted to None, i.e. missing values
-        with option-type.
-
-        See also #ak.nan_to_num to convert NaN or infinity to specified values.
+        An array with NaN ("not a number") converted to None, i.e. missing
+        values with option-type.
     """
     # Dispatch
     yield (array,)
