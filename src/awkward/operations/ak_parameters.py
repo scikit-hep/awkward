@@ -20,20 +20,20 @@ np = NumpyMetadata.instance()
 def parameters(array):
     """Returns the parameters dict of the outermost layout node.
 
+    Parameters are a dict from str to JSON-like objects, usually strings.
+    Every #ak.contents.Content node has a different set of parameters. Some
+    key names are special, such as `"__record__"` and `"__array__"` that name
+    particular records and arrays as capable of supporting special behaviors.
+
+    See #ak.Array and #ak.behavior for a more complete description of
+    behaviors.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
     Returns:
         The parameters dict of the outermost node of `array` (many types
         supported, including all Awkward Arrays and Records).
-
-        Parameters are a dict from str to JSON-like objects, usually strings.
-        Every #ak.contents.Content node has a different set of parameters. Some
-        key names are special, such as `"__record__"` and `"__array__"` that name
-        particular records and arrays as capable of supporting special behaviors.
-
-        See #ak.Array and #ak.behavior for a more complete description of
-        behaviors.
     """
     # Dispatch
     yield (array,)

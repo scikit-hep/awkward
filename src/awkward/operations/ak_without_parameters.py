@@ -16,6 +16,9 @@ np = NumpyMetadata.instance()
 def without_parameters(array, *, highlevel=True, behavior=None, attrs=None):
     """Returns an array with all parameters removed from every layout node.
 
+    Note that a "new array" is a lightweight shallow copy, not a duplication
+    of large data buffers.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -28,9 +31,6 @@ def without_parameters(array, *, highlevel=True, behavior=None, attrs=None):
     Returns:
         An array without any parameters in its
         #ak.Array.layout, on nodes of any level of depth.
-
-        Note that a "new array" is a lightweight shallow copy, not a duplication
-        of large data buffers.
     """
     # Dispatch
     yield (array,)

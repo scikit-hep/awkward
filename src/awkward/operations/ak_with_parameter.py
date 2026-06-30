@@ -17,6 +17,12 @@ def with_parameter(
 ):
     """Returns an array with the given parameter set on the outermost layout node.
 
+    Note that a "new array" is a lightweight shallow copy, not a duplication
+    of large data buffers.
+
+    You can also remove a single parameter with this function, since setting
+    a parameter to None is equivalent to removing it.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         parameter (str): Name of the parameter to set on that array.
@@ -31,12 +37,6 @@ def with_parameter(
     Returns:
         An array with a parameter set on the outermost
         node of its #ak.Array.layout.
-
-        Note that a "new array" is a lightweight shallow copy, not a duplication
-        of large data buffers.
-
-        You can also remove a single parameter with this function, since setting
-        a parameter to None is equivalent to removing it.
     """
     # Dispatch
     yield (array,)

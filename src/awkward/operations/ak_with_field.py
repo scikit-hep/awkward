@@ -20,6 +20,13 @@ np = NumpyMetadata.instance()
 def with_field(array, what, where=None, *, highlevel=True, behavior=None, attrs=None):
     """Returns an array or record with a new field added, or an existing field replaced.
 
+    This function does not change the array in-place.
+
+    See #ak.Array.__setitem__ and #ak.Record.__setitem__ for a variant that
+    changes the high-level object in-place. (These methods internally use
+    #ak.with_field, so performance is not a factor in choosing one over the
+    other.)
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         what: Array-like data (anything #ak.to_layout recognizes) to add as a new field.
@@ -36,13 +43,7 @@ def with_field(array, what, where=None, *, highlevel=True, behavior=None, attrs=
 
     Returns:
         An #ak.Array or #ak.Record (or low-level equivalent, if
-        `highlevel=False`) with a new field attached. This function does not
-        change the array in-place.
-
-        See #ak.Array.__setitem__ and #ak.Record.__setitem__ for a variant that
-        changes the high-level object in-place. (These methods internally use
-        #ak.with_field, so performance is not a factor in choosing one over the
-        other.)
+        `highlevel=False`) with a new field attached.
     """
     # Dispatch
     yield array, what
