@@ -156,6 +156,9 @@ class CupyBackend(Backend):
             "awkward_UnionArray_regular_index_getsize",
             "awkward_UnionArray_simplify",
             "awkward_UnionArray_validity",
+            "awkward_ListOffsetArray_flatten_offsets",
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+            "awkward_RegularArray_combinations_64",
         )
 
     # ---------------------------------------------------------
@@ -256,6 +259,9 @@ class CupyBackend(Backend):
             "awkward_UnionArray_regular_index_getsize": cuda_compute.awkward_UnionArray_regular_index_getsize,
             "awkward_UnionArray_simplify": cuda_compute.awkward_UnionArray_simplify,
             "awkward_UnionArray_validity": cuda_compute.awkward_UnionArray_validity,
+            "awkward_ListOffsetArray_flatten_offsets": cuda_compute.awkward_ListOffsetArray_flatten_offsets,
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64,
+            "awkward_RegularArray_combinations_64": cuda_compute.awkward_RegularArray_combinations_64,
         }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:

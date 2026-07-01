@@ -1958,20 +1958,20 @@ def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
     tocarry[:length] = cp.argsort(fromindex[:length])
 
 
-## NOT USED (revisit later)
-# Gathers inneroffsets at positions given by outeroffsets:
-# tooffsets[i] = inneroffsets[outeroffsets[i]] for i in [0, outeroffsetslen).
-# Used when flattening a nested ListOffsetArray: the outer offsets index into
-# the inner offset array to produce the combined flat offsets.
-#
-# Example: outeroffsets=[0,2,3], inneroffsets=[0,4,7,9,11]
-#   tooffsets = [inneroffsets[0], inneroffsets[2], inneroffsets[3]] = [0, 9, 11]
-def awkward_ListOffsetArray_flatten_offsets(
-    tooffsets, outeroffsets, outeroffsetslen, inneroffsets
-):
-    if outeroffsetslen == 0:
-        return
-    tooffsets[:outeroffsetslen] = inneroffsets[outeroffsets[:outeroffsetslen]]
+# ## NOT USED (revisit later)
+# # Gathers inneroffsets at positions given by outeroffsets:
+# # tooffsets[i] = inneroffsets[outeroffsets[i]] for i in [0, outeroffsetslen).
+# # Used when flattening a nested ListOffsetArray: the outer offsets index into
+# # the inner offset array to produce the combined flat offsets.
+# #
+# # Example: outeroffsets=[0,2,3], inneroffsets=[0,4,7,9,11]
+# #   tooffsets = [inneroffsets[0], inneroffsets[2], inneroffsets[3]] = [0, 9, 11]
+# def awkward_ListOffsetArray_flatten_offsets(
+#     tooffsets, outeroffsets, outeroffsetslen, inneroffsets
+# ):
+#     if outeroffsetslen == 0:
+#         return
+#     tooffsets[:outeroffsetslen] = inneroffsets[outeroffsets[:outeroffsetslen]]
 
 
 ## NOT USED (revisit later)
@@ -3787,3 +3787,120 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
     raise ValueError(
         "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
     )
+
+
+# Gathers inneroffsets at positions given by outeroffsets:
+# tooffsets[i] = inneroffsets[outeroffsets[i]] for i in [0, outeroffsetslen).
+# Used when flattening a nested ListOffsetArray: the outer offsets index into
+# the inner offset array to produce the combined flat offsets.
+#
+# Example: outeroffsets=[0,2,3], inneroffsets=[0,4,7,9,11]
+#   tooffsets = [inneroffsets[0], inneroffsets[2], inneroffsets[3]] = [0, 7, 9]
+def awkward_ListOffsetArray_flatten_offsets(
+    tooffsets, outeroffsets, outeroffsetslen, inneroffsets
+):
+    if outeroffsetslen == 0:
+        return
+    cp.take(
+        inneroffsets, outeroffsets[:outeroffsetslen], out=tooffsets[:outeroffsetslen]
+    )
+
+
+# For each of the `outlength` rows (each containing `maxcount = lendistincts //
+# outlength` elements of `distincts`), counts non-(-1) entries and sets:
+#   outstarts[i] = i * maxcount
+#   outstops[i]  = i * maxcount + count_of_non_neg1_in_row_i
+#
+# Example: distincts=[0,1,-1, 2,-1,-1], outlength=2 → maxcount=3
+#   row0: [0,1,-1] → count=2 → outstarts[0]=0, outstops[0]=2
+#   row1: [2,-1,-1] → count=1 → outstarts[1]=3, outstops[1]=4
+def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
+    outstarts, outstops, distincts, lendistincts, outlength
+):
+    if outlength == 0 or lendistincts == 0:
+        outstarts[:outlength] = 0
+        outstops[:outlength] = 0
+        return
+    maxcount = lendistincts // outlength
+    rows = distincts[:lendistincts].reshape(outlength, maxcount)
+    counts = (rows != -1).sum(axis=1)
+    row_starts = cp.arange(outlength, dtype=outstarts.dtype) * maxcount
+    outstarts[:outlength] = row_starts
+    outstops[:outlength] = row_starts + counts.astype(outstops.dtype)
+
+
+# For a RegularArray (all lists have the same `size`), enumerates all
+# n-combinations (n=2 only) of each list's elements and writes the indices
+# into n carry arrays accessed via raw device pointers in `tocarry_ptrs`.
+#
+# `tocarry_ptrs` is a CuPy int64 array of length n holding raw device pointers;
+# each pointer refers to a pre-allocated int64 array of length totallen.
+#
+# Single-pass fused kernel: each thread computes one (carry0, carry1) pair
+# entirely in registers via closed-form quadratic unranking for n=2.
+# No temporary arrays — memory traffic is just two output writes.
+#
+# Example (n=2, replacement=False, size=3, length=1):
+#   combinations: (0,1),(0,2),(1,2)
+#   tocarry_ptrs[0] → [0, 0, 1],  tocarry_ptrs[1] → [1, 2, 2]
+#   toindex: [3, 3]
+_combinations_kernel = cp.ElementwiseKernel(
+    "int64 combinationslen, int64 b_int, int64 size, bool replacement",
+    "int64 carry0, int64 carry1",
+    """
+        long long parent = i / combinationslen;
+        long long local_idx = i - parent * combinationslen;
+        double b_d = (double)b_int;
+        double disc = sqrt(b_d * b_d - 8.0 * (double)local_idx);
+        long long ii = (long long)((b_d - disc) / 2.0);
+        long long jj = local_idx + ii * (ii - b_int + 2) / 2 + (replacement ? 0LL : 1LL);
+        carry0 = ii + size * parent;
+        carry1 = jj + size * parent;
+    """,
+    "awkward_combinations_64_kernel",
+)
+
+
+def awkward_RegularArray_combinations_64(
+    tocarry_ptrs, toindex, fromindex, n, replacement, size, length
+):
+    if n != 2:
+        # the same restriction as in the old cuda kernel (_connect/cuda/cuda_kernels/awkward_RegularArray_combinations_64.cu)
+        raise ValueError(
+            "not implemented for given n in compiled CUDA code (awkward_RegularArray_combinations_64)"
+        )
+    toindex[:n] = 0
+    if length == 0 or size == 0:
+        return
+
+    if replacement:
+        combinationslen = size * (size + 1) // 2
+    else:
+        combinationslen = size * (size - 1) // 2
+
+    if combinationslen == 0:
+        return
+
+    totallen = length * combinationslen
+
+    # tocarry_ptrs holds two raw device pointers (as plain integers) that were allocated before calling this kernel
+    # UnownedMemory wraps a raw pointer + byte size without CuPy taking ownership
+    # (so CuPy won't try to free it when the array is garbage-collected)
+    # This lets the kernel write directly into externally-managed buffers.
+    ptr0 = int(tocarry_ptrs[0])
+    ptr1 = int(tocarry_ptrs[1])
+    mem0 = cp.cuda.UnownedMemory(ptr0, totallen * 8, None)
+    mem1 = cp.cuda.UnownedMemory(ptr1, totallen * 8, None)
+    carry0 = cp.ndarray(totallen, dtype=cp.int64, memptr=cp.cuda.MemoryPointer(mem0, 0))  # pylint: disable=unexpected-keyword-arg
+    carry1 = cp.ndarray(totallen, dtype=cp.int64, memptr=cp.cuda.MemoryPointer(mem1, 0))  # pylint: disable=unexpected-keyword-arg
+
+    b_int = cp.int64(2 * size + 1 if replacement else 2 * size - 1)
+    _combinations_kernel(
+        cp.int64(combinationslen),
+        b_int,
+        cp.int64(size),
+        bool(replacement),
+        carry0,
+        carry1,
+    )
+    toindex[:n] = totallen
