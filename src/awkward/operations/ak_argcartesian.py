@@ -59,8 +59,8 @@ def argcartesian(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of data from a set of
-        `arrays`, like #ak.cartesian, but returning integer indexes for
+        An array of integer indexes into the Cartesian product (i.e. cross product)
+        of a set of `arrays`, like #ak.cartesian but for use with
         #ak.Array.__getitem__.
 
     Examples:

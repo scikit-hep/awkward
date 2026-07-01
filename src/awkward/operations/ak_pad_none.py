@@ -49,7 +49,7 @@ def pad_none(
             high-level.
 
     Returns:
-        Increase the lengths of lists to a target length by adding None values.
+        An array whose lists are padded with None to at least the target `length`.
 
     Examples:
         Consider the following
