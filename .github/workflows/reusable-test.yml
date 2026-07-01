@@ -94,6 +94,7 @@ jobs:
 
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+      MACOSX_DEPLOYMENT_TARGET: ${{ startsWith(matrix.runs-on, 'macos') && '11.0' || '' }}
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -116,7 +117,7 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: awkward-cpp/dist
-          key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}-${{ hashFiles('awkward-cpp/**') }}
+          key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}${{ runner.os == 'macOS' && format('-macosx{0}', env.MACOSX_DEPLOYMENT_TARGET) || '' }}-${{ hashFiles('awkward-cpp/**') }}
 
       - name: Build awkward-cpp wheel
         if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
