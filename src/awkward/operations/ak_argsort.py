@@ -29,7 +29,8 @@ def argsort(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Sorts an array along an axis, returning integer indexes.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -53,16 +54,18 @@ def argsort(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array of integer indexes that would sort the array if applied
-    as an integer-array slice.
+    Returns:
+        An array of integer indexes that would sort the array if applied
+        as an integer-array slice.
 
-    For example,
+    Examples:
+        For example,
 
         >>> ak.argsort(ak.Array([[7.7, 5.5, 7.7], [], [2.2], [8.8, 2.2]]))
         <Array [[1, 0, 2], [], [0], [1, 0]] type='4 * var * int64'>
 
-    The result of this function can be used to index other arrays with the
-    same shape:
+        The result of this function can be used to index other arrays with the
+        same shape:
 
         >>> data = ak.Array([[7, 5, 7], [], [2], [8, 2]])
         >>> index = ak.argsort(data)
