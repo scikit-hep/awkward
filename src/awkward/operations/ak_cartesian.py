@@ -41,6 +41,10 @@ def cartesian(
 ):
     """Computes the Cartesian product (cross product) of data from a set of arrays.
 
+    This operation creates records (if `arrays` is a dict) or tuples (if
+    `arrays` is another kind of iterable) that hold the combinations of
+    elements, and it can introduce new levels of nesting.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -73,10 +77,8 @@ def cartesian(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of data from a set of
-        `arrays`. This operation creates records (if `arrays` is a dict) or tuples
-        (if `arrays` is another kind of iterable) that hold the combinations
-        of elements, and it can introduce new levels of nesting.
+        An array holding the Cartesian product (i.e. cross product) of data
+        from a set of `arrays`.
 
     Examples:
         As a simple example with `axis=0`, the Cartesian product of
