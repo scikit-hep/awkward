@@ -3669,6 +3669,7 @@ def awkward_IndexedArray_fill(toindex, toindexoffset, fromindex, length, base):
         num_items=length,
     )
 
+
 def awkward_ListArray_getitem_jagged_carrylen(
     carrylen, slicestarts, slicestops, sliceouterlen
 ):
