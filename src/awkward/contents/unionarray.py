@@ -585,8 +585,8 @@ class UnionArray(UnionMeta[Content], Content):
         return self._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._tags, PlaceholderArray) or isinstance(
-            self._index, PlaceholderArray
+        if isinstance(self._tags.data, PlaceholderArray) or isinstance(
+            self._index.data, PlaceholderArray
         ):
             return True
         for content in self._contents:

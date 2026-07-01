@@ -91,8 +91,11 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.all(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.all(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        # https://github.com/cupy/cupy/issues/3819 - cupy returns a 0d array for
+        # full reductions; coerce to a scalar to match NumPy (but not when
+        # `keepdims` requested a 1x...x1 array).
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -106,8 +109,8 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.any(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.any(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -132,8 +135,8 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.min(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.min(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -147,8 +150,8 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.sum(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.sum(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -162,8 +165,8 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.max(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out

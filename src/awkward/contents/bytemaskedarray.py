@@ -378,7 +378,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._mask, PlaceholderArray):
+        if isinstance(self._mask.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
 

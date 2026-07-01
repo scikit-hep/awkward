@@ -1135,7 +1135,7 @@ class NumpyArray(NumpyMeta, Content):
         if posaxis is not None and posaxis + 1 != depth:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         if not clip:
-            if target < self.length:
+            if self.length is unknown_length or target < self.length:
                 return self
             else:
                 return self._pad_none(target, axis, depth, clip=True)

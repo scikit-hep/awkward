@@ -440,7 +440,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 return self
             else:
                 return BitMaskedArray(
-                    ak.index.IndexU8(self._backend.nplike.logical_not(self._mask.data)),
+                    ak.index.IndexU8(~self._mask.data),
                     self._content,
                     valid_when,
                     self.length,
@@ -497,7 +497,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._mask, PlaceholderArray):
+        if isinstance(self._mask.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
 

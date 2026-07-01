@@ -935,7 +935,7 @@ class Content(Meta):
         if replacement:
             size = size + (n - 1)
         thisn = n
-        if thisn is None or size is None:
+        if thisn is None or size is unknown_length:
             combinationslen = size  # not actually size, just an unknown value
         else:
             if thisn > size:
