@@ -6,6 +6,7 @@
 #include <cmath>
 #include <numeric>
 #include <type_traits>
+#include <vector>
 
 #include "awkward/kernels.h"
 
