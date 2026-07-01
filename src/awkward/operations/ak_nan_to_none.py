@@ -21,7 +21,10 @@ def nan_to_none(
     behavior: Mapping | None = None,
     attrs: Mapping | None = None,
 ):
-    """
+    """Converts NaN values in floating-point arrays to None.
+
+    See also #ak.nan_to_num to convert NaN or infinity to specified values.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -31,9 +34,9 @@ def nan_to_none(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts NaN ("not a number") into None, i.e. missing values with option-type.
-
-    See also #ak.nan_to_num to convert NaN or infinity to specified values.
+    Returns:
+        An array with NaN ("not a number") converted to None, i.e. missing
+        values with option-type.
     """
     # Dispatch
     yield (array,)
