@@ -6,9 +6,9 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_next_at(
-  T* tocarry,
-  const C* fromstarts,
-  const C* fromstops,
+  T* __restrict__ tocarry,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lenstarts,
   int64_t at) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
@@ -24,42 +24,12 @@ ERROR awkward_ListArray_getitem_next_at(
   }
   return success();
 }
-ERROR awkward_ListArray32_getitem_next_at_64(
-  int64_t* tocarry,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t lenstarts,
-  int64_t at) {
-  return awkward_ListArray_getitem_next_at<int32_t, int64_t>(
-    tocarry,
-    fromstarts,
-    fromstops,
-    lenstarts,
-    at);
-}
-ERROR awkward_ListArrayU32_getitem_next_at_64(
-  int64_t* tocarry,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t lenstarts,
-  int64_t at) {
-  return awkward_ListArray_getitem_next_at<uint32_t, int64_t>(
-    tocarry,
-    fromstarts,
-    fromstops,
-    lenstarts,
-    at);
-}
-ERROR awkward_ListArray64_getitem_next_at_64(
-  int64_t* tocarry,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t lenstarts,
-  int64_t at) {
-  return awkward_ListArray_getitem_next_at<int64_t, int64_t>(
-    tocarry,
-    fromstarts,
-    fromstops,
-    lenstarts,
-    at);
-}
+
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t at) { \
+    return awkward_ListArray_getitem_next_at<C, T>(tocarry, fromstarts, fromstops, lenstarts, at); \
+  }
+
+WRAPPER(awkward_ListArray32_getitem_next_at_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_getitem_next_at_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_getitem_next_at_64, int64_t, int64_t)

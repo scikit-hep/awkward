@@ -104,6 +104,10 @@ PIP_ONLY_BINARY = "cmake,numpy"
 UV_ONLY_BINARY = "cmake,numpy"
 
 [[tool.cibuildwheel.overrides]]
+select = "*-win*"
+repair-wheel-command = "delvewheel repair -w {dest_dir} -v --ignore-existing {wheel}"
+
+[[tool.cibuildwheel.overrides]]
 select = "*pyodide*"
 build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
 

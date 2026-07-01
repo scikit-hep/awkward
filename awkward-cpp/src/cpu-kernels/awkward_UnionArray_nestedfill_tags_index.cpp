@@ -6,11 +6,11 @@
 
 template <typename T, typename I, typename C>
 ERROR awkward_UnionArray_nestedfill_tags_index(
-  T* totags,
-  I* toindex,
-  C* tmpstarts,
+  T* __restrict__ totags,
+  I* __restrict__ toindex,
+  C* __restrict__ tmpstarts,
   T tag,
-  const C* fromcounts,
+  const C* __restrict__ fromcounts,
   int64_t length) {
   I k = 0;
   for (int64_t i = 0;  i < length;  i++) {
@@ -25,43 +25,13 @@ ERROR awkward_UnionArray_nestedfill_tags_index(
   }
   return success();
 }
-ERROR awkward_UnionArray8_32_nestedfill_tags_index_64(
-  int8_t* totags,
-  int32_t* toindex,
-  int64_t* tmpstarts,
-  int8_t tag,
-  const int64_t* fromcounts,
-  int64_t length) {
-  return awkward_UnionArray_nestedfill_tags_index<int8_t, int32_t, int64_t>(
-    totags, toindex, tmpstarts, tag, fromcounts, length);
-}
-ERROR awkward_UnionArray8_U32_nestedfill_tags_index_64(
-  int8_t* totags,
-  uint32_t* toindex,
-  int64_t* tmpstarts,
-  int8_t tag,
-  const int64_t* fromcounts,
-  int64_t length) {
-  return awkward_UnionArray_nestedfill_tags_index<int8_t, uint32_t, int64_t>(
-    totags, toindex, tmpstarts, tag, fromcounts, length);
-}
-ERROR awkward_UnionArray8_64_nestedfill_tags_index_64(
-  int8_t* totags,
-  int64_t* toindex,
-  int64_t* tmpstarts,
-  int8_t tag,
-  const int64_t* fromcounts,
-  int64_t length) {
-  return awkward_UnionArray_nestedfill_tags_index<int8_t, int64_t, int64_t>(
-    totags, toindex, tmpstarts, tag, fromcounts, length);
-}
-ERROR awkward_UnionArray64_64_nestedfill_tags_index_64(
-  int64_t* totags,
-  int64_t* toindex,
-  int64_t* tmpstarts,
-  int64_t tag,
-  const int64_t* fromcounts,
-  int64_t length) {
-  return awkward_UnionArray_nestedfill_tags_index<int64_t, int64_t, int64_t>(
-    totags, toindex, tmpstarts, tag, fromcounts, length);
-}
+
+#define WRAPPER(FUNC, T, I, C) \
+  ERROR FUNC(T* totags, I* toindex, C* tmpstarts, T tag, const C* fromcounts, int64_t length) { \
+    return awkward_UnionArray_nestedfill_tags_index<T, I, C>(totags, toindex, tmpstarts, tag, fromcounts, length); \
+  }
+
+WRAPPER(awkward_UnionArray8_32_nestedfill_tags_index_64, int8_t, int32_t, int64_t)
+WRAPPER(awkward_UnionArray8_U32_nestedfill_tags_index_64, int8_t, uint32_t, int64_t)
+WRAPPER(awkward_UnionArray8_64_nestedfill_tags_index_64, int8_t, int64_t, int64_t)
+WRAPPER(awkward_UnionArray64_64_nestedfill_tags_index_64, int64_t, int64_t, int64_t)

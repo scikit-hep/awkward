@@ -6,12 +6,12 @@
 
 template <typename FROM, typename TO>
 ERROR awkward_ListArray_fill(
-  TO* tostarts,
+  TO* __restrict__ tostarts,
   int64_t tostartsoffset,
-  TO* tostops,
+  TO* __restrict__ tostops,
   int64_t tostopsoffset,
-  const FROM* fromstarts,
-  const FROM* fromstops,
+  const FROM* __restrict__ fromstarts,
+  const FROM* __restrict__ fromstops,
   int64_t length,
   int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -20,60 +20,12 @@ ERROR awkward_ListArray_fill(
   }
   return success();
 }
-ERROR awkward_ListArray_fill_to64_from32(
-  int64_t* tostarts,
-  int64_t tostartsoffset,
-  int64_t* tostops,
-  int64_t tostopsoffset,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t length,
-  int64_t base) {
-  return awkward_ListArray_fill<int32_t, int64_t>(
-    tostarts,
-    tostartsoffset,
-    tostops,
-    tostopsoffset,
-    fromstarts,
-    fromstops,
-    length,
-    base);
-}
-ERROR awkward_ListArray_fill_to64_fromU32(
-  int64_t* tostarts,
-  int64_t tostartsoffset,
-  int64_t* tostops,
-  int64_t tostopsoffset,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t length,
-  int64_t base) {
-  return awkward_ListArray_fill<uint32_t, int64_t>(
-    tostarts,
-    tostartsoffset,
-    tostops,
-    tostopsoffset,
-    fromstarts,
-    fromstops,
-    length,
-    base);
-}
-ERROR awkward_ListArray_fill_to64_from64(
-  int64_t* tostarts,
-  int64_t tostartsoffset,
-  int64_t* tostops,
-  int64_t tostopsoffset,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  int64_t base) {
-  return awkward_ListArray_fill<int64_t, int64_t>(
-    tostarts,
-    tostartsoffset,
-    tostops,
-    tostopsoffset,
-    fromstarts,
-    fromstops,
-    length,
-    base);
-}
+
+#define WRAPPER(FUNC, FROM, TO) \
+  ERROR FUNC(TO* tostarts, int64_t tostartsoffset, TO* tostops, int64_t tostopsoffset, const FROM* fromstarts, const FROM* fromstops, int64_t length, int64_t base) { \
+    return awkward_ListArray_fill<FROM, TO>(tostarts, tostartsoffset, tostops, tostopsoffset, fromstarts, fromstops, length, base); \
+  }
+
+WRAPPER(awkward_ListArray_fill_to64_from32, int32_t, int64_t)
+WRAPPER(awkward_ListArray_fill_to64_fromU32, uint32_t, int64_t)
+WRAPPER(awkward_ListArray_fill_to64_from64, int64_t, int64_t)

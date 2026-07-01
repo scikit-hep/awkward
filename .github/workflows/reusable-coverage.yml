@@ -41,7 +41,7 @@ jobs:
           rm -rf * .[!.]* || echo "Nothing to clean"
           rm -rf ~/micromamba* || echo "Nothing to clean"
 
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: true
           persist-credentials: false
@@ -56,7 +56,7 @@ jobs:
             -c rapidsai
             python=${{ env.PYTHON_VERSION }}
             pandas>=0.24.0
-            cccl-python
+            cccl-python>=1.0.2
             cupy>=14
             cuda-version=13
             cuda-toolkit
@@ -110,13 +110,13 @@ jobs:
           --cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml
 
       - name: Upload Codecov results
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: test_results
