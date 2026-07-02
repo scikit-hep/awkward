@@ -4,7 +4,20 @@ from __future__ import annotations
 
 import cupy as cp
 import numpy as np
-import nvtx
+
+try:
+    import nvtx
+except ImportError:
+
+    class nvtx:
+        @staticmethod
+        def annotate(*args, **kwargs):
+            def deco(fn):
+                return fn
+
+            return deco
+
+
 from cuda.compute import (
     CountingIterator,
     OpKind,
@@ -134,12 +147,12 @@ def select_segments(
 
     # Apply select to get both data and indices where mask is non-zero
     select(
-        data_mask_idx_in,
-        data_idx_out,
-        d_num_data_selected,
-        mask_predicate,
-        num_elements,
-        stream,
+        d_in=data_mask_idx_in,
+        d_out=data_idx_out,
+        d_num_selected_out=d_num_data_selected,
+        cond=mask_predicate,
+        num_items=num_elements,
+        stream=stream,
     )
 
     # Get the actual number of selected elements
@@ -167,12 +180,12 @@ def select_segments(
     if num_kept_segments > 0:
         h_init_scan = np.array([0], dtype=offsets_dtype)
         exclusive_scan(
-            kept_segment_sizes,
-            offsets_out,
-            OpKind.PLUS,
-            h_init_scan,
-            num_kept_segments,
-            stream,
+            d_in=kept_segment_sizes,
+            d_out=offsets_out,
+            op=OpKind.PLUS,
+            init_value=h_init_scan,
+            num_items=num_kept_segments,
+            stream=stream,
         )
 
     # Set the final offset to the total number of selected elements
@@ -249,7 +262,12 @@ def segmented_select(
     data_idx_out = ZipIterator(d_out_data, d_indices_out)
     d_num_selected = cp.zeros(1, dtype=cp.uint64)
     select(
-        data_idx_in, data_idx_out, d_num_selected, select_predicate, num_items, stream
+        d_in=data_idx_in,
+        d_out=data_idx_out,
+        d_num_selected_out=d_num_selected,
+        cond=select_predicate,
+        num_items=num_items,
+        stream=stream,
     )
 
     total_selected = int(d_num_selected[0])
@@ -265,12 +283,12 @@ def segmented_select(
 
     # Step 3: Use exclusive scan to compute output segment start offsets
     exclusive_scan(
-        d_counts,
-        d_out_segments[:-1],
-        OpKind.PLUS,
-        np.array(0, dtype=offsets_dtype),
-        num_segments,
-        stream,
+        d_in=d_counts,
+        d_out=d_out_segments[:-1],
+        op=OpKind.PLUS,
+        init_value=np.array([0], dtype=offsets_dtype),
+        num_items=num_segments,
+        stream=stream,
     )
 
     # Set the final offset to the total count
@@ -299,4 +317,4 @@ def transform_segments(data_in, data_out, segment_size, op, num_segments):
         )
 
     columns = ZipIterator(*[get_column(data_in, i) for i in range(segment_size)])
-    return unary_transform(columns, data_out, op, num_segments)
+    return unary_transform(d_in=columns, d_out=data_out, op=op, num_items=num_segments)
