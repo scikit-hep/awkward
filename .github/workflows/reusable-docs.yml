@@ -93,7 +93,7 @@ jobs:
 
     - name: Cache wheel
       id: cache-awkward-cpp-x86-64-wheel
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] Reuses a docs-only wheel cache to avoid rebuilding unchanged awkward-cpp docs dependencies.
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # zizmor: ignore[cache-poisoning] Reuses a docs-only wheel cache to avoid rebuilding unchanged awkward-cpp docs dependencies.
       with:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-${{ env.X86_64_PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
@@ -141,7 +141,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
       with:
         python-version: "${{ env.X86_64_PYTHON_VERSION }}"
 
@@ -327,7 +327,7 @@ jobs:
           name: docs
           path: built-docs
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.11"
       # Pushes to main trigger latest
