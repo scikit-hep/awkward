@@ -312,10 +312,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
     def __repr__(self):
         dtype = repr(self._dtype)
-        if self._shape is None:
-            shape = ""
-        else:
-            shape = f", shape={self._shape!r}"
+        shape = f", shape={self._shape!r}"
         return f"VirtualNDArray(array={self._array}, {dtype}{shape})"
 
     def __str__(self):
