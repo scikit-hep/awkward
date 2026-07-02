@@ -50,7 +50,7 @@ def nan_to_num(
     See also #ak.nan_to_none to convert NaN to None, i.e. missing values with option-type.
     """
     # Dispatch
-    yield (array,)
+    yield array, nan, posinf, neginf
 
     # Implementation
     return _impl(array, copy, nan, posinf, neginf, highlevel, behavior, attrs)

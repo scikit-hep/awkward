@@ -689,21 +689,24 @@ def test_named_axis_ak_argcartesian():
     named_two = ak.with_named_axis(two, named_axis=("x", "y"))
     named_three = ak.with_named_axis(three, named_axis=("x", "y"))
 
+    # The list input now honours the requested axis (matching the dict input
+    # branch), so the named-axis output agrees with ak.cartesian/argcartesian
+    # of an equivalent mapping.
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=False
-    ).named_axis == {"x": 0, "y": 1}
+    ).named_axis == {"x": 0}
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=True
-    ).named_axis == {"x": 1, "y": 2}
+    ).named_axis == {"x": 1}
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=[0]
-    ).named_axis == {"x": 1, "y": 2}
+    ).named_axis == {"x": 1}
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=[1]
-    ).named_axis == {"x": 0, "y": 2}
+    ).named_axis == {"x": 0}
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=[0, 1]
-    ).named_axis == {"x": 2, "y": 3}
+    ).named_axis == {"x": 2}
 
 
 def test_negative_named_axis_ak_argcartesian():
