@@ -43,7 +43,7 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs
     function.
 
     In the three-argument form, it acts as a vectorized ternary operator:
-    `condition`, `x`, and `y` must all have the same length and
+    `condition`, `x`, and `y` must all have the same length and::
 
         output[i] = x[i] if condition[i] else y[i]
 

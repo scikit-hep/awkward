@@ -69,7 +69,7 @@ class UnionArray(UnionMeta[Content], Content):
     [sparse union type](https://arrow.apache.org/docs/format/Columnar.html#sparse-union).
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class UnionArray(Content):
             def __init__(self, tags, index, contents):
@@ -172,8 +172,8 @@ class UnionArray(UnionMeta[Content], Content):
 
         if (
             backend.nplike.known_data
-            and tags.length is not unknown_length
-            and index.length is not unknown_length
+            and ak._util.maybe_length_of(tags) is not unknown_length
+            and ak._util.maybe_length_of(index) is not unknown_length
             and tags.length > index.length
         ):
             raise ValueError(
@@ -585,8 +585,8 @@ class UnionArray(UnionMeta[Content], Content):
         return self._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._tags, PlaceholderArray) or isinstance(
-            self._index, PlaceholderArray
+        if isinstance(self._tags.data, PlaceholderArray) or isinstance(
+            self._index.data, PlaceholderArray
         ):
             return True
         for content in self._contents:
@@ -1381,7 +1381,7 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         simplified = type(self).simplified(
             self._tags,
             self._index,
@@ -1392,9 +1392,9 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(simplified, ak.contents.UnionArray):
             raise ValueError("cannot check if an irreducible UnionArray is unique")
 
-        return simplified._is_unique(negaxis, starts, parents, outlength)
+        return simplified._is_unique(negaxis, starts, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         simplified = type(self).simplified(
             self._tags,
             self._index,
@@ -1405,10 +1405,10 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(simplified, ak.contents.UnionArray):
             raise ValueError("cannot make a unique irreducible UnionArray")
 
-        return simplified._unique(negaxis, starts, parents, outlength)
+        return simplified._unique(negaxis, starts, offsets, outlength)
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         simplified = type(self).simplified(
             self._tags,
@@ -1428,10 +1428,10 @@ class UnionArray(UnionMeta[Content], Content):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
         return simplified._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         if self.length is not unknown_length and self.length == 0:
             return self
 
@@ -1449,7 +1449,7 @@ class UnionArray(UnionMeta[Content], Content):
             raise ValueError("cannot sort an irreducible UnionArray")
 
         return simplified._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
 
     def _reduce_next(
@@ -1458,7 +1458,7 @@ class UnionArray(UnionMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
+        offsets,
         outlength,
         mask,
         keepdims,

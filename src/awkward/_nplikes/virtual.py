@@ -165,7 +165,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
                 )
-            for expected_dim, actual_dim in zip(self._shape, shape):
+            for expected_dim, actual_dim in zip(self._shape, shape, strict=True):
                 if expected_dim is not unknown_length and expected_dim != actual_dim:
                     raise ValueError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
@@ -184,7 +184,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
                 )
-            for expected_dim, actual_dim in zip(self._shape, array.shape):
+            for expected_dim, actual_dim in zip(self._shape, array.shape, strict=True):
                 if expected_dim is not unknown_length and expected_dim != actual_dim:
                     raise ValueError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
@@ -273,20 +273,6 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     def tolist(self) -> list:
         return self.materialize().tolist()  # type: ignore[attr-defined]
 
-    def byteswap(self, inplace=False):
-        if self._array is not UNMATERIALIZED:
-            return self._array.byteswap(inplace=inplace)
-
-        return type(self)(
-            self._nplike,
-            self._shape,
-            self._dtype,
-            lambda: self.materialize().byteswap(inplace=inplace),
-            lambda: self.shape,
-            self._buffer_key,
-            __enable_caching__=self.__enable_caching__,
-        )
-
     def tobytes(self, order="C") -> bytes:
         return self.materialize().tobytes(order)  # type: ignore[attr-defined]
 
@@ -322,14 +308,11 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return new_virtual
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
+        return self._nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
     def __repr__(self):
         dtype = repr(self._dtype)
-        if self._shape is None:
-            shape = ""
-        else:
-            shape = f", shape={self._shape!r}"
+        shape = f", shape={self._shape!r}"
         return f"VirtualNDArray(array={self._array}, {dtype}{shape})"
 
     def __str__(self):
@@ -405,6 +388,27 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         array = self.materialize()
         return iter(array)
 
+    def __array__(
+        self, dtype: DTypeLike | None = None, copy: bool | None = None
+    ) -> ArrayLike:
+        return ak._nplikes.numpy.Numpy.instance().asarray(
+            self.materialize(), dtype=dtype, copy=copy
+        )
+
+    def __cupy_get_ndarray__(self) -> ArrayLike:
+        return ak._nplikes.cupy.Cupy.instance().asarray(self.materialize())
+
+    def __jax_array__(self) -> ArrayLike:
+        return ak._nplikes.jax.Jax.instance().asarray(self.materialize())
+
+    @property
+    def __array_interface__(self) -> dict[str, Any]:
+        return self.materialize().__array_interface__  # type: ignore[attr-defined]
+
+    @property
+    def __cuda_array_interface__(self) -> dict[str, Any]:
+        return self.materialize().__cuda_array_interface__  # type: ignore[attr-defined]
+
     def __dlpack_device__(self) -> tuple[int, int]:
         return self.materialize().__dlpack_device__()  # type: ignore[attr-defined]
 
@@ -413,17 +417,3 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
     def __reduce__(self):
         return self.materialize().__reduce__()
-
-
-# backward compatibility
-class VirtualArray(VirtualNDArray):
-    def __init__(self, *args, **kwargs):
-        import warnings
-
-        warnings.warn(
-            "The `VirtualArray` class is deprecated and will be removed in a future release of Awkward Array. "
-            "Please plan to migrate your code to use the `VirtualNDArray` class instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)

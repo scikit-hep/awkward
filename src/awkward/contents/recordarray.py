@@ -129,7 +129,7 @@ class RecordArray(RecordMeta[Content], Content):
     [struct type](https://arrow.apache.org/docs/format/Columnar.html#struct-layout).
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class RecordArray(Content):
             def __init__(self, contents, fields, length):
@@ -202,17 +202,19 @@ class RecordArray(RecordMeta[Content], Content):
         contents: Iterable[Content],
         fields: Iterable[str] | None,
         length: int | type[unknown_length] | None = None,
+        length_generator: Callable[[], ShapeItem] | None = None,
         *,
         parameters=None,
         backend=None,
     ):
-        if length is not None and length is not unknown_length:
-            try:
-                length = int(length)  # TODO: this should not happen!
-            except TypeError:
-                raise TypeError(
-                    f"{type(self).__name__} 'length' must be a non-negative integer or None, not {length!r}"
-                ) from None
+        if (
+            length is not None
+            and length is not unknown_length
+            and not (is_integer(length) and length >= 0)
+        ):
+            raise TypeError(
+                f"{type(self).__name__} 'length' must be a non-negative integer or None, not {length}"
+            )
         if not isinstance(contents, Iterable):
             raise TypeError(
                 f"{type(self).__name__} 'contents' must be iterable, not {contents!r}"
@@ -260,6 +262,7 @@ class RecordArray(RecordMeta[Content], Content):
         # TODO: maybe need to store original `length` arg separately to the
         #       computed version (for typetracer conversions)
         self._length = length
+        self._length_generator = length_generator
         self._init(parameters, backend)
 
     form_cls: Final = RecordForm
@@ -269,6 +272,7 @@ class RecordArray(RecordMeta[Content], Content):
         contents=UNSET,
         fields=UNSET,
         length=UNSET,
+        length_generator=UNSET,
         *,
         parameters=UNSET,
         backend=UNSET,
@@ -277,6 +281,7 @@ class RecordArray(RecordMeta[Content], Content):
             self._contents if contents is UNSET else contents,
             self._fields if fields is UNSET else fields,
             self._length if length is UNSET else length,
+            self._length_generator if length_generator is UNSET else length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
             backend=self._backend if backend is UNSET else backend,
         )
@@ -291,21 +296,40 @@ class RecordArray(RecordMeta[Content], Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
+
     @classmethod
     def simplified(
         cls,
         contents,
         fields,
         length=None,
+        length_generator=None,
         *,
         parameters=None,
         backend=None,
     ):
-        return cls(contents, fields, length, parameters=parameters, backend=backend)
+        return cls(
+            contents,
+            fields,
+            length,
+            length_generator,
+            parameters=parameters,
+            backend=backend,
+        )
 
     def to_tuple(self) -> Self:
         return RecordArray(
-            self._contents, None, self._length, parameters=None, backend=self._backend
+            self._contents,
+            None,
+            self._length,
+            self._length_generator,
+            parameters=None,
+            backend=self._backend,
         )
 
     def _form_with_key(self, getkey: Callable[[Content], str | None]) -> RecordForm:
@@ -323,7 +347,7 @@ class RecordArray(RecordMeta[Content], Content):
         # also for tuple records
         contents = [
             x._form_with_key_path((*path, k))
-            for k, x in zip(self.fields, self._contents)
+            for k, x in zip(self.fields, self._contents, strict=True)
         ]
 
         return self.form_cls(
@@ -369,12 +393,17 @@ class RecordArray(RecordMeta[Content], Content):
     @property
     def length(self) -> ShapeItem:
         if self._backend.nplike.known_data and self._length is unknown_length:
+            gen_length = unknown_length
+            if self._length_generator:
+                gen_length = self._length_generator()
+            length = gen_length if gen_length is not unknown_length else None
             self._length = _calculate_recordarray_length(
-                self._contents, None, self._backend
+                self._contents, length, self._backend
             )
             assert is_integer(self._length), (
                 f"RecordArray length must be an integer for an array with concrete data, not {type(self._length)}"
             )
+        self._length_generator = None
         return self._length
 
     def __repr__(self):
@@ -512,7 +541,12 @@ class RecordArray(RecordMeta[Content], Content):
                     self.content(i)._getitem_fields(nexthead, nexttail) for i in indexes
                 ]
         return RecordArray(
-            contents, fields, self._length, parameters=None, backend=self._backend
+            contents,
+            fields,
+            self._length,
+            self._length_generator,
+            parameters=None,
+            backend=self._backend,
         )
 
     def _carry(self, carry: Index, allow_lazy: bool) -> Content:
@@ -671,7 +705,9 @@ class RecordArray(RecordMeta[Content], Content):
         elif isinstance(other, RecordArray):
             if self.is_tuple and other.is_tuple:
                 if len(self._contents) == len(other._contents):
-                    for self_cont, other_cont in zip(self._contents, other._contents):
+                    for self_cont, other_cont in zip(
+                        self._contents, other._contents, strict=True
+                    ):
                         if not self_cont._mergeable_next(
                             other_cont, mergebool, mergecastable
                         ):
@@ -850,21 +886,21 @@ class RecordArray(RecordMeta[Content], Content):
             backend=self._backend,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         for content in self._contents:
-            if not content._is_unique(negaxis, starts, parents, outlength):
+            if not content._is_unique(negaxis, starts, offsets, outlength):
                 return False
         return True
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         raise NotImplementedError
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         raise NotImplementedError
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         if len(self.fields) == 0:
             return ak.contents.NumpyArray(
                 self._backend.nplike.instance().empty(0, dtype=np.int64),
@@ -876,7 +912,7 @@ class RecordArray(RecordMeta[Content], Content):
         for content in self._contents:
             contents.append(
                 content._sort_next(
-                    negaxis, starts, parents, outlength, ascending, stable
+                    negaxis, starts, offsets, outlength, ascending, stable
                 )
             )
         return RecordArray(
@@ -913,7 +949,7 @@ class RecordArray(RecordMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -931,41 +967,18 @@ class RecordArray(RecordMeta[Content], Content):
             # so asking for a mask doesn't help us!
             reducer_should_mask = mask and not reducer.needs_position
 
-            # Convert parents into offsets to build a list for axis=1 reduction
-            offsets = ak.index.Index64.empty(outlength + 1, self._backend.nplike)
-            assert (
-                offsets.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-            )
-            # `parents` are possibly non monotonic increasing, so we must re-order the result
-            # This happens naturally for the `NumpyArray` reducers.
-            carry = ak.index.Index64.empty(outlength, self._backend.nplike)
-
-            # Note: if we knew that `negaxis == depth` exclusively for this layout, we could use
-            # the simpler `ListOffsetArray_reduce_local_outoffsets_64`. However, if our parent was reduced,
-            # we would still see `negaxis == depth`, so this kernel has to be used instead.
-            assert carry.nplike is self._backend.nplike
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
-                    offsets.dtype.type,
-                    carry.dtype.type,
-                    parents.dtype.type,
-                ](
-                    offsets.data,
-                    carry.data,
-                    parents.data,
-                    parents.length,
-                    outlength,
-                )
-            )
+            # In the offsets-pipeline, `offsets` is already monotonic by
+            # construction (one entry per outer bin in order), so we don't
+            # need the parents -> offsets converter that the original
+            # `awkward_RecordArray_reduce_nonlocal_outoffsets_64` provided
+            # nor its companion `carry` rearrangement: the reducer's output
+            # is already in bin order.
             out = _apply_record_reducer(
                 reducer_recordclass,
                 ak.contents.ListOffsetArray(offsets, self),
                 reducer_should_mask,
                 behavior,
             )
-            out = out._carry(carry, allow_lazy=True)
 
             if out.is_option and not reducer_should_mask:
                 reason = (
@@ -978,66 +991,88 @@ class RecordArray(RecordMeta[Content], Content):
                     f"returned an option when it was not expected ({reason})"
                 )
 
-            if reducer.needs_position:
+            # Record-reducer overrides (e.g. `_argmin_pair`, `overload_argmax`)
+            # already return *row-relative* indices: the user typically writes
+            # something like `ak.argmax(array["rho"], axis=-1, ...)` inside
+            # their override, which yields per-row indices. The standard
+            # `awkward_NumpyArray_reduce_adjust_starts_*` kernels are designed
+            # to convert ABSOLUTE argmin/argmax indices (as produced by the
+            # leaf NumpyArray reducer) into row-relative form by subtracting
+            # `starts[k]`. Applying that subtraction here would be a second
+            # adjustment on already-correct values, producing negatives like
+            # `0 - 3 = -3`. So we skip the `starts` adjustment for record
+            # reducers — the override is the authoritative source of position
+            # info. The `shifts` correction, however, still applies: when an
+            # option-type ancestor dropped missing values *inside* lists,
+            # `shifts[i]` (indexed by absolute position `i` in `self`) restores
+            # positions in the original, with-Nones coordinate system, and the
+            # override cannot know about it.
+            if reducer.needs_position and shifts is not None:
                 assert isinstance(out, ak.contents.NumpyArray)
-
-                if shifts is None:
-                    assert (
-                        out.backend is self._backend
-                        and parents.nplike is self._backend.nplike
-                        and starts.nplike is self._backend.nplike
+                # Under typetracer, overrides use `length_zero_if_typetracer`
+                # and return a length-zero NumPy-backed layout; move it back
+                # onto our backend (where the kernels below are no-ops).
+                if out.backend is not self._backend:
+                    out = out.to_backend(self._backend)
+                assert (
+                    out.backend is self._backend
+                    and offsets.nplike is self._backend.nplike
+                    and starts.nplike is self._backend.nplike
+                    and shifts.nplike is self._backend.nplike
+                )
+                # Step 1: row-relative -> absolute (in the compacted, i.e.
+                # missing-values-projected, coordinate system). The adjust
+                # kernels compute `toptr[k] -= starts[k]` (skipping masked,
+                # negative entries), so passing the *negated* bin starts adds
+                # `offsets[k]` on.
+                negated_bin_starts = ak.index.Index64(-offsets.data)
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_NumpyArray_reduce_adjust_starts_64",
+                        out.data.dtype.type,
+                        offsets.dtype.type,
+                        negated_bin_starts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        offsets.data,
+                        negated_bin_starts.data,
                     )
-                    self._backend.maybe_kernel_error(
-                        self._backend[
-                            "awkward_NumpyArray_reduce_adjust_starts_64",
-                            out.data.dtype.type,
-                            parents.dtype.type,
-                            starts.dtype.type,
-                        ](
-                            out.data,
-                            outlength,
-                            parents.data,
-                            starts.data,
-                        )
+                )
+                # Step 2: the standard correction, identical to the leaf
+                # NumpyArray reducer path: `toptr[k] += shifts[toptr[k]] -
+                # starts[k]`. `shifts[i]` maps absolute compacted positions to
+                # the original (with-Nones) coordinate system and `starts` are
+                # the original row starts, so this also restores row-relative
+                # form.
+                self._backend.maybe_kernel_error(
+                    self._backend[
+                        "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+                        out.data.dtype.type,
+                        offsets.dtype.type,
+                        starts.dtype.type,
+                        shifts.dtype.type,
+                    ](
+                        out.data,
+                        outlength,
+                        offsets.data,
+                        starts.data,
+                        shifts.data,
                     )
-                else:
-                    assert (
-                        out.backend is self._backend
-                        and parents.nplike is self._backend.nplike
-                        and starts.nplike is self._backend.nplike
-                        and shifts.nplike is self._backend.nplike
-                    )
-                    self._backend.maybe_kernel_error(
-                        self._backend[
-                            "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
-                            out.data.dtype.type,
-                            parents.dtype.type,
-                            starts.dtype.type,
-                            shifts.dtype.type,
-                        ](
-                            out.data,
-                            outlength,
-                            parents.data,
-                            starts.data,
-                            shifts.data,
-                        )
-                    )
+                )
 
             if mask:
                 outmask = ak.index.Index8.empty(outlength, self._backend.nplike)
-                assert (
-                    outmask.nplike is self._backend.nplike
-                    and parents.nplike is self._backend.nplike
-                )
+                assert outmask.nplike is self._backend.nplike
+
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
                         outmask.dtype.type,
-                        parents.dtype.type,
+                        offsets.dtype.type,
                     ](
                         outmask.data,
-                        parents.data,
-                        parents.length,
+                        offsets.data,
                         outlength,
                     )
                 )
@@ -1153,7 +1188,7 @@ class RecordArray(RecordMeta[Content], Content):
             c._to_cudf(cudf, mask=None, length=length) for c in self.contents
         )
         dt = cudf.core.dtypes.StructDtype(
-            {field: c.dtype for field, c in zip(self.fields, children)}
+            {field: c.dtype for field, c in zip(self.fields, children, strict=True)}
         )
         m = mask._to_cudf(cudf, None, length) if mask else None
         return cudf.core.column.struct.StructColumn(
@@ -1180,10 +1215,12 @@ class RecordArray(RecordMeta[Content], Content):
             )
         out = backend.nplike.empty(
             self.length,
-            dtype=[(str(n), x.dtype) for n, x in zip(self.fields, contents)],
+            dtype=[
+                (str(n), x.dtype) for n, x in zip(self.fields, contents, strict=True)
+            ],
         )
         mask = None
-        for n, x in zip(self.fields, contents):
+        for n, x in zip(self.fields, contents, strict=True):
             if allow_missing and isinstance(x, self._backend.nplike.ma.MaskedArray):
                 if mask is None:
                     mask = backend.nplike.ma.zeros(
@@ -1319,7 +1356,7 @@ class RecordArray(RecordMeta[Content], Content):
             contents = [x._to_list(behavior, json_conversions) for x in self._contents]
             out = [None] * self.length
             for i in range(self.length):
-                out[i] = dict(zip(fields, [x[i] for x in contents]))
+                out[i] = dict(zip(fields, [x[i] for x in contents], strict=True))
             return out
 
     def _to_backend(self, backend: Backend) -> Self:
@@ -1328,6 +1365,7 @@ class RecordArray(RecordMeta[Content], Content):
             contents,
             self._fields,
             length=self._length,
+            length_generator=self._length_generator,
             parameters=self._parameters,
             backend=backend,
         )
@@ -1361,6 +1399,6 @@ class RecordArray(RecordMeta[Content], Content):
                 content._is_equal_to(
                     other.content(field), index_dtype, numpyarray, all_parameters
                 )
-                for field, content in zip(self.fields, self._contents)
+                for field, content in zip(self.fields, self._contents, strict=True)
             )
         )

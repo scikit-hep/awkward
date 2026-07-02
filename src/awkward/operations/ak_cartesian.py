@@ -39,14 +39,24 @@ def cartesian(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the Cartesian product (cross product) of data from a set of arrays.
+
+    This operation creates records (if `arrays` is a dict) or tuples (if
+    `arrays` is another kind of iterable) that hold the combinations of
+    elements, and it can introduce new levels of nesting.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         nested (None, True, False, or iterable of str or int): If None or
             False, all combinations of elements from the `arrays` are
             produced at the same level of nesting; if True, they are grouped
@@ -66,17 +76,17 @@ def cartesian(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes a Cartesian product (i.e. cross product) of data from a set of
-    `arrays`. This operation creates records (if `arrays` is a dict) or tuples
-    (if `arrays` is another kind of iterable) that hold the combinations
-    of elements, and it can introduce new levels of nesting.
+    Returns:
+        An array holding the Cartesian product (i.e. cross product) of data
+        from a set of `arrays`.
 
-    As a simple example with `axis=0`, the Cartesian product of
+    Examples:
+        As a simple example with `axis=0`, the Cartesian product of
 
         >>> one = ak.Array([1, 2, 3])
         >>> two = ak.Array(["a", "b"])
 
-    is
+        is
 
         >>> ak.cartesian([one, two], axis=0).show()
         [(1, 'a'),
@@ -86,24 +96,24 @@ def cartesian(
          (3, 'a'),
          (3, 'b')]
 
-    With nesting, a new level of nested lists is created to group combinations
-    that share the same element from `one` into the same list.
+        With nesting, a new level of nested lists is created to group combinations
+        that share the same element from `one` into the same list.
 
         >>> ak.cartesian([one, two], axis=0, nested=True).show()
         [[(1, 'a'), (1, 'b')],
          [(2, 'a'), (2, 'b')],
          [(3, 'a'), (3, 'b')]]
 
-    The primary purpose of this function, however, is to compute a different
-    Cartesian product for each element of an array: in other words, `axis=1`.
-    The following arrays each have four elements.
+        The primary purpose of this function, however, is to compute a different
+        Cartesian product for each element of an array: in other words, `axis=1`.
+        The following arrays each have four elements.
 
         >>> one = ak.Array([[1, 2, 3], [], [4, 5], [6]])
         >>> two = ak.Array([["a", "b"], ["c"], ["d"], ["e", "f"]])
 
-    The default `axis=1` produces 6 pairs from the Cartesian product of
-    `[1, 2, 3]` and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from
-    `[4, 5]` and `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
+        The default `axis=1` produces 6 pairs from the Cartesian product of
+        `[1, 2, 3]` and `["a", "b"]`, 0 pairs from `[]` and `["c"]`, 1 pair from
+        `[4, 5]` and `["d"]`, and 1 pair from `[6]` and `["e", "f"]`.
 
         >>> ak.cartesian([one, two]).show()
         [[(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')],
@@ -111,9 +121,9 @@ def cartesian(
          [(4, 'd'), (5, 'd')],
          [(6, 'e'), (6, 'f')]]
 
-    The nesting depth is the same as the original arrays; with `nested=True`,
-    the nesting depth is increased by 1 and tuples are grouped by their
-    first element.
+        The nesting depth is the same as the original arrays; with `nested=True`,
+        the nesting depth is increased by 1 and tuples are grouped by their
+        first element.
 
         >>> ak.cartesian([one, two], nested=True).show()
         [[[(1, 'a'), (1, 'b')], [(2, 'a'), (2, ...)], [(3, 'a'), (3, 'b')]],
@@ -121,8 +131,8 @@ def cartesian(
          [[(4, 'd')], [(5, 'd')]],
          [[(6, 'e'), (6, 'f')]]]
 
-    These tuples are #ak.contents.RecordArray nodes with unnamed fields. To
-    name the fields, we can pass `one` and `two` in a dict, rather than a list.
+        These tuples are #ak.contents.RecordArray nodes with unnamed fields. To
+        name the fields, we can pass `one` and `two` in a dict, rather than a list.
 
         >>> ak.cartesian({"x": one, "y": two}).show()
         [[{x: 1, y: 'a'}, {x: 1, y: 'b'}, {...}, ..., {x: 3, y: 'a'}, {x: 3, y: 'b'}],
@@ -130,14 +140,14 @@ def cartesian(
          [{x: 4, y: 'd'}, {x: 5, y: 'd'}],
          [{x: 6, y: 'e'}, {x: 6, y: 'f'}]]
 
-    With more than two elements in the Cartesian product, `nested` can specify
-    which are grouped and which are not. For example,
+        With more than two elements in the Cartesian product, `nested` can specify
+        which are grouped and which are not. For example,
 
         >>> one = ak.Array([1, 2, 3, 4])
         >>> two = ak.Array([1.1, 2.2, 3.3])
         >>> three = ak.Array(["a", "b"])
 
-    can be left entirely ungrouped:
+        can be left entirely ungrouped:
 
         >>> ak.cartesian([one, two, three], axis=0).show()
         [(1, 1.1, 'a'),
@@ -161,7 +171,7 @@ def cartesian(
          (4, 3.3, 'a'),
          (4, 3.3, 'b')]
 
-    can be grouped by `one` (adding 1 more dimension):
+        can be grouped by `one` (adding 1 more dimension):
 
         >>> ak.cartesian([one, two, three], axis=0, nested=[0]).show()
         [[(1, 1.1, 'a'), (1, 1.1, 'b'), (1, 2.2, 'a')],
@@ -173,7 +183,7 @@ def cartesian(
          [(4, 1.1, 'a'), (4, 1.1, 'b'), (4, 2.2, 'a')],
          [(4, 2.2, 'b'), (4, 3.3, 'a'), (4, 3.3, 'b')]]
 
-    can be grouped by `one` and `two` (adding 2 more dimensions):
+        can be grouped by `one` and `two` (adding 2 more dimensions):
 
         >>> ak.cartesian([one, two, three], axis=0, nested=[0, 1]).show()
         [[[(1, 1.1, 'a'), (1, 1.1, 'b')], [...], [(1, 3.3, 'a'), (1, 3.3, ...)]],
@@ -181,7 +191,7 @@ def cartesian(
          [[(3, 1.1, 'a'), (3, 1.1, 'b')], [...], [(3, 3.3, 'a'), (3, 3.3, ...)]],
          [[(4, 1.1, 'a'), (4, 1.1, 'b')], [...], [(4, 3.3, 'a'), (4, 3.3, ...)]]]
 
-    or grouped by unique `one`-`two` pairs (adding 1 more dimension):
+        or grouped by unique `one`-`two` pairs (adding 1 more dimension):
 
         >>> ak.cartesian([one, two, three], axis=0, nested=[1]).show()
         [[(1, 1.1, 'a'), (1, 1.1, 'b')],
@@ -197,23 +207,24 @@ def cartesian(
          [(4, 2.2, 'a'), (4, 2.2, 'b')],
          [(4, 3.3, 'a'), (4, 3.3, 'b')]]
 
-    The order of the output is fixed: it is always lexicographical in the
-    order that the `arrays` are written.
+        The order of the output is fixed: it is always lexicographical in the
+        order that the `arrays` are written.
 
-    To emulate an SQL or Pandas "group by" operation, put the keys that you
-    wish to group by *first* and use `nested=[0]` or `nested=[n]` to group by
-    unique n-tuples. If necessary, record keys can later be reordered with a
-    list of strings in #ak.Array.__getitem__.
+        To emulate an SQL or Pandas "group by" operation, put the keys that you
+        wish to group by *first* and use `nested=[0]` or `nested=[n]` to group by
+        unique n-tuples. If necessary, record keys can later be reordered with a
+        list of strings in #ak.Array.__getitem__.
 
-    To get list index positions in the tuples/records, rather than data from
-    the original `arrays`, use #ak.argcartesian instead of #ak.cartesian. The
-    #ak.argcartesian form can be particularly useful as nested indexing in
-    #ak.Array.__getitem__.
+        To get list index positions in the tuples/records, rather than data from
+        the original `arrays`, use #ak.argcartesian instead of #ak.cartesian. The
+        #ak.argcartesian form can be particularly useful as nested indexing in
+        #ak.Array.__getitem__.
     """
     # Dispatch
     if isinstance(arrays, Mapping):
         yield arrays.values()
     else:
+        arrays = list(arrays)
         yield arrays
 
     # Implementation
@@ -232,7 +243,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
                 )
             )
             fields = list(arrays.keys())
-            array_layouts = dict(zip(fields, layouts))
+            array_layouts = dict(zip(fields, layouts, strict=True))
 
             # propagate named axis from input to output,
             #   use strategy "unify" (see: awkward._namedaxis)
@@ -329,7 +340,8 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
             )
         ]
         outs = [
-            ak.contents.IndexedArray.simplified(x, y) for x, y in zip(indexes, layouts)
+            ak.contents.IndexedArray.simplified(x, y)
+            for x, y in zip(indexes, layouts, strict=True)
         ]
 
         result = ak.contents.RecordArray(outs, fields, parameters=parameters)

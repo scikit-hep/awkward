@@ -17,7 +17,8 @@ cpu = NumpyBackend.instance()
 
 @high_level_function()
 def broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns a list of arrays whose record types contain the same fields.
+
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -27,12 +28,14 @@ def broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Return a list of arrays whose types contain the same number of fields. Unlike
-    #ak.broadcast_arrays, this function does not require record types to occur at the
-    same depths. Where fields are missing from one record, they are inserted at the same
-    position with an `option[unknown]` type. This type is easily erased by ufunc and
-    concatenation operations.
+    Returns:
+        Return a list of arrays whose types contain the same number of fields. Unlike
+        #ak.broadcast_arrays, this function does not require record types to occur at the
+        same depths. Where fields are missing from one record, they are inserted at the same
+        position with an `option[unknown]` type. This type is easily erased by ufunc and
+        concatenation operations.
 
+    Examples:
         >>> x, y = ak.broadcast_fields(
         ...     [{"x": {"y": 1, "z": 2, "w": [1]}}],
         ...     [{"x": [{"y": 1}]}],
@@ -53,7 +56,6 @@ def broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None):
                 w: ?unknown
             }
         }
-
     """
     # Dispatch
     yield arrays
@@ -96,10 +98,14 @@ def _descend_to_record_or_leaf(layout, pullback=_identity):
 # layout.copy, the pull-back functions can be arbitrarily deep: the closures maintain the structure of the array
 def _recurse(inputs):
     # Descend to records, identities, or leaves
-    pullbacks, next_inputs = zip(*[_descend_to_record_or_leaf(x) for x in inputs])
+    pullbacks, next_inputs = zip(
+        *[_descend_to_record_or_leaf(x) for x in inputs], strict=True
+    )
     # With no records, we can exit here
     if not any(c.is_record for c in next_inputs):
-        return [pull(layout) for pull, layout in zip(pullbacks, next_inputs)]
+        return [
+            pull(layout) for pull, layout in zip(pullbacks, next_inputs, strict=True)
+        ]
     # Otherwise, we can only work with all non-record, or all record/identity
     elif not all(c.is_record or c.is_identity_like for c in next_inputs):
         raise AssertionError(
@@ -142,7 +148,7 @@ def _recurse(inputs):
         )
 
     # Now we transpose the list-of-lists to group layouts by original record, instead of by the field
-    layouts_by_record = zip(*layouts_by_field)
+    layouts_by_record = zip(*layouts_by_field, strict=True)
     # Rebuild the original records with the new fields
     next_records = iter(
         [
@@ -150,7 +156,7 @@ def _recurse(inputs):
                 fields=all_fields,
                 contents=contents,
             )
-            for record, contents in zip(next_records, layouts_by_record)
+            for record, contents in zip(next_records, layouts_by_record, strict=True)
         ]
     )
 
@@ -161,7 +167,7 @@ def _recurse(inputs):
     ]
 
     # Rebuild the outermost layouts using pull-back functions
-    return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts)]
+    return [pull(layout) for pull, layout in zip(pullbacks, inner_layouts, strict=True)]
 
 
 def _impl(arrays, highlevel, behavior, attrs):
@@ -188,5 +194,5 @@ def _impl(arrays, highlevel, behavior, attrs):
             highlevel=highlevel,
             attrs=attrs_of_obj(array_in, attrs=attrs),
         )
-        for layout_out, array_in in zip(result_layouts, arrays)
+        for layout_out, array_in in zip(result_layouts, arrays, strict=True)
     ]

@@ -284,7 +284,8 @@ or
             last_row_arrays is not None
             and len(last_row_arrays) == len(row_arrays)
             and all(
-                numpy.array_equal(x, y) for x, y in zip(last_row_arrays, row_arrays)
+                numpy.array_equal(x, y)
+                for x, y in zip(last_row_arrays, row_arrays, strict=True)
             )
         ):
             oldcolumns = tables[-1].columns

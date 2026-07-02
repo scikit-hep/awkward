@@ -1,16 +1,10 @@
 from __future__ import annotations
 
-import platform
-
 import pytest
 
 import awkward as ak
 
 
-@pytest.mark.skipif(
-    platform.python_implementation() == "PyPy",
-    reason="PyPy has a different GC strategy than CPython and thus weakrefs may stay alive a little bit longer than expected, see: https://doc.pypy.org/en/latest/cpython_differences.html#differences-related-to-garbage-collection-strategies",
-)
 def test_Array_mask_weakref():
     arr = ak.Array([1])
     m = arr.mask

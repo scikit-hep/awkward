@@ -72,7 +72,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
     to mask all node types.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class ByteMaskedArray(Content):
             def __init__(self, mask, content, valid_when):
@@ -134,8 +134,8 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             )
         if (
             content.backend.nplike.known_data
-            and mask.length is not unknown_length
-            and content.length is not unknown_length
+            and ak._util.maybe_length_of(mask) is not unknown_length
+            and ak._util.maybe_length_of(content) is not unknown_length
             and mask.length > content.length
         ):
             raise ValueError(
@@ -378,7 +378,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._mask, PlaceholderArray):
+        if isinstance(self._mask.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
 
@@ -802,30 +802,30 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, offsets, outlength
         )
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         return self.to_IndexedOptionArray64()._unique(
-            negaxis, starts, parents, outlength
+            negaxis, starts, offsets, outlength
         )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         return self.to_IndexedOptionArray64()._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         return self.to_IndexedOptionArray64()._sort_next(
-            negaxis, starts, parents, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -851,7 +851,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -880,30 +880,33 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
 
         next_length = mask_length - numnull
         nextcarry = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
-        nextparents = ak.index.Index64.empty(next_length, nplike=self._backend.nplike)
+        # nextoffsets describes the same `outlength` bins, but counting only the
+        # valid (unmasked) elements that survived this layer.
+        nextoffsets = ak.index.Index64.empty(outlength + 1, nplike=self._backend.nplike)
         outindex = ak.index.Index64.empty(mask_length, nplike=self._backend.nplike)
+
         assert (
             nextcarry.nplike is self._backend.nplike
-            and nextparents.nplike is self._backend.nplike
+            and nextoffsets.nplike is self._backend.nplike
             and outindex.nplike is self._backend.nplike
             and self._mask.nplike is self._backend.nplike
-            and parents.nplike is self._backend.nplike
+            and offsets.nplike is self._backend.nplike
         )
         self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ByteMaskedArray_reduce_next_64",
                 nextcarry.dtype.type,
-                nextparents.dtype.type,
+                nextoffsets.dtype.type,
                 outindex.dtype.type,
                 self._mask.dtype.type,
-                parents.dtype.type,
+                offsets.dtype.type,
             ](
                 nextcarry.data,
-                nextparents.data,
+                nextoffsets.data,
                 outindex.data,
                 self._mask.data,
-                parents.data,
-                mask_length,
+                offsets.data,
+                outlength,
                 self._valid_when,
             )
         )
@@ -960,7 +963,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             negaxis,
             starts,
             nextshifts,
-            nextparents,
+            nextoffsets,
             outlength,
             mask,
             keepdims,
@@ -973,8 +976,9 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             if isinstance(out, ak.contents.RegularArray):
                 out_content = out.content
             elif isinstance(out, ak.contents.ListOffsetArray):
-                # The `outindex` that will index into `out_content` is 0-based, so we should ensure that we normalise
-                # the list content to start at the first offset.
+                # The `outindex` that will index into `out_content` is 0-based,
+                # so we should ensure that we normalise the list content to start
+                # at the first offset.
                 out_content = out.content[out.offsets[0] :]
             else:
                 raise ValueError(
@@ -1077,7 +1081,7 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
             m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
         m = cudf.core.buffer.as_buffer(m)
         inner = self._content._to_cudf(cudf, mask=None, length=length)
-        inner.set_base_mask(m)
+        inner = inner.set_mask(m)
         return inner
 
     def _to_backend_array(self, allow_missing, backend):

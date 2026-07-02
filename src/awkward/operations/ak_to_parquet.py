@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
 from os import fsdecode
 
@@ -334,13 +335,13 @@ def _impl(
             if only == "string":
                 return [
                     x
-                    for x, y in zip(parquet_column_names, column_types)
+                    for x, y in zip(parquet_column_names, column_types, strict=True)
                     if y == "string"
                 ]
             elif only == "floating":
                 return [
                     x
-                    for x, y in zip(parquet_column_names, column_types)
+                    for x, y in zip(parquet_column_names, column_types, strict=True)
                     if isinstance(y, metadata.dtype)
                     and issubclass(y.type, metadata.floating)
                 ]
@@ -404,6 +405,12 @@ def _impl(
 
     if extensionarray:
         table = convert_awkward_arrow_table_to_native(table)
+
+    if hasattr(array, "attrs") and array.attrs:
+        df_metadata = {"AWKWARD_ATTRS": json.dumps(array.attrs.to_dict())}
+        existing_metadata = table.schema.metadata
+        merged_metadata = {**existing_metadata, **df_metadata}
+        table = table.replace_schema_metadata(merged_metadata)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}

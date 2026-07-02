@@ -48,11 +48,15 @@ def var(
         ddof (int): "delta degrees of freedom": the divisor used in the
             calculation is `sum(weights) - ddof`. Use this for "reduced
             variance."
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -76,11 +80,11 @@ def var(
     if all lists at a given dimension have the same length and no None values,
     but it generalizes to cases where they do not.
 
-    Passing all arguments to the reducers, the variance is calculated as
+    Passing all arguments to the reducers, the variance is calculated as::
 
         ak.sum((x - ak.mean(x))**2 * weight) / ak.sum(weight)
 
-    If `ddof` is not zero, the above is further corrected by a factor of
+    If `ddof` is not zero, the above is further corrected by a factor of::
 
         ak.sum(weight) / (ak.sum(weight) - ddof)
 
@@ -125,11 +129,15 @@ def nanvar(
         ddof (int): "delta degrees of freedom": the divisor used in the
             calculation is `sum(weights) - ddof`. Use this for "reduced
             variance."
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -147,7 +155,7 @@ def nanvar(
 
     Like #ak.var, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.var(ak.nan_to_none(array))
 

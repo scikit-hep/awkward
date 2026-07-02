@@ -5,15 +5,11 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_reduce_count_64(
-  int64_t* toptr,
-  const int64_t* parents,
-  int64_t lenparents,
+  int64_t* __restrict__ toptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = 0;
-  }
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]]++;
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    toptr[bin] = offsets[bin + 1] - offsets[bin];
   }
   return success();
 }

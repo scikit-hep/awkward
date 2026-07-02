@@ -13,6 +13,7 @@
 #include <complex>
 #include <iostream>
 #include <utility>
+#include <type_traits>
 #include <stdexcept>
 #include <stdint.h>
 
@@ -71,7 +72,7 @@ namespace awkward {
     /// appends it after the current panel.
     Panel*
     append_panel(size_t reserved) {
-      next_ = std::move(std::unique_ptr<Panel>(new Panel(reserved)));
+      next_ = std::make_unique<Panel>(reserved);
       return next_.get();
     }
 
@@ -79,6 +80,22 @@ namespace awkward {
     void
     fill_panel(PRIMITIVE datum) {
       ptr_.get()[length_++] = datum;
+    }
+
+    /// @brief Inserts a contiguous segment of `size` elements from `from_ptr`
+    /// into the panel.
+    ///
+    /// The caller must ensure that the panel has at least `size` unused slots.
+    void
+    fill_panel_from(const PRIMITIVE* from_ptr, size_t size) {
+      if (std::is_trivially_copyable<PRIMITIVE>::value) {
+        memcpy(ptr_.get() + length_, from_ptr, size * sizeof(PRIMITIVE));
+        length_ += size;
+      } else {
+        for (size_t i = 0; i < size; i++) {
+          ptr_.get()[length_++] = from_ptr[i];
+        }
+      }
     }
 
     /// @brief Pointer to the next panel.
@@ -399,6 +416,12 @@ namespace awkward {
           panel_(std::move(other.panel_)),
           ptr_(other.ptr_) {}
 
+    /// @brief Move assignment
+    ///
+    /// panel_ is move-only; a user-declared move constructor would otherwise
+    /// suppress the implicit move assignment operator.
+    GrowableBuffer& operator=(GrowableBuffer&& other) noexcept = default;
+
     /// @brief Currently used number of elements.
     ///
     /// Although the #length increments every time #append is called,
@@ -419,8 +442,7 @@ namespace awkward {
     /// options.initial(), and a new #ptr is allocated.
     void
     clear() {
-      panel_ = std::move(std::unique_ptr<Panel<PRIMITIVE>>(
-          new Panel<PRIMITIVE>((size_t)options_.initial())));
+      panel_ = std::make_unique<Panel<PRIMITIVE>>((size_t)options_.initial());
       ptr_ = panel_.get();
       length_ = 0;
     }
@@ -449,7 +471,7 @@ namespace awkward {
     void
     append(PRIMITIVE datum) {
       if (ptr_->current_length() == ptr_->reserved()) {
-        add_panel((size_t)ceil(options_.initial() * options_.resize()));
+        add_panel((size_t)ceil((double)ptr_->reserved() * options_.resize()));
       }
       fill_panel(datum);
     }
@@ -464,18 +486,12 @@ namespace awkward {
     extend(const PRIMITIVE* ptr, size_t size) {
       size_t unfilled_items = ptr_->reserved() - ptr_->current_length();
       if (size > unfilled_items) {
-        for (size_t i = 0; i < unfilled_items; i++) {
-          fill_panel(ptr[i]);
-        }
+        fill_panel_from(ptr, unfilled_items);
         add_panel(size - unfilled_items > ptr_->reserved() ? size - unfilled_items
                                                         : ptr_->reserved());
-        for (size_t i = unfilled_items; i < size; i++) {
-          fill_panel(ptr[i]);
-        }
+        fill_panel_from(ptr + unfilled_items, size - unfilled_items);
       } else {
-        for (size_t i = 0; i < size; i++) {
-          fill_panel(ptr[i]);
-        }
+        fill_panel_from(ptr, size);
       }
     }
 
@@ -535,6 +551,13 @@ namespace awkward {
       ptr_->fill_panel(datum);
     }
 
+    /// @brief Fills a contiguous segment of `size` elements from `from_ptr`
+    /// into the current panel.
+    void
+    fill_panel_from(const PRIMITIVE* from_ptr, size_t size) {
+      ptr_->fill_panel_from(from_ptr, size);
+    }
+
     /// @brief Adds a new panel with slots equal to #reserved.
     /// and updates the current panel pointer to it.
     void
@@ -544,7 +567,7 @@ namespace awkward {
     }
 
     /// @brief Initial size configuration for building a panel.
-    const BuilderOptions options_;
+    BuilderOptions options_;
 
     /// @brief Filled panels data length.
     size_t length_;

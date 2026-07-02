@@ -1,0 +1,122 @@
+name: Codecov
+
+on:
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 'coverage-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
+env:
+  # Leverage reproducible builds by setting a constant SOURCE_DATE_EPOCH
+  # This will ensure that the hash of the awkward-cpp directory remains
+  # constant for unchanged files, meaning that it can be used for caching
+  SOURCE_DATE_EPOCH: "1668811211"
+
+jobs:
+  coverage:
+    runs-on: self-hosted
+    name: Run Codecov
+
+    env:
+      PIP_ONLY_BINARY: cmake
+      PYTHON_VERSION: "3.10"
+
+    # Required for miniconda to activate conda
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Clean the workspace and mamba
+        run: |
+          rm -rf * .[!.]* || echo "Nothing to clean"
+          rm -rf ~/micromamba* || echo "Nothing to clean"
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Get micromamba
+        uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
+        with:
+          environment-name: test-env
+          init-shell: bash
+          # TODO: run the tests with cudf again when it supports numba-cuda>=0.23.0
+          create-args: >-
+            -c rapidsai
+            python=${{ env.PYTHON_VERSION }}
+            pandas>=0.24.0
+            cccl-python>=1.0.2
+            cupy>=14
+            cuda-version=13
+            cuda-toolkit
+            cxx-compiler
+            numba-cuda
+            root=6.36.06
+            pipx
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w ./awkward-cpp
+          ls ./awkward-cpp/dist
+
+      - name: Install awkward-cpp
+        run: python -m pip install -v ./awkward-cpp/dist/*.whl
+
+      - name: Build & install awkward
+        run: python -m pip install -v .
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Install test requirements
+        run: python -m pip install -v -r requirements-test-full.txt -r requirements-test-gpu.txt
+
+      - name: Test
+        run: >-
+          python -m pytest -vv -rs tests --cov=awkward --cov-report=term
+          --cov-report=xml:non-cuda-coverage.xml --junitxml=junit.xml -o junit_family=legacy
+
+      - name: Test CUDA
+        run: >-
+          python -m pytest -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py
+          --cov=awkward --cov-report=term --cov-report=xml:cuda-coverage.xml
+
+      - name: Test CUDA virtual arrays
+        run: >-
+          python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py
+          --cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml
+
+      - name: Upload Codecov results
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results

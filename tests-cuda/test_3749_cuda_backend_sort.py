@@ -39,9 +39,9 @@ def test_sort_cuda_float():
 
     # Compare with tolerance for floats
     assert len(result_list) == len(expected)
-    for res_sublist, exp_sublist in zip(result_list, expected):
+    for res_sublist, exp_sublist in zip(result_list, expected, strict=True):
         assert len(res_sublist) == len(exp_sublist)
-        for res_val, exp_val in zip(res_sublist, exp_sublist):
+        for res_val, exp_val in zip(res_sublist, exp_sublist, strict=True):
             assert abs(res_val - exp_val) < 1e-10
 
 

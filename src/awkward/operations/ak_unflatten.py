@@ -24,16 +24,22 @@ numpy_backend = NumpyBackend.instance()
 
 @high_level_function()
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns an array with an additional level of nesting.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         counts (int or array): Number of elements the new level should have.
             If an integer, the new level will be regularly sized; otherwise,
             it will consist of variable-length lists with the given lengths.
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -41,11 +47,13 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array with an additional level of nesting. This is roughly the
-    inverse of #ak.flatten, where `counts` were obtained by #ak.num (both with
-    `axis=1`).
+    Returns:
+        An array with an additional level of nesting. This is roughly the
+        inverse of #ak.flatten, where `counts` were obtained by #ak.num (both
+        with `axis=1`).
 
-    For example,
+    Examples:
+        For example,
 
         >>> original = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
         >>> counts = ak.num(original)
@@ -57,10 +65,10 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
         >>> ak.unflatten(array, counts)
         <Array [[0, 1, 2], [], [3, ...], [5], [6, 7, 8, 9]] type='5 * var * int64'>
 
-    An inner dimension can be unflattened by setting the `axis` parameter, but
-    operations like this constrain the `counts` more tightly.
+        An inner dimension can be unflattened by setting the `axis` parameter, but
+        operations like this constrain the `counts` more tightly.
 
-    For example, we can subdivide an already divided list:
+        For example, we can subdivide an already divided list:
 
         >>> original = ak.Array([[1, 2, 3, 4], [], [5, 6, 7], [8, 9]])
         >>> ak.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1).show()
@@ -69,8 +77,8 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
          [[5], [6, 7]],
          [[8], [9]]]
 
-    But the counts have to add up to the lengths of those lists. We can't mix
-    values from the first `[1, 2, 3, 4]` with values from the next `[5, 6, 7]`.
+        But the counts have to add up to the lengths of those lists. We can't mix
+        values from the first `[1, 2, 3, 4]` with values from the next `[5, 6, 7]`.
 
         >>> ak.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1).show()
         ValueError: while calling
@@ -83,10 +91,10 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
             )
         Error details: structure imposed by 'counts' does not fit in the array or partition at axis=1
 
-    Also note that new lists created by this function cannot cross partitions
-    (which is only possible at `axis=0`, anyway).
+        Also note that new lists created by this function cannot cross partitions
+        (which is only possible at `axis=0`, anyway).
 
-    See also #ak.num and #ak.flatten.
+        See also #ak.num and #ak.flatten.
     """
     # Dispatch
     yield (array,)

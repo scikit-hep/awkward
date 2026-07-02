@@ -1,0 +1,4 @@
+fsspec>=2022.11.0;sys_platform != "win32"
+pytest>=6
+pytest-cov
+pytest-xdist

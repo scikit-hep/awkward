@@ -21,7 +21,11 @@ def unzip(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Splits records or tuples into a tuple or dict of arrays, one per field.
+
+    If the `array` does not contain tuples or records, the single `array` is
+    placed in a length 1 Python tuple (or dict).
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         how (type): The type of the returned output. This can be `tuple` or `dict`.
@@ -32,13 +36,12 @@ def unzip(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    If the `array` contains tuples or records, this operation splits them
-    into a Python tuple (or dict) of arrays, one for each field.
+    Returns:
+        A Python tuple (or dict) of arrays, one for each field of the tuples or
+        records in `array`.
 
-    If the `array` does not contain tuples or records, the single `array`
-    is placed in a length 1 Python tuple (or dict).
-
-    For example,
+    Examples:
+        For example,
 
         >>> array = ak.Array([{"x": 1.1, "y": [1]},
         ...                   {"x": 2.2, "y": [2, 2]},
@@ -49,9 +52,9 @@ def unzip(
         >>> y
         <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
 
-    The `how` argument determines the structure of the output. Using `how=dict`
-    returns a dictionary of arrays instead of a tuple, and let's you round-trip
-    through `ak.zip`:
+        The `how` argument determines the structure of the output. Using `how=dict`
+        returns a dictionary of arrays instead of a tuple, and let's you round-trip
+        through `ak.zip`:
 
         >>> array = ak.Array([{"x": 1.1, "y": [1]},
         ...                   {"x": 2.2, "y": [2, 2]},
@@ -61,7 +64,6 @@ def unzip(
         {'x': <Array [1.1, 2.2, 3.3] type='3 * float64'>,
          'y': <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>}
         >>> assert ak.zip(ak.unzip(array, how=dict), depth_limit=1).to_list() == array.to_list()  # True
-
     """
     # Dispatch
     yield (array,)
@@ -99,4 +101,4 @@ def _impl(array, how, highlevel, behavior, attrs):
         items = (
             ctx.wrap(layout[n], highlevel=highlevel, allow_other=True) for n in fields
         )
-    return tuple(items) if how is tuple else dict(zip(fields, items))
+    return tuple(items) if how is tuple else dict(zip(fields, items, strict=True))

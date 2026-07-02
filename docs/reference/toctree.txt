@@ -57,6 +57,11 @@
     generated/ak.to_dataframe
 
 .. toctree::
+    :caption: Converting to cuDF Series
+
+    generated/ak.to_cudf
+
+.. toctree::
     :caption: Converting ROOT RDataFrames
 
     generated/ak.from_rdataframe
@@ -317,7 +322,6 @@
 
     generated/ak.to_backend
     generated/ak.backend
-    gpu-backend
 
 .. toctree::
     :caption: Approximation and comparison

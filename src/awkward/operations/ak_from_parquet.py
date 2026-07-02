@@ -268,17 +268,27 @@ def _load(
     assert len(arrays) != 0
     if len(arrays) == 1:
         return wrap_layout(
-            arrays[0], highlevel=highlevel, attrs=attrs, behavior=behavior
+            arrays[0],
+            highlevel=highlevel,
+            attrs=(attrs if attrs else {}) | arrays[0].attrs,
+            behavior=behavior,
         )
     else:
-        # TODO: if each array is a record?
+        # The per-file layouts carry parquet-stored attrs (AWKWARD_ATTRS /
+        # PANDAS_ATTRS) on their `.attrs` attribute, but ak_concatenate does not
+        # propagate them, so merge them here and apply to the final result
+        # (mirroring the single-file path above).
+        file_attrs = {}
+        for array in arrays:
+            file_attrs |= getattr(array, "attrs", None) or {}
+        merged_attrs = (attrs if attrs else {}) | file_attrs
         return ak.operations.ak_concatenate._impl(
             arrays,
             axis=0,
             mergebool=True,
             highlevel=highlevel,
             behavior=behavior,
-            attrs=attrs,
+            attrs=merged_attrs or None,
         )
 
 
@@ -334,7 +344,19 @@ def _read_parquet_file(
             arrow_table = parquetfile.read_row_groups(row_groups, parquet_columns)
 
     arrow_table = ak._connect.pyarrow.convert_native_arrow_table_to_awkward(arrow_table)
-    return ak.operations.ak_from_arrow._impl(
+
+    array_attrs = {}
+    if arrow_table.schema.metadata:
+        if b"PANDAS_ATTRS" in arrow_table.schema.metadata:
+            array_metadata = arrow_table.schema.metadata[b"PANDAS_ATTRS"]
+            array_attrs = json.loads(array_metadata)
+        elif b"AWKWARD_ATTRS" in arrow_table.schema.metadata:
+            array_metadata = arrow_table.schema.metadata[b"AWKWARD_ATTRS"]
+            array_attrs = json.loads(array_metadata)
+    else:
+        array_attrs = {}
+
+    result = ak.operations.ak_from_arrow._impl(
         arrow_table,
         generate_bitmasks,
         # why is high-level False here?
@@ -342,6 +364,10 @@ def _read_parquet_file(
         None,
         None,
     )
+
+    result.attrs = array_attrs
+
+    return result
 
 
 class _DictOfEmptyBuffers:

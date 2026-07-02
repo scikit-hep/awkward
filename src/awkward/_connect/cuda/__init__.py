@@ -24,12 +24,21 @@ or
     conda install -c conda-forge cupy
 """
 
+from awkward._connect.cuda.reducers import get_cuda_compute_reducer  # noqa: F401
+
 cuda_streamptr_to_contexts = {}
 kernel_errors = {}
 kernel = None
 
 ERROR_BITS = 8
 NO_ERROR = numpy.iinfo(numpy.uint64).max
+
+# When the pending-invocation list for a stream reaches this length, the
+# kernel dispatchers in awkward._kernels call synchronize_cuda() to check for
+# errors and drain it. This bounds the memory held by Invocation/ErrorContext
+# objects in workloads that never synchronize explicitly, at the cost of one
+# stream synchronization per MAX_PENDING_INVOCATIONS kernel launches.
+MAX_PENDING_INVOCATIONS = 8192
 
 
 dtype_to_ctype = {
@@ -118,23 +127,22 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ListOffsetArray_rpad_length_axis1",
         "awkward_MaskedArray_getitem_next_jagged_project",
         "awkward_NumpyArray_rearrange_shifted",
-        "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
-        "awkward_reduce_count_64",
-        "awkward_reduce_sum",
-        "awkward_reduce_sum_bool",
+        # "awkward_reduce_count_64",
+        # "awkward_reduce_sum",
+        # "awkward_reduce_sum_bool",
         "awkward_reduce_sum_bool_complex",
         "awkward_reduce_sum_complex",
-        "awkward_reduce_sum_int32_bool_64",
-        "awkward_reduce_sum_int64_bool_64",
-        "awkward_reduce_prod",
-        "awkward_reduce_prod_bool",
+        # "awkward_reduce_sum_int32_bool_64",
+        # "awkward_reduce_sum_int64_bool_64",
+        # "awkward_reduce_prod",
+        # "awkward_reduce_prod_bool",
         "awkward_reduce_prod_bool_complex",
         "awkward_reduce_prod_complex",
-        "awkward_reduce_countnonzero",
+        # "awkward_reduce_countnonzero",
         "awkward_reduce_countnonzero_complex",
-        "awkward_reduce_max",
+        # "awkward_reduce_max",
         "awkward_reduce_max_complex",
-        "awkward_reduce_min",
+        # "awkward_reduce_min",
         "awkward_reduce_min_complex",
         # "awkward_reduce_argmin",
         "awkward_reduce_argmin_complex",
@@ -259,7 +267,17 @@ def synchronize_cuda(stream=None):
     invocation_index = cuda_streamptr_to_contexts[stream.ptr][0].get().tolist()
     contexts = cuda_streamptr_to_contexts[stream.ptr][1]
 
-    if invocation_index != NO_ERROR:
+    if invocation_index == NO_ERROR:
+        # All kernels enqueued so far completed without error: drain the
+        # pending-invocation list. Each Invocation holds an ErrorContext,
+        # which (lazily) holds references to operation arguments — without
+        # this reset, a successful workload accumulates Invocations (and
+        # pins their referenced buffers) for the lifetime of the process.
+        cuda_streamptr_to_contexts[stream.ptr] = (
+            cupy.array(NO_ERROR),
+            [],
+        )
+    else:
         invoked_kernel = contexts[int(invocation_index // math.pow(2, ERROR_BITS))]
         cuda_streamptr_to_contexts[stream.ptr] = (
             cupy.array(NO_ERROR),

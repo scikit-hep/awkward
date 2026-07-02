@@ -37,30 +37,26 @@ def test_record():
     assert record._not_an_existing_attribute == 10
 
 
-class BadBehaviorBase:
-    FIELD_STRING = "I am not a list of fields!"
-
-    @property
-    def fields(self):
-        return self.__class__.FIELD_STRING
-
-    @fields.setter
-    def fields(self, value):
-        self.__class__.FIELD_STRING = value
-
-
-class BadBehaviorArray(BadBehaviorBase, ak.Array):
-    pass
-
-
-class BadBehaviorRecord(BadBehaviorBase, ak.Record):
-    pass
-
-
-behavior = {("*", "bad"): BadBehaviorArray, "bad": BadBehaviorRecord}
-
-
 def test_bad_behavior_array():
+    class BadBehaviorBase:
+        FIELD_STRING = "I am not a list of fields!"
+
+        @property
+        def fields(self):
+            return self.__class__.FIELD_STRING
+
+        @fields.setter
+        def fields(self, value):
+            self.__class__.FIELD_STRING = value
+
+    class BadBehaviorArray(BadBehaviorBase, ak.Array):
+        pass
+
+    class BadBehaviorRecord(BadBehaviorBase, ak.Record):
+        pass
+
+    behavior = {("*", "bad"): BadBehaviorArray, "bad": BadBehaviorRecord}
+
     record = ak.contents.RecordArray([ak.contents.NumpyArray(np.arange(10))], ["x"])
     array = ak.Array(record, with_name="bad", behavior=behavior)
     assert isinstance(array, BadBehaviorArray)
@@ -71,6 +67,24 @@ def test_bad_behavior_array():
 
 
 def test_bad_behavior_record():
+    class BadBehaviorBase:
+        FIELD_STRING = "I am not a list of fields!"
+
+        @property
+        def fields(self):
+            return self.__class__.FIELD_STRING
+
+        @fields.setter
+        def fields(self, value):
+            self.__class__.FIELD_STRING = value
+
+    class BadBehaviorArray(BadBehaviorBase, ak.Array):
+        pass
+
+    class BadBehaviorRecord(BadBehaviorBase, ak.Record):
+        pass
+
+    behavior = {("*", "bad"): BadBehaviorArray, "bad": BadBehaviorRecord}
     record = ak.contents.RecordArray([ak.contents.NumpyArray(np.arange(10))], ["x"])
     array = ak.Array(record, with_name="bad", behavior=behavior)
     record = array[0]

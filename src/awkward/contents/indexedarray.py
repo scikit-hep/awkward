@@ -72,7 +72,7 @@ class IndexedArray(IndexedMeta[Content], Content):
     and the array can be converted to and from Arrow/Parquet's dictionary encoding.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class IndexedArray(Content):
             def __init__(self, index, content):
@@ -768,7 +768,6 @@ class IndexedArray(IndexedMeta[Content], Content):
                     offsets[1],
                     offsets.data,
                     2,
-                    offsets[1],
                     True,
                     False,
                 )
@@ -795,7 +794,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
@@ -805,144 +804,29 @@ class IndexedArray(IndexedMeta[Content], Content):
             return False
 
         next = self._content._carry(nextindex, False)
-        return next._is_unique(negaxis, starts, parents, outlength)
+        return next._is_unique(negaxis, starts, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return self
-
-        branch, depth = self.branch_depth
-
-        index_length = self._index.length
-        parents_length = parents.length
-        next_length = index_length
-
-        nextcarry = ak.index.Index64.empty(index_length, self._backend.nplike)
-        nextparents = ak.index.Index64.empty(index_length, self._backend.nplike)
-        outindex = ak.index.Index64.empty(index_length, self._backend.nplike)
-        assert (
-            nextcarry.nplike is self._backend.nplike
-            and nextparents.nplike is self._backend.nplike
-            and outindex.nplike is self._backend.nplike
-            and self._index.nplike is self._backend.nplike
-            and parents.nplike is self._backend.nplike
-        )
-        self._backend.maybe_kernel_error(
-            self._backend[
-                "awkward_IndexedArray_reduce_next_64",
-                nextcarry.dtype.type,
-                nextparents.dtype.type,
-                outindex.dtype.type,
-                self._index.dtype.type,
-                parents.dtype.type,
-            ](
-                nextcarry.data,
-                nextparents.data,
-                outindex.data,
-                self._index.data,
-                parents.data,
-                index_length,
-            )
-        )
-        next = self._content._carry(nextcarry, False)
-        unique = next._unique(
-            negaxis,
-            starts,
-            nextparents,
-            outlength,
-        )
-
-        if branch or (negaxis is not None and negaxis != depth):
-            nextoutindex = ak.index.Index64.empty(parents_length, self._backend.nplike)
-            assert (
-                nextoutindex.nplike is self._backend.nplike
-                and starts.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-                and nextparents.nplike is self._backend.nplike
-            )
-
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_IndexedArray_local_preparenext_64",
-                    nextoutindex.dtype.type,
-                    starts.dtype.type,
-                    parents.dtype.type,
-                    nextparents.dtype.type,
-                ](
-                    nextoutindex.data,
-                    starts.data,
-                    parents.data,
-                    parents_length,
-                    nextparents.data,
-                    next_length,
-                )
-            )
-
-            return ak.contents.IndexedOptionArray.simplified(
-                nextoutindex, unique, parameters=self._parameters
-            )
-
-        if not branch and negaxis == depth:
-            return unique
-        else:
-            if isinstance(unique, ak.contents.RegularArray):
-                unique = unique.to_ListOffsetArray64(True)
-
-            if isinstance(unique, ak.contents.ListOffsetArray):
-                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                    raise AssertionError(
-                        "reduce_next with unbranching depth > negaxis expects a "
-                        f"ListOffsetArray64 whose offsets start at zero ({starts[0]})"
-                    )
-
-                outoffsets = ak.index.Index64.empty(
-                    starts.length + 1, self._backend.nplike
-                )
-                assert (
-                    outoffsets.nplike is self._backend.nplike
-                    and starts.nplike is self._backend.nplike
-                )
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
-                        outoffsets.dtype.type,
-                        starts.dtype.type,
-                    ](
-                        outoffsets.data,
-                        starts.data,
-                        starts.length,
-                        self._index.length,
-                    )
-                )
-
-                tmp = ak.contents.IndexedArray(
-                    outindex, unique._content, parameters=None
-                )
-
-                return ak.contents.ListOffsetArray(outoffsets, tmp, parameters=None)
-
-            elif isinstance(unique, ak.contents.NumpyArray):
-                nextoutindex = ak.index.Index64(
-                    self._backend.nplike.arange(unique.length, dtype=np.int64),
-                    nplike=self._backend.nplike,
-                )
-                return ak.contents.IndexedOptionArray.simplified(
-                    nextoutindex, unique, parameters=self._parameters
-                )
-
-        raise NotImplementedError
+        # IndexedArray (non-Option) has no -1 entries, so we don't need the
+        # parents-filtering machinery the IndexedOptionArray version uses;
+        # just project through the index and delegate. This matches the
+        # delegation pattern used by _argsort_next, _sort_next, _reduce_next.
+        next = self._content._carry(self._index, False)
+        return next._unique(negaxis, starts, offsets, outlength)
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         next = self._content._carry(self._index, False)
         return next._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         next = self._content._carry(self._index, False)
-        return next._sort_next(negaxis, starts, parents, outlength, ascending, stable)
+        return next._sort_next(negaxis, starts, offsets, outlength, ascending, stable)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
@@ -959,7 +843,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -971,7 +855,7 @@ class IndexedArray(IndexedMeta[Content], Content):
             negaxis,
             starts,
             shifts,
-            parents,
+            offsets,
             outlength,
             mask,
             keepdims,
@@ -1022,6 +906,19 @@ class IndexedArray(IndexedMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
+        # Handle empty content FIRST, before categorical path
+        # This prevents creating DictionaryArray with empty dictionary which causes
+        # "Index 0 out of bounds" error and memory corruption during GC
+        if self._content.length is not unknown_length and self._content.length == 0:
+            # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
+            # every masked value is self._content[0], unless self._content.length == 0.
+            # In that case, don't call self._content[index]; it's empty anyway.
+            next = self._content
+            next2 = next.copy(
+                parameters=parameters_union(next._parameters, self._parameters)
+            )
+            return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
+
         if (
             not options["categorical_as_dictionary"]
             and self.parameter("__array__") == "categorical"
@@ -1057,13 +954,9 @@ class IndexedArray(IndexedMeta[Content], Content):
                 return out
 
         else:
-            if self._content.length is not unknown_length and self._content.length == 0:
-                # IndexedOptionArray._to_arrow replaces -1 in the index with 0. So behind
-                # every masked value is self._content[0], unless self._content.length == 0.
-                # In that case, don't call self._content[index]; it's empty anyway.
-                next = self._content
-            else:
-                next = self._content._carry(ak.index.Index(index), False)
+            # Original empty content check is now redundant (handled above)
+            # but kept for clarity in non-categorical path
+            next = self._content._carry(ak.index.Index(index), False)
 
             next2 = next.copy(
                 parameters=parameters_union(next._parameters, self._parameters)
