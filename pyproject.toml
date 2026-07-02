@@ -232,7 +232,7 @@ disable = [
 
 [tool.mypy]
 files = ["src/awkward/**/*.py"]
-python_version = "3.11"
+python_version = "3.12"
 ignore_errors = true
 enable_error_code = ["ignore-without-code", "truthy-bool"]
 
