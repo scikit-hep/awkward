@@ -274,14 +274,21 @@ def _load(
             behavior=behavior,
         )
     else:
-        # TODO: if each array is a record?
+        # The per-file layouts carry parquet-stored attrs (AWKWARD_ATTRS /
+        # PANDAS_ATTRS) on their `.attrs` attribute, but ak_concatenate does not
+        # propagate them, so merge them here and apply to the final result
+        # (mirroring the single-file path above).
+        file_attrs = {}
+        for array in arrays:
+            file_attrs |= getattr(array, "attrs", None) or {}
+        merged_attrs = (attrs if attrs else {}) | file_attrs
         return ak.operations.ak_concatenate._impl(
             arrays,
             axis=0,
             mergebool=True,
             highlevel=highlevel,
             behavior=behavior,
-            attrs=attrs,
+            attrs=merged_attrs or None,
         )
 
 

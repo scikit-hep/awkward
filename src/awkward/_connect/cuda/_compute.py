@@ -12,6 +12,7 @@ from cuda.compute import (
     ZipIterator,
     inclusive_scan,
     reduce_into,
+    select,
     unary_transform,
 )
 from cuda.compute import (
@@ -1404,6 +1405,36 @@ def awkward_ListArray_combinations(
         )
 
     toindex[:n] = totallen
+
+
+def awkward_localindex(toindex, length):
+    # Fills toindex with [0, 1, 2, ..., length-1]
+    def fill_local_index(i):
+        return i
+
+    segment_ids = CountingIterator(toindex.dtype.type(0))
+    unary_transform(
+        d_in=segment_ids, d_out=toindex, op=fill_local_index, num_items=length
+    )
+
+
+# Example: [[1,None,3],[None,5]]: toptr=[1,2,-1], shifts=[0,1,2], starts=[0,3]:
+#   k=0: 1 + shifts[1] - starts[0] = 1+1-0 = 2  (3rd element of list 0)
+#   k=1: 2 + shifts[2] - starts[1] = 2+2-3 = 1  (2nd element of list 1)
+#   k=2: skipped (negative)
+def awkward_NumpyArray_reduce_adjust_starts_shifts_64(
+    toptr, outlength, offsets, starts, shifts
+):
+    mask = toptr[:outlength] >= 0
+    i = toptr[:outlength]
+    toptr[:outlength] = cp.where(mask, i + shifts[i] - starts[:outlength], i)
+
+
+# toptr.dtype is always initialized as cp.int8
+def awkward_NumpyArray_reduce_mask_ByteMaskedArray_64(toptr, offsets, outlength):
+    # bin i is unmasked (0) if it has content: offsets[i+1] > offsets[i]
+    counts = offsets[1 : outlength + 1] - offsets[:outlength]
+    toptr[:outlength] = cp.where(counts > 0, toptr.dtype.type(0), toptr.dtype.type(1))
 
 
 def awkward_index_rpad_and_clip_axis0(toindex, target, length):
@@ -3389,6 +3420,151 @@ def awkward_BitMaskedArray_to_ByteMaskedArray(
         op=_make_fill(frombitmask, validwhen, lsb_order, out_dtype),
         num_items=n_elements,
     )
+
+
+def awkward_ListArray_getitem_jagged_carrylen(
+    carrylen, slicestarts, slicestops, sliceouterlen
+):
+    # sum up the lengths of all slices (stop - start) to get the total carry length
+    carrylen[0] = cp.sum(
+        slicestops[:sliceouterlen] - slicestarts[:sliceouterlen]
+    )  # carrylen: int64
+
+
+# Recomputes a flat offsets array from starts/stops pairs, while validating that the jagged slice shape matches the array shape
+def awkward_ListArray_getitem_jagged_descend(
+    tooffsets, slicestarts, slicestops, sliceouterlen, fromstarts, fromstops
+):
+    # (slicestops[i] - slicestarts[i]) for i in range(sliceouterlen)
+    slicecounts = slicestops[:sliceouterlen] - slicestarts[:sliceouterlen]
+    # (fromstops[i] - fromstarts[i]) for i in range(sliceouterlen)
+    counts = fromstops[:sliceouterlen] - fromstarts[:sliceouterlen]
+
+    if not cp.all(slicecounts == counts):
+        raise ValueError(
+            "jagged slice inner length differs from array inner length in compiled CUDA code (awkward_ListArray_getitem_jagged_descend)"
+        )
+
+    # should check for len(tooffsets) == 0?
+    tooffsets[0] = 0 if sliceouterlen == 0 else slicestarts[0]
+
+    # (tooffsets[i + 1] = tooffsets[i] + count) for i in range(sliceouterlen)
+    tooffsets[1 : sliceouterlen + 1] = tooffsets[0] + cp.cumsum(
+        counts
+    )  # tooffsets: int64
+
+
+# Counts the number of valid entries that are within any of the jagged slices
+def awkward_ListArray_getitem_jagged_numvalid(
+    numvalid, slicestarts, slicestops, length, missing, missinglength
+):
+    optional_message = (
+        "in compiled CUDA code (awkward_ListArray_getitem_jagged_numvalid)"
+    )
+
+    slicestarts_ = slicestarts[:length]
+    slicestops_ = slicestops[:length]
+
+    if cp.any(slicestops_ < slicestarts_):
+        raise ValueError("jagged slice's stops[i] < starts[i] " + optional_message)
+
+    if cp.any(slicestops_ > missinglength):
+        raise ValueError(
+            "jagged slice's offsets extend beyond its content " + optional_message
+        )
+
+    # count the number of valid (non-negative index) entries in missing
+    valid = missing[:missinglength] >= 0
+
+    # create a mask for positions that are within any slice
+    # +1 at starts, -1 at stops
+    counts = cp.zeros(missinglength + 1, dtype=cp.int32)
+    cp.add.at(counts, slicestarts_, 1)
+    cp.add.at(counts, slicestops_, -1)
+    positions = cp.cumsum(counts)[:missinglength] > 0
+
+    # count entries that are not missing and within any slice
+    numvalid[0] = cp.sum(valid & positions)  # numvalid: int64
+
+
+# Counts the number of null (missing) entries in an indexed array.
+def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
+    index_dtype = numnull.dtype
+
+    def is_null(x):
+        return 1 if x < 0 else 0
+
+    null_iter = TransformIterator(fromindex[:lenindex], is_null)
+
+    h_init = np.array([0], dtype=index_dtype)
+    reduce_into(
+        d_in=null_iter, d_out=numnull, op=OpKind.PLUS, num_items=lenindex, h_init=h_init
+    )
+
+
+# KERNEL IS NOT USED: checking for out of range errors takes too much time if I take it outside the closure
+# composes two index arrays into one by resolving outerindex through innerindex:
+# toindex[i] = innerindex[outerindex[i]], preserving -1 (missing) entries from outerindex
+def awkward_IndexedArray_simplify(
+    toindex, outerindex, outerlength, innerindex, innerlength
+):
+    if outerlength == 0:
+        return
+
+    def simplify_op(j):
+        if j < 0:
+            return -1
+        if j >= innerlength:
+            # raise inside a JIT closure is silently swallowed
+            raise IndexError(
+                "index out of range in compiled CUDA code (awkward_IndexedArray_simplify)"
+            )
+        return innerindex[j]
+
+    # to prevent out-of-bounds error
+    out_buf = (
+        toindex[:outerlength]
+        if len(toindex) >= outerlength
+        else cp.empty(outerlength, dtype=toindex.dtype)
+    )
+    unary_transform(
+        d_in=outerindex[:outerlength],
+        d_out=out_buf,
+        op=simplify_op,
+        num_items=outerlength,
+    )
+
+
+# filters an indexed array by collecting all valid (non-negative) indices into a carry array
+def awkward_IndexedArray_flatten_nextcarry(
+    tocarry: cp.ndarray, fromindex: cp.ndarray, lenindex: int, lencontent: int
+) -> None:
+    fromindex = fromindex[:lenindex]
+    index_dtype = fromindex.dtype
+
+    has_error = cp.zeros(1, index_dtype)
+    num_selected = cp.empty(1, index_dtype)
+
+    def cond(j):
+        if j >= lencontent:
+            # set has_error flag to True
+            has_error[0] = np.int64(1)
+            return False
+        # keep index in tocarry if True
+        return j >= 0
+
+    select(
+        d_in=fromindex,
+        d_out=tocarry,
+        d_num_selected_out=num_selected,
+        cond=cond,
+        num_items=lenindex,
+    )
+
+    if int(has_error[0]) != 0:
+        raise ValueError(
+            "index out of range in compiled CUDA code (awkward_IndexedArray_flatten_nextcarry)"
+        )
 
 
 # Copies `length` values from fromindex into toindex starting at toindexoffset,
