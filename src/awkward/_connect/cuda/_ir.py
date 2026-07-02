@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import weakref
+from collections.abc import Callable
 from enum import Enum
-from typing import Callable
 
 import cupy as cp
 import numpy as np
