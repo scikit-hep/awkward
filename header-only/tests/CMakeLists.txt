@@ -29,5 +29,6 @@ target_link_libraries(test_1560-builder-options
 target_link_libraries(test_3091-layout-builder-is-valid
                       PRIVATE awkward::layout-builder)
 target_link_libraries(test_4087-bitmasked-growablebuffer
+                      PRIVATE awkward::layout-builder)
 target_link_libraries(test_4088-layoutbuilder-form-fixes
                       PRIVATE awkward::layout-builder)
