@@ -1215,8 +1215,6 @@ namespace awkward {
         index_.append(i);
         if (i > max_index_) {
           max_index_ = i;
-        } else if (i < 0) {
-          max_index_ = UINTMAX_MAX;
         }
         return content_;
       }
@@ -1227,6 +1225,9 @@ namespace awkward {
       /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_index(size_t size) noexcept {
+        if (size == 0) {
+          return content_;
+        }
         size_t start = content_.length();
         size_t stop = start + size;
         if (stop - 1 > max_index_) {
@@ -1439,6 +1440,9 @@ namespace awkward {
       /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_valid(size_t size) noexcept {
+        if (size == 0) {
+          return content_;
+        }
         size_t start = content_.length();
         size_t stop = start + size;
         size_t last_valid = stop - 1;
@@ -1972,7 +1976,6 @@ namespace awkward {
       BitMasked()
           : mask_(awkward::GrowableBuffer<uint8_t>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
             current_byte_(uint8_t(0)),
-            current_byte_ref_(mask_.append_and_get_ref(current_byte_)),
             current_index_(0) {
         size_t id = 0;
         set_id(id);
@@ -1995,7 +1998,6 @@ namespace awkward {
       BitMasked(const awkward::BuilderOptions& options)
           : mask_(awkward::GrowableBuffer<uint8_t>(options)),
             current_byte_(uint8_t(0)),
-            current_byte_ref_(mask_.append_and_get_ref(current_byte_)),
             current_index_(0) {
         size_t id = 0;
         set_id(id);
@@ -2105,15 +2107,22 @@ namespace awkward {
         mask_.clear();
         content_.clear();
         current_byte_ = 0;
-        current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
         current_index_ = 0;
       }
 
-      /// @brief Current length of the `mask` buffer.
+      /// @brief Current number of elements (bits) accumulated in the mask.
+      ///
+      /// `mask_` holds completed bytes; `current_index_` counts bits in the
+      /// partial trailing byte not yet committed to `mask_`.
       size_t
       length() const noexcept {
-        return mask_.length() > 0 ?
-          (mask_.length() - 1) * 8 + current_index_ : current_index_;
+        return mask_.length() * 8 + current_index_;
+      }
+
+      /// @brief Number of bytes the mask occupies.
+      size_t
+      mask_nbytes() const noexcept {
+        return mask_.length() + (current_index_ > 0 ? 1 : 0);
       }
 
       /// @brief Checks for validity and consistency.
@@ -2137,7 +2146,7 @@ namespace awkward {
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
-        names_nbytes["node" + std::to_string(id_) + "-mask"] = mask_.nbytes();
+        names_nbytes["node" + std::to_string(id_) + "-mask"] = mask_nbytes();
         content_.buffer_nbytes(names_nbytes);
       }
 
@@ -2148,10 +2157,8 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        mask_.concatenate_from(reinterpret_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]), 0, 1);
-        mask_.append(reinterpret_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]), mask_.length() - 1, 0, 1);
+        write_mask(reinterpret_cast<uint8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_buffers(buffers);
       }
 
@@ -2162,8 +2169,7 @@ namespace awkward {
       void
       to_buffer(void* buffer, const char* name) const noexcept {
         if (std::string(name) == std::string("node" + std::to_string(id_) + "-mask")) {
-          mask_.concatenate_from(reinterpret_cast<uint8_t*>(buffer), 0, 1);
-          mask_.append(reinterpret_cast<uint8_t*>(buffer), mask_.length() - 1, 0, 1);
+          write_mask(reinterpret_cast<uint8_t*>(buffer));
         }
         content_.to_buffer(buffer, name);
       }
@@ -2174,10 +2180,8 @@ namespace awkward {
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        mask_.concatenate_from(reinterpret_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]), 0, 1);
-        mask_.append(reinterpret_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]), mask_.length() - 1, 0, 1);
+        write_mask(reinterpret_cast<uint8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_char_buffers(buffers);
       }
 
@@ -2202,30 +2206,42 @@ namespace awkward {
       }
 
     private:
-      /// @brief Inserts a byte in the mask buffer when `current_index_` equals `8`,
-      /// returns it reference to the `current_byte_ref_` and resets `current_byte_`
-      /// and `current_index_`.
+      // Byte is committed in append_end once eight bits are written; nothing
+      // to do at the start of an element.
       void
       append_begin() {
-        if (current_index_ == 8) {
-          current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
-          current_byte_ = uint8_t(0);
-          current_index_ = 0;
-        }
       }
 
-      /// @brief Updates the `current_index_` and `current_byte_ref_` according to
-      /// the value of #valid_when.
+      /// @brief Advances `current_index_`; commits a completed byte to `mask_`
+      /// (with #valid_when inversion applied) every 8 elements.
       ///
       /// If #valid_when equals `true`: `0` indicates `null`, `1` indicates `valid`.
       /// If #valid_when equals `false`: `0` indicates `valid`, `1` indicates `null`.
       void
       append_end() {
         current_index_ += 1;
-        if (valid_when_) {
-          current_byte_ref_ = current_byte_;
-        } else {
-          current_byte_ref_ = ~current_byte_;
+        if (current_index_ == 8) {
+          mask_.append(valid_when_ ? current_byte_ : (uint8_t)(~current_byte_));
+          current_byte_ = uint8_t(0);
+          current_index_ = 0;
+        }
+      }
+
+      /// @brief Writes all mask bytes to `buffer`.
+      ///
+      /// Completed bytes (held in `mask_`) already carry the #valid_when inversion
+      /// from #append_end; the partial trailing byte is inverted here if needed.
+      void
+      write_mask(uint8_t* buffer) const noexcept {
+        if (buffer == nullptr) {
+          return;
+        }
+        if (mask_.length() > 0) {
+          mask_.concatenate(buffer);
+        }
+        if (current_index_ > 0) {
+          buffer[mask_.length()] =
+              valid_when_ ? current_byte_ : (uint8_t)(~current_byte_);
         }
       }
 
@@ -2245,9 +2261,6 @@ namespace awkward {
 
       /// @brief The current byte.
       uint8_t current_byte_;
-
-      /// @brief Stores the reference to the current byte.
-      uint8_t& current_byte_ref_;
 
       /// @brief The current index.
       size_t current_index_;
