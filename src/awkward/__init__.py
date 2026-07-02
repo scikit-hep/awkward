@@ -65,5 +65,17 @@ __all__ = [
 ]
 
 
+def __getattr__(name):
+    # Backend namespaces (ak.cpu.lazy, ak.cuda.lazy) are imported on first
+    # access: awkward.cuda requires cupy, which may not be installed.
+    if name in ("cpu", "cuda"):
+        import importlib
+
+        module = importlib.import_module(f"awkward._connect.{name}")
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 def __dir__():
-    return __all__
+    return [*__all__, "cpu", "cuda"]
