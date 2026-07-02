@@ -98,7 +98,7 @@ def select_lists(array, mask):
             f"mask length {len(mask)} does not match number of lists {num_lists}"
         )
 
-    sizes = segment_sizes(offsets)
+    sizes = segment_sizes(offsets).astype(np.intp, copy=False)
     element_mask = np.repeat(mask, sizes)
 
     kept_sizes = sizes[mask]
