@@ -10,19 +10,21 @@ __all__ = ("validity_error",)
 
 @high_level_function()
 def validity_error(array, *, exception=False):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-        exception (bool): If True, validity errors raise exceptions.
-
-    Returns an empty string if there are no errors and a str containing the error message
-    if there are.
+    """Returns an error message if the array has a structural error, or empty if valid.
 
     Checks for errors in the structure of the array, such as indexes that run
     beyond the length of a node's `content`, etc. Either an error is raised or
     a string describing the error is returned.
 
     See also #ak.is_valid.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        exception (bool): If True, validity errors raise exceptions.
+
+    Returns:
+        An empty string if `array` is valid, or a string describing the structural
+        error otherwise.
     """
     # Dispatch
     yield (array,)

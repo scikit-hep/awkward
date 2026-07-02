@@ -21,18 +21,7 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def enforce_type(array, type, *, highlevel=True, behavior=None, attrs=None):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-        type (#ak.types.Type, or str): The type that `array` will be enforced to.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
-        attrs (None or dict): Custom attributes for the output array, if
-            high-level.
-
-    Returns an array whose structure is modified to match the given type.
+    """Returns an array whose structure is modified to match the given type.
 
     In addition to preserving the existing type and/or changing parameters,
 
@@ -224,6 +213,19 @@ def enforce_type(array, type, *, highlevel=True, behavior=None, attrs=None):
     The conversion rules outlined above are not data-dependent; the appropriate rule is chosen from the layout and the
     given type value. If the conversion is not possible given the layout data, e.g. a conversion from an irregular list
     to a regular type, it will fail.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        type (#ak.types.Type, or str): The type that `array` will be enforced to.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
+
+    Returns:
+        An array whose structure is modified to match the given type.
     """
     # Dispatch
     yield (array,)
