@@ -89,6 +89,7 @@ include = [
     "/CONTRIBUTING.md",
     "/README.md",
     "/juliapkg.json",
+    "/kernel-specification.yml",
     "/requirements-test-full.txt",
     "/requirements-test-minimal.txt"
 ]
