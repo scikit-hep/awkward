@@ -7,7 +7,7 @@
 # cupy-cuda12x>=14
 # cuda-cccl[cu12]>=1.0.2
 fsspec>=2022.11.0
-hypothesis-awkward==0.18.0
+hypothesis-awkward==0.18.1
 numba>=0.60
 numba-cuda>=0.25.0
 pyarrow
