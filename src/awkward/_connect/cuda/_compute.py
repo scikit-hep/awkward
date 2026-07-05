@@ -4167,3 +4167,103 @@ def awkward_NumpyArray_rearrange_shifted(
     if length > 0:
         t = toptr[:length]
         toptr[:length] = t + fromshifts[t] - fromstarts[fromparents[:length]]
+
+
+def awkward_argsort(toptr, fromptr, length, offsets, offsetslength, ascending, stable):
+    """Segmented argsort: per-segment local indices of the sorted order.
+
+    Implemented as a key/value segmented sort with the within-segment
+    positions as values (same CCCL primitive as `segmented_sort` above).
+    Closes a pre-existing coverage gap: this kernel had no CuPy raw kernel
+    and no compute dispatch, so ak.argsort raised "not supported" on CUDA.
+    """
+    from cuda.compute import SortOrder
+    from cuda.compute import segmented_sort as _segmented_sort
+
+    if offsets.dtype != cp.int64:
+        offsets = offsets.astype(cp.int64, copy=False)
+    off = offsets[:offsetslength]
+    num_segments = offsetslength - 1
+    num_items = int(off[num_segments]) if offsetslength > 0 else 0
+    if num_items == 0:
+        return
+
+    start_o, end_o = make_segment_views(off)
+
+    # within-segment local positions: pos - segment_start
+    pos = cp.arange(num_items, dtype=cp.int64)
+    bins = cp.searchsorted(off, pos, side="right") - 1
+    local = pos - off[bins]
+
+    keys_out = cp.empty(num_items, dtype=fromptr.dtype)  # discarded
+    _segmented_sort(
+        d_in_keys=fromptr,
+        d_out_keys=keys_out,
+        d_in_values=local,
+        d_out_values=toptr[:num_items],
+        num_items=num_items,
+        num_segments=num_segments,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        order=SortOrder.ASCENDING if ascending else SortOrder.DESCENDING,
+        stream=None,
+    )
+
+
+def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
+    nextcarry,
+    nextoffsets,
+    nextlen,
+    maxnextparents,
+    distincts,
+    distinctslen,
+    offsetscopy,
+    offsets,
+    length,
+    outer_offsets,
+    outlength,
+    maxcount,
+):
+    """Bin-major nonlocal-reduction gather (parents -> offsets form).
+
+    For each (outer_bin, col), gathers one element from every row in the
+    outer bin whose sub-list extends to that column; nextbin index is
+    outer_bin * maxcount + col.  `nextlen`, `offsetscopy`, and `length` are
+    unused (kept for C-API compatibility).  Closes a pre-existing coverage
+    gap: ak.sum/prod/min/max(jagged, axis=0) raised "not supported" on CUDA.
+    """
+    nbins = outlength * maxcount
+    nextoffsets[0] = 0
+    if nbins == 0 or nextlen == 0:
+        if distinctslen > 0:
+            distincts[:distinctslen] = -1
+        nextoffsets[: nbins + 1] = 0
+        maxnextparents[0] = -1
+        return
+
+    t0 = int(offsets[0])
+    total = int(offsets[length])
+    pos = cp.arange(t0, total, dtype=cp.int64)
+    r = cp.searchsorted(offsets[: length + 1], pos, side="right") - 1
+    j = pos - offsets[r]
+    b = cp.searchsorted(outer_offsets[: outlength + 1], r, side="right") - 1
+    nextbin = b * maxcount + j
+
+    # output order is (outer_bin, col, row) == sort by nextbin, then row
+    # (pos is a monotone proxy for row within a fixed (bin, col))
+    perm = cp.lexsort(cp.stack([pos, nextbin]))
+    nextcarry[:nextlen] = pos[perm]
+
+    counts = cp.bincount(nextbin, minlength=nbins)
+    nextoffsets[1 : nbins + 1] = cp.cumsum(counts)
+
+    occupied = counts > 0
+    if distinctslen > 0:
+        # any non-(-1) value works; downstream only checks for -1
+        distincts[:distinctslen] = cp.where(
+            occupied[:distinctslen], cp.arange(distinctslen, dtype=cp.int64), -1
+        )
+    # largest occupied nextbin, or -1 when nothing was processed
+    maxnextparents[0:1] = cp.max(
+        cp.where(occupied, cp.arange(nbins, dtype=cp.int64), -1)
+    )

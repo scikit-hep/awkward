@@ -175,6 +175,9 @@ class CupyBackend(Backend):
             "awkward_RegularArray_getitem_next_array_regularize",
             "awkward_UnionArray_nestedfill_tags_index",
             # Phase 2 batch 1 (pure-CuPy vectorized implementations)
+            # (+2 pre-existing coverage-gap fixes: argsort, nonlocal_preparenext)
+            "awkward_argsort",
+            "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
             "awkward_ByteMaskedArray_reduce_next_64",
             "awkward_IndexedArray_fill",
             "awkward_IndexedArray_fill_count",
@@ -309,6 +312,8 @@ class CupyBackend(Backend):
             "awkward_RegularArray_getitem_next_array_regularize": cuda_compute.awkward_RegularArray_getitem_next_array_regularize,
             "awkward_UnionArray_nestedfill_tags_index": cuda_compute.awkward_UnionArray_nestedfill_tags_index,
             # Phase 2 batch 1 (pure-CuPy vectorized implementations)
+            "awkward_argsort": cuda_compute.awkward_argsort,
+            "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_preparenext_64,
             "awkward_ByteMaskedArray_reduce_next_64": cuda_compute.awkward_ByteMaskedArray_reduce_next_64,
             "awkward_IndexedArray_fill": cuda_compute.awkward_IndexedArray_fill,
             "awkward_IndexedArray_fill_count": cuda_compute.awkward_IndexedArray_fill_count,
