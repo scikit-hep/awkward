@@ -63,12 +63,12 @@ cuda_kernels_impl = [
     "awkward_ListArray_getitem_jagged_shrink",
     # "awkward_ListArray_getitem_next_array_advanced",  # -> cuda.compute (_compute.py)
     # "awkward_ListArray_getitem_next_array",  # -> cuda.compute (_compute.py)
-    # "awkward_ListArray_getitem_next_at",  # -> cuda.compute (_compute.py)
-    # "awkward_ListArray_getitem_next_range",  # -> cuda.compute (_compute.py)
+    "awkward_ListArray_getitem_next_at",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
+    "awkward_ListArray_getitem_next_range",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     # "awkward_ListArray_getitem_next_range_carrylength",
     # "awkward_ListArray_getitem_next_range_counts",
     # "awkward_ListArray_rpad_and_clip_length_axis1",
-    # "awkward_ListArray_rpad_axis1",  # -> cuda.compute (_compute.py)
+    "awkward_ListArray_rpad_axis1",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     # "awkward_UnionArray_regular_index",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     # "awkward_ListArray_getitem_next_range_spreadadvanced",  # -> cuda.compute (_compute.py)
@@ -105,7 +105,7 @@ cuda_kernels_impl = [
     # "awkward_ListOffsetArray_rpad_and_clip_axis1",
     # "awkward_ListOffsetArray_rpad_length_axis1",
     # "awkward_ListOffsetArray_toRegularArray",  # -> cuda.compute (_compute.py)
-    # "awkward_ListOffsetArray_rpad_axis1",  # -> cuda.compute (_compute.py)
+    "awkward_ListOffsetArray_rpad_axis1",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     # "awkward_MaskedArray_getitem_next_jagged_project",
     # "awkward_UnionArray_project",
     # "awkward_ListOffsetArray_drop_none_indexes",  # -> cuda.compute (_compute.py)
@@ -113,8 +113,8 @@ cuda_kernels_impl = [
     # "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
-    # "awkward_UnionArray_flatten_length",  # -> cuda.compute (_compute.py)
-    # "awkward_UnionArray_flatten_combine",  # -> cuda.compute (_compute.py)
+    "awkward_UnionArray_flatten_length",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
+    "awkward_UnionArray_flatten_combine",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     # "awkward_UnionArray_nestedfill_tags_index",  # -> cuda.compute (_compute.py)
     # "awkward_UnionArray_regular_index_getsize",
     # "awkward_UnionArray_simplify",
