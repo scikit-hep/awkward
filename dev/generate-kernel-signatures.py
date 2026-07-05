@@ -25,8 +25,8 @@ cuda_kernels_impl = [
     # "awkward_IndexedArray_numnull_parents",
     # "awkward_IndexedArray_numnull_unique_64",
     # "awkward_ListArray_fill",
-    "awkward_IndexedArray_fill",
-    "awkward_IndexedArray_fill_count",
+    # "awkward_IndexedArray_fill",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
+    # "awkward_IndexedArray_fill_count",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
     # "awkward_UnionArray_fillindex",
     # "awkward_UnionArray_fillindex_count",
     # "awkward_UnionArray_fillna",
@@ -48,8 +48,8 @@ cuda_kernels_impl = [
     # "awkward_RegularArray_getitem_next_range_spreadadvanced",
     # "awkward_RegularArray_getitem_next_array",
     # "awkward_RegularArray_getitem_next_array_regularize",  # -> cuda.compute (_compute.py)
-    "awkward_RegularArray_reduce_local_nextparents_64",
-    "awkward_RegularArray_reduce_nonlocal_preparenext_64",
+    # "awkward_RegularArray_reduce_local_nextparents_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
+    # "awkward_RegularArray_reduce_nonlocal_preparenext_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
     # "awkward_missing_repeat",
     # "awkward_RegularArray_getitem_jagged_expand",
     # "awkward_ListArray_combinations_length",
@@ -70,18 +70,18 @@ cuda_kernels_impl = [
     # "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     # "awkward_UnionArray_regular_index",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+    # "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
     # "awkward_ListArray_getitem_next_range_spreadadvanced",  # -> cuda.compute (_compute.py)
     # "awkward_ListArray_localindex",
     # "awkward_NumpyArray_pad_zero_to_length",
-    "awkward_NumpyArray_reduce_adjust_starts_64",
-    "awkward_NumpyArray_rearrange_shifted",
+    # "awkward_NumpyArray_reduce_adjust_starts_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
+    # "awkward_NumpyArray_rearrange_shifted",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
     # "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
     # "awkward_RegularArray_getitem_next_at",
     # "awkward_BitMaskedArray_to_IndexedOptionArray",
     # "awkward_ByteMaskedArray_getitem_nextcarry",
     # "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
-    "awkward_ByteMaskedArray_reduce_next_64",
+    # "awkward_ByteMaskedArray_reduce_next_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
     # "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
     # "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
     # "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
@@ -93,8 +93,8 @@ cuda_kernels_impl = [
     # "awkward_IndexedArray_flatten_none2empty",
     # "awkward_IndexedArray_getitem_nextcarry",
     # "awkward_IndexedArray_getitem_nextcarry_outindex",
-    "awkward_IndexedArray_index_of_nulls",
-    "awkward_IndexedArray_local_preparenext_64",
+    # "awkward_IndexedArray_index_of_nulls",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
+    # "awkward_IndexedArray_local_preparenext_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
     # "awkward_IndexedArray_ranges_next_64",
     # "awkward_IndexedArray_ranges_carry_next_64",
     # "awkward_IndexedArray_reduce_next_64",
@@ -109,10 +109,10 @@ cuda_kernels_impl = [
     # "awkward_MaskedArray_getitem_next_jagged_project",
     # "awkward_UnionArray_project",
     # "awkward_ListOffsetArray_drop_none_indexes",  # -> cuda.compute (_compute.py)
-    "awkward_ListOffsetArray_reduce_local_nextparents_64",
+    # "awkward_ListOffsetArray_reduce_local_nextparents_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
     # "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
-    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
-    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
+    # "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
+    # "awkward_ListOffsetArray_reduce_local_outoffsets_64",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
     "awkward_UnionArray_flatten_length",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     "awkward_UnionArray_flatten_combine",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     # "awkward_UnionArray_nestedfill_tags_index",  # -> cuda.compute (_compute.py)
@@ -125,8 +125,8 @@ cuda_kernels_impl = [
     # helpers in awkward._connect.cuda._compute. Their signature-table entries
     # are emitted as None (this kernel name is absent from cuda_kernels_impl),
     # which routes CupyBackend.__getitem__ to the CudaComputeKernel path.
-    "awkward_sorting_ranges",
-    "awkward_sorting_ranges_length",
+    # "awkward_sorting_ranges",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
+    # "awkward_sorting_ranges_length",  # -> cuda.compute (_compute.py, Phase 2 batch 1)
 ]
 
 

@@ -3963,3 +3963,207 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
     raise ValueError(
         "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
     )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 2 batch 1 (cuda-compute-migration-plan.md): pure-CuPy vectorized
+# implementations.  Design rules from Phase 1: no numba closures over
+# per-call state (cache-stable by construction — these use only precompiled
+# CuPy ops), and no kernels with error paths (deferred to batch 2 with
+# device-side error flags).
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def awkward_NumpyArray_reduce_adjust_starts_64(toptr, outlength, offsets, starts):
+    # offsets unused: parents[toptr[k]] == k by construction of argmin/argmax
+    if outlength == 0:
+        return
+    t = toptr[:outlength]
+    toptr[:outlength] = cp.where(t >= 0, t - starts[:outlength], t)
+
+
+def awkward_IndexedArray_fill(toindex, toindexoffset, fromindex, length, base):
+    if length == 0:
+        return
+    f = fromindex[:length].astype(cp.int64, copy=False)
+    toindex[toindexoffset : toindexoffset + length] = cp.where(f < 0, -1, f + base)
+
+
+def awkward_IndexedArray_fill_count(toindex, toindexoffset, length, base):
+    if length == 0:
+        return
+    toindex[toindexoffset : toindexoffset + length] = cp.arange(
+        base, base + length, dtype=toindex.dtype
+    )
+
+
+def awkward_RegularArray_reduce_local_nextparents_64(nextparents, size, length):
+    n = length * size
+    if n == 0:
+        return
+    nextparents[:n] = cp.arange(n, dtype=cp.int64) // size
+
+
+def awkward_ListOffsetArray_reduce_local_nextparents_64(
+    nextparents, offsets, length, nextparents_length
+):
+    if nextparents_length == 0 or length == 0:
+        return
+    off = offsets[: length + 1].astype(cp.int64, copy=False) - offsets[0]
+    ids = (
+        cp.searchsorted(
+            off, cp.arange(nextparents_length, dtype=cp.int64), side="right"
+        )
+        - 1
+    )
+    nextparents[:nextparents_length] = ids
+
+
+def awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
+    nextstarts, nextparents, nextlen
+):
+    if nextlen == 0:
+        return
+    p = nextparents[:nextlen]
+    first = cp.empty(nextlen, dtype=cp.bool_)
+    first[0] = True
+    first[1:] = p[1:] != p[:-1]
+    idx = cp.arange(nextlen, dtype=cp.int64)
+    nextstarts[p[first]] = idx[first]
+
+
+def awkward_ListOffsetArray_reduce_local_outoffsets_64(
+    outoffsets, parents, lenparents, outlength
+):
+    # outoffsets[k+1] = number of parents <= k  (cumulative group counts);
+    # empty groups and the tail fall out of searchsorted naturally.
+    outoffsets[0] = 0
+    if outlength == 0:
+        return
+    outoffsets[1 : outlength + 1] = cp.searchsorted(
+        parents[:lenparents], cp.arange(outlength, dtype=cp.int64), side="right"
+    )
+
+
+def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
+    outstarts, outstops, distincts, lendistincts, outlength
+):
+    if outlength == 0:
+        return
+    if lendistincts == 0:
+        outstarts[:outlength] = 0
+        outstops[:outlength] = 0
+        return
+    maxcount = lendistincts // outlength
+    counts = cp.count_nonzero(
+        distincts[:lendistincts].reshape(outlength, maxcount) != -1, axis=1
+    )
+    starts = cp.arange(outlength, dtype=cp.int64) * maxcount
+    outstarts[:outlength] = starts
+    outstops[:outlength] = starts + counts
+
+
+def awkward_sorting_ranges(toindex, tolength, parents, parentslength):
+    toindex[0] = 0
+    if parentslength > 0 and tolength > 2:
+        p = parents[:parentslength]
+        boundaries = cp.nonzero(p[1:] != p[:-1])[0] + 1
+        toindex[1 : tolength - 1] = boundaries
+    toindex[tolength - 1] = parentslength
+
+
+def awkward_sorting_ranges_length(tolength, parents, parentslength):
+    if parentslength == 0:
+        tolength[0] = 2
+        return
+    p = parents[:parentslength]
+    # stays on device; the caller synchronizes when it reads tolength
+    tolength[0:1] = cp.count_nonzero(p[1:] != p[:-1]) + 2
+
+
+def awkward_IndexedArray_index_of_nulls(toindex, fromindex, offsets, outlength, starts):
+    if outlength == 0:
+        return
+    total = int(offsets[outlength])
+    null_pos = cp.nonzero(fromindex[:total] < 0)[0]
+    if null_pos.size == 0:
+        return
+    bins = cp.searchsorted(offsets[: outlength + 1], null_pos, side="right") - 1
+    toindex[: null_pos.size] = null_pos - starts[bins]
+
+
+def awkward_IndexedArray_local_preparenext_64(
+    tocarry, starts, offsets, nextoffsets, outlength
+):
+    # `starts` is kept in the C signature for CUDA compatibility and unused
+    # (first-of-bin detection happens via offsets), matching the CPU kernel.
+    if outlength == 0:
+        return
+    t0 = int(offsets[0])
+    total = int(offsets[outlength])
+    if total <= t0:
+        return
+    pos = cp.arange(t0, total, dtype=cp.int64)
+    bins = cp.searchsorted(offsets[: outlength + 1], pos, side="right") - 1
+    rel = pos - offsets[bins]
+    cand = nextoffsets[bins] + rel
+    tocarry[t0:total] = cp.where(cand < nextoffsets[bins + 1], cand, -1)
+
+
+def awkward_ByteMaskedArray_reduce_next_64(
+    nextcarry, nextoffsets, outindex, mask, offsets, outlength, validwhen
+):
+    nextoffsets[0] = 0
+    if outlength == 0:
+        return
+    total = int(offsets[outlength])
+    m = (mask[:total] != 0) == bool(validwhen)
+    k = cp.cumsum(m)
+    outindex[:total] = cp.where(m, k - 1, -1)
+    valid_pos = cp.nonzero(m)[0]
+    nextcarry[: valid_pos.size] = valid_pos
+    kext = cp.concatenate([cp.zeros(1, dtype=k.dtype), k])
+    nextoffsets[: outlength + 1] = kext[offsets[: outlength + 1]]
+
+
+def awkward_RegularArray_reduce_nonlocal_preparenext_64(
+    nextcarry, nextoffsets, offsets, size, length, outlength
+):
+    # Bin-major: nextbin = bin*size + col, one entry per row in the bin.
+    nextoffsets[0] = 0
+    if outlength == 0 or size == 0:
+        nextoffsets[: outlength * size + 1] = 0
+        return
+    s = (offsets[1 : outlength + 1] - offsets[:outlength]).astype(cp.int64, copy=False)
+    block = s * size
+    bs = cp.concatenate([cp.zeros(1, dtype=cp.int64), cp.cumsum(block)])
+    total = int(bs[-1])
+    if total > 0:
+        t = cp.arange(total, dtype=cp.int64)
+        binid = cp.searchsorted(bs, t, side="right") - 1
+        tin = t - bs[binid]
+        s_b = s[binid]  # > 0 wherever any t maps (empty bins have no elements)
+        col = tin // s_b
+        row = offsets[binid].astype(cp.int64, copy=False) + tin % s_b
+        nextcarry[:total] = row * size + col
+    q = cp.arange(outlength * size, dtype=cp.int64)
+    binq = q // size
+    j = q % size
+    nextoffsets[1 : outlength * size + 1] = bs[binq] + (j + 1) * s[binq]
+
+
+def awkward_NumpyArray_rearrange_shifted(
+    toptr, fromshifts, length, fromoffsets, outlength, fromparents, fromstarts
+):
+    # Phase 1: per-bin sorted positions -> absolute positions
+    if outlength > 0:
+        start0 = int(fromoffsets[0])
+        total = int(fromoffsets[outlength])
+        if total > start0:
+            pos = cp.arange(start0, total, dtype=cp.int64)
+            bins = cp.searchsorted(fromoffsets[: outlength + 1], pos, side="right") - 1
+            toptr[start0:total] = toptr[start0:total] + fromoffsets[bins]
+    # Phase 2: apply shifts relative to each parent's start
+    if length > 0:
+        t = toptr[:length]
+        toptr[:length] = t + fromshifts[t] - fromstarts[fromparents[:length]]

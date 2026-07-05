@@ -174,6 +174,22 @@ class CupyBackend(Backend):
             "awkward_ListOffsetArray_toRegularArray",
             "awkward_RegularArray_getitem_next_array_regularize",
             "awkward_UnionArray_nestedfill_tags_index",
+            # Phase 2 batch 1 (pure-CuPy vectorized implementations)
+            "awkward_ByteMaskedArray_reduce_next_64",
+            "awkward_IndexedArray_fill",
+            "awkward_IndexedArray_fill_count",
+            "awkward_IndexedArray_index_of_nulls",
+            "awkward_IndexedArray_local_preparenext_64",
+            "awkward_ListOffsetArray_reduce_local_nextparents_64",
+            "awkward_ListOffsetArray_reduce_local_outoffsets_64",
+            "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+            "awkward_NumpyArray_rearrange_shifted",
+            "awkward_NumpyArray_reduce_adjust_starts_64",
+            "awkward_RegularArray_reduce_local_nextparents_64",
+            "awkward_RegularArray_reduce_nonlocal_preparenext_64",
+            "awkward_sorting_ranges",
+            "awkward_sorting_ranges_length",
         )
 
     # ---------------------------------------------------------
@@ -292,6 +308,22 @@ class CupyBackend(Backend):
             "awkward_ListOffsetArray_toRegularArray": cuda_compute.awkward_ListOffsetArray_toRegularArray,
             "awkward_RegularArray_getitem_next_array_regularize": cuda_compute.awkward_RegularArray_getitem_next_array_regularize,
             "awkward_UnionArray_nestedfill_tags_index": cuda_compute.awkward_UnionArray_nestedfill_tags_index,
+            # Phase 2 batch 1 (pure-CuPy vectorized implementations)
+            "awkward_ByteMaskedArray_reduce_next_64": cuda_compute.awkward_ByteMaskedArray_reduce_next_64,
+            "awkward_IndexedArray_fill": cuda_compute.awkward_IndexedArray_fill,
+            "awkward_IndexedArray_fill_count": cuda_compute.awkward_IndexedArray_fill_count,
+            "awkward_IndexedArray_index_of_nulls": cuda_compute.awkward_IndexedArray_index_of_nulls,
+            "awkward_IndexedArray_local_preparenext_64": cuda_compute.awkward_IndexedArray_local_preparenext_64,
+            "awkward_ListOffsetArray_reduce_local_nextparents_64": cuda_compute.awkward_ListOffsetArray_reduce_local_nextparents_64,
+            "awkward_ListOffsetArray_reduce_local_outoffsets_64": cuda_compute.awkward_ListOffsetArray_reduce_local_outoffsets_64,
+            "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64,
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64,
+            "awkward_NumpyArray_rearrange_shifted": cuda_compute.awkward_NumpyArray_rearrange_shifted,
+            "awkward_NumpyArray_reduce_adjust_starts_64": cuda_compute.awkward_NumpyArray_reduce_adjust_starts_64,
+            "awkward_RegularArray_reduce_local_nextparents_64": cuda_compute.awkward_RegularArray_reduce_local_nextparents_64,
+            "awkward_RegularArray_reduce_nonlocal_preparenext_64": cuda_compute.awkward_RegularArray_reduce_nonlocal_preparenext_64,
+            "awkward_sorting_ranges": cuda_compute.awkward_sorting_ranges,
+            "awkward_sorting_ranges_length": cuda_compute.awkward_sorting_ranges_length,
         }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:

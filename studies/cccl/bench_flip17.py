@@ -120,6 +120,20 @@ def make_ops(a):
         "union_concat (ak.concatenate)": lambda: ak.concatenate(
             [a["union"], a["union"]], axis=0
         ),
+        # --- Phase 2 batch 1 kernels ---
+        "sum_axis1 (local reduce path)": lambda: ak.sum(a["listoffset"], axis=1),
+        "sum_axis0 (nonlocal reduce path)": lambda: ak.sum(a["listoffset"], axis=0),
+        "argmin_axis1 (adjust_starts)": lambda: ak.argmin(a["listoffset"], axis=1),
+        "argsort_jagged (sorting_ranges+shifted)": lambda: ak.argsort(
+            a["listoffset"], axis=1
+        ),
+        "sum_masked_axis1 (bytemasked_reduce_next)": lambda: ak.sum(
+            a["option_inner"], axis=1
+        ),
+        "sum_regular_axis0 (regular nonlocal)": lambda: ak.sum(a["regular"], axis=0),
+        "concat_options (IndexedArray_fill)": lambda: ak.concatenate(
+            [a["option_inner"], a["option_inner"]], axis=0
+        ),
     }
 
 
