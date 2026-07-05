@@ -41,80 +41,57 @@ import numpy as np
 
 
 def build_arrays(n_lists, avg):
-    import cupy as cp
-
+    """Build all inputs on the CPU (single backend throughout), then move
+    them to CUDA in one place — mixing NumPy indexes with CUDA-backed
+    contents inside one layout is not allowed."""
     import awkward as ak
 
     rng = np.random.default_rng(12345)
-    counts = rng.integers(0, 2 * avg, n_lists)
+    # minimum 2 so `arr[:, 0]`, `arr[:, 1:3]`, and `arr[:, [0, 1]]` are valid
+    counts = rng.integers(2, 2 * avg, n_lists)
     offsets = np.zeros(n_lists + 1, dtype=np.int64)
     np.cumsum(counts, out=offsets[1:])
     content = rng.normal(0, 1, int(offsets[-1]))
 
-    listoffset = ak.to_backend(
-        ak.Array(
-            ak.contents.ListOffsetArray(
-                ak.index.Index64(offsets), ak.contents.NumpyArray(content)
-            )
-        ),
-        "cuda",
+    listoffset_cpu = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(offsets), ak.contents.NumpyArray(content)
+        )
     )
     # A genuine ListArray (starts/stops) so ListArray_* kernels dispatch
-    listarray = ak.to_backend(
-        ak.Array(
-            ak.contents.ListArray(
-                ak.index.Index64(offsets[:-1]),
-                ak.index.Index64(offsets[1:]),
-                ak.contents.NumpyArray(content),
-            )
-        ),
-        "cuda",
+    listarray_cpu = ak.Array(
+        ak.contents.ListArray(
+            ak.index.Index64(offsets[:-1]),
+            ak.index.Index64(offsets[1:]),
+            ak.contents.NumpyArray(content),
+        )
     )
-    regular = ak.to_backend(
-        ak.Array(np.arange(n_lists * 4, dtype=np.float64).reshape(n_lists, 4)), "cuda"
+    regular_cpu = ak.Array(np.arange(n_lists * 4, dtype=np.float64).reshape(n_lists, 4))
+    nested_cpu = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.arange(0, n_lists + 1, dtype=np.int64)),
+            listoffset_cpu.layout,
+        )
     )
-    nested = ak.to_backend(
-        ak.Array(
-            ak.contents.ListOffsetArray(
-                ak.index.Index64(np.arange(0, n_lists + 1, dtype=np.int64)),
-                listoffset.layout,
-            )
-        ),
-        "cuda",
+    option_inner_cpu = ak.mask(listoffset_cpu, listoffset_cpu > 1.0)  # many None
+    # union of list<float64> and list<{x: float64}> — genuinely unmergeable,
+    # built from buffers (no Python-object construction)
+    half = n_lists // 2
+    union_cpu = ak.concatenate(
+        [listoffset_cpu[:half], ak.zip({"x": listoffset_cpu[half:]})], axis=0
     )
-    with_none = ak.to_backend(
-        ak.drop_none(  # build option-typed jagged: mask ~10% of elements
-            ak.mask(listoffset, listoffset > -10)  # no-op mask keeps option type
-        ),
-        "cuda",
-    )
-    option_inner = ak.to_backend(
-        ak.mask(listoffset, listoffset > 1.0),  # jagged with many None
-        "cuda",
-    )
-    union = ak.to_backend(
-        ak.concatenate(
-            [
-                ak.Array([[1.0, 2.0], [3.0]] * (n_lists // 2)),
-                ak.Array([[1, 2, 3], [4]] * (n_lists // 2)),
-            ],
-            axis=0,
-            mergebool=False,
-        ),
-        "cuda",
-    )
-    inner_mask = ak.to_backend(listoffset > 0.0, "cuda")
-    idx = ak.to_backend(ak.Array(np.array([0, 1], dtype=np.int64)), "cuda")
+
+    to = lambda arr: ak.to_backend(arr, "cuda")  # noqa: E731
+    listoffset = to(listoffset_cpu)
     return {
         "listoffset": listoffset,
-        "listarray": listarray,
-        "regular": regular,
-        "nested": nested,
-        "with_none": with_none,
-        "option_inner": option_inner,
-        "union": union,
-        "inner_mask": inner_mask,
-        "idx": idx,
+        "listarray": to(listarray_cpu),
+        "regular": to(regular_cpu),
+        "nested": to(nested_cpu),
+        "option_inner": to(option_inner_cpu),
+        "union": to(union_cpu),
+        "inner_mask": listoffset > 0.0,
+        "idx": to(ak.Array(np.array([0, 1], dtype=np.int64))),
     }
 
 
@@ -143,7 +120,6 @@ def make_ops(a):
         "union_concat (ak.concatenate)": lambda: ak.concatenate(
             [a["union"], a["union"]], axis=0
         ),
-        "simplify (option projection)": lambda: ak.drop_none(a["with_none"]),
     }
 
 
