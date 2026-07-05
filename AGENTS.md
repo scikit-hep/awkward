@@ -93,3 +93,17 @@ To change a kernel: (1) edit `kernel-specification.yml`; (2) run the generation 
 nox -s prepare -- --docs --headers
 nox -s docs -- --serve    # requires Doxygen; serves at localhost:8000
 ```
+
+## Imported Claude Cowork project instructions
+
+The following files implement Lazy execution for cuda backend: 	src/awkward/_connect/cuda/_executor.py
+	src/awkward/_connect/cuda/_ir.py
+	src/awkward/_connect/cuda/_lazy_impl.py
+	src/awkward/_connect/cuda/_segment_algorithms.py
+	src/awkward/_connect/cuda/helpers.py
+	src/awkward/_connect/cuda/ir_nodes.py
+	studies/cccl/playground-cccl-with-ir.py
+	tests-cuda/test_3792_lazy_executor.py
+	tests-cuda/test_3792_lazy_ir.py
+Review the implementation. Propose the same for CPU backend.
+rawkward directory contains Rust re-implementation of awkward for multiple backends and MVP in Python with Rust core. Review it and propose full migration plan.

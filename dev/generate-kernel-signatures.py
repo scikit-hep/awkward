@@ -14,11 +14,11 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 cuda_kernels_impl = [
     # "awkward_Index_nones_as_index",
     # "awkward_ListArray_min_range",
-    "awkward_ListArray_validity",
+    # "awkward_ListArray_validity",  # -> cuda.compute (_compute.py)
     # "awkward_BitMaskedArray_to_ByteMaskedArray",
     # "awkward_ListArray_broadcast_tooffsets",
     # "awkward_ListArray_compact_offsets",
-    "awkward_ListOffsetArray_flatten_offsets",
+    # "awkward_ListOffsetArray_flatten_offsets",  # -> cuda.compute (_compute.py)
     # "awkward_IndexedArray_overlay_mask",
     # "awkward_ByteMaskedArray_numnull",
     # "awkward_IndexedArray_numnull",
@@ -36,7 +36,7 @@ cuda_kernels_impl = [
     # "awkward_IndexedArray_reduce_next_fix_offsets_64",
     # "awkward_RegularArray_getitem_next_array_advanced",
     # "awkward_ByteMaskedArray_toIndexedOptionArray",
-    "awkward_IndexedArray_simplify",
+    # "awkward_IndexedArray_simplify",  # -> cuda.compute (_compute.py)
     # "awkward_UnionArray_validity",
     # "awkward_IndexedArray_validity",
     # "awkward_ByteMaskedArray_overlay_mask",
@@ -47,7 +47,7 @@ cuda_kernels_impl = [
     # "awkward_RegularArray_getitem_next_range",
     # "awkward_RegularArray_getitem_next_range_spreadadvanced",
     # "awkward_RegularArray_getitem_next_array",
-    "awkward_RegularArray_getitem_next_array_regularize",
+    # "awkward_RegularArray_getitem_next_array_regularize",  # -> cuda.compute (_compute.py)
     "awkward_RegularArray_reduce_local_nextparents_64",
     "awkward_RegularArray_reduce_nonlocal_preparenext_64",
     # "awkward_missing_repeat",
@@ -58,20 +58,20 @@ cuda_kernels_impl = [
     "awkward_ListArray_getitem_jagged_apply",
     # "awkward_ListArray_getitem_jagged_carrylen",
     # "awkward_ListArray_getitem_jagged_descend",
-    "awkward_ListArray_getitem_jagged_expand",
+    # "awkward_ListArray_getitem_jagged_expand",  # -> cuda.compute (_compute.py)
     # "awkward_ListArray_getitem_jagged_numvalid",
     "awkward_ListArray_getitem_jagged_shrink",
-    "awkward_ListArray_getitem_next_array_advanced",
-    "awkward_ListArray_getitem_next_array",
-    "awkward_ListArray_getitem_next_at",
-    "awkward_ListArray_getitem_next_range",
+    # "awkward_ListArray_getitem_next_array_advanced",  # -> cuda.compute (_compute.py)
+    # "awkward_ListArray_getitem_next_array",  # -> cuda.compute (_compute.py)
+    # "awkward_ListArray_getitem_next_at",  # -> cuda.compute (_compute.py)
+    # "awkward_ListArray_getitem_next_range",  # -> cuda.compute (_compute.py)
     # "awkward_ListArray_getitem_next_range_carrylength",
     # "awkward_ListArray_getitem_next_range_counts",
     # "awkward_ListArray_rpad_and_clip_length_axis1",
-    "awkward_ListArray_rpad_axis1",
+    # "awkward_ListArray_rpad_axis1",  # -> cuda.compute (_compute.py)
     # "awkward_UnionArray_regular_index",
     "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
-    "awkward_ListArray_getitem_next_range_spreadadvanced",
+    # "awkward_ListArray_getitem_next_range_spreadadvanced",  # -> cuda.compute (_compute.py)
     # "awkward_ListArray_localindex",
     # "awkward_NumpyArray_pad_zero_to_length",
     "awkward_NumpyArray_reduce_adjust_starts_64",
@@ -104,18 +104,18 @@ cuda_kernels_impl = [
     # "awkward_ListOffsetArray_local_preparenext_64",
     # "awkward_ListOffsetArray_rpad_and_clip_axis1",
     # "awkward_ListOffsetArray_rpad_length_axis1",
-    "awkward_ListOffsetArray_toRegularArray",
-    "awkward_ListOffsetArray_rpad_axis1",
+    # "awkward_ListOffsetArray_toRegularArray",  # -> cuda.compute (_compute.py)
+    # "awkward_ListOffsetArray_rpad_axis1",  # -> cuda.compute (_compute.py)
     # "awkward_MaskedArray_getitem_next_jagged_project",
     # "awkward_UnionArray_project",
-    "awkward_ListOffsetArray_drop_none_indexes",
+    # "awkward_ListOffsetArray_drop_none_indexes",  # -> cuda.compute (_compute.py)
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     # "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListOffsetArray_reduce_local_outoffsets_64",
-    "awkward_UnionArray_flatten_length",
-    "awkward_UnionArray_flatten_combine",
-    "awkward_UnionArray_nestedfill_tags_index",
+    # "awkward_UnionArray_flatten_length",  # -> cuda.compute (_compute.py)
+    # "awkward_UnionArray_flatten_combine",  # -> cuda.compute (_compute.py)
+    # "awkward_UnionArray_nestedfill_tags_index",  # -> cuda.compute (_compute.py)
     # "awkward_UnionArray_regular_index_getsize",
     # "awkward_UnionArray_simplify",
     # "awkward_UnionArray_simplify_one",

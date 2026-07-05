@@ -164,6 +164,24 @@ class CupyBackend(Backend):
             "awkward_UnionArray_regular_index_getsize",
             "awkward_UnionArray_simplify",
             "awkward_UnionArray_validity",
+            # flipped from CuPy raw kernels (cuda.compute migration, Phase 1)
+            "awkward_IndexedArray_simplify",
+            "awkward_ListArray_getitem_jagged_expand",
+            "awkward_ListArray_getitem_next_array",
+            "awkward_ListArray_getitem_next_array_advanced",
+            "awkward_ListArray_getitem_next_at",
+            "awkward_ListArray_getitem_next_range",
+            "awkward_ListArray_getitem_next_range_spreadadvanced",
+            "awkward_ListArray_rpad_axis1",
+            "awkward_ListArray_validity",
+            "awkward_ListOffsetArray_drop_none_indexes",
+            "awkward_ListOffsetArray_flatten_offsets",
+            "awkward_ListOffsetArray_rpad_axis1",
+            "awkward_ListOffsetArray_toRegularArray",
+            "awkward_RegularArray_getitem_next_array_regularize",
+            "awkward_UnionArray_flatten_combine",
+            "awkward_UnionArray_flatten_length",
+            "awkward_UnionArray_nestedfill_tags_index",
         )
 
     # ---------------------------------------------------------
@@ -272,6 +290,24 @@ class CupyBackend(Backend):
             "awkward_UnionArray_regular_index_getsize": cuda_compute.awkward_UnionArray_regular_index_getsize,
             "awkward_UnionArray_simplify": cuda_compute.awkward_UnionArray_simplify,
             "awkward_UnionArray_validity": cuda_compute.awkward_UnionArray_validity,
+            # flipped from CuPy raw kernels (cuda.compute migration, Phase 1)
+            "awkward_IndexedArray_simplify": cuda_compute.awkward_IndexedArray_simplify,
+            "awkward_ListArray_getitem_jagged_expand": cuda_compute.awkward_ListArray_getitem_jagged_expand,
+            "awkward_ListArray_getitem_next_array": cuda_compute.awkward_ListArray_getitem_next_array,
+            "awkward_ListArray_getitem_next_array_advanced": cuda_compute.awkward_ListArray_getitem_next_array_advanced,
+            "awkward_ListArray_getitem_next_at": cuda_compute.awkward_ListArray_getitem_next_at,
+            "awkward_ListArray_getitem_next_range": cuda_compute.awkward_ListArray_getitem_next_range,
+            "awkward_ListArray_getitem_next_range_spreadadvanced": cuda_compute.awkward_ListArray_getitem_next_range_spreadadvanced,
+            "awkward_ListArray_rpad_axis1": cuda_compute.awkward_ListArray_rpad_axis1,
+            "awkward_ListArray_validity": cuda_compute.awkward_ListArray_validity,
+            "awkward_ListOffsetArray_drop_none_indexes": cuda_compute.awkward_ListOffsetArray_drop_none_indexes,
+            "awkward_ListOffsetArray_flatten_offsets": cuda_compute.awkward_ListOffsetArray_flatten_offsets,
+            "awkward_ListOffsetArray_rpad_axis1": cuda_compute.awkward_ListOffsetArray_rpad_axis1,
+            "awkward_ListOffsetArray_toRegularArray": cuda_compute.awkward_ListOffsetArray_toRegularArray,
+            "awkward_RegularArray_getitem_next_array_regularize": cuda_compute.awkward_RegularArray_getitem_next_array_regularize,
+            "awkward_UnionArray_flatten_combine": cuda_compute.awkward_UnionArray_flatten_combine,
+            "awkward_UnionArray_flatten_length": cuda_compute.awkward_UnionArray_flatten_length,
+            "awkward_UnionArray_nestedfill_tags_index": cuda_compute.awkward_UnionArray_nestedfill_tags_index,
         }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
