@@ -167,10 +167,8 @@ class CupyBackend(Backend):
             # flipped from CuPy raw kernels (cuda.compute migration, Phase 1)
             "awkward_IndexedArray_simplify",
             "awkward_ListArray_getitem_jagged_expand",
-            "awkward_ListArray_getitem_next_array",
             "awkward_ListArray_getitem_next_array_advanced",
             "awkward_ListArray_getitem_next_range_spreadadvanced",
-            "awkward_ListArray_validity",
             "awkward_ListOffsetArray_drop_none_indexes",
             "awkward_ListOffsetArray_flatten_offsets",
             "awkward_ListOffsetArray_toRegularArray",
@@ -287,10 +285,8 @@ class CupyBackend(Backend):
             # flipped from CuPy raw kernels (cuda.compute migration, Phase 1)
             "awkward_IndexedArray_simplify": cuda_compute.awkward_IndexedArray_simplify,
             "awkward_ListArray_getitem_jagged_expand": cuda_compute.awkward_ListArray_getitem_jagged_expand,
-            "awkward_ListArray_getitem_next_array": cuda_compute.awkward_ListArray_getitem_next_array,
             "awkward_ListArray_getitem_next_array_advanced": cuda_compute.awkward_ListArray_getitem_next_array_advanced,
             "awkward_ListArray_getitem_next_range_spreadadvanced": cuda_compute.awkward_ListArray_getitem_next_range_spreadadvanced,
-            "awkward_ListArray_validity": cuda_compute.awkward_ListArray_validity,
             "awkward_ListOffsetArray_drop_none_indexes": cuda_compute.awkward_ListOffsetArray_drop_none_indexes,
             "awkward_ListOffsetArray_flatten_offsets": cuda_compute.awkward_ListOffsetArray_flatten_offsets,
             "awkward_ListOffsetArray_toRegularArray": cuda_compute.awkward_ListOffsetArray_toRegularArray,

@@ -14,7 +14,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 cuda_kernels_impl = [
     # "awkward_Index_nones_as_index",
     # "awkward_ListArray_min_range",
-    # "awkward_ListArray_validity",  # -> cuda.compute (_compute.py)
+    "awkward_ListArray_validity",  # reverted from cuda.compute: fixed ~0.4ms error-sync overhead never amortizes (launch-bound); see migration plan
     # "awkward_BitMaskedArray_to_ByteMaskedArray",
     # "awkward_ListArray_broadcast_tooffsets",
     # "awkward_ListArray_compact_offsets",
@@ -62,7 +62,7 @@ cuda_kernels_impl = [
     # "awkward_ListArray_getitem_jagged_numvalid",
     "awkward_ListArray_getitem_jagged_shrink",
     # "awkward_ListArray_getitem_next_array_advanced",  # -> cuda.compute (_compute.py)
-    # "awkward_ListArray_getitem_next_array",  # -> cuda.compute (_compute.py)
+    "awkward_ListArray_getitem_next_array",  # reverted from cuda.compute: fixed ~0.4ms error-sync overhead never amortizes (launch-bound); see migration plan
     "awkward_ListArray_getitem_next_at",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     "awkward_ListArray_getitem_next_range",  # reverted from cuda.compute: see studies/cccl/cuda-compute-migration-plan.md Phase 1 results
     # "awkward_ListArray_getitem_next_range_carrylength",
