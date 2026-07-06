@@ -2037,7 +2037,8 @@ def awkward_ListArray_validity(starts, stops, length, lencontent):
     # argmax finds both the first failing index and which condition fired.
     # Priority: 1=s>e, 2=s<0, 3=e>lencontent (checked in that order).
     err_code = cp.where(
-        nonempty & (s > e), 1,
+        nonempty & (s > e),
+        1,
         cp.where(nonempty & (s < 0), 2, cp.where(nonempty & (e > lencontent), 3, 0)),
     )
     first_idx = int(cp.argmax(err_code > 0))
