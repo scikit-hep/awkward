@@ -75,7 +75,7 @@ def moment(
 
     This function has no NumPy equivalent.
 
-    Passing all arguments to the reducers, the moment is calculated as
+    Passing all arguments to the reducers, the moment is calculated as::
 
         ak.sum(x**n * weight) / ak.sum(weight)
 

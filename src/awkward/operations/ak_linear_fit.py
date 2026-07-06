@@ -65,7 +65,7 @@ def linear_fit(
 
     This function has no NumPy equivalent.
 
-    Passing all arguments to the reducers, the linear fit is calculated as
+    Passing all arguments to the reducers, the linear fit is calculated as::
 
         sumw            = ak.sum(weight)
         sumwx           = ak.sum(weight * x)

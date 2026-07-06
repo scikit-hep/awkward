@@ -63,7 +63,7 @@ class ListArray(ListMeta[Content], Content):
     * `stops`: The stopping index of each list.
 
     #ak.contents.ListOffsetArray `offsets` may be related to `starts` and
-    `stops` by
+    `stops` by::
 
         starts = offsets[:-1]
         stops = offsets[1:]
@@ -83,7 +83,7 @@ class ListArray(ListMeta[Content], Content):
     There is no equivalent of ListArray in Apache Arrow.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class ListArray(Content):
             def __init__(self, starts, stops, content):
@@ -1320,36 +1320,34 @@ class ListArray(ListMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self._starts.length is not unknown_length and self._starts.length == 0:
             return True
 
         return self.to_ListOffsetArray64(True)._is_unique(
-            negaxis, starts, parents, offsets, outlength
+            negaxis, starts, offsets, outlength
         )
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self._starts.length is not unknown_length and self._starts.length == 0:
             return self
 
         return self.to_ListOffsetArray64(True)._unique(
-            negaxis, starts, parents, offsets, outlength
+            negaxis, starts, offsets, outlength
         )
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         next = self.to_ListOffsetArray64(True)
         out = next._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
         return out
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         return self.to_ListOffsetArray64(True)._sort_next(
-            negaxis, starts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -1363,7 +1361,6 @@ class ListArray(ListMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -1375,7 +1372,6 @@ class ListArray(ListMeta[Content], Content):
             negaxis,
             starts,
             shifts,
-            parents,
             offsets,
             outlength,
             mask,

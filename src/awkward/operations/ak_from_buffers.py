@@ -34,7 +34,7 @@ def from_buffers(
     buffer_key="{form_key}-{attribute}",
     *,
     backend="cpu",
-    byteorder="<",
+    byteorder=ak._util.native_byteorder,
     allow_noncanonical_form=False,
     enable_virtualarray_caching=True,
     highlevel=True,

@@ -6,9 +6,9 @@
 
 template <typename M>
 ERROR awkward_ByteMaskedArray_overlay_mask(
-  M* tomask,
-  const M* theirmask,
-  const M* mymask,
+  M* __restrict__ tomask,
+  const M* __restrict__ theirmask,
+  const M* __restrict__ mymask,
   int64_t length,
   bool validwhen) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -18,9 +18,9 @@ ERROR awkward_ByteMaskedArray_overlay_mask(
   return success();
 }
 ERROR awkward_ByteMaskedArray_overlay_mask8(
-  int8_t* tomask,
-  const int8_t* theirmask,
-  const int8_t* mymask,
+  int8_t* __restrict__ tomask,
+  const int8_t* __restrict__ theirmask,
+  const int8_t* __restrict__ mymask,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_overlay_mask<int8_t>(

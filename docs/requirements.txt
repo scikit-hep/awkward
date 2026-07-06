@@ -15,6 +15,7 @@ pydata-sphinx-theme
 myst-nb~=1.0
 myst-parser~=2.0
 sphinx-external-toc
+sphinx-autoapi
 ipyleaflet
 
 numpy
@@ -22,7 +23,7 @@ scipy
 numba>=0.50.0;python_version<"3.11"
 pandas>=0.24.0
 numexpr
-pyarrow>=7.0.0
+pyarrow>=17.0.0
 fsspec
 fsspec-xrootd
 hist[plot]

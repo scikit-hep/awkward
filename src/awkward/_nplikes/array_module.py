@@ -37,6 +37,17 @@ def _nplike_concatenate_has_casting(module: Any) -> bool:
         return True
 
 
+@lru_cache
+def _nplike_reshape_has_copy(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.reshape(x, (2,), copy=False)
+    except TypeError:
+        return False
+    else:
+        return True
+
+
 ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
 
 
@@ -371,10 +382,14 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return self._module.reshape(self._module.copy(x, order="C"), shape)
         else:
             result = self._module.asarray(x)
+            if _nplike_reshape_has_copy(self._module):
+                return self._module.reshape(result, shape, copy=False)
             try:
                 result.shape = shape
             except AttributeError:
-                raise ValueError("cannot reshape array without copying") from None
+                raise ValueError(
+                    "Unable to avoid creating a copy while reshaping."
+                ) from None
             return result
 
     def shape_item_as_index(self, x1: ShapeItem) -> int:
@@ -504,7 +519,42 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLikeT:
+    ) -> ArrayLikeT | VirtualNDArray:
+        if any(isinstance(x, VirtualNDArray) and not x.is_materialized for x in arrays):
+            # TODO: switch to np.result_type when we pin numpy >= 1.23
+            dtype = self._module.concatenate(
+                [self._module.empty(0, x.dtype) for x in arrays]
+            ).dtype
+
+            if axis is None:
+                shape = (sum((x.size for x in arrays), 0),)
+            else:
+                ref = arrays[0]
+                if axis < 0:
+                    axis += ref.ndim
+                for i, x in enumerate(arrays[1:], start=1):
+                    for dim, (ref_d, x_d) in enumerate(
+                        zip(ref.shape, x.shape, strict=True)
+                    ):
+                        if dim != axis and ref_d != x_d:
+                            raise ValueError(
+                                "all the input array dimensions except for the concatenation axis "
+                                f"must match exactly, but along dimension {dim}, the array at index 0 "
+                                f"has size {ref_d} and the array at index {i} has size {x_d}"
+                            )
+                shape = (  # type: ignore[assignment]
+                    *ref.shape[:axis],
+                    sum((x.shape[axis] for x in arrays), 0),
+                    *ref.shape[axis + 1 :],
+                )
+
+            return VirtualNDArray(
+                self,
+                shape,
+                dtype,
+                lambda: self.concat(maybe_materialize(*arrays), axis=axis),
+            )
+
         arrays = maybe_materialize(*arrays)
         if _nplike_concatenate_has_casting(self._module):
             return self._module.concatenate(arrays, axis=axis, casting="same_kind")
@@ -566,6 +616,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
         (x,) = maybe_materialize(x)
         return x.strides
+
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT:
+        raise NotImplementedError
 
     ############################ ufuncs
 
@@ -791,4 +844,4 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         return cls.is_own_array_type(type(obj))
 
     def memory_ptr(self, x: ArrayLikeT) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError

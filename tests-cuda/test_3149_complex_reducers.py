@@ -549,10 +549,13 @@ def test_block_boundary_prod_complex12():
 
 def test_block_boundary_prod_complex13():
     rng = np.random.default_rng(seed=42)
-    array = rng.integers(50, size=1000)
-    complex_array = np.vectorize(complex)(
-        array[0 : len(array) : 2], array[1 : len(array) : 2]
-    )
+    # 2000 ints → 1000 complex values, matching the offsets [0, 5, 996, 1000]
+    # below. The earlier size=1000 produced only 500 complex values and the
+    # ListOffsetArray indexed past the end of `content`, so both backends read
+    # uninitialised memory for bin 2 and disagreed on the resulting garbage.
+    array = rng.integers(50, size=2000)
+    complex_array = np.vectorize(complex)(array[::2], array[1::2])
+
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
     cpt.assert_allclose(
@@ -767,19 +770,29 @@ def test_block_boundary_argmax_complex1():
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
+
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
-    assert ak.argmax(cuda_content, -1, highlevel=False) == ak.argmax(
-        content, -1, highlevel=False
-    )
+
+    res_flat_cuda = ak.argmax(cuda_content, -1, highlevel=False)
+    res_flat_cpu = ak.argmax(content, -1, highlevel=False)
+
+    assert int(res_flat_cuda) == int(res_flat_cpu)
 
     offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets, content)
     cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
-    assert to_list(ak.argmax(cuda_depth1, -1, highlevel=False)) == to_list(
-        ak.argmax(depth1, -1, highlevel=False)
-    )
+
+    res_seg_cuda = ak.argmax(cuda_depth1, -1, highlevel=False)
+    res_seg_cpu = ak.argmax(depth1, -1, highlevel=False)
+
+    cuda_list = to_list(res_seg_cuda)
+    cpu_list = to_list(res_seg_cpu)
+
+    np.testing.assert_array_equal(cuda_list, cpu_list)
+
     del cuda_content, cuda_depth1
+    cp.get_default_memory_pool().free_all_blocks()
 
 
 def test_block_boundary_argmax_complex2():
@@ -790,56 +803,74 @@ def test_block_boundary_argmax_complex2():
     )
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
-    assert ak.argmax(cuda_content, -1, highlevel=False) == ak.argmax(
-        content, -1, highlevel=False
-    )
+
+    res_flat_cuda = ak.argmax(cuda_content, -1, highlevel=False)
+    res_flat_cpu = ak.argmax(content, -1, highlevel=False)
+    assert int(res_flat_cuda) == int(res_flat_cpu)
 
     offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets, content)
     cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
-    assert to_list(ak.argmax(cuda_depth1, -1, highlevel=False)) == to_list(
-        ak.argmax(depth1, -1, highlevel=False)
-    )
+
+    res_seg_cuda = ak.argmax(cuda_depth1, -1, highlevel=False)
+    res_seg_cpu = ak.argmax(depth1, -1, highlevel=False)
+
+    np.testing.assert_array_equal(to_list(res_seg_cuda), to_list(res_seg_cpu))
+
     del cuda_content, cuda_depth1
+    cp.get_default_memory_pool().free_all_blocks()
 
 
 def test_block_boundary_argmin_complex1():
     rng = np.random.default_rng(seed=42)
+    # 6000 integers -> 3000 complex numbers
     array = rng.integers(5, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
-    assert ak.argmin(cuda_content, -1, highlevel=False) == ak.argmin(
-        content, -1, highlevel=False
-    )
+
+    res_flat_cuda = ak.argmin(cuda_content, -1, highlevel=False)
+    res_flat_cpu = ak.argmin(content, -1, highlevel=False)
+    assert int(res_flat_cuda) == int(res_flat_cpu)
 
     offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets, content)
     cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
-    assert to_list(ak.argmin(cuda_depth1, -1, highlevel=False)) == to_list(
-        ak.argmin(depth1, -1, highlevel=False)
-    )
+
+    res_seg_cuda = ak.argmin(cuda_depth1, -1, highlevel=False)
+    res_seg_cpu = ak.argmin(depth1, -1, highlevel=False)
+
+    np.testing.assert_array_equal(to_list(res_seg_cuda), to_list(res_seg_cpu))
+
     del cuda_content, cuda_depth1
+    cp.get_default_memory_pool().free_all_blocks()
 
 
 def test_block_boundary_argmin_complex2():
     rng = np.random.default_rng(seed=42)
+    # Higher range (6000) makes ties for the minimum value extremely unlikely
     array = rng.integers(6000, size=6000)
     complex_array = np.vectorize(complex)(
         array[0 : len(array) : 2], array[1 : len(array) : 2]
     )
+
     content = ak.contents.NumpyArray(complex_array)
     cuda_content = ak.to_backend(content, "cuda", highlevel=False)
-    assert ak.argmin(cuda_content, -1, highlevel=False) == ak.argmin(
-        content, -1, highlevel=False
-    )
+
+    res_flat_cuda = ak.argmin(cuda_content, -1, highlevel=False)
+    res_flat_cpu = ak.argmin(content, -1, highlevel=False)
+    assert int(res_flat_cuda) == int(res_flat_cpu)
 
     offsets = ak.index.Index64(np.array([0, 1, 2998, 3000], dtype=np.int64))
     depth1 = ak.contents.ListOffsetArray(offsets, content)
     cuda_depth1 = ak.to_backend(depth1, "cuda", highlevel=False)
-    assert to_list(ak.argmin(cuda_depth1, -1, highlevel=False)) == to_list(
-        ak.argmin(depth1, -1, highlevel=False)
-    )
+
+    res_seg_cuda = ak.argmin(cuda_depth1, -1, highlevel=False)
+    res_seg_cpu = ak.argmin(depth1, -1, highlevel=False)
+
+    np.testing.assert_array_equal(to_list(res_seg_cuda), to_list(res_seg_cpu))
+
     del cuda_content, cuda_depth1
+    cp.get_default_memory_pool().free_all_blocks()
