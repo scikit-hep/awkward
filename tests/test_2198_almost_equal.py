@@ -23,7 +23,7 @@ def test_dtype():
     assert not ak.almost_equal([1, 2, 3], ["1", "2", "3"], dtype_exact=True)
     assert not ak.almost_equal(
         np.array([1, 2, 3], dtype=np.int64),
-        np.array([1, 2, 3], dtype=np.timedelta64),
+        np.array([1, 2, 3], dtype=np.dtype("timedelta64[s]")),
         dtype_exact=True,
     )
     assert not ak.almost_equal(

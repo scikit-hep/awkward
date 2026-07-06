@@ -17,7 +17,8 @@ cpu = NumpyBackend.instance()
 
 @high_level_function()
 def broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns a list of arrays whose record types contain the same fields.
+
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -27,12 +28,14 @@ def broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Return a list of arrays whose types contain the same number of fields. Unlike
-    #ak.broadcast_arrays, this function does not require record types to occur at the
-    same depths. Where fields are missing from one record, they are inserted at the same
-    position with an `option[unknown]` type. This type is easily erased by ufunc and
-    concatenation operations.
+    Returns:
+        Return a list of arrays whose types contain the same number of fields. Unlike
+        #ak.broadcast_arrays, this function does not require record types to occur at the
+        same depths. Where fields are missing from one record, they are inserted at the same
+        position with an `option[unknown]` type. This type is easily erased by ufunc and
+        concatenation operations.
 
+    Examples:
         >>> x, y = ak.broadcast_fields(
         ...     [{"x": {"y": 1, "z": 2, "w": [1]}}],
         ...     [{"x": [{"y": 1}]}],
@@ -53,7 +56,6 @@ def broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None):
                 w: ?unknown
             }
         }
-
     """
     # Dispatch
     yield arrays

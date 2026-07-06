@@ -72,7 +72,7 @@ def corr(
 
     This function has no NumPy equivalent.
 
-    Passing all arguments to the reducers, the correlation is calculated as
+    Passing all arguments to the reducers, the correlation is calculated as::
 
         ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight)
             / np.sqrt(ak.sum((x - ak.mean(x))**2))

@@ -76,7 +76,7 @@ def mean(
     if all lists at a given dimension have the same length and no None values,
     but it generalizes to cases where they do not.
 
-    Passing all arguments to the reducers, the mean is calculated as
+    Passing all arguments to the reducers, the mean is calculated as::
 
         ak.sum(x*weight) / ak.sum(weight)
 
@@ -161,7 +161,7 @@ def nanmean(
 
     Like #ak.mean, but treating NaN ("not a number") values as missing.
 
-    Equivalent to
+    Equivalent to::
 
         ak.mean(ak.nan_to_none(array))
 

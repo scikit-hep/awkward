@@ -144,6 +144,9 @@ def _impl(
                 mergecastable="equiv" if dtype_exact else "family",
                 dropunused=True,
             )
+            # UnionArray simplifications can produce IndexedArrays
+            if left.is_indexed and not left.is_option:
+                left = left.project()
         if right.is_union:
             right = right.simplified(
                 right.tags,
@@ -154,6 +157,9 @@ def _impl(
                 mergecastable="equiv" if dtype_exact else "family",
                 dropunused=True,
             )
+            # UnionArray simplifications can produce IndexedArrays
+            if right.is_indexed and not right.is_option:
+                right = right.project()
 
         # Simplify regular NumPy types
         if left.is_numpy and left.purelist_depth > 1:
@@ -215,7 +221,11 @@ def _impl(
             ):
                 return (
                     (left.dtype == right.dtype)
-                    and backend.nplike.all(left.data == right.data)
+                    and backend.nplike.array_equal(
+                        left.data,
+                        right.data,
+                        equal_nan=equal_nan,
+                    )
                     and left.shape == right.shape
                 )
             elif exact_eq:
@@ -294,7 +304,8 @@ def _impl(
                     or not check_parameters
                 )
                 and left.is_tuple == right.is_tuple
-                and (left.is_tuple or (len(left.fields) == len(right.fields)))
+                and len(left.fields) == len(right.fields)
+                and (left.is_tuple or set(left.fields) == set(right.fields))
                 and all(visitor(left.content(f), right.content(f)) for f in left.fields)
             )
         elif left.is_unknown and right.is_unknown:

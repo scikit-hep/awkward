@@ -36,7 +36,8 @@ np = NumpyMetadata.instance()
 def concatenate(
     arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None, attrs=None
 ):
-    """
+    """Returns an array with the given arrays concatenated along an axis.
+
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -59,10 +60,11 @@ def concatenate(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array with `arrays` concatenated. For `axis=0`, this means that
-    one whole array follows another. For `axis=1`, it means that the `arrays`
-    must have the same lengths and nested lists are each concatenated,
-    element for element, and similarly for deeper levels.
+    Returns:
+        An array with `arrays` concatenated. For `axis=0`, this means that
+        one whole array follows another. For `axis=1`, it means that the `arrays`
+        must have the same lengths and nested lists are each concatenated,
+        element for element, and similarly for deeper levels.
     """
     # Dispatch
     if (
@@ -71,6 +73,7 @@ def concatenate(
     ):
         yield (arrays,)
     else:
+        arrays = list(arrays)
         yield arrays
 
     # Implementation

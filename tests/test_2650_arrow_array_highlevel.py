@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from packaging.version import parse as parse_version
 
 import awkward as ak
 
@@ -27,10 +26,6 @@ def test_simple_conversion():
     assert arrow_array.tolist() == array.to_list()
 
 
-@pytest.mark.skipif(
-    parse_version(pyarrow.__version__) < parse_version("12.0.0"),
-    reason="pyarrow >= 12.0.0 required for casting test",
-)
 def test_type_cast():
     array = ak.mask(np.array([1, 2, 3], dtype=np.uint8), [True, False, False])
     arrow_array = pyarrow.array(array, type=pyarrow.float64())

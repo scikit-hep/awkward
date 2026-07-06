@@ -81,7 +81,6 @@ class NumpyMetadata(PublicSingleton):
     nan = numpy.nan
     inf = numpy.inf
 
-    nat = numpy.datetime64("NaT")
     datetime_data = staticmethod(numpy.datetime_data)
     issubdtype = staticmethod(numpy.issubdtype)
 
@@ -324,7 +323,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLikeT: ...
+    ) -> ArrayLikeT | VirtualNDArray: ...
 
     @abstractmethod
     def repeat(
@@ -364,6 +363,9 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
 
     @abstractmethod
     def strides(self, x: ArrayLikeT | PlaceholderArray) -> tuple[ShapeItem, ...]: ...
+
+    @abstractmethod
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT: ...
 
     ############################ ufuncs
 

@@ -61,12 +61,12 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     BitMaskedArray has an additional parameter, `lsb_order`; if True,
     the position of each bit is in
     [Least-Significant Bit order](https://en.wikipedia.org/wiki/Bit_numbering)
-    (LSB):
+    (LSB)::
 
         is_valid[j] = bool(mask[j // 8] & (1 << (j % 8))) == valid_when
 
     If False, the position of each bit is in Most-Significant Bit order
-    (MSB):
+    (MSB)::
 
         is_valid[j] = bool(mask[j // 8] & (128 >> (j % 8))) == valid_when
 
@@ -79,7 +79,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     to mask their data, with `valid_when=True` and `lsb_order=True`.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class BitMaskedArray(Content):
             def __init__(self, mask, content, valid_when, length, lsb_order):
@@ -137,7 +137,15 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     """
 
     def __init__(
-        self, mask, content, valid_when, length, lsb_order, *, parameters=None
+        self,
+        mask,
+        content,
+        valid_when,
+        length,
+        lsb_order,
+        length_generator=None,
+        *,
+        parameters=None,
     ):
         if not (isinstance(mask, Index) and mask.dtype == np.dtype(np.uint8)):
             raise TypeError(
@@ -168,7 +176,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         if (
             content.backend.nplike.known_data
             and length is not unknown_length
-            and mask.length is not unknown_length
+            and ak._util.maybe_length_of(mask) is not unknown_length
             and length > mask.length * 8
         ):
             raise ValueError(
@@ -177,8 +185,8 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         if (
             content.backend.nplike.known_data
             and length is not unknown_length
-            and mask.length is not unknown_length
-            and length > content.length * 8
+            and ak._util.maybe_length_of(content) is not unknown_length
+            and length > content.length
         ):
             raise ValueError(
                 f"{type(self).__name__} 'length' ({length}) must be <= len(content) ({content.length})"
@@ -190,6 +198,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         self._content = content
         self._valid_when = valid_when
         self._length = length
+        self._length_generator = length_generator
         self._lsb_order = lsb_order
         self._init(parameters, content.backend)
 
@@ -214,6 +223,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         valid_when=UNSET,
         length=UNSET,
         lsb_order=UNSET,
+        length_generator=UNSET,
         *,
         parameters=UNSET,
     ):
@@ -223,6 +233,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._valid_when if valid_when is UNSET else valid_when,
             self._length if length is UNSET else length,
             self._lsb_order if lsb_order is UNSET else lsb_order,
+            self._length_generator if length_generator is UNSET else length_generator,
             parameters=self._parameters if parameters is UNSET else parameters,
         )
 
@@ -236,6 +247,12 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             parameters=copy.deepcopy(self._parameters, memo),
         )
 
+    def __getstate__(self):
+        # Calling .length resolves _length and clears _length_generator
+        # (a local closure from ak.from_buffers that can't be pickled).
+        _ = self.length
+        return self.__dict__
+
     @classmethod
     def simplified(
         cls,
@@ -244,6 +261,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         valid_when,
         length,
         lsb_order,
+        length_generator=None,
         *,
         parameters=None,
     ):
@@ -276,6 +294,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 valid_when,
                 length,
                 lsb_order,
+                length_generator=length_generator,
                 parameters=parameters,
             )
 
@@ -338,6 +357,13 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
     @property
     def length(self) -> ShapeItem:
+        if self._backend.nplike.known_data and self._length is unknown_length:
+            if self._length_generator:
+                self._length = self._length_generator()
+            assert is_integer(self._length), (
+                f"BitMaskedArray length must be an integer for an array with concrete data, not {type(self._length)}"
+            )
+        self._length_generator = None
         return self._length
 
     def __repr__(self):
@@ -414,7 +440,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
                 return self
             else:
                 return BitMaskedArray(
-                    ak.index.IndexU8(self._backend.nplike.logical_not(self._mask.data)),
+                    ak.index.IndexU8(~self._mask.data),
                     self._content,
                     valid_when,
                     self.length,
@@ -471,7 +497,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         return self._content._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._mask, PlaceholderArray):
+        if isinstance(self._mask.data, PlaceholderArray):
             return True
         return self._content._is_getitem_at_placeholder()
 
@@ -512,7 +538,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._mask,
             self._content._getitem_field(where, only_fields),
             self._valid_when,
-            self._length,
+            self.length,
             self._lsb_order,
             parameters=None,
         )
@@ -524,7 +550,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             self._mask,
             self._content._getitem_fields(where, only_fields),
             self._valid_when,
-            self._length,
+            self.length,
             self._lsb_order,
             parameters=None,
         )
@@ -623,18 +649,18 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
     def _numbers_to_type(self, name, including_unknown):
         return self.to_ByteMaskedArray()._numbers_to_type(name, including_unknown)
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return True
         return self.to_IndexedOptionArray64()._is_unique(
-            negaxis, starts, parents, offsets, outlength
+            negaxis, starts, offsets, outlength
         )
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self._mask.length is not unknown_length and self._mask.length == 0:
             return self
         out = self.to_IndexedOptionArray64()._unique(
-            negaxis, starts, parents, offsets, outlength
+            negaxis, starts, offsets, outlength
         )
         if negaxis is None:
             return out
@@ -642,17 +668,15 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             return out._content
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         return self.to_IndexedOptionArray64()._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         return self.to_IndexedOptionArray64()._sort_next(
-            negaxis, starts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -666,7 +690,6 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -678,7 +701,6 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             negaxis,
             starts,
             shifts,
-            parents,
             offsets,
             outlength,
             mask,
@@ -878,6 +900,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             valid_when=self._valid_when,
             length=self._length,
             lsb_order=self._lsb_order,
+            length_generator=self._length_generator,
             parameters=self._parameters,
         )
 
@@ -888,7 +911,7 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
             mask,
             content,
             valid_when=self._valid_when,
-            length=self._length,
+            length=self.length,
             lsb_order=self._lsb_order,
             parameters=self._parameters,
         )

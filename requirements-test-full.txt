@@ -1,12 +1,13 @@
 fsspec>=2022.11.0;sys_platform != "win32"
-hypothesis-awkward>=0.6.1
+hypothesis-awkward==0.18.1
 jax[cpu]>=0.2.15;sys_platform != "win32"
 numba>=0.50.0;sys_platform != "win32"
 numexpr>=2.7
 pandas>=0.24.0;sys_platform != "win32"
-pyarrow>=12.0.0;sys_platform != "win32"
+pyarrow>=17.0.0;sys_platform != "win32"
 pytest>=6
 pytest-cov
 pytest-xdist
+PyYAML
 safetensors>=0.6.2
 uproot>=5
