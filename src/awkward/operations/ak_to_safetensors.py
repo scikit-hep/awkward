@@ -27,7 +27,7 @@ def to_safetensors(
 ):
     """
     Args:
-        array: An Awkward Array or array-like object to serialize.
+        array: Array-like data (anything #ak.to_layout recognizes).
         destination (path-like): Name of the output file, file path, or
             remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
             for remote writing.

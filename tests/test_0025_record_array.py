@@ -117,7 +117,7 @@ def test_basic():
         [1, 2, 3, 4, 5],
     ]
 
-    pairs = list(zip(recordarray.fields, recordarray.contents))
+    pairs = list(zip(recordarray.fields, recordarray.contents, strict=True))
     assert pairs[0][0] == "one"
     assert pairs[1][0] == "two"
     assert pairs[2][0] == "2"

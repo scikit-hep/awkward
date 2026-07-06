@@ -229,7 +229,7 @@ class Record:
         if self.is_tuple and json_conversions is None:
             return tuple(contents)
         else:
-            return dict(zip(self._array.fields, contents))
+            return dict(zip(self._array.fields, contents, strict=True))
 
     def to_backend(self, backend: Backend | str | None = None) -> Self:
         if backend is None:

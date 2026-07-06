@@ -6,6 +6,13 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: needs-cpp-release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   determine-source-date-epoch:
     name: "Determine SOURCE_DATE_EPOCH"
@@ -14,10 +21,11 @@ jobs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: true
           fetch-depth: 0
+          persist-credentials: false
 
       - id: log
         name: Compute SOURCE_DATE_EPOCH
@@ -35,9 +43,10 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Prepare build files
         run: pipx run nox -s prepare

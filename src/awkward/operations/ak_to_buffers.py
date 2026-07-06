@@ -60,7 +60,7 @@ def to_buffers(
     so that data can be losslessly written to file formats and storage devices
     that only map names to binary blobs (such as a filesystem directory).
 
-    This function returns a 3-tuple:
+    This function returns a 3-tuple::
 
         (form, length, container)
 

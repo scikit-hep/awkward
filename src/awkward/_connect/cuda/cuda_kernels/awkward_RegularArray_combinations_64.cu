@@ -6,10 +6,15 @@
 //     scan_in_array_offsets = cupy.zeros(length + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_RegularArray_combinations_64_a", tocarry[0].dtype, toindex.dtype, fromindex.dtype]))(grid, block, (tocarry, toindex, fromindex, n, replacement, size, length, scan_in_array_offsets, invocation_index, err_code))
 //     scan_in_array_offsets = cupy.cumsum(scan_in_array_offsets)
-//     scan_in_array_parents = cupy.zeros(int(scan_in_array_offsets[length]), dtype=cupy.int64)
-//     scan_in_array_local_indices = cupy.zeros(int(scan_in_array_offsets[length]), dtype=cupy.int64)
-//     for i in range(1, length + 1):
-//         scan_in_array_parents[scan_in_array_offsets[i - 1]:scan_in_array_offsets[i]] = i - 1
+//     # Compute total outputs and allocate local_indices
+//     total = int(scan_in_array_offsets[length])
+//     scan_in_array_local_indices = cupy.zeros(total, dtype=cupy.int64)
+//     # Compute parents as a run-length expansion of [0..length-1]
+//     # using cp.searchsorted
+//     if total > 0:
+//         scan_in_array_parents = cupy.searchsorted(scan_in_array_offsets[1:], cupy.arange(total), side='right').astype(cupy.int64)
+//     else:
+//         scan_in_array_parents = cupy.zeros(0, dtype=cupy.int64)
 //     if int(scan_in_array_offsets[length]) < 1024:
 //         block_size = int(scan_in_array_offsets[length])
 //     else:

@@ -107,7 +107,7 @@ class UnionType(Type):
             and any(
                 all(
                     this._is_equal_to(that, all_parameters)
-                    for this, that in zip(self._contents, contents)
+                    for this, that in zip(self._contents, contents, strict=True)
                 )
                 for contents in permutations(other._contents)
             )

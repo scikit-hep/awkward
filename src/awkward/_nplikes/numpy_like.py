@@ -81,7 +81,6 @@ class NumpyMetadata(PublicSingleton):
     nan = numpy.nan
     inf = numpy.inf
 
-    nat = numpy.datetime64("NaT")
     datetime_data = staticmethod(numpy.datetime_data)
     issubdtype = staticmethod(numpy.issubdtype)
 
@@ -324,7 +323,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLikeT: ...
+    ) -> ArrayLikeT | VirtualNDArray: ...
 
     @abstractmethod
     def repeat(
@@ -365,6 +364,9 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     @abstractmethod
     def strides(self, x: ArrayLikeT | PlaceholderArray) -> tuple[ShapeItem, ...]: ...
 
+    @abstractmethod
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT: ...
+
     ############################ ufuncs
 
     @abstractmethod
@@ -397,6 +399,16 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
 
     @abstractmethod
     def divide(
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT: ...
+
+    @abstractmethod
+    def minimum(
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT: ...
+
+    @abstractmethod
+    def maximum(
         self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
     ) -> ArrayLikeT: ...
 
@@ -507,7 +519,12 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     ) -> ArrayLikeT: ...
 
     @abstractmethod
-    def can_cast(self, from_: DType | ArrayLikeT, to: DType | ArrayLikeT) -> bool: ...
+    def can_cast(
+        self,
+        from_: DType | ArrayLikeT,
+        to: DType | ArrayLikeT,
+        casting: Literal["no", "equiv", "safe", "same_kind", "unsafe"] = "same_kind",
+    ) -> bool: ...
 
     @abstractmethod
     def is_c_contiguous(self, x: ArrayLikeT | PlaceholderArray) -> bool: ...

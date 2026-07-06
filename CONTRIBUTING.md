@@ -20,12 +20,29 @@ Feel free to [open pull requests in GitHub](https://github.com/scikit-hep/awkwar
 
 Please [make the pull request a draft](https://github.blog/2019-02-14-introducing-draft-pull-requests/) to indicate that it is in an incomplete state and shouldn't be merged until you click "ready for review."
 
+### AI-assisted contributions
+
+We welcome the use of AI tools as part of the development process. They can be valuable aids for drafting, refactoring, documentation, and exploration. However, contributions to Awkward Array require human judgment, contextual understanding, and familiarity with the project’s structure, goals, and standards.
+
+When using AI tools:
+
+* **You remain the author of the contribution.** Review, understand, and test all AI-assisted code or documentation before submitting it under your name. You should be able to explain and defend the changes on request.
+* **Avoid fully automated submissions.** Issues or pull requests generated end-to-end by automated tools, without meaningful human review or intent, are not appropriate.
+* **Be respectful of reviewers’ time.** Ensure that both the content of the PR and its description reflect your own understanding. Reviewers should not be expected to infer authorship or unknowingly interact with an AI during review.
+* **Disclose significant AI assistance.** If AI tools were used for a substantial portion of the contribution, please note this in the PR description. (This guide is an example of that: we used ChatGPT to help with the writing, and in this comment, we acknowledge that fact.)
+
+Contributors are responsible for the correctness, maintainability, and long-term impact of all submitted changes, regardless of whether AI tools were used.
+
+Pull requests that do not meet these expectations may be closed without review.
+
 ### Getting your pull request reviewed
 
-Currently, we have two regular reviewers of pull requests:
+Currently, we have four regular reviewers of pull requests:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
   * Peter Fackeldey ([pfackeldey](https://github.com/pfackeldey))
+  * Andres Rios Tascon ([ariostas](https://github.com/ariostas))
+  * Iason Krommydas ([ikrommyd](https://github.com/ikrommyd))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
@@ -299,7 +316,7 @@ To make an `awkward-cpp` release:
 #### `awkward` releases
 To make an `awkward` release:
 1. A commit to `main` should increase the version number in `pyproject.toml`
-2. A new GitHub release must be published.
+2. A new GitHub release must be published. "Generate release notes" produces categorized notes automatically: a workflow labels each PR `type/<type>` from its conventional-commit title, and `.github/release.yml` groups those labels into sections.
 3. A `docs/switcher.json` entry must be added for new minor/major versions.
 
 Pushes that modify `docs/switcher.json` on `main` will automatically be synchronised with AWS.
@@ -314,3 +331,41 @@ python -m pip install --upgrade awkward
 python -m pip uninstall --yes awkward awkward-cpp
 python -m pip install --upgrade --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple awkward
 ```
+
+### Guidelines for Dependency and Version Changes
+
+To ensure stability and reproducibility across the Awkward ecosystem:
+
+1. Collaborative Review Required
+   - Pull requests that affect core dependencies (e.g., Numba, Pandas, PyArrow, NumPy) or Python version support must be discussed with maintainers before merging.
+   - This avoids unilateral decisions that could break critical workflows.
+
+2. Compatibility Transparency
+   - If a dependency is not yet available for a new Python release, note this clearly in the PR description and documentation.
+   - Example: “Supports Python 3.14, but Numba-dependent features are disabled until upstream support is released.”
+
+3. Testing Expectations
+   - CI should run against all supported Python versions.
+   - Tests that depend on unsupported features (e.g., Numba on Python 3.14) must be marked with xfail so contributors see the limitation.
+
+4. Version Pinning
+   - Pin or constrain versions of critical dependencies to prevent silent breakages from upstream changes.
+   - Floating versions may be allowed for secondary utilities, but core scientific packages should be locked.
+
+5. Communication
+   - Use GitHub Discussions or Issues to propose changes before opening a PR that alters compatibility.
+   - This ensures consensus and avoids surprises for downstream users.
+
+
+
+---
+
+#### Example PR Checklist
+
+- Have I discussed this change with maintainers?
+
+- Did I document limitations (e.g., missing Numba support)?
+
+- Are CI tests updated to reflect compatibility status?
+
+- Did I pin or constrain critical dependencies?

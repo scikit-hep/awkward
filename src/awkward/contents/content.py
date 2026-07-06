@@ -846,7 +846,12 @@ class Content(Meta):
             localindex.data, parameters=None, backend=self._backend
         )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         raise NotImplementedError
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
@@ -888,7 +893,7 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
         mask: bool,
         keepdims: bool,
@@ -901,7 +906,7 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -912,7 +917,7 @@ class Content(Meta):
         self,
         negaxis: int,
         starts: Index,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -930,7 +935,7 @@ class Content(Meta):
         if replacement:
             size = size + (n - 1)
         thisn = n
-        if thisn is None or size is None:
+        if thisn is None or size is unknown_length:
             combinationslen = size  # not actually size, just an unknown value
         else:
             if thisn > size:
@@ -1034,7 +1039,7 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
     ) -> bool:
         raise NotImplementedError
@@ -1043,7 +1048,7 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
     ):
         raise NotImplementedError
@@ -1295,7 +1300,7 @@ class Content(Meta):
                             outimag[i] = f2(f1(f0(x)))
 
                 if outimag is not None:
-                    for i, (real, imag) in enumerate(zip(out, outimag)):
+                    for i, (real, imag) in enumerate(zip(out, outimag, strict=True)):
                         out[i] = {complex_real_string: real, complex_imag_string: imag}
 
             return out

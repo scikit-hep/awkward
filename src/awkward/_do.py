@@ -78,7 +78,7 @@ def to_buffers(
     form_key: str | None = "node{id}",
     id_start: Integral = 0,
     backend: Backend | None = None,
-    byteorder: Literal["<", ">"] = "<",
+    byteorder: Literal["<", ">"] = ak._util.native_byteorder,
 ) -> tuple[form.Form, int, Mapping[str, Any]]:
     if container is None:
         container = {}
@@ -145,8 +145,8 @@ def combinations(
 def is_unique(layout, axis: Integral | None = None) -> bool:
     negaxis = axis if axis is None else -axis
     starts = ak.index.Index64.zeros(1, nplike=layout._backend.nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.nplike)
-    return layout._is_unique(negaxis, starts, parents, 1)
+    offsets = ak.index.Index64([0, layout.length], nplike=layout.backend.nplike)
+    return layout._is_unique(negaxis, starts, offsets, 1)
 
 
 def unique(layout: Content, axis=None):
@@ -175,9 +175,9 @@ def unique(layout: Content, axis=None):
                     )
 
         starts = ak.index.Index64.zeros(1, nplike=layout._backend.nplike)
-        parents = ak.index.Index64.zeros(layout.length, nplike=layout._backend.nplike)
+        offsets = ak.index.Index64([0, layout.length], nplike=layout.backend.nplike)
 
-        return layout._unique(negaxis, starts, parents, 1)
+        return layout._unique(negaxis, starts, offsets, 1)
 
     raise AxisError(
         f"unique expects axis 'None' or '-1', got axis={axis} that is not supported yet"
@@ -207,8 +207,13 @@ def num(layout, axis):
     return layout._num(axis, 0)
 
 
-def mergeable(one: Content, two: Content, mergebool: bool = True) -> bool:
-    return one._mergeable_next(two, mergebool=mergebool)
+def mergeable(
+    one: Content,
+    two: Content,
+    mergebool: bool = True,
+    mergecastable: Literal["same_kind", "equiv", "family"] = "same_kind",
+) -> bool:
+    return one._mergeable_next(two, mergebool=mergebool, mergecastable=mergecastable)
 
 
 def mergemany(contents: list[Content]) -> Content:
@@ -262,14 +267,14 @@ def reduce(
             reducer = specialization
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
-        parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
+        offsets = ak.index.Index64([0, layout.length], nplike=layout.backend.nplike)
         shifts = None
         next = layout._reduce_next(
             reducer,
             1,
             starts,
             shifts,
-            parents,
+            offsets,
             1,
             mask,
             keepdims,
@@ -316,14 +321,15 @@ def reduce(
             del original_reducer  # not used below this point
 
         starts = ak.index.Index64.zeros(1, layout.backend.nplike)
-        parents = ak.index.Index64.zeros(layout.length, layout.backend.nplike)
+        offsets = ak.index.Index64([0, layout.length], nplike=layout.backend.nplike)
+
         shifts = None
         next = layout._reduce_next(
             reducer,
             negaxis,
             starts,
             shifts,
-            parents,
+            offsets,
             1,
             mask,
             keepdims,
@@ -367,12 +373,13 @@ def argsort(
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.nplike)
+    offsets = ak.index.Index64([0, layout.length], nplike=layout.backend.nplike)
+
     return layout._argsort_next(
         negaxis,
         starts,
         None,
-        parents,
+        offsets,
         1,
         ascending,
         stable,
@@ -406,8 +413,9 @@ def sort(
             )
 
     starts = ak.index.Index64.zeros(1, nplike=layout.backend.nplike)
-    parents = ak.index.Index64.zeros(layout.length, nplike=layout.backend.nplike)
-    return layout._sort_next(negaxis, starts, parents, 1, ascending, stable)
+    offsets = ak.index.Index64([0, layout.length], nplike=layout.backend.nplike)
+
+    return layout._sort_next(negaxis, starts, offsets, 1, ascending, stable)
 
 
 def touch_data(layout: Content, recursive: bool = True):

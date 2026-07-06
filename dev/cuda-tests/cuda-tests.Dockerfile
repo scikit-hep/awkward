@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.2-devel-ubuntu20.04
+FROM nvidia/cuda:12.6.3-devel-ubuntu22.04
 WORKDIR /app
 
 ARG DEBIAN_FRONTEND=noninteractive
