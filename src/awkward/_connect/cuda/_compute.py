@@ -1762,9 +1762,14 @@ def awkward_RegularArray_getitem_next_array_regularize(
     if lenarray == 0:
         return
     dtype = toarray.dtype.type
+    has_error = cp.zeros(1, dtype=toarray.dtype)
 
     def _regularize(v):
-        return dtype(v + size) if v < 0 else dtype(v)
+        normalized = v + size if v < 0 else v
+        if normalized < 0 or normalized >= size:
+            has_error[0] = dtype(1)
+            return dtype(0)
+        return dtype(normalized)
 
     unary_transform(
         d_in=fromarray[:lenarray],
@@ -1772,7 +1777,7 @@ def awkward_RegularArray_getitem_next_array_regularize(
         op=_regularize,
         num_items=lenarray,
     )
-    if cp.any((toarray[:lenarray] < 0) | (toarray[:lenarray] >= size)):
+    if int(has_error[0]) != 0:
         raise ValueError(
             "index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_array_regularize)"
         )
@@ -1814,11 +1819,12 @@ def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
         return
     n = offsetslength - 1
     counts = fromoffsets[1:offsetslength] - fromoffsets[:n]
-    if cp.any(counts < 0):
-        raise ValueError(
-            "offsets must be monotonically increasing in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
-        )
-    if not cp.all(counts == counts[0]):
+    # Fuse both checks into one sync for the happy path.
+    if cp.any((counts < 0) | (counts != counts[0])):
+        if cp.any(counts < 0):
+            raise ValueError(
+                "offsets must be monotonically increasing in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
+            )
         raise ValueError(
             "cannot convert to RegularArray because subarray lengths are not regular in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
         )
@@ -2027,15 +2033,20 @@ def awkward_ListArray_validity(starts, stops, length, lencontent):
     # (no errors, the common case) only needs a single GPU→CPU sync instead of three.
     if not cp.any(nonempty & ((s > e) | (s < 0) | (e > lencontent))):
         return
-    # Error path: identify which condition failed and find its first index.
-    mask = nonempty & (s > e)
-    if cp.any(mask):
-        raise ValueError(f"start[i] > stop[i] at i={int(cp.argmax(mask))}")
-    mask = nonempty & (s < 0)
-    if cp.any(mask):
-        raise ValueError(f"start[i] < 0 at i={int(cp.argmax(mask))}")
-    mask = nonempty & (e > lencontent)
-    raise ValueError(f"stop[i] > len(content) at i={int(cp.argmax(mask))}")
+    # Error path: priority-encode all conditions into one array, then a single
+    # argmax finds both the first failing index and which condition fired.
+    # Priority: 1=s>e, 2=s<0, 3=e>lencontent (checked in that order).
+    err_code = cp.where(
+        nonempty & (s > e), 1,
+        cp.where(nonempty & (s < 0), 2, cp.where(nonempty & (e > lencontent), 3, 0)),
+    )
+    first_idx = int(cp.argmax(err_code > 0))
+    code = int(err_code[first_idx])
+    if code == 1:
+        raise ValueError(f"start[i] > stop[i] at i={first_idx}")
+    if code == 2:
+        raise ValueError(f"start[i] < 0 at i={first_idx}")
+    raise ValueError(f"stop[i] > len(content) at i={first_idx}")
 
 
 ## NOT USED (revisit later)
@@ -2210,12 +2221,14 @@ def awkward_ListArray_getitem_next_at(tocarry, fromstarts, fromstops, lenstarts,
     if lenstarts == 0:
         return
     dtype = tocarry.dtype.type
+    has_error = cp.zeros(1, dtype=tocarry.dtype)
 
     def compute(i):
         length = fromstops[i] - fromstarts[i]
         reg = length + at if at < 0 else at
         if reg < 0 or reg >= length:
-            return dtype(-1)
+            has_error[0] = dtype(1)
+            return dtype(0)
         return dtype(fromstarts[i] + reg)
 
     unary_transform(
@@ -2224,9 +2237,8 @@ def awkward_ListArray_getitem_next_at(tocarry, fromstarts, fromstops, lenstarts,
         op=compute,
         num_items=lenstarts,
     )
-    if cp.any(tocarry[:lenstarts] < 0):
-        i = int(cp.argmax(tocarry[:lenstarts] < 0))
-        raise ValueError(f"index out of range at i={i}, at={at}")
+    if int(has_error[0]) != 0:
+        raise ValueError(f"index out of range at={at}")
 
 
 # kSliceNone sentinel value (matches C++ kMaxInt64 + 1 = 2**63 - 1)
@@ -2428,26 +2440,30 @@ def awkward_ListArray_getitem_next_array_advanced(
     if lenstarts == 0:
         return
 
-    starts = fromstarts[:lenstarts]
-    stops = fromstops[:lenstarts]
-    if cp.any(stops < starts):
-        raise ValueError("stops[i] < starts[i]")
-    nonempty = starts != stops
-    if cp.any(nonempty & (stops > lencontent)):
-        raise ValueError("stops[i] > len(content)")
-
     dtype = tocarry.dtype.type
     adtype = toadvanced.dtype.type
+    has_error = cp.zeros(1, dtype=fromstarts.dtype)
 
     def fill(i):
-        length = fromstops[i] - fromstarts[i]
+        start = fromstarts[i]
+        stop = fromstops[i]
+        if stop < start:
+            has_error[0] = fromstarts.dtype.type(1)
+            toadvanced[i] = adtype(i)
+            return dtype(0)
+        if start != stop and stop > lencontent:
+            has_error[0] = fromstarts.dtype.type(2)
+            toadvanced[i] = adtype(i)
+            return dtype(0)
+        length = stop - start
         reg_at = fromarray[fromadvanced[i]]
         if reg_at < 0:
             reg_at = reg_at + length
         if reg_at < 0 or reg_at >= length:
-            tocarry[i] = dtype(-1)
-        else:
-            tocarry[i] = dtype(fromstarts[i] + reg_at)
+            has_error[0] = fromstarts.dtype.type(3)
+            toadvanced[i] = adtype(i)
+            return dtype(0)
+        tocarry[i] = dtype(start + reg_at)
         toadvanced[i] = adtype(i)
         return dtype(0)
 
@@ -2457,7 +2473,13 @@ def awkward_ListArray_getitem_next_array_advanced(
         op=fill,
         num_items=lenstarts,
     )
-    if cp.any(tocarry[:lenstarts] < 0):
+
+    err = int(has_error[0])
+    if err == 1:
+        raise ValueError("stops[i] < starts[i]")
+    if err == 2:
+        raise ValueError("stops[i] > len(content)")
+    if err == 3:
         raise ValueError("index out of range")
 
 
@@ -2482,28 +2504,32 @@ def awkward_ListArray_getitem_next_array(
     if lenstarts == 0 or lenarray == 0:
         return
 
-    starts = fromstarts[:lenstarts]
-    stops = fromstops[:lenstarts]
-    if cp.any(stops < starts):
-        raise ValueError("stops[i] < starts[i]")
-    nonempty = starts != stops
-    if cp.any(nonempty & (stops > lencontent)):
-        raise ValueError("stops[i] > len(content)")
-
     dtype = tocarry.dtype.type
     adtype = toadvanced.dtype.type
+    has_error = cp.zeros(1, dtype=fromstarts.dtype)
 
     def fill(k):
         i = k // lenarray
         j = k % lenarray
-        length = fromstops[i] - fromstarts[i]
+        start = fromstarts[i]
+        stop = fromstops[i]
+        if stop < start:
+            has_error[0] = fromstarts.dtype.type(1)
+            toadvanced[k] = adtype(j)
+            return dtype(0)
+        if start != stop and stop > lencontent:
+            has_error[0] = fromstarts.dtype.type(2)
+            toadvanced[k] = adtype(j)
+            return dtype(0)
+        length = stop - start
         reg_at = fromarray[j]
         if reg_at < 0:
             reg_at = reg_at + length
         if reg_at < 0 or reg_at >= length:
-            tocarry[k] = dtype(-1)
-        else:
-            tocarry[k] = dtype(fromstarts[i] + reg_at)
+            has_error[0] = fromstarts.dtype.type(3)
+            toadvanced[k] = adtype(j)
+            return dtype(0)
+        tocarry[k] = dtype(start + reg_at)
         toadvanced[k] = adtype(j)
         return dtype(0)
 
@@ -2513,7 +2539,13 @@ def awkward_ListArray_getitem_next_array(
         op=fill,
         num_items=lenstarts * lenarray,
     )
-    if cp.any(tocarry[: lenstarts * lenarray] < 0):
+
+    err = int(has_error[0])
+    if err == 1:
+        raise ValueError("stops[i] < starts[i]")
+    if err == 2:
+        raise ValueError("stops[i] > len(content)")
+    if err == 3:
         raise ValueError("index out of range")
 
 
@@ -2540,23 +2572,25 @@ def awkward_ListArray_getitem_jagged_expand(
     if length == 0 or jaggedsize == 0:
         return
 
-    starts = fromstarts[:length]
-    stops = fromstops[:length]
-    if cp.any(stops < starts):
-        raise ValueError("stops[i] < starts[i]")
-    if cp.any((stops - starts) != jaggedsize):
-        raise ValueError("cannot fit jagged slice into nested list")
-
     dtype_ms = multistarts.dtype.type
     dtype_me = multistops.dtype.type
     dtype_c = tocarry.dtype.type
+    has_error = cp.zeros(1, dtype=fromstarts.dtype)
 
     def fill(k):
         i = k // jaggedsize
         j = k % jaggedsize
+        start = fromstarts[i]
+        stop = fromstops[i]
+        if stop < start:
+            has_error[0] = fromstarts.dtype.type(1)
+            return dtype_c(0)
+        if stop - start != jaggedsize:
+            has_error[0] = fromstarts.dtype.type(2)
+            return dtype_c(0)
         multistarts[k] = dtype_ms(singleoffsets[j])
         multistops[k] = dtype_me(singleoffsets[j + 1])
-        tocarry[k] = dtype_c(fromstarts[i] + j)
+        tocarry[k] = dtype_c(start + j)
         return dtype_c(0)
 
     unary_transform(
@@ -2565,6 +2599,12 @@ def awkward_ListArray_getitem_jagged_expand(
         op=fill,
         num_items=length * jaggedsize,
     )
+
+    err = int(has_error[0])
+    if err == 1:
+        raise ValueError("stops[i] < starts[i]")
+    if err == 2:
+        raise ValueError("cannot fit jagged slice into nested list")
 
 
 # Copies fromstarts/fromstops into tostarts/tostops at the given offsets, adding base.
