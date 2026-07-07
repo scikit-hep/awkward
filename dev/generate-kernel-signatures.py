@@ -2,13 +2,35 @@
 
 from __future__ import annotations
 
+import contextlib
 import datetime
+import io
 import os
 import time
 
 import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+@contextlib.contextmanager
+def write_if_changed(path):
+    """Yield a buffer to write to; only touch the file if the content changed
+    (ignoring the generation timestamp), so unchanged outputs keep their
+    mtimes and don't trigger rebuilds."""
+    buffer = io.StringIO()
+    yield buffer
+    content = buffer.getvalue()
+
+    def strip_stamp(text):
+        return [line for line in text.splitlines() if "AUTO GENERATED ON" not in line]
+
+    if os.path.exists(path):
+        with open(path) as file:
+            if strip_stamp(file.read()) == strip_stamp(content):
+                return
+    with open(path, "w") as file:
+        file.write(content)
 
 
 cuda_kernels_impl = [
@@ -162,11 +184,10 @@ def type_to_ctype(typename):
 def include_kernels_h(specification):
     print("Generating awkward-cpp/include/awkward/kernels.h...")
 
-    with open(
+    with write_if_changed(
         os.path.join(
             CURRENT_DIR, "..", "awkward-cpp", "include", "awkward", "kernels.h"
         ),
-        "w",
     ) as header:
         header.write(
             f"""// AUTO GENERATED ON {reproducible_datetime()}
@@ -242,7 +263,7 @@ def type_to_pytype(typename, special):
 def kernel_signatures_py(specification):
     print("Generating awkward-cpp/src/awkward_cpp/_kernel_signatures.py...")
 
-    with open(
+    with write_if_changed(
         os.path.join(
             CURRENT_DIR,
             "..",
@@ -251,7 +272,6 @@ def kernel_signatures_py(specification):
             "awkward_cpp",
             "_kernel_signatures.py",
         ),
-        "w",
     ) as file:
         file.write(
             f"""# AUTO GENERATED ON {reproducible_datetime()}
@@ -346,7 +366,7 @@ def by_signature(lib):
 def kernel_signatures_cuda_py(specification):
     print("Generating src/awkward/_connect/cuda/_kernel_signatures.py...")
 
-    with open(
+    with write_if_changed(
         os.path.join(
             os.path.dirname(CURRENT_DIR),
             "src",
@@ -355,7 +375,6 @@ def kernel_signatures_cuda_py(specification):
             "cuda",
             "_kernel_signatures.py",
         ),
-        "w",
     ) as file:
         file.write(
             f"""# AUTO GENERATED ON {reproducible_datetime()}
