@@ -15,12 +15,12 @@ Parts of `awkward-cpp` are generated; building `awkward-cpp` from the repository
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward.git  # rapidjson submodule
-python -m pip install -v ./awkward-cpp   # generates headers, kernel signatures, and kernel tests
+python -m pip install -v ./awkward-cpp   # generates headers and kernel signatures
 python -m pip install -e .
 ```
 
-- `nox -s prepare` runs the generation scripts without building; it accepts `--headers --signatures --tests --docs` to select targets (`--docs` data is the only target the build doesn't cover). `noxfile.py` is a uv script (`./noxfile.py -s prepare` also works without nox installed); `nox -R -s ...` reuses the session venv.
-- Python-only changes need no rebuild (editable install). Rebuilding `awkward-cpp` is only needed when C++ or the kernel spec changes; for fast iteration install build deps (including `pyyaml` and `numpy`) and use `pip install --no-build-isolation --check-build-dependencies ./awkward-cpp`.
+- `nox -s prepare` runs the generation scripts without building; it accepts `--headers --signatures --tests --docs` to select targets (the build only covers `--headers` and `--signatures`; kernel tests and docs data still need `prepare`). `noxfile.py` is a uv script (`./noxfile.py -s prepare` also works without nox installed); `nox -R -s ...` reuses the session venv.
+- Python-only changes need no rebuild (editable install). Rebuilding `awkward-cpp` is only needed when C++ or the kernel spec changes; for fast iteration install build deps (including `pyyaml`) and use `pip install --no-build-isolation --check-build-dependencies ./awkward-cpp`.
 
 ## Testing
 
@@ -31,7 +31,7 @@ python -m pytest -n auto awkward-cpp/tests-spec         # generated kernel-spec 
 python -m pytest -n auto awkward-cpp/tests-cpu-kernels  # generated tests against compiled kernels
 ```
 
-CUDA suites (`tests-cuda`, `tests-cuda-kernels`) require an Nvidia GPU + CuPy. The generated kernel test dirs are created by building `awkward-cpp` from the repository (or by `nox -s prepare -- --tests`).
+CUDA suites (`tests-cuda`, `tests-cuda-kernels`) require an Nvidia GPU + CuPy. The generated kernel test dirs are created by `nox -s prepare -- --tests`.
 
 Test files are named `tests/test_XXXX-description.py` where `XXXX` is the GitHub issue or PR number (enforced by `dev/validate-test-names.py`). New code needs a new test file following this convention.
 
@@ -67,11 +67,11 @@ There is also a custom flake8 plugin (`dev/flake8_awkward.py`) and `nox -s pylin
 - `dev/generate-kernel-signatures.py` → `awkward-cpp/include/awkward/kernels.h`, `awkward_cpp/_kernel_signatures.py`, and the CUDA signature table in `src/awkward/_connect/cuda/`.
 - `dev/generate-tests.py` + `kernel-test-data.json` → the `tests-spec*` and `tests-cpu-kernels*` suites.
 
-The hand-written C++ implementations live in `awkward-cpp/src/cpu-kernels/` (one file per kernel) and must match the spec; `nox -s diagnostics` checks kernel definitions. Adding/changing a kernel means touching the YAML spec, the C++ implementation, and (sometimes) test data, then rebuilding `awkward-cpp` (which regenerates) or running `nox -s prepare`.
+The hand-written C++ implementations live in `awkward-cpp/src/cpu-kernels/` (one file per kernel) and must match the spec; `nox -s diagnostics` checks kernel definitions. Adding/changing a kernel means touching the YAML spec, the C++ implementation, and (sometimes) test data, then running `nox -s prepare -- --signatures --tests` (a rebuild regenerates signatures but not tests) and rebuilding `awkward-cpp`.
 
 **`kernel-specification.yml` is the single source of truth for all backends** — the canonical signature, semantics, edge-case behavior, and Python reference. CPU C++ and CUDA kernels must conform to it identically: Awkward guarantees cross-backend consistency (NumPy, CuPy, JAX, typetracer, compiled kernels), so any divergence breaks slicing, broadcasting, masking, union, and Dask/JAX typetracer guarantees. Do **not** introduce CUDA-only behavior, reorder arguments, change pointer/buffer types, alter edge cases, add kernels directly in C++/CUDA, or bypass the generation pipeline. GPU optimizations are fine only if semantics stay bit-for-bit identical.
 
-To change a kernel: (1) edit `kernel-specification.yml`; (2) run the generation pipeline (rebuild `awkward-cpp`, or `nox -s prepare -- --signatures --tests`); (3) update **both** the CPU C++ and CUDA implementations to match the reference; (4) confirm `tests-spec`, `tests-cpu-kernels`, and `tests-cuda-kernels` all pass.
+To change a kernel: (1) edit `kernel-specification.yml`; (2) run the generation pipeline (`nox -s prepare -- --signatures --tests`); (3) update **both** the CPU C++ and CUDA implementations to match the reference; (4) confirm `tests-spec`, `tests-cpu-kernels`, and `tests-cuda-kernels` all pass.
 
 ### header-only C++
 

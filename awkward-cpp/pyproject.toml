@@ -82,9 +82,15 @@ if.platform-system = "darwin"
 cmake.version = ">=3.29"
 
 # Generating the kernel artefacts (only possible and only needed when building
-# from the repository, not from an sdist) needs pyyaml and numpy.
+# from the repository, not from an sdist) needs pyyaml; the kernel tests, which
+# are generated only when packing the sdist, additionally need numpy.
 [[tool.scikit-build.overrides]]
 if.from-sdist = false
+build.requires = ["pyyaml"]
+
+[[tool.scikit-build.overrides]]
+if.from-sdist = false
+if.state = "sdist"
 build.requires = ["pyyaml", "numpy"]
 
 
