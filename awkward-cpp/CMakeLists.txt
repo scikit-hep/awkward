@@ -48,12 +48,22 @@ option(AWKWARD_PREPARE
        "Generate kernel artefacts from the repository sources when they are available" ON)
 set(AWKWARD_REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
 if(AWKWARD_PREPARE AND EXISTS "${AWKWARD_REPO_ROOT}/kernel-specification.yml")
-  set(prepare_scripts "dev/copy-cpp-headers.py" "dev/generate-kernel-signatures.py"
-                      "dev/generate-tests.py")
+  set(prepare_scripts "dev/copy-cpp-headers.py" "dev/generate-kernel-signatures.py")
+  set(prepare_inputs "${AWKWARD_REPO_ROOT}/kernel-specification.yml")
+  set(prepare_outputs
+      "${CMAKE_CURRENT_SOURCE_DIR}/header-only"
+      "${CMAKE_CURRENT_SOURCE_DIR}/include/awkward/kernels.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/awkward_cpp/_kernel_signatures.py")
+
+  # The kernel tests are only shipped in the sdist, not the wheel; generating them additionally
+  # needs numpy, which some cross-compiling build environments (pyodide) cannot provide.
+  if(SKBUILD_STATE STREQUAL "sdist")
+    list(APPEND prepare_scripts "dev/generate-tests.py")
+    list(APPEND prepare_inputs "${AWKWARD_REPO_ROOT}/kernel-test-data.json")
+    list(APPEND prepare_outputs "${CMAKE_CURRENT_SOURCE_DIR}/tests-spec")
+  endif()
 
   # Rerun configure (and hence generation) when any generation input changes
-  set(prepare_inputs "${AWKWARD_REPO_ROOT}/kernel-specification.yml"
-                     "${AWKWARD_REPO_ROOT}/kernel-test-data.json")
   foreach(script IN LISTS prepare_scripts)
     list(APPEND prepare_inputs "${AWKWARD_REPO_ROOT}/${script}")
   endforeach()
@@ -73,11 +83,17 @@ if(AWKWARD_PREPARE AND EXISTS "${AWKWARD_REPO_ROOT}/kernel-specification.yml")
   endforeach()
   string(SHA256 prepare_hash "${prepare_state}")
 
-  if(NOT prepare_hash STREQUAL _AWKWARD_PREPARE_STAMP
-     OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/header-only"
-     OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/awkward/kernels.h"
-     OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/awkward_cpp/_kernel_signatures.py"
-     OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests-spec")
+  set(prepare_needed FALSE)
+  if(NOT prepare_hash STREQUAL _AWKWARD_PREPARE_STAMP)
+    set(prepare_needed TRUE)
+  endif()
+  foreach(output IN LISTS prepare_outputs)
+    if(NOT EXISTS "${output}")
+      set(prepare_needed TRUE)
+    endif()
+  endforeach()
+
+  if(prepare_needed)
     foreach(script IN LISTS prepare_scripts)
       message(STATUS "Generating kernel artefacts: ${script}")
       execute_process(COMMAND "${Python_EXECUTABLE}" "${AWKWARD_REPO_ROOT}/${script}"
@@ -86,8 +102,9 @@ if(AWKWARD_PREPARE AND EXISTS "${AWKWARD_REPO_ROOT}/kernel-specification.yml")
         message(
           FATAL_ERROR
             "${script} failed (exit code ${prepare_result}). Generating awkward-cpp's kernel \
-artefacts requires 'pyyaml' and 'numpy' in the build environment (installed automatically for \
-isolated builds). Pass -DAWKWARD_PREPARE=OFF to skip generation if the artefacts already exist.")
+artefacts requires 'pyyaml' (plus 'numpy' when generating the kernel tests for an sdist) in the \
+build environment; these are installed automatically for isolated builds. Pass \
+-DAWKWARD_PREPARE=OFF to skip generation if the artefacts already exist.")
       endif()
     endforeach()
     set(_AWKWARD_PREPARE_STAMP
