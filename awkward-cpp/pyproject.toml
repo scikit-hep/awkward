@@ -61,14 +61,17 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 minimum-version = "build-system.requires"
 build-dir = "build/{cache_tag}"
 sdist.reproducible = true
+# Run CMake configure before packing the sdist so that the generated artefacts
+# below are created from the repository sources and shipped in the sdist.
+sdist.cmake = true
 sdist.include = [
-    "header-only",
-    "include/awkward/kernels.h",
-    "src/awkward_cpp/_kernel_signatures.py",
-    "tests-spec",
-    "tests-spec-explicit",
-    "tests-cpu-kernels",
-    "tests-cpu-kernels-explicit"
+    "/header-only",
+    "/include/awkward/kernels.h",
+    "/src/awkward_cpp/_kernel_signatures.py",
+    "/tests-spec",
+    "/tests-spec-explicit",
+    "/tests-cpu-kernels",
+    "/tests-cpu-kernels-explicit"
 ]
 sdist.exclude = [
   "rapidjson/bin",
@@ -77,6 +80,12 @@ sdist.exclude = [
 [[tool.scikit-build.overrides]]
 if.platform-system = "darwin"
 cmake.version = ">=3.29"
+
+# Generating the kernel artefacts (only possible and only needed when building
+# from the repository, not from an sdist) needs pyyaml and numpy.
+[[tool.scikit-build.overrides]]
+if.from-sdist = false
+build.requires = ["pyyaml", "numpy"]
 
 
 [tool.cibuildwheel]

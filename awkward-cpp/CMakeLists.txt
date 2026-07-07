@@ -39,15 +39,73 @@ if(AWKWARD_O2)
   message(STATUS "AWKWARD_O2 enabled: compiling with -O2 (overrides the default -O3)")
 endif()
 
-# Check for header-only libraries
-if(NOT (EXISTS "header-only" AND EXISTS "include/awkward/kernels.h"))
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+
+# Generated artefacts (header-only copies, kernels.h, kernel signature tables, and kernel tests)
+# are produced from sources at the repository root. A git checkout has the sources but not the
+# artefacts; an sdist ships the artefacts but not the sources.
+option(AWKWARD_PREPARE
+       "Generate kernel artefacts from the repository sources when they are available" ON)
+set(AWKWARD_REPO_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
+if(AWKWARD_PREPARE AND EXISTS "${AWKWARD_REPO_ROOT}/kernel-specification.yml")
+  set(prepare_scripts "dev/copy-cpp-headers.py" "dev/generate-kernel-signatures.py"
+                      "dev/generate-tests.py")
+
+  # Rerun configure (and hence generation) when any generation input changes
+  set(prepare_inputs "${AWKWARD_REPO_ROOT}/kernel-specification.yml"
+                     "${AWKWARD_REPO_ROOT}/kernel-test-data.json")
+  foreach(script IN LISTS prepare_scripts)
+    list(APPEND prepare_inputs "${AWKWARD_REPO_ROOT}/${script}")
+  endforeach()
+  file(GLOB_RECURSE header_only_sources CONFIGURE_DEPENDS "${AWKWARD_REPO_ROOT}/header-only/*")
+  list(APPEND prepare_inputs ${header_only_sources})
+  set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY CMAKE_CONFIGURE_DEPENDS ${prepare_inputs})
+
+  # Only regenerate when the inputs change, so unchanged artefacts keep their timestamps and don't
+  # trigger needless recompilation.
+  set(prepare_state "$ENV{SOURCE_DATE_EPOCH}")
+  foreach(input IN LISTS prepare_inputs)
+    file(SHA256 "${input}" input_hash)
+    string(APPEND prepare_state "${input_hash}")
+  endforeach()
+  string(SHA256 prepare_hash "${prepare_state}")
+
+  if(NOT prepare_hash STREQUAL _AWKWARD_PREPARE_STAMP
+     OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/header-only"
+     OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/awkward/kernels.h"
+     OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/awkward_cpp/_kernel_signatures.py"
+     OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests-spec")
+    foreach(script IN LISTS prepare_scripts)
+      message(STATUS "Generating kernel artefacts: ${script}")
+      execute_process(COMMAND "${Python_EXECUTABLE}" "${AWKWARD_REPO_ROOT}/${script}"
+                      RESULT_VARIABLE prepare_result)
+      if(NOT prepare_result EQUAL 0)
+        message(
+          FATAL_ERROR
+            "${script} failed (exit code ${prepare_result}). Generating awkward-cpp's kernel \
+artefacts requires 'pyyaml' and 'numpy' in the build environment (installed automatically for \
+isolated builds). Pass -DAWKWARD_PREPARE=OFF to skip generation if the artefacts already exist.")
+      endif()
+    endforeach()
+    set(_AWKWARD_PREPARE_STAMP
+        "${prepare_hash}"
+        CACHE INTERNAL "Input hash of the last kernel artefact generation")
+  else()
+    message(STATUS "Generated kernel artefacts are up to date")
+  endif()
+endif()
+
+# Check for generated artefacts (pre-generated in an sdist, created above in a git checkout)
+if(NOT (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/header-only"
+        AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/awkward/kernels.h"))
   message(
     FATAL_ERROR
       "\
 awkward-cpp relies upon generated and copied artefacts such as the header-only libraries and generated kernel headers. \
-These could not be found, which indicates that\n\n\
-    nox -s prepare\
-\n\nwas skipped or failed. \
+These could not be found and could not be generated (generation requires the repository sources at '${AWKWARD_REPO_ROOT}'). \
 Please check https://github.com/scikit-hep/awkward#installation-for-developers to learn more about this process.\
 ")
 endif()
@@ -124,7 +182,6 @@ set_target_properties(
              CXX_EXTENSIONS NO)
 
 # Third tier: Python modules.
-find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 
 # Install python bindings

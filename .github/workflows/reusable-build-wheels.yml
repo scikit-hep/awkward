@@ -52,9 +52,6 @@ jobs:
         submodules: true
         persist-credentials: false
 
-    - name: Prepare build files
-      run: pipx run nox -s prepare
-
     - name: Build awkward-cpp sdist
       run: pipx run build --sdist awkward-cpp
 
@@ -105,9 +102,6 @@ jobs:
     - name: Setup uv
       uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
 
-    - name: Prepare build files
-      run: pipx run nox -s prepare
-
     - uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v4.1.0
       env:
         CIBW_ARCHS: ${{ matrix.arch }}
@@ -139,9 +133,6 @@ jobs:
 
     - name: Setup uv
       uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
-
-    - name: Prepare build files
-      run: pipx run nox -s prepare
 
     - uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v4.1.0
       env:
