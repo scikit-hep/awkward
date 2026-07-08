@@ -33,7 +33,7 @@ def to_parquet(
     count_nulls=True,
     compression="zstd",
     compression_level=None,
-    row_group_size=1024 * 1024,
+    row_group_size=None,
     data_page_size=None,
     parquet_flavor=None,
     parquet_version="2.4",
