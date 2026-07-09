@@ -73,9 +73,7 @@ def validate_iterator_layout(layout):
                 "(or ak.enforce_type) to materialize it first"
             )
     # Normalize a top-level list to ListOffsetArray so offsets always exist.
-    if isinstance(
-        layout, (ak.contents.ListArray, ak.contents.RegularArray)
-    ):
+    if isinstance(layout, (ak.contents.ListArray, ak.contents.RegularArray)):
         return layout.to_ListOffsetArray64(True)
     return layout
 

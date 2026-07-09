@@ -29,7 +29,6 @@ import functools
 import numpy as np
 
 import awkward as ak
-
 from awkward._connect.lazy._fusion import py_scalar_literal
 from awkward._connect.lazy._layout import is_fusible_numeric_list
 

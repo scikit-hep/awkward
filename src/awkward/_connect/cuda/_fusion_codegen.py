@@ -40,7 +40,6 @@ from __future__ import annotations
 import functools
 
 import awkward as ak
-
 from awkward._connect.lazy._fusion import py_scalar_literal
 from awkward._connect.lazy._layout import is_fusible_numeric_list
 
@@ -96,7 +95,7 @@ def _infer_out_dtype(op, columns, single):
         probe = samples[0] if single else tuple(samples)
         with np.errstate(all="ignore"):  # divide-by-zero etc. in the probe only
             return np.asarray(op(probe)).dtype
-    except Exception:  # noqa: BLE001
+    except Exception:
         # A value-domain error in the probe (e.g. int ** negative int) need not
         # reflect the real data; fall back to NumPy input promotion.
         return np.result_type(*dtypes)

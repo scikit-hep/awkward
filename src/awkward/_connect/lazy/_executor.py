@@ -259,7 +259,7 @@ class IRExecutor:
             return _NO_FUSED_KERNEL
         try:
             return execute_fused_cuda(node, values)
-        except Exception:  # noqa: BLE001 - fast path, fall back on any failure
+        except Exception:
             return _NO_FUSED_KERNEL
 
     @staticmethod
@@ -279,7 +279,7 @@ class IRExecutor:
             return _NO_FUSED_KERNEL
         try:
             return execute_fused_cpu(node, values)
-        except Exception:  # noqa: BLE001 - fast path, fall back on any failure
+        except Exception:
             return _NO_FUSED_KERNEL
 
     def _execute_binary_op(self, node: BinaryOpNode) -> ak.Array:

@@ -595,7 +595,7 @@ def test_py_scalar_literal_handles_non_finite():
     assert py_scalar_literal(float("-inf")) == "float('-inf')"
     assert py_scalar_literal(float("nan")) == "float('nan')"
     assert py_scalar_literal(2.5) == "2.5"
-    assert eval(py_scalar_literal(float("inf"))) == float("inf")  # noqa: S307
+    assert eval(py_scalar_literal(float("inf"))) == float("inf")
 
 
 def test_deep_chain_falls_back_not_crash():
