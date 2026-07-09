@@ -19,7 +19,6 @@ import awkward as ak
 from awkward._connect.lazy._fusion import (
     FusedNode,
     fuse,
-    fusion_stats,
     is_elementwise,
 )
 from awkward._connect.lazy._ir import OpType
@@ -57,9 +56,9 @@ def test_division_produces_float_like_eager(arr):
 
 def test_power_and_mixed_ops(arr):
     expected = ak.to_list((arr**2 - arr) * 2)
-    assert ak.to_list((_fresh(arr) ** 2 - _fresh(arr)).compute(fuse=False)) == ak.to_list(
-        arr**2 - arr
-    )
+    assert ak.to_list(
+        (_fresh(arr) ** 2 - _fresh(arr)).compute(fuse=False)
+    ) == ak.to_list(arr**2 - arr)
     la = _fresh(arr)
     assert ak.to_list(((la**2 - la) * 2).compute(fuse=True)) == expected
 
@@ -245,7 +244,7 @@ def test_op_source_generation(arr):
     src = fused.op_source({lid_input: "t[0]", lid_c2: "2", lid_c1: "1"})
     assert src == "((t[0] * 2) + 1)"
     # and it is valid, correct Python
-    fn = eval("lambda t: " + src)  # noqa: S307
+    fn = eval("lambda t: " + src)
     assert fn((5,)) == 11
 
 

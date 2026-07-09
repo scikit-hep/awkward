@@ -82,7 +82,7 @@ def _compile_op(source: str, arity: int):
     """
     ns: dict = {}
     # ``t`` is the zipped tuple of column values for one element.
-    exec(f"def _fused_op(t):\n    return {source}\n", {}, ns)  # noqa: S102
+    exec(f"def _fused_op(t):\n    return {source}\n", {}, ns)
     return ns["_fused_op"]
 
 
@@ -94,7 +94,7 @@ def _build_op(node, values):
     """
     columns = []
     leaf_expr = {}
-    for leaf_id, value in zip(node.leaf_ids, values):
+    for leaf_id, value in zip(node.leaf_ids, values, strict=True):
         kind, payload = _classify_leaf(value)
         if kind == "column":
             leaf_expr[leaf_id] = f"t[{len(columns)}]"
@@ -150,9 +150,7 @@ def execute_fused_cuda(node, values, reduce_ops):
 
     import numpy as np
 
-    zipped = (
-        ZipIterator(*content_iters) if len(content_iters) > 1 else content_iters[0]
-    )
+    zipped = ZipIterator(*content_iters) if len(content_iters) > 1 else content_iters[0]
 
     if node.reduce_op is None:
         # ---- element-wise: one transform kernel over the zipped columns ----
