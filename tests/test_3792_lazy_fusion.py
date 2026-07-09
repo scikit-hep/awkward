@@ -686,3 +686,48 @@ def test_transform_lists_rejects_ragged_and_bad_out():
         transform_lists(ak.Array([[1, 2], [3]]), np.empty(2), 2, lambda x, y: x + y)
     with pytest.raises(TypeError, match="NumPy array"):
         transform_lists(ak.Array([[1, 2], [3, 4]]), [0, 0], 2, lambda x, y: x + y)
+
+
+# ----------------------------------------------------------------------
+# Cleanup batch: new operators, op-node rename, dead-code removal
+# ----------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("make_lazy", "make_eager"),
+    [
+        (lambda la: la // 2, lambda a: a // 2),
+        (lambda la: la % 3, lambda a: a % 3),
+        (lambda la: -la, lambda a: -a),
+        (lambda la: 2**la, lambda a: 2**a),
+        (lambda la: 17 // la, lambda a: 17 // a),
+        (lambda la: 17 % la, lambda a: 17 % a),
+        (lambda la: (la * 2) // (la + 1), lambda a: (a * 2) // (a + 1)),
+    ],
+)
+def test_new_operators_fuse_and_match_eager(make_lazy, make_eager):
+    arr = ak.Array([[5, 6, 7], [8, 9]])
+    fused = make_lazy(ak.cpu.lazy(arr)).compute(fuse=True)
+    assert ak.to_list(fused) == ak.to_list(make_eager(arr))
+
+
+def test_opnode_distinct_from_core_irnode():
+    # The operator-IR base is OpNode; the lowering-protocol base stays IRNode.
+    from awkward._connect.lazy import IRNode  # core lowering node
+    from awkward._connect.lazy._ir import BinaryOpNode, OpNode
+
+    assert OpNode.__name__ == "OpNode"
+    assert IRNode.__name__ == "IRNode"
+    assert OpNode is not IRNode
+    assert issubclass(BinaryOpNode, OpNode)
+
+
+def test_removed_map_optype_and_shims_are_gone():
+    import importlib
+
+    from awkward._connect.lazy._ir import OpType
+
+    assert not hasattr(OpType, "MAP")
+    for dead in ("awkward._connect.cuda._ir", "awkward._connect.cuda._executor"):
+        with pytest.raises(ModuleNotFoundError):
+            importlib.import_module(dead)
