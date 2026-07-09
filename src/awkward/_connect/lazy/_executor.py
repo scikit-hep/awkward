@@ -130,7 +130,7 @@ class IRExecutor:
         handed, so passing the original (unfused) root gives the no-fuse
         debug path.
         """
-        return self.execute(fuse(node))
+        return self.execute(self.optimize(node))
 
     @nvtx.annotate("execute_ir")
     def execute(self, node: IRNode) -> ak.Array:
@@ -362,13 +362,18 @@ class IRExecutor:
 
     def optimize(self, node: IRNode) -> IRNode:
         """
-        Apply optimization passes to the IR.
+        Apply optimization passes to the IR and return the rewritten root.
 
-        Potential optimizations:
-        - Constant folding
-        - Common subexpression elimination
-        - Kernel fusion
-        - Dead code elimination
+        Currently one pass runs: **kernel fusion** (``_fusion.fuse``), which
+        collapses maximal element-wise regions (and transform+reduce) into
+        single ``FusedNode`` kernels.  The pass also folds shared
+        sub-expressions to one materialization point (single-use fusion), so
+        common-subexpression elimination for the fused regions falls out of it.
+
+        The pass is idempotent: a graph that is already fused (its element-wise
+        regions are ``FusedNode``s) is returned unchanged, because ``FusedNode``
+        is opaque to ``fuse`` and every other node is rebuilt structurally.
+
+        Future passes (constant folding, dead-code elimination) compose here.
         """
-        # Placeholder for optimization passes
-        return node
+        return fuse(node)

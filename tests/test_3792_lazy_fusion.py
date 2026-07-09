@@ -281,6 +281,93 @@ def test_cuda_build_op_multi_column_uses_indexed_element():
     assert op((5.0, 7.0)) == 12.0  # op receives the zipped tuple
 
 
+# ----------------------------------------------------------------------
+# Phase 2 completion: optimize() home, idempotence, cache-stability,
+# no-fuse debug mode.  (These are the plan's hard constraints.)
+# ----------------------------------------------------------------------
+
+
+def test_optimize_runs_fusion(arr):
+    from awkward._connect.lazy._executor import IRExecutor
+
+    optimized = IRExecutor().optimize((_fresh(arr) * 2 + 1).ir_node)
+    assert isinstance(optimized, FusedNode)
+
+
+def test_optimize_is_idempotent(arr):
+    from awkward._connect.lazy._executor import IRExecutor
+
+    ex = IRExecutor()
+    once = ex.optimize((_fresh(arr) * 2 + 1).ir_node)
+    twice = ex.optimize(once)
+    assert isinstance(once, FusedNode) and isinstance(twice, FusedNode)
+    # second pass leaves the already-fused graph structurally unchanged
+    assert twice is once or twice.expr_text == once.expr_text
+    assert ak.to_list(ex.execute(twice)) == ak.to_list(ex.execute(once))
+
+
+def test_compile_and_execute_matches_optimize_then_execute(arr):
+    from awkward._connect.lazy._executor import IRExecutor
+
+    node = ((_fresh(arr) * 2 + 1) * 3).ir_node
+    a = ak.to_list(IRExecutor().compile_and_execute(node))
+    ex = IRExecutor()
+    b = ak.to_list(ex.execute(ex.optimize(node)))
+    assert a == b == ak.to_list((arr * 2 + 1) * 3)
+
+
+def test_fused_op_is_cache_stable():
+    # Plan's hard constraint: a stable program must compile the fused op ONCE,
+    # not per call (the 1.8 s/call regression). Repeated fresh graphs with the
+    # same expression structure must hit the interned op cache.
+    from awkward._connect.cpu import _fusion_codegen as cfc
+
+    cfc._compile_op.cache_clear()
+    a = ak.Array([[1.0, 2, 3], [4, 5], [6, 7]])
+    for _ in range(5):
+        (ak.cpu.lazy(a) * 2 + 1).compute(fuse=True)  # fresh node ids each time
+    info = cfc._compile_op.cache_info()
+    assert info.misses == 1  # compiled exactly once
+    assert info.hits >= 4  # reused on every subsequent call
+
+
+def test_no_fuse_debug_mode_matches_fused_across_battery(arr, arr2):
+    la, lb = _fresh(arr), ak.cpu.lazy(arr2)
+    programs = [
+        lambda: _fresh(arr) * 2 + 1,
+        lambda: (_fresh(arr) * 2 + 1) * 3 - 4,
+        lambda: _fresh(arr) / 2 + 0.5,
+        lambda: la * lb + la,
+        lambda: (_fresh(arr) * 2) > (_fresh(arr) + 3),
+    ]
+    for make in programs:
+        fused = ak.to_list(make().compute(fuse=True))
+        interp = ak.to_list(make().compute(fuse=False))
+        assert fused == interp
+
+
+# ----------------------------------------------------------------------
+# Public entry point: ak.cuda.to_cccl_iterator (CPU-visible surface)
+# ----------------------------------------------------------------------
+
+
+def test_to_cccl_iterator_is_public():
+    # The symbol is exported regardless of whether cupy is installed.
+    assert "to_cccl_iterator" in ak.cuda.__all__
+    assert callable(ak.cuda.to_cccl_iterator)
+
+
+def test_to_cccl_iterator_without_cupy_errors_clearly():
+    # Where cupy is unavailable, the entry point must fail with an actionable
+    # install hint rather than an obscure ImportError deep in the helpers.
+    pytest.importorskip  # noqa: B018 - keep import symmetry with GPU tests
+    try:
+        import cupy  # noqa: F401
+    except ImportError:
+        with pytest.raises(ModuleNotFoundError, match="cupy"):
+            ak.cuda.to_cccl_iterator(ak.Array([[1, 2], [3]]))
+
+
 def test_cpu_arrays_skip_cuda_codegen(arr):
     # _is_cuda_backed must be False for cpu-backed leaves, so the executor
     # never reaches the cuda codegen path (it evaluates eagerly instead).

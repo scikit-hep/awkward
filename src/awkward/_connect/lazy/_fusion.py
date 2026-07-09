@@ -281,8 +281,11 @@ def emit_source(root_node: IRNode, leaf_expr: dict) -> str:
 
 def _rebuild_boundary(node: IRNode, rewrite):
     """Reconstruct a non-fused (boundary) node with rewritten children."""
-    if isinstance(node, (InputNode, ConstantNode)):
-        return node  # true leaves: identity preserves refs and executor memo
+    if isinstance(node, (InputNode, ConstantNode, FusedNode)):
+        # True leaves and already-fused regions are identity: this makes the
+        # pass idempotent (``fuse(fuse(g)) == fuse(g)``) and preserves the
+        # executor memo / input references.
+        return node
     if isinstance(node, FilterNode):
         return FilterNode(rewrite(node.input), rewrite(node.condition))
     if isinstance(node, SelectListsNode):
