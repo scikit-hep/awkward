@@ -90,19 +90,27 @@ def _build_op(node, values):
     """Generate the fused device op plus the ordered list of column layouts.
 
     Walks the region (via ``node.op_source``) mapping each column leaf to its
-    zip slot ``t[k]`` and each scalar leaf to a folded literal.
+    element accessor and each scalar leaf to a folded literal.  With one column
+    the transform element is the scalar itself (``t``); with several it is a
+    zipped tuple (``t[k]``).
     """
+    col_slot = {}
+    scalar_expr = {}
     columns = []
-    leaf_expr = {}
     for leaf_id, value in zip(node.leaf_ids, values, strict=True):
         kind, payload = _classify_leaf(value)
         if kind == "column":
-            leaf_expr[leaf_id] = f"t[{len(columns)}]"
+            col_slot[leaf_id] = len(columns)
             columns.append(payload)
         else:  # scalar constant, folded in
-            leaf_expr[leaf_id] = repr(payload)
+            scalar_expr[leaf_id] = repr(payload)
     if not columns:
         raise FusionUnsupported("fused region has no array leaves")
+
+    single = len(columns) == 1
+    leaf_expr = dict(scalar_expr)
+    for leaf_id, slot in col_slot.items():
+        leaf_expr[leaf_id] = "t" if single else f"t[{slot}]"
     source = node.op_source(leaf_expr)
     return _compile_op(source, len(columns)), columns
 
@@ -143,7 +151,7 @@ def execute_fused_cuda(node, values, reduce_ops):
     """
     from cuda.compute import OpKind, TransformIterator, ZipIterator, unary_transform
 
-    from ._compute import segmented_reduce
+    from ._compute import make_segment_views, segmented_reduce
 
     op, columns = _build_op(node, values)
     content_iters, offsets, count, cp = _aligned_contents(columns)
@@ -169,19 +177,20 @@ def execute_fused_cuda(node, values, reduce_ops):
         # e.g. MEAN (two reductions): let the executor apply it eagerly.
         raise FusionUnsupported(f"reduction {reduce_name!r} not fusible")
 
-    opkind_name, init_value = _REDUCE_TO_OPKIND[reduce_name]
+    opkind_name, identity = _REDUCE_TO_OPKIND[reduce_name]
     num_segments = len(offsets) - 1
     out_dtype = np.dtype(node.dtype) if node.dtype is not None else np.float64
 
-    # The element-wise map rides into the reduce kernel as a TransformIterator.
+    # The element-wise map rides into the reduce kernel as a TransformIterator,
+    # so the map + segmented reduction are one kernel with no intermediate
+    # buffer -- the same map-into-reduce idiom as _compute.py's reducers.
     mapped = TransformIterator(zipped, op)
     out = cp.empty(int(num_segments), dtype=out_dtype)
-    start_offsets = offsets[:-1]
-    end_offsets = offsets[1:]
+    start_offsets, end_offsets = make_segment_views(offsets)
 
-    if init_value is None:
+    if identity is None:  # MAX/MIN: identity is the dtype's extreme
         info = np.finfo(out_dtype) if out_dtype.kind == "f" else np.iinfo(out_dtype)
-        init_value = info.min if opkind_name == "MAXIMUM" else info.max
+        identity = info.min if opkind_name == "MAXIMUM" else info.max
 
     segmented_reduce(
         d_in=mapped,
@@ -190,6 +199,6 @@ def execute_fused_cuda(node, values, reduce_ops):
         start_offsets_in=start_offsets,
         end_offsets_in=end_offsets,
         op=getattr(OpKind, opkind_name),
-        init_value=np.asarray([init_value], dtype=out_dtype),
+        h_init=np.asarray(identity, dtype=out_dtype),
     )
     return ak.Array(out)

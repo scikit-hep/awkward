@@ -258,6 +258,29 @@ def test_classify_leaf_scalar_and_unsupported():
         fc._classify_leaf(object())
 
 
+def test_cuda_build_op_single_column_uses_scalar_element():
+    # Regression: a one-column region's transform element is the scalar itself
+    # (`t`), not `t[0]` — the input is not zipped when there is a single column.
+    import awkward._connect.cuda._fusion_codegen as fc
+
+    a = ak.Array([[1.0, 2], [3.0]])
+    node = fuse((ak.cpu.lazy(a) * 2 + 1).ir_node)  # leaves: [col, 2, 1]
+    op, columns = fc._build_op(node, [a, 2, 1])
+    assert len(columns) == 1
+    assert op(5.0) == 11.0  # op receives a bare scalar, not a tuple
+
+
+def test_cuda_build_op_multi_column_uses_indexed_element():
+    import awkward._connect.cuda._fusion_codegen as fc
+
+    a = ak.Array([[1.0, 2], [3.0]])
+    b = ak.Array([[4.0, 5], [6.0]])
+    node = fuse((ak.cpu.lazy(a) + ak.cpu.lazy(b)).ir_node)  # leaves: [colA, colB]
+    op, columns = fc._build_op(node, [a, b])
+    assert len(columns) == 2
+    assert op((5.0, 7.0)) == 12.0  # op receives the zipped tuple
+
+
 def test_cpu_arrays_skip_cuda_codegen(arr):
     # _is_cuda_backed must be False for cpu-backed leaves, so the executor
     # never reaches the cuda codegen path (it evaluates eagerly instead).

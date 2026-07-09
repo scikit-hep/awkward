@@ -88,6 +88,9 @@ class IRExecutor:
         self._memo_bytes = 0
         self.max_entries = max_entries
         self.max_bytes = max_bytes
+        # Which path each FusedNode took, so callers (benchmarks, tests) can
+        # confirm a real fused kernel ran instead of a silent eager fallback.
+        self.fused_hits = {"cuda": 0, "cpu": 0, "eager": 0}
 
     def invalidate(self):
         """Clear all memoized node results."""
@@ -194,12 +197,15 @@ class IRExecutor:
 
         fused = self._maybe_fused_kernel(node, values)
         if fused is not _NO_FUSED_KERNEL:
+            self.fused_hits["cuda"] += 1
             return fused
 
         fused = self._maybe_cpu_fused(node, values)
         if fused is not _NO_FUSED_KERNEL:
+            self.fused_hits["cpu"] += 1
             return fused
 
+        self.fused_hits["eager"] += 1
         result = node.evaluate(values)
         if node.reduce_op is not None:
             result = _REDUCE_OPS[node.reduce_op](result)

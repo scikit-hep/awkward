@@ -50,10 +50,16 @@ def make_jagged(n_lists, max_len=6, seed=0):
     )
 
 
+def _lazy(arr):
+    """Wrap ``arr`` with the lazy entry point for its backend."""
+    if arr.layout.backend.name == "cuda":
+        return ak.cuda.lazy(arr)
+    return ak.cpu.lazy(arr)
+
+
 def build_chain(arr, depth):
     """A depth-op element-wise chain: (((a*1.001 + 0.5) * 1.001 + 0.5) ...)."""
-    la = ak.cpu.lazy(arr)
-    expr = la
+    expr = _lazy(arr)
     for _ in range(depth):
         expr = expr * 1.001 + 0.5
     return expr
@@ -61,8 +67,7 @@ def build_chain(arr, depth):
 
 def build_pipeline(arr):
     """scale -> shift -> filter-by-transformed-condition (a fan-out DAG)."""
-    la = ak.cpu.lazy(arr)
-    t = la * 2.0 + 1.0
+    t = _lazy(arr) * 2.0 + 1.0
     return t.filter(t > 1.5)
 
 
@@ -117,6 +122,117 @@ def print_table(result):
         )
 
 
+# ----------------------------------------------------------------------
+# GPU arm: measured with CUDA events, validated against the interpreter
+# ----------------------------------------------------------------------
+
+
+def _matches(a, b):
+    """Fused vs interpreter agreement, tolerant to float reduction-order drift."""
+    la = ak.to_backend(a, "cpu")
+    lb = ak.to_backend(b, "cpu")
+    try:
+        fa = np.asarray(ak.to_numpy(ak.flatten(la, axis=None)))
+        fb = np.asarray(ak.to_numpy(ak.flatten(lb, axis=None)))
+    except Exception:  # noqa: BLE001 - fall back to structural compare
+        return ak.to_list(la) == ak.to_list(lb)
+    if fa.shape != fb.shape:
+        return False
+    if np.issubdtype(fa.dtype, np.floating):
+        return bool(np.allclose(fa, fb, rtol=1e-9, atol=0.0))
+    return bool(np.array_equal(fa, fb))
+
+
+def _time_gpu(cp, make, fuse, reps):
+    """ms/op on the device timeline (invalidate+recompute so kernels re-run).
+
+    The graph is built once outside the timed window; each iteration clears the
+    cached result (host-side, ~us) and recomputes, so only device work is
+    timed.  Warms up first to exclude NVRTC / cuda.compute JIT.
+    """
+    expr = make()
+    expr.compute(fuse=fuse)  # warmup: compile + op-cache fill
+    cp.cuda.Device().synchronize()
+    start, end = cp.cuda.Event(), cp.cuda.Event()
+    start.record()
+    for _ in range(reps):
+        expr.invalidate()
+        expr.compute(fuse=fuse)
+    end.record()
+    end.synchronize()
+    return cp.cuda.get_elapsed_time(start, end) / reps
+
+
+def bench_case_gpu(name, make, cp, reps=50):
+    # correctness + fusion-engagement check (once, untimed)
+    fused_expr = make()
+    fused_res = fused_expr.compute(fuse=True)
+    hits = dict(fused_expr.executor.fused_hits)
+    interp_res = make().compute(fuse=False)
+    same = _matches(fused_res, interp_res)
+
+    interp = _time_gpu(cp, make, fuse=False, reps=reps)
+    fused = _time_gpu(cp, make, fuse=True, reps=reps)
+    stats = make().fusion_stats()
+    return {
+        "case": name,
+        "elementwise_ops": stats["elementwise_before"],
+        "fused_regions": stats["fused_regions"],
+        "cuda_kernel_hits": hits["cuda"],
+        "matches_interpreter": bool(same),
+        "interp_ms": interp,
+        "fused_ms": fused,
+        "speedup": interp / fused if fused else float("nan"),
+    }
+
+
+def build_chain_sum(arr, depth):
+    """A depth-op element-wise chain reduced per sublist (transform+reduce)."""
+    return build_chain(arr, depth).sum()
+
+
+def _safe_case(name, make, cp):
+    try:
+        return bench_case_gpu(name, make, cp)
+    except Exception as exc:  # noqa: BLE001 - report, don't abort the sweep
+        return {"case": name, "error": f"{type(exc).__name__}: {exc}"}
+
+
+def run_gpu(n_lists):
+    import cupy as cp
+
+    base = make_jagged(n_lists)
+    n_items = int(np.asarray(base.layout.offsets)[-1])  # avoid reducers here
+    arr = ak.to_backend(base, "cuda")
+    rows = []
+    for depth in (1, 2, 4, 8, 16):
+        rows.append(
+            _safe_case(f"chain d={depth:<2}", lambda d=depth: build_chain(arr, d), cp)
+        )
+    rows.append(_safe_case("chain d=4 ->sum", lambda: build_chain_sum(arr, 4), cp))
+    rows.append(_safe_case("filter pipeline", lambda: build_pipeline(arr), cp))
+    return {"device": "cuda", "n_lists": n_lists, "n_items": n_items, "rows": rows}
+
+
+def print_table_gpu(result):
+    print(f"\n### [GPU] {result['n_lists']:,} lists / {result['n_items']:,} items")
+    hdr = (
+        f"{'case':<16}{'ew ops':>7}{'kernels':>8}{'cuda hit':>9}{'match':>7}"
+        f"{'interp ms':>11}{'fused ms':>10}{'speedup':>9}"
+    )
+    print(hdr)
+    print("-" * len(hdr))
+    for r in result["rows"]:
+        if "error" in r:
+            print(f"{r['case']:<16}  ERROR: {r['error']}")
+            continue
+        print(
+            f"{r['case']:<16}{r['elementwise_ops']:>7}{r['fused_regions']:>8}"
+            f"{r['cuda_kernel_hits']:>9}{('yes' if r['matches_interpreter'] else 'NO!'):>7}"
+            f"{r['interp_ms']:>11.3f}{r['fused_ms']:>10.3f}{r['speedup']:>8.2f}x"
+        )
+
+
 def gpu_projection(results, per_launch_us=6.0):
     """Rough GPU launch-overhead saving from the measured launch reduction.
 
@@ -146,16 +262,47 @@ def main():
         default=[200_000, 2_000_000],
         help="list counts to benchmark",
     )
+    ap.add_argument(
+        "--gpu",
+        choices=("auto", "on", "off"),
+        default="auto",
+        help="run the CUDA arm ('auto' = on iff cupy imports)",
+    )
     args = ap.parse_args()
 
-    results = [run(n) for n in args.sizes]
-    for res in results:
+    cpu_results = [run(n) for n in args.sizes]
+    for res in cpu_results:
         print_table(res)
-    gpu_projection(results)
+
+    gpu_results = []
+    want_gpu = args.gpu != "off"
+    if want_gpu:
+        try:
+            import cupy  # noqa: F401
+        except ImportError:
+            if args.gpu == "on":
+                raise
+            print("\n[GPU] cupy not available; skipping CUDA arm.")
+            want_gpu = False
+    if want_gpu:
+        gpu_results = [run_gpu(n) for n in args.sizes]
+        for res in gpu_results:
+            print_table_gpu(res)
+        # sanity: warn loudly if fusion never engaged on device
+        for res in gpu_results:
+            for r in res["rows"]:
+                if "error" in r:
+                    continue
+                if r["fused_regions"] and r["cuda_kernel_hits"] == 0:
+                    print(f"[GPU] WARNING: {r['case']} fell back (no cuda kernel).")
+                if not r["matches_interpreter"]:
+                    print(f"[GPU] WARNING: {r['case']} result != interpreter!")
+
+    gpu_projection(cpu_results)
 
     if args.out:
         with open(args.out, "w") as f:
-            json.dump(results, f, indent=2)
+            json.dump({"cpu": cpu_results, "gpu": gpu_results}, f, indent=2)
         print(f"\nwrote {args.out}")
 
 
