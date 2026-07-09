@@ -1349,6 +1349,7 @@ def awkward_ListArray_combinations(
     # cache-stable: cuda.compute keys plain Python ints by id() (fresh every
     # call -> JIT rebuild each call), but numpy scalars by dtype+value.
     length = np.int64(length)
+
     def make_pass(k, carry_k):
         def fill_pos(g):
             # a) Find source list i via binary search on offsets
