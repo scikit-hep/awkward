@@ -13,6 +13,73 @@ import numpy as np
 import awkward as ak
 
 
+def is_fusible_numeric_list(array) -> bool:
+    """True only for a plain ``var`` list of unparameterized numbers.
+
+    Fusion lowers raw element-wise arithmetic over a shared offsets buffer, so
+    it is correct **only** for a ``ListOffsetArray`` whose content is a numeric
+    ``NumpyArray`` with no behavior-bearing parameters.  Everything else must
+    fall back to the eager interpreter to preserve exact semantics:
+
+    - strings / bytestrings carry ``__array__`` parameters on the list and its
+      char content -> fusing would compare/scale characters (silent wrong);
+    - ``RegularArray`` would degrade ``N * M`` to ``N * var``;
+    - ``ListArray`` uses starts/stops (the CUDA offsets extractor only knows
+      ``-offsets``), and ``IndexedArray`` / ``IndexedOptionArray`` misapply a
+      list-level index to flat elements (silent wrong / OOB device reads);
+    - records / custom parameters must round-trip through eager to be preserved.
+    """
+    layout = array.layout if isinstance(array, ak.Array) else array
+    if not isinstance(layout, ak.contents.ListOffsetArray):
+        return False
+    if layout.parameters:
+        return False
+    content = layout.content
+    if not isinstance(content, ak.contents.NumpyArray):
+        return False
+    if content.parameters:
+        return False
+    # Real numbers only (exclude datetime/timedelta/complex/object/char dtypes).
+    return np.dtype(content.dtype).kind in "biuf"
+
+
+def validate_iterator_layout(layout):
+    """Normalize/validate a layout before building a cuda.compute iterator.
+
+    Returns a layout safe for ``awkward_to_cccl_iterator``: top-level
+    ``ListArray`` / ``RegularArray`` are normalized to ``ListOffsetArray`` (so
+    offsets always exist), and layouts the recursive builder cannot represent
+    without silent corruption raise ``NotImplementedError`` instead of
+    returning wrong data or reading out of bounds.
+
+    In particular an ``IndexedArray`` / ``IndexedOptionArray`` *wrapping a list*
+    permutes list-level indices onto flat elements (and ``-1``/``None`` indices
+    read out of bounds); such layouts must be packed first.
+    """
+    # Reject index-of-list before it silently corrupts (or OOB-reads).
+    if isinstance(layout, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)):
+        inner = layout.content
+        if isinstance(
+            inner,
+            (
+                ak.contents.ListOffsetArray,
+                ak.contents.ListArray,
+                ak.contents.RegularArray,
+            ),
+        ):
+            raise NotImplementedError(
+                "awkward_to_cccl_iterator does not support an "
+                f"{type(layout).__name__} wrapping a list; call ak.to_packed() "
+                "(or ak.enforce_type) to materialize it first"
+            )
+    # Normalize a top-level list to ListOffsetArray so offsets always exist.
+    if isinstance(
+        layout, (ak.contents.ListArray, ak.contents.RegularArray)
+    ):
+        return layout.to_ListOffsetArray64(True)
+    return layout
+
+
 def _as_layout(array):
     if isinstance(array, ak.Array):
         return array.layout

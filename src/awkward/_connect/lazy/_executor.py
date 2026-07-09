@@ -63,6 +63,23 @@ def _is_cuda_backed(values) -> bool:
     return False
 
 
+def _uniform_backend(values):
+    """Return the single backend name shared by all array leaves, else ``None``.
+
+    Scalars (no ``.layout``) are ignored.  ``None`` means the leaves mix
+    backends (or there are no array leaves) — fusion must decline so the eager
+    path decides validity (e.g. a cuda+cpu mix raises ``ValueError`` just like
+    ``fuse=False``, instead of silently copying one side to the other device).
+    """
+    names = set()
+    for value in values:
+        backend = getattr(getattr(value, "layout", None), "backend", None)
+        name = getattr(backend, "name", None)
+        if name is not None:
+            names.add(name)
+    return names.pop() if len(names) == 1 else None
+
+
 class IRExecutor:
     """
     Executes the IR by traversing the graph and dispatching each node to
@@ -223,47 +240,46 @@ class IRExecutor:
 
     @staticmethod
     def _maybe_fused_kernel(node: FusedNode, values):
-        """Try to emit a single backend kernel for the region.
+        """Try to emit a single CUDA kernel for the region.
 
-        Returns the result, or ``_NO_FUSED_KERNEL`` if no codegen applies
-        (non-CUDA leaves, cuda.compute unavailable, or an unsupported region
-        shape).  Kept deliberately defensive: a codegen miss must never fail
-        the computation, only fall back.
+        Only fires when *every* array leaf is CUDA-backed (a mixed cuda/cpu
+        expression declines, so the eager path decides validity — matching
+        ``fuse=False``).  Returns the result or ``_NO_FUSED_KERNEL``.
+
+        The fallback catch is deliberately broad: fusion is a fast path, never
+        a correctness dependency, so *any* codegen failure (unsupported shape,
+        a bad generated op, a device error) must fall back to eager rather than
+        propagate.
         """
-        if not _is_cuda_backed(values):
+        if _uniform_backend(values) != "cuda":
             return _NO_FUSED_KERNEL
         try:
-            from awkward._connect.cuda._fusion_codegen import (
-                FusionUnsupported,
-                execute_fused_cuda,
-            )
+            from awkward._connect.cuda._fusion_codegen import execute_fused_cuda
         except ImportError:
             return _NO_FUSED_KERNEL
         try:
             return execute_fused_cuda(node, values)
-        except FusionUnsupported:
+        except Exception:  # noqa: BLE001 - fast path, fall back on any failure
             return _NO_FUSED_KERNEL
 
     @staticmethod
     def _maybe_cpu_fused(node: FusedNode, values):
         """Try to evaluate the region as one flat-buffer NumPy pass.
 
-        Collapses the per-op ``ak`` dispatch of an element-wise chain into a
-        single pass over the shared content buffer.  Returns the result or
-        ``_NO_FUSED_KERNEL`` when the region shape is unsupported.
+        Only fires when *every* array leaf is CPU-backed.  Collapses the
+        per-op ``ak`` dispatch of an element-wise chain into a single pass over
+        the shared content buffer.  Returns the result or ``_NO_FUSED_KERNEL``;
+        like the CUDA path, any codegen failure falls back to eager.
         """
-        if _is_cuda_backed(values):
+        if _uniform_backend(values) != "cpu":
             return _NO_FUSED_KERNEL
         try:
-            from awkward._connect.cpu._fusion_codegen import (
-                FusionUnsupported,
-                execute_fused_cpu,
-            )
+            from awkward._connect.cpu._fusion_codegen import execute_fused_cpu
         except ImportError:
             return _NO_FUSED_KERNEL
         try:
             return execute_fused_cpu(node, values)
-        except FusionUnsupported:
+        except Exception:  # noqa: BLE001 - fast path, fall back on any failure
             return _NO_FUSED_KERNEL
 
     def _execute_binary_op(self, node: BinaryOpNode) -> ak.Array:

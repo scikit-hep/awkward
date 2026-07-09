@@ -532,3 +532,133 @@ def test_cuda_infer_out_dtype_matches_numpy():
     node = fuse((ak.cpu.lazy(a) * 2 + 1).ir_node)
     op, columns = _build_op(node, [a, 2, 1])
     assert _infer_out_dtype(op, columns, single=True) == np.dtype("int64")
+
+
+# ----------------------------------------------------------------------
+# Adversarial review regressions: fused-default must never silently diverge
+# from eager or crash where eager works.
+# ----------------------------------------------------------------------
+
+
+def _fell_back_to_eager(lazy_expr):
+    """Compute with fusion on and report whether it declined to eager."""
+    lazy_expr.compute(fuse=True)
+    hits = lazy_expr.executor.fused_hits
+    return hits["cpu"] == 0 and hits["cuda"] == 0 and hits["eager"] >= 1
+
+
+def test_string_array_is_not_fusible():
+    from awkward._connect.lazy._layout import is_fusible_numeric_list
+
+    assert not is_fusible_numeric_list(ak.Array(["ab", "cd"]))  # ListOffset+params
+    assert not is_fusible_numeric_list(ak.Array([b"ab", b"cd"]))
+    assert is_fusible_numeric_list(ak.Array([[1.0, 2.0], [3.0]]))
+
+
+def test_regular_array_falls_back_and_preserves_type():
+    r = ak.to_regular(ak.Array([[1.0, 2.0], [3.0, 4.0]]))
+    expr = ak.cpu.lazy(r) * 2
+    assert _fell_back_to_eager(expr)
+    fused, eager = expr.compute(fuse=True), r * 2
+    assert str(ak.type(fused)) == str(ak.type(eager))  # stays N * 2, not N * var
+    assert ak.to_list(fused) == ak.to_list(eager)
+
+
+def test_custom_parameters_preserved_via_fallback():
+    p = ak.with_parameter(ak.Array([[1.0, 2.0], [3.0]]), "custom", "yes")
+    expr = ak.cpu.lazy(p) * 2
+    assert _fell_back_to_eager(expr)
+    assert expr.compute(fuse=True).layout.parameters == (p * 2).layout.parameters
+
+
+def test_indexed_array_falls_back():
+    base = ak.Array([[1.0, 2.0], [3.0], [4.0, 5.0, 6.0]])
+    taken = base[[2, 0, 1]]  # ListArray / indexed
+    expr = ak.cpu.lazy(taken) * 2
+    assert _fell_back_to_eager(expr)
+    assert ak.to_list(expr.compute(fuse=True)) == ak.to_list(taken * 2)
+
+
+def test_inf_and_nan_constants_still_fuse():
+    # Safe scalar emission keeps fusion for inf/nan instead of a NameError.
+    arr = ak.Array([[1.0, 2.0], [3.0]])
+    expr = ak.cpu.lazy(arr) * float("inf")
+    out = expr.compute(fuse=True)
+    assert expr.executor.fused_hits["cpu"] >= 1  # fused, not fallback
+    assert ak.to_list(out) == ak.to_list(arr * float("inf"))
+
+
+def test_py_scalar_literal_handles_non_finite():
+    from awkward._connect.lazy._fusion import py_scalar_literal
+
+    assert py_scalar_literal(float("inf")) == "float('inf')"
+    assert py_scalar_literal(float("-inf")) == "float('-inf')"
+    assert py_scalar_literal(float("nan")) == "float('nan')"
+    assert py_scalar_literal(2.5) == "2.5"
+    assert eval(py_scalar_literal(float("inf"))) == float("inf")  # noqa: S307
+
+
+def test_deep_chain_falls_back_not_crash():
+    # A very deep element-wise chain overflows the generated-source parser; the
+    # widened fallback must catch it and use the eager path, not crash.
+    arr = ak.Array([[1.0, 2.0], [3.0]])
+    expr = ak.cpu.lazy(arr)
+    for _ in range(300):
+        expr = expr + 1.0
+    got = ak.to_list(expr.compute(fuse=True))
+    assert got == ak.to_list(expr.compute(fuse=False))
+
+
+def test_lazy_boolean_getitem_is_rejected():
+    la = ak.cpu.lazy(ak.Array([[1, 2, 3], [4, 5]]))
+    with pytest.raises(TypeError, match="filter"):
+        _ = la[la > 2]
+
+
+def test_uniform_backend_helper():
+    from awkward._connect.lazy._executor import _uniform_backend
+
+    a, b = ak.Array([[1.0], [2.0]]), ak.Array([[3.0], [4.0]])
+    assert _uniform_backend([a, b, 2.0]) == "cpu"  # scalars ignored
+    assert _uniform_backend([2.0, 3.0]) is None  # no array leaves
+    # a forged cuda-backed value mixed with cpu -> None (decline to fuse)
+
+    class _B:
+        name = "cuda"
+
+    class _L:
+        backend = _B()
+
+    class _A:
+        layout = _L()
+
+    assert _uniform_backend([a, _A()]) is None
+
+
+def test_validate_iterator_layout_normalizes_and_guards():
+    from awkward._connect.lazy._layout import validate_iterator_layout
+
+    base = ak.Array([[1.0, 2.0], [3.0], [4.0, 5.0, 6.0]])
+    # ListArray (from fancy indexing) -> ListOffsetArray
+    assert isinstance(
+        validate_iterator_layout(base[[2, 0, 1]].layout),
+        ak.contents.ListOffsetArray,
+    )
+    # RegularArray -> ListOffsetArray
+    reg = ak.to_regular(ak.Array([[1.0, 2.0], [3.0, 4.0]])).layout
+    assert isinstance(validate_iterator_layout(reg), ak.contents.ListOffsetArray)
+    # IndexedArray-of-list -> raise (would otherwise permute flat elements / OOB)
+    idx = ak.contents.IndexedArray(
+        ak.index.Index64(np.array([2, 0, 1], dtype=np.int64)), base.layout
+    )
+    with pytest.raises(NotImplementedError, match="to_packed"):
+        validate_iterator_layout(idx)
+
+
+def test_transform_lists_rejects_ragged_and_bad_out():
+    from awkward._connect.cpu.helpers import transform_lists
+
+    with pytest.raises(ValueError, match="ragged"):
+        transform_lists(ak.Array([[1, 2], [3]]), np.empty(2), 2, lambda x, y: x + y)
+    with pytest.raises(TypeError, match="NumPy array"):
+        transform_lists(ak.Array([[1, 2], [3, 4]]), [0, 0], 2, lambda x, y: x + y)

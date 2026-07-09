@@ -38,6 +38,7 @@ points the interpreter would have materialized anyway.
 
 from __future__ import annotations
 
+import math
 import operator
 from collections import defaultdict
 
@@ -253,6 +254,21 @@ def _build_region(root: IRNode, counts: dict[int, int]):
         return f"({render(node.left)} {sym} {render(node.right)})"
 
     return leaves, compile_expr(root), render(root)
+
+
+def py_scalar_literal(value) -> str:
+    """Emit a folded scalar constant as valid Python source.
+
+    ``repr`` renders ``inf`` / ``nan`` as bare names that do not exist in the
+    compiled op's namespace (a ``NameError`` at exec time, which used to escape
+    the fusion fallback); emit explicit ``float(...)`` calls instead.
+    """
+    if isinstance(value, float):
+        if math.isinf(value):
+            return "float('inf')" if value > 0 else "float('-inf')"
+        if math.isnan(value):
+            return "float('nan')"
+    return repr(value)
 
 
 def emit_source(root_node: IRNode, leaf_expr: dict) -> str:

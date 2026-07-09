@@ -30,6 +30,9 @@ import numpy as np
 
 import awkward as ak
 
+from awkward._connect.lazy._fusion import py_scalar_literal
+from awkward._connect.lazy._layout import is_fusible_numeric_list
+
 from .helpers import _listoffset_parts
 
 
@@ -71,6 +74,11 @@ def _aligned_columns(columns):
     contents = []
     ref_offsets = None
     for arr in columns:
+        if not is_fusible_numeric_list(arr):
+            raise FusionUnsupported(
+                "column is not a plain numeric var-list (strings, regular, "
+                "indexed, parametered, or record layouts fall back to eager)"
+            )
         try:
             _layout, offsets, content = _listoffset_parts(arr)
         except (TypeError, NotImplementedError) as exc:
@@ -104,7 +112,7 @@ def execute_fused_cpu(node, values):
             leaf_expr[leaf_id] = f"c[{len(columns)}]"
             columns.append(payload)
         else:
-            leaf_expr[leaf_id] = repr(payload)
+            leaf_expr[leaf_id] = py_scalar_literal(payload)
     if not columns:
         raise FusionUnsupported("fused region has no array leaves")
 

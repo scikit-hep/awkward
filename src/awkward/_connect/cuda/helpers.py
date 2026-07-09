@@ -88,6 +88,14 @@ def awkward_to_cccl_iterator(
             # Rare fallback: need to convert to layout (will use dispatch, but rare)
             layout = ak.to_layout(array)
 
+        # Normalize a top-level ListArray/RegularArray to ListOffsetArray (so
+        # the offsets extractor below always finds ``-offsets``) and reject
+        # index-of-list layouts, which would otherwise permute list indices
+        # onto flat elements / read out of bounds (silent wrong data).
+        from awkward._connect.lazy._layout import validate_iterator_layout
+
+        layout = validate_iterator_layout(layout)
+
         # Check if already on CUDA backend, if not convert using low-level method
         if layout._backend.name != "cuda":
             from awkward._backends.dispatch import regularize_backend

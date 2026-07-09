@@ -119,9 +119,21 @@ def transform_lists(array, out, list_size, op):
     _, offsets, content = _listoffset_parts(array)
     num_segments = len(offsets) - 1
 
+    # The equal-size precondition is load-bearing: a ragged reshape would
+    # silently mix elements across lists.  Check it rather than corrupt.
+    sizes = offsets[1:] - offsets[:-1]
+    if not bool(np.all(sizes == list_size)):
+        raise ValueError(
+            f"transform_lists requires every list to have exactly {list_size} "
+            "items; got ragged input"
+        )
+
     columns = content[: num_segments * list_size].reshape(num_segments, list_size)
     result = op(*(columns[:, i] for i in range(list_size)))
 
-    out_buffer = out if isinstance(out, np.ndarray) else np.asarray(out)
-    out_buffer[:num_segments] = result
+    # ``out`` must be writeable in place; a non-ndarray would be copied by
+    # np.asarray and the write lost, so require an ndarray.
+    if not isinstance(out, np.ndarray):
+        raise TypeError("transform_lists `out` must be a writeable NumPy array")
+    out[:num_segments] = result
     return out

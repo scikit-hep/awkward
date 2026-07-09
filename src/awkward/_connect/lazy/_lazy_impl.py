@@ -233,7 +233,18 @@ class LazyAwkwardArray:
     def __getitem__(self, key: str | int | slice):
         """
         Access fields or indices lazily.
+
+        Boolean-mask selection (``la[la > 5]``) is not expressible as a
+        ``GetItemNode`` — it must go through the list-aware fusion nodes.  Reject
+        a lazy/array key up front with a clear pointer instead of failing deep
+        inside eager ``__getitem__`` at compute time.
         """
+        if isinstance(key, LazyAwkwardArray):
+            raise TypeError(
+                "boolean/array indexing of a LazyAwkwardArray is not supported; "
+                "use .filter(mask) to keep elements within lists, or "
+                ".select_lists(mask) to keep whole lists"
+            )
         return LazyAwkwardArray(GetItemNode(self.ir_node, key), self.executor)
 
     def _to_ir_node(self, value):

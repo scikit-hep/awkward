@@ -41,6 +41,9 @@ import functools
 
 import awkward as ak
 
+from awkward._connect.lazy._fusion import py_scalar_literal
+from awkward._connect.lazy._layout import is_fusible_numeric_list
+
 
 class FusionUnsupported(Exception):
     """Raised when a fused region cannot be lowered to a single CUDA kernel.
@@ -87,11 +90,16 @@ def _infer_out_dtype(op, columns, single):
 
     from awkward._connect.lazy._ir import _leaf_numpy_dtype
 
-    samples = [
-        np.ones(1, dtype=_leaf_numpy_dtype(col) or np.float64) for col in columns
-    ]
-    probe = samples[0] if single else tuple(samples)
-    return np.asarray(op(probe)).dtype
+    dtypes = [_leaf_numpy_dtype(col) or np.dtype(np.float64) for col in columns]
+    try:
+        samples = [np.ones(1, dtype=d) for d in dtypes]
+        probe = samples[0] if single else tuple(samples)
+        with np.errstate(all="ignore"):  # divide-by-zero etc. in the probe only
+            return np.asarray(op(probe)).dtype
+    except Exception:  # noqa: BLE001
+        # A value-domain error in the probe (e.g. int ** negative int) need not
+        # reflect the real data; fall back to NumPy input promotion.
+        return np.result_type(*dtypes)
 
 
 def _classify_leaf(value):
@@ -142,7 +150,7 @@ def _build_op(node, values):
             col_slot[leaf_id] = len(columns)
             columns.append(payload)
         else:  # scalar constant, folded in
-            scalar_expr[leaf_id] = repr(payload)
+            scalar_expr[leaf_id] = py_scalar_literal(payload)
     if not columns:
         raise FusionUnsupported("fused region has no array leaves")
 
@@ -169,6 +177,11 @@ def _aligned_contents(columns):
     ref_offsets = None
     count = None
     for arr in columns:
+        if not is_fusible_numeric_list(arr):
+            raise FusionUnsupported(
+                "column is not a plain numeric var-list (strings, regular, "
+                "indexed, parametered, or record layouts fall back to eager)"
+            )
         it, meta = awkward_to_cccl_iterator(arr)
         offsets = meta["offsets"]
         if offsets is None:
