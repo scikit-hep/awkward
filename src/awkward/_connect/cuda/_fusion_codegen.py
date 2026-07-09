@@ -14,12 +14,14 @@ would produce:
   intermediate stays in registers; nothing is written back to global memory
   between ops.
 
-* **Reduction-terminated region** (``sum`` / ``max`` / ``min``).  The
-  element-wise map is wrapped in a ``TransformIterator`` and fed straight into
-  ``segmented_reduce``, so the map is fused *into* the reduction kernel — the
-  same map-into-reduce idiom already used in ``_compute.py``
-  (``_widen_for_reduce`` / ``_nonzero_for_reduce``).  One kernel, no
-  materialized transform buffer.
+* **Reduction-terminated region** (``sum`` only).  The element-wise map is
+  wrapped in a ``TransformIterator`` and fed straight into ``segmented_reduce``,
+  so the map is fused *into* the reduction kernel — the same map-into-reduce
+  idiom already used in ``_compute.py`` (``_widen_for_reduce`` /
+  ``_nonzero_for_reduce``).  One kernel, no materialized transform buffer.
+  ``max`` / ``min`` (empty sublists reduce to a missing value under eager
+  Awkward) and ``mean`` (two reductions) are *not* fused — they raise
+  :class:`FusionUnsupported` and the executor applies the eager reducer.
 
 Anything outside the supported shape raises :class:`FusionUnsupported`, and
 the executor falls back to the eager (still backend-dispatched, still correct)
@@ -47,12 +49,49 @@ class FusionUnsupported(Exception):
     """
 
 
-# Awkward reduce op -> cuda.compute OpKind name and the identity/init value.
-_REDUCE_TO_OPKIND = {
-    "sum": ("PLUS", 0),
-    "max": ("MAXIMUM", None),  # init supplied from dtype at call time
-    "min": ("MINIMUM", None),
-}
+# Reductions fused on the device.  Only ``sum`` is fused: its CCCL identity
+# (0) matches ``ak.sum(..., axis=-1)`` empty-list semantics exactly.  ``max`` /
+# ``min`` reduce empty sublists to the *missing value* (option/None) under
+# eager Awkward, which a plain ``segmented_reduce`` seeded with the dtype
+# extreme cannot reproduce; ``mean`` is two reductions.  Those fall back to the
+# eager reducer (``FusionUnsupported``) so results stay identical.
+_FUSIBLE_REDUCE = {"sum": "PLUS"}
+
+
+def _sum_accumulator_dtype(dtype):
+    """Widen small integer/bool dtypes like NumPy's ``sum`` accumulator.
+
+    Mirrors ``ak.sum`` so the fused sum's dtype matches the eager result
+    (int8/16/32 -> int64, unsigned -> uint64, bool -> int64; floats unchanged).
+    """
+    import numpy as np
+
+    dtype = np.dtype(dtype)
+    if dtype.kind == "b":
+        return np.dtype(np.int64)
+    if dtype.kind == "i" and dtype.itemsize < 8:
+        return np.dtype(np.int64)
+    if dtype.kind == "u" and dtype.itemsize < 8:
+        return np.dtype(np.uint64)
+    return dtype
+
+
+def _infer_out_dtype(op, columns, single):
+    """Dtype of the fused element-wise result, matching NumPy/eager promotion.
+
+    Runs the folded op on a one-element sample of each column's leaf dtype (so
+    folded scalar constants and true type promotion are honoured) instead of
+    defaulting to ``float64``.
+    """
+    import numpy as np
+
+    from awkward._connect.lazy._ir import _leaf_numpy_dtype
+
+    samples = [
+        np.ones(1, dtype=_leaf_numpy_dtype(col) or np.float64) for col in columns
+    ]
+    probe = samples[0] if single else tuple(samples)
+    return np.asarray(op(probe)).dtype
 
 
 def _classify_leaf(value):
@@ -142,12 +181,12 @@ def _aligned_contents(columns):
     return content_iters, ref_offsets, count, cp
 
 
-def execute_fused_cuda(node, values, reduce_ops):
+def execute_fused_cuda(node, values):
     """Lower and run a :class:`FusedNode` as a single ``cuda.compute`` kernel.
 
-    ``values`` are the realized leaf arrays (slot order); ``reduce_ops`` is the
-    executor's eager reduction table, used only for the unsupported-reduction
-    fallback path.  Returns the region result as an Awkward array.
+    ``values`` are the realized leaf arrays (slot order).  Returns the region
+    result as an Awkward array, or raises :class:`FusionUnsupported` (e.g. a
+    non-``sum`` reduction) so the executor applies the eager reducer instead.
     """
     from cuda.compute import OpKind, TransformIterator, ZipIterator, unary_transform
 
@@ -158,12 +197,15 @@ def execute_fused_cuda(node, values, reduce_ops):
 
     import numpy as np
 
-    zipped = ZipIterator(*content_iters) if len(content_iters) > 1 else content_iters[0]
+    single = len(content_iters) == 1
+    zipped = content_iters[0] if single else ZipIterator(*content_iters)
+    # Output dtype from the actual leaf dtypes (matches NumPy/eager promotion),
+    # never a blanket float64 that would turn an integer input floating.
+    map_dtype = _infer_out_dtype(op, columns, single)
 
     if node.reduce_op is None:
         # ---- element-wise: one transform kernel over the zipped columns ----
-        out_dtype = np.dtype(node.dtype) if node.dtype is not None else np.float64
-        out_content = cp.empty(int(count), dtype=out_dtype)
+        out_content = cp.empty(int(count), dtype=map_dtype)
         unary_transform(d_in=zipped, d_out=out_content, op=op, num_items=int(count))
         template = ak.contents.ListOffsetArray(
             ak.index.Index64(cp.asarray(offsets, dtype=cp.int64)),
@@ -173,13 +215,13 @@ def execute_fused_cuda(node, values, reduce_ops):
 
     # ---- reduction-terminated: fuse the map into a segmented_reduce --------
     reduce_name = node.reduce_op.value
-    if reduce_name not in _REDUCE_TO_OPKIND:
-        # e.g. MEAN (two reductions): let the executor apply it eagerly.
-        raise FusionUnsupported(f"reduction {reduce_name!r} not fusible")
+    if reduce_name not in _FUSIBLE_REDUCE:
+        # max/min (empty -> missing value) and mean (two reductions) can't match
+        # eager semantics from a single seeded segmented_reduce; fall back.
+        raise FusionUnsupported(f"reduction {reduce_name!r} not fused on device")
 
-    opkind_name, identity = _REDUCE_TO_OPKIND[reduce_name]
     num_segments = len(offsets) - 1
-    out_dtype = np.dtype(node.dtype) if node.dtype is not None else np.float64
+    out_dtype = _sum_accumulator_dtype(map_dtype)  # widen small ints like ak.sum
 
     # The element-wise map rides into the reduce kernel as a TransformIterator,
     # so the map + segmented reduction are one kernel with no intermediate
@@ -188,17 +230,13 @@ def execute_fused_cuda(node, values, reduce_ops):
     out = cp.empty(int(num_segments), dtype=out_dtype)
     start_offsets, end_offsets = make_segment_views(offsets)
 
-    if identity is None:  # MAX/MIN: identity is the dtype's extreme
-        info = np.finfo(out_dtype) if out_dtype.kind == "f" else np.iinfo(out_dtype)
-        identity = info.min if opkind_name == "MAXIMUM" else info.max
-
     segmented_reduce(
         d_in=mapped,
         d_out=out,
         num_segments=int(num_segments),
         start_offsets_in=start_offsets,
         end_offsets_in=end_offsets,
-        op=getattr(OpKind, opkind_name),
-        h_init=np.asarray(identity, dtype=out_dtype),
+        op=getattr(OpKind, _FUSIBLE_REDUCE[reduce_name]),
+        h_init=np.asarray(0, dtype=out_dtype),  # sum identity; empty -> 0 (== ak.sum)
     )
     return ak.Array(out)

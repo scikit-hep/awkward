@@ -13,10 +13,13 @@ NumPy ufuncs run) and only the single final result is rewrapped with the
 shared offsets.
 
 Supported shape: element-wise regions whose array leaves are list arrays with
-``NumpyArray`` content sharing identical offsets, plus folded scalar
-constants; optionally terminated by ``sum`` / ``mean`` (computed with a
-vectorized cumsum so empty sublists are handled).  Anything else raises
-:class:`FusionUnsupported` and the executor falls back to eager evaluation.
+``NumpyArray`` content sharing identical offsets, plus folded scalar constants.
+This lowers the **element-wise map only** — a terminating reduction is applied
+by the executor via the eager Awkward reducer on the fused result, so
+``compute(fuse=True)`` and ``compute(fuse=False)`` return the identical
+Awkward-typed reduction (same masking / empty-list / backend semantics).
+Anything else raises :class:`FusionUnsupported` and the executor falls back to
+eager evaluation.
 """
 
 from __future__ import annotations
@@ -58,11 +61,20 @@ def _compile_op(source: str):
 
 
 def _aligned_columns(columns):
-    """Return (contents, offsets) for identically-shaped list columns."""
+    """Return (contents, offsets) for identically-shaped list columns.
+
+    Layouts that ``_listoffset_parts`` cannot handle (flat/non-list arrays,
+    non-``NumpyArray`` content) are turned into :class:`FusionUnsupported` so
+    the executor falls back to the eager interpreter rather than surfacing a
+    raw ``TypeError`` / ``NotImplementedError``.
+    """
     contents = []
     ref_offsets = None
     for arr in columns:
-        _layout, offsets, content = _listoffset_parts(arr)
+        try:
+            _layout, offsets, content = _listoffset_parts(arr)
+        except (TypeError, NotImplementedError) as exc:
+            raise FusionUnsupported(str(exc)) from exc
         if ref_offsets is None:
             ref_offsets = offsets
         elif len(offsets) != len(ref_offsets) or not np.array_equal(
@@ -75,19 +87,14 @@ def _aligned_columns(columns):
     return contents, ref_offsets
 
 
-def _segment_sum(flat, offsets):
-    """Vectorized per-sublist sum that tolerates empty sublists."""
-    csum = np.zeros(len(flat) + 1, dtype=np.result_type(flat.dtype, np.int64))
-    np.cumsum(flat, out=csum[1:])
-    return csum[offsets[1:]] - csum[offsets[:-1]]
-
-
 def execute_fused_cpu(node, values):
-    """Lower and run a :class:`FusedNode` as a single flat-buffer NumPy pass.
+    """Lower a :class:`FusedNode`'s element-wise map to one flat-buffer pass.
 
-    Returns the region result as an Awkward array (element-wise) or a NumPy
-    array (reduction).  Raises :class:`FusionUnsupported` for shapes outside
-    the supported set.
+    Returns the fused element-wise result as an Awkward list array.  The
+    reduction (if ``node.reduce_op`` is set) is **not** applied here — the
+    executor applies the eager Awkward reducer to this result, so the fused and
+    interpreter paths return the identical Awkward-typed reduction.  Raises
+    :class:`FusionUnsupported` for shapes outside the supported set.
     """
     columns = []
     leaf_expr = {}
@@ -105,21 +112,9 @@ def execute_fused_cpu(node, values):
     op = _compile_op(node.op_source(leaf_expr))
     flat_out = op(tuple(contents))  # one pass over the flat content
 
-    if node.reduce_op is None:
-        return ak.Array(
-            ak.contents.ListOffsetArray(
-                ak.index.Index64(offsets.astype(np.int64, copy=False)),
-                ak.contents.NumpyArray(np.asarray(flat_out)),
-            )
+    return ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(offsets.astype(np.int64, copy=False)),
+            ak.contents.NumpyArray(np.asarray(flat_out)),
         )
-
-    name = node.reduce_op.value
-    if name == "sum":
-        return _segment_sum(np.asarray(flat_out), offsets)
-    if name == "mean":
-        counts = offsets[1:] - offsets[:-1]
-        with np.errstate(invalid="ignore", divide="ignore"):
-            return _segment_sum(np.asarray(flat_out), offsets) / counts
-    # max/min: no cheap empty-safe vectorization here -> let the executor try
-    # the eager reducer instead.
-    raise FusionUnsupported(f"reduction {name!r} not lowered on CPU")
+    )

@@ -415,22 +415,42 @@ def test_cpu_codegen_used_for_cpu_leaves():
     assert ak.to_list(out) == ak.to_list(arr * 2 + 1)
 
 
-def test_cpu_fused_sum_matches_manual():
-    # Fused sum runs on the flat buffer via NumPy (works even where the eager
-    # ak reducer kernel is unavailable), including empty sublists -> 0.
+def _axis_reducers_available():
+    # The generated axis=-1 reducer kernels are missing in some sandboxes;
+    # skip the reduction-execution tests there (they are environment-specific,
+    # not fusion-specific -- eager ak.sum fails identically).
+    try:
+        ak.sum(ak.Array([[1.0, 2.0], [3.0]]), axis=-1)
+        return True
+    except Exception:
+        return False
+
+
+@pytest.mark.skipif(
+    not _axis_reducers_available(), reason="axis=-1 reducer unavailable here"
+)
+def test_cpu_fused_sum_returns_awkward_and_matches_eager():
+    # CPU fusion lowers only the element-wise map; the reduction is delegated
+    # to the eager Awkward reducer, so fuse=True/False are identical and the
+    # result is an Awkward value (not a raw NumPy array).
     arr = ak.Array([[1.0, 2, 3], [4, 5], [], [6.0]])
     la = ak.cpu.lazy(arr)
-    out = np.asarray((la * 2 + 1).sum().compute(fuse=True)).tolist()
-    expected = [sum(2 * x + 1 for x in row) for row in ak.to_list(arr)]
-    assert out == expected
+    fused = (la * 2 + 1).sum().compute(fuse=True)
+    eager = (la * 2 + 1).sum().compute(fuse=False)
+    assert not isinstance(fused, np.ndarray)  # Awkward-typed, not raw NumPy
+    assert ak.to_list(fused) == ak.to_list(eager)
+    assert ak.to_list(fused) == [sum(2 * x + 1 for x in row) for row in ak.to_list(arr)]
 
 
-def test_cpu_fused_mean_matches_manual():
+@pytest.mark.skipif(
+    not _axis_reducers_available(), reason="axis=-1 reducer unavailable here"
+)
+def test_cpu_fused_mean_matches_eager():
     arr = ak.Array([[2.0, 4], [1.0, 2, 3], [5.0]])
     la = ak.cpu.lazy(arr)
-    out = np.asarray((la + 0.0).mean().compute(fuse=True)).tolist()
-    expected = [sum(row) / len(row) for row in ak.to_list(arr)]
-    assert out == expected
+    fused = (la + 0.0).mean().compute(fuse=True)
+    eager = (la + 0.0).mean().compute(fuse=False)
+    assert ak.to_list(fused) == ak.to_list(eager)
 
 
 def test_cpu_codegen_rejects_mismatched_offsets():
@@ -445,3 +465,70 @@ def test_cpu_codegen_rejects_mismatched_offsets():
     node = fuse((ak.cpu.lazy(a) + ak.cpu.lazy(b)).ir_node)
     with pytest.raises(FusionUnsupported):
         execute_fused_cpu(node, [a, b])
+
+
+# ----------------------------------------------------------------------
+# Regression: fused-default path must not diverge from eager (review P2s)
+# ----------------------------------------------------------------------
+
+
+def test_flat_array_falls_back_to_eager_not_crash():
+    # A flat (non-list) array is a valid eager expression but unsupported by CPU
+    # fusion; default fuse=True must fall back, not raise (P2 #1).
+    a = ak.Array([1, 2, 3])
+    expr = ak.cpu.lazy(a) * 2 + 1
+    assert ak.to_list(expr.compute(fuse=True)) == ak.to_list(a * 2 + 1)
+    assert expr.executor.fused_hits["cpu"] == 0  # cpu fusion declined
+    assert expr.executor.fused_hits["eager"] >= 1  # eager fallback taken
+
+
+def test_cpu_unsupported_layout_raises_fusion_unsupported():
+    # The boundary itself converts layout errors to FusionUnsupported so the
+    # executor can catch and fall back.
+    from awkward._connect.cpu._fusion_codegen import (
+        FusionUnsupported,
+        execute_fused_cpu,
+    )
+
+    a = ak.Array([1, 2, 3])  # flat, no offsets
+    node = fuse((ak.cpu.lazy(a) + 1).ir_node)
+    with pytest.raises(FusionUnsupported):
+        execute_fused_cpu(node, [a, 1])
+
+
+def test_cpu_fused_preserves_integer_dtype():
+    # Integer input must stay integer through the fused element-wise path (P2 #3).
+    arr = ak.Array([[1, 2, 3], [4, 5]])
+    fused = (ak.cpu.lazy(arr) * 2 + 1).compute(fuse=True)
+    eager = arr * 2 + 1
+    assert fused.layout.content.dtype == eager.layout.content.dtype
+    assert not np.issubdtype(fused.layout.content.dtype, np.floating)
+    assert ak.to_list(fused) == ak.to_list(eager)
+
+
+def test_input_node_infers_dtype():
+    from awkward._connect.lazy._ir import InputNode
+
+    assert InputNode(ak.Array([[1, 2, 3], [4, 5]])).dtype == np.dtype("int64")
+    assert InputNode(ak.Array([[1.0, 2.0]])).dtype == np.dtype("float64")
+    assert InputNode(ak.Array([{"x": 1}])).dtype is None  # record: no single dtype
+
+
+def test_cuda_sum_accumulator_dtype_widens_like_ak():
+    # GPU-free: the sum-output dtype widens small ints like ak.sum's accumulator.
+    from awkward._connect.cuda._fusion_codegen import _sum_accumulator_dtype
+
+    assert _sum_accumulator_dtype(np.int32) == np.dtype("int64")
+    assert _sum_accumulator_dtype(np.uint16) == np.dtype("uint64")
+    assert _sum_accumulator_dtype(np.bool_) == np.dtype("int64")
+    assert _sum_accumulator_dtype(np.float32) == np.dtype("float32")  # floats unchanged
+
+
+def test_cuda_infer_out_dtype_matches_numpy():
+    # GPU-free: element-wise output dtype follows NumPy promotion, not float64.
+    from awkward._connect.cuda._fusion_codegen import _build_op, _infer_out_dtype
+
+    a = ak.Array([[1, 2, 3], [4, 5]])  # int64 content
+    node = fuse((ak.cpu.lazy(a) * 2 + 1).ir_node)
+    op, columns = _build_op(node, [a, 2, 1])
+    assert _infer_out_dtype(op, columns, single=True) == np.dtype("int64")

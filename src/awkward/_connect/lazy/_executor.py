@@ -187,24 +187,34 @@ class IRExecutor:
     def _execute_fused(self, node: FusedNode) -> ak.Array:
         """Execute a fused element-wise (optionally +reduction) region.
 
-        Leaves are realized first (memoized like any other node).  If a
-        backend fusion codegen is available for the leaf backend, the whole
-        region is emitted as a single kernel; otherwise the fused expression
-        is evaluated eagerly in one pass.  Both paths are numerically
-        identical to the interpreter.
+        Leaves are realized first (memoized like any other node).  A backend
+        fusion codegen may emit the region as a single kernel; otherwise the
+        fused expression is evaluated eagerly in one pass.  In every case a
+        terminating reduction is produced by the eager Awkward reducer
+        (``_REDUCE_OPS``) — on CUDA the codegen fuses ``sum`` into its kernel
+        and returns the final result directly; the CPU codegen and the eager
+        fallback fuse only the element-wise map and let ``_REDUCE_OPS`` apply
+        the reduction, so the fused and interpreter paths return the identical
+        Awkward-typed result (same dtype, masking, and empty-list semantics).
         """
         values = [self.execute(leaf) for leaf in node.leaves]
 
+        # CUDA: one kernel for the map (and the sum reduction, when fusible).
         fused = self._maybe_fused_kernel(node, values)
         if fused is not _NO_FUSED_KERNEL:
             self.fused_hits["cuda"] += 1
             return fused
 
-        fused = self._maybe_cpu_fused(node, values)
-        if fused is not _NO_FUSED_KERNEL:
+        # CPU: fuse the element-wise map into one flat pass; the reduction is
+        # delegated to the eager reducer below for identical result semantics.
+        mapped = self._maybe_cpu_fused(node, values)
+        if mapped is not _NO_FUSED_KERNEL:
             self.fused_hits["cpu"] += 1
-            return fused
+            if node.reduce_op is not None:
+                return _REDUCE_OPS[node.reduce_op](mapped)
+            return mapped
 
+        # Eager fallback: composite expression, then the eager reduction.
         self.fused_hits["eager"] += 1
         result = node.evaluate(values)
         if node.reduce_op is not None:
@@ -230,7 +240,7 @@ class IRExecutor:
         except ImportError:
             return _NO_FUSED_KERNEL
         try:
-            return execute_fused_cuda(node, values, _REDUCE_OPS)
+            return execute_fused_cuda(node, values)
         except FusionUnsupported:
             return _NO_FUSED_KERNEL
 

@@ -88,6 +88,24 @@ class IRNode:
         return f"{self.__class__.__name__}(op={self.op_type.value}, id={self.node_id})"
 
 
+def _leaf_numpy_dtype(array):
+    """Return the leaf ``NumpyArray`` dtype of ``array``, or ``None``.
+
+    Descends through option/index/list wrappers to the numeric leaf; returns
+    ``None`` for record arrays (no single dtype) or anything without one.
+    """
+    try:
+        layout = array.layout
+    except AttributeError:
+        return None
+    # Records expose ``contents`` (plural), not a single ``content``; stopping
+    # there yields None, which is the right answer (no single dtype).
+    while hasattr(layout, "content"):
+        layout = layout.content
+    dtype = getattr(layout, "dtype", None)
+    return np.dtype(dtype) if dtype is not None else None
+
+
 class InputNode(IRNode):
     """Represents an input array.
 
@@ -103,6 +121,10 @@ class InputNode(IRNode):
             # Cache the layout type and backend for later use
             self.layout_type = type(array.layout).__name__
             self.backend_name = array.layout.backend.name
+            # Infer the leaf numeric dtype so downstream binary/reduce nodes
+            # propagate it (e.g. an integer input must not become float64 in
+            # the fused output allocation).
+            self.dtype = _leaf_numpy_dtype(array)
         else:
             self.layout_type = None
             self.backend_name = None
