@@ -23,6 +23,7 @@ Backend-specific nodes and kernels live in ``awkward._connect.cuda``
 
 from __future__ import annotations
 
+from awkward._connect.lazy._fusion import FusedNode, fuse, fusion_stats
 from awkward._connect.lazy._lazy_impl import LazyAwkwardArray, lazy
 from awkward._connect.lazy.core import (
     Input,
@@ -34,10 +35,13 @@ from awkward._connect.lazy.core import (
 )
 
 __all__ = (
+    "FusedNode",
     "IRNode",
     "Input",
     "LazyAwkwardArray",
     "compute",
+    "fuse",
+    "fusion_stats",
     "lazy",
     "reset_cache",
     "topological_order",

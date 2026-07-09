@@ -39,6 +39,7 @@ class LazyAwkwardArray:
         self.ir_node = ir_node
         self.executor = executor or IRExecutor()
         self._computed_result = None
+        self._computed_fuse = None
 
     @classmethod
     def from_array(cls, array: ak.Array, executor: IRExecutor | None = None):
@@ -46,11 +47,38 @@ class LazyAwkwardArray:
         input_node = InputNode(array)
         return cls(input_node, executor)
 
-    def compute(self) -> ak.Array:
-        """Execute the IR and return the result"""
-        if self._computed_result is None:
-            self._computed_result = self.executor.execute(self.ir_node)
+    def compute(self, fuse: bool = True) -> ak.Array:
+        """Execute the IR and return the result.
+
+        With ``fuse=True`` (default) the expression graph is compiled first:
+        element-wise regions are collapsed into single fused kernels
+        (:func:`awkward._connect.lazy._fusion.fuse`).  ``fuse=False`` runs the
+        plain per-node interpreter — the no-fuse / debug path, which keeps
+        every intermediate visible.  Both are numerically identical.
+        """
+        if self._computed_result is None or self._computed_fuse != fuse:
+            if fuse:
+                self._computed_result = self.executor.compile_and_execute(self.ir_node)
+            else:
+                self._computed_result = self.executor.execute(self.ir_node)
+            self._computed_fuse = fuse
         return self._computed_result
+
+    def compile(self) -> IRNode:
+        """Return the fused expression graph without executing it.
+
+        Useful for inspecting how many kernels the computation will launch
+        (see :meth:`fusion_stats`) or for debugging the fusion pass.
+        """
+        from ._fusion import fuse as _fuse
+
+        return _fuse(self.ir_node)
+
+    def fusion_stats(self) -> dict:
+        """Report how fusion reshapes this graph (see ``_fusion.fusion_stats``)."""
+        from ._fusion import fusion_stats as _stats
+
+        return _stats(self.ir_node)
 
     def invalidate(self):
         """Discard cached results (this wrapper's and the executor's memo).
@@ -58,6 +86,7 @@ class LazyAwkwardArray:
         Call this if an input array was mutated in place.
         """
         self._computed_result = None
+        self._computed_fuse = None
         self.executor.invalidate()
 
     # Arithmetic operations
@@ -220,9 +249,14 @@ class LazyAwkwardArray:
         else:
             raise TypeError(f"Cannot convert {type(value)} to IR node")
 
-    def visualize(self) -> str:
-        """Generate a string representation of the IR"""
-        return self.executor.visualize_ir(self.ir_node)
+    def visualize(self, fused: bool = False) -> str:
+        """Generate a string representation of the IR.
+
+        With ``fused=True`` the fused (compiled) graph is shown, so the
+        ``FusedNode`` regions and their leaves are visible.
+        """
+        node = self.compile() if fused else self.ir_node
+        return self.executor.visualize_ir(node)
 
     def __repr__(self):
         """String representation showing this is a lazy array"""

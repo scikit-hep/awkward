@@ -58,6 +58,10 @@ class OpType(Enum):
     INPUT = "input"
     CONSTANT = "constant"
 
+    # Compiler-internal: a region of element-wise ops (optionally terminated
+    # by a reduction) collapsed into a single fused kernel by the fusion pass.
+    FUSED = "fused"
+
 
 class IRNode:
     """Base class for IR nodes - Awkward Array compliant"""

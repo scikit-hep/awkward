@@ -280,7 +280,9 @@ def test_memo_skips_leaves(arr):
 
     ex = IRExecutor()
     la = LazyAwkwardArray.from_array(arr, ex)
-    (la * 2 + 1).compute()
+    # fuse=False exercises the per-node interpreter memo this test targets;
+    # under fusion the mul+add collapse into one FusedNode (see fusion tests).
+    (la * 2 + 1).compute(fuse=False)
     # Only the mul and add nodes are cached; InputNode/ConstantNode are not
     assert len(ex._memo) == 2
 
@@ -293,13 +295,15 @@ def test_memo_lru_eviction_by_entries(arr):
     la = LazyAwkwardArray.from_array(arr, ex)
     shared = la * 2
 
+    # fuse=False keeps `shared` a distinct materialized node so the LRU policy
+    # is observable; fusion would otherwise absorb it into each consumer.
     r1 = shared + 1
-    r1.compute()
+    r1.compute(fuse=False)
     assert len(ex._memo) == 2  # shared, r1
 
     # Computing r2 hits `shared` (refreshing it) and evicts r1, the LRU entry
     r2 = shared + 2
-    r2.compute()
+    r2.compute(fuse=False)
     assert len(ex._memo) == 2
     assert shared.ir_node.node_id in ex._memo
     assert r2.ir_node.node_id in ex._memo

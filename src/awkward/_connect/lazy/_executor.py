@@ -15,6 +15,7 @@ from collections import OrderedDict
 
 import awkward as ak
 
+from ._fusion import FusedNode, fuse
 from ._ir import (
     BinaryOpNode,
     CombinationsNode,
@@ -29,6 +30,17 @@ from ._ir import (
     SelectListsNode,
 )
 
+# Sentinel: no backend fused-kernel path was taken, fall back to eager eval.
+_NO_FUSED_KERNEL = object()
+
+# Axis=-1 reductions used both by ReduceNode and the fused reduction stage.
+_REDUCE_OPS = {
+    OpType.SUM: lambda a: ak.sum(a, axis=-1),
+    OpType.MEAN: lambda a: ak.mean(a, axis=-1),
+    OpType.MAX: lambda a: ak.max(a, axis=-1),
+    OpType.MIN: lambda a: ak.min(a, axis=-1),
+}
+
 try:
     import nvtx
 except ImportError:
@@ -40,6 +52,15 @@ except ImportError:
                 return fn
 
             return deco
+
+
+def _is_cuda_backed(values) -> bool:
+    """True if any realized leaf value lives on the CUDA backend."""
+    for value in values:
+        backend = getattr(getattr(value, "layout", None), "backend", None)
+        if backend is not None and getattr(backend, "name", None) == "cuda":
+            return True
+    return False
 
 
 class IRExecutor:
@@ -95,6 +116,19 @@ class IRExecutor:
             evicted_key, _ = self._memo.popitem(last=False)
             self._memo_bytes -= self._memo_sizes.pop(evicted_key)
 
+    @nvtx.annotate("compile_and_execute")
+    def compile_and_execute(self, node: IRNode) -> ak.Array:
+        """Run the fusion pass, then execute the fused graph.
+
+        This is the entry point that realizes the *dynamic compilation* step:
+        element-wise regions of the expression graph are collapsed into
+        ``FusedNode``s (one kernel each on a fusing backend) before execution.
+        ``execute`` remains the plain interpreter over whatever graph it is
+        handed, so passing the original (unfused) root gives the no-fuse
+        debug path.
+        """
+        return self.execute(fuse(node))
+
     @nvtx.annotate("execute_ir")
     def execute(self, node: IRNode) -> ak.Array:
         """Execute an IR node and return the result"""
@@ -141,8 +175,54 @@ class IRExecutor:
         elif isinstance(node, GetItemNode):
             return self._execute_getitem(node)
 
+        elif isinstance(node, FusedNode):
+            return self._execute_fused(node)
+
         else:
             raise NotImplementedError(f"Execution not implemented for {type(node)}")
+
+    def _execute_fused(self, node: FusedNode) -> ak.Array:
+        """Execute a fused element-wise (optionally +reduction) region.
+
+        Leaves are realized first (memoized like any other node).  If a
+        backend fusion codegen is available for the leaf backend, the whole
+        region is emitted as a single kernel; otherwise the fused expression
+        is evaluated eagerly in one pass.  Both paths are numerically
+        identical to the interpreter.
+        """
+        values = [self.execute(leaf) for leaf in node.leaves]
+
+        fused = self._maybe_fused_kernel(node, values)
+        if fused is not _NO_FUSED_KERNEL:
+            return fused
+
+        result = node.evaluate(values)
+        if node.reduce_op is not None:
+            result = _REDUCE_OPS[node.reduce_op](result)
+        return result
+
+    @staticmethod
+    def _maybe_fused_kernel(node: FusedNode, values):
+        """Try to emit a single backend kernel for the region.
+
+        Returns the result, or ``_NO_FUSED_KERNEL`` if no codegen applies
+        (non-CUDA leaves, cuda.compute unavailable, or an unsupported region
+        shape).  Kept deliberately defensive: a codegen miss must never fail
+        the computation, only fall back.
+        """
+        if not _is_cuda_backed(values):
+            return _NO_FUSED_KERNEL
+        try:
+            from awkward._connect.cuda._fusion_codegen import (
+                FusionUnsupported,
+                execute_fused_cuda,
+            )
+        except ImportError:
+            return _NO_FUSED_KERNEL
+        try:
+            return execute_fused_cuda(node, values, _REDUCE_OPS)
+        except FusionUnsupported:
+            return _NO_FUSED_KERNEL
 
     def _execute_binary_op(self, node: BinaryOpNode) -> ak.Array:
         """Execute binary operations"""
@@ -194,16 +274,7 @@ class IRExecutor:
     def _execute_reduce(self, node: ReduceNode) -> ak.Array:
         """Execute reduction operations"""
         input_array = self.execute(node.input)
-
-        # Use Awkward's built-in reductions
-        op_map = {
-            OpType.SUM: lambda a: ak.sum(a, axis=-1),
-            OpType.MEAN: lambda a: ak.mean(a, axis=-1),
-            OpType.MAX: lambda a: ak.max(a, axis=-1),
-            OpType.MIN: lambda a: ak.min(a, axis=-1),
-        }
-
-        return op_map[node.reduce_op](input_array)
+        return _REDUCE_OPS[node.reduce_op](input_array)
 
     def _execute_combinations(self, node: CombinationsNode) -> ak.Array:
         """Execute combinations operation"""
@@ -248,6 +319,12 @@ class IRExecutor:
         elif isinstance(node, GetItemNode):
             lines.append(f"{prefix}  key={node.key!r}")
             lines.append(self.visualize_ir(node.input, indent + 1))
+        elif isinstance(node, FusedNode):
+            red = f" -> reduce {node.reduce_op.value}" if node.reduce_op else ""
+            lines.append(f"{prefix}  expr={node.expr_text}{red}")
+            for i, leaf in enumerate(node.leaves):
+                lines.append(f"{prefix}  ${i}:")
+                lines.append(self.visualize_ir(leaf, indent + 2))
 
         return "\n".join(lines)
 
