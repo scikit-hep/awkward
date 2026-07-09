@@ -6,12 +6,12 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_jagged_descend(
-  T* tooffsets,
-  const T* slicestarts,
-  const T* slicestops,
+  T* __restrict__ tooffsets,
+  const T* __restrict__ slicestarts,
+  const T* __restrict__ slicestops,
   int64_t sliceouterlen,
-  const C* fromstarts,
-  const C* fromstops) {
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops) {
   if (sliceouterlen == 0) {
     tooffsets[0] = 0;
   }
@@ -30,48 +30,12 @@ ERROR awkward_ListArray_getitem_jagged_descend(
   }
   return success();
 }
-ERROR awkward_ListArray32_getitem_jagged_descend_64(
-  int64_t* tooffsets,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
-  int64_t sliceouterlen,
-  const int32_t* fromstarts,
-  const int32_t* fromstops) {
-  return awkward_ListArray_getitem_jagged_descend<int32_t, int64_t>(
-    tooffsets,
-    slicestarts,
-    slicestops,
-    sliceouterlen,
-    fromstarts,
-    fromstops);
-}
-ERROR awkward_ListArrayU32_getitem_jagged_descend_64(
-  int64_t* tooffsets,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
-  int64_t sliceouterlen,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops) {
-  return awkward_ListArray_getitem_jagged_descend<uint32_t, int64_t>(
-    tooffsets,
-    slicestarts,
-    slicestops,
-    sliceouterlen,
-    fromstarts,
-    fromstops);
-}
-ERROR awkward_ListArray64_getitem_jagged_descend_64(
-  int64_t* tooffsets,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
-  int64_t sliceouterlen,
-  const int64_t* fromstarts,
-  const int64_t* fromstops) {
-  return awkward_ListArray_getitem_jagged_descend<int64_t, int64_t>(
-    tooffsets,
-    slicestarts,
-    slicestops,
-    sliceouterlen,
-    fromstarts,
-    fromstops);
-}
+
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tooffsets, const T* slicestarts, const T* slicestops, int64_t sliceouterlen, const C* fromstarts, const C* fromstops) { \
+    return awkward_ListArray_getitem_jagged_descend<C, T>(tooffsets, slicestarts, slicestops, sliceouterlen, fromstarts, fromstops); \
+  }
+
+WRAPPER(awkward_ListArray32_getitem_jagged_descend_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_getitem_jagged_descend_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_getitem_jagged_descend_64, int64_t, int64_t)

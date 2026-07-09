@@ -13,6 +13,7 @@ from awkward._backends.backend import Backend
 from awkward._backends.dispatch import backend_of
 from awkward._namedaxis import (
     NAMED_AXIS_KEY,
+    NamedAxesWithDims,
     _add_named_axis,
     _unify_named_axis,
 )
@@ -325,20 +326,6 @@ BROADCAST_RULE_TO_FACTORY_IMPL = {
 }
 
 
-def _export_named_axis_from_depth_to_lateral(
-    idx: int,
-    depth_context: dict[str, Any],
-    lateral_context: dict[str, Any],
-) -> None:
-    # set adjusted named axes to lateral (inplace)
-    named_axis, ndim = depth_context[NAMED_AXIS_KEY][idx]
-    seen_named_axis, _ = lateral_context[NAMED_AXIS_KEY][idx]
-    lateral_context[NAMED_AXIS_KEY][idx] = (
-        _unify_named_axis(named_axis, seen_named_axis),
-        ndim,
-    )
-
-
 def broadcast_regular_dim_size(contents: Sequence[ak.contents.Content]) -> ShapeItem:
     # Find known size out of our contents
     dim_size: ShapeItem
@@ -464,10 +451,11 @@ def apply_step(
                             _unify_named_axis(named_axis, seen_named_axis),
                             ndim + 1 if ndim is not None else ndim,
                         )
-                        if o.is_leaf:
-                            _export_named_axis_from_depth_to_lateral(
-                                i, depth_context, lateral_context
-                            )
+                        # mirror into the lateral context (independent storage
+                        # now; this used to rely on the two contexts sharing it)
+                        lateral_context[NAMED_AXIS_KEY][i] = depth_context[
+                            NAMED_AXIS_KEY
+                        ][i]
                     nextinputs.append(o)
                 else:
                     nextinputs.append(o)
@@ -553,6 +541,11 @@ def apply_step(
                 numoutputs = len(outcontents[-1])
             else:
                 assert numoutputs == len(outcontents[-1])
+
+        # With zero fields the loop above never runs, so no recursion tells us
+        # the output count; default to a single RecordArray.
+        if numoutputs is None:
+            numoutputs = 1
 
         parameters = parameters_factory(nextparameters, numoutputs)
 
@@ -646,10 +639,10 @@ def apply_step(
                             _add_named_axis(named_axis, depth, ndim),
                             ndim + 1 if ndim is not None else ndim,
                         )
-                        if x.is_leaf:
-                            _export_named_axis_from_depth_to_lateral(
-                                i, depth_context, lateral_context
-                            )
+                        # mirror into the lateral context (independent storage)
+                        lateral_context[NAMED_AXIS_KEY][i] = depth_context[
+                            NAMED_AXIS_KEY
+                        ][i]
                     # Any unknown values or sizes are assumed to be correct as-is
                     elif (
                         dim_size is unknown_length
@@ -715,7 +708,7 @@ def apply_step(
             nextinputs = []
             nextparameters = []
             for i, ((named_axis, ndim), x, x_is_string) in enumerate(
-                zip(named_axes_with_ndims, inputs, input_is_string, strict=False)
+                zip(named_axes_with_ndims, inputs, input_is_string, strict=True)
             ):
                 if isinstance(x, listtypes) and not x_is_string:
                     next_content = broadcast_to_offsets_avoiding_carry(x, offsets)
@@ -735,10 +728,10 @@ def apply_step(
                         _add_named_axis(named_axis, depth + 1, ndim),
                         ndim + 1 if ndim is not None else ndim,
                     )
-                    if x.is_leaf:
-                        _export_named_axis_from_depth_to_lateral(
-                            i, depth_context, lateral_context
-                        )
+                    # mirror into the lateral context (independent storage)
+                    lateral_context[NAMED_AXIS_KEY][i] = depth_context[NAMED_AXIS_KEY][
+                        i
+                    ]
                 else:
                     nextinputs.append(x)
                     nextparameters.append(NO_PARAMETERS)
@@ -956,13 +949,19 @@ def apply_step(
                 return (out,)
 
         cond_mask = masks[2]
+        # Build fresh contexts sized to these two inputs: the outer contexts have
+        # one entry per original input (x, y, cond), but the named-axis bookkeeping
+        # zips contexts against inputs, so a 3-entry context here would mismatch.
+        or_depth_context, or_lateral_context = NamedAxesWithDims.prepare_contexts(
+            [xy_mask, cond_mask]
+        )
         mask = apply_step(
             backend,
             (xy_mask, cond_mask),
             action_logical_or,
             0,
-            depth_context,
-            lateral_context,
+            or_depth_context,
+            or_lateral_context,
             simple_options,
         )[0]
 
@@ -984,13 +983,17 @@ def apply_step(
                 )
                 return (out,)
 
+        # fresh contexts sized to these two inputs (as above)
+        mask_depth_context, mask_lateral_context = NamedAxesWithDims.prepare_contexts(
+            [xy_unmasked, mask]
+        )
         masked = apply_step(
             backend,
             (xy_unmasked, mask),
             apply_mask_action,
             0,
-            depth_context,
-            lateral_context,
+            mask_depth_context,
+            mask_lateral_context,
             simple_options,
         )
         return masked

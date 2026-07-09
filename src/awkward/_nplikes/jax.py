@@ -29,6 +29,7 @@ class Jax(ArrayModuleNumpyLike):
             stacklevel=2,
         )
         jax = ak.jax.import_jax()
+        ak.jax.ensure_jax_config()
         self._module = jax.numpy
 
     def prepare_ufunc(self, ufunc: UfuncLike) -> UfuncLike:

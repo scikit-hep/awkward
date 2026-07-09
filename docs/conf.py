@@ -63,6 +63,7 @@ autoapi_options = [
     "members",
     "undoc-members",
     "private-members",
+    "special-members",
     "show-module-summary",
     "imported-members",
 ]
@@ -184,7 +185,10 @@ def _process_docstring_filter(docstring, obj):
 
     lines = docstring.split("\n")
     for i, line in enumerate(lines):
-        line = line.replace("`", "``")
+        # Promote single backticks to double-backtick inline literals, but leave
+        # already-doubled backticks untouched (``write(str)`` must stay a pair).
+        line = re.sub(r"(?<!`)`(?!`)", "``", line)
+        line = re.sub(r"<<<([^>]+)>>>", r"`\1`_", line)
         line = re.sub(
             r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
             r":py:obj:`\1`",
@@ -237,7 +241,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "_templates", "Thumbs.db", "jupyter_execute", ".*"]
+exclude_patterns = ["_build", "_templates", "_autoapi_templates", "Thumbs.db", "jupyter_execute", ".*"]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -388,6 +392,12 @@ def _skip_member(app, what, name, obj, skip, options):
     # Keep the top-level awkward package
     if name == "awkward":
         return False
+    # Skip module-level dunder functions (e.g., awkward.__dir__); special-members
+    # is enabled for class methods but these should not be documented as top-level.
+    if what == "function":
+        short = name.rsplit(".", 1)[-1]
+        if short.startswith("__") and short.endswith("__"):
+            return True
     # Skip private modules (awkward._*) but not private methods/attributes
     # within public classes (those are controlled by the "private-members" option)
     if what in ("module", "package"):
@@ -407,6 +417,38 @@ def _skip_member(app, what, name, obj, skip, options):
     return skip
 
 
+def _add_awkward_inventory_aliases(app, exception):
+    """Duplicate ak.* inventory entries as awkward.* so intersphinx works.
+
+    Downstream projects that annotate ``awkward.Array`` (resolved from
+    ``import awkward as ak``) need ``awkward.*`` entries in objects.inv.
+    See https://github.com/scikit-hep/awkward/issues/3950.
+    """
+    if exception:
+        return
+    import zlib
+
+    inv_path = os.path.join(app.outdir, "objects.inv")
+    with open(inv_path, "rb") as f:
+        # Read the 4-line header verbatim
+        header = b"".join(f.readline() for _ in range(4))
+        # Decompress the body
+        body = zlib.decompress(f.read()).decode("utf-8")
+
+    extra_lines = []
+    for line in body.splitlines():
+        name = line.split(" ", 1)[0]
+        if name.startswith("ak."):
+            extra_lines.append("awkward." + line[3:])
+
+    if extra_lines:
+        new_body = body.rstrip("\n") + "\n" + "\n".join(extra_lines) + "\n"
+        with open(inv_path, "wb") as f:
+            f.write(header)
+            f.write(zlib.compress(new_body.encode("utf-8")))
+
+
 def setup(app):
     app.connect("html-page-context", install_jupyterlite_styles)
     app.connect("autoapi-skip-member", _skip_member)
+    app.connect("build-finished", _add_awkward_inventory_aliases)

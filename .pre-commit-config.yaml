@@ -6,7 +6,7 @@ ci:
 exclude: ^(docs|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v6.0.0
+  rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -22,20 +22,20 @@ repos:
     args: ["--pytest-test-first"]
 
 - repo: https://github.com/cheshirekow/cmake-format-precommit
-  rev: v0.6.13
+  rev: e2c2116d86a80e72e7146a06e68b7c228afc6319  # frozen: v0.6.13
   hooks:
   - id: cmake-format
     additional_dependencies: [pyyaml]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.9
+  rev: 0671d8ab202c4ac093b78433ae5baf74f3fc7246  # frozen: v0.15.15
   hooks:
   - id: ruff-check
     args: ["--fix", "--show-fixes"]
   - id: ruff-format
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.2
+  rev: 2ccb47ff45ad361a21071a7eedda4c37e6ae8c5a  # frozen: v2.4.2
   hooks:
   - id: codespell
     args: ["-L", "ue,subjet,parms,fo,numer,thre,nin,nout"]
@@ -49,7 +49,7 @@ repos:
     exclude: .pre-commit-config.yaml
 
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: "v0.11.0.1"
+  rev: "745eface02aef23e168a8afb6b5737818efbea95"  # frozen: v0.11.0.1
   hooks:
   - id: shellcheck
 
@@ -63,13 +63,13 @@ repos:
     files: ^tests/
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.37.1
+  rev: 943377262562a12b57292fc98fabd7dbf81451fe  # frozen: 0.37.2
   hooks:
     - id: check-github-workflows
       args: ["--verbose"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.20.0
+  rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # frozen: v2.1.0
   hooks:
     - id: mypy
       files: src
@@ -77,6 +77,13 @@ repos:
         - numpy>=1.24
 
 - repo: https://github.com/abravalheri/validate-pyproject
-  rev: v0.25
+  rev: 4b2e70d08cb2ccd26d1fba73588de41c7a5d50b7  # frozen: v0.25
   hooks:
     - id: validate-pyproject
+
+- repo: https://github.com/zizmorcore/zizmor-pre-commit
+  rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # frozen: v1.25.2
+  hooks:
+    - id: zizmor
+      files: "^\\.github"
+      args: [--persona=pedantic]

@@ -18,6 +18,7 @@ awkward-cpp/tests-spec
 awkward-cpp/tests-spec-explicit
 tests-cuda-kernels
 tests-cuda-kernels-explicit
+tests-cuda-kernels-explicit-parametrized
 
 # to use all-contributors-cli without adding it to the project
 node_modules
@@ -166,3 +167,12 @@ Testing/
 
 # MacOS
 .DS_Store
+
+
+# Symlink to AGENTS.md
+CLAUDE.md
+.claude/
+
+# Lockfiles
+uv.lock
+*pylock*

@@ -7,25 +7,32 @@ on:
             type: boolean
             description: Publish to PyPI
 
-jobs:
+permissions:
+  contents: read
 
+concurrency:
+  group: deploy-cpp-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
   build-wheels:
-    uses: ./.github/workflows/build-wheels.yml
+    uses: ./.github/workflows/reusable-build-wheels.yml
 
   upload-awkward-cpp:
+    name: Upload awkward-cpp
     needs: [build-wheels]
     runs-on: ubuntu-latest
     if: inputs.publish-pypi
     permissions:
-      id-token: write
-      attestations: write
+      id-token: write # Required for trusted publishing to PyPI.
+      attestations: write # Required to sign release artifacts before publishing.
       contents: read
     environment:
       name: "pypi"
       url: "https://pypi.org/project/awkward-cpp/"
     steps:
 
-    - uses: actions/download-artifact@v8
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         pattern: "awkward-cpp*"
         path: dist
@@ -39,4 +46,4 @@ jobs:
       with:
         subject-path: "dist/awkward*cpp-*"
 
-    - uses: pypa/gh-action-pypi-publish@v1.14.0
+    - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0

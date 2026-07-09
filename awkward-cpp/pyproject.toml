@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "52"
+version = "54"
 dependencies = [
     "numpy>=1.21.3"
 ]
@@ -102,6 +102,10 @@ build-verbosity = 1
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = "cmake,numpy"
 UV_ONLY_BINARY = "cmake,numpy"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-win*"
+repair-wheel-command = "delvewheel repair -w {dest_dir} -v --ignore-existing {wheel}"
 
 [[tool.cibuildwheel.overrides]]
 select = "*pyodide*"

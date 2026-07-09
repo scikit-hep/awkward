@@ -3,19 +3,17 @@
 from __future__ import annotations
 
 import hypothesis_awkward.strategies as st_ak
-from hypothesis import given, settings
+from hypothesis import given
 
 import awkward as ak
 
 
-@settings(max_examples=200)
 @given(a=st_ak.constructors.arrays())
 def test_reflexivity(a: ak.Array) -> None:
     """An array must be equal to itself."""
     assert ak.array_equal(a, a, equal_nan=True)
 
 
-@settings(max_examples=200)
 @given(
     a1=st_ak.constructors.arrays(),
     a2=st_ak.constructors.arrays(),

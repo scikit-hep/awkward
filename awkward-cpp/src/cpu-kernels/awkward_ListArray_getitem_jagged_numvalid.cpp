@@ -6,11 +6,11 @@
 
 template <typename T>
 ERROR awkward_ListArray_getitem_jagged_numvalid(
-  int64_t* numvalid,
-  const T* slicestarts,
-  const T* slicestops,
+  int64_t* __restrict__ numvalid,
+  const T* __restrict__ slicestarts,
+  const T* __restrict__ slicestops,
   int64_t length,
-  const T* missing,
+  const T* __restrict__ missing,
   int64_t missinglength) {
   *numvalid = 0;
   for (int64_t i = 0;  i < length;  i++) {
@@ -31,11 +31,11 @@ ERROR awkward_ListArray_getitem_jagged_numvalid(
   return success();
 }
 ERROR awkward_ListArray_getitem_jagged_numvalid_64(
-  int64_t* numvalid,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
+  int64_t* __restrict__ numvalid,
+  const int64_t* __restrict__ slicestarts,
+  const int64_t* __restrict__ slicestops,
   int64_t length,
-  const int64_t* missing,
+  const int64_t* __restrict__ missing,
   int64_t missinglength) {
   return awkward_ListArray_getitem_jagged_numvalid<int64_t>(
     numvalid,

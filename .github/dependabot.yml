@@ -9,6 +9,8 @@ updates:
       actions:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
 
   # Bump hypothesis-awkward, which is pinned to an exact version in
   # requirements-test-full.txt. Newer versions produce more varied test
@@ -21,3 +23,5 @@ updates:
       interval: "weekly"
     allow:
       - dependency-name: "hypothesis-awkward"
+    cooldown:
+      default-days: 7

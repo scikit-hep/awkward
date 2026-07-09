@@ -177,6 +177,7 @@ def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
          1.1,
          2.2,
          999]
+
     """
     # Dispatch
     yield (array,)

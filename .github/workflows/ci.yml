@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  change-detection:
+    uses: ./.github/workflows/reusable-change-detection.yml
+
+  tests:
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-tests)
+    uses: ./.github/workflows/reusable-test.yml
+    with:
+     run-gpu-kernel-tests: ${{ needs.change-detection.outputs.run-gpu-kernel-tests }}
+
+  packaging-tests:
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.build-wheels)
+    uses: ./.github/workflows/reusable-packaging-test.yml
+
+  header-only-tests:
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-header-only-tests)
+    uses: ./.github/workflows/reusable-header-only-test.yml
+
+  coverage:
+    uses: ./.github/workflows/reusable-coverage.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  docs:
+    uses: ./.github/workflows/reusable-docs.yml
+    permissions:
+      id-token: write # Required by the reusable docs deploy job for AWS OIDC.
+      contents: read
+    secrets:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_DEPLOY_ROLE: ${{ secrets.AWS_DEPLOY_ROLE }}
+
+  pass:
+    name: Check CI result
+    if: always()
+    needs:
+      - change-detection
+      - tests
+      - packaging-tests
+      - header-only-tests
+      - coverage
+      - docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{
+              fromJSON(needs.change-detection.outputs.run-tests)
+              && ''
+              || '
+              tests,
+              '
+            }} ${{
+              fromJSON(needs.change-detection.outputs.build-wheels)
+              && ''
+              || '
+              packaging-tests,
+              '
+            }} ${{
+              fromJSON(needs.change-detection.outputs.run-header-only-tests)
+              && ''
+              || '
+              header-only-tests,
+              '
+            }}
+          jobs: ${{ toJSON(needs) }}

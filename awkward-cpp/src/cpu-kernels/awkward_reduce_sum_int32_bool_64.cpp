@@ -5,16 +5,16 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_reduce_sum_int32_bool_64(
-  int32_t* toptr,
-  const bool* fromptr,
-  const int64_t* parents,
-  const int64_t* offsets,
-  int64_t lenparents,
+  int32_t* __restrict__ toptr,
+  const bool* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
-  std::memset(toptr, 0, outlength * sizeof(int32_t));
-
-  for (int64_t i = 0; i < lenparents; i++) {
-    toptr[parents[i]] += fromptr[i];
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    int32_t acc = 0;
+    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+      if (fromptr[i]) acc++;
+    }
+    toptr[bin] = acc;
   }
   return success();
 }
