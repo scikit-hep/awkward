@@ -34,6 +34,10 @@ so shared sub-expressions are materialized once rather than recomputed inside
 every consumer.  This keeps the memoization guarantee of the interpreter
 while still fusing linear chains, and it is safe: boundaries are exactly the
 points the interpreter would have materialized anyway.
+
+Everything here is iterative (explicit stacks, no recursion): expression
+graphs are user-sized — a loop appending ``expr = expr + x`` thousands of
+times must fuse and evaluate without hitting the Python recursion limit.
 """
 
 from __future__ import annotations
@@ -41,6 +45,8 @@ from __future__ import annotations
 import math
 import operator
 from collections import defaultdict
+
+import numpy as np
 
 from ._ir import (
     BinaryOpNode,
@@ -50,7 +56,7 @@ from ._ir import (
     FilterNode,
     GetItemNode,
     InputNode,
-    IRNode,
+    OpNode,
     OpType,
     ReduceNode,
     SelectListsNode,
@@ -69,6 +75,8 @@ ELEMENTWISE_OPS = {
     OpType.MUL: operator.mul,
     OpType.DIV: operator.truediv,
     OpType.POW: operator.pow,
+    OpType.MOD: operator.mod,
+    OpType.FLOORDIV: operator.floordiv,
     OpType.LT: operator.lt,
     OpType.LE: operator.le,
     OpType.GT: operator.gt,
@@ -77,13 +85,16 @@ ELEMENTWISE_OPS = {
     OpType.NE: operator.ne,
 }
 
-#: Symbols used only for human-readable fused-expression rendering.
+#: Symbols used for fused-expression rendering (both the human-readable
+#: ``expr_text`` and the backend codegen source).
 _OP_SYMBOL = {
     OpType.ADD: "+",
     OpType.SUB: "-",
     OpType.MUL: "*",
     OpType.DIV: "/",
     OpType.POW: "**",
+    OpType.MOD: "%",
+    OpType.FLOORDIV: "//",
     OpType.LT: "<",
     OpType.LE: "<=",
     OpType.GT: ">",
@@ -93,7 +104,7 @@ _OP_SYMBOL = {
 }
 
 
-def is_elementwise(node: IRNode) -> bool:
+def is_elementwise(node: OpNode) -> bool:
     """True for a binary/comparison node whose op can be fused."""
     return (
         isinstance(node, (BinaryOpNode, ComparisonNode))
@@ -101,22 +112,26 @@ def is_elementwise(node: IRNode) -> bool:
     )
 
 
-def _children(node: IRNode) -> tuple[IRNode, ...]:
-    """Return the IRNode operands of ``node`` (empty for leaves)."""
+def _children(node: OpNode) -> tuple[OpNode, ...]:
+    """Return the OpNode operands of ``node`` (empty for leaves)."""
     if isinstance(node, (BinaryOpNode, ComparisonNode)):
         return (node.left, node.right)
     if isinstance(node, FilterNode):
         return (node.input, node.condition)
     if isinstance(node, SelectListsNode):
         return (node.input, node.mask)
-    if isinstance(node, (ReduceNode, CombinationsNode, GetItemNode)):
+    if isinstance(node, (ReduceNode, CombinationsNode)):
+        return (node.input,)
+    if isinstance(node, GetItemNode):
+        if isinstance(node.key, OpNode):
+            return (node.input, node.key)
         return (node.input,)
     if isinstance(node, FusedNode):
         return tuple(node.leaves)
     return ()  # InputNode, ConstantNode
 
 
-def _walk(root: IRNode):
+def _walk(root: OpNode):
     """Yield every distinct node reachable from ``root`` (DFS)."""
     seen: set[int] = set()
     stack = [root]
@@ -129,7 +144,27 @@ def _walk(root: IRNode):
         stack.extend(_children(node))
 
 
-def consumer_counts(root: IRNode) -> dict[int, int]:
+def topo_order(root: OpNode) -> list[OpNode]:
+    """Return the graph's nodes in dependency order (children first)."""
+    seen: set[int] = set()
+    order: list[OpNode] = []
+    stack: list[tuple[OpNode, bool]] = [(root, False)]
+    while stack:
+        node, processed = stack.pop()
+        if processed:
+            order.append(node)
+            continue
+        if node.node_id in seen:
+            continue
+        seen.add(node.node_id)
+        stack.append((node, True))
+        for child in reversed(_children(node)):
+            if child.node_id not in seen:
+                stack.append((child, False))
+    return order
+
+
+def consumer_counts(root: OpNode) -> dict[int, int]:
     """Map ``node_id`` -> number of parents referencing it within the graph.
 
     The graph root has count 0.  A count > 1 marks a fan-out point, which the
@@ -147,7 +182,25 @@ def consumer_counts(root: IRNode) -> dict[int, int]:
 # ---------------------------------------------------------------------------
 
 
-class FusedNode(IRNode):
+def _eval_program(program, values):
+    """Evaluate a postorder (RPN) instruction list with an explicit stack.
+
+    ``program`` entries are ``(fn, slot)``: leaf loads have ``fn is None`` and
+    push ``values[slot]``; ops pop two operands and push ``fn(left, right)``.
+    Stack-based so arbitrarily deep fused regions evaluate without recursion.
+    """
+    stack = []
+    for fn, slot in program:
+        if fn is None:
+            stack.append(values[slot])
+        else:
+            right = stack.pop()
+            left = stack.pop()
+            stack.append(fn(left, right))
+    return stack[-1]
+
+
+class FusedNode(OpNode):
     """A run of element-wise ops (optionally terminated by a reduction),
     collapsed into a single compiled expression over boundary ``leaves``.
 
@@ -163,8 +216,6 @@ class FusedNode(IRNode):
     ):
         dtype = getattr(root_node, "dtype", None)
         if reduce_op is OpType.MEAN:
-            import numpy as np
-
             dtype = np.dtype(np.float64)
         super().__init__(op_type=OpType.FUSED, dtype=dtype)
         self.leaves = list(leaves)
@@ -209,51 +260,55 @@ class FusedNode(IRNode):
 # ---------------------------------------------------------------------------
 
 
-def _build_region(root: IRNode, counts: dict[int, int]):
+def _build_region(root: OpNode, counts: dict[int, int]):
     """Collect the fused region rooted at element-wise ``root``.
 
     Returns ``(leaves, expr, expr_text)`` where ``leaves`` are the ordered
-    boundary IRNodes, ``expr`` is a cache-stable callable evaluating the
+    boundary OpNodes, ``expr`` is a cache-stable callable evaluating the
     region from a list of leaf values, and ``expr_text`` renders it.
     """
-    leaves: list[IRNode] = []
+    leaves: list[OpNode] = []
     leaf_slot: dict[int, int] = {}
-    interior: set[int] = set()
 
-    def is_interior(node: IRNode) -> bool:
+    def is_interior(node: OpNode) -> bool:
         # The root is always interior; other element-wise nodes are absorbed
         # only when single-use (fan-out == 1 -> unique consumer is this parent).
         if node is root:
             return True
         return is_elementwise(node) and counts.get(node.node_id, 0) == 1
 
-    def classify(node: IRNode):
+    # Pre-order DFS: assign leaf slots in first-encounter (left-to-right) order.
+    stack = [root]
+    while stack:
+        node = stack.pop()
         if is_interior(node):
-            interior.add(node.node_id)
-            for child in _children(node):
-                classify(child)
+            left, right = node.left, node.right
+            stack.append(right)
+            stack.append(left)
         elif node.node_id not in leaf_slot:
             leaf_slot[node.node_id] = len(leaves)
             leaves.append(node)
 
-    classify(root)
-
-    def compile_expr(node: IRNode):
+    # Postorder (RPN) program over the region: leaf loads and binary ops.
+    program: list[tuple] = []
+    post: list[tuple[OpNode, bool]] = [(root, False)]
+    while post:
+        node, processed = post.pop()
+        if processed:
+            program.append((ELEMENTWISE_OPS[node.op_type], None))
+            continue
         if node.node_id in leaf_slot:
-            slot = leaf_slot[node.node_id]
-            return lambda values: values[slot]
-        fn = ELEMENTWISE_OPS[node.op_type]
-        left = compile_expr(node.left)
-        right = compile_expr(node.right)
-        return lambda values: fn(left(values), right(values))
+            program.append((None, leaf_slot[node.node_id]))
+            continue
+        post.append((node, True))
+        post.append((node.right, False))
+        post.append((node.left, False))
 
-    def render(node: IRNode) -> str:
-        if node.node_id in leaf_slot:
-            return f"${leaf_slot[node.node_id]}"
-        sym = _OP_SYMBOL[node.op_type]
-        return f"({render(node.left)} {sym} {render(node.right)})"
+    def expr(values, _program=tuple(program)):
+        return _eval_program(_program, values)
 
-    return leaves, compile_expr(root), render(root)
+    text = emit_source(root, {nid: f"${slot}" for nid, slot in leaf_slot.items()})
+    return leaves, expr, text
 
 
 def py_scalar_literal(value) -> str:
@@ -261,7 +316,10 @@ def py_scalar_literal(value) -> str:
 
     ``repr`` renders ``inf`` / ``nan`` as bare names that do not exist in the
     compiled op's namespace (a ``NameError`` at exec time, which used to escape
-    the fusion fallback); emit explicit ``float(...)`` calls instead.
+    the fusion fallback); emit explicit ``float(...)`` calls instead.  (The
+    CUDA codegen instead resolves the bare names via exec globals — numba
+    cannot compile ``float(str)`` in device code — so both backends stay
+    correct for non-finite constants.)
     """
     if isinstance(value, float):
         if math.isinf(value):
@@ -271,7 +329,7 @@ def py_scalar_literal(value) -> str:
     return repr(value)
 
 
-def emit_source(root_node: IRNode, leaf_expr: dict) -> str:
+def emit_source(root_node: OpNode, leaf_expr: dict) -> str:
     """Walk an element-wise region and emit an equivalent Python expression.
 
     ``leaf_expr`` maps original leaf ``node_id`` -> source snippet.  Interior
@@ -279,15 +337,23 @@ def emit_source(root_node: IRNode, leaf_expr: dict) -> str:
     application.  Shared with the CUDA codegen so the fused-op structure has a
     single source of truth.
     """
-
-    def go(node: IRNode) -> str:
+    out: list[str] = []
+    stack: list[tuple[OpNode, bool]] = [(root_node, False)]
+    while stack:
+        node, processed = stack.pop()
+        if processed:
+            right = out.pop()
+            left = out.pop()
+            out.append(f"({left} {_OP_SYMBOL[node.op_type]} {right})")
+            continue
         snippet = leaf_expr.get(node.node_id)
         if snippet is not None:
-            return snippet
-        sym = _OP_SYMBOL[node.op_type]
-        return f"({go(node.left)} {sym} {go(node.right)})"
-
-    return go(root_node)
+            out.append(snippet)
+            continue
+        stack.append((node, True))
+        stack.append((node.right, False))
+        stack.append((node.left, False))
+    return out[0]
 
 
 # ---------------------------------------------------------------------------
@@ -295,33 +361,54 @@ def emit_source(root_node: IRNode, leaf_expr: dict) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _rebuild_boundary(node: IRNode, rewrite):
-    """Reconstruct a non-fused (boundary) node with rewritten children."""
+def _rebuild_boundary(node: OpNode, rewritten):
+    """Reconstruct a non-fused (boundary) node with rewritten children.
+
+    ``rewritten`` maps ``node_id`` -> already-rewritten node (children are
+    guaranteed present because ``fuse`` processes in topological order).
+    """
     if isinstance(node, (InputNode, ConstantNode, FusedNode)):
         # True leaves and already-fused regions are identity: this makes the
         # pass idempotent (``fuse(fuse(g)) == fuse(g)``) and preserves the
         # executor memo / input references.
         return node
     if isinstance(node, FilterNode):
-        return FilterNode(rewrite(node.input), rewrite(node.condition))
+        return FilterNode(
+            rewritten[node.input.node_id], rewritten[node.condition.node_id]
+        )
     if isinstance(node, SelectListsNode):
-        return SelectListsNode(rewrite(node.input), rewrite(node.mask))
+        return SelectListsNode(
+            rewritten[node.input.node_id], rewritten[node.mask.node_id]
+        )
     if isinstance(node, ReduceNode):
-        return ReduceNode(rewrite(node.input), node.reduce_op)
+        return ReduceNode(rewritten[node.input.node_id], node.reduce_op)
     if isinstance(node, CombinationsNode):
         return CombinationsNode(
-            rewrite(node.input),
+            rewritten[node.input.node_id],
             node.n,
             node.replacement,
             node.axis,
             node.fields,
         )
     if isinstance(node, GetItemNode):
-        return GetItemNode(rewrite(node.input), node.key)
+        key = node.key
+        if isinstance(key, OpNode):
+            key = rewritten[key.node_id]
+        return GetItemNode(rewritten[node.input.node_id], key)
     raise NotImplementedError(f"cannot rebuild node of type {type(node).__name__}")
 
 
-def fuse(root: IRNode) -> IRNode:
+def _fuses_reduce(node: OpNode, counts: dict[int, int]) -> bool:
+    """True when ``node`` is a reduction over a single-use element-wise input
+    (transform+reduce collapses into one FusedNode / one kernel)."""
+    return (
+        isinstance(node, ReduceNode)
+        and is_elementwise(node.input)
+        and counts.get(node.input.node_id, 0) == 1
+    )
+
+
+def fuse(root: OpNode) -> OpNode:
     """Rewrite the expression graph, collapsing element-wise regions.
 
     Returns a new root.  Element-wise regions become :class:`FusedNode`;
@@ -332,23 +419,29 @@ def fuse(root: IRNode) -> IRNode:
     shared sub-graphs are fused once and reused.
     """
     counts = consumer_counts(root)
-    memo: dict[int, IRNode] = {}
+    order = topo_order(root)
 
-    def rewrite(node: IRNode) -> IRNode:
-        cached = memo.get(node.node_id)
-        if cached is not None:
-            return cached
+    # Interior nodes — absorbed into their (unique, absorbing) consumer's
+    # region — are skipped: only region roots get a FusedNode of their own.
+    absorbed: set[int] = set()
+    for node in order:
+        if is_elementwise(node) or isinstance(node, ReduceNode):
+            for child in _children(node):
+                if (
+                    is_elementwise(child)
+                    and counts.get(child.node_id, 0) == 1
+                    and (is_elementwise(node) or child is node.input)
+                ):
+                    absorbed.add(child.node_id)
 
-        # transform+reduce fusion: a reduction over a single-use element-wise
-        # sub-expression collapses into one FusedNode (one kernel).
-        if (
-            isinstance(node, ReduceNode)
-            and is_elementwise(node.input)
-            and counts.get(node.input.node_id, 0) == 1
-        ):
+    rewritten: dict[int, OpNode] = {}
+    for node in order:
+        if node.node_id in absorbed:
+            continue
+        if _fuses_reduce(node, counts):
             leaves, expr, text = _build_region(node.input, counts)
-            result: IRNode = FusedNode(
-                [rewrite(leaf) for leaf in leaves],
+            result: OpNode = FusedNode(
+                [rewritten[leaf.node_id] for leaf in leaves],
                 expr,
                 root_node=node.input,
                 leaf_ids=[leaf.node_id for leaf in leaves],
@@ -358,22 +451,20 @@ def fuse(root: IRNode) -> IRNode:
         elif is_elementwise(node):
             leaves, expr, text = _build_region(node, counts)
             result = FusedNode(
-                [rewrite(leaf) for leaf in leaves],
+                [rewritten[leaf.node_id] for leaf in leaves],
                 expr,
                 root_node=node,
                 leaf_ids=[leaf.node_id for leaf in leaves],
                 expr_text=text,
             )
         else:
-            result = _rebuild_boundary(node, rewrite)
+            result = _rebuild_boundary(node, rewritten)
+        rewritten[node.node_id] = result
 
-        memo[node.node_id] = result
-        return result
-
-    return rewrite(root)
+    return rewritten[root.node_id]
 
 
-def fusion_stats(root: IRNode) -> dict[str, int]:
+def fusion_stats(root: OpNode) -> dict[str, int]:
     """Summarize what fusion does to a graph (for tests / introspection).
 
     ``elementwise_before`` counts fusible nodes in the original graph;

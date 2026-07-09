@@ -15,7 +15,7 @@ from collections import OrderedDict
 
 import awkward as ak
 
-from ._fusion import FusedNode, fuse
+from ._fusion import FusedNode, _children, fuse
 from ._ir import (
     BinaryOpNode,
     CombinationsNode,
@@ -24,11 +24,12 @@ from ._ir import (
     FilterNode,
     GetItemNode,
     InputNode,
-    IRNode,
+    OpNode,
     OpType,
     ReduceNode,
     SelectListsNode,
 )
+from ._nvtx import nvtx
 
 # Sentinel: no backend fused-kernel path was taken, fall back to eager eval.
 _NO_FUSED_KERNEL = object()
@@ -41,26 +42,24 @@ _REDUCE_OPS = {
     OpType.MIN: lambda a: ak.min(a, axis=-1),
 }
 
-try:
-    import nvtx
-except ImportError:
+_BINARY_OPS = {
+    OpType.ADD: lambda a, b: a + b,
+    OpType.SUB: lambda a, b: a - b,
+    OpType.MUL: lambda a, b: a * b,
+    OpType.DIV: lambda a, b: a / b,
+    OpType.POW: lambda a, b: a**b,
+    OpType.MOD: lambda a, b: a % b,
+    OpType.FLOORDIV: lambda a, b: a // b,
+}
 
-    class nvtx:
-        @staticmethod
-        def annotate(*args, **kwargs):
-            def deco(fn):
-                return fn
-
-            return deco
-
-
-def _is_cuda_backed(values) -> bool:
-    """True if any realized leaf value lives on the CUDA backend."""
-    for value in values:
-        backend = getattr(getattr(value, "layout", None), "backend", None)
-        if backend is not None and getattr(backend, "name", None) == "cuda":
-            return True
-    return False
+_COMPARISON_OPS = {
+    OpType.LT: lambda a, b: a < b,
+    OpType.LE: lambda a, b: a <= b,
+    OpType.GT: lambda a, b: a > b,
+    OpType.GE: lambda a, b: a >= b,
+    OpType.EQ: lambda a, b: a == b,
+    OpType.NE: lambda a, b: a != b,
+}
 
 
 def _uniform_backend(values):
@@ -137,7 +136,7 @@ class IRExecutor:
             self._memo_bytes -= self._memo_sizes.pop(evicted_key)
 
     @nvtx.annotate("compile_and_execute")
-    def compile_and_execute(self, node: IRNode) -> ak.Array:
+    def compile_and_execute(self, node: OpNode) -> ak.Array:
         """Run the fusion pass, then execute the fused graph.
 
         This is the entry point that realizes the *dynamic compilation* step:
@@ -150,24 +149,45 @@ class IRExecutor:
         return self.execute(self.optimize(node))
 
     @nvtx.annotate("execute_ir")
-    def execute(self, node: IRNode) -> ak.Array:
-        """Execute an IR node and return the result"""
-        # Leaves are free to "recompute" (they return a stored reference);
-        # keeping them out of the memo preserves the budget for real work.
-        if isinstance(node, (ConstantNode, InputNode)):
-            return self._execute_node(node)
+    def execute(self, node: OpNode) -> ak.Array:
+        """Execute an IR node and return the result.
 
-        # Check cache first
-        if node.node_id in self._memo:
-            self._memo.move_to_end(node.node_id)
-            return self._memo[node.node_id]
+        Evaluation is an explicit-stack postorder walk (no recursion, so
+        loop-built graphs thousands of nodes deep execute fine).  Sub-graphs
+        below a memoized node are pruned — a memo hit never recomputes its
+        dependencies.  ``results`` holds this call's realized intermediates;
+        they are released when the call returns (the bounded LRU memo decides
+        what survives across calls).
+        """
+        results: dict[int, object] = {}
+        stack: list[tuple[OpNode, bool]] = [(node, False)]
+        while stack:
+            current, processed = stack.pop()
+            nid = current.node_id
+            if nid in results:
+                continue
+            if processed:
+                value = self._execute_node(current, results)
+                self._memo_insert(nid, value)
+                results[nid] = value
+                continue
+            # Leaves are free to "recompute" (they return a stored reference);
+            # keeping them out of the memo preserves the budget for real work.
+            if isinstance(current, (ConstantNode, InputNode)):
+                results[nid] = self._execute_node(current, results)
+                continue
+            if nid in self._memo:
+                self._memo.move_to_end(nid)
+                results[nid] = self._memo[nid]
+                continue
+            stack.append((current, True))
+            for child in _children(current):
+                if child.node_id not in results:
+                    stack.append((child, False))
+        return results[node.node_id]
 
-        result = self._execute_node(node)
-        self._memo_insert(node.node_id, result)
-        return result
-
-    def _execute_node(self, node: IRNode) -> ak.Array:
-        """Execute a single IR node"""
+    def _execute_node(self, node: OpNode, results: dict) -> ak.Array:
+        """Execute a single IR node; children are looked up in ``results``."""
         if isinstance(node, InputNode):
             return node.get_array()
 
@@ -175,36 +195,51 @@ class IRExecutor:
             return node.value
 
         elif isinstance(node, BinaryOpNode):
-            return self._execute_binary_op(node)
+            left = results[node.left.node_id]
+            right = results[node.right.node_id]
+            return _BINARY_OPS[node.op_type](left, right)
 
         elif isinstance(node, ComparisonNode):
-            return self._execute_comparison(node)
+            left = results[node.left.node_id]
+            right = results[node.right.node_id]
+            return _COMPARISON_OPS[node.op_type](left, right)
 
         elif isinstance(node, FilterNode):
-            return self._execute_filter(node)
+            # Boolean-mask ``__getitem__`` dispatches to the array's backend,
+            # so this is GPU-accelerated for cuda-backed arrays already.
+            return results[node.input.node_id][results[node.condition.node_id]]
 
         elif isinstance(node, SelectListsNode):
-            return self._execute_select_lists(node)
+            return results[node.input.node_id][results[node.mask.node_id]]
 
         elif isinstance(node, ReduceNode):
-            return self._execute_reduce(node)
+            return _REDUCE_OPS[node.reduce_op](results[node.input.node_id])
 
         elif isinstance(node, CombinationsNode):
-            return self._execute_combinations(node)
+            return ak.combinations(
+                results[node.input.node_id],
+                node.n,
+                replacement=node.replacement,
+                axis=node.axis,
+                fields=node.fields,
+            )
 
         elif isinstance(node, GetItemNode):
-            return self._execute_getitem(node)
+            key = node.key
+            if isinstance(key, OpNode):
+                key = results[key.node_id]
+            return results[node.input.node_id][key]
 
         elif isinstance(node, FusedNode):
-            return self._execute_fused(node)
+            return self._execute_fused(node, results)
 
         else:
             raise NotImplementedError(f"Execution not implemented for {type(node)}")
 
-    def _execute_fused(self, node: FusedNode) -> ak.Array:
+    def _execute_fused(self, node: FusedNode, results: dict) -> ak.Array:
         """Execute a fused element-wise (optionally +reduction) region.
 
-        Leaves are realized first (memoized like any other node).  A backend
+        Leaves were realized first (memoized like any other node).  A backend
         fusion codegen may emit the region as a single kernel; otherwise the
         fused expression is evaluated eagerly in one pass.  In every case a
         terminating reduction is produced by the eager Awkward reducer
@@ -214,7 +249,7 @@ class IRExecutor:
         the reduction, so the fused and interpreter paths return the identical
         Awkward-typed result (same dtype, masking, and empty-list semantics).
         """
-        values = [self.execute(leaf) for leaf in node.leaves]
+        values = [results[leaf.node_id] for leaf in node.leaves]
 
         # CUDA: one kernel for the map (and the sum reduction, when fusible).
         fused = self._maybe_fused_kernel(node, values)
@@ -240,16 +275,16 @@ class IRExecutor:
 
     @staticmethod
     def _maybe_fused_kernel(node: FusedNode, values):
-        """Try to emit a single CUDA kernel for the region.
+        """Try to emit a single backend kernel for the region.
 
-        Only fires when *every* array leaf is CUDA-backed (a mixed cuda/cpu
-        expression declines, so the eager path decides validity — matching
-        ``fuse=False``).  Returns the result or ``_NO_FUSED_KERNEL``.
-
-        The fallback catch is deliberately broad: fusion is a fast path, never
-        a correctness dependency, so *any* codegen failure (unsupported shape,
-        a bad generated op, a device error) must fall back to eager rather than
-        propagate.
+        Returns the result, or ``_NO_FUSED_KERNEL`` if no codegen applies.
+        Requires every array leaf to be cuda-backed: a mixed cpu/cuda region
+        must fall back so it fails (or not) exactly like the eager expression
+        instead of silently migrating data to the device.  Any exception from
+        the codegen also falls back — fusion is a fast path, never a
+        correctness dependency, so a codegen defect must degrade to the eager
+        (still backend-dispatched, still correct) evaluation, not fail the
+        computation.
         """
         if _uniform_backend(values) != "cuda":
             return _NO_FUSED_KERNEL
@@ -266,10 +301,11 @@ class IRExecutor:
     def _maybe_cpu_fused(node: FusedNode, values):
         """Try to evaluate the region as one flat-buffer NumPy pass.
 
-        Only fires when *every* array leaf is CPU-backed.  Collapses the
-        per-op ``ak`` dispatch of an element-wise chain into a single pass over
-        the shared content buffer.  Returns the result or ``_NO_FUSED_KERNEL``;
-        like the CUDA path, any codegen failure falls back to eager.
+        Collapses the per-op ``ak`` dispatch of an element-wise chain into a
+        single pass over the shared content buffer.  Returns the result or
+        ``_NO_FUSED_KERNEL`` when the region shape is unsupported or the
+        codegen fails for any reason (same fallback discipline as the CUDA
+        path).
         """
         if _uniform_backend(values) != "cpu":
             return _NO_FUSED_KERNEL
@@ -282,76 +318,7 @@ class IRExecutor:
         except Exception:
             return _NO_FUSED_KERNEL
 
-    def _execute_binary_op(self, node: BinaryOpNode) -> ak.Array:
-        """Execute binary operations"""
-        left = self.execute(node.left)
-        right = self.execute(node.right)
-
-        op_map = {
-            OpType.ADD: lambda a, b: a + b,
-            OpType.SUB: lambda a, b: a - b,
-            OpType.MUL: lambda a, b: a * b,
-            OpType.DIV: lambda a, b: a / b,
-            OpType.POW: lambda a, b: a**b,
-        }
-
-        return op_map[node.op_type](left, right)
-
-    def _execute_comparison(self, node: ComparisonNode) -> ak.Array:
-        """Execute comparison operations"""
-        left = self.execute(node.left)
-        right = self.execute(node.right)
-
-        op_map = {
-            OpType.LT: lambda a, b: a < b,
-            OpType.LE: lambda a, b: a <= b,
-            OpType.GT: lambda a, b: a > b,
-            OpType.GE: lambda a, b: a >= b,
-            OpType.EQ: lambda a, b: a == b,
-            OpType.NE: lambda a, b: a != b,
-        }
-
-        return op_map[node.op_type](left, right)
-
-    def _execute_filter(self, node: FilterNode) -> ak.Array:
-        """Execute filter with a materialized boolean condition.
-
-        Boolean-mask ``__getitem__`` dispatches to the array's backend, so
-        this is GPU-accelerated for cuda-backed arrays already.
-        """
-        input_array = self.execute(node.input)
-        condition = self.execute(node.condition)
-        return input_array[condition]
-
-    def _execute_select_lists(self, node: SelectListsNode) -> ak.Array:
-        """Execute select-lists with a materialized per-list mask."""
-        input_array = self.execute(node.input)
-        mask = self.execute(node.mask)
-        return input_array[mask]
-
-    def _execute_reduce(self, node: ReduceNode) -> ak.Array:
-        """Execute reduction operations"""
-        input_array = self.execute(node.input)
-        return _REDUCE_OPS[node.reduce_op](input_array)
-
-    def _execute_combinations(self, node: CombinationsNode) -> ak.Array:
-        """Execute combinations operation"""
-        input_array = self.execute(node.input)
-
-        return ak.combinations(
-            input_array,
-            node.n,
-            replacement=node.replacement,
-            axis=node.axis,
-            fields=node.fields,
-        )
-
-    def _execute_getitem(self, node: GetItemNode) -> ak.Array:
-        """Execute field/index access"""
-        input_array = self.execute(node.input)
-        return input_array[node.key]
-
-    def visualize_ir(self, node: IRNode, indent: int = 0) -> str:
+    def visualize_ir(self, node: OpNode, indent: int = 0) -> str:
         """Generate a string visualization of the IR tree"""
         prefix = "  " * indent
         lines = [f"{prefix}{node}"]
@@ -377,6 +344,8 @@ class IRExecutor:
         elif isinstance(node, GetItemNode):
             lines.append(f"{prefix}  key={node.key!r}")
             lines.append(self.visualize_ir(node.input, indent + 1))
+            if isinstance(node.key, OpNode):
+                lines.append(self.visualize_ir(node.key, indent + 1))
         elif isinstance(node, FusedNode):
             red = f" -> reduce {node.reduce_op.value}" if node.reduce_op else ""
             lines.append(f"{prefix}  expr={node.expr_text}{red}")
@@ -386,7 +355,7 @@ class IRExecutor:
 
         return "\n".join(lines)
 
-    def optimize(self, node: IRNode) -> IRNode:
+    def optimize(self, node: OpNode) -> OpNode:
         """
         Apply optimization passes to the IR and return the rewritten root.
 

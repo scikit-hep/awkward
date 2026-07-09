@@ -302,7 +302,7 @@ def lazy(array):
             "ak.cuda.lazy is only available for arrays with the CUDA backend"
         )
 
-    from ._lazy_impl import lazy as _lazy
+    from awkward._connect.lazy._lazy_impl import lazy as _lazy
 
     return _lazy(array)
 

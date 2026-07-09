@@ -4,20 +4,6 @@ from __future__ import annotations
 
 import cupy as cp
 import numpy as np
-
-try:
-    import nvtx
-except ImportError:
-
-    class nvtx:
-        @staticmethod
-        def annotate(*args, **kwargs):
-            def deco(fn):
-                return fn
-
-            return deco
-
-
 from cuda.compute import PermutationIterator, ZipIterator
 
 import awkward as ak
@@ -26,7 +12,9 @@ import awkward as ak
 from awkward._connect.lazy._layout import (
     empty_like,
     reconstruct_with_offsets,
+    validate_iterator_layout,
 )
+from awkward._connect.lazy._nvtx import nvtx
 
 from ._segment_algorithms import (
     segment_sizes,
@@ -34,6 +22,23 @@ from ._segment_algorithms import (
     select_segments,
     transform_segments,
 )
+
+
+def _form_contains_list(form) -> bool:
+    """True if any node of the form tree is a list type."""
+    stack = [form]
+    while stack:
+        current = stack.pop()
+        if isinstance(
+            current,
+            (ak.forms.ListOffsetForm, ak.forms.ListForm, ak.forms.RegularForm),
+        ):
+            return True
+        if isinstance(current, ak.forms.RecordForm):
+            stack.extend(current.contents)
+        elif hasattr(current, "content"):
+            stack.append(current.content)
+    return False
 
 
 @nvtx.annotate("awkward_to_iterator")
@@ -88,20 +93,18 @@ def awkward_to_cccl_iterator(
             # Rare fallback: need to convert to layout (will use dispatch, but rare)
             layout = ak.to_layout(array)
 
-        # Normalize a top-level ListArray/RegularArray to ListOffsetArray (so
-        # the offsets extractor below always finds ``-offsets``) and reject
-        # index-of-list layouts, which would otherwise permute list indices
-        # onto flat elements / read out of bounds (silent wrong data).
-        from awkward._connect.lazy._layout import validate_iterator_layout
-
-        layout = validate_iterator_layout(layout)
-
         # Check if already on CUDA backend, if not convert using low-level method
         if layout._backend.name != "cuda":
             from awkward._backends.dispatch import regularize_backend
 
             cuda_backend = regularize_backend("cuda")
             layout = layout.to_backend(cuda_backend)
+
+        # Canonicalize layouts whose raw buffers cannot express the flat
+        # iteration: ListArray/RegularArray -> ListOffsetArray (so the offsets
+        # extractor below always finds ``-offsets``), list-level IndexedArray
+        # projected, missing values rejected (they would read out of bounds).
+        layout = validate_iterator_layout(layout)
 
         # Use low-level to_buffers to avoid @high_level_function dispatch overhead
         form, length, buffers = ak._do.to_buffers(layout)
@@ -111,16 +114,14 @@ def awkward_to_cccl_iterator(
         """Navigate through form structure to find and extract list offsets."""
         search_form = form_to_search
 
-        # Unwrap IndexedForm/IndexedOptionForm
-        if isinstance(search_form, (ak.forms.IndexedForm, ak.forms.IndexedOptionForm)):
-            search_form = search_form.content
-
         # Unwrap RecordForm (use first field)
         if isinstance(search_form, ak.forms.RecordForm):
             search_form = search_form.contents[0]
 
-        # Extract offsets from ListOffsetForm/ListForm
-        if isinstance(search_form, (ak.forms.ListOffsetForm, ak.forms.ListForm)):
+        # Extract offsets from ListOffsetForm.  ListForm (starts/stops) has no
+        # offsets buffer; a top-level ListArray was normalized away above, so
+        # anything else has no top-level list structure to report.
+        if isinstance(search_form, ak.forms.ListOffsetForm):
             offsets_key = f"{search_form.form_key}-offsets"
             return cp.asarray(buffers[offsets_key], dtype=np.int64)
 
@@ -174,8 +175,18 @@ def awkward_to_cccl_iterator(
         else:
             return result, (form, buffers)
 
-    # IndexedArray: create PermutationIterator with index mapping
-    elif isinstance(form, (ak.forms.IndexedForm, ak.forms.IndexedOptionForm)):
+    # IndexedArray: create PermutationIterator with index mapping.  The index
+    # addresses direct content elements, so it is only meaningful when the
+    # content contains no list (a list-level index cannot be applied to the
+    # flattened elements — the top-level case is projected away in
+    # ``validate_iterator_layout``, but a nested one must fail loudly, not permute
+    # the wrong things).
+    elif isinstance(form, ak.forms.IndexedForm):
+        if _form_contains_list(form.content):
+            raise NotImplementedError(
+                "an IndexedArray above a list type cannot be represented as a "
+                "cuda.compute iterator; project the array first"
+            )
         index_key = f"{form.form_key}-index"
         index_buffer = cp.asarray(buffers[index_key])
 
@@ -190,9 +201,17 @@ def awkward_to_cccl_iterator(
         else:
             return result, (form, buffers)
 
+    # IndexedOptionArray: -1 indices mark missing values, which have no
+    # iterator representation (a PermutationIterator would read out of bounds).
+    elif isinstance(form, ak.forms.IndexedOptionForm):
+        raise NotImplementedError(
+            "arrays with missing values (IndexedOptionArray) cannot be "
+            "represented as a cuda.compute iterator"
+        )
+
     # ListOffsetArray: return iterator for the flattened content
     # (Offsets are extracted at the top level if this is an initial call)
-    elif isinstance(form, (ak.forms.ListOffsetForm, ak.forms.ListForm)):
+    elif isinstance(form, ak.forms.ListOffsetForm):
         # Recursively handle the content (which is already flattened)
         content_iter, _ = awkward_to_cccl_iterator(
             form=form.content, buffers=buffers, dtype=dtype, return_offsets=False
@@ -202,6 +221,15 @@ def awkward_to_cccl_iterator(
             return content_iter, make_metadata()
         else:
             return content_iter, (form, buffers)
+
+    # ListForm (starts/stops): the flattened content is not contiguous, so a
+    # plain content iterator would visit the wrong elements.  The top-level
+    # case is normalized to ListOffsetArray above; a nested one must fail.
+    elif isinstance(form, ak.forms.ListForm):
+        raise NotImplementedError(
+            "a nested ListArray (starts/stops) cannot be represented as a "
+            "cuda.compute iterator; convert to ListOffsetArray first"
+        )
 
     else:
         raise NotImplementedError(
@@ -265,6 +293,11 @@ def list_sizes(array):
 @nvtx.annotate("transform_lists")
 def transform_lists(array, out_array, list_size, op):
     data_in, meta = awkward_to_cccl_iterator(array)
+    sizes = segment_sizes(meta["offsets"])
+    if not bool((sizes == list_size).all()):
+        raise ValueError(
+            f"transform_lists requires every list to have exactly {list_size} items"
+        )
     data_out, _ = awkward_to_cccl_iterator(out_array)
     num_segments = meta["length"]
     transform_segments(data_in, data_out, list_size, op, num_segments)

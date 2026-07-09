@@ -121,8 +121,8 @@ def transform_lists(array, out, list_size, op):
 
     # The equal-size precondition is load-bearing: a ragged reshape would
     # silently mix elements across lists.  Check it rather than corrupt.
-    sizes = offsets[1:] - offsets[:-1]
-    if not bool(np.all(sizes == list_size)):
+    sizes = segment_sizes(offsets)
+    if not np.all(sizes == list_size):
         raise ValueError(
             f"transform_lists requires every list to have exactly {list_size} "
             "items; got ragged input"

@@ -381,12 +381,13 @@ def test_to_cccl_iterator_without_cupy_errors_clearly():
 
 
 def test_cpu_arrays_skip_cuda_codegen(arr):
-    # _is_cuda_backed must be False for cpu-backed leaves, so the executor
-    # never reaches the cuda codegen path (it evaluates eagerly instead).
-    from awkward._connect.lazy._executor import _is_cuda_backed
+    # The leaf-backend gate must report "cpu" for cpu-backed leaves, so the
+    # executor never reaches the cuda codegen path (scalars contribute none).
+    from awkward._connect.lazy._executor import _uniform_backend
 
-    assert _is_cuda_backed([arr]) is False
-    assert _is_cuda_backed([arr, 3, 2.0]) is False
+    assert _uniform_backend([arr]) == "cpu"
+    assert _uniform_backend([arr, 3, 2.0]) == "cpu"
+    assert _uniform_backend([3, 2.0]) is None
 
 
 # ----------------------------------------------------------------------
@@ -571,12 +572,27 @@ def test_custom_parameters_preserved_via_fallback():
     assert expr.compute(fuse=True).layout.parameters == (p * 2).layout.parameters
 
 
-def test_indexed_array_falls_back():
+def test_listarray_fuses_and_matches():
+    # ListArray (starts/stops, e.g. from fancy indexing) is normalized to
+    # ListOffsetArray64 and still takes the fused path.
     base = ak.Array([[1.0, 2.0], [3.0], [4.0, 5.0, 6.0]])
-    taken = base[[2, 0, 1]]  # ListArray / indexed
+    taken = base[[2, 0, 1]]
+    assert isinstance(taken.layout, ak.contents.ListArray)
     expr = ak.cpu.lazy(taken) * 2
-    assert _fell_back_to_eager(expr)
     assert ak.to_list(expr.compute(fuse=True)) == ak.to_list(taken * 2)
+    assert expr.executor.fused_hits["cpu"] == 1
+
+
+def test_indexed_array_of_lists_falls_back():
+    base = ak.Array([[1.0, 2.0], [3.0], [4.0, 5.0, 6.0]])
+    indexed = ak.Array(
+        ak.contents.IndexedArray(
+            ak.index.Index64(np.array([2, 0, 1], dtype=np.int64)), base.layout
+        )
+    )
+    expr = ak.cpu.lazy(indexed) * 2
+    assert _fell_back_to_eager(expr)
+    assert ak.to_list(expr.compute(fuse=True)) == ak.to_list(indexed * 2)
 
 
 def test_inf_and_nan_constants_still_fuse():
@@ -609,10 +625,12 @@ def test_deep_chain_falls_back_not_crash():
     assert got == ak.to_list(expr.compute(fuse=False))
 
 
-def test_lazy_boolean_getitem_is_rejected():
-    la = ak.cpu.lazy(ak.Array([[1, 2, 3], [4, 5]]))
-    with pytest.raises(TypeError, match="filter"):
-        _ = la[la > 2]
+def test_lazy_boolean_getitem_matches_eager():
+    # ``la[la > 2]`` builds a GetItemNode whose key is itself lazy, matching
+    # eager ``arr[arr > 2]`` semantics.
+    arr = ak.Array([[1, 2, 3], [4, 5]])
+    la = ak.cpu.lazy(arr)
+    assert ak.to_list(la[la > 2].compute(fuse=True)) == ak.to_list(arr[arr > 2])
 
 
 def test_uniform_backend_helper():
@@ -647,12 +665,18 @@ def test_validate_iterator_layout_normalizes_and_guards():
     # RegularArray -> ListOffsetArray
     reg = ak.to_regular(ak.Array([[1.0, 2.0], [3.0, 4.0]])).layout
     assert isinstance(validate_iterator_layout(reg), ak.contents.ListOffsetArray)
-    # IndexedArray-of-list -> raise (would otherwise permute flat elements / OOB)
+    # IndexedArray-of-list -> projected (a list-level index cannot be applied
+    # to the flattened elements; any zero-copy answer would be wrong)
     idx = ak.contents.IndexedArray(
         ak.index.Index64(np.array([2, 0, 1], dtype=np.int64)), base.layout
     )
-    with pytest.raises(NotImplementedError, match="to_packed"):
-        validate_iterator_layout(idx)
+    projected = validate_iterator_layout(idx)
+    assert isinstance(projected, ak.contents.ListOffsetArray)
+    assert ak.to_list(ak.Array(projected)) == ak.to_list(ak.Array(idx))
+    # missing values have no iterator representation at all
+    opt = ak.Array([[1.0], None, [2.0]]).layout
+    with pytest.raises(NotImplementedError, match="missing values"):
+        validate_iterator_layout(opt)
 
 
 def test_transform_lists_rejects_ragged_and_bad_out():

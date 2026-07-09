@@ -23,24 +23,29 @@ would produce:
   Awkward) and ``mean`` (two reductions) are *not* fused — they raise
   :class:`FusionUnsupported` and the executor applies the eager reducer.
 
-Anything outside the supported shape raises :class:`FusionUnsupported`, and
-the executor falls back to the eager (still backend-dispatched, still correct)
+Only parameter-free ``ListOffsetArray``/``ListArray``-over-``NumpyArray``
+columns are lowered (the same shape the CPU codegen accepts): parameterized
+layouts (strings, behaviors), ``RegularArray``, option types, and indexed
+lists have semantics a flat element-wise kernel cannot reproduce.  Anything
+outside the supported shape raises :class:`FusionUnsupported`, and the
+executor falls back to the eager (still backend-dispatched, still correct)
 evaluation of the fused expression.  This mirrors the migration doc's revert
 discipline: fusion is a fast path, never a correctness dependency.
 
 Note: this module is only imported when a fused region's leaves are
 CUDA-backed, so importing ``cupy`` / ``cuda.compute`` at call time is safe.
-Constants are folded into the compiled op; the op is interned per
-(expression, constant, dtype) signature so a stable program compiles each
-kernel once (cache-stable, per the plan's hard constraint).
+Constants are folded into the compiled op; the op is interned per generated
+source so a stable program compiles each kernel once (cache-stable, per the
+plan's hard constraint).
 """
 
 from __future__ import annotations
 
 import functools
 
+import numpy as np
+
 import awkward as ak
-from awkward._connect.lazy._fusion import py_scalar_literal
 from awkward._connect.lazy._layout import is_fusible_numeric_list
 
 
@@ -66,8 +71,6 @@ def _sum_accumulator_dtype(dtype):
     Mirrors ``ak.sum`` so the fused sum's dtype matches the eager result
     (int8/16/32 -> int64, unsigned -> uint64, bool -> int64; floats unchanged).
     """
-    import numpy as np
-
     dtype = np.dtype(dtype)
     if dtype.kind == "b":
         return np.dtype(np.int64)
@@ -83,22 +86,25 @@ def _infer_out_dtype(op, columns, single):
 
     Runs the folded op on a one-element sample of each column's leaf dtype (so
     folded scalar constants and true type promotion are honoured) instead of
-    defaulting to ``float64``.
+    defaulting to ``float64``.  The sample values (ones) are arbitrary, so the
+    probe must never fail or warn on them — e.g. ``1 / (1 - 1)`` or
+    ``1 ** (1 - 2)`` on integers — when the real data is fine: fp warnings are
+    suppressed and any probe exception falls back via
+    :class:`FusionUnsupported`.
     """
-    import numpy as np
-
     from awkward._connect.lazy._ir import _leaf_numpy_dtype
 
-    dtypes = [_leaf_numpy_dtype(col) or np.dtype(np.float64) for col in columns]
+    samples = [
+        np.ones(1, dtype=_leaf_numpy_dtype(col) or np.float64) for col in columns
+    ]
+    probe = samples[0] if single else tuple(samples)
     try:
-        samples = [np.ones(1, dtype=d) for d in dtypes]
-        probe = samples[0] if single else tuple(samples)
         with np.errstate(all="ignore"):  # divide-by-zero etc. in the probe only
             return np.asarray(op(probe)).dtype
     except Exception:
         # A value-domain error in the probe (e.g. int ** negative int) need not
         # reflect the real data; fall back to NumPy input promotion.
-        return np.result_type(*dtypes)
+        return np.result_type(*samples)
 
 
 def _classify_leaf(value):
@@ -118,22 +124,29 @@ def _classify_leaf(value):
     raise FusionUnsupported(f"unsupported fused leaf of type {type(value).__name__}")
 
 
-@functools.cache
-def _compile_op(source: str, arity: int):
+# ``inf``/``nan`` back the repr of non-finite folded constants; numba treats
+# op globals as frozen constants, so the generated source stays cache-stable.
+_EXEC_GLOBALS = {"inf": float("inf"), "nan": float("nan")}
+
+
+@functools.lru_cache(maxsize=128)
+def _compile_op(source: str):
     """Build (and intern) the fused element-wise op from generated source.
 
     ``source`` is a Python expression over ``t`` (the zipped column tuple) with
     constants already folded in.  Interned on the source string so cuda.compute
-    compiles one kernel per distinct fused expression.
+    compiles one kernel per distinct fused expression.  Bounded: constants are
+    folded into the source, so a loop generating distinct constants must not
+    grow the cache (and its compiled GPU kernels) without limit.
     """
     ns: dict = {}
     # ``t`` is the zipped tuple of column values for one element.
-    exec(f"def _fused_op(t):\n    return {source}\n", {}, ns)
+    exec(f"def _fused_op(t):\n    return {source}\n", _EXEC_GLOBALS, ns)
     return ns["_fused_op"]
 
 
 def _build_op(node, values):
-    """Generate the fused device op plus the ordered list of column layouts.
+    """Generate the fused device op plus the ordered list of column arrays.
 
     Walks the region (via ``node.op_source``) mapping each column leaf to its
     element accessor and each scalar leaf to a folded literal.  With one column
@@ -149,7 +162,7 @@ def _build_op(node, values):
             col_slot[leaf_id] = len(columns)
             columns.append(payload)
         else:  # scalar constant, folded in
-            scalar_expr[leaf_id] = py_scalar_literal(payload)
+            scalar_expr[leaf_id] = repr(payload)
     if not columns:
         raise FusionUnsupported("fused region has no array leaves")
 
@@ -158,7 +171,11 @@ def _build_op(node, values):
     for leaf_id, slot in col_slot.items():
         leaf_expr[leaf_id] = "t" if single else f"t[{slot}]"
     source = node.op_source(leaf_expr)
-    return _compile_op(source, len(columns)), columns
+    try:
+        return _compile_op(source), columns
+    except SyntaxError as exc:
+        # e.g. a region deep enough to exceed the parser's nesting limit
+        raise FusionUnsupported(f"cannot compile fused source: {exc}") from exc
 
 
 def _aligned_contents(columns):
@@ -176,12 +193,15 @@ def _aligned_contents(columns):
     ref_offsets = None
     count = None
     for arr in columns:
+        # Mirrors the CPU codegen's supported shape; everything else (regular,
+        # parameterized/strings, option, indexed, record layouts) falls back so
+        # the eager path preserves its exact semantics and type.
         if not is_fusible_numeric_list(arr):
             raise FusionUnsupported(
                 "column is not a plain numeric var-list (strings, regular, "
                 "indexed, parametered, or record layouts fall back to eager)"
             )
-        it, meta = awkward_to_cccl_iterator(arr)
+        it, meta = awkward_to_cccl_iterator(arr.layout.to_ListOffsetArray64(True))
         offsets = meta["offsets"]
         if offsets is None:
             raise FusionUnsupported("fused column is not a list array")
@@ -206,8 +226,6 @@ def execute_fused_cuda(node, values):
 
     op, columns = _build_op(node, values)
     content_iters, offsets, count, cp = _aligned_contents(columns)
-
-    import numpy as np
 
     single = len(content_iters) == 1
     zipped = content_iters[0] if single else ZipIterator(*content_iters)

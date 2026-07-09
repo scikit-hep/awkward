@@ -15,7 +15,7 @@ from ._ir import (
     FilterNode,
     GetItemNode,
     InputNode,
-    IRNode,
+    OpNode,
     OpType,
     ReduceNode,
     SelectListsNode,
@@ -35,7 +35,7 @@ class LazyAwkwardArray:
     optimization and fusion of kernels.
     """
 
-    def __init__(self, ir_node: IRNode, executor: IRExecutor | None = None):
+    def __init__(self, ir_node: OpNode, executor: IRExecutor | None = None):
         self.ir_node = ir_node
         self.executor = executor or IRExecutor()
         self._computed_result = None
@@ -64,7 +64,7 @@ class LazyAwkwardArray:
             self._computed_fuse = fuse
         return self._computed_result
 
-    def compile(self) -> IRNode:
+    def compile(self) -> OpNode:
         """Return the fused expression graph without executing it.
 
         Useful for inspecting how many kernels the computation will launch
@@ -118,6 +118,24 @@ class LazyAwkwardArray:
         other_node = self._to_ir_node(other)
         return LazyAwkwardArray(
             BinaryOpNode(OpType.POW, self.ir_node, other_node), self.executor
+        )
+
+    def __mod__(self, other):
+        other_node = self._to_ir_node(other)
+        return LazyAwkwardArray(
+            BinaryOpNode(OpType.MOD, self.ir_node, other_node), self.executor
+        )
+
+    def __floordiv__(self, other):
+        other_node = self._to_ir_node(other)
+        return LazyAwkwardArray(
+            BinaryOpNode(OpType.FLOORDIV, self.ir_node, other_node), self.executor
+        )
+
+    def __neg__(self):
+        # 0 - x follows the same value-based promotion as eager -x.
+        return LazyAwkwardArray(
+            BinaryOpNode(OpType.SUB, ConstantNode(0), self.ir_node), self.executor
         )
 
     # Comparison operations
@@ -183,6 +201,24 @@ class LazyAwkwardArray:
             BinaryOpNode(OpType.DIV, other_node, self.ir_node), self.executor
         )
 
+    def __rpow__(self, other):
+        other_node = self._to_ir_node(other)
+        return LazyAwkwardArray(
+            BinaryOpNode(OpType.POW, other_node, self.ir_node), self.executor
+        )
+
+    def __rmod__(self, other):
+        other_node = self._to_ir_node(other)
+        return LazyAwkwardArray(
+            BinaryOpNode(OpType.MOD, other_node, self.ir_node), self.executor
+        )
+
+    def __rfloordiv__(self, other):
+        other_node = self._to_ir_node(other)
+        return LazyAwkwardArray(
+            BinaryOpNode(OpType.FLOORDIV, other_node, self.ir_node), self.executor
+        )
+
     # List operations
     def filter(self, condition):
         """Filter elements in lists based on a condition"""
@@ -230,21 +266,14 @@ class LazyAwkwardArray:
             CombinationsNode(self.ir_node, n, replacement, axis, fields), self.executor
         )
 
-    def __getitem__(self, key: str | int | slice):
-        """
-        Access fields or indices lazily.
+    def __getitem__(self, key):
+        """Access fields, indices, or slices lazily.
 
-        Boolean-mask selection (``la[la > 5]``) is not expressible as a
-        ``GetItemNode`` — it must go through the list-aware fusion nodes.  Reject
-        a lazy/array key up front with a clear pointer instead of failing deep
-        inside eager ``__getitem__`` at compute time.
+        A lazy (or eager) array key selects like eager ``__getitem__``, so
+        ``lazy_arr[lazy_arr > 5]`` matches ``arr[arr > 5]``.
         """
-        if isinstance(key, LazyAwkwardArray):
-            raise TypeError(
-                "boolean/array indexing of a LazyAwkwardArray is not supported; "
-                "use .filter(mask) to keep elements within lists, or "
-                ".select_lists(mask) to keep whole lists"
-            )
+        if isinstance(key, (LazyAwkwardArray, ak.Array)):
+            key = self._to_ir_node(key)
         return LazyAwkwardArray(GetItemNode(self.ir_node, key), self.executor)
 
     def _to_ir_node(self, value):

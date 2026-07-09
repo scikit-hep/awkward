@@ -4,20 +4,6 @@ from __future__ import annotations
 
 import cupy as cp
 import numpy as np
-
-try:
-    import nvtx
-except ImportError:
-
-    class nvtx:
-        @staticmethod
-        def annotate(*args, **kwargs):
-            def deco(fn):
-                return fn
-
-            return deco
-
-
 from cuda.compute import (
     CountingIterator,
     OpKind,
@@ -28,6 +14,8 @@ from cuda.compute import (
     select,
     unary_transform,
 )
+
+from awkward._connect.lazy._nvtx import nvtx
 
 
 @nvtx.annotate("segment_sizes")
