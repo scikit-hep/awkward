@@ -196,6 +196,10 @@ class IRExecutor:
         if fused is not _NO_FUSED_KERNEL:
             return fused
 
+        fused = self._maybe_cpu_fused(node, values)
+        if fused is not _NO_FUSED_KERNEL:
+            return fused
+
         result = node.evaluate(values)
         if node.reduce_op is not None:
             result = _REDUCE_OPS[node.reduce_op](result)
@@ -221,6 +225,28 @@ class IRExecutor:
             return _NO_FUSED_KERNEL
         try:
             return execute_fused_cuda(node, values, _REDUCE_OPS)
+        except FusionUnsupported:
+            return _NO_FUSED_KERNEL
+
+    @staticmethod
+    def _maybe_cpu_fused(node: FusedNode, values):
+        """Try to evaluate the region as one flat-buffer NumPy pass.
+
+        Collapses the per-op ``ak`` dispatch of an element-wise chain into a
+        single pass over the shared content buffer.  Returns the result or
+        ``_NO_FUSED_KERNEL`` when the region shape is unsupported.
+        """
+        if _is_cuda_backed(values):
+            return _NO_FUSED_KERNEL
+        try:
+            from awkward._connect.cpu._fusion_codegen import (
+                FusionUnsupported,
+                execute_fused_cpu,
+            )
+        except ImportError:
+            return _NO_FUSED_KERNEL
+        try:
+            return execute_fused_cpu(node, values)
         except FusionUnsupported:
             return _NO_FUSED_KERNEL
 

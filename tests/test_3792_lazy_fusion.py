@@ -265,3 +265,61 @@ def test_cpu_arrays_skip_cuda_codegen(arr):
 
     assert _is_cuda_backed([arr]) is False
     assert _is_cuda_backed([arr, 3, 2.0]) is False
+
+
+# ----------------------------------------------------------------------
+# CPU fusion codegen: the flat-buffer single pass that makes fusion a win
+# ----------------------------------------------------------------------
+
+
+def test_cpu_codegen_elementwise_matches_eager_with_empty_lists():
+    arr = ak.Array([[1.0, 2, 3], [4, 5], [], [6, 7, 8, 9]])
+    la = ak.cpu.lazy(arr)
+    got = ak.to_list(((la * 2 + 1) * 3).compute(fuse=True))
+    assert got == ak.to_list((arr * 2 + 1) * 3)  # empty sublist preserved
+
+
+def test_cpu_codegen_used_for_cpu_leaves():
+    # The executor's CPU fused path returns a result (not the fallback
+    # sentinel) for an aligned element-wise region on cpu-backed leaves.
+    from awkward._connect.lazy._executor import _NO_FUSED_KERNEL, IRExecutor
+    from awkward._connect.lazy._fusion import fuse
+
+    arr = ak.Array([[1.0, 2], [3, 4, 5]])
+    node = fuse((ak.cpu.lazy(arr) * 2 + 1).ir_node)
+    values = [IRExecutor().execute(leaf) for leaf in node.leaves]
+    out = IRExecutor._maybe_cpu_fused(node, values)
+    assert out is not _NO_FUSED_KERNEL
+    assert ak.to_list(out) == ak.to_list(arr * 2 + 1)
+
+
+def test_cpu_fused_sum_matches_manual():
+    # Fused sum runs on the flat buffer via NumPy (works even where the eager
+    # ak reducer kernel is unavailable), including empty sublists -> 0.
+    arr = ak.Array([[1.0, 2, 3], [4, 5], [], [6.0]])
+    la = ak.cpu.lazy(arr)
+    out = np.asarray((la * 2 + 1).sum().compute(fuse=True)).tolist()
+    expected = [sum(2 * x + 1 for x in row) for row in ak.to_list(arr)]
+    assert out == expected
+
+
+def test_cpu_fused_mean_matches_manual():
+    arr = ak.Array([[2.0, 4], [1.0, 2, 3], [5.0]])
+    la = ak.cpu.lazy(arr)
+    out = np.asarray((la + 0.0).mean().compute(fuse=True)).tolist()
+    expected = [sum(row) / len(row) for row in ak.to_list(arr)]
+    assert out == expected
+
+
+def test_cpu_codegen_rejects_mismatched_offsets():
+    from awkward._connect.cpu._fusion_codegen import (
+        FusionUnsupported,
+        execute_fused_cpu,
+    )
+    from awkward._connect.lazy._fusion import fuse
+
+    a = ak.Array([[1.0, 2, 3], [4, 5]])
+    b = ak.Array([[1.0, 2], [3, 4, 5]])  # different offsets
+    node = fuse((ak.cpu.lazy(a) + ak.cpu.lazy(b)).ir_node)
+    with pytest.raises(FusionUnsupported):
+        execute_fused_cpu(node, [a, b])
