@@ -13,20 +13,30 @@ over one flat buffer, and times each with CUDA events across increasing depth:
      intermediate buffer (the "no fusion" baseline).
   B. composed op          — ONE ``unary_transform`` whose op is the whole
      depth-N expression (fusion by folding the ops into a single custom op).
-  C. iterator composition — nested ``TransformIterator`` (depth N) fed into ONE
-     consuming primitive (``unary_transform`` for map, ``reduce_into`` for
-     map+reduce). This is the idiom already shipping in ``_compute.py``
-     (``_widen_for_reduce`` / ``_nonzero_for_reduce``).
+  C. iterator composition — N *stacked* ``TransformIterator`` layers (one per
+     step) fed into ONE consuming primitive. NOTE: the idiom shipping in
+     ``_compute.py`` (``_widen_for_reduce`` / ``_nonzero_for_reduce``) uses a
+     *single* map iterator into a reduce, not N stacked layers; C deliberately
+     stacks them to test whether deep iterator nesting is a substitute for a
+     folded op. (Measured on A100: it is not — see below.)
 
 Reading the result
 ------------------
-* If B and C stay ~flat as depth grows while A scales ~linearly, then the whole
-  chain runs as ONE kernel in B/C: cuda.compute composes multiple ops into one
-  compiled kernel **when we drive it** via a composed op or composed iterators.
-* A scaling linearly (and allocating an intermediate per step) shows cuda.compute
-  does **not** auto-fuse a sequence of separate primitive *launches* — there is
-  no deferred/lazy graph that fuses post-hoc. The fused kernel is emitted by the
-  composition layer (our op / iterator), compiled once by cuda.compute.
+* B (one folded op) stays ~flat as depth grows while A scales ~linearly: the
+  whole chain runs as ONE kernel. cuda.compute composes multiple ops into one
+  compiled kernel **when we fold them into a single op**.
+* A scaling linearly (an intermediate per step) shows cuda.compute does **not**
+  auto-fuse a sequence of separate primitive *launches* — no deferred graph.
+* C (N stacked iterators) is ALSO one kernel per call (nsys confirms one
+  transform kernel per call, not N) — stacking iterators fuses to one launch
+  too. But its single kernel gets slower with nesting depth, whereas B's folded
+  op is bandwidth-bound and stays flat. So the difference is kernel *quality*,
+  not launch count: fold the whole expression into ONE op (B) for the best
+  single kernel. That is what ``_fusion_codegen`` does — element-wise → one
+  ``unary_transform`` over a folded op; transform+reduce → ONE folded map op in
+  a single ``TransformIterator`` into the reduce (one map layer, not N stacked).
+  The fused kernel is emitted by the composition layer (our folded op),
+  compiled once by cuda.compute.
 
 For an exact kernel COUNT (not just timing), run under nsys:
 
@@ -155,6 +165,20 @@ def run_separate_reduce(x, depth):
     return out
 
 
+def run_fusedop_reduce(x, depth):
+    # ONE folded map op fed into the reduce -- exactly what _fusion_codegen
+    # emits for a transform+reduce region (one map layer, not N).
+    out = cp.empty(1, dtype=x.dtype)
+    reduce_into(
+        d_in=TransformIterator(x, _chain_op(depth)),
+        d_out=out,
+        op=OpKind.PLUS,
+        num_items=x.size,
+        h_init=np.asarray([0.0], dtype=x.dtype),
+    )
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=2_000_000, help="element count")
@@ -173,14 +197,20 @@ def main():
         c = _cuda_time(lambda d=d: run_iter_transform(x, d))
         print(f"{d:>6}{a:>15.3f}{b:>15.3f}{c:>12.3f}{a / b:>7.1f}x{a / c:>7.1f}x")
 
-    hdr2 = f"{'depth':>6}{'A+reduce ms':>15}{'C iter+reduce ms':>18}{'speedup':>10}"
+    hdr2 = (
+        f"{'depth':>6}{'A+reduce ms':>14}{'B op+reduce ms':>16}"
+        f"{'C iter+reduce ms':>18}{'A/B':>8}"
+    )
     print("\n== map + reduction (chain then sum) ==")
+    print("  A = N transforms+buffers then reduce; B = ONE folded op into reduce")
+    print("  (B is what _fusion_codegen ships); C = N stacked iterators into reduce")
     print(hdr2)
     print("-" * len(hdr2))
     for d in DEPTHS:
         a = _cuda_time(lambda d=d: run_separate_reduce(x, d))
+        b = _cuda_time(lambda d=d: run_fusedop_reduce(x, d))
         c = _cuda_time(lambda d=d: run_iter_reduce(x, d))
-        print(f"{d:>6}{a:>15.3f}{c:>18.3f}{a / c:>9.1f}x")
+        print(f"{d:>6}{a:>14.3f}{b:>16.3f}{c:>18.3f}{a / b:>7.1f}x")
 
     # verdict from the depth-16 map-only row
     a16 = _cuda_time(lambda: run_separate(x, 16))
