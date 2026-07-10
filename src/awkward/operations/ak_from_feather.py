@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import awkward as ak
 import warnings
 
+import awkward as ak
 from awkward._dispatch import high_level_function
 
 __all__ = ("from_feather",)
