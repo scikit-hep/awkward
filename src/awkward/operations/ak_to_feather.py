@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 
 import awkward as ak
 from awkward._dispatch import high_level_function
