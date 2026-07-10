@@ -40,6 +40,7 @@ Pull requests that do not meet these expectations may be closed without review.
 Currently, we have four regular reviewers of pull requests:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
+  * Tai Sakuma ([TaiSakuma](https://github.com/TaiSakuma)) 
   * Andres Rios Tascon ([ariostas](https://github.com/ariostas))
   * Iason Krommydas ([ikrommyd](https://github.com/ikrommyd))
 
