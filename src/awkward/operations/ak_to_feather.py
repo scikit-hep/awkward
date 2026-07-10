@@ -166,5 +166,10 @@ def _impl(
             category=FutureWarning,
         )
         pyarrow.feather.write_feather(
-            table, destination, compression, compression_level, chunksize, feather_version
+            table,
+            destination,
+            compression,
+            compression_level,
+            chunksize,
+            feather_version,
         )
