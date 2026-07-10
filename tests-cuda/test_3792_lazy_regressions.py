@@ -18,6 +18,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._connect import cpu, cuda
 
 cp = pytest.importorskip("cupy")
 
@@ -43,13 +44,13 @@ def _as_list(array):
 
 def test_listarray_layout_matches_eager(arr, arr_cpu):
     carried = arr[[2, 0, 1]]  # ListArray (starts/stops): buffers have no -offsets
-    expr = ak.cuda.lazy(carried) * 2
+    expr = cuda.lazy(carried) * 2
     assert _as_list(expr.compute(fuse=True)) == ak.to_list(arr_cpu[[2, 0, 1]] * 2)
 
 
 def test_listarray_public_iterator(arr):
     carried = arr[[2, 0, 1]]
-    it, meta = ak.cuda.to_cccl_iterator(carried)
+    it, meta = cuda.to_cccl_iterator(carried)
     assert meta["count"] == 9
     assert cp.asarray(meta["offsets"]).tolist() == [0, 4, 7, 9]
     assert cp.asarray(it).tolist() == pytest.approx(
@@ -63,7 +64,7 @@ def test_indexed_array_of_lists_matches_eager(arr, arr_cpu):
     )
     indexed = ak.Array(lay)
     expected = ak.to_list(ak.to_backend(indexed, "cpu") * 2)
-    expr = ak.cuda.lazy(indexed) * 2
+    expr = cuda.lazy(indexed) * 2
     assert _as_list(expr.compute(fuse=True)) == expected
     assert _as_list(expr.compute(fuse=False)) == expected
 
@@ -75,7 +76,7 @@ def test_indexed_array_of_lists_public_iterator(arr):
         ak.index.Index64(cp.asarray(np.array([2, 0, 1]))), arr.layout
     )
     indexed = ak.Array(lay)
-    it, meta = ak.cuda.to_cccl_iterator(indexed)
+    it, meta = cuda.to_cccl_iterator(indexed)
     assert meta["count"] == 9
     assert cp.asarray(meta["offsets"]).tolist() == [0, 4, 7, 9]
     assert cp.asarray(it).tolist() == pytest.approx(
@@ -88,19 +89,19 @@ def test_indexed_option_array_iterator_raises():
     # device read is never acceptable.
     a = ak.Array([[1.0, 2.0], None, [3.0]], backend="cuda")
     with pytest.raises(NotImplementedError, match="missing values"):
-        ak.cuda.to_cccl_iterator(a)
+        cuda.to_cccl_iterator(a)
 
 
 def test_option_lists_lazy_compute_matches_eager():
     a = ak.Array([[1.0, 2.0], None, [3.0]], backend="cuda")
     expected = ak.to_list(ak.to_backend(a, "cpu") * 2)
-    expr = ak.cuda.lazy(a) * 2
+    expr = cuda.lazy(a) * 2
     assert _as_list(expr.compute(fuse=True)) == expected
 
 
 def test_regular_array_matches_eager_and_preserves_type():
     r = ak.to_regular(ak.Array([[1.0, 2.0], [3.0, 4.0]], backend="cuda"), axis=1)
-    expr = ak.cuda.lazy(r) * 2
+    expr = cuda.lazy(r) * 2
     fused = expr.compute(fuse=True)
     eager = r * 2
     assert str(fused.type) == str(eager.type)
@@ -111,7 +112,7 @@ def test_flat_string_equality_matches_eager():
     s = ak.Array(["ab", "cd"], backend="cuda")
     s2 = ak.Array(["ab", "ce"], backend="cuda")
     expected = ak.to_list(ak.Array(["ab", "cd"]) == ak.Array(["ab", "ce"]))
-    expr = ak.cuda.lazy(s) == ak.cuda.lazy(s2)
+    expr = cuda.lazy(s) == cuda.lazy(s2)
     assert _as_list(expr.compute(fuse=True)) == expected == [True, False]
     assert expr.executor.fused_hits["cuda"] == 0  # declined, not silently wrong
 
@@ -122,7 +123,7 @@ def test_flat_string_equality_matches_eager():
 
 
 def test_inf_constant_matches_eager(arr, arr_cpu):
-    expr = ak.cuda.lazy(arr) * float("inf")
+    expr = cuda.lazy(arr) * float("inf")
     assert _as_list(expr.compute(fuse=True)) == ak.to_list(arr_cpu * float("inf"))
 
 
@@ -132,7 +133,7 @@ def test_int_pow_negative_probe_does_not_crash():
     ia = ak.Array([[2, 3], [4]], backend="cuda")
     ib = ak.Array([[2, 2], [2]], backend="cuda")
     expected = ak.to_list(ak.Array([[2, 3], [4]]) ** (ak.Array([[2, 2], [2]]) - 2))
-    expr = ak.cuda.lazy(ia) ** (ak.cuda.lazy(ib) - 2)
+    expr = cuda.lazy(ia) ** (cuda.lazy(ib) - 2)
     assert _as_list(expr.compute(fuse=True)) == expected
 
 
@@ -146,13 +147,13 @@ def test_division_probe_emits_no_warning():
     )
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        expr = ak.cuda.lazy(ia) / (ak.cuda.lazy(ib) - 1)
+        expr = cuda.lazy(ia) / (cuda.lazy(ib) - 1)
         assert _as_list(expr.compute(fuse=True)) == expected
 
 
 def test_deep_chain_on_cuda(arr, arr_cpu):
     n = 300
-    expr = ak.cuda.lazy(arr)
+    expr = cuda.lazy(arr)
     for _ in range(n):
         expr = expr + 1
     assert _as_list(expr.compute(fuse=True)) == ak.to_list(arr_cpu + n)
@@ -166,7 +167,7 @@ def test_deep_chain_on_cuda(arr, arr_cpu):
 def test_mixed_backends_raise_like_eager(arr, arr_cpu):
     with pytest.raises(ValueError):
         arr + arr_cpu  # eager refuses mixed backends
-    expr = ak.cuda.lazy(arr) + ak.cpu.lazy(arr_cpu)
+    expr = cuda.lazy(arr) + cpu.lazy(arr_cpu)
     with pytest.raises(ValueError):
         expr.compute(fuse=True)
 
@@ -177,13 +178,13 @@ def test_mixed_backends_raise_like_eager(arr, arr_cpu):
 
 
 def test_elementwise_still_takes_cuda_kernel(arr, arr_cpu):
-    expr = ak.cuda.lazy(arr) * 2 + 1
+    expr = cuda.lazy(arr) * 2 + 1
     assert _as_list(expr.compute(fuse=True)) == ak.to_list(arr_cpu * 2 + 1)
     assert expr.executor.fused_hits["cuda"] == 1
 
 
 def test_fused_sum_still_takes_cuda_kernel(arr, arr_cpu):
-    expr = (ak.cuda.lazy(arr) * 2).sum()
+    expr = (cuda.lazy(arr) * 2).sum()
     assert _as_list(expr.compute(fuse=True)) == ak.to_list(ak.sum(arr_cpu * 2, axis=-1))
     assert expr.executor.fused_hits["cuda"] == 1
 
@@ -191,7 +192,7 @@ def test_fused_sum_still_takes_cuda_kernel(arr, arr_cpu):
 def test_listarray_leaves_still_fuse_on_device(arr, arr_cpu):
     # ListArray columns are normalized (to_ListOffsetArray64), not rejected.
     carried = arr[[2, 0, 1]]
-    expr = ak.cuda.lazy(carried) * 2 + 1
+    expr = cuda.lazy(carried) * 2 + 1
     assert _as_list(expr.compute(fuse=True)) == ak.to_list(arr_cpu[[2, 0, 1]] * 2 + 1)
     assert expr.executor.fused_hits["cuda"] == 1
 

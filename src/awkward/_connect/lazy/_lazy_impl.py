@@ -365,8 +365,9 @@ def lazy(array: ak.Array) -> LazyAwkwardArray:
 
     Example:
         >>> import awkward as ak
+        >>> from awkward._connect import cpu   # internal for now (PoC)
         >>> arr = ak.Array([[1, 2, 3], [4, 5], [6, 7, 8, 9]])
-        >>> lazy_arr = ak.cpu.lazy(arr)   # or ak.cuda.lazy for cuda-backed arrays
+        >>> lazy_arr = cpu.lazy(arr)   # or awkward._connect.cuda.lazy for cuda
         >>> result = lazy_arr * 2 + 1
         >>> filtered = result.filter(result > 5)
         >>> output = filtered.compute()

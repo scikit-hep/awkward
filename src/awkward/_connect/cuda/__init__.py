@@ -297,7 +297,10 @@ def synchronize_cuda(stream=None):
 
 
 def lazy(array):
-    """Wrap a CUDA-backed array for lazy, fused execution (``ak.cuda.lazy``).
+    """Wrap a CUDA-backed array for lazy, fused execution.
+
+    Internal entry point (``awkward._connect.cuda.lazy``); not exposed as a
+    public ``ak.*`` name while the lazy/fusion work is a PoC.
 
     Args:
         array (ak.Array): A CUDA-backed array.
@@ -308,9 +311,7 @@ def lazy(array):
         TypeError: If ``array`` is not on the CUDA backend.
     """
     if array.layout.backend.name != "cuda":
-        raise TypeError(
-            "ak.cuda.lazy is only available for arrays with the CUDA backend"
-        )
+        raise TypeError("cuda.lazy is only available for arrays with the CUDA backend")
 
     from awkward._connect.lazy._lazy_impl import lazy as _lazy
 
@@ -351,15 +352,21 @@ def to_cccl_iterator(array, *, dtype=None):
     Raises:
         ModuleNotFoundError: If ``cupy`` is not installed.
 
+    Internal entry point (``awkward._connect.cuda.to_cccl_iterator``); not
+    exposed as a public ``ak.*`` name while the lazy/fusion work is a PoC.
+
     Examples:
         >>> import awkward as ak
+        >>> from awkward._connect import cuda
         >>> arr = ak.Array([[1.0, 2.0, 3.0], [4.0, 5.0]], backend="cuda")
-        >>> it, meta = ak.cuda.to_cccl_iterator(arr)
+        >>> it, meta = cuda.to_cccl_iterator(arr)
         >>> meta["count"], len(meta["offsets"])
         (5, 3)
     """
     if cupy is None:
-        raise ModuleNotFoundError(error_message.format("ak.cuda.to_cccl_iterator"))
+        raise ModuleNotFoundError(
+            error_message.format("awkward._connect.cuda.to_cccl_iterator")
+        )
 
     from awkward._connect.cuda.helpers import awkward_to_cccl_iterator
 

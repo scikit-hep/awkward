@@ -16,6 +16,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._connect import cpu, cuda
 from awkward._connect.lazy._fusion import (
     FusedNode,
     fuse,
@@ -40,7 +41,7 @@ def arr2():
 
 
 def _fresh(arr):
-    return ak.cpu.lazy(arr)
+    return cpu.lazy(arr)
 
 
 def test_elementwise_chain_matches_interpreter(arr):
@@ -65,7 +66,7 @@ def test_power_and_mixed_ops(arr):
 
 def test_two_input_columns(arr, arr2):
     expected = ak.to_list(arr * arr2 + arr)
-    la, lb = _fresh(arr), ak.cpu.lazy(arr2)
+    la, lb = _fresh(arr), cpu.lazy(arr2)
     # share `la` twice -> fan-out, still numerically correct
     assert ak.to_list((la * lb + la).compute(fuse=True)) == expected
 
@@ -160,7 +161,7 @@ def test_reduce_over_plain_input_not_fused(arr):
 
 def test_getitem_is_a_boundary(arr):
     # field access is opaque to fusion; the sum over it is a separate region
-    la = ak.cpu.lazy(ak.Array([[{"x": 1}], [{"x": 2}, {"x": 3}]]))
+    la = cpu.lazy(ak.Array([[{"x": 1}], [{"x": 2}, {"x": 3}]]))
     node = (la["x"] + 1).ir_node
     fused = fuse(node)
     assert isinstance(fused, FusedNode)
@@ -264,7 +265,7 @@ def test_cuda_build_op_single_column_uses_scalar_element():
     import awkward._connect.cuda._fusion_codegen as fc
 
     a = ak.Array([[1.0, 2], [3.0]])
-    node = fuse((ak.cpu.lazy(a) * 2 + 1).ir_node)  # leaves: [col, 2, 1]
+    node = fuse((cpu.lazy(a) * 2 + 1).ir_node)  # leaves: [col, 2, 1]
     op, columns = fc._build_op(node, [a, 2, 1])
     assert len(columns) == 1
     assert op(5.0) == 11.0  # op receives a bare scalar, not a tuple
@@ -275,7 +276,7 @@ def test_cuda_build_op_multi_column_uses_indexed_element():
 
     a = ak.Array([[1.0, 2], [3.0]])
     b = ak.Array([[4.0, 5], [6.0]])
-    node = fuse((ak.cpu.lazy(a) + ak.cpu.lazy(b)).ir_node)  # leaves: [colA, colB]
+    node = fuse((cpu.lazy(a) + cpu.lazy(b)).ir_node)  # leaves: [colA, colB]
     op, columns = fc._build_op(node, [a, b])
     assert len(columns) == 2
     assert op((5.0, 7.0)) == 12.0  # op receives the zipped tuple
@@ -329,7 +330,7 @@ def test_fused_op_is_cache_stable():
     from awkward._connect.cpu import _fusion_codegen as cfc
 
     a = ak.Array([[1.0, 2, 3], [4, 5], [6, 7]])
-    node = fuse((ak.cpu.lazy(a) * 2 + 1).ir_node)
+    node = fuse((cpu.lazy(a) * 2 + 1).ir_node)
     ids = node.leaf_ids  # [column, const 2, const 1]
     src = node.op_source({ids[0]: "c[0]", ids[1]: "2", ids[2]: "1"})
 
@@ -339,12 +340,12 @@ def test_fused_op_is_cache_stable():
     # Running the program (fresh graphs, new node ids) never replaces the op:
     # each compute reuses the one interned callable rather than recompiling.
     for _ in range(5):
-        (ak.cpu.lazy(a) * 2 + 1).compute(fuse=True)
+        (cpu.lazy(a) * 2 + 1).compute(fuse=True)
     assert cfc._compile_op(src) is op_obj
 
 
 def test_no_fuse_debug_mode_matches_fused_across_battery(arr, arr2):
-    la, lb = _fresh(arr), ak.cpu.lazy(arr2)
+    la, lb = _fresh(arr), cpu.lazy(arr2)
     programs = [
         lambda: _fresh(arr) * 2 + 1,
         lambda: (_fresh(arr) * 2 + 1) * 3 - 4,
@@ -359,14 +360,18 @@ def test_no_fuse_debug_mode_matches_fused_across_battery(arr, arr2):
 
 
 # ----------------------------------------------------------------------
-# Public entry point: ak.cuda.to_cccl_iterator (CPU-visible surface)
+# Public entry point: cuda.to_cccl_iterator (CPU-visible surface)
 # ----------------------------------------------------------------------
 
 
-def test_to_cccl_iterator_is_public():
-    # The symbol is exported regardless of whether cupy is installed.
-    assert "to_cccl_iterator" in ak.cuda.__all__
-    assert callable(ak.cuda.to_cccl_iterator)
+def test_to_cccl_iterator_in_connect_all():
+    # Exported from the internal _connect.cuda module (not a public ak.* name,
+    # per review, while this is a PoC).
+    assert "to_cccl_iterator" in cuda.__all__
+    assert callable(cuda.to_cccl_iterator)
+    import awkward as ak
+
+    assert not hasattr(ak, "cuda")  # not surfaced publicly
 
 
 def test_to_cccl_iterator_without_cupy_errors_clearly():
@@ -377,7 +382,7 @@ def test_to_cccl_iterator_without_cupy_errors_clearly():
         import cupy  # noqa: F401
     except ImportError:
         with pytest.raises(ModuleNotFoundError, match="cupy"):
-            ak.cuda.to_cccl_iterator(ak.Array([[1, 2], [3]]))
+            cuda.to_cccl_iterator(ak.Array([[1, 2], [3]]))
 
 
 def test_cpu_arrays_skip_cuda_codegen(arr):
@@ -397,7 +402,7 @@ def test_cpu_arrays_skip_cuda_codegen(arr):
 
 def test_cpu_codegen_elementwise_matches_eager_with_empty_lists():
     arr = ak.Array([[1.0, 2, 3], [4, 5], [], [6, 7, 8, 9]])
-    la = ak.cpu.lazy(arr)
+    la = cpu.lazy(arr)
     got = ak.to_list(((la * 2 + 1) * 3).compute(fuse=True))
     assert got == ak.to_list((arr * 2 + 1) * 3)  # empty sublist preserved
 
@@ -409,7 +414,7 @@ def test_cpu_codegen_used_for_cpu_leaves():
     from awkward._connect.lazy._fusion import fuse
 
     arr = ak.Array([[1.0, 2], [3, 4, 5]])
-    node = fuse((ak.cpu.lazy(arr) * 2 + 1).ir_node)
+    node = fuse((cpu.lazy(arr) * 2 + 1).ir_node)
     values = [IRExecutor().execute(leaf) for leaf in node.leaves]
     out = IRExecutor._maybe_cpu_fused(node, values)
     assert out is not _NO_FUSED_KERNEL
@@ -435,7 +440,7 @@ def test_cpu_fused_sum_returns_awkward_and_matches_eager():
     # to the eager Awkward reducer, so fuse=True/False are identical and the
     # result is an Awkward value (not a raw NumPy array).
     arr = ak.Array([[1.0, 2, 3], [4, 5], [], [6.0]])
-    la = ak.cpu.lazy(arr)
+    la = cpu.lazy(arr)
     fused = (la * 2 + 1).sum().compute(fuse=True)
     eager = (la * 2 + 1).sum().compute(fuse=False)
     assert not isinstance(fused, np.ndarray)  # Awkward-typed, not raw NumPy
@@ -448,7 +453,7 @@ def test_cpu_fused_sum_returns_awkward_and_matches_eager():
 )
 def test_cpu_fused_mean_matches_eager():
     arr = ak.Array([[2.0, 4], [1.0, 2, 3], [5.0]])
-    la = ak.cpu.lazy(arr)
+    la = cpu.lazy(arr)
     fused = (la + 0.0).mean().compute(fuse=True)
     eager = (la + 0.0).mean().compute(fuse=False)
     assert ak.to_list(fused) == ak.to_list(eager)
@@ -463,7 +468,7 @@ def test_cpu_codegen_rejects_mismatched_offsets():
 
     a = ak.Array([[1.0, 2, 3], [4, 5]])
     b = ak.Array([[1.0, 2], [3, 4, 5]])  # different offsets
-    node = fuse((ak.cpu.lazy(a) + ak.cpu.lazy(b)).ir_node)
+    node = fuse((cpu.lazy(a) + cpu.lazy(b)).ir_node)
     with pytest.raises(FusionUnsupported):
         execute_fused_cpu(node, [a, b])
 
@@ -477,7 +482,7 @@ def test_flat_array_falls_back_to_eager_not_crash():
     # A flat (non-list) array is a valid eager expression but unsupported by CPU
     # fusion; default fuse=True must fall back, not raise (P2 #1).
     a = ak.Array([1, 2, 3])
-    expr = ak.cpu.lazy(a) * 2 + 1
+    expr = cpu.lazy(a) * 2 + 1
     assert ak.to_list(expr.compute(fuse=True)) == ak.to_list(a * 2 + 1)
     assert expr.executor.fused_hits["cpu"] == 0  # cpu fusion declined
     assert expr.executor.fused_hits["eager"] >= 1  # eager fallback taken
@@ -492,7 +497,7 @@ def test_cpu_unsupported_layout_raises_fusion_unsupported():
     )
 
     a = ak.Array([1, 2, 3])  # flat, no offsets
-    node = fuse((ak.cpu.lazy(a) + 1).ir_node)
+    node = fuse((cpu.lazy(a) + 1).ir_node)
     with pytest.raises(FusionUnsupported):
         execute_fused_cpu(node, [a, 1])
 
@@ -500,7 +505,7 @@ def test_cpu_unsupported_layout_raises_fusion_unsupported():
 def test_cpu_fused_preserves_integer_dtype():
     # Integer input must stay integer through the fused element-wise path (P2 #3).
     arr = ak.Array([[1, 2, 3], [4, 5]])
-    fused = (ak.cpu.lazy(arr) * 2 + 1).compute(fuse=True)
+    fused = (cpu.lazy(arr) * 2 + 1).compute(fuse=True)
     eager = arr * 2 + 1
     assert fused.layout.content.dtype == eager.layout.content.dtype
     assert not np.issubdtype(fused.layout.content.dtype, np.floating)
@@ -530,7 +535,7 @@ def test_cuda_infer_out_dtype_matches_numpy():
     from awkward._connect.cuda._fusion_codegen import _build_op, _infer_out_dtype
 
     a = ak.Array([[1, 2, 3], [4, 5]])  # int64 content
-    node = fuse((ak.cpu.lazy(a) * 2 + 1).ir_node)
+    node = fuse((cpu.lazy(a) * 2 + 1).ir_node)
     op, columns = _build_op(node, [a, 2, 1])
     assert _infer_out_dtype(op, columns, single=True) == np.dtype("int64")
 
@@ -558,7 +563,7 @@ def test_string_array_is_not_fusible():
 
 def test_regular_array_falls_back_and_preserves_type():
     r = ak.to_regular(ak.Array([[1.0, 2.0], [3.0, 4.0]]))
-    expr = ak.cpu.lazy(r) * 2
+    expr = cpu.lazy(r) * 2
     assert _fell_back_to_eager(expr)
     fused, eager = expr.compute(fuse=True), r * 2
     assert str(ak.type(fused)) == str(ak.type(eager))  # stays N * 2, not N * var
@@ -567,7 +572,7 @@ def test_regular_array_falls_back_and_preserves_type():
 
 def test_custom_parameters_preserved_via_fallback():
     p = ak.with_parameter(ak.Array([[1.0, 2.0], [3.0]]), "custom", "yes")
-    expr = ak.cpu.lazy(p) * 2
+    expr = cpu.lazy(p) * 2
     assert _fell_back_to_eager(expr)
     assert expr.compute(fuse=True).layout.parameters == (p * 2).layout.parameters
 
@@ -578,7 +583,7 @@ def test_listarray_fuses_and_matches():
     base = ak.Array([[1.0, 2.0], [3.0], [4.0, 5.0, 6.0]])
     taken = base[[2, 0, 1]]
     assert isinstance(taken.layout, ak.contents.ListArray)
-    expr = ak.cpu.lazy(taken) * 2
+    expr = cpu.lazy(taken) * 2
     assert ak.to_list(expr.compute(fuse=True)) == ak.to_list(taken * 2)
     assert expr.executor.fused_hits["cpu"] == 1
 
@@ -590,7 +595,7 @@ def test_indexed_array_of_lists_falls_back():
             ak.index.Index64(np.array([2, 0, 1], dtype=np.int64)), base.layout
         )
     )
-    expr = ak.cpu.lazy(indexed) * 2
+    expr = cpu.lazy(indexed) * 2
     assert _fell_back_to_eager(expr)
     assert ak.to_list(expr.compute(fuse=True)) == ak.to_list(indexed * 2)
 
@@ -598,7 +603,7 @@ def test_indexed_array_of_lists_falls_back():
 def test_inf_and_nan_constants_still_fuse():
     # Safe scalar emission keeps fusion for inf/nan instead of a NameError.
     arr = ak.Array([[1.0, 2.0], [3.0]])
-    expr = ak.cpu.lazy(arr) * float("inf")
+    expr = cpu.lazy(arr) * float("inf")
     out = expr.compute(fuse=True)
     assert expr.executor.fused_hits["cpu"] >= 1  # fused, not fallback
     assert ak.to_list(out) == ak.to_list(arr * float("inf"))
@@ -618,7 +623,7 @@ def test_deep_chain_falls_back_not_crash():
     # A very deep element-wise chain overflows the generated-source parser; the
     # widened fallback must catch it and use the eager path, not crash.
     arr = ak.Array([[1.0, 2.0], [3.0]])
-    expr = ak.cpu.lazy(arr)
+    expr = cpu.lazy(arr)
     for _ in range(300):
         expr = expr + 1.0
     got = ak.to_list(expr.compute(fuse=True))
@@ -629,7 +634,7 @@ def test_lazy_boolean_getitem_matches_eager():
     # ``la[la > 2]`` builds a GetItemNode whose key is itself lazy, matching
     # eager ``arr[arr > 2]`` semantics.
     arr = ak.Array([[1, 2, 3], [4, 5]])
-    la = ak.cpu.lazy(arr)
+    la = cpu.lazy(arr)
     assert ak.to_list(la[la > 2].compute(fuse=True)) == ak.to_list(arr[arr > 2])
 
 
@@ -707,7 +712,7 @@ def test_transform_lists_rejects_ragged_and_bad_out():
 )
 def test_new_operators_fuse_and_match_eager(make_lazy, make_eager):
     arr = ak.Array([[5, 6, 7], [8, 9]])
-    fused = make_lazy(ak.cpu.lazy(arr)).compute(fuse=True)
+    fused = make_lazy(cpu.lazy(arr)).compute(fuse=True)
     assert ak.to_list(fused) == ak.to_list(make_eager(arr))
 
 

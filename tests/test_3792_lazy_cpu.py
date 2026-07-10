@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._connect import cpu
 from awkward._connect.cpu.helpers import (
     filter_lists,
     list_sizes,
@@ -210,7 +211,7 @@ def arr():
 
 
 def test_lazy_arithmetic(arr):
-    lazy_arr = ak.cpu.lazy(arr)
+    lazy_arr = cpu.lazy(arr)
     transformed = lazy_arr * 2 + 1
     assert ak.to_list(transformed.compute()) == [
         [3, 5, 7],
@@ -220,14 +221,14 @@ def test_lazy_arithmetic(arr):
 
 
 def test_lazy_filter(arr):
-    lazy_arr = ak.cpu.lazy(arr)
+    lazy_arr = cpu.lazy(arr)
     transformed = lazy_arr * 2 + 1
     result = transformed.filter(lazy_arr > 3)
     assert ak.to_list(result.compute()) == [[], [9, 11], [13, 15, 17, 19]]
 
 
 def test_lazy_filter_on_transformed(arr):
-    lazy_arr = ak.cpu.lazy(arr)
+    lazy_arr = cpu.lazy(arr)
     transformed = lazy_arr * 2 + 1
     result = transformed.filter(transformed > 5)
     assert ak.to_list(result.compute()) == [[7], [9, 11], [13, 15, 17, 19]]
@@ -235,37 +236,37 @@ def test_lazy_filter_on_transformed(arr):
 
 def test_lazy_combinations():
     arr2 = ak.Array([[1, 2, 3], [4, 5]])
-    pairs = ak.cpu.lazy(arr2).combinations(2)
+    pairs = cpu.lazy(arr2).combinations(2)
     assert ak.to_list(pairs.compute()) == [[(1, 2), (1, 3), (2, 3)], [(4, 5)]]
 
 
 def test_lazy_field_access_on_combinations():
     arr3 = ak.Array([[1, 2, 3], [4, 5]])
-    pairs = ak.cpu.lazy(arr3).combinations(2)
+    pairs = cpu.lazy(arr3).combinations(2)
     pair_sums = pairs["0"] + pairs["1"]
     assert ak.to_list(pair_sums.compute()) == [[3, 4, 5], [9]]
 
 
 def test_lazy_sum(arr):
-    result = ak.cpu.lazy(arr).sum()
+    result = cpu.lazy(arr).sum()
     assert ak.to_list(result.compute()) == [6, 9, 30]
 
 
 def test_lazy_is_actually_lazy(arr):
-    lazy_arr = ak.cpu.lazy(arr)
+    lazy_arr = cpu.lazy(arr)
     transformed = lazy_arr * 2 + 1
     # Nothing computed yet
     assert transformed._computed_result is None
 
 
 def test_compute_is_memoized(arr):
-    lazy_arr = ak.cpu.lazy(arr)
+    lazy_arr = cpu.lazy(arr)
     result = (lazy_arr * 2 + 1).filter(lazy_arr > 3)
     assert result.compute() is result.compute()
 
 
 def test_invalidate(arr):
-    lazy_arr = ak.cpu.lazy(arr)
+    lazy_arr = cpu.lazy(arr)
     result = lazy_arr * 2
     first = result.compute()
     result.invalidate()
@@ -364,20 +365,20 @@ def test_memo_unbounded_when_limits_none(arr):
 
 
 def test_bool_raises(arr):
-    lazy_arr = ak.cpu.lazy(arr)
+    lazy_arr = cpu.lazy(arr)
     with pytest.raises(TypeError):
         bool(lazy_arr == lazy_arr)
 
 
 def test_visualize(arr):
-    lazy_arr = ak.cpu.lazy(arr)
+    lazy_arr = cpu.lazy(arr)
     text = ((lazy_arr * 2 + 1).filter(lazy_arr > 3)).visualize()
     assert isinstance(text, str)
     assert "filter" in text
 
 
 def test_cuda_backed_array_is_rejected(arr):
-    # ak.cpu.lazy must reject non-cpu arrays; forging the check is enough here
+    # cpu.lazy must reject non-cpu arrays; forging the check is enough here
     class FakeBackend:
         name = "cuda"
 
@@ -388,4 +389,4 @@ def test_cuda_backed_array_is_rejected(arr):
         layout = FakeLayout()
 
     with pytest.raises(TypeError):
-        ak.cpu.lazy(FakeArray())
+        cpu.lazy(FakeArray())

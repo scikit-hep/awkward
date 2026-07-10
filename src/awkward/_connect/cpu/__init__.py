@@ -11,7 +11,10 @@ from __future__ import annotations
 
 
 def lazy(array):
-    """Wrap a CPU-backed array for lazy, fused execution (``ak.cpu.lazy``).
+    """Wrap a CPU-backed array for lazy, fused execution.
+
+    Internal entry point (``awkward._connect.cpu.lazy``); not exposed as a public
+    ``ak.*`` name while the lazy/fusion work is a PoC.
 
     Args:
         array (ak.Array): A CPU-backed array.
@@ -22,7 +25,7 @@ def lazy(array):
         TypeError: If ``array`` is not on the CPU backend.
     """
     if array.layout.backend.name != "cpu":
-        raise TypeError("ak.cpu.lazy is only available for arrays with the CPU backend")
+        raise TypeError("cpu.lazy is only available for arrays with the CPU backend")
 
     from awkward._connect.lazy._lazy_impl import lazy as _lazy
 

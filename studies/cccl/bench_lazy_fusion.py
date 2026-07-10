@@ -33,6 +33,7 @@ import time
 import numpy as np
 
 import awkward as ak
+from awkward._connect import cpu, cuda
 
 REPEATS = 7
 
@@ -53,8 +54,8 @@ def make_jagged(n_lists, max_len=6, seed=0):
 def _lazy(arr):
     """Wrap ``arr`` with the lazy entry point for its backend."""
     if arr.layout.backend.name == "cuda":
-        return ak.cuda.lazy(arr)
-    return ak.cpu.lazy(arr)
+        return cuda.lazy(arr)
+    return cpu.lazy(arr)
 
 
 def build_chain(arr, depth):
