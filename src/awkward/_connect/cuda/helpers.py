@@ -25,7 +25,13 @@ from ._segment_algorithms import (
 
 
 def _form_contains_list(form) -> bool:
-    """True if any node of the form tree is a list type."""
+    """
+    Args:
+        form (ak.forms.Form): Form tree to inspect.
+
+    Returns True if any node of the form tree is a list type
+    (``ListOffsetForm``, ``ListForm``, or ``RegularForm``).
+    """
     stack = [form]
     while stack:
         current = stack.pop()
@@ -240,7 +246,15 @@ def awkward_to_cccl_iterator(
 
 @nvtx.annotate("filter_lists")
 def filter_lists(array, cond):
-    """Keep elements within each list for which the callable `cond` is true."""
+    """Keep elements within each list for which ``cond`` is true.
+
+    Args:
+        array (ak.Array): A cuda-backed list array.
+        cond (callable): A predicate compiled for the device (numba.cuda),
+            applied to each element.
+
+    Returns a new ``ak.Array`` with the kept elements and updated offsets.
+    """
     it, meta = awkward_to_cccl_iterator(array)
     in_segments = meta["offsets"]
     out_array = empty_like(array)
@@ -253,7 +267,14 @@ def filter_lists(array, cond):
 
 @nvtx.annotate("select_lists")
 def select_lists(array, mask):
-    """Keep entire lists selected by the per-list `mask`."""
+    """Keep entire lists selected by a per-list mask.
+
+    Args:
+        array (ak.Array): A cuda-backed list array.
+        mask: A per-list boolean/int8 mask (non-zero keeps the list).
+
+    Returns a new ``ak.Array`` containing only the selected lists.
+    """
     data_in, meta_in = awkward_to_cccl_iterator(array)
     offsets_in = meta_in["offsets"]
     num_elements = meta_in["count"]
@@ -286,12 +307,32 @@ def select_lists(array, mask):
 
 @nvtx.annotate("list_sizes")
 def list_sizes(array):
+    """
+    Args:
+        array (ak.Array): A cuda-backed list array.
+
+    Returns a device array of per-list element counts.
+    """
     _, meta = awkward_to_cccl_iterator(array)
     return segment_sizes(meta["offsets"])
 
 
 @nvtx.annotate("transform_lists")
 def transform_lists(array, out_array, list_size, op):
+    """Apply an n-ary ``op`` across the items of equal-size lists.
+
+    Args:
+        array (ak.Array): A cuda-backed list array; every list must have exactly
+            ``list_size`` items.
+        out_array: Pre-allocated output buffer (one value per list).
+        list_size (int): The common list length.
+        op (callable): Device op taking one argument per item position.
+
+    Returns ``out_array`` with the per-list results.
+
+    Raises:
+        ValueError: If any list does not have exactly ``list_size`` items.
+    """
     data_in, meta = awkward_to_cccl_iterator(array)
     sizes = segment_sizes(meta["offsets"])
     if not bool((sizes == list_size).all()):

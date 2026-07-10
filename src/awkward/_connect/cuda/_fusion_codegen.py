@@ -68,8 +68,13 @@ _FUSIBLE_REDUCE = {"sum": "PLUS"}
 def _sum_accumulator_dtype(dtype):
     """Widen small integer/bool dtypes like NumPy's ``sum`` accumulator.
 
-    Mirrors ``ak.sum`` so the fused sum's dtype matches the eager result
-    (int8/16/32 -> int64, unsigned -> uint64, bool -> int64; floats unchanged).
+    Mirrors ``ak.sum`` so the fused sum's dtype matches the eager result.
+
+    Args:
+        dtype: The element dtype of the mapped values.
+
+    Returns the accumulator ``numpy.dtype`` (int8/16/32 -> int64, unsigned ->
+    uint64, bool -> int64; floats unchanged).
     """
     dtype = np.dtype(dtype)
     if dtype.kind == "b":
@@ -86,11 +91,18 @@ def _infer_out_dtype(op, columns, single):
 
     Runs the folded op on a one-element sample of each column's leaf dtype (so
     folded scalar constants and true type promotion are honoured) instead of
-    defaulting to ``float64``.  The sample values (ones) are arbitrary, so the
+    defaulting to ``float64``. The sample values (ones) are arbitrary, so the
     probe must never fail or warn on them — e.g. ``1 / (1 - 1)`` or
     ``1 ** (1 - 2)`` on integers — when the real data is fine: fp warnings are
-    suppressed and any probe exception falls back via
-    :class:`FusionUnsupported`.
+    suppressed and any probe exception falls back to NumPy input promotion.
+
+    Args:
+        op (callable): The folded element-wise op.
+        columns (list): The ``ak.Array`` column leaves, in slot order.
+        single (bool): True if there is exactly one column (the op takes the
+            scalar element directly rather than a zipped tuple).
+
+    Returns the result ``numpy.dtype``.
     """
     from awkward._connect.lazy._ir import _leaf_numpy_dtype
 
@@ -108,11 +120,16 @@ def _infer_out_dtype(op, columns, single):
 
 
 def _classify_leaf(value):
-    """Return ``("column", layout)`` or ``("scalar", value)`` for a leaf.
+    """
+    Args:
+        value: A realized leaf value.
 
-    Columns are cuda-backed list-of-number arrays (their flat content becomes
-    a zipped iterator).  Scalars are numeric constants folded into the op.
-    Anything else is unsupported.
+    Returns ``("column", array)`` for a cuda-backed list-of-number array (its
+    flat content becomes a zipped iterator) or ``("scalar", value)`` for a
+    numeric constant folded into the op.
+
+    Raises:
+        FusionUnsupported: If ``value`` is neither a column nor a scalar.
     """
     if isinstance(value, ak.Array):
         return "column", value
@@ -133,11 +150,16 @@ _EXEC_GLOBALS = {"inf": float("inf"), "nan": float("nan")}
 def _compile_op(source: str):
     """Build (and intern) the fused element-wise op from generated source.
 
-    ``source`` is a Python expression over ``t`` (the zipped column tuple) with
-    constants already folded in.  Interned on the source string so cuda.compute
-    compiles one kernel per distinct fused expression.  Bounded: constants are
-    folded into the source, so a loop generating distinct constants must not
-    grow the cache (and its compiled GPU kernels) without limit.
+    Interned on the source string so cuda.compute compiles one kernel per
+    distinct fused expression. Bounded: constants are folded into the source, so
+    a loop generating distinct constants must not grow the cache (and its
+    compiled GPU kernels) without limit.
+
+    Args:
+        source (str): Python expression over ``t`` (the zipped column tuple)
+            with constants already folded in.
+
+    Returns a callable ``_fused_op(t)`` — the device op cuda.compute compiles.
     """
     ns: dict = {}
     # ``t`` is the zipped tuple of column values for one element.
@@ -149,9 +171,20 @@ def _build_op(node, values):
     """Generate the fused device op plus the ordered list of column arrays.
 
     Walks the region (via ``node.op_source``) mapping each column leaf to its
-    element accessor and each scalar leaf to a folded literal.  With one column
+    element accessor and each scalar leaf to a folded literal. With one column
     the transform element is the scalar itself (``t``); with several it is a
     zipped tuple (``t[k]``).
+
+    Args:
+        node (FusedNode): The fused region to lower.
+        values (list): Realized leaf values, in ``node.leaves`` order.
+
+    Returns an ``(op, columns)`` tuple: the compiled device op and the ordered
+    ``ak.Array`` column leaves.
+
+    Raises:
+        FusionUnsupported: If the region has no array leaves or the generated
+            source cannot be compiled (e.g. too deeply nested).
     """
     col_slot = {}
     scalar_expr = {}
@@ -179,11 +212,22 @@ def _build_op(node, values):
 
 
 def _aligned_contents(columns):
-    """Return (content_iters, offsets, count) for identically-shaped columns.
+    """Build zero-copy content iterators for identically-shaped columns.
 
     All columns must be list arrays sharing the same offsets so their flat
-    contents line up element-for-element.  Otherwise element-wise fusion over
-    the flat content is invalid -> unsupported.
+    contents line up element-for-element; otherwise element-wise fusion over the
+    flat content is invalid.
+
+    Args:
+        columns (list): The ``ak.Array`` column leaves of the region.
+
+    Returns a ``(content_iters, offsets, count, cp)`` tuple: the per-column
+    cuda.compute content iterators, the shared offsets buffer, the total item
+    count, and the ``cupy`` module.
+
+    Raises:
+        FusionUnsupported: If a column is not a plain numeric var-list or the
+            columns have mismatched offsets.
     """
     import cupy as cp
 
@@ -216,9 +260,16 @@ def _aligned_contents(columns):
 def execute_fused_cuda(node, values):
     """Lower and run a :class:`FusedNode` as a single ``cuda.compute`` kernel.
 
-    ``values`` are the realized leaf arrays (slot order).  Returns the region
-    result as an Awkward array, or raises :class:`FusionUnsupported` (e.g. a
-    non-``sum`` reduction) so the executor applies the eager reducer instead.
+    Args:
+        node (FusedNode): The fused region to lower.
+        values (list): Realized leaf arrays, in ``node.leaves`` order.
+
+    Returns the region result as an Awkward array (element-wise result, or the
+    per-sublist ``sum`` when ``node.reduce_op`` is ``sum``).
+
+    Raises:
+        FusionUnsupported: For regions the device path cannot fuse (e.g. a
+            non-``sum`` reduction), so the executor applies the eager reducer.
     """
     from cuda.compute import OpKind, TransformIterator, ZipIterator, unary_transform
 

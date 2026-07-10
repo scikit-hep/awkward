@@ -31,6 +31,8 @@ from .helpers import (
 
 
 class EmptyLike(IRNode):
+    """Lazy node that allocates an empty array shaped like its input."""
+
     __slots__ = ()
 
     def lower(self, array):
@@ -38,6 +40,8 @@ class EmptyLike(IRNode):
 
 
 class ToIterator(IRNode):
+    """Lazy node that builds a cuda.compute iterator over its input."""
+
     __slots__ = ()
 
     def lower(self, array):
@@ -45,10 +49,12 @@ class ToIterator(IRNode):
 
 
 class Filter(IRNode):
-    """Keep elements within each list for which `predicate` is true.
+    """Keep elements within each list for which ``predicate`` is true.
 
-    `predicate` is a callable compiled with numba.cuda for the CCCL
-    select path (not a materialized boolean array).
+    Args:
+        array: The input node/array to filter.
+        predicate (callable): A callable compiled with numba.cuda for the CCCL
+            select path (not a materialized boolean array).
     """
 
     __slots__ = ("predicate",)
@@ -62,7 +68,12 @@ class Filter(IRNode):
 
 
 class SelectLists(IRNode):
-    """Keep entire lists selected by a per-list mask."""
+    """Keep entire lists selected by a per-list mask.
+
+    Args:
+        array: The input node/array whose lists are selected.
+        mask: A per-list mask node/array.
+    """
 
     __slots__ = ()
 
@@ -74,6 +85,8 @@ class SelectLists(IRNode):
 
 
 class ListSizes(IRNode):
+    """Lazy node that yields per-list element counts."""
+
     __slots__ = ()
 
     def lower(self, array):
@@ -81,7 +94,14 @@ class ListSizes(IRNode):
 
 
 class TransformLists(IRNode):
-    """Apply an n-ary op across the items of equal-size lists."""
+    """Apply an n-ary op across the items of equal-size lists.
+
+    Args:
+        array: The input node/array of equal-size lists.
+        out: Pre-allocated output buffer (one value per list).
+        list_size (int): The common list length.
+        op (callable): Device op taking one argument per item position.
+    """
 
     __slots__ = ("op",)
 

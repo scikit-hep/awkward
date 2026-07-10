@@ -41,7 +41,16 @@ class FusionUnsupported(Exception):
 
 
 def _classify_leaf(value):
-    """Return ``("column", array)`` or ``("scalar", value)`` for a leaf."""
+    """
+    Args:
+        value: A realized leaf value (an ``ak.Array`` column or a scalar).
+
+    Returns ``("column", array)`` for an ``ak.Array`` leaf or
+    ``("scalar", value)`` for a numeric scalar.
+
+    Raises:
+        FusionUnsupported: If ``value`` is neither an array nor a scalar.
+    """
     if isinstance(value, ak.Array):
         return "column", value
     if isinstance(value, (int, float)):
@@ -57,8 +66,14 @@ def _compile_op(source: str):
 
     Interned on the generated source so a stable program builds each fused
     callable once — the CPU echo of the cuda.compute op-cache requirement.
-    Bounded: constants are folded into the source, so a loop generating
-    distinct constants must not grow the cache without limit.
+    Bounded: constants are folded into the source, so a loop generating distinct
+    constants must not grow the cache without limit.
+
+    Args:
+        source (str): Python expression over the column tuple ``c`` with
+            constants folded in.
+
+    Returns a callable ``_fused(c)`` evaluating the expression.
     """
     ns: dict = {}
     exec(f"def _fused(c):\n    return {source}\n", {"np": np}, ns)
@@ -66,13 +81,21 @@ def _compile_op(source: str):
 
 
 def _validated_parts(arr):
-    """Return (offsets, flat content) for a fusible list column.
+    """Extract the flat parts of a fusible list column.
 
-    Only the shape :func:`is_fusible_numeric_list` accepts qualifies.
-    Everything else — ``RegularArray`` (the fallback preserves the regular
-    type), parameterized layouts (strings and other behaviors have
-    non-element-wise semantics), option types, records, flat arrays — raises
-    :class:`FusionUnsupported` so the executor falls back to eager evaluation.
+    Only the shape :func:`is_fusible_numeric_list` accepts qualifies; everything
+    else — ``RegularArray`` (the fallback preserves the regular type),
+    parameterized layouts (strings and other behaviors have non-element-wise
+    semantics), option types, records, flat arrays — falls back to eager.
+
+    Args:
+        arr (ak.Array): Candidate column.
+
+    Returns an ``(offsets, content)`` tuple of NumPy arrays: the list offsets
+    and the flattened numeric content.
+
+    Raises:
+        FusionUnsupported: If ``arr`` is not a plain numeric var-list.
     """
     if not is_fusible_numeric_list(arr):
         raise FusionUnsupported(
@@ -86,7 +109,17 @@ def _validated_parts(arr):
 
 
 def _aligned_columns(columns):
-    """Return (contents, offsets) for identically-shaped list columns."""
+    """
+    Args:
+        columns (list): The ``ak.Array`` column leaves of the region.
+
+    Returns a ``(contents, offsets)`` tuple: the flattened numeric contents of
+    every column and the shared offsets buffer.
+
+    Raises:
+        FusionUnsupported: If the columns have mismatched offsets, or the region
+            has no array leaves.
+    """
     contents = []
     ref_offsets = None
     for arr in columns:
@@ -106,11 +139,19 @@ def _aligned_columns(columns):
 def execute_fused_cpu(node, values):
     """Lower a :class:`FusedNode`'s element-wise map to one flat-buffer pass.
 
-    Returns the fused element-wise result as an Awkward list array.  The
-    reduction (if ``node.reduce_op`` is set) is **not** applied here — the
+    The reduction (if ``node.reduce_op`` is set) is **not** applied here — the
     executor applies the eager Awkward reducer to this result, so the fused and
-    interpreter paths return the identical Awkward-typed reduction.  Raises
-    :class:`FusionUnsupported` for shapes outside the supported set.
+    interpreter paths return the identical Awkward-typed reduction.
+
+    Args:
+        node (FusedNode): The fused region to lower.
+        values (list): Realized leaf values, in ``node.leaves`` order.
+
+    Returns the fused element-wise result as an Awkward list array.
+
+    Raises:
+        FusionUnsupported: For shapes outside the supported set (non-numeric
+            layouts, mismatched offsets, or no array leaves).
     """
     columns = []
     leaf_expr = {}

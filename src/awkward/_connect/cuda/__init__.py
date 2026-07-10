@@ -297,6 +297,16 @@ def synchronize_cuda(stream=None):
 
 
 def lazy(array):
+    """Wrap a CUDA-backed array for lazy, fused execution (``ak.cuda.lazy``).
+
+    Args:
+        array (ak.Array): A CUDA-backed array.
+
+    Returns a :class:`awkward._connect.lazy._lazy_impl.LazyAwkwardArray`.
+
+    Raises:
+        TypeError: If ``array`` is not on the CUDA backend.
+    """
     if array.layout.backend.name != "cuda":
         raise TypeError(
             "ak.cuda.lazy is only available for arrays with the CUDA backend"
@@ -312,45 +322,41 @@ def to_cccl_iterator(array, *, dtype=None):
 
     This is the public, supported entry point for the recursive
     form-to-iterator construction that the fusion codegen and the eager CCCL
-    helpers use internally.  External ``cuda.compute`` code should call this
+    helpers use internally. External ``cuda.compute`` code should call this
     instead of hand-extracting buffers from ``ak.to_buffers`` and assembling
     iterators by hand.
 
     The mapping follows the layout tree:
 
-    - ``NumpyArray``     -> a CuPy buffer
-    - ``RecordArray``    -> ``ZipIterator`` over the field iterators
-    - ``IndexedArray``   -> ``PermutationIterator`` over (content, index)
-    - ``ListOffsetArray``-> the flattened content iterator (offsets returned
-      separately in the metadata)
+    - ``NumpyArray`` -> a CuPy buffer;
+    - ``RecordArray`` -> ``ZipIterator`` over the field iterators;
+    - ``IndexedArray`` -> ``PermutationIterator`` over (content, index);
+    - ``ListOffsetArray`` -> the flattened content iterator (offsets returned
+      separately in the metadata).
 
-    Parameters
-    ----------
-    array : ak.Array, ak.Record, or ak.contents.Content
-        Source array.  A CUDA-backed array is consumed zero-copy; an array on
-        another backend is moved to the device first.
-    dtype : optional
-        If given, cast the leaf ``NumpyArray`` buffers to this dtype (e.g.
-        ``numpy.float32``) while building the iterator.
+    Args:
+        array (ak.Array, ak.Record, or ak.contents.Content): Source array. A
+            CUDA-backed array is consumed zero-copy; an array on another backend
+            is moved to the device first.
+        dtype: If given, cast the leaf ``NumpyArray`` buffers to this dtype
+            (e.g. ``numpy.float32``) while building the iterator.
 
-    Returns
-    -------
-    iterator :
-        A ``cuda.compute`` iterator (or CuPy buffer for a bare ``NumpyArray``)
-        representing the array's content.
-    metadata : dict
-        ``{"form", "buffers", "offsets", "length", "count"}`` — ``offsets`` is
-        the list offsets as an ``int64`` CuPy array (or ``None`` for a
-        non-list array), ``length`` the top-level length, and ``count`` the
-        total number of items across all sublists.
+    Returns an ``(iterator, metadata)`` tuple. ``iterator`` is a
+    ``cuda.compute`` iterator (or CuPy buffer for a bare ``NumpyArray``);
+    ``metadata`` is a dict ``{"form", "buffers", "offsets", "length", "count"}``
+    where ``offsets`` is the list offsets as an ``int64`` CuPy array (or
+    ``None`` for a non-list array), ``length`` is the top-level length, and
+    ``count`` is the total number of items across all sublists.
 
-    Examples
-    --------
-    >>> import awkward as ak
-    >>> arr = ak.Array([[1.0, 2.0, 3.0], [4.0, 5.0]], backend="cuda")
-    >>> it, meta = ak.cuda.to_cccl_iterator(arr)
-    >>> meta["count"], len(meta["offsets"])
-    (5, 3)
+    Raises:
+        ModuleNotFoundError: If ``cupy`` is not installed.
+
+    Examples:
+        >>> import awkward as ak
+        >>> arr = ak.Array([[1.0, 2.0, 3.0], [4.0, 5.0]], backend="cuda")
+        >>> it, meta = ak.cuda.to_cccl_iterator(arr)
+        >>> meta["count"], len(meta["offsets"])
+        (5, 3)
     """
     if cupy is None:
         raise ModuleNotFoundError(error_message.format("ak.cuda.to_cccl_iterator"))

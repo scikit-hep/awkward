@@ -11,6 +11,16 @@ from __future__ import annotations
 
 
 def lazy(array):
+    """Wrap a CPU-backed array for lazy, fused execution (``ak.cpu.lazy``).
+
+    Args:
+        array (ak.Array): A CPU-backed array.
+
+    Returns a :class:`awkward._connect.lazy._lazy_impl.LazyAwkwardArray`.
+
+    Raises:
+        TypeError: If ``array`` is not on the CPU backend.
+    """
     if array.layout.backend.name != "cpu":
         raise TypeError("ak.cpu.lazy is only available for arrays with the CPU backend")
 

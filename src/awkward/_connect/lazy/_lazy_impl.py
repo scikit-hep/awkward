@@ -43,18 +43,29 @@ class LazyAwkwardArray:
 
     @classmethod
     def from_array(cls, array: ak.Array, executor: IRExecutor | None = None):
-        """Create a LazyAwkwardArray from an existing Awkward Array"""
+        """Create a ``LazyAwkwardArray`` from an existing Awkward Array.
+
+        Args:
+            array (ak.Array): The array to wrap as an ``InputNode`` leaf.
+            executor (IRExecutor or None): Executor to reuse; a fresh one is
+                created when ``None``.
+
+        Returns a new :class:`LazyAwkwardArray`.
+        """
         input_node = InputNode(array)
         return cls(input_node, executor)
 
     def compute(self, fuse: bool = True) -> ak.Array:
         """Execute the IR and return the result.
 
-        With ``fuse=True`` (default) the expression graph is compiled first:
-        element-wise regions are collapsed into single fused kernels
-        (:func:`awkward._connect.lazy._fusion.fuse`).  ``fuse=False`` runs the
-        plain per-node interpreter — the no-fuse / debug path, which keeps
-        every intermediate visible.  Both are numerically identical.
+        Args:
+            fuse (bool): With ``True`` (default) the expression graph is compiled
+                first, collapsing element-wise regions into single fused kernels
+                (:func:`awkward._connect.lazy._fusion.fuse`); ``False`` runs the
+                plain per-node interpreter (the no-fuse / debug path, which keeps
+                every intermediate visible). Both are numerically identical.
+
+        Returns the computed ``ak.Array`` (or reduction result).
         """
         if self._computed_result is None or self._computed_fuse != fuse:
             if fuse:
@@ -65,17 +76,23 @@ class LazyAwkwardArray:
         return self._computed_result
 
     def compile(self) -> OpNode:
-        """Return the fused expression graph without executing it.
+        """Compile the graph without executing it.
 
-        Useful for inspecting how many kernels the computation will launch
-        (see :meth:`fusion_stats`) or for debugging the fusion pass.
+        Useful for inspecting how many kernels the computation will launch (see
+        :meth:`fusion_stats`) or for debugging the fusion pass.
+
+        Returns the fused expression graph as an ``OpNode``.
         """
         from ._fusion import fuse as _fuse
 
         return _fuse(self.ir_node)
 
     def fusion_stats(self) -> dict:
-        """Report how fusion reshapes this graph (see ``_fusion.fusion_stats``)."""
+        """Report how fusion reshapes this graph.
+
+        Returns the dict from :func:`awkward._connect.lazy._fusion.fusion_stats`
+        (``elementwise_before``, ``fused_regions``, ``materialized``).
+        """
         from ._fusion import fusion_stats as _stats
 
         return _stats(self.ir_node)
@@ -221,29 +238,42 @@ class LazyAwkwardArray:
 
     # List operations
     def filter(self, condition):
-        """Filter elements in lists based on a condition"""
+        """Filter elements within lists by a condition.
+
+        Args:
+            condition: A boolean mask (a ``LazyAwkwardArray``, ``ak.Array``, or
+                array-like) selecting elements to keep within each list.
+
+        Returns a new ``LazyAwkwardArray`` wrapping the filter operation.
+        """
         cond_node = self._to_ir_node(condition)
         return LazyAwkwardArray(FilterNode(self.ir_node, cond_node), self.executor)
 
     def select_lists(self, mask):
-        """Select entire lists based on a boolean mask"""
+        """Select entire lists by a per-list boolean mask.
+
+        Args:
+            mask: A per-list boolean mask.
+
+        Returns a new ``LazyAwkwardArray`` wrapping the select-lists operation.
+        """
         mask_node = self._to_ir_node(mask)
         return LazyAwkwardArray(SelectListsNode(self.ir_node, mask_node), self.executor)
 
     def sum(self):
-        """Sum reduction over lists"""
+        """Returns a new ``LazyAwkwardArray`` for a per-list sum reduction."""
         return LazyAwkwardArray(ReduceNode(self.ir_node, OpType.SUM), self.executor)
 
     def mean(self):
-        """Mean reduction over lists"""
+        """Returns a new ``LazyAwkwardArray`` for a per-list mean reduction."""
         return LazyAwkwardArray(ReduceNode(self.ir_node, OpType.MEAN), self.executor)
 
     def max(self):
-        """Max reduction over lists"""
+        """Returns a new ``LazyAwkwardArray`` for a per-list max reduction."""
         return LazyAwkwardArray(ReduceNode(self.ir_node, OpType.MAX), self.executor)
 
     def min(self):
-        """Min reduction over lists"""
+        """Returns a new ``LazyAwkwardArray`` for a per-list min reduction."""
         return LazyAwkwardArray(ReduceNode(self.ir_node, OpType.MIN), self.executor)
 
     def combinations(
@@ -253,14 +283,17 @@ class LazyAwkwardArray:
         axis: int = 1,
         fields: list | None = None,
     ):
-        """
-        Generate n-element combinations from lists.
+        """Generate n-element combinations from lists.
 
         Args:
-            n: Number of elements in each combination
-            replacement: If True, allow replacement (combinations with repetition)
-            axis: Axis along which to generate combinations (default: 1)
-            fields: Optional field names for the combination tuple
+            n (int): Number of elements in each combination.
+            replacement (bool): If True, allow replacement (combinations with
+                repetition).
+            axis (int): Axis along which to generate combinations.
+            fields (list or None): Optional field names for the combination
+                tuple.
+
+        Returns a new ``LazyAwkwardArray`` wrapping the combinations operation.
         """
         return LazyAwkwardArray(
             CombinationsNode(self.ir_node, n, replacement, axis, fields), self.executor
@@ -271,13 +304,28 @@ class LazyAwkwardArray:
 
         A lazy (or eager) array key selects like eager ``__getitem__``, so
         ``lazy_arr[lazy_arr > 5]`` matches ``arr[arr > 5]``.
+
+        Args:
+            key: A field name, index, slice, or a (lazy or eager) array key.
+
+        Returns a new ``LazyAwkwardArray`` wrapping the item access.
         """
         if isinstance(key, (LazyAwkwardArray, ak.Array)):
             key = self._to_ir_node(key)
         return LazyAwkwardArray(GetItemNode(self.ir_node, key), self.executor)
 
     def _to_ir_node(self, value):
-        """Convert a value to an IR node"""
+        """Convert a value to an IR node.
+
+        Args:
+            value: A ``LazyAwkwardArray``, ``ak.Array``, or numeric scalar/array.
+
+        Returns the corresponding ``OpNode`` (``InputNode`` / ``ConstantNode``,
+        or the wrapped node for a ``LazyAwkwardArray``).
+
+        Raises:
+            TypeError: If ``value`` cannot be converted to an IR node.
+        """
         if isinstance(value, LazyAwkwardArray):
             return value.ir_node
         elif isinstance(value, ak.Array):
@@ -292,8 +340,12 @@ class LazyAwkwardArray:
     def visualize(self, fused: bool = False) -> str:
         """Generate a string representation of the IR.
 
-        With ``fused=True`` the fused (compiled) graph is shown, so the
-        ``FusedNode`` regions and their leaves are visible.
+        Args:
+            fused (bool): If True, show the fused (compiled) graph so the
+                ``FusedNode`` regions and their leaves are visible; otherwise
+                show the original operator graph.
+
+        Returns the IR tree as a multi-line string.
         """
         node = self.compile() if fused else self.ir_node
         return self.executor.visualize_ir(node)
@@ -304,21 +356,19 @@ class LazyAwkwardArray:
 
 
 def lazy(array: ak.Array) -> LazyAwkwardArray:
-    """
-    Convert an Awkward Array to a lazy evaluation wrapper.
+    """Convert an Awkward Array to a lazy evaluation wrapper.
+
+    Args:
+        array (ak.Array): The array to wrap for delayed, fused execution.
+
+    Returns a :class:`LazyAwkwardArray` over ``array``.
 
     Example:
         >>> import awkward as ak
-        >>>
-        >>> # Create lazy array
         >>> arr = ak.Array([[1, 2, 3], [4, 5], [6, 7, 8, 9]])
         >>> lazy_arr = ak.cpu.lazy(arr)   # or ak.cuda.lazy for cuda-backed arrays
-        >>>
-        >>> # Build computation graph
         >>> result = lazy_arr * 2 + 1
         >>> filtered = result.filter(result > 5)
-        >>>
-        >>> # Execute when needed
         >>> output = filtered.compute()
     """
     return LazyAwkwardArray.from_array(array)

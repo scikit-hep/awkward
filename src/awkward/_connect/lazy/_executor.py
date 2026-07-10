@@ -63,12 +63,16 @@ _COMPARISON_OPS = {
 
 
 def _uniform_backend(values):
-    """Return the single backend name shared by all array leaves, else ``None``.
+    """
+    Args:
+        values (list): Realized leaf values; scalars (no ``.layout``) are
+            ignored.
 
-    Scalars (no ``.layout``) are ignored.  ``None`` means the leaves mix
-    backends (or there are no array leaves) — fusion must decline so the eager
-    path decides validity (e.g. a cuda+cpu mix raises ``ValueError`` just like
-    ``fuse=False``, instead of silently copying one side to the other device).
+    Returns the single backend name shared by all array leaves, or ``None`` if
+    the leaves mix backends (or there are no array leaves). ``None`` makes
+    fusion decline so the eager path decides validity — e.g. a cuda+cpu mix
+    raises ``ValueError`` just like ``fuse=False``, instead of silently copying
+    one side to the other device.
     """
     names = set()
     for value in values:
@@ -116,7 +120,13 @@ class IRExecutor:
 
     @staticmethod
     def _result_nbytes(result):
-        """Estimated size of a result; 0 for objects without nbytes."""
+        """
+        Args:
+            result: A computed node result.
+
+        Returns the estimated size in bytes, or 0 for objects without
+        ``nbytes``.
+        """
         try:
             return int(result.nbytes)
         except (AttributeError, TypeError):
@@ -142,9 +152,14 @@ class IRExecutor:
         This is the entry point that realizes the *dynamic compilation* step:
         element-wise regions of the expression graph are collapsed into
         ``FusedNode``s (one kernel each on a fusing backend) before execution.
-        ``execute`` remains the plain interpreter over whatever graph it is
-        handed, so passing the original (unfused) root gives the no-fuse
-        debug path.
+        :meth:`execute` remains the plain interpreter over whatever graph it is
+        handed, so passing the original (unfused) root gives the no-fuse debug
+        path.
+
+        Args:
+            node (OpNode): Root of the expression graph to compile and run.
+
+        Returns the computed ``ak.Array`` (or reduction result).
         """
         return self.execute(self.optimize(node))
 
@@ -153,11 +168,15 @@ class IRExecutor:
         """Execute an IR node and return the result.
 
         Evaluation is an explicit-stack postorder walk (no recursion, so
-        loop-built graphs thousands of nodes deep execute fine).  Sub-graphs
+        loop-built graphs thousands of nodes deep execute fine). Sub-graphs
         below a memoized node are pruned — a memo hit never recomputes its
-        dependencies.  ``results`` holds this call's realized intermediates;
-        they are released when the call returns (the bounded LRU memo decides
-        what survives across calls).
+        dependencies. This call's realized intermediates are released when the
+        call returns (the bounded LRU memo decides what survives across calls).
+
+        Args:
+            node (OpNode): Root of the graph to evaluate (fused or not).
+
+        Returns the computed ``ak.Array`` (or reduction result).
         """
         results: dict[int, object] = {}
         stack: list[tuple[OpNode, bool]] = [(node, False)]
@@ -187,7 +206,18 @@ class IRExecutor:
         return results[node.node_id]
 
     def _execute_node(self, node: OpNode, results: dict) -> ak.Array:
-        """Execute a single IR node; children are looked up in ``results``."""
+        """Execute a single IR node, given already-computed children.
+
+        Args:
+            node (OpNode): The node to evaluate.
+            results (dict): Maps ``node_id`` to the realized value of each
+                already-computed child.
+
+        Returns the node's computed value.
+
+        Raises:
+            NotImplementedError: If ``node`` is of an unhandled type.
+        """
         if isinstance(node, InputNode):
             return node.get_array()
 
@@ -239,15 +269,21 @@ class IRExecutor:
     def _execute_fused(self, node: FusedNode, results: dict) -> ak.Array:
         """Execute a fused element-wise (optionally +reduction) region.
 
-        Leaves were realized first (memoized like any other node).  A backend
-        fusion codegen may emit the region as a single kernel; otherwise the
-        fused expression is evaluated eagerly in one pass.  In every case a
-        terminating reduction is produced by the eager Awkward reducer
-        (``_REDUCE_OPS``) — on CUDA the codegen fuses ``sum`` into its kernel
-        and returns the final result directly; the CPU codegen and the eager
-        fallback fuse only the element-wise map and let ``_REDUCE_OPS`` apply
-        the reduction, so the fused and interpreter paths return the identical
-        Awkward-typed result (same dtype, masking, and empty-list semantics).
+        A backend fusion codegen may emit the region as a single kernel;
+        otherwise the fused expression is evaluated eagerly in one pass. In
+        every case a terminating reduction is produced by the eager Awkward
+        reducer (``_REDUCE_OPS``) — on CUDA the codegen fuses ``sum`` into its
+        kernel and returns the final result directly; the CPU codegen and the
+        eager fallback fuse only the element-wise map and let ``_REDUCE_OPS``
+        apply the reduction, so the fused and interpreter paths return the
+        identical Awkward-typed result (same dtype, masking, and empty-list
+        semantics).
+
+        Args:
+            node (FusedNode): The fused region to execute.
+            results (dict): Maps ``node_id`` to each already-realized leaf value.
+
+        Returns the region's computed ``ak.Array`` (or reduction result).
         """
         values = [results[leaf.node_id] for leaf in node.leaves]
 
@@ -275,16 +311,21 @@ class IRExecutor:
 
     @staticmethod
     def _maybe_fused_kernel(node: FusedNode, values):
-        """Try to emit a single backend kernel for the region.
+        """Try to emit a single CUDA kernel for the region.
 
-        Returns the result, or ``_NO_FUSED_KERNEL`` if no codegen applies.
         Requires every array leaf to be cuda-backed: a mixed cpu/cuda region
         must fall back so it fails (or not) exactly like the eager expression
-        instead of silently migrating data to the device.  Any exception from
-        the codegen also falls back — fusion is a fast path, never a
-        correctness dependency, so a codegen defect must degrade to the eager
-        (still backend-dispatched, still correct) evaluation, not fail the
-        computation.
+        instead of silently migrating data to the device. Any exception from the
+        codegen also falls back — fusion is a fast path, never a correctness
+        dependency, so a codegen defect must degrade to the eager (still
+        backend-dispatched, still correct) evaluation, not fail the computation.
+
+        Args:
+            node (FusedNode): The fused region to lower.
+            values (list): Realized leaf values, in ``node.leaves`` order.
+
+        Returns the region result, or ``_NO_FUSED_KERNEL`` if no codegen
+        applies (non-CUDA leaves, cuda.compute unavailable, or a codegen miss).
         """
         if _uniform_backend(values) != "cuda":
             return _NO_FUSED_KERNEL
@@ -302,10 +343,15 @@ class IRExecutor:
         """Try to evaluate the region as one flat-buffer NumPy pass.
 
         Collapses the per-op ``ak`` dispatch of an element-wise chain into a
-        single pass over the shared content buffer.  Returns the result or
-        ``_NO_FUSED_KERNEL`` when the region shape is unsupported or the
-        codegen fails for any reason (same fallback discipline as the CUDA
-        path).
+        single pass over the shared content buffer. Same fallback discipline as
+        the CUDA path (any exception degrades to eager).
+
+        Args:
+            node (FusedNode): The fused region to lower.
+            values (list): Realized leaf values, in ``node.leaves`` order.
+
+        Returns the fused element-wise result, or ``_NO_FUSED_KERNEL`` when the
+        region shape is unsupported or the codegen fails for any reason.
         """
         if _uniform_backend(values) != "cpu":
             return _NO_FUSED_KERNEL
@@ -319,7 +365,13 @@ class IRExecutor:
             return _NO_FUSED_KERNEL
 
     def visualize_ir(self, node: OpNode, indent: int = 0) -> str:
-        """Generate a string visualization of the IR tree"""
+        """
+        Args:
+            node (OpNode): Root of the (sub)tree to render.
+            indent (int): Current indentation depth (used in recursion).
+
+        Returns a multi-line string visualization of the IR tree.
+        """
         prefix = "  " * indent
         lines = [f"{prefix}{node}"]
 
@@ -356,19 +408,22 @@ class IRExecutor:
         return "\n".join(lines)
 
     def optimize(self, node: OpNode) -> OpNode:
-        """
-        Apply optimization passes to the IR and return the rewritten root.
+        """Apply optimization passes to the IR and return the rewritten root.
 
-        Currently one pass runs: **kernel fusion** (``_fusion.fuse``), which
+        Currently one pass runs: **kernel fusion** (:func:`_fusion.fuse`), which
         collapses maximal element-wise regions (and transform+reduce) into
-        single ``FusedNode`` kernels.  The pass also folds shared
-        sub-expressions to one materialization point (single-use fusion), so
-        common-subexpression elimination for the fused regions falls out of it.
+        single ``FusedNode`` kernels. The pass also folds shared sub-expressions
+        to one materialization point (single-use fusion), so common-subexpression
+        elimination for the fused regions falls out of it.
 
         The pass is idempotent: a graph that is already fused (its element-wise
         regions are ``FusedNode``s) is returned unchanged, because ``FusedNode``
         is opaque to ``fuse`` and every other node is rebuilt structurally.
-
         Future passes (constant folding, dead-code elimination) compose here.
+
+        Args:
+            node (OpNode): Root of the graph to optimize.
+
+        Returns the rewritten (fused) root ``OpNode``.
         """
         return fuse(node)

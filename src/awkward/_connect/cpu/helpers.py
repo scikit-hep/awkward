@@ -21,7 +21,18 @@ from awkward._connect.lazy._layout import (  # noqa: F401
 
 
 def _listoffset_parts(array):
-    """Return (layout, offsets, flat content) for a list-of-numbers array."""
+    """Extract the flat parts of a list-of-numbers array.
+
+    Args:
+        array (ak.Array or ak.contents.Content): A list-type array.
+
+    Returns a ``(layout, offsets, content)`` tuple: the normalized
+    ``ListOffsetArray64`` layout, its offsets, and the flattened NumPy content.
+
+    Raises:
+        TypeError: If ``array`` is not a list-type array.
+        NotImplementedError: If the list content is not a ``NumpyArray``.
+    """
     if isinstance(array, ak.Array):
         layout = array.layout
     elif isinstance(array, ak.contents.Content):
@@ -59,20 +70,36 @@ def _rebuild(layout, offsets, content):
 
 
 def segment_sizes(offsets):
-    """Size of each segment from segment offsets (length = num_segments)."""
+    """
+    Args:
+        offsets: Segment offsets (length = num_segments + 1).
+
+    Returns the size of each segment (length = num_segments).
+    """
     return offsets[1:] - offsets[:-1]
 
 
 def list_sizes(array):
+    """
+    Args:
+        array (ak.Array): A list array.
+
+    Returns a NumPy array of per-list element counts.
+    """
     _, offsets, _ = _listoffset_parts(array)
     return segment_sizes(offsets)
 
 
 def filter_lists(array, cond):
-    """Keep elements within each list for which `cond` is true.
+    """Keep elements within each list for which ``cond`` is true.
 
-    `cond` must be vectorized over a NumPy array of the flat content
-    (e.g. ``lambda x: x > 2``), mirroring the CUDA predicate semantics.
+    Args:
+        array (ak.Array): A list array.
+        cond (callable): Vectorized predicate over a NumPy array of the flat
+            content (e.g. ``lambda x: x > 2``), mirroring the CUDA predicate
+            semantics.
+
+    Returns a new ``ak.Array`` with the kept elements and updated offsets.
     """
     layout, offsets, content = _listoffset_parts(array)
 
@@ -88,7 +115,18 @@ def filter_lists(array, cond):
 
 
 def select_lists(array, mask):
-    """Keep entire lists selected by the per-list `mask`."""
+    """Keep entire lists selected by a per-list mask.
+
+    Args:
+        array (ak.Array): A list array.
+        mask: A per-list boolean mask; its length must equal the number of
+            lists.
+
+    Returns a new ``ak.Array`` containing only the selected lists.
+
+    Raises:
+        ValueError: If ``mask`` length does not match the number of lists.
+    """
     layout, offsets, content = _listoffset_parts(array)
 
     mask = np.asarray(mask, dtype=bool)
@@ -109,12 +147,23 @@ def select_lists(array, mask):
 
 
 def transform_lists(array, out, list_size, op):
-    """Apply the n-ary `op` across the items of equal-size lists.
+    """Apply an n-ary ``op`` across the items of equal-size lists.
 
-    Each list must contain exactly `list_size` items; `op` receives one
-    argument per item position (each a NumPy array over all lists) and must
-    return one value per list, e.g. ``lambda x, y, z: x + y + z``.
-    The result is written into `out` (a NumPy array of length num_lists).
+    Args:
+        array (ak.Array): A list array; every list must contain exactly
+            ``list_size`` items.
+        out (numpy.ndarray): Writeable output buffer of length num_lists; the
+            result is written in place.
+        list_size (int): The common list length.
+        op (callable): Receives one argument per item position (each a NumPy
+            array over all lists) and returns one value per list, e.g.
+            ``lambda x, y, z: x + y + z``.
+
+    Returns ``out`` with the per-list results.
+
+    Raises:
+        ValueError: If any list does not have exactly ``list_size`` items.
+        TypeError: If ``out`` is not a writeable NumPy array.
     """
     _, offsets, content = _listoffset_parts(array)
     num_segments = len(offsets) - 1

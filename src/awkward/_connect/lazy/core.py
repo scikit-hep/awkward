@@ -29,12 +29,11 @@ class IRNode:
         self._computed = False
 
     def compute(self):
-        """
-        Compute this node and return its value.
-        Execution is:
-        - demand-driven
-        - memoized
-        - iterative (stack-safe)
+        """Compute this node and return its value.
+
+        Execution is demand-driven, memoized, and iterative (stack-safe).
+
+        Returns the node's computed value.
         """
         if self._computed:
             return self._value
@@ -53,9 +52,15 @@ class IRNode:
         return self._value
 
     def lower(self, *args):
-        """
-        Lower this node to concrete execution.
-        Must be implemented by subclasses.
+        """Lower this node to concrete execution (implemented by subclasses).
+
+        Args:
+            *args: The already-computed values of this node's inputs.
+
+        Returns the node's computed value.
+
+        Raises:
+            NotImplementedError: Always, in the base class.
         """
         raise NotImplementedError
 
@@ -67,7 +72,10 @@ class IRNode:
 
 def compute(node):
     """
-    Compute a node or return the value if already concrete.
+    Args:
+        node (IRNode or Any): A node to compute, or an already-concrete value.
+
+    Returns ``node.compute()`` for an ``IRNode``, otherwise ``node`` unchanged.
     """
     if isinstance(node, IRNode):
         return node.compute()
@@ -75,8 +83,10 @@ def compute(node):
 
 
 def reset_cache(node):
-    """
-    Clear cached values in a graph rooted at `node`.
+    """Clear cached values in the graph rooted at ``node``.
+
+    Args:
+        node (IRNode): Root of the graph to reset.
     """
     for current in walk(node):
         current._value = None
@@ -85,7 +95,11 @@ def reset_cache(node):
 
 def walk(node):
     """
-    Yield all IRNodes reachable from `node` (DFS).
+    Args:
+        node (IRNode): Root of the graph to traverse.
+
+    Yields:
+        IRNode: Every ``IRNode`` reachable from ``node`` (depth-first).
     """
     visited = set()
     stack = [node]
@@ -105,9 +119,14 @@ def walk(node):
 
 
 def topological_order(node):
-    """
-    Return nodes in dependency order (inputs first).
-    Iterative implementation (DFS post-order) to ensure stack safety.
+    """Order the graph's nodes so inputs precede the nodes that consume them.
+
+    Iterative (DFS post-order) implementation to ensure stack safety.
+
+    Args:
+        node (IRNode): Root of the graph.
+
+    Returns a list of ``IRNode`` in dependency order (inputs first).
     """
     visited = set()
     order = []
@@ -141,7 +160,11 @@ def topological_order(node):
 
 
 class Input(IRNode):
-    """A concrete array used as a leaf of the graph (strong reference)."""
+    """A concrete array used as a leaf of the graph (strong reference).
+
+    Args:
+        array: The concrete value this leaf returns when computed.
+    """
 
     __slots__ = ("array",)
 

@@ -94,10 +94,13 @@ class OpNode:
 
 
 def _leaf_numpy_dtype(array):
-    """Return the leaf ``NumpyArray`` dtype of ``array``, or ``None``.
+    """Descend through option/index/list wrappers to the numeric leaf dtype.
 
-    Descends through option/index/list wrappers to the numeric leaf; returns
-    ``None`` for record arrays (no single dtype) or anything without one.
+    Args:
+        array (ak.Array): Array whose leaf dtype to read.
+
+    Returns the leaf ``NumpyArray`` ``numpy.dtype``, or ``None`` for record
+    arrays (no single dtype) or anything without one.
     """
     try:
         layout = array.layout
@@ -115,8 +118,11 @@ class InputNode(OpNode):
     """Represents an input array.
 
     Holds a strong reference: the whole point of lazy evaluation is that
-    `compute()` may run long after graph construction, so the graph must
-    keep its leaves alive.
+    ``compute()`` may run long after graph construction, so the graph must keep
+    its leaves alive.
+
+    Args:
+        array (ak.Array): The concrete array this leaf refers to.
     """
 
     def __init__(self, array: ak.Array):
@@ -129,14 +135,24 @@ class InputNode(OpNode):
             self.dtype = _leaf_numpy_dtype(array)
 
     def get_array(self):
-        """Get the referenced array."""
+        """
+        Returns the referenced ``ak.Array``.
+
+        Raises:
+            ValueError: If no array reference is available.
+        """
         if self.array is None:
             raise ValueError("No array reference available")
         return self.array
 
 
 class ConstantNode(OpNode):
-    """Represents a constant value"""
+    """Represents a constant value.
+
+    Args:
+        value: A Python/NumPy/CuPy scalar or array folded into the expression;
+            non-array values are coerced with ``np.asarray``.
+    """
 
     def __init__(self, value):
         dtype = None
@@ -156,7 +172,16 @@ class ConstantNode(OpNode):
 
 
 class BinaryOpNode(OpNode):
-    """Represents binary operations (add, mul, etc.)"""
+    """Represents binary operations (add, mul, etc.).
+
+    The result dtype is inferred from the operands via NumPy promotion when both
+    are known (true division always widens to an inexact type).
+
+    Args:
+        op_type (OpType): The arithmetic op (e.g. ``OpType.ADD``).
+        left (OpNode): Left operand.
+        right (OpNode): Right operand.
+    """
 
     def __init__(self, op_type: OpType, left: OpNode, right: OpNode):
         super().__init__(op_type=op_type)
@@ -173,7 +198,13 @@ class BinaryOpNode(OpNode):
 
 
 class ComparisonNode(OpNode):
-    """Represents comparison operations"""
+    """Represents comparison operations (produces a boolean result).
+
+    Args:
+        op_type (OpType): The comparison op (e.g. ``OpType.GT``).
+        left (OpNode): Left operand.
+        right (OpNode): Right operand.
+    """
 
     def __init__(self, op_type: OpType, left: OpNode, right: OpNode):
         super().__init__(op_type=op_type, dtype=np.bool_)
@@ -182,7 +213,12 @@ class ComparisonNode(OpNode):
 
 
 class FilterNode(OpNode):
-    """Represents filtering operations on lists"""
+    """Represents filtering elements within lists by a boolean condition.
+
+    Args:
+        input (OpNode): The array to filter.
+        condition (OpNode): A boolean mask (typically a ``ComparisonNode``).
+    """
 
     def __init__(self, input: OpNode, condition: OpNode):
         super().__init__(op_type=OpType.FILTER)
@@ -193,7 +229,13 @@ class FilterNode(OpNode):
 
 
 class ReduceNode(OpNode):
-    """Represents reduction operations on lists"""
+    """Represents a per-list reduction (``axis=-1``).
+
+    Args:
+        input (OpNode): The array to reduce.
+        reduce_op (OpType): The reduction (``SUM``, ``MEAN``, ``MAX``, ``MIN``);
+            all preserve the input dtype except ``MEAN`` (always float64).
+    """
 
     def __init__(self, input: OpNode, reduce_op: OpType):
         super().__init__(op_type=OpType.REDUCE)
@@ -207,7 +249,12 @@ class ReduceNode(OpNode):
 
 
 class SelectListsNode(OpNode):
-    """Represents selecting entire lists based on a mask"""
+    """Represents selecting entire lists based on a per-list mask.
+
+    Args:
+        input (OpNode): The array whose lists are selected.
+        mask (OpNode): A per-list boolean mask.
+    """
 
     def __init__(self, input: OpNode, mask: OpNode):
         super().__init__(op_type=OpType.SELECT_LISTS)
@@ -217,7 +264,15 @@ class SelectListsNode(OpNode):
 
 
 class CombinationsNode(OpNode):
-    """Represents generating combinations from lists"""
+    """Represents generating combinations from lists (``ak.combinations``).
+
+    Args:
+        input (OpNode): The array to combine.
+        n (int): Number of elements per combination.
+        replacement (bool): If True, allow repeated elements.
+        axis (int): Axis along which to form combinations.
+        fields (list or None): Optional field names for the resulting records.
+    """
 
     def __init__(
         self,
@@ -238,9 +293,14 @@ class CombinationsNode(OpNode):
 
 
 class GetItemNode(OpNode):
-    """Represents item access: a field name, index, slice, or a (lazy or
-    eager) array key — the latter gives ``lazy_arr[lazy_arr > 5]`` the same
-    semantics as eager ``arr[arr > 5]``."""
+    """Represents item access.
+
+    Args:
+        input (OpNode): The array being indexed.
+        key: A field name, index, slice, or a (lazy or eager) array key. An
+            array key gives ``lazy_arr[lazy_arr > 5]`` the same semantics as
+            eager ``arr[arr > 5]``.
+    """
 
     def __init__(self, input: OpNode, key):
         super().__init__(op_type=OpType.GETITEM)
