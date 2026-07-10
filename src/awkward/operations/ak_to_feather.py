@@ -165,6 +165,6 @@ def _impl(
             message="pyarrow.feather.write_feather is deprecated.*",
             category=FutureWarning,
         )
-            pyarrow.feather.write_feather(
-                table, destination, compression, compression_level, chunksize, feather_version
-            )
+        pyarrow.feather.write_feather(
+            table, destination, compression, compression_level, chunksize, feather_version
+        )
