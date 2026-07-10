@@ -159,6 +159,12 @@ def _impl(
             f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
 
-    pyarrow.feather.write_feather(
-        table, destination, compression, compression_level, chunksize, feather_version
-    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="pyarrow.feather.write_feather is deprecated.*",
+            category=FutureWarning,
+        )
+            pyarrow.feather.write_feather(
+                table, destination, compression, compression_level, chunksize, feather_version
+            )
