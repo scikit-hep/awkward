@@ -36,7 +36,7 @@ def to_parquet(
     row_group_size=64 * 1024 * 1024,
     data_page_size=None,
     parquet_flavor=None,
-    parquet_version="2.4",
+    parquet_version="2.6",
     parquet_page_version="1.0",
     parquet_metadata_statistics=True,
     parquet_dictionary_encoding=False,
