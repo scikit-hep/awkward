@@ -103,8 +103,6 @@ class RegularType(Type):
         return "{}({})".format(type(self).__name__, ", ".join(args))
 
     def _is_equal_to(self, other: Any, all_parameters: bool) -> bool:
-        from awkward._nplikes.shape import unknown_length
-
         compare_parameters = (
             parameters_are_equal if all_parameters else type_parameters_equal
         )
