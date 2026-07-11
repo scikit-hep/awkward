@@ -1572,11 +1572,7 @@ class ListArray(ListMeta[Content], Content):
         lateral_context: Mapping[str, Any] | None,
         options: ApplyActionOptions,
     ) -> Content | None:
-        if (
-            self._backend.nplike.known_data
-            and self._backend.nplike.known_data
-            and self._starts.length != 0
-        ):
+        if self._backend.nplike.known_data and self._starts.length != 0:
             startsmin = self._backend.nplike.min(self._starts.data)
             starts = ak.index.Index(
                 self._starts.data - startsmin, nplike=self._backend.nplike
