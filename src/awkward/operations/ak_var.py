@@ -171,7 +171,7 @@ def nanvar(
         weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
 
     return _impl(
-        ak.operations.ak_nan_to_none._impl(x, highlevel, behavior, attrs),
+        ak.operations.ak_nan_to_none._impl(x, True, behavior, attrs),
         weight,
         ddof,
         axis,
