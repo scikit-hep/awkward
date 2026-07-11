@@ -125,10 +125,14 @@ class ListArray(ListMeta[Content], Content):
     """
 
     def __init__(self, starts, stops, content, *, parameters=None):
-        if not isinstance(starts, Index) and starts.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not (
+            isinstance(starts, Index)
+            and starts.dtype
+            in (
+                np.dtype(np.int32),
+                np.dtype(np.uint32),
+                np.dtype(np.int64),
+            )
         ):
             raise TypeError(
                 f"{type(self).__name__} 'starts' must be an Index with dtype in (int32, uint32, int64), "
