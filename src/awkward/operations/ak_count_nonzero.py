@@ -98,8 +98,6 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
 
     axis = regularize_axis(axis, none_allowed=True)
 
-    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
-        layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
     reducer = ak._reducers.CountNonzero()
 
     out = ak._do.reduce(
