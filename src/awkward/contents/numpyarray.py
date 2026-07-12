@@ -611,16 +611,15 @@ class NumpyArray(NumpyMeta, Content):
         return self._backend.nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
+        if not self.is_contiguous:
+            return self.to_contiguous()._subranges_equal(starts, stops, length, sorted)
+
         is_equal = self._backend.nplike.zeros(1, dtype=np.bool_)
 
         assert (
             starts.nplike is self._backend.nplike
             and stops.nplike is self._backend.nplike
         )
-        # The `awkward_NumpyArray_subrange_equal*` kernels only read from
-        # `tmpptr` (never write), so no buffer copy is needed; they do index it
-        # flatly, so it must be C-contiguous (a no-op when already contiguous).
-        data = self._backend.nplike.ascontiguousarray(self._data)
         if self.dtype == np.bool_:
             self._backend.maybe_kernel_error(
                 self._backend[
@@ -630,7 +629,7 @@ class NumpyArray(NumpyMeta, Content):
                     stops.dtype.type,
                     np.bool_,
                 ](
-                    data,
+                    self._data,
                     starts.data,
                     stops.data,
                     starts.length,
@@ -646,7 +645,7 @@ class NumpyArray(NumpyMeta, Content):
                     stops.dtype.type,
                     np.bool_,
                 ](
-                    data,
+                    self._data,
                     starts.data,
                     stops.data,
                     starts.length,
