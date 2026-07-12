@@ -259,7 +259,7 @@ def _impl(
             )
         else:
             raise ValueError(
-                f"Encountered an invalid string policy value {primitive_policy!r}. "
+                f"Encountered an invalid string policy value {string_policy!r}. "
                 f'The permitted values are "pass-through", "as-characters", "promote", and "error".'
             )
     elif isinstance(obj, (datetime, date, time, Number, bool)):
