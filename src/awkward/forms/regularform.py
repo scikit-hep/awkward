@@ -126,6 +126,10 @@ class RegularForm(RegularMeta[Form], Form):
     def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
         return (
             self._is_equal_to_generic(other, all_parameters, form_key)
-            and (self._size == other._size)
+            and (
+                self._size is unknown_length
+                or other._size is unknown_length
+                or self._size == other._size
+            )
             and self._content._is_equal_to(other._content, all_parameters, form_key)
         )
