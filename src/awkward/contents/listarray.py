@@ -125,10 +125,14 @@ class ListArray(ListMeta[Content], Content):
     """
 
     def __init__(self, starts, stops, content, *, parameters=None):
-        if not isinstance(starts, Index) and starts.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not (
+            isinstance(starts, Index)
+            and starts.dtype
+            in (
+                np.dtype(np.int32),
+                np.dtype(np.uint32),
+                np.dtype(np.int64),
+            )
         ):
             raise TypeError(
                 f"{type(self).__name__} 'starts' must be an Index with dtype in (int32, uint32, int64), "
@@ -1568,11 +1572,7 @@ class ListArray(ListMeta[Content], Content):
         lateral_context: Mapping[str, Any] | None,
         options: ApplyActionOptions,
     ) -> Content | None:
-        if (
-            self._backend.nplike.known_data
-            and self._backend.nplike.known_data
-            and self._starts.length != 0
-        ):
+        if self._backend.nplike.known_data and self._starts.length != 0:
             startsmin = self._backend.nplike.min(self._starts.data)
             starts = ak.index.Index(
                 self._starts.data - startsmin, nplike=self._backend.nplike
