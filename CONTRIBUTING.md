@@ -37,12 +37,11 @@ Pull requests that do not meet these expectations may be closed without review.
 
 ### Getting your pull request reviewed
 
-Currently, we have four regular reviewers of pull requests:
+Currently, we have three regular reviewers of pull requests:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
   * Peter Fackeldey ([pfackeldey](https://github.com/pfackeldey))
   * Andres Rios Tascon ([ariostas](https://github.com/ariostas))
-  * Iason Krommydas ([ikrommyd](https://github.com/ikrommyd))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
