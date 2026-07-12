@@ -73,21 +73,19 @@ def _impl(
     behavior,
     attrs,
 ):
-    import pyarrow.feather
+    import pyarrow
+    import pyarrow.ipc
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=r".*pyarrow\.feather\.(write_feather|read_table) is deprecated.*",
-            category=FutureWarning,
+    with pyarrow.memory_map(path, "r") if memory_map else pyarrow.OSFile(path, "rb") as source:
+        reader = pyarrow.ipc.open_file(
+            source,
+            options=pyarrow.ipc.IpcReadOptions(
+                use_threads=use_threads,
+            ),
         )
-
-        arrow_table = pyarrow.feather.read_table(
-            path,
-            columns,
-            use_threads,
-            memory_map,
-        )
+        arrow_table = reader.read_all()
+    if columns is not None:
+        arrow_table = arrow_table.select(columns)
 
     return ak.operations.ak_from_arrow._impl(
         arrow_table,

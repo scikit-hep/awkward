@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-import warnings
+
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -124,7 +124,8 @@ def _impl(
     chunksize,
     feather_version,
 ):
-    import pyarrow.feather
+    import pyarrow
+    import pyarrow.ipc
 
     layout = ak.operations.ak_to_layout._impl(
         array,
@@ -148,29 +149,45 @@ def _impl(
         count_nulls,
     )
 
+
+    if feather_version != 2:
+        raise NotImplementedError(
+            "Only Feather V2 is supported by the IPC prototype."
+        )
+
     if compression is True:
         compression = "zstd"
     elif compression is False or compression is None:
-        compression = "none"
+        compression = None
 
     try:
         destination = os.fsdecode(destination)
     except TypeError:
         raise TypeError(
-            f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
+            f"'destination' argument of 'ak.to_feather' must be a path-like, "
+            f"not {type(destination).__name__} "
+            f"('array' argument is first; 'destination' second)"
         ) from None
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message="pyarrow.feather.write_feather is deprecated.*",
-            category=FutureWarning,
-        )
-        pyarrow.feather.write_feather(
-            table,
-            destination,
-            compression,
-            compression_level,
-            chunksize,
-            feather_version,
-        )
+    if compression is None:
+        codec = None
+    elif compression_level is None:
+        codec = compression
+    else:
+        codec = pyarrow.Codec(compression, compression_level)
+
+    options = pyarrow.ipc.IpcWriteOptions(
+        compression=codec,
+    )
+
+    with pyarrow.OSFile(destination, "wb") as sink:
+        with pyarrow.ipc.new_file(
+            sink,
+            table.schema,
+            options=options,
+        ) as writer:
+            writer.write_table(
+                table,
+                max_chunksize=chunksize,
+            )
+
