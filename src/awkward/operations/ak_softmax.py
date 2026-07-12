@@ -26,7 +26,7 @@ np = NumpyMetadata.instance()
 @high_level_function()
 def softmax(
     x,
-    axis=None,
+    axis=-1,
     *,
     keepdims=False,
     mask_identity=False,
@@ -37,11 +37,12 @@ def softmax(
     """
     Args:
         x: The data on which to compute the softmax (anything #ak.to_layout recognizes).
-        axis (None or int or str): The dimension over which the softmax is
-            computed. If None, the softmax is computed over the innermost
-            dimension. If an int, `0` is the outermost dimension, `1` is the
-            first level of nested lists, etc., and negative values count from
-            the innermost: `-1` is the innermost, `-2` is the next level up, etc.
+        axis (int or str): The dimension over which the softmax is
+            computed (default is `-1`, the innermost dimension). ak.softmax is
+            currently only defined for the innermost axis. If an int, `0` is the
+            outermost dimension, `1` is the first level of nested lists, etc.,
+            and negative values count from the innermost: `-1` is the innermost,
+            `-2` is the next level up, etc.
             If a str, it is interpreted as the name of the axis which maps to
             an int if named axes are present.
             Named axes are attached to an array using #ak.with_named_axis and
@@ -95,6 +96,13 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     # Step 1: Normalize named axis to positional axis
     axis = _named_axis_to_positional_axis(named_axis, axis)
     axis = regularize_axis(axis, none_allowed=True)
+
+    if axis is None:
+        raise ValueError(
+            "ak.softmax requires an explicit axis (it is only defined for "
+            "axis=-1); axis=None is not supported. "
+            "See https://github.com/scikit-hep/awkward/issues/2760"
+        )
 
     x = ctx.wrap(x_layout)
 

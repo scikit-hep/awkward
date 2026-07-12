@@ -217,51 +217,64 @@ def _impl(
             def opener():
                 return _NoContextManager(file)
 
-    try:
-        if line_delimited:
-            if file is None:
-                out = []
-                for datum in jsondata:
-                    out.append(
-                        json.dumps(
-                            datum,
-                            skipkeys=True,
-                            ensure_ascii=True,
-                            check_circular=False,
-                            allow_nan=False,
-                            indent=None,
-                            separators=separators,
-                            default=convert_other,
-                            sort_keys=False,
-                        )
+    if line_delimited:
+        if file is None:
+            out = []
+            for datum in jsondata:
+                out.append(
+                    json.dumps(
+                        datum,
+                        skipkeys=True,
+                        ensure_ascii=True,
+                        check_circular=False,
+                        allow_nan=False,
+                        indent=None,
+                        separators=separators,
+                        default=convert_other,
+                        sort_keys=False,
                     )
-                    out.append(line_delimited)
-                return "".join(out)
-
-            else:
-                with opener() as openfile:
-                    for datum in jsondata:
-                        json.dump(
-                            datum,
-                            openfile,
-                            skipkeys=True,
-                            ensure_ascii=True,
-                            check_circular=False,
-                            allow_nan=False,
-                            indent=None,
-                            separators=separators,
-                            default=convert_other,
-                            sort_keys=False,
-                        )
-                        openfile.write(line_delimited)
+                )
+                out.append(line_delimited)
+            return "".join(out)
 
         else:
-            if isinstance(array, (ak.highlevel.Record, ak.record.Record)):
-                jsondata = jsondata[0]
+            with opener() as openfile:
+                for datum in jsondata:
+                    json.dump(
+                        datum,
+                        openfile,
+                        skipkeys=True,
+                        ensure_ascii=True,
+                        check_circular=False,
+                        allow_nan=False,
+                        indent=None,
+                        separators=separators,
+                        default=convert_other,
+                        sort_keys=False,
+                    )
+                    openfile.write(line_delimited)
 
-            if file is None:
-                return json.dumps(
+    else:
+        if isinstance(array, (ak.highlevel.Record, ak.record.Record)):
+            jsondata = jsondata[0]
+
+        if file is None:
+            return json.dumps(
+                jsondata,
+                skipkeys=True,
+                ensure_ascii=True,
+                check_circular=False,
+                allow_nan=False,
+                indent=num_indent_spaces,
+                separators=separators,
+                default=convert_other,
+                sort_keys=False,
+            )
+        else:
+            with opener() as openfile:
+                return json.dump(
                     jsondata,
+                    openfile,
                     skipkeys=True,
                     ensure_ascii=True,
                     check_circular=False,
@@ -271,23 +284,6 @@ def _impl(
                     default=convert_other,
                     sort_keys=False,
                 )
-            else:
-                with opener() as openfile:
-                    return json.dump(
-                        jsondata,
-                        openfile,
-                        skipkeys=True,
-                        ensure_ascii=True,
-                        check_circular=False,
-                        allow_nan=False,
-                        indent=num_indent_spaces,
-                        separators=separators,
-                        default=convert_other,
-                        sort_keys=False,
-                    )
-
-    except Exception as err:
-        raise err from err
 
 
 class _NoContextManager:
