@@ -3,7 +3,7 @@
 """Internal entry point ``cuda.to_cccl_iterator`` (needs a GPU).
 
 Promotes the internal ``awkward_to_cccl_iterator`` buffer-to-iterator builder
-to a supported API so external cuda.compute code stops hand-extracting buffers
+to a private entry point so cuda.compute code stops hand-extracting buffers
 from ``ak.to_buffers``.  See the follow-up plan, Phase 3.
 """
 
