@@ -99,5 +99,5 @@ def _recursive_call(content, offsets_arr, count):
         )
     else:
         return ak.contents.ListOffsetArray(
-            offsets_arr[count], _recursive_call(content, offsets_arr, count)
+            offsets_arr[count], _recursive_call(content, offsets_arr, count + 1)
         )
