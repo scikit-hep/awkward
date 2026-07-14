@@ -360,7 +360,7 @@ def test_no_fuse_debug_mode_matches_fused_across_battery(arr, arr2):
 
 
 # ----------------------------------------------------------------------
-# Public entry point: cuda.to_cccl_iterator (CPU-visible surface)
+# Internal entry point: cuda.to_cccl_iterator (CPU-visible surface)
 # ----------------------------------------------------------------------
 
 
