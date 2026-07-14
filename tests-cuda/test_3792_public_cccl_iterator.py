@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-"""Public entry point ``cuda.to_cccl_iterator`` (needs a GPU).
+"""Internal entry point ``cuda.to_cccl_iterator`` (needs a GPU).
 
 Promotes the internal ``awkward_to_cccl_iterator`` buffer-to-iterator builder
 to a supported API so external cuda.compute code stops hand-extracting buffers
