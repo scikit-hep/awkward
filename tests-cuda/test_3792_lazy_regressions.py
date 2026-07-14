@@ -48,7 +48,7 @@ def test_listarray_layout_matches_eager(arr, arr_cpu):
     assert _as_list(expr.compute(fuse=True)) == ak.to_list(arr_cpu[[2, 0, 1]] * 2)
 
 
-def test_listarray_public_iterator(arr):
+def test_listarray_iterator(arr):
     carried = arr[[2, 0, 1]]
     it, meta = cuda.to_cccl_iterator(carried)
     assert meta["count"] == 9
