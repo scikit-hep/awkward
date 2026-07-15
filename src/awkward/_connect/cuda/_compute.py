@@ -1345,6 +1345,11 @@ def awkward_ListArray_combinations(
     #      convert from a within-list index to an absolute content index.
     #      For replacement, subtract pos to undo the stars-and-bars shift.
     # -------------------------------------------------------------------------
+    # Coerce `length` to a numpy scalar so the fill_pos closure below is
+    # cache-stable: cuda.compute keys plain Python ints by id() (fresh every
+    # call -> JIT rebuild each call), but numpy scalars by dtype+value.
+    length = np.int64(length)
+
     def make_pass(k, carry_k):
         def fill_pos(g):
             # a) Find source list i via binary search on offsets
