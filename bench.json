@@ -1,0 +1,110 @@
+[
+  {
+    "n_lists": 200000,
+    "n_items": 600016,
+    "rows": [
+      {
+        "case": "chain d=1 ",
+        "elementwise_ops": 2,
+        "fused_regions": 1,
+        "interp_ms": 1.04058301076293,
+        "fused_ms": 0.4342920146882534,
+        "speedup": 2.396044540468672
+      },
+      {
+        "case": "chain d=2 ",
+        "elementwise_ops": 4,
+        "fused_regions": 1,
+        "interp_ms": 2.1305838599801064,
+        "fused_ms": 0.63699996098876,
+        "speedup": 3.3447158405990876
+      },
+      {
+        "case": "chain d=4 ",
+        "elementwise_ops": 8,
+        "fused_regions": 1,
+        "interp_ms": 4.83233411796391,
+        "fused_ms": 0.8798339404165745,
+        "speedup": 5.492325194542902
+      },
+      {
+        "case": "chain d=8 ",
+        "elementwise_ops": 16,
+        "fused_regions": 1,
+        "interp_ms": 10.117833036929369,
+        "fused_ms": 1.5931250527501106,
+        "speedup": 6.350934610854055
+      },
+      {
+        "case": "chain d=16",
+        "elementwise_ops": 32,
+        "fused_regions": 1,
+        "interp_ms": 20.930625032633543,
+        "fused_ms": 2.5713329669088125,
+        "speedup": 8.139990153743401
+      },
+      {
+        "case": "filter pipeline",
+        "elementwise_ops": 3,
+        "fused_regions": 2,
+        "interp_ms": 9.086125064641237,
+        "fused_ms": 7.928499951958656,
+        "speedup": 1.1460080872418497
+      }
+    ]
+  },
+  {
+    "n_lists": 2000000,
+    "n_items": 6001426,
+    "rows": [
+      {
+        "case": "chain d=1 ",
+        "elementwise_ops": 2,
+        "fused_regions": 1,
+        "interp_ms": 5.594583926722407,
+        "fused_ms": 4.643208114430308,
+        "speedup": 1.204896224516705
+      },
+      {
+        "case": "chain d=2 ",
+        "elementwise_ops": 4,
+        "fused_regions": 1,
+        "interp_ms": 14.459582976996899,
+        "fused_ms": 6.918000057339668,
+        "speedup": 2.090139181432352
+      },
+      {
+        "case": "chain d=4 ",
+        "elementwise_ops": 8,
+        "fused_regions": 1,
+        "interp_ms": 23.803000105544925,
+        "fused_ms": 9.93816601112485,
+        "speedup": 2.3951099306350576
+      },
+      {
+        "case": "chain d=8 ",
+        "elementwise_ops": 16,
+        "fused_regions": 1,
+        "interp_ms": 34.70204188488424,
+        "fused_ms": 15.909916022792459,
+        "speedup": 2.1811580799779384
+      },
+      {
+        "case": "chain d=16",
+        "elementwise_ops": 32,
+        "fused_regions": 1,
+        "interp_ms": 60.66358298994601,
+        "fused_ms": 29.04133382253349,
+        "speedup": 2.088870413482058
+      },
+      {
+        "case": "filter pipeline",
+        "elementwise_ops": 3,
+        "fused_regions": 2,
+        "interp_ms": 85.10124986059964,
+        "fused_ms": 85.23133397102356,
+        "speedup": 0.99847375249966
+      }
+    ]
+  }
+]

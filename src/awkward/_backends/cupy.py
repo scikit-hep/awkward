@@ -172,6 +172,11 @@ class CupyBackend(Backend):
             "awkward_UnionArray_regular_index_getsize",
             "awkward_UnionArray_simplify",
             "awkward_UnionArray_validity",
+            # Phase 2 batch 2 (device-side error flags / segmented-rank forms)
+            "awkward_ListArray_getitem_jagged_apply",
+            "awkward_ListArray_getitem_jagged_shrink",
+            "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
+            "awkward_RegularArray_combinations_64",
         )
 
     # ---------------------------------------------------------
@@ -288,6 +293,11 @@ class CupyBackend(Backend):
             "awkward_UnionArray_regular_index_getsize": cuda_compute.awkward_UnionArray_regular_index_getsize,
             "awkward_UnionArray_simplify": cuda_compute.awkward_UnionArray_simplify,
             "awkward_UnionArray_validity": cuda_compute.awkward_UnionArray_validity,
+            # Phase 2 batch 2 (device-side error flags / segmented-rank forms)
+            "awkward_ListArray_getitem_jagged_apply": cuda_compute.awkward_ListArray_getitem_jagged_apply,
+            "awkward_ListArray_getitem_jagged_shrink": cuda_compute.awkward_ListArray_getitem_jagged_shrink,
+            "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64,
+            "awkward_RegularArray_combinations_64": cuda_compute.awkward_RegularArray_combinations_64,
         }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:

@@ -4300,3 +4300,238 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
     raise ValueError(
         "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
     )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 2 batch 2: the error-path and complex kernels.
+#
+# Device-side error flags: instead of an eager cp.any() sync (the Phase-1
+# regression), errors are encoded exactly like the raw kernels' RAISE_ERROR
+# (atomicMin of invocation_index << ERROR_BITS | code into the per-stream
+# err_code) and raised later by the existing synchronize_cuda() machinery.
+# Zero host syncs on the happy path AND on the error path.
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _device_error_channel(kernel_name, messages):
+    """Register an invocation on the current stream and return the error
+    channel for device-side flagging.
+
+    Mirrors CupyKernel's protocol: appends an ``Invocation`` to the stream's
+    context list and returns ``(err_code, base)`` where ``err_code`` is the
+    stream's 0-d uint64 error word and ``base = invocation_index << ERROR_BITS``.
+    ``messages`` registers the error strings for kernels whose ``.cu`` file
+    (the usual source of ``kernel_errors``) may be deleted in Phase 3.
+    """
+    from awkward._connect import cuda as ak_cuda
+
+    stream = cp.cuda.get_current_stream()
+    if stream.ptr not in ak_cuda.cuda_streamptr_to_contexts:
+        ak_cuda.cuda_streamptr_to_contexts[stream.ptr] = (
+            cp.array(ak_cuda.NO_ERROR),
+            [],
+        )
+    err_code, contexts = ak_cuda.cuda_streamptr_to_contexts[stream.ptr]
+    ak_cuda.kernel_errors.setdefault(kernel_name, list(messages))
+    base = len(contexts) * (1 << ak_cuda.ERROR_BITS)
+    contexts.append(ak_cuda.Invocation(kernel_name, None))
+    return err_code, base
+
+
+def _device_flag_errors(err_code, base, masks):
+    """Fold per-element error masks into the stream error word (device-side).
+
+    ``masks`` is an ordered sequence of boolean arrays (index == error code);
+    the minimum encoded value wins, matching atomicMin in RAISE_ERROR.
+    """
+    from awkward._connect import cuda as ak_cuda
+
+    no_error = cp.uint64(ak_cuda.NO_ERROR)
+    cand = None
+    for code, mask in enumerate(masks):
+        if mask is None or mask.size == 0:
+            continue
+        c = cp.where(mask, cp.uint64(base + code), no_error).min()
+        cand = c if cand is None else cp.minimum(cand, c)
+    if cand is not None:
+        cp.minimum(err_code, cand, out=err_code)
+
+
+_JAGGED_APPLY_ERRORS = [
+    "jagged slice's stops[i] < starts[i]",
+    "jagged slice's offsets extend beyond its content",
+    "stops[i] < starts[i]",
+    "stops[i] > len(content)",
+    "index out of range",
+]
+
+
+def awkward_ListArray_getitem_jagged_apply(
+    tooffsets,
+    tocarry,
+    slicestarts,
+    slicestops,
+    sliceouterlen,
+    sliceindex,
+    sliceinnerlen,
+    fromstarts,
+    fromstops,
+    contentlen,
+):
+    err_code, base = _device_error_channel(
+        "awkward_ListArray_getitem_jagged_apply", _JAGGED_APPLY_ERRORS
+    )
+    n = sliceouterlen
+    ss = slicestarts[:n].astype(cp.int64, copy=False)
+    se = slicestops[:n].astype(cp.int64, copy=False)
+    nonempty = ss != se
+    counts_slice = cp.where(nonempty, se - ss, 0)
+    scan = cp.zeros(n + 1, dtype=cp.int64)
+    cp.cumsum(counts_slice, out=scan[1:])
+    tooffsets[: n + 1] = scan
+
+    fs = fromstarts[:n].astype(cp.int64, copy=False)
+    fe = fromstops[:n].astype(cp.int64, copy=False)
+    _device_flag_errors(
+        err_code,
+        base,
+        [
+            nonempty & (se < ss),
+            nonempty & (se > sliceinnerlen),
+            nonempty & (fe < fs),
+            nonempty & (fs != fe) & (fe > contentlen),
+        ],
+    )
+
+    total = int(scan[n])
+    if total == 0:
+        return
+    out_k = cp.arange(total, dtype=cp.int64)
+    i = cp.searchsorted(scan, out_k, side="right") - 1
+    j = ss[i] + (out_k - scan[i])
+    # clamp the gather so a flagged OFF_GET_CON error cannot also crash it;
+    # values on the error path are never observed (synchronize raises first)
+    j_safe = cp.clip(j, 0, max(sliceinnerlen - 1, 0))
+    index = sliceindex[j_safe].astype(cp.int64, copy=False)
+    count_i = fe[i] - fs[i]
+    _device_flag_errors(
+        err_code,
+        base + 4,  # IND_OUT_OF_RANGE is code 4
+        [(index < -count_i) | (index > count_i)],
+    )
+    index = cp.where(index < 0, index + count_i, index)
+    tocarry[:total] = fs[i] + index
+
+
+def awkward_ListArray_getitem_jagged_shrink(
+    tocarry, tosmalloffsets, tolargeoffsets, slicestarts, slicestops, length, missing
+):
+    if length == 0:
+        tosmalloffsets[0] = 0
+        tolargeoffsets[0] = 0
+        return
+    ss = slicestarts[:length].astype(cp.int64, copy=False)
+    se = slicestops[:length].astype(cp.int64, copy=False)
+    large = se - ss
+    base0 = ss[0]
+
+    # flat (row, j) elements over each row's [slicestart, slicestop) range
+    total = int(large.sum())
+    if total > 0:
+        rows = cp.repeat(cp.arange(length, dtype=cp.int64), large)
+        starts_flat = cp.repeat(ss, large)
+        row_scan = cp.zeros(length + 1, dtype=cp.int64)
+        cp.cumsum(large, out=row_scan[1:])
+        intra = cp.arange(total, dtype=cp.int64) - row_scan[rows]
+        jpos = starts_flat + intra
+        keep = missing[jpos] >= 0
+        kept = jpos[keep]
+        tocarry[: kept.size] = kept
+        small = cp.bincount(rows[keep], minlength=length)
+    else:
+        small = cp.zeros(length, dtype=cp.int64)
+
+    tosmalloffsets[0] = base0
+    tolargeoffsets[0] = base0
+    tosmalloffsets[1 : length + 1] = base0 + cp.cumsum(small)
+    tolargeoffsets[1 : length + 1] = base0 + cp.cumsum(large)
+
+
+def awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
+    nummissing,
+    missing,
+    nextshifts,
+    offsets,
+    length,
+    starts,
+    outer_offsets,
+    outlength,
+    maxcount,
+    nextlen,
+    nextcarry,
+):
+    """Rank-based segmented formulation of the per-bin missing counters.
+
+    Key identity: for the element of row ``r`` at column ``j``,
+    ``missing(r, j) = #{r' < r in bin(r) : count(r') <= j}``
+                    ``= local_row_index(r) - rank_of_(r,j)_within_its_(bin,j)_group``
+    because rows with ``count <= j`` (contributors) and rows with
+    ``count > j`` (holders of a (bin, j) element) partition the prior rows.
+    This removes the sequential per-bin state entirely.
+    """
+    # `starts` and `length` are kept for C-API compatibility; bins come from
+    # outer_offsets and rows from offsets.
+    if outlength == 0 or nextlen == 0:
+        nextshifts[:nextlen] = 0
+        return
+    t0 = int(offsets[0])
+    total = int(offsets[length])
+    pos = cp.arange(t0, total, dtype=cp.int64)
+    r = cp.searchsorted(offsets[: length + 1], pos, side="right") - 1
+    j = pos - offsets[r]
+    b = cp.searchsorted(outer_offsets[: outlength + 1], r, side="right") - 1
+    nextbin = b * maxcount + j
+
+    # rank within (bin, j) group, rows ascending == pos ascending
+    perm = cp.lexsort(cp.stack([pos, nextbin]))
+    group_counts = cp.bincount(nextbin, minlength=outlength * maxcount)
+    group_starts = cp.zeros(outlength * maxcount, dtype=cp.int64)
+    cp.cumsum(group_counts[:-1], out=group_starts[1:])
+    rank_sorted = cp.arange(total - t0, dtype=cp.int64) - group_starts[nextbin[perm]]
+    rank = cp.empty_like(rank_sorted)
+    rank[perm] = rank_sorted
+
+    rloc = r - outer_offsets[b]
+    missing[pos] = rloc - rank
+    nextshifts[:nextlen] = missing[nextcarry[:nextlen]]
+
+    # nummissing scratch: final state == last bin's counters,
+    # nummissing[jj] = #{rows in last outer bin with count <= jj}
+    last_lo = int(outer_offsets[outlength - 1])
+    last_hi = int(outer_offsets[outlength])
+    if maxcount > 0 and last_hi > last_lo:
+        c_last = (
+            offsets[last_lo + 1 : last_hi + 1] - offsets[last_lo:last_hi]
+        ).astype(cp.int64, copy=False)
+        hist = cp.bincount(cp.minimum(c_last, maxcount), minlength=maxcount + 1)
+        nummissing[:maxcount] = cp.cumsum(hist)[:maxcount]
+
+
+def awkward_RegularArray_combinations_64(
+    tocarry, toindex, fromindex, n, replacement, size, length
+):
+    if n != 2:
+        raise ValueError(
+            "not implemented for given n in compiled CUDA code "
+            "(awkward_RegularArray_combinations_64)"
+        )
+    i0, j0 = cp.triu_indices(size, k=0 if replacement else 1)
+    npairs = int(i0.size)
+    total = length * npairs
+    toindex[0] = total
+    toindex[1] = total
+    if total == 0:
+        return
+    parents = cp.repeat(cp.arange(length, dtype=cp.int64), npairs) * size
+    tocarry[0][:total] = cp.tile(i0.astype(cp.int64, copy=False), length) + parents
+    tocarry[1][:total] = cp.tile(j0.astype(cp.int64, copy=False), length) + parents

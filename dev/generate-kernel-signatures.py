@@ -54,13 +54,13 @@ cuda_kernels_impl = [
     # "awkward_RegularArray_getitem_jagged_expand",
     # "awkward_ListArray_combinations_length",
     # "awkward_ListArray_combinations",
-    "awkward_RegularArray_combinations_64",
-    "awkward_ListArray_getitem_jagged_apply",
+    # "awkward_RegularArray_combinations_64",  # -> cuda.compute (_compute.py, Phase 2 batch 2)
+    # "awkward_ListArray_getitem_jagged_apply",  # -> cuda.compute (_compute.py, Phase 2 batch 2)
     # "awkward_ListArray_getitem_jagged_carrylen",
     # "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_expand",
     # "awkward_ListArray_getitem_jagged_numvalid",
-    "awkward_ListArray_getitem_jagged_shrink",
+    # "awkward_ListArray_getitem_jagged_shrink",  # -> cuda.compute (_compute.py, Phase 2 batch 2)
     "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
     "awkward_ListArray_getitem_next_at",
