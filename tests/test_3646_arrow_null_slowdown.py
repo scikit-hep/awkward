@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import tracemalloc
+
 import pytest
+
 import awkward as ak
 
 pyarrow = pytest.importorskip("pyarrow")
