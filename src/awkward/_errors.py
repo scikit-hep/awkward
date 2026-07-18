@@ -134,27 +134,26 @@ class ErrorContext:
                 valuestr = f"repr-raised-{type(err).__name__}"
 
         elif isinstance(value, np.ndarray):
-            if not numpy.__version__.startswith("1.13."):  # 'threshold' argument
-                prefix = f"{type(value).__module__}.{type(value).__name__}("
-                suffix = ")"
-                try:
-                    valuestr = numpy.array2string(
-                        value,
-                        max_line_width=width - len(prefix) - len(suffix),
-                        threshold=0,
-                    ).replace("\n", " ")
-                    valuestr = prefix + valuestr + suffix
-                except Exception as err:
-                    valuestr = f"array2string-raised-{type(err).__name__}"
+            prefix = f"{type(value).__module__}.{type(value).__name__}("
+            suffix = ")"
+            try:
+                valuestr = numpy.array2string(
+                    value,
+                    max_line_width=width - len(prefix) - len(suffix),
+                    threshold=0,
+                ).replace("\n", " ")
+                valuestr = prefix + valuestr + suffix
+            except Exception as err:
+                valuestr = f"array2string-raised-{type(err).__name__}"
 
-                if len(valuestr) > width and "..." in valuestr[:-1]:
-                    last = valuestr.rfind("...") + 3
-                    while last > width:
-                        last = valuestr[: last - 3].rfind("...") + 3
-                    valuestr = valuestr[:last]
+            if len(valuestr) > width and "..." in valuestr[:-1]:
+                last = valuestr.rfind("...") + 3
+                while last > width:
+                    last = valuestr[: last - 3].rfind("...") + 3
+                valuestr = valuestr[:last]
 
-                if len(valuestr) > width:
-                    valuestr = valuestr[: width - 3] + "..."
+            if len(valuestr) > width:
+                valuestr = valuestr[: width - 3] + "..."
 
         elif isinstance(value, (Collection, Mapping)) and len(value) < 10000:
             valuestr = repr(value)
@@ -188,12 +187,11 @@ class OperationErrorContext(ErrorContext):
             if backend is None:
                 # Is this an iterable object, and are we permitted to recurse?
                 if isinstance(obj, Collection) and depth != depth_limit:
-                    return self.any_backend_is_delayed(
+                    if self.any_backend_is_delayed(
                         obj, depth=depth + 1, depth_limit=depth_limit
-                    )
-                # Assume not delayed!
-                else:
-                    return False
+                    ):
+                        return True
+                # Assume not delayed! Continue checking remaining args.
             # Eager backends aren't delayed!
             elif backend.nplike.is_eager:
                 continue
