@@ -37,7 +37,7 @@ Pull requests that do not meet these expectations may be closed without review.
 
 ### Getting your pull request reviewed
 
-Currently, we have four regular reviewers of pull requests:
+Currently, we have three regular reviewers of pull requests:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
   * Tai Sakuma ([TaiSakuma](https://github.com/TaiSakuma))
@@ -298,9 +298,10 @@ The `main-v1` branch was split from `main` just before Awkward 1.x code was remo
 
 ### Releases
 
-Currently, only one person can deploy releases:
+Currently, two people can deploy releases:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
+  * Tai Sakuma ([TaiSakuma](https://github.com/TaiSakuma))
 
 There are two kinds of releases: (1) `awkward-cpp` updates, which only occur when the C++ is updated (rare) and involves compilation on many platforms (takes hours), and (2) `awkward` updates, which can happen with any bug-fix. The [releases listed in GitHub](https://github.com/scikit-hep/awkward/releases) are `awkward` releases, not `awkward-cpp`.
 
