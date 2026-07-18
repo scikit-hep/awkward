@@ -42,7 +42,6 @@ Currently, we have four regular reviewers of pull requests:
   * Ianna Osborne ([ianna](https://github.com/ianna))
   * Tai Sakuma ([TaiSakuma](https://github.com/TaiSakuma))
   * Andres Rios Tascon ([ariostas](https://github.com/ariostas))
-  * Iason Krommydas ([ikrommyd](https://github.com/ikrommyd))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
