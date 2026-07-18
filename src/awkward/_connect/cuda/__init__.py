@@ -294,3 +294,83 @@ def synchronize_cuda(stream=None):
                     f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
                 ),
             )
+
+
+def lazy(array):
+    """Wrap a CUDA-backed array for lazy, fused execution.
+
+    Internal entry point (``awkward._connect.cuda.lazy``); not exposed as a
+    public ``ak.*`` name while the lazy/fusion work is a PoC.
+
+    Args:
+        array (ak.Array): A CUDA-backed array.
+
+    Returns a :class:`awkward._connect.lazy._lazy_impl.LazyAwkwardArray`.
+
+    Raises:
+        TypeError: If ``array`` is not on the CUDA backend.
+    """
+    if array.layout.backend.name != "cuda":
+        raise TypeError("cuda.lazy is only available for arrays with the CUDA backend")
+
+    from awkward._connect.lazy._lazy_impl import lazy as _lazy
+
+    return _lazy(array)
+
+
+def to_cccl_iterator(array, *, dtype=None):
+    """Build a ``cuda.compute`` iterator over an Awkward Array (zero-copy).
+
+    This is the public, supported entry point for the recursive
+    form-to-iterator construction that the fusion codegen and the eager CCCL
+    helpers use internally. External ``cuda.compute`` code should call this
+    instead of hand-extracting buffers from ``ak.to_buffers`` and assembling
+    iterators by hand.
+
+    The mapping follows the layout tree:
+
+    - ``NumpyArray`` -> a CuPy buffer;
+    - ``RecordArray`` -> ``ZipIterator`` over the field iterators;
+    - ``IndexedArray`` -> ``PermutationIterator`` over (content, index);
+    - ``ListOffsetArray`` -> the flattened content iterator (offsets returned
+      separately in the metadata).
+
+    Args:
+        array (ak.Array, ak.Record, or ak.contents.Content): Source array. A
+            CUDA-backed array is consumed zero-copy; an array on another backend
+            is moved to the device first.
+        dtype: If given, cast the leaf ``NumpyArray`` buffers to this dtype
+            (e.g. ``numpy.float32``) while building the iterator.
+
+    Returns an ``(iterator, metadata)`` tuple. ``iterator`` is a
+    ``cuda.compute`` iterator (or CuPy buffer for a bare ``NumpyArray``);
+    ``metadata`` is a dict ``{"form", "buffers", "offsets", "length", "count"}``
+    where ``offsets`` is the list offsets as an ``int64`` CuPy array (or
+    ``None`` for a non-list array), ``length`` is the top-level length, and
+    ``count`` is the total number of items across all sublists.
+
+    Raises:
+        ModuleNotFoundError: If ``cupy`` is not installed.
+
+    Internal entry point (``awkward._connect.cuda.to_cccl_iterator``); not
+    exposed as a public ``ak.*`` name while the lazy/fusion work is a PoC.
+
+    Examples:
+        >>> import awkward as ak
+        >>> from awkward._connect import cuda
+        >>> arr = ak.Array([[1.0, 2.0, 3.0], [4.0, 5.0]], backend="cuda")
+        >>> it, meta = cuda.to_cccl_iterator(arr)
+        >>> meta["count"], len(meta["offsets"])
+        (5, 3)
+    """
+    if cupy is None:
+        raise ModuleNotFoundError(
+            error_message.format("awkward._connect.cuda.to_cccl_iterator")
+        )
+
+    from awkward._connect.cuda.helpers import awkward_to_cccl_iterator
+
+    return awkward_to_cccl_iterator(array, dtype=dtype)
+
+
+__all__ = ("lazy", "to_cccl_iterator")
