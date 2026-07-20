@@ -942,6 +942,17 @@ def test_transient_attrs_not_written(tmp_path):
     assert ak.from_parquet(filename).attrs == {"property": "value"}
 
 
+def test_explicit_attrs_take_precedence(generate_datafiles):
+    # both files store {"property": "value"}, which the caller asks to override
+    path, _mdlist, _fs = generate_datafiles
+
+    one_file = ak.from_parquet(f"{path}/data1.parq", attrs={"property": "other"})
+    assert one_file.attrs == {"property": "other"}
+
+    both_files = ak.from_parquet(path, attrs={"property": "other"})
+    assert both_files.attrs == {"property": "other"}
+
+
 def test_attrs_without_extensionarray(tmp_path):
     # here the table has no schema metadata for the attrs to be merged into
     array = ak.from_iter([[1, 2, 3], [4, 5]], attrs={"property": "value"})

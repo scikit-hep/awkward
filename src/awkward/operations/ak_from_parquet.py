@@ -270,7 +270,7 @@ def _load(
         return wrap_layout(
             arrays[0],
             highlevel=highlevel,
-            attrs=(attrs if attrs else {}) | arrays[0].attrs,
+            attrs=arrays[0].attrs | (attrs if attrs else {}),
             behavior=behavior,
         )
     else:
@@ -281,7 +281,7 @@ def _load(
         file_attrs = {}
         for array in arrays:
             file_attrs |= getattr(array, "attrs", None) or {}
-        merged_attrs = (attrs if attrs else {}) | file_attrs
+        merged_attrs = file_attrs | (attrs if attrs else {})
         return ak.operations.ak_concatenate._impl(
             arrays,
             axis=0,
