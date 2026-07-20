@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import base64
+import numbers
 import os
+import re
 import struct
 import sys
 from collections.abc import Collection
@@ -27,6 +29,55 @@ kMaxUInt32 = 4294967295  # 2**32 - 1
 kMaxInt64 = 9223372036854775806  # 2**63 - 2: see below
 kSliceNone = kMaxInt64 + 1  # for Slice::none()
 kMaxLevels = 48
+
+
+_memory_size_pattern = re.compile(
+    r"^\s*([+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?)\s*([kmgtpezy]?i?b)\s*$",
+    re.I,
+)
+
+_memory_size_units = {
+    "B": 1,
+    "KB": 1000,
+    "MB": 1000**2,
+    "GB": 1000**3,
+    "TB": 1000**4,
+    "PB": 1000**5,
+    "EB": 1000**6,
+    "ZB": 1000**7,
+    "YB": 1000**8,
+    "KIB": 1024,
+    "MIB": 1024**2,
+    "GIB": 1024**3,
+    "TIB": 1024**4,
+    "PIB": 1024**5,
+    "EIB": 1024**6,
+    "ZIB": 1024**7,
+    "YIB": 1024**8,
+}
+
+
+def parse_memory_size(data) -> int:
+    """
+    Regularizes strings like ``'## kB'`` and plain integer numbers of bytes to
+    an integer number of bytes.
+
+    Both decimal (``kB``, ``MB``, ``GB``, ...) and binary (``kiB``, ``MiB``,
+    ``GiB``, ...) unit prefixes are recognized, case-insensitively.
+    """
+    if isinstance(data, str):
+        match = _memory_size_pattern.match(data)
+        if match is not None:
+            target, unit = float(match.group(1)), match.group(5).upper()
+            return int(target * _memory_size_units[unit])
+
+    elif not isinstance(data, bool) and isinstance(data, numbers.Integral):
+        return int(data)
+
+    raise TypeError(
+        "a number of bytes or a memory-size string with units "
+        f"(such as '100 MiB') is required, not {data!r}"
+    )
 
 
 def in_module(obj, modulename: str) -> bool:

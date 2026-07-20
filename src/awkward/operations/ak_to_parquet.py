@@ -91,8 +91,12 @@ def to_parquet(
             Compression levels have different meanings for different compression
             algorithms: GZIP ranges from 1 to 9, but ZSTD ranges from -7 to 22, for
             example. Generally, higher numbers provide slower but smaller compression.
-        row_group_size (int or None): Maximum number of rows in each row group,
-            passed to [pyarrow.parquet.ParquetWriter.write_table](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html#pyarrow.parquet.ParquetWriter.write_table).
+        row_group_size (int, str, or None): If an integer, the maximum number of
+            rows in each row group; if a string, the maximum memory size of each
+            row group. The string must be a number followed by a memory unit, such
+            as `"100 MB"`, and is converted into the number of rows that fit into
+            that many bytes based on the in-memory size of the data. Passed to
+            [pyarrow.parquet.ParquetWriter.write_table](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html#pyarrow.parquet.ParquetWriter.write_table).
             If None, PyArrow's default of at most 1024 * 1024 rows is used.
         data_page_size (None or int): Number of bytes in each data page, passed to
             [pyarrow.parquet.ParquetWriter](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html).
@@ -445,11 +449,17 @@ def _impl(
     ) as writer:
         try:
             if not write_iteratively:
-                writer.write_table(table, row_group_size=row_group_size)
+                writer.write_table(
+                    table,
+                    row_group_size=_row_group_size_for_table(row_group_size, table),
+                )
 
             else:
                 # this `table` is JUST for the first array
-                writer.write_table(table, row_group_size=row_group_size)
+                writer.write_table(
+                    table,
+                    row_group_size=_row_group_size_for_table(row_group_size, table),
+                )
 
                 # this `data` is an iterator (not iterable), starting AFTER the first array
                 # a `for` loop implicitly calls `next` and stops at `StopIteration`
@@ -457,7 +467,10 @@ def _impl(
                     layout, table = get_layout_and_table(item)
                     if extensionarray:
                         table = convert_awkward_arrow_table_to_native(table)
-                    writer.write_table(table, row_group_size=row_group_size)
+                    writer.write_table(
+                        table,
+                        row_group_size=_row_group_size_for_table(row_group_size, table),
+                    )
 
         finally:
             # ensure that the ParquetWriter is closed for iterative and non-iterative cases
@@ -466,6 +479,28 @@ def _impl(
     meta = metalist[0]
     meta.set_file_path(destination.rsplit("/", 1)[-1])
     return meta
+
+
+def _row_group_size_for_table(row_group_size, table):
+    """Translate a `row_group_size` argument into a number of rows for `table`.
+
+    If `row_group_size` is an integer (a number of rows) or None, it is returned
+    unchanged. If it is a memory-size string (such as `"100 MiB"`), it is
+    converted into the number of rows of `table` that fit into that many bytes,
+    based on the table's in-memory size.
+    """
+    if row_group_size is None or not isinstance(row_group_size, str):
+        return row_group_size
+
+    target_num_bytes = ak._util.parse_memory_size(row_group_size)
+
+    num_rows = table.num_rows
+    num_bytes = table.nbytes
+    if num_rows == 0 or num_bytes == 0:
+        # nothing to size against; let PyArrow use its default
+        return None
+
+    return max(1, round(target_num_bytes * num_rows / num_bytes))
 
 
 def write_metadata(dir_path, fs, *metas, global_metadata=True):
