@@ -43,7 +43,7 @@ from awkward.contents.content import (
 from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.indexedform import IndexedForm
-from awkward.index import Index, resolve_index
+from awkward.index import Index
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -454,7 +454,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         if mask is not None:
             if self._backend.nplike.known_data and self._index.length != mask.length:
                 raise ValueError(
-                    f"mask length ({mask.length()}) is not equal to {type(self).__name__} length ({self._index.length})"
+                    f"mask length ({mask.length}) is not equal to {type(self).__name__} length ({self._index.length})"
                 )
             nextindex = ak.index.Index64.empty(self._index.length, self._backend.nplike)
             assert (
@@ -743,50 +743,11 @@ class IndexedArray(IndexedMeta[Content], Content):
         else:
             return self.project()._local_index(axis, depth)
 
-    def _unique_index(self, index, sorted=True):
-        next = ak.index.Index64.zeros(self.length, nplike=self._backend.nplike)
-        length = ak.index.Index64.zeros(1, nplike=self._backend.nplike)
-
-        if not sorted:
-            next = self._index
-            offsets = ak.index.Index64.empty(2, self._backend.nplike)
-            offsets[0] = 0
-            offsets[1] = next.length
-            assert (
-                next.nplike is self._backend.nplike
-                and offsets.nplike is self._backend.nplike
-            )
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_sort",
-                    next.dtype.type,
-                    next.dtype.type,
-                    offsets.dtype.type,
-                ](
-                    next.data,
-                    next.data,
-                    offsets[1],
-                    offsets.data,
-                    2,
-                    offsets[1],
-                    True,
-                    False,
-                )
-            )
-
-        assert (
-            self._index.nplike is self._backend.nplike
-            and next.nplike is self._backend.nplike
-            and length.nplike is self._backend.nplike
-        )
-
-        next = ak.index.Index64(
-            self._backend.nplike.unique_values(self._index),
+    def _unique_index(self):
+        return ak.index.Index64(
+            self._backend.nplike.unique_values(self._index.data),
             nplike=self._backend.nplike,
         )
-        length[0] = next.data.size
-
-        return next[0 : length[0]]
 
     def _numbers_to_type(self, name, including_unknown):
         return ak.contents.IndexedArray(
@@ -795,161 +756,39 @@ class IndexedArray(IndexedMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return True
 
-        nextindex = self._unique_index(self._index)
+        nextindex = self._unique_index()
 
         if len(nextindex) != len(self._index):
             return False
 
         next = self._content._carry(nextindex, False)
-        return next._is_unique(negaxis, starts, parents, offsets, outlength)
+        return next._is_unique(negaxis, starts, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         if self._index.length is not unknown_length and self._index.length == 0:
             return self
-
-        branch, depth = self.branch_depth
-
-        parents = resolve_index(parents, self._backend)
-
-        index_length = self._index.length
-        parents_length = parents.length
-        next_length = index_length
-
-        nextcarry = ak.index.Index64.empty(index_length, self._backend.nplike)
-        nextparents = ak.index.Index64.empty(index_length, self._backend.nplike)
-        outindex = ak.index.Index64.empty(index_length, self._backend.nplike)
-        assert (
-            nextcarry.nplike is self._backend.nplike
-            and nextparents.nplike is self._backend.nplike
-            and outindex.nplike is self._backend.nplike
-            and self._index.nplike is self._backend.nplike
-            and parents.nplike is self._backend.nplike
-        )
-        self._backend.maybe_kernel_error(
-            self._backend[
-                "awkward_IndexedArray_reduce_next_64",
-                nextcarry.dtype.type,
-                nextparents.dtype.type,
-                outindex.dtype.type,
-                self._index.dtype.type,
-                parents.dtype.type,
-            ](
-                nextcarry.data,
-                nextparents.data,
-                outindex.data,
-                self._index.data,
-                parents.data,
-                index_length,
-            )
-        )
-        next = self._content._carry(nextcarry, False)
-        unique = next._unique(
-            negaxis,
-            starts,
-            nextparents,
-            offsets,
-            outlength,
-        )
-
-        if branch or (negaxis is not None and negaxis != depth):
-            nextoutindex = ak.index.Index64.empty(parents_length, self._backend.nplike)
-            assert (
-                nextoutindex.nplike is self._backend.nplike
-                and starts.nplike is self._backend.nplike
-                and parents.nplike is self._backend.nplike
-                and nextparents.nplike is self._backend.nplike
-            )
-
-            self._backend.maybe_kernel_error(
-                self._backend[
-                    "awkward_IndexedArray_local_preparenext_64",
-                    nextoutindex.dtype.type,
-                    starts.dtype.type,
-                    parents.dtype.type,
-                    nextparents.dtype.type,
-                ](
-                    nextoutindex.data,
-                    starts.data,
-                    parents.data,
-                    parents_length,
-                    nextparents.data,
-                    next_length,
-                )
-            )
-
-            return ak.contents.IndexedOptionArray.simplified(
-                nextoutindex, unique, parameters=self._parameters
-            )
-
-        if not branch and negaxis == depth:
-            return unique
-        else:
-            if isinstance(unique, ak.contents.RegularArray):
-                unique = unique.to_ListOffsetArray64(True)
-
-            if isinstance(unique, ak.contents.ListOffsetArray):
-                if starts.nplike.known_data and starts.length > 0 and starts[0] != 0:
-                    raise AssertionError(
-                        "reduce_next with unbranching depth > negaxis expects a "
-                        f"ListOffsetArray64 whose offsets start at zero ({starts[0]})"
-                    )
-
-                outoffsets = ak.index.Index64.empty(
-                    starts.length + 1, self._backend.nplike
-                )
-                assert (
-                    outoffsets.nplike is self._backend.nplike
-                    and starts.nplike is self._backend.nplike
-                )
-                self._backend.maybe_kernel_error(
-                    self._backend[
-                        "awkward_IndexedArray_reduce_next_fix_offsets_64",
-                        outoffsets.dtype.type,
-                        starts.dtype.type,
-                    ](
-                        outoffsets.data,
-                        starts.data,
-                        starts.length,
-                        self._index.length,
-                    )
-                )
-
-                tmp = ak.contents.IndexedArray(
-                    outindex, unique._content, parameters=None
-                )
-
-                return ak.contents.ListOffsetArray(outoffsets, tmp, parameters=None)
-
-            elif isinstance(unique, ak.contents.NumpyArray):
-                nextoutindex = ak.index.Index64(
-                    self._backend.nplike.arange(unique.length, dtype=np.int64),
-                    nplike=self._backend.nplike,
-                )
-                return ak.contents.IndexedOptionArray.simplified(
-                    nextoutindex, unique, parameters=self._parameters
-                )
-
-        raise NotImplementedError
+        # IndexedArray (non-Option) has no -1 entries, so we don't need the
+        # parents-filtering machinery the IndexedOptionArray version uses;
+        # just project through the index and delegate. This matches the
+        # delegation pattern used by _argsort_next, _sort_next, _reduce_next.
+        next = self._content._carry(self._index, False)
+        return next._unique(negaxis, starts, offsets, outlength)
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         next = self._content._carry(self._index, False)
         return next._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         next = self._content._carry(self._index, False)
-        return next._sort_next(
-            negaxis, starts, parents, offsets, outlength, ascending, stable
-        )
+        return next._sort_next(negaxis, starts, offsets, outlength, ascending, stable)
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
         posaxis = maybe_posaxis(self, axis, depth)
@@ -966,7 +805,6 @@ class IndexedArray(IndexedMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -979,7 +817,6 @@ class IndexedArray(IndexedMeta[Content], Content):
             negaxis,
             starts,
             shifts,
-            parents,
             offsets,
             outlength,
             mask,
@@ -1114,11 +951,7 @@ class IndexedArray(IndexedMeta[Content], Content):
         lateral_context: Mapping[str, Any] | None,
         options: ApplyActionOptions,
     ) -> Content | None:
-        if (
-            self._backend.nplike.known_data
-            and self._backend.nplike.known_data
-            and self._index.length != 0
-        ):
+        if self._backend.nplike.known_data and self._index.length != 0:
             npindex = self._index.data
             indexmin = self._backend.nplike.min(npindex)
             indexmax = self._backend.nplike.max(npindex)

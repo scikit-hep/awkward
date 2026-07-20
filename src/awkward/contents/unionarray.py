@@ -115,10 +115,14 @@ class UnionArray(UnionMeta[Content], Content):
                 f"{type(self).__name__} 'tags' must be an Index with dtype=int8, not {tags!r}"
             )
 
-        if not isinstance(index, Index) and index.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not (
+            isinstance(index, Index)
+            and index.dtype
+            in (
+                np.dtype(np.int32),
+                np.dtype(np.uint32),
+                np.dtype(np.int64),
+            )
         ):
             raise TypeError(
                 f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
@@ -451,7 +455,7 @@ class UnionArray(UnionMeta[Content], Content):
 
                 if isinstance(backend.nplike, Jax):
                     # function-composition of this part of the UnionArray.index with the IndexedArray.index
-                    index._data = content.index.data.at[selection].set(
+                    index._data = index.data.at[selection].set(
                         content.index.data[index.data[selection]]
                     )
                     # now we don't have an IndexedArray anymore, but we want to preserve its parameters
@@ -585,8 +589,8 @@ class UnionArray(UnionMeta[Content], Content):
         return self._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._tags, PlaceholderArray) or isinstance(
-            self._index, PlaceholderArray
+        if isinstance(self._tags.data, PlaceholderArray) or isinstance(
+            self._index.data, PlaceholderArray
         ):
             return True
         for content in self._contents:
@@ -1381,7 +1385,7 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         simplified = type(self).simplified(
             self._tags,
             self._index,
@@ -1392,9 +1396,9 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(simplified, ak.contents.UnionArray):
             raise ValueError("cannot check if an irreducible UnionArray is unique")
 
-        return simplified._is_unique(negaxis, starts, parents, offsets, outlength)
+        return simplified._is_unique(negaxis, starts, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         simplified = type(self).simplified(
             self._tags,
             self._index,
@@ -1405,10 +1409,10 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(simplified, ak.contents.UnionArray):
             raise ValueError("cannot make a unique irreducible UnionArray")
 
-        return simplified._unique(negaxis, starts, parents, offsets, outlength)
+        return simplified._unique(negaxis, starts, offsets, outlength)
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         simplified = type(self).simplified(
             self._tags,
@@ -1428,12 +1432,10 @@ class UnionArray(UnionMeta[Content], Content):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
         return simplified._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         if self.length is not unknown_length and self.length == 0:
             return self
 
@@ -1451,7 +1453,7 @@ class UnionArray(UnionMeta[Content], Content):
             raise ValueError("cannot sort an irreducible UnionArray")
 
         return simplified._sort_next(
-            negaxis, starts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
 
     def _reduce_next(
@@ -1460,7 +1462,6 @@ class UnionArray(UnionMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -1643,6 +1644,60 @@ class UnionArray(UnionMeta[Content], Content):
             return out
 
         # backends with concrete data
+        nplike = self._backend.nplike
+        tags = self._tags.data
+        index = self._index.data[: self._tags.length]
+
+        # Fast path: recurse once per content rather than once per element,
+        # restoring the original interleaving with a stable argsort over a
+        # broadcast position marker flattened through the *same* recursion as
+        # the values (so per-leaf dropping, e.g. ``drop_nones``, applies
+        # identically). Only valid when every content flattens to a single
+        # mergeable ``NumpyArray``: multi-part contents (records) and whole-kept
+        # contents (strings) are order-sensitive in ways the reorder cannot
+        # reproduce, so they fall back to the element-wise loop below.
+        if not options["keepdims"]:
+            value_parts: list[Content] = []
+            position_parts: list[Content] = []
+            fast_path = True
+            for tag in range(len(self._contents)):
+                selection = tags == tag
+                sub = self._contents[tag]._carry(
+                    ak.index.Index(index[selection]), False
+                )
+                sub_parts = sub._remove_structure(backend, options)
+                if len(sub_parts) != 1 or not isinstance(
+                    sub_parts[0], ak.contents.NumpyArray
+                ):
+                    fast_path = False
+                    break
+
+                positions = nplike.nonzero(selection)[0]
+                marker = ak.operations.broadcast_arrays(
+                    sub,
+                    ak.contents.NumpyArray(positions, backend=backend),
+                    highlevel=False,
+                )[1]
+                marker_parts = marker._remove_structure(backend, options)
+                if len(marker_parts) != 1 or not isinstance(
+                    marker_parts[0], ak.contents.NumpyArray
+                ):
+                    fast_path = False
+                    break
+
+                value_parts.append(sub_parts[0])
+                position_parts.append(marker_parts[0])
+
+            if fast_path:
+                if len(value_parts) == 0:
+                    return out
+                merged_values = ak._do.mergemany(value_parts)
+                merged_positions = nplike.concat([part.data for part in position_parts])
+                order = nplike._module.argsort(merged_positions, kind="stable")
+                out.append(merged_values._carry(ak.index.Index(order), False))
+                return out
+
+        # Fallback: order-sensitive multi-part / string contents.
         for i in range(self._tags.length):
             content = (
                 self._contents[self._tags[i]]

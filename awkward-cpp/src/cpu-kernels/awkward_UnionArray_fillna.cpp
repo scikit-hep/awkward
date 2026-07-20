@@ -6,8 +6,8 @@
 
 template <typename T, typename C>
 ERROR awkward_UnionArray_fillna(
-  T* toindex,
-  const C* fromindex,
+  T* __restrict__ toindex,
+  const C* __restrict__ fromindex,
   int64_t length) {
   for (int64_t i = 0; i < length; i++)
   {
@@ -15,30 +15,12 @@ ERROR awkward_UnionArray_fillna(
   }
   return success();
 }
-ERROR awkward_UnionArray_fillna_from32_to64(
-  int64_t* toindex,
-  const int32_t* fromindex,
-  int64_t length) {
-  return awkward_UnionArray_fillna<int64_t, int32_t>(
-    toindex,
-    fromindex,
-    length);
-}
-ERROR awkward_UnionArray_fillna_fromU32_to64(
-  int64_t* toindex,
-  const uint32_t* fromindex,
-  int64_t length) {
-  return awkward_UnionArray_fillna<int64_t, uint32_t>(
-    toindex,
-    fromindex,
-    length);
-}
-ERROR awkward_UnionArray_fillna_from64_to64(
-  int64_t* toindex,
-  const int64_t* fromindex,
-  int64_t length) {
-  return awkward_UnionArray_fillna<int64_t, int64_t>(
-    toindex,
-    fromindex,
-    length);
-}
+
+#define WRAPPER(FUNC, T, C) \
+  ERROR FUNC(T* toindex, const C* fromindex, int64_t length) { \
+    return awkward_UnionArray_fillna<T, C>(toindex, fromindex, length); \
+  }
+
+WRAPPER(awkward_UnionArray_fillna_from32_to64, int64_t, int32_t)
+WRAPPER(awkward_UnionArray_fillna_fromU32_to64, int64_t, uint32_t)
+WRAPPER(awkward_UnionArray_fillna_from64_to64, int64_t, int64_t)

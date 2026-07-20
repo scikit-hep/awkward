@@ -25,7 +25,7 @@ jobs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           submodules: true
           fetch-depth: 0
@@ -47,7 +47,7 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         submodules: true
         persist-credentials: false
@@ -92,23 +92,23 @@ jobs:
           arch: auto64
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         submodules: true
         persist-credentials: false
 
     - name: Python 3.12
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
       with:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
 
     - name: Prepare build files
       run: pipx run nox -s prepare
 
-    - uses: pypa/cibuildwheel@8d2b08b68458a16aeb24b64e68a09ab1c8e82084 # v3.4.1
+    - uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v4.1.0
       env:
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
@@ -123,6 +123,41 @@ jobs:
         name: awkward-cpp-wheels-${{ matrix.os }}-${{ matrix.arch }}
         path: wheelhouse/*.whl
 
+  build_pyodide_wheels:
+    needs: [determine-source-date-epoch]
+    name: "Wheel awkward-cpp: pyodide"
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
+
+    steps:
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+        submodules: true
+        persist-credentials: false
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+
+    - name: Prepare build files
+      run: pipx run nox -s prepare
+
+    - uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v4.1.0
+      env:
+        CIBW_PLATFORM: pyodide
+      with:
+        package-dir: awkward-cpp
+
+    - name: Check metadata
+      run: pipx run twine check wheelhouse/*.whl
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: awkward-cpp-wheels-pyodide
+        path: wheelhouse/*.whl
+
   build_awkward_wheel:
     name: "Build awkward sdist and wheel"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
@@ -131,13 +166,13 @@ jobs:
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         submodules: true
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
 
     - name: Prepare build files
       run: pipx run nox -s prepare

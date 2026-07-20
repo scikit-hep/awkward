@@ -37,12 +37,11 @@ Pull requests that do not meet these expectations may be closed without review.
 
 ### Getting your pull request reviewed
 
-Currently, we have four regular reviewers of pull requests:
+Currently, we have three regular reviewers of pull requests:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
-  * Peter Fackeldey ([pfackeldey](https://github.com/pfackeldey))
+  * Tai Sakuma ([TaiSakuma](https://github.com/TaiSakuma))
   * Andres Rios Tascon ([ariostas](https://github.com/ariostas))
-  * Iason Krommydas ([ikrommyd](https://github.com/ikrommyd))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
@@ -299,9 +298,10 @@ The `main-v1` branch was split from `main` just before Awkward 1.x code was remo
 
 ### Releases
 
-Currently, only one person can deploy releases:
+Currently, two people can deploy releases:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
+  * Tai Sakuma ([TaiSakuma](https://github.com/TaiSakuma))
 
 There are two kinds of releases: (1) `awkward-cpp` updates, which only occur when the C++ is updated (rare) and involves compilation on many platforms (takes hours), and (2) `awkward` updates, which can happen with any bug-fix. The [releases listed in GitHub](https://github.com/scikit-hep/awkward/releases) are `awkward` releases, not `awkward-cpp`.
 
@@ -316,7 +316,7 @@ To make an `awkward-cpp` release:
 #### `awkward` releases
 To make an `awkward` release:
 1. A commit to `main` should increase the version number in `pyproject.toml`
-2. A new GitHub release must be published.
+2. A new GitHub release must be published. "Generate release notes" produces categorized notes automatically: a workflow labels each PR `type/<type>` from its conventional-commit title, and `.github/release.yml` groups those labels into sections.
 3. A `docs/switcher.json` entry must be added for new minor/major versions.
 
 Pushes that modify `docs/switcher.json` on `main` will automatically be synchronised with AWS.

@@ -6,11 +6,11 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_broadcast_tooffsets(
-  T* tocarry,
-  const T* fromoffsets,
+  T* __restrict__ tocarry,
+  const T* __restrict__ fromoffsets,
   int64_t offsetslength,
-  const C* fromstarts,
-  const C* fromstops,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lencontent) {
   int64_t k = 0;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
@@ -33,48 +33,12 @@ ERROR awkward_ListArray_broadcast_tooffsets(
   }
   return success();
 }
-ERROR awkward_ListArray32_broadcast_tooffsets_64(
-  int64_t* tocarry,
-  const int64_t* fromoffsets,
-  int64_t offsetslength,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t lencontent) {
-  return awkward_ListArray_broadcast_tooffsets<int32_t, int64_t>(
-    tocarry,
-    fromoffsets,
-    offsetslength,
-    fromstarts,
-    fromstops,
-    lencontent);
-}
-ERROR awkward_ListArrayU32_broadcast_tooffsets_64(
-  int64_t* tocarry,
-  const int64_t* fromoffsets,
-  int64_t offsetslength,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t lencontent) {
-  return awkward_ListArray_broadcast_tooffsets<uint32_t, int64_t>(
-    tocarry,
-    fromoffsets,
-    offsetslength,
-    fromstarts,
-    fromstops,
-    lencontent);
-}
-ERROR awkward_ListArray64_broadcast_tooffsets_64(
-  int64_t* tocarry,
-  const int64_t* fromoffsets,
-  int64_t offsetslength,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t lencontent) {
-  return awkward_ListArray_broadcast_tooffsets<int64_t, int64_t>(
-    tocarry,
-    fromoffsets,
-    offsetslength,
-    fromstarts,
-    fromstops,
-    lencontent);
-}
+
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tocarry, const T* fromoffsets, int64_t offsetslength, const C* fromstarts, const C* fromstops, int64_t lencontent) { \
+    return awkward_ListArray_broadcast_tooffsets<C, T>(tocarry, fromoffsets, offsetslength, fromstarts, fromstops, lencontent); \
+  }
+
+WRAPPER(awkward_ListArray32_broadcast_tooffsets_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_broadcast_tooffsets_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_broadcast_tooffsets_64, int64_t, int64_t)

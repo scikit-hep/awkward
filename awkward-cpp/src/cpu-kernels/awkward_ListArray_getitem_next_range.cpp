@@ -7,10 +7,10 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_next_range(
-  C* tooffsets,
-  T* tocarry,
-  const C* fromstarts,
-  const C* fromstops,
+  C* __restrict__ tooffsets,
+  T* __restrict__ tocarry,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lenstarts,
   int64_t start,
   int64_t stop,
@@ -40,60 +40,12 @@ ERROR awkward_ListArray_getitem_next_range(
   }
   return success();
 }
-ERROR awkward_ListArray32_getitem_next_range_64(
-  int32_t* tooffsets,
-  int64_t* tocarry,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t lenstarts,
-  int64_t start,
-  int64_t stop,
-  int64_t step) {
-  return awkward_ListArray_getitem_next_range<int32_t, int64_t>(
-    tooffsets,
-    tocarry,
-    fromstarts,
-    fromstops,
-    lenstarts,
-    start,
-    stop,
-    step);
-}
-ERROR awkward_ListArrayU32_getitem_next_range_64(
-  uint32_t* tooffsets,
-  int64_t* tocarry,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t lenstarts,
-  int64_t start,
-  int64_t stop,
-  int64_t step) {
-  return awkward_ListArray_getitem_next_range<uint32_t, int64_t>(
-    tooffsets,
-    tocarry,
-    fromstarts,
-    fromstops,
-    lenstarts,
-    start,
-    stop,
-    step);
-}
-ERROR awkward_ListArray64_getitem_next_range_64(
-  int64_t* tooffsets,
-  int64_t* tocarry,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t lenstarts,
-  int64_t start,
-  int64_t stop,
-  int64_t step) {
-  return awkward_ListArray_getitem_next_range<int64_t, int64_t>(
-    tooffsets,
-    tocarry,
-    fromstarts,
-    fromstops,
-    lenstarts,
-    start,
-    stop,
-    step);
-}
+
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(C* tooffsets, T* tocarry, const C* fromstarts, const C* fromstops, int64_t lenstarts, int64_t start, int64_t stop, int64_t step) { \
+    return awkward_ListArray_getitem_next_range<C, T>(tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step); \
+  }
+
+WRAPPER(awkward_ListArray32_getitem_next_range_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_getitem_next_range_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_getitem_next_range_64, int64_t, int64_t)

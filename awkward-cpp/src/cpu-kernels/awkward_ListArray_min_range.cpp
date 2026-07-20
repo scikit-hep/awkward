@@ -6,9 +6,9 @@
 
 template <typename C>
 ERROR awkward_ListArray_min_range(
-  int64_t* tomin,
-  const C* fromstarts,
-  const C* fromstops,
+  int64_t* __restrict__ tomin,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t lenstarts) {
   int64_t shorter = fromstops[0] - fromstarts[0];
   for (int64_t i = 1;  i < lenstarts;  i++) {
@@ -18,36 +18,12 @@ ERROR awkward_ListArray_min_range(
   *tomin = shorter;
   return success();
 }
-ERROR awkward_ListArray32_min_range(
-  int64_t* tomin,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t lenstarts) {
-  return awkward_ListArray_min_range<int32_t>(
-    tomin,
-    fromstarts,
-    fromstops,
-    lenstarts);
-}
-ERROR awkward_ListArrayU32_min_range(
-  int64_t* tomin,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t lenstarts) {
-  return awkward_ListArray_min_range<uint32_t>(
-    tomin,
-    fromstarts,
-    fromstops,
-    lenstarts);
-}
-ERROR awkward_ListArray64_min_range(
-  int64_t* tomin,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t lenstarts) {
-  return awkward_ListArray_min_range<int64_t>(
-    tomin,
-    fromstarts,
-    fromstops,
-    lenstarts);
-}
+
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t* tomin, const C* fromstarts, const C* fromstops, int64_t lenstarts) { \
+    return awkward_ListArray_min_range<C>(tomin, fromstarts, fromstops, lenstarts); \
+  }
+
+WRAPPER(awkward_ListArray32_min_range, int32_t)
+WRAPPER(awkward_ListArrayU32_min_range, uint32_t)
+WRAPPER(awkward_ListArray64_min_range, int64_t)

@@ -59,8 +59,8 @@ def argcartesian(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of data from a set of
-        `arrays`, like #ak.cartesian, but returning integer indexes for
+        An array of integer indexes into the Cartesian product (i.e. cross product)
+        of a set of `arrays`, like #ak.cartesian but for use with
         #ak.Array.__getitem__.
 
     Examples:
@@ -118,7 +118,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
     if isinstance(arrays, Mapping):
         index_arrays = {n: ak.local_index(x, axis) for n, x in arrays.items()}
     else:
-        index_arrays = [ak.local_index(x) for x in arrays]
+        index_arrays = [ak.local_index(x, axis) for x in arrays]
 
     if with_name is not None:
         if parameters is None:

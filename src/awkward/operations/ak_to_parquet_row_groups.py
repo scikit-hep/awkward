@@ -20,10 +20,10 @@ def to_parquet_row_groups(
     count_nulls=True,
     compression="zstd",
     compression_level=None,
-    row_group_size=64 * 1024 * 1024,
+    row_group_size=None,
     data_page_size=None,
     parquet_flavor=None,
-    parquet_version="2.4",
+    parquet_version="2.6",
     parquet_page_version="1.0",
     parquet_metadata_statistics=True,
     parquet_dictionary_encoding=False,
@@ -78,9 +78,13 @@ def to_parquet_row_groups(
             Compression levels have different meanings for different compression
             algorithms: GZIP ranges from 1 to 9, but ZSTD ranges from -7 to 22, for
             example. Generally, higher numbers provide slower but smaller compression.
-        row_group_size (int or None): Maximum number of entries in each row group (except the last),
-            passed to [pyarrow.parquet.ParquetWriter.write_table](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html#pyarrow.parquet.ParquetWriter.write_table).
-            If None, the Parquet default of 64 MiB is used.
+        row_group_size (int, str, or None): If an integer, the maximum number of
+            rows in each row group; if a string, the maximum memory size of each
+            row group. The string must be a number followed by a memory unit, such
+            as `"100 MB"`, and is converted into the number of rows that fit into
+            that many bytes based on the in-memory size of each batch. Passed to
+            [pyarrow.parquet.ParquetWriter.write_table](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html#pyarrow.parquet.ParquetWriter.write_table).
+            If None, PyArrow's default of at most 1024 * 1024 rows is used.
         data_page_size (None or int): Number of bytes in each data page, passed to
             [pyarrow.parquet.ParquetWriter](https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html).
             If None, the Parquet default of 1 MiB is used.
