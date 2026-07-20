@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.10.0"
+version = "2.11.0"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
