@@ -412,12 +412,16 @@ def _impl(
         table = convert_awkward_arrow_table_to_native(table)
 
     if hasattr(array, "attrs") and array.attrs:
-        df_metadata = {
-            "AWKWARD_ATTRS": json.dumps(without_transient_attrs(array.attrs.to_dict()))
-        }
-        existing_metadata = table.schema.metadata or {}
-        merged_metadata = {**existing_metadata, **df_metadata}
-        table = table.replace_schema_metadata(merged_metadata)
+        serializable_attrs = without_transient_attrs(array.attrs.to_dict())
+
+        # Only modify table metadata if there are actual non-transient attrs
+        if serializable_attrs:
+            existing_metadata = table.schema.metadata or {}
+            merged_metadata = {
+                **existing_metadata,
+                b"AWKWARD_ATTRS": json.dumps(serializable_attrs).encode("utf-8"),
+            }
+            table = table.replace_schema_metadata(merged_metadata)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}
