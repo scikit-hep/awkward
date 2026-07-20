@@ -411,8 +411,10 @@ def _impl(
     if extensionarray:
         table = convert_awkward_arrow_table_to_native(table)
 
-    if hasattr(array, "attrs") and array.attrs:
-        serializable_attrs = without_transient_attrs(array.attrs.to_dict())
+    # when writing row groups iteratively, the attrs are those of the first array
+    attrs_from = first_array if write_iteratively else array
+    if hasattr(attrs_from, "attrs") and attrs_from.attrs:
+        serializable_attrs = without_transient_attrs(attrs_from.attrs.to_dict())
 
         # Only modify table metadata if there are actual non-transient attrs
         if serializable_attrs:
