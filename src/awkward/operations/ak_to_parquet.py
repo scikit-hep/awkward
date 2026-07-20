@@ -170,6 +170,11 @@ def to_parquet(
           format_version: 2.6
           serialized_size: 0
 
+    The array's #ak.Array.attrs are written into the file's metadata, so that
+    #ak.from_parquet can restore them. They must therefore be JSON-compatible.
+    Transient attrs (those whose keys start with `"@"`) are not written, just as
+    they are not written when pickling.
+
     If the `array` does not contain records at top-level, the Arrow table will consist
     of one field whose name is `""` iff. `extensionarray` is False.
 
