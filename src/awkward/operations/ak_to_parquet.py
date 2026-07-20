@@ -10,6 +10,7 @@ import fsspec
 
 import awkward as ak
 import awkward._connect.pyarrow
+from awkward._attrs import without_transient_attrs
 from awkward._connect.pyarrow import convert_awkward_arrow_table_to_native
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -411,10 +412,12 @@ def _impl(
         table = convert_awkward_arrow_table_to_native(table)
 
     if hasattr(array, "attrs") and array.attrs:
-        df_metadata = {"AWKWARD_ATTRS": json.dumps(array.attrs.to_dict())}
-        existing_metadata = table.schema.metadata
-        merged_metadata = {**existing_metadata, **df_metadata}
-        table = table.replace_schema_metadata(merged_metadata)
+        serialisable_attrs = without_transient_attrs(array.attrs.to_dict())
+        if serialisable_attrs:
+            df_metadata = {"AWKWARD_ATTRS": json.dumps(serialisable_attrs)}
+            existing_metadata = table.schema.metadata or {}
+            merged_metadata = {**existing_metadata, **df_metadata}
+            table = table.replace_schema_metadata(merged_metadata)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}

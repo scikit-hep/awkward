@@ -928,6 +928,27 @@ def test_awkward_attr_serialisation(generate_datafiles):
     assert ak.from_parquet(f"{path}/data1.parq").attrs == {"property": "value"}
 
 
+def test_transient_attrs_not_serialised(tmp_path):
+    # attrs whose key starts with "@" are transient: they may hold arbitrary
+    # (non-JSON-serialisable) objects, so they must be dropped when writing
+    class NotSerialisable:
+        pass
+
+    array = ak.from_iter(
+        [[1, 2, 3], [4, 5]],
+        attrs={"property": "value", "@transient": NotSerialisable()},
+    )
+    filename = os.path.join(tmp_path, f"transient-{threading.get_ident()}.parq")
+    ak.to_parquet(array, filename)
+    assert ak.from_parquet(filename).attrs == {"property": "value"}
+
+    # only transient attrs: nothing to write, but it must not raise
+    array = ak.from_iter([[1, 2, 3], [4, 5]], attrs={"@transient": NotSerialisable()})
+    filename = os.path.join(tmp_path, f"transient-only-{threading.get_ident()}.parq")
+    ak.to_parquet(array, filename)
+    assert ak.from_parquet(filename).attrs == {}
+
+
 def test_pandas_attr_serialisation(generate_datafiles):
 
     pd = pytest.importorskip("pandas", "2.1.0")
