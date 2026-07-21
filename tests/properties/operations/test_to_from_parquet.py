@@ -36,9 +36,9 @@ def parquet_dtype(dtype: np.dtype) -> bool:
         return False
     if dtype.kind == "M":
         # Only "ns" roundtrips: coarser units are unsupported or coerced
-        # ("s" -> "ms"; "D" corrupts values), and out-of-range values such
-        # as NaT in "ms"/"us" crash `from_parquet` reading row-group
-        # statistics (OverflowError in pyarrow's TimestampScalar.as_py).
+        # ("s" -> "ms"; "D" corrupts values, #4219), and out-of-range
+        # values such as NaT in "ms"/"us" crash `from_parquet` reading
+        # row-group statistics (OverflowError, #4220).
         return np.datetime_data(dtype)[0] == "ns"
     if dtype.kind == "m":
         # pyarrow durations support only seconds and finer units
@@ -79,7 +79,7 @@ def _nodes_writable(layout: ak.contents.Content, nullable: bool = False) -> bool
     and indexed nodes, and stop below lists. A var-length list receiving
     validity bytes whose offsets do not start at zero is compacted against
     unshifted content in `ListOffsetArray._to_arrow`, shifting every list
-    by `offsets[0]` (data corruption); indexed nodes can recreate such
+    by `offsets[0]` (data corruption, #4222); indexed nodes can recreate such
     offsets from anywhere in their content, so they are excluded outright
     when nullable.
     """
@@ -97,7 +97,7 @@ def _nodes_writable(layout: ak.contents.Content, nullable: bool = False) -> bool
         if isinstance(layout, ak.contents.IndexedOptionArray):
             if layout.length > 0 and layout.content.length == 0:
                 # `to_arrow` crashes projecting nulls over a zero-length
-                # content (IndexError in `ListOffsetArray._to_arrow`)
+                # content (IndexError in `ListOffsetArray._to_arrow`, #4221)
                 return False
             if nullable and layout.content.is_list:
                 return False
