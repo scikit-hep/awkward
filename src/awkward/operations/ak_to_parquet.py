@@ -10,6 +10,7 @@ import fsspec
 
 import awkward as ak
 import awkward._connect.pyarrow
+from awkward._attrs import without_transient_attrs
 from awkward._connect.pyarrow import convert_awkward_arrow_table_to_native
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -168,6 +169,11 @@ def to_parquet(
           num_row_groups: 1
           format_version: 2.6
           serialized_size: 0
+
+    The array's #ak.Array.attrs are written into the file's metadata, so that
+    #ak.from_parquet can restore them. They must therefore be JSON-compatible.
+    Transient attrs (those whose keys start with `"@"`) are not written, just as
+    they are not written when pickling.
 
     If the `array` does not contain records at top-level, the Arrow table will consist
     of one field whose name is `""` iff. `extensionarray` is False.
@@ -410,11 +416,19 @@ def _impl(
     if extensionarray:
         table = convert_awkward_arrow_table_to_native(table)
 
-    if hasattr(array, "attrs") and array.attrs:
-        df_metadata = {"AWKWARD_ATTRS": json.dumps(array.attrs.to_dict())}
-        existing_metadata = table.schema.metadata
-        merged_metadata = {**existing_metadata, **df_metadata}
-        table = table.replace_schema_metadata(merged_metadata)
+    # when writing row groups iteratively, the attrs are those of the first array
+    attrs_from = first_array if write_iteratively else array
+    if hasattr(attrs_from, "attrs") and attrs_from.attrs:
+        serializable_attrs = without_transient_attrs(attrs_from.attrs.to_dict())
+
+        # Only modify table metadata if there are actual non-transient attrs
+        if serializable_attrs:
+            existing_metadata = table.schema.metadata or {}
+            merged_metadata = {
+                **existing_metadata,
+                b"AWKWARD_ATTRS": json.dumps(serializable_attrs).encode("utf-8"),
+            }
+            table = table.replace_schema_metadata(merged_metadata)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}
