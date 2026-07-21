@@ -56,7 +56,7 @@ def from_parquet(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         attrs (None or dict): Custom attributes for the output array, if
-            high-level. These take precedence over any attrs stored in the file.
+            high-level. These take precedence over any `attrs` stored in the file.
 
     Reads data from a local or remote Parquet file or collection of files.
 
