@@ -18,35 +18,35 @@ namespace awkward {
   public:
     /// @brief HERE
     ForthInputBuffer(const std::shared_ptr<void> ptr,
-                     int64_t offset,
-                     int64_t length);
+                     std::int64_t offset,
+                     std::int64_t length);
 
     /// @brief HERE
     uint8_t
-      peek_byte(int64_t after, util::ForthError& err) noexcept;
+      peek_byte(std::int64_t after, util::ForthError& err) noexcept;
 
     /// @brief HERE
     void*
-      read(int64_t num_bytes, util::ForthError& err) noexcept;
+      read(std::int64_t num_bytes, util::ForthError& err) noexcept;
 
     /// @brief HERE
     uint8_t
       read_byte(util::ForthError& err) noexcept;
 
     /// @brief HERE
-    int64_t
-      read_enum(const std::vector<std::string>& strings, int64_t start, int64_t stop) noexcept;
+    std::int64_t
+      read_enum(const std::vector<std::string>& strings, std::int64_t start, std::int64_t stop) noexcept;
 
     /// @brief HERE
-    uint64_t
+    std::uint64_t
       read_varint(util::ForthError& err) noexcept;
 
     /// @brief HERE
-    int64_t
+    std::int64_t
       read_zigzag(util::ForthError& err) noexcept;
 
     /// @brief HERE
-    int64_t
+    std::int64_t
       read_textint(util::ForthError& err) noexcept;
 
     /// @brief HERE
@@ -55,16 +55,16 @@ namespace awkward {
 
     /// @brief HERE
     void
-      read_quotedstr(char* string_buffer, int64_t max_string_size, int64_t& length,
+      read_quotedstr(char* string_buffer, std::int64_t max_string_size, std::int64_t& length,
                      util::ForthError& err) noexcept;
 
     /// @brief HERE
     void
-      seek(int64_t to, util::ForthError& err) noexcept;
+      seek(std::int64_t to, util::ForthError& err) noexcept;
 
     /// @brief HERE
     void
-      skip(int64_t num_bytes, util::ForthError& err) noexcept;
+      skip(std::int64_t num_bytes, util::ForthError& err) noexcept;
 
     /// @brief HERE
     void
@@ -75,11 +75,11 @@ namespace awkward {
       end() const noexcept;
 
     /// @brief HERE
-    int64_t
+    std::int64_t
       pos() const noexcept;
 
     /// @brief HERE
-    int64_t
+    std::int64_t
       len() const noexcept;
 
     /// @brief Returns a shared pointer to an AwkwardForth input buffer.
@@ -88,9 +88,9 @@ namespace awkward {
 
   private:
     std::shared_ptr<void> ptr_;
-    int64_t offset_;
-    int64_t length_;
-    int64_t pos_;
+    std::int64_t offset_;
+    std::int64_t length_;
+    std::int64_t pos_;
   };
 }
 

@@ -7,35 +7,35 @@
 
 namespace awkward {
   ForthInputBuffer::ForthInputBuffer(const std::shared_ptr<void> ptr,
-                                     int64_t offset,
-                                     int64_t length)
+                                     std::int64_t offset,
+                                     std::int64_t length)
     : ptr_(ptr)
     , offset_(offset)
     , length_(length)
     , pos_(0) { }
 
   uint8_t
-  ForthInputBuffer::peek_byte(int64_t after, util::ForthError& err) noexcept {
+  ForthInputBuffer::peek_byte(std::int64_t after, util::ForthError& err) noexcept {
     if (pos_ + after + 1 > length_) {
       err = util::ForthError::read_beyond;
       return 0;
     }
-    return *reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_ + (size_t)after
+    return *reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_ + (std::size_t)pos_ + (std::size_t)after
     );
   }
 
   void*
-  ForthInputBuffer::read(int64_t num_bytes, util::ForthError& err) noexcept {
-    int64_t next = pos_ + num_bytes;
+  ForthInputBuffer::read(std::int64_t num_bytes, util::ForthError& err) noexcept {
+    std::int64_t next = pos_ + num_bytes;
     if (next > length_) {
       err = util::ForthError::read_beyond;
       return nullptr;
     }
-    int64_t tmp = pos_;
+    std::int64_t tmp = pos_;
     pos_ = next;
     return reinterpret_cast<void*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)tmp
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_ + (std::size_t)tmp
     );
   }
 
@@ -45,15 +45,15 @@ namespace awkward {
       err = util::ForthError::read_beyond;
       return 0;
     }
-    int64_t tmp = pos_;
+    std::int64_t tmp = pos_;
     pos_++;
-    return *reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)tmp
+    return *reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_ + (std::size_t)tmp
     );
   }
 
-  int64_t
-  ForthInputBuffer::read_enum(const std::vector<std::string>& strings, int64_t start, int64_t stop) noexcept {
+  std::int64_t
+  ForthInputBuffer::read_enum(const std::vector<std::string>& strings, std::int64_t start, std::int64_t stop) noexcept {
     // Ideally, we'd use a string trie instead of repeatedly looping over the same set of strings.
     // However, C++ doesn't seem to have one in its standard library, and anyway, we don't
     // care about insertion/removal, so it can be compact (small array indexes, not pointers).
@@ -66,14 +66,14 @@ namespace awkward {
         reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_
     );
 
-    int64_t i = 0;
-    int64_t howmany = stop - start;
-    int64_t len;
+    std::int64_t i = 0;
+    std::int64_t howmany = stop - start;
+    std::int64_t len;
 
     for (auto it = strings.begin() + start;  i < howmany;  i++) {
-      len = (int64_t)it->length();
+      len = (std::int64_t)it->length();
       if (pos_ + len <= length_) {
-        if (strncmp(it->data(), ptr, (size_t)len) == 0) {
+        if (strncmp(it->data(), ptr, (std::size_t)len) == 0) {
           pos_ += len;
           return i;
         }
@@ -84,15 +84,15 @@ namespace awkward {
     return -1;
   }
 
-  uint64_t
+  std::uint64_t
   ForthInputBuffer::read_varint(util::ForthError& err) noexcept {
-    const uint8_t* ptr = reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_
+    const std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_
     );
 
-    int64_t shift = 0;
-    uint64_t result = 0;
-    uint8_t byte;
+    std::int64_t shift = 0;
+    std::uint64_t result = 0;
+    std::uint8_t byte;
     do {
       if (pos_ >= length_) {
         err = util::ForthError::read_beyond;
@@ -106,22 +106,22 @@ namespace awkward {
         return 0;
       }
 
-      result |= (uint64_t)(byte & 0x7f) << shift;
+      result |= (std::uint64_t)(byte & 0x7f) << shift;
       shift += 7;
     } while (byte & 0x80);
 
     return result;
   }
 
-  int64_t
+  std::int64_t
   ForthInputBuffer::read_zigzag(util::ForthError& err) noexcept {
-    const uint8_t* ptr = reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_
+    const std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_
     );
 
-    int64_t shift = 0;
-    int64_t result = 0;
-    uint8_t byte;
+    std::int64_t shift = 0;
+    std::int64_t result = 0;
+    std::uint8_t byte;
     do {
       if (pos_ >= length_) {
         err = util::ForthError::read_beyond;
@@ -135,7 +135,7 @@ namespace awkward {
         return 0;
       }
 
-      result |= (int64_t)(byte & 0x7f) << shift;
+      result |= (std::int64_t)(byte & 0x7f) << shift;
       shift += 7;
     } while (byte & 0x80);
 
@@ -143,15 +143,15 @@ namespace awkward {
     return (result >> 1) ^ (-(result & 1));
   }
 
-  int64_t
+  std::int64_t
   ForthInputBuffer::read_textint(util::ForthError& err) noexcept {
     if (pos_ >= length_) {
       err = util::ForthError::read_beyond;
       return 0;
     }
 
-    const uint8_t* ptr = reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_
+    const std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_
     );
 
     bool negative = false;
@@ -169,8 +169,8 @@ namespace awkward {
       return 0;
     }
 
-    int64_t digits = 0;
-    int64_t result = 0;
+    std::int64_t digits = 0;
+    std::int64_t result = 0;
     do {
       digits++;
       result *= 10;
@@ -275,8 +275,8 @@ namespace awkward {
       return 0.0;
     }
 
-    const uint8_t* ptr = reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_
+    const std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_
     );
 
     bool negative = false;
@@ -384,15 +384,15 @@ namespace awkward {
   }
 
   void
-  ForthInputBuffer::read_quotedstr(char* string_buffer, int64_t max_string_size, int64_t& length,
+  ForthInputBuffer::read_quotedstr(char* string_buffer, std::int64_t max_string_size, std::int64_t& length,
                                    util::ForthError& err) noexcept {
     if (pos_ >= length_) {
       err = util::ForthError::read_beyond;
       return;
     }
 
-    const uint8_t* ptr = reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_
+    const std::uint8_t* ptr = reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_
     );
 
     if (ptr[pos_] == '\"') {
@@ -408,8 +408,8 @@ namespace awkward {
     }
 
     length = 0;
-    uint64_t code_point;
-    int64_t i;
+    std::uint64_t code_point;
+    std::int64_t i;
     while (ptr[pos_] != '\"') {
       // this while loop puts one character in the output buffer
       if (length == max_string_size) {
@@ -546,7 +546,7 @@ namespace awkward {
   }
 
   void
-  ForthInputBuffer::seek(int64_t to, util::ForthError& err) noexcept {
+  ForthInputBuffer::seek(std::int64_t to, util::ForthError& err) noexcept {
     if (to < 0  ||  to > length_) {
       err = util::ForthError::seek_beyond;
     }
@@ -556,8 +556,8 @@ namespace awkward {
   }
 
   void
-  ForthInputBuffer::skip(int64_t num_bytes, util::ForthError& err) noexcept {
-    int64_t next = pos_ + num_bytes;
+  ForthInputBuffer::skip(std::int64_t num_bytes, util::ForthError& err) noexcept {
+    std::int64_t next = pos_ + num_bytes;
     if (next < 0  ||  next > length_) {
       err = util::ForthError::skip_beyond;
     }
@@ -568,10 +568,10 @@ namespace awkward {
 
   void
   ForthInputBuffer::skipws() noexcept {
-    uint8_t* byte;
+    std::uint8_t* byte;
     while (pos_ < length_) {
-      byte = reinterpret_cast<uint8_t*>(
-        reinterpret_cast<size_t>(ptr_.get()) + (size_t)offset_ + (size_t)pos_
+      byte = reinterpret_cast<std::uint8_t*>(
+        reinterpret_cast<std::size_t>(ptr_.get()) + (std::size_t)offset_ + (std::size_t)pos_
       );
       if (*byte == ' ' || *byte == '\n' || *byte == '\r' || *byte == '\t') {
         pos_++;
@@ -587,12 +587,12 @@ namespace awkward {
     return pos_ == length_;
   }
 
-  int64_t
+  std::int64_t
   ForthInputBuffer::pos() const noexcept {
     return pos_;
   }
 
-  int64_t
+  std::int64_t
   ForthInputBuffer::len() const noexcept {
     return length_;
   }
