@@ -6,11 +6,14 @@ import threading
 
 import hypothesis_awkward.strategies as st_ak
 import numpy as np
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
 
 import awkward as ak
+
+pytest.importorskip("pyarrow.parquet")
 
 # The first example pays one-time lazy imports (pyarrow.parquet, fsspec's
 # memory filesystem) of ~350 ms, exceeding hypothesis' default 200 ms
@@ -33,6 +36,10 @@ def parquet_path() -> str:
 def parquet_dtype(dtype: np.dtype) -> bool:
     if dtype.kind == "c":
         # pyarrow cannot write complex numbers (ArrowNotImplementedError)
+        return False
+    if dtype.kind == "f" and dtype.itemsize == 16:
+        # pyarrow cannot write extended-precision floats, which exist on
+        # some platforms (e.g. float128 on Linux)
         return False
     if dtype.kind == "M":
         # Only "ns" roundtrips: coarser units are unsupported or coerced
