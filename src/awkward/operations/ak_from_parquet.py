@@ -56,7 +56,7 @@ def from_parquet(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         attrs (None or dict): Custom attributes for the output array, if
-            high-level.
+            high-level. These take precedence over any `attrs` stored in the file.
 
     Reads data from a local or remote Parquet file or collection of files.
 
@@ -64,6 +64,9 @@ def from_parquet(
     and/or `row_groups` to select and filter manageable subsets of the data, and
     use #ak.metadata_from_parquet to find column names and the range of row groups
     that a dataset has.
+
+    Any attrs that #ak.to_parquet stored in the file are restored (as are those
+    written by pandas), unless overridden by the `attrs` argument.
 
     See also #ak.to_parquet, #ak.metadata_from_parquet.
     """

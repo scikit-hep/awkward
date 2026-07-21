@@ -170,6 +170,11 @@ def to_parquet(
           format_version: 2.6
           serialized_size: 0
 
+    The array's #ak.Array.attrs are written into the file's metadata, so that
+    #ak.from_parquet can restore them. They must therefore be JSON-compatible.
+    Transient attrs (those whose keys start with `"@"`) are not written, just as
+    they are not written when pickling.
+
     If the `array` does not contain records at top-level, the Arrow table will consist
     of one field whose name is `""` iff. `extensionarray` is False.
 
@@ -411,8 +416,10 @@ def _impl(
     if extensionarray:
         table = convert_awkward_arrow_table_to_native(table)
 
-    if hasattr(array, "attrs") and array.attrs:
-        serializable_attrs = without_transient_attrs(array.attrs.to_dict())
+    # when writing row groups iteratively, the attrs are those of the first array
+    attrs_from = first_array if write_iteratively else array
+    if hasattr(attrs_from, "attrs") and attrs_from.attrs:
+        serializable_attrs = without_transient_attrs(attrs_from.attrs.to_dict())
 
         # Only modify table metadata if there are actual non-transient attrs
         if serializable_attrs:
