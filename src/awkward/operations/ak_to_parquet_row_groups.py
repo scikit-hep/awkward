@@ -156,6 +156,12 @@ def to_parquet_row_groups(
           format_version: 2.6
           serialized_size: 0
 
+    As in #ak.to_parquet, the arrays' #ak.Array.attrs are written into the file's
+    metadata. The file-level `attrs` are defined by the first array, just as the
+    schema is, and the `attrs` of subsequent arrays are not merged into them. If
+    you need the `attrs` of every array to be combined, do so explicitly before
+    passing the iterator to this function.
+
     If the `array` does not contain records at top-level, the Arrow table will consist
     of one field whose name is `""` iff. `extensionarray` is False.
 
