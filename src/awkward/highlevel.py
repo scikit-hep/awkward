@@ -377,11 +377,19 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __dask_tokenize__(self):
         return id(self)
 
-    def _update_class(self):
+    def _update_class(self, restore=None):
         self._numbaview = None
+        previous_class = self.__class__
         self.__class__ = get_array_class(self._layout, self._behavior)
         if hasattr(self, "__awkward_validation__"):
-            self.__awkward_validation__()
+            try:
+                self.__awkward_validation__()
+            except Exception:
+                # a rejected assignment must not be left applied
+                if restore is not None:
+                    self.__dict__.update(restore)
+                    self.__class__ = previous_class
+                raise
 
     @property
     def attrs(self) -> Attrs:
@@ -450,8 +458,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @layout.setter
     def layout(self, layout):
         if isinstance(layout, ak.contents.Content):
+            restore = {"_layout": self._layout}
             self._layout = layout
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("layout must be a subclass of ak.contents.Content")
 
@@ -477,8 +486,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
+            restore = {"_behavior": self._behavior}
             self._behavior = behavior
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -1920,11 +1930,19 @@ class Record(NDArrayOperatorsMixin):
 
         ak.jax.register_behavior_class(cls)
 
-    def _update_class(self):
+    def _update_class(self, restore=None):
         self._numbaview = None
+        previous_class = self.__class__
         self.__class__ = get_record_class(self._layout, self._behavior)
         if hasattr(self, "__awkward_validation__"):
-            self.__awkward_validation__()
+            try:
+                self.__awkward_validation__()
+            except Exception:
+                # a rejected assignment must not be left applied
+                if restore is not None:
+                    self.__dict__.update(restore)
+                    self.__class__ = previous_class
+                raise
 
     @property
     def attrs(self) -> Attrs:
@@ -1987,8 +2005,9 @@ class Record(NDArrayOperatorsMixin):
     @layout.setter
     def layout(self, layout):
         if isinstance(layout, ak.record.Record):
+            restore = {"_layout": self._layout}
             self._layout = layout
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("layout must be a subclass of ak.record.Record")
 
@@ -2014,8 +2033,9 @@ class Record(NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
+            restore = {"_behavior": self._behavior}
             self._behavior = behavior
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -2167,7 +2187,7 @@ class Record(NDArrayOperatorsMixin):
 
             # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
             layout = self.layout
-            layout._array = ak.operations.ak_with_field._impl(
+            new_array = ak.operations.ak_with_field._impl(
                 layout._array,
                 what,
                 where,
@@ -2175,7 +2195,9 @@ class Record(NDArrayOperatorsMixin):
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self.layout = layout
+            # rebind to a fresh record rather than mutating the shared layout in
+            # place, so that the setter above can restore it
+            self.layout = ak.record.Record(new_array, layout.at)
 
     def __delitem__(self, where):
         """
