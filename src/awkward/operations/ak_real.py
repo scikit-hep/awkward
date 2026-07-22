@@ -15,7 +15,10 @@ np = NumpyMetadata.instance()
 @ak._connect.numpy.implements("real")
 @high_level_function()
 def real(array, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns the real components of the given array elements.
+
+    If the arrays have complex elements, the returned arrays are floats.
+
     Args:
         array : array_like
             Input array.
@@ -26,8 +29,8 @@ def real(array, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns the real components of the given array elements.
-    If the arrays have complex elements, the returned arrays are floats.
+    Returns:
+        The real components of the given array elements.
     """
     # Dispatch
     yield (array,)
