@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hypothesis_awkward.strategies as st_ak
+import numpy as np
 from hypothesis import given
 
 import awkward as ak
@@ -28,6 +29,42 @@ def test_roundtrip(a: ak.Array) -> None:
     n = ak.to_numpy(a)
     returned = ak.from_numpy(n)
     assert ak.array_equal(a, returned, equal_nan=True)
+
+
+@given(
+    a=st_ak.constructors.arrays(
+        # to_numpy(allow_missing=True) raises on timedelta64 with missing
+        # values (create_missing_data calls np.iinfo on the "m8" dtype)
+        dtypes=st_ak.supported_dtypes().filter(lambda d: d.kind != "m"),
+        # from_numpy crashes on multidimensional MaskedArrays that to_numpy
+        # builds from option-of-regular layouts: with no mask and a string
+        # dtype it calls `.size` on a `ListArray`; with a mask, ndim >= 3,
+        # and a zero-length dimension it attempts a `reshape(-1, 0)`
+        allow_regular=False,
+        allow_list=False,
+        allow_list_offset=False,
+        allow_record=False,
+        allow_union=False,
+    )
+)
+def test_roundtrip_stable(a: ak.Array) -> None:
+    """`from_numpy` then `to_numpy` reproduces `to_numpy`'s output.
+
+    `to_numpy` can lose type information (an unknown type becomes
+    `float64`, trailing NULs are stripped from strings, tuples become named
+    records), so `from_numpy` cannot always reconstruct the original array,
+    but the converted form is a fixed point: converting the reconstruction
+    yields the same NumPy array.
+    """
+    n = ak.to_numpy(a)
+    r = ak.from_numpy(n)
+    m = ak.to_numpy(r)
+    # itemsize of "U"/"S" dtypes is not stable: trailing NULs widen `n`'s
+    # dtype but are stripped in the roundtrip, narrowing `m`'s
+    np.testing.assert_array_equal(n, m, strict=(n.dtype.kind not in "SU"))
+    # assert_array_equal treats masked positions as equal to anything (even
+    # under differing masks), so the masks must be compared separately
+    np.testing.assert_array_equal(np.ma.getmaskarray(n), np.ma.getmaskarray(m))
 
 
 @given(
