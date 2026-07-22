@@ -38,8 +38,9 @@ def test_roundtrip(a: ak.Array) -> None:
         dtypes=st_ak.supported_dtypes().filter(lambda d: d.kind != "m"),
         # from_numpy crashes on multidimensional MaskedArrays that to_numpy
         # builds from option-of-regular layouts: with no mask and a string
-        # dtype it calls `.size` on a `ListArray`; with a mask, ndim >= 3,
-        # and a zero-length dimension it attempts a `reshape(-1, 0)`
+        # dtype it calls `.size` on a `ListArray` (#4226); with a mask,
+        # ndim >= 3, and a zero-length dimension it attempts a
+        # `reshape(-1, 0)` (#4227)
         allow_regular=False,
         allow_list=False,
         allow_list_offset=False,
