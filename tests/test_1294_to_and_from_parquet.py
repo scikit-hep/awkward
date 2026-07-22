@@ -928,6 +928,39 @@ def test_awkward_attr_serialisation(generate_datafiles):
     assert ak.from_parquet(f"{path}/data1.parq").attrs == {"property": "value"}
 
 
+def test_transient_attrs_not_written(tmp_path):
+    # transient attrs may hold arbitrary, non-JSON-serializable objects
+    class NotSerializable:
+        pass
+
+    array = ak.from_iter(
+        [[1, 2, 3], [4, 5]],
+        attrs={"property": "value", "@transient": NotSerializable()},
+    )
+    filename = os.path.join(tmp_path, f"transient-{threading.get_ident()}.parq")
+    ak.to_parquet(array, filename)
+    assert ak.from_parquet(filename).attrs == {"property": "value"}
+
+
+def test_explicit_attrs_take_precedence(generate_datafiles):
+    # both files store {"property": "value"}, which the caller asks to override
+    path, _mdlist, _fs = generate_datafiles
+
+    one_file = ak.from_parquet(f"{path}/data1.parq", attrs={"property": "other"})
+    assert one_file.attrs == {"property": "other"}
+
+    both_files = ak.from_parquet(path, attrs={"property": "other"})
+    assert both_files.attrs == {"property": "other"}
+
+
+def test_attrs_without_extensionarray(tmp_path):
+    # here the table has no schema metadata for the attrs to be merged into
+    array = ak.from_iter([[1, 2, 3], [4, 5]], attrs={"property": "value"})
+    filename = os.path.join(tmp_path, f"no-extn-{threading.get_ident()}.parq")
+    ak.to_parquet(array, filename, extensionarray=False)
+    assert ak.from_parquet(filename).attrs == {"property": "value"}
+
+
 def test_pandas_attr_serialisation(generate_datafiles):
 
     pd = pytest.importorskip("pandas", "2.1.0")
