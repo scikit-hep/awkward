@@ -44,7 +44,11 @@ def test_mean_weighted_integer_no_overflow():
 def test_var_jagged_integer_no_overflow():
     array = ak.Array([[100000, 200000, 300000], [], [400000, 500000]])
     result = ak.var(array, axis=-1)
-    expected = [np.var([100000.0, 200000.0, 300000.0]), np.nan, np.var([400000.0, 500000.0])]
+    expected = [
+        np.var([100000.0, 200000.0, 300000.0]),
+        np.nan,
+        np.var([400000.0, 500000.0]),
+    ]
     assert result[0] == pytest.approx(expected[0])
     assert np.isnan(result[1])
     assert result[2] == pytest.approx(expected[2])

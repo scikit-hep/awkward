@@ -53,7 +53,6 @@ def _has_integral_leaf(layout) -> bool:
         nonlocal found
         if node.is_numpy and node.dtype.kind in "biu":
             found = True
-        return None
 
     ak._do.recursively_apply(layout, action, return_array=False)
     return found
