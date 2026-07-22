@@ -865,8 +865,10 @@ namespace awkward {
       switch (specializedjson_->instruction()) {
         case FillIndexedOptionArray:
           specializedjson_->push_stack(specializedjson_->current_instruction() + 1);
+          break;
         case KeyTableHeader:
           specializedjson_->push_stack(specializedjson_->current_instruction());
+          break;
       }
       int64_t keytableheader_instruction = specializedjson_->current_instruction();
       int64_t num_fields = specializedjson_->argument1();
