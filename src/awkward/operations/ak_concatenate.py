@@ -21,7 +21,7 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._parameters import type_parameters_equal
 from awkward._regularize import regularize_axis
-from awkward._typing import Sequence
+from awkward._typing import Any, Mapping, Sequence
 from awkward.contents import Content
 from awkward.operations.ak_fill_none import fill_none
 from awkward.types.numpytype import primitive_to_dtype
@@ -34,8 +34,14 @@ np = NumpyMetadata.instance()
 @ak._connect.numpy.implements("concatenate")
 @high_level_function()
 def concatenate(
-    arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None, attrs=None
-):
+    arrays: Any,
+    axis: int | str | None = 0,
+    *,
+    mergebool: bool = True,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
     """Returns an array with the given arrays concatenated along an axis.
 
     Args:
