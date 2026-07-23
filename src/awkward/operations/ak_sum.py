@@ -40,6 +40,8 @@ def sum(
     if all lists at a given dimension have the same length and no None values,
     but it generalizes to cases where they do not.
 
+    See also #ak.nansum.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -215,8 +217,6 @@ def sum(
         The third list is reduced to `0` if `mask_identity=False` because `0` is
         the identity of addition, but it is reduced to None if
         `mask_identity=True`.
-
-        See also #ak.nansum.
     """
     # Dispatch
     yield (array,)

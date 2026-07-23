@@ -44,6 +44,9 @@ def ptp(
     if all lists at a given dimension have the same length and no None values,
     but it generalizes to cases where they do not.
 
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -85,9 +88,6 @@ def ptp(
         <Array [3, 0, 1] type='3 * float64'>
 
         The second value is `0` because the list is empty.
-
-        See #ak.sum for a more complete description of nested list and missing
-        value (None) handling in reducers.
     """
     # Dispatch
     yield (array,)

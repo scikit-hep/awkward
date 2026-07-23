@@ -50,6 +50,11 @@ def mean(
 
         ak.sum(x*weight) / ak.sum(weight)
 
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers.
+
+    See also #ak.nanmean.
+
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -107,11 +112,6 @@ def mean(
         the mean of `1` and `5` is `3.0`, the mean of `2` (by itself) is `2.0`,
         and the mean of `3` (by itself) is `3.0`. This follows the same grouping
         behavior as reducers.
-
-        See #ak.sum for a complete description of handling nested lists and
-        missing values (None) in reducers.
-
-        See also #ak.nanmean.
     """
     # Dispatch
     yield x, weight

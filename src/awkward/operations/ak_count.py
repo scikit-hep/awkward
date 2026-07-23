@@ -35,6 +35,23 @@ def count(
     Many types are supported, including all Awkward Arrays and Records. The
     identity of counting is `0` and it is usually not masked.
 
+    This function has no analog in NumPy because counting values in a
+    rectilinear array would only result in elements of the NumPy array's
+    [shape](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.shape.html).
+
+    The gaps and None values are not counted, and if a None value occurs at
+    a higher axis than the one being counted, it is kept as a placeholder
+    so that the outer list length does not change.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+
+    If it is desirable to include None values in #ak.count, use #ak.fill_none
+    to turn the None values into something that would be counted.
+
+    If it is desirable to exclude NaN ("not a number") values from #ak.count,
+    use #ak.nan_to_none to turn them into None, which are not counted.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -64,10 +81,6 @@ def count(
         The number of elements of `array`.
 
     Examples:
-        This function has no analog in NumPy because counting values in a
-        rectilinear array would only result in elements of the NumPy array's
-        [shape](https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.shape.html).
-
         However, for nested lists of variable dimension and missing values, the
         result of counting is non-trivial. For example, with this
 
@@ -92,13 +105,6 @@ def count(
         >>> ak.count(array, axis=None)
         8
 
-        The gaps and None values are not counted, and if a None value occurs at
-        a higher axis than the one being counted, it is kept as a placeholder
-        so that the outer list length does not change.
-
-        See #ak.sum for a more complete description of nested list and missing
-        value (None) handling in reducers.
-
         Note also that this function is different from #ak.num, which counts
         the number of values at a given depth, maintaining structure: #ak.num
         never counts across different lists the way that reducers do (#ak.num
@@ -108,12 +114,6 @@ def count(
         5
         >>> ak.num(array, axis=1)
         <Array [2, 3, None, 3, 2] type='5 * ?int64'>
-
-        If it is desirable to include None values in #ak.count, use #ak.fill_none
-        to turn the None values into something that would be counted.
-
-        If it is desirable to exclude NaN ("not a number") values from #ak.count,
-        use #ak.nan_to_none to turn them into None, which are not counted.
     """
     # Dispatch
     yield (array,)
