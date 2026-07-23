@@ -28,10 +28,10 @@ def zeros_like(
 
     This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
 
-    See #ak.full_like for details, and see also #ak.ones_like.
-
     (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
     are immutable.)
+
+    See #ak.full_like for details, and see also #ak.ones_like.
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).

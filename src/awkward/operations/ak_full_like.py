@@ -46,6 +46,11 @@ def full_like(
     the array. This function gets all types from the array, which might not be
     the same in all parts of the structure.
 
+    (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
+    are immutable.)
+
+    See also #ak.zeros_like and #ak.ones_like.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         fill_value: Value to fill the new array with.
@@ -87,11 +92,6 @@ def full_like(
         retain their type (`int64`). Booleans get filled with True because `12.3`
         is not zero. Missing values remain in the same positions as in the original
         `array`. (To fill them in, use #ak.fill_none.)
-
-        See also #ak.zeros_like and #ak.ones_like.
-
-        (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
-        are immutable.)
     """
     # Dispatch
     yield array, fill_value
