@@ -28,6 +28,31 @@ def test_sum_dtype_promotion_bool(tt):
     assert out.dtype != np.dtype(np.bool_)
 
 
+def test_sum_forced_dtype_axis_none(tt):
+    # Explicit dtype= is reported verbatim, not the default promotion.
+    x = TypeTracerArray._new(np.dtype(np.int32), (unknown_length,))
+    out = tt.sum(x, axis=None, dtype=np.float64)
+    assert out.shape == ()
+    assert out.dtype == np.dtype(np.float64)
+
+
+def test_sum_forced_dtype_overrides_promotion(tt):
+    # For bool input the default would promote to intp; an explicit float64
+    # dtype must win (exercises the `dtype is not None` branch).
+    x = TypeTracerArray._new(np.dtype(np.bool_), (unknown_length,))
+    out = tt.sum(x, axis=None, dtype=np.float64)
+    assert out.dtype == np.dtype(np.float64)
+    assert out.dtype != np.empty(0, dtype=np.bool_).sum().dtype
+
+
+def test_sum_forced_dtype_axis_keepdims(tt):
+    # Forced dtype also applies on the segmented (axis given) path.
+    x = TypeTracerArray._new(np.dtype(np.int64), (3, unknown_length))
+    out = tt.sum(x, axis=1, keepdims=True, dtype=np.float64)
+    assert out.dtype == np.dtype(np.float64)
+    assert out.shape == (3, 1)
+
+
 def test_stack_symbolic_shape(tt):
     a = TypeTracerArray._new(np.dtype(np.int32), (unknown_length,))
     b = TypeTracerArray._new(np.dtype(np.float64), (unknown_length,))
