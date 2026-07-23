@@ -17,6 +17,8 @@ cpu = NumpyBackend.instance()
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
     """Converts an Awkward Array into ROOT RDataFrame columns.
 
+    See also #ak.from_rdataframe.
+
     Args:
         arrays (dict of arrays): Each value in this dict can be any array-like data
             that #ak.to_layout recognizes, but they must all have the same length.
@@ -46,8 +48,6 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
 
         >>> ak.sum(x, axis=-1) + y.a + y.b[:, 0]
         <Array [8.7, 4.2, 16.2] type='3 * float64'>
-
-        See also #ak.from_rdataframe.
     """
     # Dispatch
     yield arrays.values()
