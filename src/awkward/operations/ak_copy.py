@@ -26,6 +26,26 @@ def copy(array):
     change an array in-place, but the data in the array might be owned by
     another library that can change it in-place.
 
+    There is an exception to this rule: you can add fields to records in an
+    #ak.Array in-place. However, this changes the #ak.Array wrapper without
+    affecting the underlying layout data (it *replaces* its layout), so a
+    shallow copy will do:
+
+        >>> import copy
+        >>> original = ak.Array([{"x": 1}, {"x": 2}, {"x": 3}])
+        >>> shallow_copy = copy.copy(original)
+        >>> shallow_copy["y"] = original.x**2
+        >>> shallow_copy
+        <Array [{x: 1, y: 1}, {...}, {x: 3, y: 9}] type='3 * {x: int64, y: int64}'>
+        >>> original
+        <Array [{x: 1}, {x: 2}, {x: 3}] type='3 * {x: int64}'>
+
+    This is key to Awkward Array's efficiency (memory and speed): operations that
+    only change part of a structure reuse pieces from the original ("structural
+    sharing"). Changing data in-place would result in many surprising long-distance
+    changes, so we don't support it. However, an #ak.Array's data might come from
+    a mutable third-party library, so this function allows you to make a true copy.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
@@ -45,26 +65,6 @@ def copy(array):
         <Array [1.1, 2.2, 123, 4.4, 5.5] type='5 * float64'>
         >>> duplicate
         <Array [1.1, 2.2, 3.3, 4.4, 5.5] type='5 * float64'>
-
-        There is an exception to this rule: you can add fields to records in an
-        #ak.Array in-place. However, this changes the #ak.Array wrapper without
-        affecting the underlying layout data (it *replaces* its layout), so a
-        shallow copy will do:
-
-        >>> import copy
-        >>> original = ak.Array([{"x": 1}, {"x": 2}, {"x": 3}])
-        >>> shallow_copy = copy.copy(original)
-        >>> shallow_copy["y"] = original.x**2
-        >>> shallow_copy
-        <Array [{x: 1, y: 1}, {...}, {x: 3, y: 9}] type='3 * {x: int64, y: int64}'>
-        >>> original
-        <Array [{x: 1}, {x: 2}, {x: 3}] type='3 * {x: int64}'>
-
-        This is key to Awkward Array's efficiency (memory and speed): operations that
-        only change part of a structure reuse pieces from the original ("structural
-        sharing"). Changing data in-place would result in many surprising long-distance
-        changes, so we don't support it. However, an #ak.Array's data might come from
-        a mutable third-party library, so this function allows you to make a true copy.
     """
     # Dispatch
     yield (array,)

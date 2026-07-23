@@ -47,6 +47,18 @@ def transform(
     This is a public interface to the infrastructure that is used to implement
     most Awkward Array operations. As such, it's very powerful, but low-level.
 
+    The primary purpose of this function is to allow you to edit one level of
+    structure without having to worry about what it's embedded in. Suppose, for
+    instance, you want to apply NumPy's `np.round` function to numerical data,
+    regardless of what lists or other structures they're embedded in.
+
+    The return value must be a subclass of #ak.contents.Content (to replace the
+    array node) or None (to leave the array node unchanged).
+
+    If you pass multiple arrays to this function (`more_arrays`), those arrays
+    will be broadcasted and all inputs, at the same level of depth and structure,
+    will be passed to the `transformation` function as a group.
+
     Args:
         transformation (callable): Function to apply to each node of the array.
             See below for details.
@@ -124,14 +136,6 @@ def transform(
         different types. The data types are low-level "layouts," subclasses of
         #ak.contents.Content, rather than high-level #ak.Array.
 
-        The primary purpose of this function is to allow you to edit one level of
-        structure without having to worry about what it's embedded in. Suppose, for
-        instance, you want to apply NumPy's `np.round` function to numerical data,
-        regardless of what lists or other structures they're embedded in.
-
-        The return value must be a subclass of #ak.contents.Content (to replace the
-        array node) or None (to leave the array node unchanged).
-
         >>> def rounder(layout, **kwargs):
         ...     if layout.is_numpy:
         ...         return ak.contents.NumpyArray(
@@ -146,10 +150,6 @@ def transform(
         type: 2 * var * var * option[var * var * int32]
         [[[[[1, 2, 3], []], None], []],
          [[[[4, 6]]]]]
-
-        If you pass multiple arrays to this function (`more_arrays`), those arrays
-        will be broadcasted and all inputs, at the same level of depth and structure,
-        will be passed to the `transformation` function as a group.
 
         Here is an example with broadcasting:
 

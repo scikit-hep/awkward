@@ -38,6 +38,39 @@ def broadcast_arrays(
 ):
     """Broadcasts arrays together so they can be combined element-by-element.
 
+    One typically wants single-item-per-element data to be duplicated to
+    match multiple-items-per-element data. Operations on the broadcasted
+    arrays like::
+
+        one_dimensional + nested_lists
+
+    would then have the same effect as the procedural code::
+
+        for x, outer in zip(one_dimensional, nested_lists):
+            output = []
+            for inner in outer:
+                output.append(x + inner)
+            yield output
+
+    where `x` has the same value for each `inner` in the inner loop.
+
+    Awkward Array's broadcasting manages to have it both ways by applying the
+    following rules:
+
+    * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
+      implicit broadcasting aligns to the right, like NumPy.
+    * If any dimension is variable (i.e. #ak.types.ListType), which can
+      never be true of NumPy, implicit broadcasting aligns to the left.
+    * Explicit broadcasting with a length-1 regular dimension always
+      broadcasts, like NumPy.
+
+    Thus, it is important to be aware of the distinction between a dimension
+    that is declared to be regular in the type specification and a dimension
+    that is allowed to be variable (even if it happens to have the same length
+    for all elements). This distinction is can be accessed through the
+    #ak.Array.type, but it is lost when converting an array into JSON or
+    Python objects.
+
     Args:
         arrays: Array-like data (anything #ak.to_layout recognizes).
         depth_limit (None or int, default is None): If None, attempt to fully
@@ -131,39 +164,6 @@ def broadcast_arrays(
         ...                     [[1.1, 2.2, 3.3],    [], [4.4, 5.5]])
         [<Array [[100, 100, 100], [], [300, 300]] type='3 * var * int64'>,
          <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>]
-
-        One typically wants single-item-per-element data to be duplicated to
-        match multiple-items-per-element data. Operations on the broadcasted
-        arrays like::
-
-            one_dimensional + nested_lists
-
-        would then have the same effect as the procedural code::
-
-            for x, outer in zip(one_dimensional, nested_lists):
-                output = []
-                for inner in outer:
-                    output.append(x + inner)
-                yield output
-
-        where `x` has the same value for each `inner` in the inner loop.
-
-        Awkward Array's broadcasting manages to have it both ways by applying the
-        following rules:
-
-        * If all dimensions are regular (i.e. #ak.types.RegularType), like NumPy,
-          implicit broadcasting aligns to the right, like NumPy.
-        * If any dimension is variable (i.e. #ak.types.ListType), which can
-          never be true of NumPy, implicit broadcasting aligns to the left.
-        * Explicit broadcasting with a length-1 regular dimension always
-          broadcasts, like NumPy.
-
-        Thus, it is important to be aware of the distinction between a dimension
-        that is declared to be regular in the type specification and a dimension
-        that is allowed to be variable (even if it happens to have the same length
-        for all elements). This distinction is can be accessed through the
-        #ak.Array.type, but it is lost when converting an array into JSON or
-        Python objects.
 
         If arrays have the same depth but different lengths of nested
         lists, attempting to broadcast them together is a broadcasting error.
