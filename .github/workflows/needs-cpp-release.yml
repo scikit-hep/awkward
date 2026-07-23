@@ -48,9 +48,6 @@ jobs:
           submodules: true
           persist-credentials: false
 
-      - name: Prepare build files
-        run: pipx run nox -s prepare
-
       - name: Build awkward-cpp sdist
         run: pipx run build --sdist awkward-cpp
 

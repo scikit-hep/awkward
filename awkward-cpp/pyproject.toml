@@ -60,14 +60,17 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 minimum-version = "build-system.requires"
 build-dir = "build/{cache_tag}"
 sdist.reproducible = true
+# Run CMake configure before packing the sdist so that the generated artefacts
+# below are created from the repository sources and shipped in the sdist.
+sdist.cmake = true
 sdist.include = [
-    "header-only",
-    "include/awkward/kernels.h",
-    "src/awkward_cpp/_kernel_signatures.py",
-    "tests-spec",
-    "tests-spec-explicit",
-    "tests-cpu-kernels",
-    "tests-cpu-kernels-explicit"
+    "/header-only",
+    "/include/awkward/kernels.h",
+    "/src/awkward_cpp/_kernel_signatures.py",
+    "/tests-spec",
+    "/tests-spec-explicit",
+    "/tests-cpu-kernels",
+    "/tests-cpu-kernels-explicit"
 ]
 sdist.exclude = [
   "rapidjson/bin",
@@ -76,6 +79,21 @@ sdist.exclude = [
 [[tool.scikit-build.overrides]]
 if.platform-system = "darwin"
 cmake.version = ">=3.29"
+
+# Generating the kernel artefacts (only possible and only needed when building
+# from the repository, not from an sdist) needs pyyaml; the kernel tests, which
+# are generated only when packing the sdist, additionally need numpy.
+[[tool.scikit-build.overrides]]
+if.from-sdist = false
+build.requires = ["pyyaml"]
+
+# scikit-build-core < 1.0 evaluates requires overrides as the sdist state, so
+# older versions (harmlessly) request numpy for wheel builds too; drop this
+# note when the build-system minimum reaches >= 1.0.
+[[tool.scikit-build.overrides]]
+if.from-sdist = false
+if.state = "sdist"
+build.requires = ["pyyaml", "numpy"]
 
 
 [tool.cibuildwheel]

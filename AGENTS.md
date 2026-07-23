@@ -9,20 +9,18 @@ This repo ships **two PyPI packages** from one repository:
 - **`awkward`** — pure Python, in `src/awkward`. Released frequently.
 - **`awkward-cpp`** — compiled C++ kernels (pybind11 + scikit-build-core), in `awkward-cpp/`. Versioned independently, released rarely (compilation takes hours in CI). `pyproject.toml` pins the exact `awkward-cpp` version that `awkward` requires.
 
-Because parts of `awkward-cpp` are generated, a fresh clone will not build until you run the `prepare` step.
+Parts of `awkward-cpp` are generated; building `awkward-cpp` from the repository generates them automatically (CMake runs the `dev/` generation scripts at configure time).
 
 ## Development setup
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward.git  # rapidjson submodule
-nox -s prepare                      # generate headers, kernel signatures, kernel tests, docs data
-python -m pip install -v ./awkward-cpp
+python -m pip install -v ./awkward-cpp   # generates headers and kernel signatures
 python -m pip install -e .
 ```
 
-- `noxfile.py` is a uv script (`./noxfile.py -s prepare` also works without nox installed).
-- `nox -s prepare -- --headers --signatures --tests --docs` runs selected generation targets only; `nox -R -s ...` reuses the session venv.
-- Python-only changes need no rebuild (editable install). Rebuilding `awkward-cpp` is only needed when C++ changes; for fast iteration install build deps and use `pip install --no-build-isolation --check-build-dependencies ./awkward-cpp`.
+- `nox -s prepare` runs the generation scripts without building; it accepts `--headers --signatures --tests --docs` to select targets (the build only covers `--headers` and `--signatures`; kernel tests and docs data still need `prepare`). `noxfile.py` is a uv script (`./noxfile.py -s prepare` also works without nox installed); `nox -R -s ...` reuses the session venv.
+- Python-only changes need no rebuild (editable install). Rebuilding `awkward-cpp` is only needed when C++ or the kernel spec changes; for fast iteration install build deps (including `pyyaml` and `numpy`) and use `pip install --no-build-isolation --check-build-dependencies ./awkward-cpp`.
 
 ## Testing
 
@@ -33,7 +31,7 @@ python -m pytest -n auto awkward-cpp/tests-spec         # generated kernel-spec 
 python -m pytest -n auto awkward-cpp/tests-cpu-kernels  # generated tests against compiled kernels
 ```
 
-CUDA suites (`tests-cuda`, `tests-cuda-kernels`) require an Nvidia GPU + CuPy. The generated kernel test dirs only exist after `nox -s prepare` (the `--tests` target).
+CUDA suites (`tests-cuda`, `tests-cuda-kernels`) require an Nvidia GPU + CuPy. The generated kernel test dirs are created by `nox -s prepare -- --tests`.
 
 Test files are named `tests/test_XXXX-description.py` where `XXXX` is the GitHub issue or PR number (enforced by `dev/validate-test-names.py`). New code needs a new test file following this convention.
 
@@ -69,7 +67,7 @@ There is also a custom flake8 plugin (`dev/flake8_awkward.py`) and `nox -s pylin
 - `dev/generate-kernel-signatures.py` → `awkward-cpp/include/awkward/kernels.h`, `awkward_cpp/_kernel_signatures.py`, and the CUDA signature table in `src/awkward/_connect/cuda/`.
 - `dev/generate-tests.py` + `kernel-test-data.json` → the `tests-spec*` and `tests-cpu-kernels*` suites.
 
-The hand-written C++ implementations live in `awkward-cpp/src/cpu-kernels/` (one file per kernel) and must match the spec; `nox -s diagnostics` checks kernel definitions. Adding/changing a kernel means touching the YAML spec, the C++ implementation, and (sometimes) test data, then re-running `nox -s prepare`.
+The hand-written C++ implementations live in `awkward-cpp/src/cpu-kernels/` (one file per kernel) and must match the spec; `nox -s diagnostics` checks kernel definitions. Adding/changing a kernel means touching the YAML spec, the C++ implementation, and (sometimes) test data, then running `nox -s prepare -- --signatures --tests` (a rebuild regenerates signatures but not tests) and rebuilding `awkward-cpp`.
 
 **`kernel-specification.yml` is the single source of truth for all backends** — the canonical signature, semantics, edge-case behavior, and Python reference. CPU C++ and CUDA kernels must conform to it identically: Awkward guarantees cross-backend consistency (NumPy, CuPy, JAX, typetracer, compiled kernels), so any divergence breaks slicing, broadcasting, masking, union, and Dask/JAX typetracer guarantees. Do **not** introduce CUDA-only behavior, reorder arguments, change pointer/buffer types, alter edge cases, add kernels directly in C++/CUDA, or bypass the generation pipeline. GPU optimizations are fine only if semantics stay bit-for-bit identical.
 
