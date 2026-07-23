@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.11",
+    "scikit-build-core>=1.0",
     "pybind11>=3",
 ]
 build-backend = "scikit_build_core.build"
@@ -59,7 +59,10 @@ Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
 [tool.scikit-build]
 minimum-version = "build-system.requires"
 build-dir = "build/{cache_tag}"
-sdist.reproducible = true
+wheel.reproducible = true
+messages.after-failure = """
+{bold.red}awkward-cpp failed to build.{normal} If you are building from a git checkout, \
+make sure you ran {bold}nox -s prepare{normal} first (see CONTRIBUTING.md)."""
 sdist.include = [
     "header-only",
     "include/awkward/kernels.h",
