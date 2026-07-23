@@ -30,7 +30,15 @@ def almost_equal(
     check_regular: bool = True,
     check_named_axis: bool = True,
 ):
-    """
+    """Returns True if two arrays are equal within the given tolerances and options.
+
+    The relative difference (`rtol * abs(b)`) and the absolute difference
+    `atol` are added together to compare against the absolute difference
+    between `left` and `right`.
+
+    TypeTracer arrays are not supported, as there is very little information
+    to be compared.
+
     Args:
         left: Array-like data (anything #ak.to_layout recognizes).
         right: Array-like data (anything #ak.to_layout recognizes).
@@ -43,15 +51,9 @@ def almost_equal(
             unequal.
         check_named_axis: bool (default=True) whether to consider named axes as unequal.
 
-    Return True if the two array-like arguments are considered equal for the
-    given options. Otherwise, return False.
-
-    The relative difference (`rtol * abs(b)`) and the absolute difference `atol`
-    are added together to compare against the absolute difference between `left`
-    and `right`.
-
-    TypeTracer arrays are not supported, as there is very little information to
-    be compared.
+    Returns:
+        True if the two array-like arguments are equal within the given options
+        and tolerances, False otherwise.
     """
     # Dispatch
     yield left, right
