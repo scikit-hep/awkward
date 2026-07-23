@@ -11,6 +11,7 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     NAMED_AXIS_KEY,
@@ -198,6 +199,10 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
 
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
+
+    # Integer squares (x * x) overflow before reduction; promote integral data
+    # to float64 once (no-op and zero copy for floating inputs), matching NumPy.
+    x = promote_integral_to_float64(x)
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)

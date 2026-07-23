@@ -43,6 +43,43 @@ K = TypeVar("K")
 V = TypeVar("V")
 
 
+def _has_integral_leaf(layout) -> bool:
+    """True if any NumpyArray leaf of ``layout`` is bool/integer (dtype kind b, i, u)."""
+    import awkward as ak
+
+    found = False
+
+    def action(node, **kwargs):
+        nonlocal found
+        if node.is_numpy and node.dtype.kind in "biu":
+            found = True
+
+    ak._do.recursively_apply(layout, action, return_array=False)
+    return found
+
+
+def promote_integral_to_float64(array):
+    """Promote bool/integer data to ``float64`` to avoid integer overflow in
+    summations, matching NumPy's reduction dtype for ``mean``/``var``/``std``.
+
+    Floating and complex data is returned unchanged, so there is no copy for the
+    common (already-floating) case. The cast is performed by the array's own
+    backend, so on GPU it stays on device -- no host transfer.
+    """
+    import awkward as ak
+
+    if _has_integral_leaf(array.layout):
+        return ak.operations.ak_values_astype._impl(
+            array,
+            np.float64,
+            including_unknown=False,
+            highlevel=True,
+            behavior=None,
+            attrs=None,
+        )
+    return array
+
+
 def merge_mappings(
     mappings: Sequence[Mapping[K, V]], default: Mapping[K, V] | None = None
 ) -> Mapping[K, V]:

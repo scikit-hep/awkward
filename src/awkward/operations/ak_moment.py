@@ -9,6 +9,7 @@ from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     AxisName,
@@ -120,6 +121,10 @@ def _impl(
 
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
+
+    # Integer powers (x ** n) overflow before reduction; promote integral data
+    # to float64 once (no-op and zero copy for floating inputs), matching NumPy.
+    x = promote_integral_to_float64(x)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
