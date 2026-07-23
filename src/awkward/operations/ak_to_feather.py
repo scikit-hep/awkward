@@ -30,7 +30,18 @@ def to_feather(
     chunksize=None,
     feather_version=2,
 ):
-    """
+    """Writes an Awkward Array to a Feather file (through pyarrow).
+
+    If the `array` does not contain records at top-level, the Arrow table will
+    consist of one field whose name is `""` iff. `extensionarray` is False.
+
+    If `extensionarray` is True`, use a custom Arrow extension to store this array.
+    Otherwise, generic Arrow arrays are used, and if the `array` does not
+    contain records at top-level, the Arrow table will consist of one field whose
+    name is `""`. See #ak.to_arrow_table for more details.
+
+    See also #ak.from_feather.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         destination (str): Local destination path, passed to
@@ -73,20 +84,13 @@ def to_feather(
             Version 2 is the current. Version 1 is the more limited legacy format. If not
             provided, version 2 is used.
 
-    Writes an Awkward Array to a Feather file (through pyarrow).
+    Returns:
+        None. The contents of `array` are written to the given Feather file
+        (through pyarrow).
 
+    Examples:
         >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
         >>> ak.to_feather(array, "filename.feather")
-
-    If the `array` does not contain records at top-level, the Arrow table will
-    consist of one field whose name is `""` iff. `extensionarray` is False.
-
-    If `extensionarray` is True`, use a custom Arrow extension to store this array.
-    Otherwise, generic Arrow arrays are used, and if the `array` does not
-    contain records at top-level, the Arrow table will consist of one field whose
-    name is `""`. See #ak.to_arrow_table for more details.
-
-    See also #ak.from_feather.
     """
 
     # Dispatch

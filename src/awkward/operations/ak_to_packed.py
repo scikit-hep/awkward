@@ -13,18 +13,7 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
-        attrs (None or dict): Custom attributes for the output array, if
-            high-level.
-
-    Returns an array with the same type and values as the input,
-    with all virtual buffers materialized (see #ak.materialize) and inner structures packed:
+    """Packs an array's inner structure and materializes its virtual buffers.
 
     - #ak.contents.NumpyArray becomes C-contiguous (if it isn't already)
     - #ak.contents.RegularArray trims unreachable content
@@ -41,8 +30,26 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
     - #ak.contents.UnionArray gets projected contents
     - #ak.record.Record becomes a record over a single-item #ak.contents.RecordArray
 
-    Example:
+    Performing these operations will minimize the output size of data sent to
+    #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
+    #ak.to_parquet, do not need this because packing is part of that conversion).
 
+    See also #ak.to_buffers.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
+
+    Returns:
+        An array with the same type and values as the input,
+        with all virtual buffers materialized (see #ak.materialize) and inner structures packed.
+
+    Examples:
         >>> a = ak.Array([[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]])
         >>> b = a[::-1]
         >>> b.layout
@@ -66,12 +73,6 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
                 [ 7  8  9 10  6  4  5  1  2  3]
             </NumpyArray></content>
         </ListOffsetArray>
-
-    Performing these operations will minimize the output size of data sent to
-    #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
-    #ak.to_parquet, do not need this because packing is part of that conversion).
-
-    See also #ak.to_buffers.
     """
     # Dispatch
     yield (array,)
