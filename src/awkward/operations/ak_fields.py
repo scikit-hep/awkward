@@ -13,12 +13,7 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def fields(array):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-
-    Extracts record fields or tuple slot numbers from `array` (many types
-    supported, including all Awkward Arrays and Records).
+    """Returns a list of field names or tuple slot numbers for the outermost record.
 
     If the array contains nested records, only the outermost record is
     queried. If it contains tuples instead of records, this function outputs
@@ -27,6 +22,13 @@ def fields(array):
 
     If the array contains neither tuples nor records, this returns an empty
     list.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
+    Returns:
+        A list of the field names (or tuple slot numbers) of the outermost record of
+        `array` (many types supported, including all Awkward Arrays and Records).
     """
     # Dispatch
     yield (array,)
