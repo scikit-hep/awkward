@@ -45,6 +45,19 @@ def cartesian(
     `arrays` is another kind of iterable) that hold the combinations of
     elements, and it can introduce new levels of nesting.
 
+    The order of the output is fixed: it is always lexicographical in the
+    order that the `arrays` are written.
+
+    To emulate an SQL or Pandas "group by" operation, put the keys that you
+    wish to group by *first* and use `nested=[0]` or `nested=[n]` to group by
+    unique n-tuples. If necessary, record keys can later be reordered with a
+    list of strings in #ak.Array.__getitem__.
+
+    To get list index positions in the tuples/records, rather than data from
+    the original `arrays`, use #ak.argcartesian instead of #ak.cartesian. The
+    #ak.argcartesian form can be particularly useful as nested indexing in
+    #ak.Array.__getitem__.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -206,19 +219,6 @@ def cartesian(
          [(4, 1.1, 'a'), (4, 1.1, 'b')],
          [(4, 2.2, 'a'), (4, 2.2, 'b')],
          [(4, 3.3, 'a'), (4, 3.3, 'b')]]
-
-        The order of the output is fixed: it is always lexicographical in the
-        order that the `arrays` are written.
-
-        To emulate an SQL or Pandas "group by" operation, put the keys that you
-        wish to group by *first* and use `nested=[0]` or `nested=[n]` to group by
-        unique n-tuples. If necessary, record keys can later be reordered with a
-        list of strings in #ak.Array.__getitem__.
-
-        To get list index positions in the tuples/records, rather than data from
-        the original `arrays`, use #ak.argcartesian instead of #ak.cartesian. The
-        #ak.argcartesian form can be particularly useful as nested indexing in
-        #ak.Array.__getitem__.
     """
     # Dispatch
     if isinstance(arrays, Mapping):
