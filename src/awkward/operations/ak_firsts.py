@@ -25,6 +25,8 @@ np = NumpyMetadata.instance()
 def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     """Returns the first element of each list, or None for each empty list.
 
+    See #ak.singletons to invert this function.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -60,8 +62,6 @@ def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
          None,
          4.4,
          5.5]
-
-        See #ak.singletons to invert this function.
     """
     # Dispatch
     yield (array,)

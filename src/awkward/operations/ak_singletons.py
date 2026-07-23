@@ -23,6 +23,8 @@ np = NumpyMetadata.instance()
 def singletons(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
     """Wraps each value in a length-1 list, or an empty list for each missing value.
 
+    See #ak.firsts to invert this function.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -58,8 +60,6 @@ def singletons(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
          [],
          [4.4],
          [5.5]]
-
-        See #ak.firsts to invert this function.
     """
     # Dispatch
     yield (array,)

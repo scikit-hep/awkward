@@ -28,6 +28,19 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None, attrs=N
     calculations with it, such as
     [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html).
 
+    Another syntax for::
+
+        ak.mask(array, array_of_booleans)
+
+    is::
+
+        array.mask[array_of_booleans]
+
+    (which is 5 characters away from simply filtering the `array`).
+
+    See #ak.broadcast_arrays for details about broadcasting and the generalized
+    set of broadcasting rules.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         mask (array of booleans): The mask that overlays elements in the
@@ -89,19 +102,6 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None, attrs=N
 
         >>> ak.mask(array, good)
         <Array [[[None, 1, None], [], ..., [5]], ...] type='2 * var * var * ?int64'>
-
-        See #ak.broadcast_arrays for details about broadcasting and the generalized
-        set of broadcasting rules.
-
-        Another syntax for::
-
-            ak.mask(array, array_of_booleans)
-
-        is::
-
-            array.mask[array_of_booleans]
-
-        (which is 5 characters away from simply filtering the `array`).
     """
     # Dispatch
     yield array, mask
