@@ -18,6 +18,8 @@ np = NumpyMetadata.instance()
 def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
     """Returns the lengths of runs of identical values at the deepest level.
 
+    See also #ak.num, #ak.argsort, #ak.unflatten.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -91,8 +93,6 @@ def run_lengths(array, *, highlevel=True, behavior=None, attrs=None):
         >>> ak.unflatten(sorted, counts, axis=-1).show()
         [[[{x: 1, y: 1.1}, {x: 1, y: 1.1}], [{x: 2, y: 2.2}]],
          [[{x: 1, y: 1.1}], [{x: 2, y: 2.2}], [{x: 3, y: 3.3}]]]
-
-        See also #ak.num, #ak.argsort, #ak.unflatten.
     """
     # Dispatch
     yield (array,)
