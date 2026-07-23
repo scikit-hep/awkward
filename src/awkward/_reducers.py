@@ -334,8 +334,15 @@ class Sum(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    def __init__(self, dtype: DTypeLike | None = None):
+        # Optional forced accumulator/output dtype. When set (e.g. float64),
+        # integer/bool inputs are summed *directly* into that dtype, matching
+        # NumPy's `np.add.reduce(x, dtype=...)` and avoiding integer overflow
+        # without materialising a promoted copy of the input.
+        self._dtype = None if dtype is None else np.dtype(dtype)
+
     def axis_none_reducer(self) -> AxisNoneSum:
-        return AxisNoneSum()
+        return AxisNoneSum(self._dtype)
 
     def apply(
         self,
@@ -386,12 +393,24 @@ class Sum(KernelReducer):
                 )
             else:
                 raise NotImplementedError
+            # bool sums cannot overflow (max == segment length); if a float
+            # accumulator was requested, cast the small (outlength) result.
+            if self._dtype is not None:
+                result = result.astype(self._dtype)
             return ak.contents.NumpyArray(result, backend=array.backend)
         else:
+            is_complex = array.dtype.type in (np.complex128, np.complex64)
             kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+            # A forced float accumulator (self._dtype) sums integers directly
+            # into that dtype via the awkward_reduce_sum_<out>_<in>_64 kernel,
+            # so no promoted input copy is allocated. Not applied to complex.
+            if self._dtype is not None and not is_complex:
+                result_dtype = self._dtype
+            else:
+                result_dtype = self._promote_integer_rank(kernel_array_data.dtype)
             result = array.backend.nplike.empty(
                 self._length_for_kernel(array.dtype.type, outlength),
-                dtype=self._promote_integer_rank(kernel_array_data.dtype),
+                dtype=result_dtype,
             )
             if array.dtype.type in (np.complex128, np.complex64):
                 assert offsets.nplike is array.backend.nplike
@@ -424,8 +443,12 @@ class Sum(KernelReducer):
                     )
                 )
 
+            if self._dtype is not None and not is_complex:
+                final_dtype = self._dtype
+            else:
+                final_dtype = self._promote_integer_rank(array.dtype)
             return ak.contents.NumpyArray(
-                result.view(self._promote_integer_rank(array.dtype)),
+                result.view(final_dtype),
                 backend=array.backend,
             )
 
@@ -445,7 +468,12 @@ class AxisNoneSum(Sum):
 
         nplike = array.backend.nplike
         reduce_fn = getattr(nplike, self.name)
-        result_scalar = reduce_fn(array.data, axis=None)
+        # A forced accumulator dtype maps straight onto NumPy/CuPy's `dtype=`
+        # argument, casting element-by-element inside the reduction (no copy).
+        if self._dtype is not None and array.dtype.kind != "c":
+            result_scalar = reduce_fn(array.data, axis=None, dtype=self._dtype)
+        else:
+            result_scalar = reduce_fn(array.data, axis=None)
         result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
 
         return ak.contents.NumpyArray(result_array, backend=array.backend)

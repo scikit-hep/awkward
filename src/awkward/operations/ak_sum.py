@@ -27,6 +27,7 @@ def sum(
     *,
     keepdims=False,
     mask_identity=False,
+    dtype=None,
     highlevel=True,
     behavior=None,
     attrs=None,
@@ -50,6 +51,11 @@ def sum(
         mask_identity (bool): If True, reducing over empty lists results in
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
+        dtype (None or dtype): If not None, the reduction accumulates directly
+            into this dtype (e.g. `np.float64`), matching NumPy's
+            `np.sum(..., dtype=...)`. Casting integer/bool input to `float64`
+            this way avoids integer overflow without allocating a promoted copy
+            of the input. If None, the default integer-promotion rules apply.
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -217,7 +223,9 @@ def sum(
     yield (array,)
 
     # Implementation
-    return _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs)
+    return _impl(
+        array, axis, keepdims, mask_identity, highlevel, behavior, attrs, dtype
+    )
 
 
 @high_level_function()
@@ -282,7 +290,7 @@ def nansum(
     )
 
 
-def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
+def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs, dtype=None):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
@@ -303,7 +311,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
 
     axis = regularize_axis(axis, none_allowed=True)
 
-    reducer = ak._reducers.Sum()
+    reducer = ak._reducers.Sum(dtype=dtype)
 
     out = ak._do.reduce(
         layout,
