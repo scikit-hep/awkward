@@ -70,6 +70,9 @@ jobs:
     - name: Setup uv
       uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
 
+    - name: Generate kernel tests for the wheel test suite
+      run: pipx run nox -s prepare -- --tests
+
     - uses: pypa/cibuildwheel@4726cd35bb13f7bde50cf2761f2499ac7b3aa32c # v4.1.1
       env:
         CIBW_ARCHS_MACOS: universal2
@@ -96,6 +99,9 @@ jobs:
 
     - name: Setup uv
       uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+
+    - name: Generate kernel tests for the wheel test suite
+      run: pipx run nox -s prepare -- --tests
 
     - uses: pypa/cibuildwheel@4726cd35bb13f7bde50cf2761f2499ac7b3aa32c # v4.1.1
       env:
