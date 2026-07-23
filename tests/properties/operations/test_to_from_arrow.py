@@ -48,86 +48,174 @@ def arrow_dtypes() -> st.SearchStrategy[np.dtype]:
     return st.sampled_from(SUPPORTED_ARROW_DTYPES)
 
 
-def arrow_writable(a: ak.Array) -> bool:
-    return _nodes_writable(a.layout)
+def arrow_compatible(a: ak.Array) -> bool:
+    """Arrays whose type the Arrow conversion preserves.
+
+    The clauses in `_loses_type` are limits of the conversion itself and
+    stay even when every cited issue is fixed.
+    """
+    return not _loses_type(a.layout)
 
 
-def _nodes_writable(
-    layout: ak.contents.Content,
-    nullable: bool = False,
-    sliced: bool = False,
-    lossless: bool = True,
-) -> bool:
-    """Exclude layouts that `to_arrow` or `from_arrow` currently mishandles.
+def _loses_type(layout: ak.contents.Content, nullable: bool = False) -> bool:
+    """The roundtrip changes the array's type without corrupting values.
 
-    `nullable` tracks whether Arrow validity bytes flow into this node from
-    an enclosing option: they start at option nodes, pass through records
-    and indexed nodes, and stop below lists. A var-length list receiving
-    validity bytes whose offsets do not start at zero is compacted against
-    unshifted content in `ListOffsetArray._to_arrow`, shifting every list
-    by `offsets[0]` (data corruption, #4222).
-
-    `sliced` tracks whether `to_arrow` reaches this node through a
-    transformation that can move list offsets away from zero even if they
-    were constructed zero-based: a list trims its content to
-    `offsets[0]:offsets[length]`, an indexed node projects its content, a
-    `ListArray` may be compacted from anywhere, and a union selects each
-    child through its index; such nodes can present any list below an
-    option with nonzero offsets, triggering #4222.
-
-    `lossless` distinguishes exact reconstruction from mere convertibility:
-    layouts whose type the roundtrip changes without crashing or corrupting
-    values (mergeable union contents, unknown-type fields under an option)
-    are excluded only when `lossless` is true.
+    `nullable` tracks whether Arrow validity bytes flow into this node
+    from an enclosing option: they start at option nodes, pass through
+    records and indexed nodes, and stop below lists.
     """
     if layout.is_union:
-        if nullable:
-            # `UnionArray._to_arrow` scatters incoming validity bytes with
-            # a per-child index that it misapplies when the index skips
-            # values (IndexError, #4228)
-            return False
-        if lossless and any(
+        if any(
             ak._do.mergeable(x, y, mergebool=False)
             for x, y in itertools.combinations(layout.contents, 2)
         ):
             # `from_arrow` rebuilds unions with `UnionArray.simplified`,
             # which merges mergeable contents (e.g. `union[float64, int64]`
             # reads back as `float64`)
-            return False
-        return all(_nodes_writable(x, False, True, lossless) for x in layout.contents)
+            return True
+        return any(_loses_type(x, False) for x in layout.contents)
     if layout.is_record:
-        return all(
-            _nodes_writable(x, nullable, sliced, lossless) for x in layout.contents
-        )
+        return any(_loses_type(x, nullable) for x in layout.contents)
     if layout.is_regular:
-        # `from_arrow` loses the length of a size-0 fixed-size list (a
-        # `3 * 0 * float64` array reads back with length 0, #4229)
-        return layout.size > 0 and _nodes_writable(
-            layout.content, False, sliced, lossless
-        )
+        return _loses_type(layout.content, False)
+    if layout.is_option:
+        return _loses_type(layout.content, True)
+    if layout.is_indexed:
+        return _loses_type(layout.content, nullable)
+    if layout.is_list:
+        return _loses_type(layout.content, False)
+    if layout.is_unknown:
+        # Arrow's null type is intrinsically nullable: an unknown-type
+        # record field under an option reads back as `?unknown`
+        return nullable
+    return False
+
+
+def has_issues(a: ak.Array) -> bool:
+    """Arrays affected by a known issue in the conversion.
+
+    One function per known issue, each named after the issue whose
+    released fix deletes it; with all of them gone the test filters
+    reduce to `arrow_compatible` and `table_compatible`.
+    """
+    if _has_issue_4221(a.layout):
+        return True
+    if _has_issue_4222(a.layout):
+        return True
+    if _has_issue_4228(a.layout):
+        return True
+    if _has_issue_4229(a.layout):
+        return True
+    return False
+
+
+def _has_issue_4221(layout: ak.contents.Content) -> bool:
+    """`to_arrow` crashes projecting nulls over a zero-length content
+    (IndexError in `ListOffsetArray._to_arrow`, #4221)."""
+    if (
+        isinstance(layout, ak.contents.IndexedOptionArray)
+        and layout.length > 0
+        and layout.content.length == 0
+    ):
+        return True
+    return any(_has_issue_4221(x) for x in _children(layout))
+
+
+def _has_issue_4222(
+    layout: ak.contents.Content,
+    nullable: bool = False,
+    sliced: bool = False,
+) -> bool:
+    """A nullable var-length list whose offsets do not start at zero is
+    compacted against unshifted content in `ListOffsetArray._to_arrow`,
+    shifting every list by `offsets[0]` (data corruption, #4222).
+
+    `nullable` tracks whether Arrow validity bytes flow into this node
+    from an enclosing option: they start at option nodes, pass through
+    records and indexed nodes, and stop below lists.
+
+    `sliced` tracks whether `to_arrow` reaches this node through a
+    transformation that can move list offsets away from zero even if
+    they were constructed zero-based: a list trims its content to
+    `offsets[0]:offsets[length]`, an indexed node projects its content,
+    a `ListArray` may be compacted from anywhere, and a union selects
+    each child through its index; such nodes can present any list below
+    an option with nonzero offsets.
+    """
+    if layout.is_union:
+        return any(_has_issue_4222(x, False, True) for x in layout.contents)
+    if layout.is_record:
+        return any(_has_issue_4222(x, nullable, sliced) for x in layout.contents)
+    if layout.is_regular:
+        return _has_issue_4222(layout.content, False, sliced)
     if layout.is_option:
         if isinstance(layout, ak.contents.IndexedOptionArray):
-            if layout.length > 0 and layout.content.length == 0:
-                # `to_arrow` crashes projecting nulls over a zero-length
-                # content (IndexError in `ListOffsetArray._to_arrow`, #4221)
-                return False
-            return _nodes_writable(layout.content, True, True, lossless)
-        return _nodes_writable(layout.content, True, sliced, lossless)
+            return _has_issue_4222(layout.content, True, True)
+        return _has_issue_4222(layout.content, True, sliced)
     if layout.is_indexed:
-        return _nodes_writable(layout.content, nullable, True, lossless)
+        return _has_issue_4222(layout.content, nullable, True)
     if layout.is_list:
         if nullable and layout.length > 0 and (sliced or layout.starts[0] != 0):
-            return False
+            return True
         if isinstance(layout, ak.contents.ListOffsetArray):
             child_sliced = sliced or bool(layout.offsets[0] != 0)
         else:
             child_sliced = True
-        return _nodes_writable(layout.content, False, child_sliced, lossless)
-    if layout.is_unknown:
-        # Arrow's null type is intrinsically nullable: an unknown-type
-        # record field under an option reads back as `?unknown`
-        return not (lossless and nullable)
-    return True
+        return _has_issue_4222(layout.content, False, child_sliced)
+    return False
+
+
+def _has_issue_4228(layout: ak.contents.Content, nullable: bool = False) -> bool:
+    """`UnionArray._to_arrow` scatters incoming validity bytes with a
+    per-child index that it misapplies when the index skips values
+    (IndexError, #4228).
+
+    `nullable` tracks validity bytes as in `_has_issue_4222`.
+    """
+    if layout.is_union:
+        if nullable:
+            return True
+        return any(_has_issue_4228(x, False) for x in layout.contents)
+    if layout.is_record:
+        return any(_has_issue_4228(x, nullable) for x in layout.contents)
+    if layout.is_regular:
+        return _has_issue_4228(layout.content, False)
+    if layout.is_option:
+        return _has_issue_4228(layout.content, True)
+    if layout.is_indexed:
+        return _has_issue_4228(layout.content, nullable)
+    if layout.is_list:
+        return _has_issue_4228(layout.content, False)
+    return False
+
+
+def _has_issue_4229(layout: ak.contents.Content) -> bool:
+    """`from_arrow` loses the length of a size-0 fixed-size list (a
+    `3 * 0 * float64` array reads back with length 0, #4229)."""
+    if layout.is_regular and layout.size == 0:
+        return True
+    return any(_has_issue_4229(x) for x in _children(layout))
+
+
+def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
+    """The direct child layouts of a node."""
+    if layout.is_record or layout.is_union:
+        return list(layout.contents)
+    if layout.is_option or layout.is_indexed or layout.is_list:
+        return [layout.content]
+    return []
+
+
+def _strip_options(
+    layout: ak.contents.Content,
+) -> tuple[ak.contents.Content, bool]:
+    """Strip option and indexed wrappers, reporting whether an option
+    was among them."""
+    is_option = False
+    while layout.is_option or layout.is_indexed:
+        is_option = is_option or layout.is_option
+        layout = layout.content
+    return layout, is_option
 
 
 @suppress_too_slow
@@ -138,7 +226,7 @@ def _nodes_writable(
         allow_byte_masked=False,
         allow_bit_masked=False,
         allow_unmasked=False,
-    ).filter(arrow_writable)
+    ).filter(lambda a: arrow_compatible(a) and not has_issues(a))
 )
 def test_roundtrip(a: ak.Array) -> None:
     """`to_arrow` followed by `from_arrow` reconstructs the array."""
@@ -155,7 +243,7 @@ def test_roundtrip(a: ak.Array) -> None:
         # index reference crashes `to_arrow` (IndexError in
         # `ListOffsetArray._to_arrow` via `UnionArray._to_arrow`, #4228)
         allow_union=False,
-    ).filter(arrow_writable)
+    ).filter(lambda a: arrow_compatible(a) and not has_issues(a))
 )
 def test_roundtrip_masked(a: ak.Array) -> None:
     """Option-type arrays roundtrip through Arrow validity bitmaps.
@@ -168,11 +256,15 @@ def test_roundtrip_masked(a: ak.Array) -> None:
     assert ak.array_equal(a, returned, equal_nan=True, same_content_types=False)
 
 
-def table_writable(a: ak.Array) -> bool:
-    layout, is_option = a.layout, False
-    while layout.is_option or layout.is_indexed:
-        is_option = is_option or layout.is_option
-        layout = layout.content
+def table_compatible(a: ak.Array) -> bool:
+    """Arrays that additionally survive the table wrapping of
+    `to_arrow_table`.
+
+    Like `arrow_compatible`, which this extends, the clauses here are
+    limits of the representation and stay even when every cited issue is
+    fixed.
+    """
+    layout, is_option = _strip_options(a.layout)
     if layout.is_record:
         if layout.fields == [""]:
             # collides with the anonymous column that `to_arrow_table` uses
@@ -185,7 +277,7 @@ def table_writable(a: ak.Array) -> bool:
             # a valid row whose fields are all null reads back as a null
             # row (outermost struct validity is not stored)
             return False
-    return _nodes_writable(a.layout)
+    return arrow_compatible(a)
 
 
 @suppress_too_slow
@@ -197,7 +289,7 @@ def table_writable(a: ak.Array) -> bool:
         # schema comparison
         allow_empty=False,
         allow_union=False,
-    ).filter(table_writable)
+    ).filter(lambda a: table_compatible(a) and not has_issues(a))
 )
 def test_roundtrip_table(a: ak.Array) -> None:
     """Arrays roundtrip through `to_arrow_table`, and `from_arrow_schema`
@@ -214,10 +306,6 @@ def test_roundtrip_table(a: ak.Array) -> None:
     assert ak.from_arrow_schema(table.schema) == returned.layout.form
 
 
-def stable_writable(a: ak.Array) -> bool:
-    return _nodes_writable(a.layout, lossless=False)
-
-
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
@@ -225,7 +313,7 @@ def stable_writable(a: ak.Array) -> bool:
         # pyarrow's `Array.equals` counts NaN as unequal to itself and has
         # no `equal_nan` option; NaN coverage lives in the tests above
         allow_nan=False,
-    ).filter(stable_writable)
+    ).filter(lambda a: not has_issues(a))
 )
 def test_roundtrip_stable(a: ak.Array) -> None:
     """One roundtrip brings the conversion to a fixed point.
@@ -235,8 +323,8 @@ def test_roundtrip_stable(a: ak.Array) -> None:
     read side (`from_arrow` merges mergeable union contents), so neither
     the array nor the first Arrow conversion is reproducible in general.
     After one full roundtrip both normalizations have happened: converting
-    the reconstruction again yields an identical Arrow array. Layouts that
-    `to_arrow` crashes on or corrupts (#4219, #4221, #4222) are still
+    the reconstruction again yields an identical Arrow array. Layouts
+    affected by `has_issues` (or by #4219, in the dtype filter) are still
     excluded: this test does not vouch for them.
     """
     r = ak.from_arrow(ak.to_arrow(a))
