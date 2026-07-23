@@ -18,6 +18,11 @@ def values_astype(
 ):
     """Converts all numbers in the array to a new type, leaving the structure untouched.
 
+    Note, when converting values to a `np.datetime64` type that is unitless, a
+    default '[us]' unit is assumed - until further specified as numpy dtypes.
+
+    See also #ak.strings_astype.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         to (dtype or dtype specifier): Type to convert the numbers into.
@@ -48,9 +53,6 @@ def values_astype(
         >>> ak.values_astype(array, np.int32)
         <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int32'>
 
-        Note, when converting values to a `np.datetime64` type that is unitless, a
-        default '[us]' unit is assumed - until further specified as numpy dtypes.
-
         For example,
 
         >>> array = ak.Array([1567416600000])
@@ -62,8 +64,6 @@ def values_astype(
         >>> array = ak.Array([1567416600000])
         >>> ak.values_astype(array, np.dtype("M8[ms]"))
         <Array [2019-09-02T09:30:00.000] type='1 * datetime64[ms]['>
-
-        See also #ak.strings_astype.
     """
     # Dispatch
     yield (array,)

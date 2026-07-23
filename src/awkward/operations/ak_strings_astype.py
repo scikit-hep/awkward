@@ -18,6 +18,8 @@ numpy = Numpy.instance()
 def strings_astype(array, to, *, highlevel=True, behavior=None, attrs=None):
     """Converts all strings in the array to a new type, leaving the structure untouched.
 
+    See also #ak.numbers_astype.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         to (dtype or dtype specifier): Type to convert the strings into.
@@ -50,8 +52,6 @@ def strings_astype(array, to, *, highlevel=True, behavior=None, attrs=None):
         >>> array = ak.Array([["1.1", "2.2", "    3.3    "], [], ["00004.4", "-5.5"]])
         >>> ak.strings_astype(array, np.float64)
         <Array [[1.1, 2.2, 3.3], [], [4.4, -5.5]] type='3 * var * float64'>
-
-        See also #ak.numbers_astype.
     """
     # Dispatch
     yield (array,)
