@@ -19,7 +19,16 @@ def from_jax(
     attrs=None,
     primitive_policy="error",
 ):
-    """
+    """Converts a JAX Array into an Awkward Array.
+
+    The resulting layout may involve the following #ak.contents.Content types
+    (only):
+
+    * #ak.contents.NumpyArray
+    * #ak.contents.RegularArray if `regulararray=True`.
+
+    See also #ak.to_jax, #ak.from_numpy and #ak.from_jax.
+
     Args:
         array (jax.Array): The JAX Array to convert into an Awkward Array.
         regulararray (bool): If True and the array is multidimensional,
@@ -34,15 +43,8 @@ def from_jax(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a JAX Array into an Awkward Array.
-
-    The resulting layout may involve the following #ak.contents.Content types
-    (only):
-
-    * #ak.contents.NumpyArray
-    * #ak.contents.RegularArray if `regulararray=True`.
-
-    See also #ak.to_jax, #ak.from_numpy and #ak.from_jax.
+    Returns:
+        An #ak.Array built from the given JAX array.
     """
     jax.assert_registered()
     return wrap_layout(
