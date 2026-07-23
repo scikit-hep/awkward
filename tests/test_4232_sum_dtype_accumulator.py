@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 import awkward as ak
+from awkward._reducers import KernelReducer
 
 
 def _has_float64_integer_kernel():
@@ -65,3 +66,26 @@ def test_sum_segmented_no_overflow():
     a = ak.Array([[2_000_000_000, 2_000_000_000], [2_000_000_000]])
     out = ak.sum(a, axis=-1, dtype=np.float64)
     assert out.to_list() == [4_000_000_000.0, 2_000_000_000.0]
+
+
+def test_sum_segmented_bool_float64_cast():
+    # Segmented bool reduction with a forced float64 accumulator: the small
+    # (per-segment) int result is cast to float64 (Sum.apply bool branch).
+    a = ak.Array([[True, True, False], [], [True, True]])
+    out = ak.sum(a, axis=-1, dtype=np.float64)
+    assert out.to_list() == [2.0, 0.0, 2.0]
+    assert str(out.type) == "3 * float64"
+
+
+def test_sum_bool_unsupported_accumulator_raises(monkeypatch):
+    # Defensive branch: if the bool reduction's promoted result dtype is neither
+    # a 32- nor 64-bit integer, Sum.apply raises NotImplementedError. Force it
+    # by making _promote_integer_rank return an unsupported dtype.
+    monkeypatch.setattr(
+        KernelReducer,
+        "_promote_integer_rank",
+        staticmethod(lambda dtype: np.dtype(np.float32)),
+    )
+    a = ak.Array([[True, False], [True]])
+    with pytest.raises(NotImplementedError):
+        ak.sum(a, axis=-1)
