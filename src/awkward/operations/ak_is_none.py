@@ -21,7 +21,8 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns True where an element is None at a given axis depth, False otherwise.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -40,8 +41,9 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array whose value is True where an element of `array` is None;
-    False otherwise (at a given `axis` depth).
+    Returns:
+        An array whose value is True where an element of `array` is None;
+        False otherwise (at a given `axis` depth).
     """
     # Dispatch
     yield (array,)
