@@ -18,6 +18,8 @@ np = NumpyMetadata.instance()
 def to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
     """Converts one or all variable-length axes into regular ones, if possible.
 
+    See also #ak.from_regular.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or None): The dimension at which this operation is applied.
@@ -59,8 +61,6 @@ def to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
                 behavior = None
             )
         Error details: cannot convert to RegularArray because subarray lengths are not regular
-
-        See also #ak.from_regular.
     """
     # Dispatch
     yield (array,)

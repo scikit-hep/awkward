@@ -34,6 +34,36 @@ def to_buffers(
     the MutableMapping you passed in or a new dict containing the buffers (as
     NumPy arrays).
 
+    These are also the first three arguments of #ak.from_buffers, so a full
+    round-trip is
+
+        >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
+
+    The `container` argument lets you specify your own MutableMapping, which
+    might be an interface to some storage format or device (e.g. h5py). It's
+    okay if the `container` drops NumPy's `dtype` and `shape` information,
+    leaving raw bytes, since `dtype` and `shape` can be reconstituted from
+    the #ak.forms.NumpyForm.
+
+    The `buffer_key` and `form_key` arguments let you configure the names of the
+    buffers added to the `container` and string labels on each Form node, so that
+    the two can be uniquely matched later. `buffer_key` and `form_key` are distinct
+    arguments to allow for more indirection (buffer keys can differ from Form keys,
+    as long as there's a way to map them to each other) and because some Form nodes,
+    such as #ak.forms.ListForm and #ak.forms.UnionForm, have more than one attribute
+    (`starts` and `stops` for #ak.forms.ListForm and `tags` and `index` for
+    #ak.forms.UnionForm).
+
+    Awkward 1.x also included partition numbers (`"part0-"`, `"part1-"`, ...) in
+    the buffer keys. In version 2.x onward, partitioning is handled externally by
+    Dask, but partition numbers can be emulated by prepending a fixed `"partN-"`
+    string to the `buffer_key`. The `array` represents exactly one partition.
+
+    If you intend to use this function for saving data, you may want to pack it
+    first with #ak.to_packed.
+
+    See also #ak.from_buffers and #ak.to_packed.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         container (None or MutableMapping): The str \u2192 NumPy arrays (or
@@ -72,31 +102,6 @@ def to_buffers(
         that only map names to binary blobs (such as a filesystem directory).
 
     Examples:
-        These are also the first three arguments of #ak.from_buffers, so a full
-        round-trip is
-
-        >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
-
-        The `container` argument lets you specify your own MutableMapping, which
-        might be an interface to some storage format or device (e.g. h5py). It's
-        okay if the `container` drops NumPy's `dtype` and `shape` information,
-        leaving raw bytes, since `dtype` and `shape` can be reconstituted from
-        the #ak.forms.NumpyForm.
-
-        The `buffer_key` and `form_key` arguments let you configure the names of the
-        buffers added to the `container` and string labels on each Form node, so that
-        the two can be uniquely matched later. `buffer_key` and `form_key` are distinct
-        arguments to allow for more indirection (buffer keys can differ from Form keys,
-        as long as there's a way to map them to each other) and because some Form nodes,
-        such as #ak.forms.ListForm and #ak.forms.UnionForm, have more than one attribute
-        (`starts` and `stops` for #ak.forms.ListForm and `tags` and `index` for
-        #ak.forms.UnionForm).
-
-        Awkward 1.x also included partition numbers (`"part0-"`, `"part1-"`, ...) in
-        the buffer keys. In version 2.x onward, partitioning is handled externally by
-        Dask, but partition numbers can be emulated by prepending a fixed `"partN-"`
-        string to the `buffer_key`. The `array` represents exactly one partition.
-
         Here is a simple example:
 
         >>> original = ak.Array([[1, 2, 3], [], [4, 5]])
@@ -121,11 +126,6 @@ def to_buffers(
 
         >>> ak.from_buffers(form, length, container)
         <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
-
-        If you intend to use this function for saving data, you may want to pack it
-        first with #ak.to_packed.
-
-        See also #ak.from_buffers and #ak.to_packed.
     """
     # Dispatch
     yield (array,)

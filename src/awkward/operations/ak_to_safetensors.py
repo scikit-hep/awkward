@@ -38,6 +38,8 @@ def to_safetensors(
     The resulting safetensors file includes metadata containing the Awkward `form` and
     array `length`, which are required for `ak.from_safetensors` to reconstruct the array.
 
+    See also #ak.from_safetensors.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         destination (path-like): Name of the output file, file path, or
@@ -68,8 +70,6 @@ def to_safetensors(
         >>> import awkward as ak
         >>> arr = ak.Array([[1, 2, 3], [], [4]])
         >>> ak.to_safetensors(arr, "out.safetensors")
-
-        See also #ak.from_safetensors.
     """
     # Implementation
     return _impl(

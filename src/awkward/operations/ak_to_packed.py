@@ -30,6 +30,12 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
     - #ak.contents.UnionArray gets projected contents
     - #ak.record.Record becomes a record over a single-item #ak.contents.RecordArray
 
+    Performing these operations will minimize the output size of data sent to
+    #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
+    #ak.to_parquet, do not need this because packing is part of that conversion).
+
+    See also #ak.to_buffers.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -67,12 +73,6 @@ def to_packed(array, *, highlevel=True, behavior=None, attrs=None):
                 [ 7  8  9 10  6  4  5  1  2  3]
             </NumpyArray></content>
         </ListOffsetArray>
-
-        Performing these operations will minimize the output size of data sent to
-        #ak.to_buffers (though conversions through Arrow, #ak.to_arrow and
-        #ak.to_parquet, do not need this because packing is part of that conversion).
-
-        See also #ak.to_buffers.
     """
     # Dispatch
     yield (array,)
