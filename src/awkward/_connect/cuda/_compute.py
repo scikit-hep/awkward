@@ -192,6 +192,31 @@ def segmented_sort(
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
 
+    # NaN parity with the CPU kernel: NaNs must sort to the *front* of each
+    # segment in both directions. Radix sort orders them by bit pattern (they end
+    # up misplaced), so sort by a NaN-remapped key (-inf ascending / +inf
+    # descending) while carrying the *original* values, so the output keeps real
+    # NaNs but positions them correctly. Only floats with NaNs need this.
+    if num_items > 0 and fromptr.dtype.kind == "f":
+        nan_mask = cp.isnan(fromptr)
+        if bool(nan_mask.any()):
+            keys = fromptr.copy()
+            keys[nan_mask] = -cp.inf if ascending else cp.inf
+            keys_out = cp.empty_like(keys)
+            segmented_sort(
+                d_in_keys=keys,
+                d_out_keys=keys_out,
+                d_in_values=fromptr,
+                d_out_values=toptr,
+                num_items=num_items,
+                num_segments=num_segments,
+                start_offsets_in=start_o,
+                end_offsets_in=end_o,
+                order=order,
+                stream=None,
+            )
+            return
+
     segmented_sort(
         d_in_keys=fromptr,
         d_out_keys=toptr,

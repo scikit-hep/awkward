@@ -75,17 +75,17 @@ def test_argsort_matches_cpu_stable(dtype, ascending):
 @pytest.mark.parametrize("stable", [True, False])
 def test_argsort_carry_reproduces_sort(dtype, ascending, stable):
     # Regardless of tie-breaking, gathering with the argsort result must yield
-    # the same ordering as ak.sort — this validates the permutation even when
-    # stable=False (where exact indices may legitimately differ).
-    gpu = ak.to_backend(_cpu_array(dtype), "cuda")
+    # the same ordering as ak.sort. Compare against the CPU backend (the source
+    # of truth) so this validates the GPU permutation even when stable=False,
+    # where exact indices may legitimately differ.
+    cpu = _cpu_array(dtype)
+    gpu = ak.to_backend(cpu, "cuda")
 
     carry = ak.argsort(gpu, axis=-1, ascending=ascending, stable=stable)
     via_carry = ak.to_list(ak.to_backend(gpu[carry], "cpu"))
-    sorted_gpu = ak.to_list(
-        ak.to_backend(ak.sort(gpu, axis=-1, ascending=ascending, stable=stable), "cpu")
-    )
+    sorted_cpu = ak.to_list(ak.sort(cpu, axis=-1, ascending=ascending, stable=stable))
 
-    assert _nan_aware_equal(via_carry, sorted_gpu)
+    assert _nan_aware_equal(via_carry, sorted_cpu)
 
 
 @pytest.mark.parametrize("dtype", ["bool", *INTEGER_DTYPES, *FLOAT_DTYPES])
