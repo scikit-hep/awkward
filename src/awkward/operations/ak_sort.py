@@ -29,7 +29,8 @@ def sort(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns an array with elements sorted along an axis.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -53,9 +54,11 @@ def sort(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns a sorted array.
+    Returns:
+        A sorted array.
 
-    For example,
+    Examples:
+        For example,
 
         >>> ak.sort(ak.Array([[7, 5, 7], [], [2], [8, 2]]))
         <Array [[5, 7, 7], [], [2], [2, 8]] type='4 * var * int64'>
