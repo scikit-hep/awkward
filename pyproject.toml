@@ -58,7 +58,6 @@ init = "awkward.numba:_register"
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scikit-hep/awkward-1.0/issues"
-"Chat" = "https://gitter.im/Scikit-HEP/awkward-array"
 "Discussions" = "https://github.com/scikit-hep/awkward-1.0/discussions"
 "Documentation" = "https://awkward-array.org"
 "Homepage" = "https://github.com/scikit-hep/awkward-1.0"
