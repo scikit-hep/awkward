@@ -142,24 +142,26 @@ def test_segmented_argsort_non_int64_offsets():
     assert cp.asnumpy(toptr).tolist() == [1, 2, 0, 1, 0]
 
 
-def test_segmented_argsort_datetime_keys():
-    # Directly exercise the datetime/timedelta branch, which views the keys as
-    # int64 before sorting (segmented_argsort's `keys_in.view(int64)`). cupy has
-    # no datetime dtype on some builds, so skip cleanly if it can't be created.
+@pytest.mark.parametrize("kind_dtype", ["datetime64[D]", "timedelta64[s]"])
+def test_segmented_argsort_datetime_keys(kind_dtype):
+    # Exercise the datetime/timedelta branch, which views the keys as int64
+    # before sorting (segmented_argsort's `keys_in.view(int64)`). cupy often
+    # cannot *create/compute* datetime arrays, but a datetime64/timedelta64 view
+    # of an int64 buffer (same 8-byte width) is a pure dtype reinterpret and
+    # needs no datetime support -- exactly the shape the layout hands the kernel.
     from awkward._connect.cuda import _compute
 
-    np_dates = np.array(
-        ["2021-01-03", "2021-01-01", "2021-01-02"], dtype="datetime64[D]"
-    )
+    base = cp.asarray([3, 1, 2], dtype=cp.int64)
     try:
-        fromptr = cp.asarray(np_dates)
+        fromptr = base.view(kind_dtype)
     except (TypeError, ValueError):
-        pytest.skip("cupy build does not support datetime64 arrays")
+        pytest.skip(f"cupy build cannot view arrays as {kind_dtype}")
+    assert fromptr.dtype.kind in "Mm"
 
     offsets = cp.asarray([0, 3], dtype=cp.int64)
     toptr = cp.empty(3, dtype=cp.int64)
 
     _compute.segmented_argsort(toptr, fromptr, 3, offsets, len(offsets), True, True)
 
-    # ascending by date: Jan-01 (idx 1), Jan-02 (idx 2), Jan-03 (idx 0)
+    # payloads 3, 1, 2 ascending -> local indices [1, 2, 0]
     assert cp.asnumpy(toptr).tolist() == [1, 2, 0]

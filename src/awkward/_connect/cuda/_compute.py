@@ -167,6 +167,56 @@ def _nonzero_for_reduce(input_data, out_dtype):
     )
 
 
+# Fused elementwise kernels that turn IEEE float bits into an order-preserving
+# unsigned key in a single launch (built lazily, once, per float width). See
+# `_float_order_keys` for the semantics. Working on the raw uint bit-view means
+# the whole transform -- signed-zero canonicalisation, bit-based NaN detection,
+# sign transform, and NaN sentinel -- is pure integer arithmetic with no
+# temporaries.
+_FLOAT_ORDER_KEY_KERNELS: dict[int, object] = {}
+
+_FLOAT_ORDER_KEY_SOURCE = {
+    64: (
+        "uint64",
+        "unsigned long long",
+        "0x8000000000000000ULL",
+        "0x7FF0000000000000ULL",
+        "0x000FFFFFFFFFFFFFULL",
+        "0ULL",
+        63,
+    ),
+    32: (
+        "uint32",
+        "unsigned int",
+        "0x80000000U",
+        "0x7F800000U",
+        "0x007FFFFFU",
+        "0U",
+        31,
+    ),
+}
+
+
+def _float_order_key_kernel(cp, width):
+    kernel = _FLOAT_ORDER_KEY_KERNELS.get(width)
+    if kernel is None:
+        ctype, c, signbit, exp, mant, zero, top = _FLOAT_ORDER_KEY_SOURCE[width]
+        kernel = cp.ElementwiseKernel(
+            f"{ctype} u_in, {ctype} nan_sentinel",
+            f"{ctype} out",
+            f"""
+            {c} u = u_in;
+            if (u == {signbit}) u = {zero};              // -0.0 -> +0.0
+            bool is_nan = ((u & {exp}) == {exp}) && ((u & {mant}) != {zero});
+            {c} key = (u >> {top}) ? (~u) : (u ^ {signbit});
+            out = is_nan ? nan_sentinel : key;
+            """,
+            f"awkward_float{width}_order_key",
+        )
+        _FLOAT_ORDER_KEY_KERNELS[width] = kernel
+    return kernel
+
+
 def _float_order_keys(cp, values, ascending):
     """Order-preserving unsigned keys that reproduce the CPU float ordering.
 
@@ -175,8 +225,7 @@ def _float_order_keys(cp, values, ascending):
     ``-inf`` (there is no float below ``-inf``). This maps each float to an
     unsigned integer whose ascending order is the exact CPU ordering:
 
-    * ``-0.0`` is canonicalised to ``+0.0`` (they compare equal on the CPU), via
-      ``x + 0.0`` -- an IEEE identity for every other value, including inf/NaN.
+    * ``-0.0`` is canonicalised to ``+0.0`` (they compare equal on the CPU).
     * The bit pattern is transformed so signed floats sort in true numeric order
       (negatives flip all bits; others flip only the sign bit).
     * NaNs are sent to the *front* in both directions: their transform is the
@@ -184,20 +233,14 @@ def _float_order_keys(cp, values, ascending):
       or all-ones for descending (unique maximum, first under DESCENDING order).
 
     The keys are sorted; the actual values/indices are carried separately, so the
-    sentinels never appear in the output.
+    sentinels never appear in the output. The transform is a single fused
+    elementwise kernel over the (zero-copy) uint bit-view -- no temporaries.
     """
     width = values.dtype.itemsize * 8
     uint_dtype = cp.uint32 if width == 32 else cp.uint64
-    signbit = uint_dtype(1 << (width - 1))
-    allones = uint_dtype((1 << width) - 1)
-
-    canon = values + values.dtype.type(0.0)  # -0.0 -> +0.0
-    u = canon.view(uint_dtype)
-    negative = (u >> (width - 1)).astype(cp.bool_)
-    key = cp.where(negative, u ^ allones, u ^ signbit).astype(uint_dtype)
-
-    nan_sentinel = uint_dtype(0) if ascending else allones
-    return cp.where(cp.isnan(canon), nan_sentinel, key).astype(uint_dtype)
+    u = values.view(uint_dtype)  # zero-copy bit reinterpretation
+    nan_sentinel = uint_dtype(0) if ascending else uint_dtype((1 << width) - 1)
+    return _float_order_key_kernel(cp, width)(u, nan_sentinel)
 
 
 def segmented_sort(
