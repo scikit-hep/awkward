@@ -14,7 +14,7 @@ def test_var_integer_no_overflow():
     result = ak.var(ak.Array(data))
     expected = np.var(data.astype(np.float64))
     assert result == pytest.approx(expected)
-    assert np.dtype(np.asarray(result).dtype) == np.dtype(np.float64)
+    assert np.asarray(result).dtype == np.dtype(np.float64)
 
 
 def test_std_integer_no_overflow():
@@ -42,7 +42,11 @@ def test_mean_weighted_integer_no_overflow():
 
 
 def test_var_jagged_integer_no_overflow():
-    array = ak.Array([[100000, 200000, 300000], [], [400000, 500000]])
+    # int32 leaves, so x*x overflows int32 without the promotion (values entered
+    # as the default int64 would only square to ~2.5e11 and pass on main too).
+    array = ak.values_astype(
+        ak.Array([[100000, 200000, 300000], [], [400000, 500000]]), np.int32
+    )
     result = ak.var(array, axis=-1)
     expected = [
         np.var([100000.0, 200000.0, 300000.0]),
@@ -59,3 +63,23 @@ def test_float_input_unchanged():
     data = np.array([1.5, 2.5, 3.5], dtype=np.float64)
     assert ak.var(ak.Array(data)) == pytest.approx(np.var(data))
     assert ak.mean(ak.Array(data)) == pytest.approx(np.mean(data))
+
+
+def test_var_int64_no_overflow_issue_3525():
+    # Resolves #3525: the squares overflow int64 (the reducer's accumulator), so
+    # on main the variance goes negative and ak.std returns nan. The new int32
+    # tests do not exercise the int64 accumulator path.
+    data = np.array([3_000_000_000, 4_000_000_000, 5_000_000_000], dtype=np.int64)
+    result = ak.var(ak.Array(data))
+    assert result == pytest.approx(np.var(data.astype(np.float64)))
+    assert not np.isnan(ak.std(ak.Array(data)))
+
+
+def test_typetracer_promotion():
+    # The promotion must work on typetracer layouts (protects the dask-awkward
+    # path): integer input still yields float64 output types.
+    base = ak.values_astype(ak.Array([[1, 2, 3], [4, 5]]), np.int32)
+    tt = ak.to_backend(base, "typetracer")
+    assert str(ak.var(tt, axis=-1).type) == "2 * float64"
+    assert str(ak.mean(tt, axis=-1).type) == "2 * float64"
+    assert ak.moment(tt, 2, axis=-1).layout.dtype == np.dtype(np.float64)
