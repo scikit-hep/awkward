@@ -112,6 +112,7 @@ class CupyBackend(Backend):
             "awkward_index_rpad_and_clip_axis1",
             # sort
             "awkward_sort",
+            "awkward_argsort",
             # other kernels
             "awkward_RegularArray_getitem_carry",
             "awkward_NumpyArray_subrange_equal",
