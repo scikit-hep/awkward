@@ -5175,6 +5175,54 @@ kernels:
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_int8_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_uint8_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_int16_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_uint16_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_int32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_uint32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_int64_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_uint64_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
     description: null
     definition: |
       def awkward_reduce_sum(toptr, fromptr, offsets, outlength):
