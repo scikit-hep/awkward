@@ -112,6 +112,7 @@ class CupyBackend(Backend):
             "awkward_index_rpad_and_clip_axis1",
             # sort
             "awkward_sort",
+            "awkward_argsort",
             # other kernels
             "awkward_RegularArray_getitem_carry",
             "awkward_NumpyArray_subrange_equal",
@@ -182,6 +183,7 @@ class CupyBackend(Backend):
 
         return {
             "awkward_sort": cuda_compute.segmented_sort,
+            "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
             "awkward_reduce_sum_bool": cuda_compute.awkward_reduce_sum_bool,
             "awkward_reduce_sum_int32_bool_64": cuda_compute.awkward_reduce_sum_int32_bool_64,

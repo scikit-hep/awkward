@@ -192,6 +192,31 @@ def segmented_sort(
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
 
+    # NaN parity with the CPU kernel: NaNs must sort to the *front* of each
+    # segment in both directions. Radix sort orders them by bit pattern (they end
+    # up misplaced), so sort by a NaN-remapped key (-inf ascending / +inf
+    # descending) while carrying the *original* values, so the output keeps real
+    # NaNs but positions them correctly. Only floats with NaNs need this.
+    if num_items > 0 and fromptr.dtype.kind == "f":
+        nan_mask = cp.isnan(fromptr)
+        if bool(nan_mask.any()):
+            keys = fromptr.copy()
+            keys[nan_mask] = -cp.inf if ascending else cp.inf
+            keys_out = cp.empty_like(keys)
+            segmented_sort(
+                d_in_keys=keys,
+                d_out_keys=keys_out,
+                d_in_values=fromptr,
+                d_out_values=toptr,
+                num_items=num_items,
+                num_segments=num_segments,
+                start_offsets_in=start_o,
+                end_offsets_in=end_o,
+                order=order,
+                stream=None,
+            )
+            return
+
     segmented_sort(
         d_in_keys=fromptr,
         d_out_keys=toptr,
@@ -204,6 +229,94 @@ def segmented_sort(
         order=order,
         stream=None,
     )
+
+
+def segmented_argsort(
+    toptr,
+    fromptr,
+    length,
+    offsets,
+    offsetslength,
+    ascending,
+    stable,
+):
+    """Per-segment argsort on the ``cuda.compute`` path.
+
+    Runs a key--value ``segmented_sort`` where the keys are the data and the
+    values are global element indices; the permuted values are the argsort
+    carry. Indices are then made segment-local, matching the CPU
+    ``awkward_argsort`` kernel (which does ``iota`` then ``j - start_off``).
+
+    Notes on parity with the CPU kernel:
+
+    * Floating-point NaNs must sort to the *front* of each segment in both
+      directions (the CPU comparator treats NaN as "less than everything"). A
+      fixed sentinel cannot do this because its position flips with the sort
+      order, so NaN keys are remapped to ``-inf`` for ascending and ``+inf`` for
+      descending in a private key copy -- either way they land first. The
+      sentinel never reaches the output, which holds indices only.
+    * CCCL's segmented radix sort is stable on keys; because the seeded values
+      are strictly increasing indices, equal keys retain their original order,
+      so ``stable=True`` is satisfied inherently and ``stable=False`` is still
+      deterministic.
+    """
+    from cuda.compute import SortOrder, segmented_sort
+
+    cupy_nplike = Cupy.instance()
+    cp = cupy_nplike._module
+
+    # Ensure offsets are int64 as expected by segmented_sort
+    if offsets.dtype != cp.int64:
+        offsets = offsets.astype(cp.int64, copy=False)
+
+    num_segments = offsetslength - 1
+    num_items = int(offsets[-1]) if len(offsets) > 0 else 0
+    if num_items == 0:
+        return
+
+    start_o, end_o = make_segment_views(offsets)
+    order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
+
+    # Keys to sort by. datetime/timedelta compare as their int64 payload (the
+    # layout already reports int64 for the kernel signature).
+    keys_in = fromptr
+    if keys_in.dtype.kind in "Mm":
+        keys_in = keys_in.view(cp.int64)
+
+    # NaN parity: the CPU comparator sends NaNs to the *front* of each segment
+    # in both directions. A fixed sentinel would flip sides with `order`, so use
+    # -inf for ascending and +inf for descending; both land NaNs first. Done in
+    # a private copy so the sentinel never leaks to the output (indices only).
+    if keys_in.dtype.kind == "f":
+        nan_mask = cp.isnan(keys_in)
+        if bool(nan_mask.any()):
+            keys_in = keys_in.copy()
+            keys_in[nan_mask] = -cp.inf if ascending else cp.inf
+
+    # Values = global indices; after the sort these are the argsort carry.
+    values_in = cp.arange(num_items, dtype=cp.int64)
+
+    # segmented_sort also emits sorted keys, which we discard; the API still
+    # requires an output buffer, so hand it scratch.
+    keys_out = cp.empty_like(keys_in)
+
+    segmented_sort(
+        d_in_keys=keys_in,
+        d_out_keys=keys_out,
+        d_in_values=values_in,
+        d_out_values=toptr,
+        num_items=num_items,
+        num_segments=num_segments,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        order=order,
+        stream=None,
+    )
+
+    # Convert global indices to segment-local (CPU kernel does `j - start_off`).
+    seg_sizes = end_o - start_o
+    seg_start_per_position = cp.repeat(start_o, seg_sizes)
+    toptr -= seg_start_per_position
 
 
 def awkward_reduce_argmax(
