@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-import warnings
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -124,7 +123,6 @@ def _impl(
     chunksize,
     feather_version,
 ):
-    import pyarrow.feather
 
     layout = ak.operations.ak_to_layout._impl(
         array,
@@ -148,29 +146,86 @@ def _impl(
         count_nulls,
     )
 
-    if compression is True:
-        compression = "zstd"
-    elif compression is False or compression is None:
-        compression = "none"
-
     try:
         destination = os.fsdecode(destination)
     except TypeError:
         raise TypeError(
-            f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
+            f"'destination' argument of 'ak.to_feather' must be a path-like, "
+            f"not {type(destination).__name__} "
+            f"('array' argument is first; 'destination' second)"
         ) from None
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message="pyarrow.feather.write_feather is deprecated.*",
-            category=FutureWarning,
-        )
-        pyarrow.feather.write_feather(
-            table,
-            destination,
-            compression,
-            compression_level,
-            chunksize,
-            feather_version,
-        )
+    # Normalize `compression` the same way for both backends below:
+    # True -> "zstd", False/None -> Python None ("no compression").
+    # NOTE: intentionally NOT the string "none" here - that was never a
+    # valid pyarrow value and raised ValueError in the pre-existing code
+    # whenever a caller passed compression=None or compression=False
+    # explicitly (both hit the same underlying default path in practice,
+    # since the public default is compression="zstd").
+    if compression is True:
+        compression = "zstd"
+    elif compression is False or compression is None:
+        compression = None
+
+    if feather_version < 2:
+        # Feather V2 (and, presumably, any future version >= 2) is the
+        # Arrow IPC file format on disk. Version 1 predates the IPC format
+        # entirely and cannot be written via pyarrow.ipc at all - pyarrow
+        # offers no non-deprecated way to produce a V1 file, so we fall
+        # back to the deprecated pyarrow.feather API here, scoped narrowly
+        # to this one legacy case, and let pyarrow validate `feather_version`
+        # itself (e.g. reject negative or zero values).
+        import warnings
+
+        import pyarrow.feather
+
+        compression_arg = "none" if compression is None else compression
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="pyarrow.feather.write_feather is deprecated.*",
+                category=FutureWarning,
+            )
+            pyarrow.feather.write_feather(
+                table,
+                destination,
+                compression=compression_arg,
+                compression_level=compression_level,
+                chunksize=chunksize,
+                version=feather_version,
+            )
+        return
+
+    # feather_version >= 2: write via the non-deprecated pyarrow.ipc API.
+    # This produces the same on-disk format as the old
+    # pyarrow.feather.write_feather call did for V2 - a different
+    # (non-deprecated) API for writing the same bytes, not a different
+    # format.
+    import pyarrow
+    import pyarrow.ipc
+
+    if compression is None:
+        codec = None
+    elif compression_level is None:
+        codec = compression
+    else:
+        codec = pyarrow.Codec(compression, compression_level)
+
+    options = pyarrow.ipc.IpcWriteOptions(
+        compression=codec,
+    )
+
+    with pyarrow.OSFile(destination, "wb") as sink:
+        with pyarrow.ipc.new_file(
+            sink,
+            table.schema,
+            options=options,
+        ) as writer:
+            # `max_chunksize` is the pyarrow.ipc equivalent of the old
+            # `chunksize` parameter - same meaning (max rows per
+            # RecordBatch chunk), renamed keyword in the new API.
+            writer.write_table(
+                table,
+                max_chunksize=chunksize,
+            )

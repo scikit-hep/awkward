@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
-
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -76,21 +74,30 @@ def _impl(
     behavior,
     attrs,
 ):
-    import pyarrow.feather
+    import pyarrow
+    import pyarrow.ipc
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=r".*pyarrow\.feather\.(write_feather|read_table) is deprecated.*",
-            category=FutureWarning,
-        )
+    # Read via the non-deprecated pyarrow.ipc API.
+    # This reads the same on-disk format as the old
+    # pyarrow.feather.read_table call did - a different
+    # (non-deprecated) API for reading the same bytes, not a different
+    # format.
+    # A fundamental difference in the way we are reading all columns then dropping the non-selected ones
 
-        arrow_table = pyarrow.feather.read_table(
-            path,
-            columns,
-            use_threads,
-            memory_map,
+    with (
+        pyarrow.memory_map(path, "r")
+        if memory_map
+        else pyarrow.OSFile(path, "rb") as source
+    ):
+        reader = pyarrow.ipc.open_file(
+            source,
+            options=pyarrow.ipc.IpcReadOptions(
+                use_threads=use_threads,
+            ),
         )
+        arrow_table = reader.read_all()
+    if columns is not None:
+        arrow_table = arrow_table.select(columns)
 
     return ak.operations.ak_from_arrow._impl(
         arrow_table,
