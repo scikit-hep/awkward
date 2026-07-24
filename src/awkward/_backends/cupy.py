@@ -182,6 +182,7 @@ class CupyBackend(Backend):
 
         return {
             "awkward_sort": cuda_compute.segmented_sort,
+            "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
             "awkward_reduce_sum_bool": cuda_compute.awkward_reduce_sum_bool,
             "awkward_reduce_sum_int32_bool_64": cuda_compute.awkward_reduce_sum_int32_bool_64,
