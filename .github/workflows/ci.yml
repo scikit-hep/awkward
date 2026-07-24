@@ -66,22 +66,22 @@ jobs:
         with:
           allowed-skips: >-
             ${{
-              fromJSON(needs.change-detection.outputs.run-tests)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.run-tests)
+              && '
               tests,
               '
+              || ''
             }} ${{
-              fromJSON(needs.change-detection.outputs.build-wheels)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.build-wheels)
+              && '
               packaging-tests,
               '
+              || ''
             }} ${{
-              fromJSON(needs.change-detection.outputs.run-header-only-tests)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.run-header-only-tests)
+              && '
               header-only-tests,
               '
+              || ''
             }}
           jobs: ${{ toJSON(needs) }}
