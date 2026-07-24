@@ -167,6 +167,39 @@ def _nonzero_for_reduce(input_data, out_dtype):
     )
 
 
+def _float_order_keys(cp, values, ascending):
+    """Order-preserving unsigned keys that reproduce the CPU float ordering.
+
+    A plain radix sort of raw float bits mis-orders NaNs (by bit pattern) and,
+    with a simple sentinel remap, cannot place NaN *strictly before* a real
+    ``-inf`` (there is no float below ``-inf``). This maps each float to an
+    unsigned integer whose ascending order is the exact CPU ordering:
+
+    * ``-0.0`` is canonicalised to ``+0.0`` (they compare equal on the CPU), via
+      ``x + 0.0`` -- an IEEE identity for every other value, including inf/NaN.
+    * The bit pattern is transformed so signed floats sort in true numeric order
+      (negatives flip all bits; others flip only the sign bit).
+    * NaNs are sent to the *front* in both directions: their transform is the
+      unique maximum, so they are remapped to 0 for ascending (unique minimum)
+      or all-ones for descending (unique maximum, first under DESCENDING order).
+
+    The keys are sorted; the actual values/indices are carried separately, so the
+    sentinels never appear in the output.
+    """
+    width = values.dtype.itemsize * 8
+    uint_dtype = cp.uint32 if width == 32 else cp.uint64
+    signbit = uint_dtype(1 << (width - 1))
+    allones = uint_dtype((1 << width) - 1)
+
+    canon = values + values.dtype.type(0.0)  # -0.0 -> +0.0
+    u = canon.view(uint_dtype)
+    negative = (u >> (width - 1)).astype(cp.bool_)
+    key = cp.where(negative, u ^ allones, u ^ signbit).astype(uint_dtype)
+
+    nan_sentinel = uint_dtype(0) if ascending else allones
+    return cp.where(cp.isnan(canon), nan_sentinel, key).astype(uint_dtype)
+
+
 def segmented_sort(
     toptr,
     fromptr,
@@ -192,30 +225,26 @@ def segmented_sort(
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
 
-    # NaN parity with the CPU kernel: NaNs must sort to the *front* of each
-    # segment in both directions. Radix sort orders them by bit pattern (they end
-    # up misplaced), so sort by a NaN-remapped key (-inf ascending / +inf
-    # descending) while carrying the *original* values, so the output keeps real
-    # NaNs but positions them correctly. Only floats with NaNs need this.
+    # Float parity with the CPU kernel: sort by an order-preserving unsigned key
+    # (correct NaN placement, -0.0 == +0.0) while carrying the *original* values,
+    # so the output keeps real NaNs but positions everything as the CPU does.
+    # Non-float dtypes sort natively (CCCL handles signed integers correctly).
     if num_items > 0 and fromptr.dtype.kind == "f":
-        nan_mask = cp.isnan(fromptr)
-        if bool(nan_mask.any()):
-            keys = fromptr.copy()
-            keys[nan_mask] = -cp.inf if ascending else cp.inf
-            keys_out = cp.empty_like(keys)
-            segmented_sort(
-                d_in_keys=keys,
-                d_out_keys=keys_out,
-                d_in_values=fromptr,
-                d_out_values=toptr,
-                num_items=num_items,
-                num_segments=num_segments,
-                start_offsets_in=start_o,
-                end_offsets_in=end_o,
-                order=order,
-                stream=None,
-            )
-            return
+        keys = _float_order_keys(cp, fromptr, ascending)
+        keys_out = cp.empty_like(keys)
+        segmented_sort(
+            d_in_keys=keys,
+            d_out_keys=keys_out,
+            d_in_values=fromptr,
+            d_out_values=toptr,
+            num_items=num_items,
+            num_segments=num_segments,
+            start_offsets_in=start_o,
+            end_offsets_in=end_o,
+            order=order,
+            stream=None,
+        )
+        return
 
     segmented_sort(
         d_in_keys=fromptr,
@@ -249,12 +278,12 @@ def segmented_argsort(
 
     Notes on parity with the CPU kernel:
 
-    * Floating-point NaNs must sort to the *front* of each segment in both
-      directions (the CPU comparator treats NaN as "less than everything"). A
-      fixed sentinel cannot do this because its position flips with the sort
-      order, so NaN keys are remapped to ``-inf`` for ascending and ``+inf`` for
-      descending in a private key copy -- either way they land first. The
-      sentinel never reaches the output, which holds indices only.
+    * Floating-point keys go through :func:`_float_order_keys`, an
+      order-preserving unsigned transform that places NaNs at the *front* in both
+      directions and treats ``-0.0 == +0.0`` -- a plain sentinel cannot do this
+      because NaN must sort strictly below a real ``-inf``. The transformed keys
+      are sorted; the indices are carried separately, so the transform never
+      reaches the output.
     * CCCL's segmented radix sort is stable on keys; because the seeded values
       are strictly increasing indices, equal keys retain their original order,
       so ``stable=True`` is satisfied inherently and ``stable=False`` is still
@@ -277,21 +306,17 @@ def segmented_argsort(
     start_o, end_o = make_segment_views(offsets)
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
 
-    # Keys to sort by. datetime/timedelta compare as their int64 payload (the
-    # layout already reports int64 for the kernel signature).
+    # Keys to sort by. Floats use an order-preserving unsigned key so NaNs land
+    # at the front (both directions) and -0.0 == +0.0, matching the CPU kernel;
+    # a plain sentinel remap cannot place NaN below a real -inf. datetime and
+    # timedelta compare as their int64 payload (the layout already reports int64
+    # for the kernel signature). Signed integers sort natively (CCCL handles the
+    # sign correctly).
     keys_in = fromptr
     if keys_in.dtype.kind in "Mm":
         keys_in = keys_in.view(cp.int64)
-
-    # NaN parity: the CPU comparator sends NaNs to the *front* of each segment
-    # in both directions. A fixed sentinel would flip sides with `order`, so use
-    # -inf for ascending and +inf for descending; both land NaNs first. Done in
-    # a private copy so the sentinel never leaks to the output (indices only).
-    if keys_in.dtype.kind == "f":
-        nan_mask = cp.isnan(keys_in)
-        if bool(nan_mask.any()):
-            keys_in = keys_in.copy()
-            keys_in[nan_mask] = -cp.inf if ascending else cp.inf
+    elif keys_in.dtype.kind == "f":
+        keys_in = _float_order_keys(cp, keys_in, ascending)
 
     # Values = global indices; after the sort these are the argsort carry.
     values_in = cp.arange(num_items, dtype=cp.int64)

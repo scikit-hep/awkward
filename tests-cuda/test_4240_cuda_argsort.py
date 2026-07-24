@@ -30,14 +30,17 @@ def _cpu_array(dtype):
         return ak.Array(segs)
     if dtype in FLOAT_DTYPES:
         nan = float("nan")
-        # Finite values + NaN. (A real +-inf alongside NaN hits a documented
-        # sentinel-collision edge case and is intentionally excluded here.)
+        inf = float("inf")
+        # Mix of finite values, duplicates, NaN, +-inf, and signed zero -- all of
+        # which must match the CPU ordering (NaN to the front, -0.0 == +0.0).
         segs = [
             [3.0, nan, 1.0, 1.0],
             [],
             [nan, nan, 4.0],
             [2.0],
             [9.0, 0.0, 0.0, 7.0, 7.0],
+            [-inf, nan, 0.0, inf],
+            [inf, -inf, -0.0, 0.0, nan, -2.5],
         ]
         return ak.values_astype(ak.Array(segs), dtype)
     # signed/unsigned integers: keep values non-negative so uint is valid
@@ -101,6 +104,20 @@ def test_sort_matches_cpu(dtype, ascending):
     )
 
     assert _nan_aware_equal(out_gpu, out_cpu)
+
+
+@pytest.mark.parametrize("ascending", [True, False])
+def test_argsort_nan_with_real_infinities(ascending):
+    # Regression: NaN must sort strictly before a real -inf (ascending) and stay
+    # at the front for descending too -- the case a single -inf/+inf sentinel
+    # could not express. e.g. [-inf, nan, 0, inf] ascending -> indices [1,0,2,3].
+    cpu = ak.Array([[-float("inf"), float("nan"), 0.0, float("inf")]])
+    gpu = ak.to_backend(cpu, "cuda")
+
+    out_cpu = ak.argsort(cpu, axis=-1, ascending=ascending, stable=True)
+    out_gpu = ak.argsort(gpu, axis=-1, ascending=ascending, stable=True)
+
+    assert ak.to_list(ak.to_backend(out_gpu, "cpu")) == ak.to_list(out_cpu)
 
 
 def test_argsort_all_empty():
