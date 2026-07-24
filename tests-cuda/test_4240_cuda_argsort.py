@@ -107,3 +107,42 @@ def test_argsort_all_empty():
     gpu = ak.to_backend(ak.Array([[], [], []]), "cuda")
     out = ak.to_list(ak.to_backend(ak.argsort(gpu, axis=-1), "cpu"))
     assert out == [[], [], []]
+
+
+def test_segmented_argsort_non_int64_offsets():
+    # Directly exercise the offsets-dtype normalization: when offsets are not
+    # int64 they must be cast before segmented_sort (segmented_argsort's
+    # `offsets.astype(int64)` branch).
+    from awkward._connect.cuda import _compute
+
+    fromptr = cp.asarray([3.0, 1.0, 2.0, 5.0, 4.0], dtype=cp.float64)
+    offsets = cp.asarray([0, 3, 5], dtype=cp.int32)  # <- non-int64 offsets
+    toptr = cp.empty(5, dtype=cp.int64)
+
+    _compute.segmented_argsort(toptr, fromptr, 5, offsets, len(offsets), True, True)
+
+    # segment [3,1,2] -> local [1,2,0]; segment [5,4] -> local [1,0]
+    assert cp.asnumpy(toptr).tolist() == [1, 2, 0, 1, 0]
+
+
+def test_segmented_argsort_datetime_keys():
+    # Directly exercise the datetime/timedelta branch, which views the keys as
+    # int64 before sorting (segmented_argsort's `keys_in.view(int64)`). cupy has
+    # no datetime dtype on some builds, so skip cleanly if it can't be created.
+    from awkward._connect.cuda import _compute
+
+    np_dates = np.array(
+        ["2021-01-03", "2021-01-01", "2021-01-02"], dtype="datetime64[D]"
+    )
+    try:
+        fromptr = cp.asarray(np_dates)
+    except (TypeError, ValueError):
+        pytest.skip("cupy build does not support datetime64 arrays")
+
+    offsets = cp.asarray([0, 3], dtype=cp.int64)
+    toptr = cp.empty(3, dtype=cp.int64)
+
+    _compute.segmented_argsort(toptr, fromptr, 3, offsets, len(offsets), True, True)
+
+    # ascending by date: Jan-01 (idx 1), Jan-02 (idx 2), Jan-03 (idx 0)
+    assert cp.asnumpy(toptr).tolist() == [1, 2, 0]
