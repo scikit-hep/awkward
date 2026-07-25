@@ -25,6 +25,21 @@ __all__ = ("nanvar", "var")
 np = NumpyMetadata.instance()
 
 
+def _has_complex_leaf(layout) -> bool:
+    """True if any NumpyArray leaf is complex (dtype kind 'c')."""
+    found = False
+
+    def action(node, **kwargs):
+        nonlocal found
+        if node.is_numpy and node.dtype.kind == "c":
+            found = True
+            return node
+        return None
+
+    ak._do.recursively_apply(layout, action, return_array=False)
+    return found
+
+
 def _promote_products_to_float64(array):
     """Promote bool/integer/float32 leaves to float64 so the *weighted* products
     (``x*x*weight``, ``x*weight``) neither overflow nor lose precision.
@@ -266,16 +281,29 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 attrs=ctx.attrs,
             )
             # sum(x**2) accumulated in float64 directly from the input: no x*x
-            # buffer and no integer/float32 overflow (see ak_sumofsquares).
-            sumwxx = ak.operations.ak_sumofsquares._impl(
-                x,
-                axis,
-                keepdims=True,
-                mask_identity=True,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            # buffer and no integer/float32 overflow (see ak_sumofsquares). The
+            # float64-only reducer doesn't cover complex, so complex keeps the
+            # original sum(x*x) path (which yields a complex E[x**2]).
+            if _has_complex_leaf(x.layout):
+                sumwxx = ak.operations.ak_sum._impl(
+                    x * x,
+                    axis,
+                    keepdims=True,
+                    mask_identity=True,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            else:
+                sumwxx = ak.operations.ak_sumofsquares._impl(
+                    x,
+                    axis,
+                    keepdims=True,
+                    mask_identity=True,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
         else:
             # Promote x to float64 so the weighted products don't overflow /
             # lose precision. Bounded copy (float64/complex left as-is); the
