@@ -20,7 +20,11 @@ def array_equal(
     check_regular: bool = True,
     check_named_axis: bool = True,
 ):
-    """
+    """Returns True if two arrays have the same shape and elements.
+
+    TypeTracer arrays are not supported, as there is very little information
+    to be compared.
+
     Args:
         a1: Array-like data (anything #ak.to_layout recognizes).
         a2: Array-like data (anything #ak.to_layout recognizes).
@@ -35,10 +39,8 @@ def array_equal(
             unequal.
         check_named_axis: bool (default=True) whether to consider named axes as unequal.
 
-    True if two arrays have the same shape and elements, False otherwise.
-
-    TypeTracer arrays are not supported, as there is very little information to
-    be compared.
+    Returns:
+        True if two arrays have the same shape and elements, False otherwise.
     """
     # Dispatch
     yield a1, a2

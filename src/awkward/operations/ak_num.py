@@ -29,7 +29,8 @@ def num(
     behavior: Mapping | None = None,
     attrs: Mapping | None = None,
 ):
-    """
+    """Returns the number of elements at a given axis depth.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -48,10 +49,12 @@ def num(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array of integers specifying the number of elements at a
-    particular level.
+    Returns:
+        An array of integers specifying the number of elements at a
+        particular level.
 
-    For instance, given the following doubly nested `array`,
+    Examples:
+        For instance, given the following doubly nested `array`,
 
         >>> array = ak.Array([[[1.1, 2.2, 3.3],
         ...                    [],
@@ -63,33 +66,33 @@ def num(
         ...                    [8.8, 9.9]]
         ...                   ])
 
-    The number of elements in `axis=1` is
+        The number of elements in `axis=1` is
 
         >>> ak.num(array, axis=1)
         <Array [4, 0, 2] type='3 * int64'>
 
-    and the number of elements at the next level down, `axis=2`, is
+        and the number of elements at the next level down, `axis=2`, is
 
         >>> ak.num(array, axis=2)
         <Array [[3, 0, 2, 1], [], [1, 2]] type='3 * var * int64'>
 
-    The `axis=0` case is special: it returns a scalar, the length of the array.
+        The `axis=0` case is special: it returns a scalar, the length of the array.
 
         >>> ak.num(array, axis=0)
         3
 
-    This function is useful for ensuring that slices do not raise errors. For
-    instance, suppose that we want to select the first element from each
-    of the outermost nested lists of `array`. One of these lists is empty, so
-    selecting the first element (`0`) would raise an error. However, if our
-    first selection is `ak.num(array) > 0`, we are left with only those lists
-    that *do* have a first element:
+        This function is useful for ensuring that slices do not raise errors. For
+        instance, suppose that we want to select the first element from each
+        of the outermost nested lists of `array`. One of these lists is empty, so
+        selecting the first element (`0`) would raise an error. However, if our
+        first selection is `ak.num(array) > 0`, we are left with only those lists
+        that *do* have a first element:
 
         >>> array[ak.num(array) > 0, 0]
         <Array [[1.1, 2.2, 3.3], [7.7]] type='2 * var * float64'>
 
-    To keep a placeholder (None) in each place we do not want to select,
-    consider using #ak.mask instead of a #ak.Array.__getitem__.
+        To keep a placeholder (None) in each place we do not want to select,
+        consider using #ak.mask instead of a #ak.Array.__getitem__.
 
         >>> array.mask[ak.num(array) > 0][:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>

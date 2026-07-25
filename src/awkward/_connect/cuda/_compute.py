@@ -185,6 +185,82 @@ def _nonzero_for_reduce(input_data, out_dtype):
     )
 
 
+# Fused elementwise kernels that turn IEEE float bits into an order-preserving
+# unsigned key in a single launch (built lazily, once, per float width). See
+# `_float_order_keys` for the semantics. Working on the raw uint bit-view means
+# the whole transform -- signed-zero canonicalisation, bit-based NaN detection,
+# sign transform, and NaN sentinel -- is pure integer arithmetic with no
+# temporaries.
+_FLOAT_ORDER_KEY_KERNELS: dict[int, object] = {}
+
+_FLOAT_ORDER_KEY_SOURCE = {
+    64: (
+        "uint64",
+        "unsigned long long",
+        "0x8000000000000000ULL",
+        "0x7FF0000000000000ULL",
+        "0x000FFFFFFFFFFFFFULL",
+        "0ULL",
+        63,
+    ),
+    32: (
+        "uint32",
+        "unsigned int",
+        "0x80000000U",
+        "0x7F800000U",
+        "0x007FFFFFU",
+        "0U",
+        31,
+    ),
+}
+
+
+def _float_order_key_kernel(cp, width):
+    kernel = _FLOAT_ORDER_KEY_KERNELS.get(width)
+    if kernel is None:
+        ctype, c, signbit, exp, mant, zero, top = _FLOAT_ORDER_KEY_SOURCE[width]
+        kernel = cp.ElementwiseKernel(
+            f"{ctype} u_in, {ctype} nan_sentinel",
+            f"{ctype} out",
+            f"""
+            {c} u = u_in;
+            if (u == {signbit}) u = {zero};              // -0.0 -> +0.0
+            bool is_nan = ((u & {exp}) == {exp}) && ((u & {mant}) != {zero});
+            {c} key = (u >> {top}) ? (~u) : (u ^ {signbit});
+            out = is_nan ? nan_sentinel : key;
+            """,
+            f"awkward_float{width}_order_key",
+        )
+        _FLOAT_ORDER_KEY_KERNELS[width] = kernel
+    return kernel
+
+
+def _float_order_keys(cp, values, ascending):
+    """Order-preserving unsigned keys that reproduce the CPU float ordering.
+
+    A plain radix sort of raw float bits mis-orders NaNs (by bit pattern) and,
+    with a simple sentinel remap, cannot place NaN *strictly before* a real
+    ``-inf`` (there is no float below ``-inf``). This maps each float to an
+    unsigned integer whose ascending order is the exact CPU ordering:
+
+    * ``-0.0`` is canonicalised to ``+0.0`` (they compare equal on the CPU).
+    * The bit pattern is transformed so signed floats sort in true numeric order
+      (negatives flip all bits; others flip only the sign bit).
+    * NaNs are sent to the *front* in both directions: their transform is the
+      unique maximum, so they are remapped to 0 for ascending (unique minimum)
+      or all-ones for descending (unique maximum, first under DESCENDING order).
+
+    The keys are sorted; the actual values/indices are carried separately, so the
+    sentinels never appear in the output. The transform is a single fused
+    elementwise kernel over the (zero-copy) uint bit-view -- no temporaries.
+    """
+    width = values.dtype.itemsize * 8
+    uint_dtype = cp.uint32 if width == 32 else cp.uint64
+    u = values.view(uint_dtype)  # zero-copy bit reinterpretation
+    nan_sentinel = uint_dtype(0) if ascending else uint_dtype((1 << width) - 1)
+    return _float_order_key_kernel(cp, width)(u, nan_sentinel)
+
+
 def segmented_sort(
     toptr,
     fromptr,
@@ -210,6 +286,27 @@ def segmented_sort(
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
 
+    # Float parity with the CPU kernel: sort by an order-preserving unsigned key
+    # (correct NaN placement, -0.0 == +0.0) while carrying the *original* values,
+    # so the output keeps real NaNs but positions everything as the CPU does.
+    # Non-float dtypes sort natively (CCCL handles signed integers correctly).
+    if num_items > 0 and fromptr.dtype.kind == "f":
+        keys = _float_order_keys(cp, fromptr, ascending)
+        keys_out = cp.empty_like(keys)
+        segmented_sort(
+            d_in_keys=keys,
+            d_out_keys=keys_out,
+            d_in_values=fromptr,
+            d_out_values=toptr,
+            num_items=num_items,
+            num_segments=num_segments,
+            start_offsets_in=start_o,
+            end_offsets_in=end_o,
+            order=order,
+            stream=None,
+        )
+        return
+
     segmented_sort(
         d_in_keys=fromptr,
         d_out_keys=toptr,
@@ -222,6 +319,90 @@ def segmented_sort(
         order=order,
         stream=None,
     )
+
+
+def segmented_argsort(
+    toptr,
+    fromptr,
+    length,
+    offsets,
+    offsetslength,
+    ascending,
+    stable,
+):
+    """Per-segment argsort on the ``cuda.compute`` path.
+
+    Runs a key--value ``segmented_sort`` where the keys are the data and the
+    values are global element indices; the permuted values are the argsort
+    carry. Indices are then made segment-local, matching the CPU
+    ``awkward_argsort`` kernel (which does ``iota`` then ``j - start_off``).
+
+    Notes on parity with the CPU kernel:
+
+    * Floating-point keys go through :func:`_float_order_keys`, an
+      order-preserving unsigned transform that places NaNs at the *front* in both
+      directions and treats ``-0.0 == +0.0`` -- a plain sentinel cannot do this
+      because NaN must sort strictly below a real ``-inf``. The transformed keys
+      are sorted; the indices are carried separately, so the transform never
+      reaches the output.
+    * CCCL's segmented radix sort is stable on keys; because the seeded values
+      are strictly increasing indices, equal keys retain their original order,
+      so ``stable=True`` is satisfied inherently and ``stable=False`` is still
+      deterministic.
+    """
+    from cuda.compute import SortOrder, segmented_sort
+
+    cupy_nplike = Cupy.instance()
+    cp = cupy_nplike._module
+
+    # Ensure offsets are int64 as expected by segmented_sort
+    if offsets.dtype != cp.int64:
+        offsets = offsets.astype(cp.int64, copy=False)
+
+    num_segments = offsetslength - 1
+    num_items = int(offsets[-1]) if len(offsets) > 0 else 0
+    if num_items == 0:
+        return
+
+    start_o, end_o = make_segment_views(offsets)
+    order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
+
+    # Keys to sort by. Floats use an order-preserving unsigned key so NaNs land
+    # at the front (both directions) and -0.0 == +0.0, matching the CPU kernel;
+    # a plain sentinel remap cannot place NaN below a real -inf. datetime and
+    # timedelta compare as their int64 payload (the layout already reports int64
+    # for the kernel signature). Signed integers sort natively (CCCL handles the
+    # sign correctly).
+    keys_in = fromptr
+    if keys_in.dtype.kind in "Mm":
+        keys_in = keys_in.view(cp.int64)
+    elif keys_in.dtype.kind == "f":
+        keys_in = _float_order_keys(cp, keys_in, ascending)
+
+    # Values = global indices; after the sort these are the argsort carry.
+    values_in = cp.arange(num_items, dtype=cp.int64)
+
+    # segmented_sort also emits sorted keys, which we discard; the API still
+    # requires an output buffer, so hand it scratch.
+    keys_out = cp.empty_like(keys_in)
+
+    segmented_sort(
+        d_in_keys=keys_in,
+        d_out_keys=keys_out,
+        d_in_values=values_in,
+        d_out_values=toptr,
+        num_items=num_items,
+        num_segments=num_segments,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        order=order,
+        stream=None,
+    )
+
+    # Convert global indices to segment-local (CPU kernel does `j - start_off`).
+    seg_sizes = end_o - start_o
+    seg_start_per_position = cp.repeat(start_o, seg_sizes)
+    toptr -= seg_start_per_position
 
 
 def awkward_reduce_argmax(
