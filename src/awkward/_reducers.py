@@ -482,9 +482,7 @@ class SumOfSquares(KernelReducer):
                 f"cannot compute the sum-of-squares (ak.var/ak.std) of {array.dtype!r}"
             )
         if array.dtype.kind == "M":
-            raise ValueError(
-                f"cannot compute the sum-of-squares of {array.dtype!r}"
-            )
+            raise ValueError(f"cannot compute the sum-of-squares of {array.dtype!r}")
         result = array.backend.nplike.empty(outlength, dtype=np.float64)
         assert offsets.nplike is array.backend.nplike
         array.backend.maybe_kernel_error(
