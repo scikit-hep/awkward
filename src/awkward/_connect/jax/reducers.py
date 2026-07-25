@@ -386,6 +386,40 @@ class Sum(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+@overloads(_reducers.SumOfSquares)
+class SumOfSquares(JAXReducer):
+    name: Final = "sumofsquares"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.SumOfSquares)
+        return cls()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        offsets: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "c":
+            raise TypeError(
+                f"cannot compute the sum-of-squares (ak.var/ak.std) of {array.dtype!r}"
+            )
+        # Square in float64, then segment_sum (differentiable, no x*x overflow).
+        data = array.data.astype(np.float64)
+        squared = data * data
+        parents_data = _parents_from_offsets(offsets.data, outlength)
+        result = jax.ops.segment_sum(
+            *maybe_materialize(squared, parents_data), outlength
+        )
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
 @overloads(_reducers.AxisNoneSum)
 class AxisNoneSum(JAXReducer):
     name: Final = "sum"
