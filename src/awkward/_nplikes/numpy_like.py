@@ -485,7 +485,6 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
-        dtype: DTypeLike | None = None,
     ) -> ArrayLikeT: ...
 
     @abstractmethod

@@ -25,6 +25,41 @@ __all__ = ("nanvar", "var")
 np = NumpyMetadata.instance()
 
 
+def _promote_products_to_float64(array):
+    """Promote bool/integer/float32 leaves to float64 so the *weighted* products
+    (``x*x*weight``, ``x*weight``) neither overflow nor lose precision.
+
+    float64 and complex leaves are returned unchanged (no copy). Promoting ``x``
+    alone is enough: ``float64 * weight`` is float64 for any real weight. Used
+    only on the weighted branch of ``ak.var``; the unweighted branch is copy-free
+    via the sum-of-squares reducer. (The fully-fused, copy-free weighted reduce
+    would need a two-input segmented reduce -- deferred.)
+    """
+    if not hasattr(array, "layout"):
+        return array
+
+    found = False
+
+    def action(node, **kwargs):
+        nonlocal found
+        if node.is_numpy and (node.dtype.kind in "biu" or node.dtype == np.float32):
+            found = True
+            return node
+        return None
+
+    ak._do.recursively_apply(array.layout, action, return_array=False)
+    if found:
+        return ak.operations.ak_values_astype._impl(
+            array,
+            np.float64,
+            including_unknown=False,
+            highlevel=True,
+            behavior=None,
+            attrs=None,
+        )
+    return array
+
+
 @high_level_function()
 def var(
     x,
@@ -230,8 +265,10 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            sumwxx = ak.operations.ak_sum._impl(
-                x * x,
+            # sum(x**2) accumulated in float64 directly from the input: no x*x
+            # buffer and no integer/float32 overflow (see ak_sumofsquares).
+            sumwxx = ak.operations.ak_sumofsquares._impl(
+                x,
                 axis,
                 keepdims=True,
                 mask_identity=True,
@@ -240,6 +277,10 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 attrs=ctx.attrs,
             )
         else:
+            # Promote x to float64 so the weighted products don't overflow /
+            # lose precision. Bounded copy (float64/complex left as-is); the
+            # copy-free fused path needs a two-input reduce (deferred).
+            x = _promote_products_to_float64(x)
             sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,

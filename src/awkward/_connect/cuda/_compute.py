@@ -124,6 +124,24 @@ def _make_widening_cast(in_type, out_type):
     return _cast
 
 
+@functools.cache
+def _make_square_to_float64(in_type):
+    """Interned ``x -> (double)x * (double)x`` map op.
+
+    Widens each element to ``float64`` and squares it on the fly, so a
+    downstream segmented_reduce accumulates ``sum(x**2)`` in double precision
+    with no materialised ``x*x`` buffer and no integer/float32 overflow. Cached
+    per input dtype so cuda.compute builds one kernel per type.
+    """
+
+    def _sq(x):
+        v = float(x)
+        return v * v
+
+    _sq.__annotations__ = {"x": in_type, "return": np.float64}
+    return _sq
+
+
 def _widen_for_reduce(input_data, out_dtype):
     """Fuse a widening cast into a downstream segmented_reduce.
 
@@ -376,6 +394,33 @@ def awkward_reduce_sum(
     outlength,
 ):
     d_input = _widen_for_reduce(input_data, result.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
+
+    h_init = np.asarray(0, dtype=result.dtype)
+
+    segmented_reduce(
+        d_in=d_input,
+        d_out=result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=h_init,
+    )
+
+
+def awkward_reduce_sumofsquares(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
+    # sum(x**2) accumulated in float64. A TransformIterator squares each element
+    # (widened to double) on the fly, feeding a PLUS segmented_reduce -- no x*x
+    # buffer, no integer/float32 overflow. `result` is float64 (SumOfSquares).
+    d_input = TransformIterator(
+        input_data, _make_square_to_float64(input_data.dtype.type)
+    )
     start_o, end_o = make_segment_views(offsets_data)
 
     h_init = np.asarray(0, dtype=result.dtype)

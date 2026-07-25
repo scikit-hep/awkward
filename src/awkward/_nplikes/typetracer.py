@@ -1663,7 +1663,6 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         maybe_out: TypeTracerArray | None = None,
-        dtype: DTypeLike | None = None,
     ) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
@@ -1676,11 +1675,8 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         # NumPy's `sum` promotes integer and boolean inputs narrower than the
         # platform integer up to the platform integer (e.g. bool/int32 -> intp).
         # Mirror that behaviour so the typetracer reports the same dtype as the
-        # concrete backends. An explicit `dtype` overrides the promotion.
-        if dtype is not None:
-            out_dtype = numpy.dtype(dtype)
-        else:
-            out_dtype = numpy.empty(0, dtype=x.dtype).sum().dtype
+        # concrete backends.
+        out_dtype = numpy.empty(0, dtype=x.dtype).sum().dtype
 
         if axis is None:
             x = cast(TypeTracerArray, self.reshape(x, (-1,)))
