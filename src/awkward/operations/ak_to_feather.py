@@ -166,13 +166,17 @@ def _impl(
         compression = "zstd"
     elif compression is False or compression is None:
         compression = None
+    elif compression == "uncompressed":
+        compression = None
 
+
+    
     if feather_version < 2:
         # Feather V2 (and, presumably, any future version >= 2) is the
         # Arrow IPC file format on disk. Version 1 predates the IPC format
         # entirely and cannot be written via pyarrow.ipc at all - pyarrow
         # offers no non-deprecated way to produce a V1 file, so we fall
-        # back to the deprecated pyarrow.feather API here, scoped narrowly
+        # back to the deprecated pyarrow.feather API here, scoped narrowlyzw
         # to this one legacy case, and let pyarrow validate `feather_version`
         # itself (e.g. reject negative or zero values).
         import warnings
