@@ -43,4 +43,7 @@ def test_var_int32_overflow_matches_numpy():
 def test_var_axis_none_matches_cpu():
     cpu = ak.values_astype(ak.Array([[1, 2, 3], [4, 5]]), np.int32)
     gpu = ak.to_backend(cpu, "cuda")
-    assert ak.var(gpu) == pytest.approx(ak.var(cpu))
+    # axis=None returns a 0-d scalar that stays on the device (cupy). Bring it to
+    # the host *explicitly* for the comparison -- cupy (correctly) refuses the
+    # implicit np.asarray() that pytest.approx would otherwise trigger.
+    assert float(ak.var(gpu)) == pytest.approx(float(ak.var(cpu)))
