@@ -13,7 +13,6 @@ import awkward as ak
 pyarrow = pytest.importorskip("pyarrow")
 
 
-
 # Coverage: parameters not exercised by the original test_2683 file
 
 
@@ -23,6 +22,7 @@ RECORD_ARRAY = [
     [],
     [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}],
 ]
+
 
 # TO check roundway stablity in compression
 @pytest.mark.parametrize("compression", [None, False, "uncompressed"])
@@ -35,6 +35,7 @@ def test_compression_none_false_uncompressed_roundtrip(tmp_path, compression):
 
     assert array2.tolist() == BASE_ARRAY
 
+
 # TO roundway check multiple compression variants
 @pytest.mark.parametrize("compression", [True, "lz4", "zstd", "uncompressed"])
 def test_compression_variants(tmp_path, compression):
@@ -46,7 +47,8 @@ def test_compression_variants(tmp_path, compression):
 
     assert array2.tolist() == BASE_ARRAY
 
-# 
+
+#
 def test_compression_level(tmp_path):
     filename = os.path.join(tmp_path, "compression_level.feather")
     array = ak.Array(BASE_ARRAY)
@@ -71,10 +73,7 @@ def test_feather_version_1_is_unconditionally_broken(tmp_path):
 
     for compression in (True, False, None, "zstd", "uncompressed"):
         with pytest.raises(ValueError, match="Feather V1 files do not support"):
-            ak.to_feather(
-                array, filename, feather_version=1, compression=compression
-            )
-
+            ak.to_feather(array, filename, feather_version=1, compression=compression)
 
 
 def test_bad_destination_type():
@@ -145,8 +144,6 @@ def test_extensionarray_false(tmp_path):
     assert array2.tolist() == RECORD_ARRAY
 
 
-
-
 def _make_union_array():
     c, i = ak.contents, ak.index
     layout = c.UnionArray(
@@ -161,7 +158,7 @@ def test_union_type_extensionarray_true_is_known_broken(tmp_path):
     filename = os.path.join(tmp_path, "union.feather")
     array = _make_union_array()
 
-    ak.to_feather(array, filename) # if it works ,it is the bug
+    ak.to_feather(array, filename)  # if it works ,it is the bug
 
     with pytest.raises(ValueError):
         ak.from_feather(filename)
@@ -176,7 +173,9 @@ def test_union_type_extensionarray_false_roundtrips(tmp_path):
 
     assert array2.tolist() == [1.5, "abc"]
 
+
 # Canary Tests
+
 
 def _time_it(fn):
     start = time.perf_counter()
@@ -200,7 +199,7 @@ def test_timing_flat_array(tmp_path, n, compression):
     print(
         f"\n[timing] n={n} compression={compression!r} "
         f"write={write_time:.4f}s read={read_time:.4f}s "
-        f"file_size={os.path.getsize(filename)/1e6:.2f}MB"
+        f"file_size={os.path.getsize(filename) / 1e6:.2f}MB"
     )
 
     # Generous upper bound: this is not meant to be a tight perf assertion,
@@ -224,7 +223,7 @@ def test_timing_nested_array(tmp_path):
     print(
         f"\n[timing] nested list array (50k rows) "
         f"write={write_time:.4f}s read={read_time:.4f}s "
-        f"file_size={os.path.getsize(filename)/1e6:.2f}MB"
+        f"file_size={os.path.getsize(filename) / 1e6:.2f}MB"
     )
 
     assert write_time < 30

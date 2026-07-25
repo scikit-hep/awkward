@@ -169,8 +169,6 @@ def _impl(
     elif compression == "uncompressed":
         compression = None
 
-
-    
     if feather_version < 2:
         # Feather V2 (and, presumably, any future version >= 2) is the
         # Arrow IPC file format on disk. Version 1 predates the IPC format
