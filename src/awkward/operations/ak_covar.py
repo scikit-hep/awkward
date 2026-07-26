@@ -9,6 +9,7 @@ from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import _get_named_axis, _is_valid_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -144,15 +145,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=None,
                 attrs=None,
             )
-            sumwxy = ak.operations.ak_sum._impl(
-                (x - xmean) * (y - ymean),
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=None,
-                attrs=None,
-            )
         else:
             sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
@@ -163,8 +155,16 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=None,
                 attrs=None,
             )
+
+        # Two-pass, centring on the (float64) means -- numerically stable. Falls
+        # back to the one-pass E[xy]-E[x]E[y] form only when `x - xmean` cannot
+        # broadcast (a non-innermost axis over a ragged array).
+        try:
+            prod = (x - xmean) * (y - ymean)
+            if weight is not None:
+                prod = prod * weight
             sumwxy = ak.operations.ak_sum._impl(
-                (x - xmean) * (y - ymean) * weight,
+                prod,
                 axis,
                 keepdims,
                 mask_identity,
@@ -172,8 +172,21 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=None,
                 attrs=None,
             )
-
-        out = sumwxy / sumw
+            out = sumwxy / sumw
+        except ValueError:
+            xp = promote_integral_to_float64(x)
+            yp = promote_integral_to_float64(y)
+            xy = xp * yp if weight is None else xp * yp * weight
+            sumwxy = ak.operations.ak_sum._impl(
+                xy,
+                axis,
+                keepdims,
+                mask_identity,
+                highlevel=True,
+                behavior=None,
+                attrs=None,
+            )
+            out = sumwxy / sumw - xmean * ymean
 
         wrapped = ctx.wrap(
             maybe_highlevel_to_lowlevel(out),

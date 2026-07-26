@@ -11,6 +11,7 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     NAMED_AXIS_KEY,
@@ -225,82 +226,66 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
     axis = _named_axis_to_positional_axis(named_axis, axis)
     axis = regularize_axis(axis, none_allowed=True)
 
+    kw = {
+        "keepdims": True,
+        "mask_identity": True,
+        "highlevel": True,
+        "behavior": ctx.behavior,
+        "attrs": ctx.attrs,
+    }
+    is_complex = _has_complex_leaf(x.layout)
+
     with np.errstate(invalid="ignore", divide="ignore"):
-        # Two-pass, like NumPy and ak.covar: centre on the (float64) mean, then
-        # sum the squared deviations. The one-pass E[x**2] - E[x]**2 form
-        # catastrophically cancels; centring is stable and, because the mean is
-        # float64, the deviations are float64 -- so integer/float32 squares no
-        # longer overflow or lose precision, without pre-promoting the input.
-        xmean = ak.operations.ak_mean._impl(
-            x,
-            weight,
-            axis,
-            keepdims=True,
-            mask_identity=True,
-            highlevel=True,
-            behavior=ctx.behavior,
-            attrs=ctx.attrs,
-        )
-        dev = x - xmean
-
         if weight is None:
-            sumw = ak.operations.ak_count._impl(
-                x,
-                axis,
-                keepdims=True,
-                mask_identity=True,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            sumw = ak.operations.ak_count._impl(x, axis, **kw)
         else:
-            sumw = ak.operations.ak_sum._impl(
-                x * 0 + weight,
-                axis,
-                keepdims=True,
-                mask_identity=True,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            sumw = ak.operations.ak_sum._impl(x * 0 + weight, axis, **kw)
 
-        if _has_complex_leaf(x.layout):
-            # Variance of complex data is E[|x - mean|**2], a real number.
-            squared_dev = abs(dev) ** 2
-            if weight is not None:
-                squared_dev = squared_dev * weight
-            sumwxx = ak.operations.ak_sum._impl(
-                squared_dev,
-                axis,
-                keepdims=True,
-                mask_identity=True,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-        elif weight is None:
-            # Deviations are float64 -> fused sum-of-squares, no (x-mean)**2 buffer.
-            sumwxx = ak.operations.ak_sumofsquares._impl(
-                dev,
-                axis,
-                keepdims=True,
-                mask_identity=True,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+        # Two-pass, like NumPy and ak.covar: centre on the (float64) mean, then
+        # sum the squared deviations. This is numerically stable (the one-pass
+        # E[x**2]-E[x]**2 form catastrophically cancels) and overflow-safe, since
+        # the mean is float64 so the deviations are float64.
+        #
+        # Centring needs `x - xmean` to broadcast, which is undefined when the
+        # reduced axis is not the innermost one of a *ragged* array (short
+        # sublists cannot broadcast to the column width). There the one-pass form
+        # is used instead -- correct, and not a large-mean cancellation setting.
+        xmean = ak.operations.ak_mean._impl(x, weight, axis, **kw)
+        try:
+            dev = x - xmean
+        except ValueError:
+            dev = None
+
+        if dev is not None:
+            if is_complex:
+                # Variance of complex data is E[|x - mean|**2], a real number.
+                squared_dev = abs(dev) ** 2
+                if weight is not None:
+                    squared_dev = squared_dev * weight
+                sumwxx = ak.operations.ak_sum._impl(squared_dev, axis, **kw)
+            elif weight is None:
+                # float64 deviations -> fused sum-of-squares, no (x-mean)**2 buffer.
+                sumwxx = ak.operations.ak_sumofsquares._impl(dev, axis, **kw)
+            else:
+                sumwxx = ak.operations.ak_sum._impl(weight * dev * dev, axis, **kw)
+            out = sumwxx / sumw
         else:
-            sumwxx = ak.operations.ak_sum._impl(
-                weight * dev * dev,
-                axis,
-                keepdims=True,
-                mask_identity=True,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            # One-pass fallback (non-innermost ragged axis).
+            if weight is None:
+                sumwx = ak.operations.ak_sum._impl(x, axis, dtype=np.float64, **kw)
+                if is_complex:
+                    sumwxx = ak.operations.ak_sum._impl(x * x, axis, **kw)
+                else:
+                    sumwxx = ak.operations.ak_sumofsquares._impl(x, axis, **kw)
+            else:
+                xp = x if is_complex else promote_integral_to_float64(x)
+                sumwx = ak.operations.ak_sum._impl(
+                    xp * weight, axis, dtype=np.float64, **kw
+                )
+                sumwxx = ak.operations.ak_sum._impl(xp * xp * weight, axis, **kw)
+            mean = sumwx / sumw
+            out = sumwxx / sumw - mean * mean
 
-        out = sumwxx / sumw
         if ddof != 0:
             out = out * (sumw / (sumw - ddof))
 
