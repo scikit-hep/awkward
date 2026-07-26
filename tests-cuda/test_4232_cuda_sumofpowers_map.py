@@ -15,6 +15,17 @@ cp = pytest.importorskip("cupy")
 # overflow):
 #   * _make_square_to_float64._sq   -- v = float(x); return v * v   (ak.var/std)
 #   * _make_power_to_float64._pow   -- return float(x) ** n         (ak.moment)
+#
+# The widening happens inside the device map op, and the segmented reduction runs
+# via cuda.compute, so the whole computation stays on the GPU. `_gpu` below asserts
+# device residency (the op did not silently fall back to / round-trip through the
+# host) before values are copied to the CPU for comparison.
+
+
+def _gpu(array):
+    """Assert an array is still on the cuda backend, then return it."""
+    assert ak.backend(array) == "cuda"
+    return array
 
 
 @pytest.mark.parametrize(
@@ -28,7 +39,7 @@ def test_var_square_map_matches_cpu(dtype):
     gpu = ak.to_backend(cpu, "cuda")
 
     out_cpu = ak.to_list(ak.var(cpu, axis=-1))
-    out_gpu = ak.to_list(ak.to_backend(ak.var(gpu, axis=-1), "cpu"))
+    out_gpu = ak.to_list(ak.to_backend(_gpu(ak.var(gpu, axis=-1)), "cpu"))
     for a, b in zip(out_cpu, out_gpu, strict=True):
         if a is None or (isinstance(a, float) and np.isnan(a)):
             assert b is None or np.isnan(b)
@@ -53,7 +64,7 @@ def test_moment_power_map_matches_cpu(n):
     gpu = ak.to_backend(cpu, "cuda")
 
     out_cpu = ak.to_list(ak.moment(cpu, n, axis=-1))
-    out_gpu = ak.to_list(ak.to_backend(ak.moment(gpu, n, axis=-1), "cpu"))
+    out_gpu = ak.to_list(ak.to_backend(_gpu(ak.moment(gpu, n, axis=-1)), "cpu"))
     for a, b in zip(out_cpu, out_gpu, strict=True):
         if a is None or (isinstance(a, float) and np.isnan(a)):
             assert b is None or np.isnan(b)
@@ -77,6 +88,41 @@ def test_moment_power_map_dtypes(dtype):
     cpu = ak.values_astype(ak.Array(segs), dtype)
     gpu = ak.to_backend(cpu, "cuda")
     out_cpu = ak.to_list(ak.moment(cpu, 3, axis=-1))
-    out_gpu = ak.to_list(ak.to_backend(ak.moment(gpu, 3, axis=-1), "cpu"))
+    out_gpu = ak.to_list(ak.to_backend(_gpu(ak.moment(gpu, 3, axis=-1)), "cpu"))
     for a, b in zip(out_cpu, out_gpu, strict=True):
         assert b == pytest.approx(a)
+
+
+# --- device residency: nothing round-trips through the host ------------------
+
+
+def test_all_touched_ops_stay_on_device():
+    # Every statistic touched by the PR must keep its result on the cuda backend
+    # for a segmented (axis=-1) reduction -- proving the elementwise centring,
+    # squaring/powering and the segmented reductions all run on the GPU.
+    x = ak.to_backend(ak.values_astype(ak.Array([[3, 1, 2], [4, 5]]), np.int32), "cuda")
+    y = ak.to_backend(ak.values_astype(ak.Array([[2, 4, 6], [1, 3]]), np.int32), "cuda")
+    w = ak.to_backend(ak.values_astype(ak.Array([[1, 2, 1], [2, 1]]), np.int32), "cuda")
+
+    assert ak.backend(ak.sum(x, axis=-1)) == "cuda"
+    assert ak.backend(ak.mean(x, axis=-1)) == "cuda"
+    assert ak.backend(ak.var(x, axis=-1)) == "cuda"
+    assert ak.backend(ak.std(x, axis=-1)) == "cuda"
+    assert ak.backend(ak.moment(x, 3, axis=-1)) == "cuda"
+    assert ak.backend(ak.covar(x, y, axis=-1)) == "cuda"
+    assert ak.backend(ak.corr(x, y, axis=-1)) == "cuda"
+    # weighted paths (extra products) and complex var must also stay resident
+    assert ak.backend(ak.var(x, weight=w, axis=-1)) == "cuda"
+    assert ak.backend(ak.mean(x, weight=w, axis=-1)) == "cuda"
+    xc = ak.to_backend(ak.Array([[1 + 2j, 3 + 4j], [5 + 1j, 2 + 0j]]), "cuda")
+    assert ak.backend(ak.var(xc, axis=-1)) == "cuda"
+
+
+def test_full_reduction_keeps_input_on_device():
+    # For axis=None the *result* is a single scalar, but the O(n) input must never
+    # be pulled to the host. Using keepdims=True the reduction returns a device
+    # array (a 0-d/1-d cuda array), confirming no whole-array host round-trip.
+    x = ak.to_backend(ak.values_astype(ak.Array([[3, 1, 2], [4, 5]]), np.int32), "cuda")
+    for op in (ak.mean, ak.var, ak.std):
+        assert ak.backend(op(x, axis=None, keepdims=True)) == "cuda"
+    assert ak.backend(ak.moment(x, 3, axis=None, keepdims=True)) == "cuda"

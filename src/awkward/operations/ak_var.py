@@ -276,11 +276,14 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 sumwxx = ak.operations.ak_sum._impl(weight * dev * dev, axis, **kw)
             out = sumwxx / sumw
         else:
-            # One-pass fallback (non-innermost ragged axis).
+            # One-pass fallback (non-innermost ragged axis). For complex data the
+            # variance is E[|x - mean|**2] = E[|x|**2] - |E[x]|**2, so the second
+            # moment and the mean-correction use the (real) squared modulus --
+            # matching NumPy and the innermost complex path, not E[x**2]-E[x]**2.
             if weight is None:
                 sumwx = ak.operations.ak_sum._impl(x, axis, dtype=np.float64, **kw)
                 if is_complex:
-                    sumwxx = ak.operations.ak_sum._impl(x * x, axis, **kw)
+                    sumwxx = ak.operations.ak_sum._impl(abs(x) ** 2, axis, **kw)
                 else:
                     sumwxx = ak.operations.ak_sumofsquares._impl(x, axis, **kw)
             else:
@@ -288,9 +291,14 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 sumwx = ak.operations.ak_sum._impl(
                     xp * weight, axis, dtype=np.float64, **kw
                 )
-                sumwxx = ak.operations.ak_sum._impl(xp * xp * weight, axis, **kw)
+                if is_complex:
+                    sumwxx = ak.operations.ak_sum._impl(
+                        abs(xp) ** 2 * weight, axis, **kw
+                    )
+                else:
+                    sumwxx = ak.operations.ak_sum._impl(xp * xp * weight, axis, **kw)
             mean = sumwx / sumw
-            out = sumwxx / sumw - mean * mean
+            out = sumwxx / sumw - (abs(mean) ** 2 if is_complex else mean * mean)
 
         if ddof != 0:
             out = out * (sumw / (sumw - ddof))

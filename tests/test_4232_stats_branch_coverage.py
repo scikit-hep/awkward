@@ -91,21 +91,20 @@ def test_var_fallback_weighted_ragged_axis0():
 
 
 def test_var_fallback_complex_ragged_axis0():
-    # The complex branch of the fallback: sum(x, float64) and sum(x*x). NOTE:
-    # for complex data this computes E[x**2]-E[x]**2 (the pseudo-variance),
-    # unlike the innermost complex path which returns NumPy's E[|x-mean|**2].
-    # This test characterises the fallback as implemented.
+    # The complex branch of the fallback uses |x|**2 and |mean|**2, so it returns
+    # NumPy's variance E[|x - mean|**2] (a real number) -- consistent with the
+    # innermost complex path, not the E[x**2]-E[x]**2 pseudo-variance.
     rows = [[1 + 1j, 2 + 0j, 3 - 1j], [4 + 2j, 5 + 0j, 6 + 1j], [7 + 0j, 8 - 2j]]
     x = ak.Array(rows)
     out = ak.var(x, axis=0)
 
-    def col_pseudo_var(j):
+    def col_var(j):
         c = np.array([r[j] for r in rows if len(r) > j], dtype=np.complex128)
-        return np.mean(c * c) - np.mean(c) ** 2
+        return np.var(c)
 
-    got = ak.to_list(out)
-    for j, g in enumerate(got):
-        assert g == pytest.approx(col_pseudo_var(j))
+    for j, g in enumerate(ak.to_list(out)):
+        assert np.imag(g) == pytest.approx(0.0)
+        assert float(np.real(g)) == pytest.approx(float(col_var(j)))
 
 
 # --- ak.var: named-axis strip (two-pass must be taken, not the fallback) -----
