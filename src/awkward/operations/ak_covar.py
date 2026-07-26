@@ -195,6 +195,37 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=None,
                 attrs=None,
             )
+
+            # xmean and ymean were forced to keepdims=True earlier for the try block.
+            # If keepdims=False, we must recalculate them so they match the dimensions of sumwxy.
+            if not keepdims:
+                xmean = ak.operations.ak_mean._impl(
+                    x,
+                    weight,
+                    axis,
+                    False,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=None,
+                    attrs=None,
+                )
+                ymean = ak.operations.ak_mean._impl(
+                    y,
+                    weight,
+                    axis,
+                    False,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=None,
+                    attrs=None,
+                )
+                xmean = ak.operations.ak_without_named_axis._impl(
+                    xmean, highlevel=True, behavior=None, attrs=None
+                )
+                ymean = ak.operations.ak_without_named_axis._impl(
+                    ymean, highlevel=True, behavior=None, attrs=None
+                )
+
             out = sumwxy / sumw - xmean * ymean
 
         wrapped = ctx.wrap(

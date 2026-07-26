@@ -202,6 +202,34 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 )
             out = sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
         except ValueError:
+            if not keepdims:
+                xmean = ak.operations.ak_mean._impl(
+                    x,
+                    weight,
+                    axis,
+                    False,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+                ymean = ak.operations.ak_mean._impl(
+                    y,
+                    weight,
+                    axis,
+                    False,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+                xmean = ak.operations.ak_without_named_axis._impl(
+                    xmean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+                )
+                ymean = ak.operations.ak_without_named_axis._impl(
+                    ymean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+                )
+
             sw = (axis, keepdims, mask_identity)
             if weight is None:
                 sumw = ak.operations.ak_count._impl(
