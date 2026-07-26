@@ -280,6 +280,67 @@ def test_sum_bool_forced_dtype_unsupported_result(monkeypatch):
         )
 
 
+# --- Sum.apply numeric segmented path (plain / forced-accumulator / complex) -
+
+
+def test_sum_numeric_segmented_plain():
+    # Numeric, non-complex, no forced dtype (use_forced=False): the segmented
+    # awkward_reduce_sum runs, then the result is viewed back to the promoted
+    # integer rank (int32 -> int64).
+    array = ak.values_astype(ak.Array([[1, 2, 3], [], [4, 5]]), np.int32)
+    out = ak.sum(array, axis=1)
+    assert ak.to_list(out) == [6, 0, 9]
+    assert ak.to_numpy(out).dtype == np.dtype(np.int64)
+
+
+def test_sum_numeric_segmented_forced_float64_accumulator():
+    # Numeric with a forced float64 accumulator (use_forced=True): the same
+    # segmented kernel sums directly into float64, returned without a view-back.
+    array = ak.values_astype(ak.Array([[1, 2, 3], [], [4, 5]]), np.int32)
+    out = ak.operations.ak_sum._impl(
+        array, 1, False, False, True, None, None, dtype=np.float64
+    )
+    assert ak.to_list(out) == [6.0, 0.0, 9.0]
+    assert ak.to_numpy(out).dtype == np.dtype(np.float64)
+
+
+def test_sum_complex_segmented():
+    # Complex numeric (is_complex=True): the awkward_reduce_sum_complex branch.
+    array = ak.Array([[1 + 2j, 3 + 0j], [], [4 - 1j]])
+    out = ak.sum(array, axis=1)
+    assert ak.to_list(out) == [4 + 2j, 0j, 4 - 1j]
+
+
+# --- AxisNoneSum.apply (axis=None routes through nplike.sum) ------------------
+
+
+def test_sum_axis_none_plain():
+    # axis=None, no forced dtype: reduce via nplike.sum (else branch), reshaped
+    # to length 1 and wrapped -- exercises the AxisNoneSum return path.
+    array = ak.values_astype(ak.Array([[1, 2, 3], [], [4, 5]]), np.int32)
+    out = ak.sum(array, axis=None)
+    assert out == 15
+    assert np.asarray(out).dtype == np.dtype(np.int64)
+
+
+def test_sum_axis_none_forced_float64_accumulator():
+    # axis=None with a forced float64 accumulator (self._dtype set, not complex):
+    # nplike.sum is called with dtype=float64.
+    array = ak.values_astype(ak.Array([[1, 2, 3], [], [4, 5]]), np.int32)
+    out = ak.operations.ak_sum._impl(
+        array, None, False, False, True, None, None, dtype=np.float64
+    )
+    assert out == 15.0
+    assert np.asarray(out).dtype == np.dtype(np.float64)
+
+
+def test_sum_axis_none_complex():
+    # axis=None complex: dtype.kind == "c" forces the plain (no-dtype) reduce.
+    array = ak.Array([[1 + 2j, 3 + 0j], [], [4 - 1j]])
+    out = ak.sum(array, axis=None)
+    assert out == 8 + 1j
+
+
 # --- typetracer honours an explicit dtype -----------------------------------
 
 
