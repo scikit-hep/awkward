@@ -139,6 +139,15 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
             behavior=ctx.behavior,
             attrs=ctx.attrs,
         )
+        # Centring is internal; strip named axes from the means so the
+        # subtractions are not rejected by the named-axis compatibility check.
+        xmean = ak.operations.ak_without_named_axis._impl(
+            xmean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+        )
+        ymean = ak.operations.ak_without_named_axis._impl(
+            ymean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+        )
+
         # Two-pass (stable), with a one-pass fallback when `x - xmean` cannot
         # broadcast (a non-innermost axis over a ragged array). The 1/sumw factor
         # cancels in the ratio, so the fallback uses centred raw sums directly.

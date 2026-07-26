@@ -251,6 +251,12 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
         # sublists cannot broadcast to the column width). There the one-pass form
         # is used instead -- correct, and not a large-mean cancellation setting.
         xmean = ak.operations.ak_mean._impl(x, weight, axis, **kw)
+        # Centring is an internal step; strip named axes from the mean so the
+        # subtraction is not rejected by the named-axis compatibility check (the
+        # output's named axis is propagated from `x`, not `xmean`).
+        xmean = ak.operations.ak_without_named_axis._impl(
+            xmean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+        )
         try:
             dev = x - xmean
         except ValueError:
