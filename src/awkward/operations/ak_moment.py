@@ -125,9 +125,8 @@ def _impl(
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
-    # Integer powers (x ** n) overflow before reduction; promote integral data
-    # to float64 once (no-op and zero copy for floating inputs), matching NumPy.
-    x = promote_integral_to_float64(x)
+    # sum-of-squares is float64-only, so complex falls back to the sum(x**n) path.
+    is_complex = "complex" in str(ak.type(x))
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
@@ -140,18 +139,36 @@ def _impl(
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            sumwxn = ak.operations.ak_sum._impl(
-                x**n,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            if n == 2 and not is_complex:
+                # E[x**2]: sum of squares accumulated in float64 directly from
+                # the input -- no x**2 buffer, no integer/float32 overflow.
+                sumwxn = ak.operations.ak_sumofsquares._impl(
+                    x,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            else:
+                # Other powers: sum(x**n) accumulated in float64 directly from
+                # the input -- no x**n buffer, no integer/float32 overflow.
+                sumwxn = ak.operations.ak_sumofpowers._impl(
+                    x,
+                    n,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
         else:
+            # Promote so (x**n) * weight does not overflow for integer input.
+            xp = promote_integral_to_float64(x)
             sumw = ak.operations.ak_sum._impl(
-                x * 0 + weight,
+                xp * 0 + weight,
                 axis,
                 keepdims,
                 mask_identity,
@@ -160,7 +177,7 @@ def _impl(
                 attrs=ctx.attrs,
             )
             sumwxn = ak.operations.ak_sum._impl(
-                (x**n) * weight,
+                (xp**n) * weight,
                 axis,
                 keepdims,
                 mask_identity,

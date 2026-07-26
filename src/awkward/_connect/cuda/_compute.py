@@ -142,6 +142,24 @@ def _make_square_to_float64(in_type):
     return _sq
 
 
+@functools.cache
+def _make_power_to_float64(in_type, n):
+    """Interned ``x -> (double)x ** n`` map op (cached per (in_type, n)).
+
+    Widens each element to ``float64`` and raises it to the runtime power ``n``
+    on the fly, so a downstream segmented_reduce accumulates ``sum(x**n)`` in
+    double precision with no materialised ``x**n`` buffer and no overflow.
+    """
+
+    n_int = int(n)
+
+    def _pow(x):
+        return float(x) ** n_int
+
+    _pow.__annotations__ = {"x": in_type, "return": np.float64}
+    return _pow
+
+
 def _widen_for_reduce(input_data, out_dtype):
     """Fuse a widening cast into a downstream segmented_reduce.
 
@@ -601,6 +619,34 @@ def awkward_reduce_sumofsquares(
     # buffer, no integer/float32 overflow. `result` is float64 (SumOfSquares).
     d_input = TransformIterator(
         input_data, _make_square_to_float64(input_data.dtype.type)
+    )
+    start_o, end_o = make_segment_views(offsets_data)
+
+    h_init = np.asarray(0, dtype=result.dtype)
+
+    segmented_reduce(
+        d_in=d_input,
+        d_out=result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=h_init,
+    )
+
+
+def awkward_reduce_sumofpowers(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+    n,
+):
+    # sum(x**n) accumulated in float64. A TransformIterator raises each element
+    # (widened to double) to the runtime power n on the fly, feeding a PLUS
+    # segmented_reduce -- no x**n buffer, no integer/float32 overflow.
+    d_input = TransformIterator(
+        input_data, _make_power_to_float64(input_data.dtype.type, int(n))
     )
     start_o, end_o = make_segment_views(offsets_data)
 

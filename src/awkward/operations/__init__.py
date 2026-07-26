@@ -86,6 +86,7 @@ from awkward.operations.ak_sort import *
 from awkward.operations.ak_std import *
 from awkward.operations.ak_strings_astype import *
 from awkward.operations.ak_sum import *
+from awkward.operations.ak_sumofpowers import *
 from awkward.operations.ak_sumofsquares import *
 from awkward.operations.ak_to_arrow import *
 from awkward.operations.ak_to_arrow_table import *

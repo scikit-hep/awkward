@@ -11,7 +11,6 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
-    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     NAMED_AXIS_KEY,
@@ -39,41 +38,6 @@ def _has_complex_leaf(layout) -> bool:
 
     ak._do.recursively_apply(layout, action, return_array=False)
     return found
-
-
-def _promote_products_to_float64(array):
-    """Promote bool/integer/float32 leaves to float64 so the *weighted* products
-    (``x*x*weight``, ``x*weight``) neither overflow nor lose precision.
-
-    float64 and complex leaves are returned unchanged (no copy). Promoting ``x``
-    alone is enough: ``float64 * weight`` is float64 for any real weight. Used
-    only on the weighted branch of ``ak.var``; the unweighted branch is copy-free
-    via the sum-of-squares reducer. (The fully-fused, copy-free weighted reduce
-    would need a two-input segmented reduce -- deferred.)
-    """
-    if not hasattr(array, "layout"):
-        return array
-
-    found = False
-
-    def action(node, **kwargs):
-        nonlocal found
-        if node.is_numpy and (node.dtype.kind in "biu" or node.dtype == np.float32):
-            found = True
-            return node
-        return None
-
-    ak._do.recursively_apply(array.layout, action, return_array=False)
-    if found:
-        return ak.operations.ak_values_astype._impl(
-            array,
-            np.float64,
-            including_unknown=False,
-            highlevel=True,
-            behavior=None,
-            attrs=None,
-        )
-    return array
 
 
 @high_level_function()
@@ -255,10 +219,6 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
-    # Integer squares (x * x) overflow before reduction; promote integral data
-    # to float64 once (no-op and zero copy for floating inputs), matching NumPy.
-    x = promote_integral_to_float64(x)
-
     # Handle named axis
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
@@ -266,6 +226,23 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
     axis = regularize_axis(axis, none_allowed=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
+        # Two-pass, like NumPy and ak.covar: centre on the (float64) mean, then
+        # sum the squared deviations. The one-pass E[x**2] - E[x]**2 form
+        # catastrophically cancels; centring is stable and, because the mean is
+        # float64, the deviations are float64 -- so integer/float32 squares no
+        # longer overflow or lose precision, without pre-promoting the input.
+        xmean = ak.operations.ak_mean._impl(
+            x,
+            weight,
+            axis,
+            keepdims=True,
+            mask_identity=True,
+            highlevel=True,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+        dev = x - xmean
+
         if weight is None:
             sumw = ak.operations.ak_count._impl(
                 x,
@@ -276,44 +253,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            sumwx = ak.operations.ak_sum._impl(
-                x,
-                axis,
-                keepdims=True,
-                mask_identity=True,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            # sum(x**2) accumulated in float64 directly from the input: no x*x
-            # buffer and no integer/float32 overflow (see ak_sumofsquares). The
-            # float64-only reducer doesn't cover complex, so complex keeps the
-            # original sum(x*x) path (which yields a complex E[x**2]).
-            if _has_complex_leaf(x.layout):
-                sumwxx = ak.operations.ak_sum._impl(
-                    x * x,
-                    axis,
-                    keepdims=True,
-                    mask_identity=True,
-                    highlevel=True,
-                    behavior=ctx.behavior,
-                    attrs=ctx.attrs,
-                )
-            else:
-                sumwxx = ak.operations.ak_sumofsquares._impl(
-                    x,
-                    axis,
-                    keepdims=True,
-                    mask_identity=True,
-                    highlevel=True,
-                    behavior=ctx.behavior,
-                    attrs=ctx.attrs,
-                )
         else:
-            # Promote x to float64 so the weighted products don't overflow /
-            # lose precision. Bounded copy (float64/complex left as-is); the
-            # copy-free fused path needs a two-input reduce (deferred).
-            x = _promote_products_to_float64(x)
             sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
                 axis,
@@ -323,17 +263,14 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            sumwx = ak.operations.ak_sum._impl(
-                x * weight,
-                axis,
-                keepdims=True,
-                mask_identity=True,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+
+        if _has_complex_leaf(x.layout):
+            # Variance of complex data is E[|x - mean|**2], a real number.
+            squared_dev = abs(dev) ** 2
+            if weight is not None:
+                squared_dev = squared_dev * weight
             sumwxx = ak.operations.ak_sum._impl(
-                x * x * weight,
+                squared_dev,
                 axis,
                 keepdims=True,
                 mask_identity=True,
@@ -341,8 +278,29 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-        mean = sumwx / sumw
-        out = sumwxx / sumw - mean * mean
+        elif weight is None:
+            # Deviations are float64 -> fused sum-of-squares, no (x-mean)**2 buffer.
+            sumwxx = ak.operations.ak_sumofsquares._impl(
+                dev,
+                axis,
+                keepdims=True,
+                mask_identity=True,
+                highlevel=True,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+            )
+        else:
+            sumwxx = ak.operations.ak_sum._impl(
+                weight * dev * dev,
+                axis,
+                keepdims=True,
+                mask_identity=True,
+                highlevel=True,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+            )
+
+        out = sumwxx / sumw
         if ddof != 0:
             out = out * (sumw / (sumw - ddof))
 
