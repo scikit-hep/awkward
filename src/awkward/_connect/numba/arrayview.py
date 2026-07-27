@@ -1068,6 +1068,7 @@ def lower_asarray(context, builder, sig, args):
     whichpos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.ARRAY
     )
+
     arrayptr = ak._connect.numba.layout.getat(
         context, builder, viewproxy.arrayptrs, whichpos
     )
@@ -1075,11 +1076,16 @@ def lower_asarray(context, builder, sig, args):
     bitwidth = ak._connect.numba.layout.type_bitwidth(rettype.dtype)
     itemsize = context.get_constant(numba.intp, bitwidth // 8)
 
-    data = numba.core.cgutils.pointer_add(
-        builder,
+    data_pointer_type = context.get_value_type(numba.types.CPointer(rettype.dtype))
+
+    typed_arrayptr = builder.inttoptr(
         arrayptr,
-        builder.mul(viewproxy.start, itemsize),
-        context.get_value_type(numba.types.CPointer(rettype.dtype)),
+        data_pointer_type,
+    )
+
+    data = builder.gep(
+        typed_arrayptr,
+        [viewproxy.start],
     )
 
     shape = context.make_tuple(
