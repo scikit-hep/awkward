@@ -290,7 +290,9 @@ def test_sum_numeric_segmented_plain():
     array = ak.values_astype(ak.Array([[1, 2, 3], [], [4, 5]]), np.int32)
     out = ak.sum(array, axis=1)
     assert ak.to_list(out) == [6, 0, 9]
-    assert ak.to_numpy(out).dtype == np.dtype(np.int64)
+    # Result is viewed back to the promoted integer rank (platform intp: int64 on
+    # 64-bit POSIX, int32 on Windows) -- assert the kind, not the exact width.
+    assert ak.to_numpy(out).dtype.kind == "i"
 
 
 def test_sum_numeric_segmented_forced_float64_accumulator():
@@ -320,7 +322,7 @@ def test_sum_axis_none_plain():
     array = ak.values_astype(ak.Array([[1, 2, 3], [], [4, 5]]), np.int32)
     out = ak.sum(array, axis=None)
     assert out == 15
-    assert np.asarray(out).dtype == np.dtype(np.int64)
+    assert np.asarray(out).dtype.kind == "i"
 
 
 def test_sum_axis_none_forced_float64_accumulator():
