@@ -234,6 +234,9 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
+            # Accumulate in float64 (NumPy's mean dtype), so integer/float32
+            # input neither overflows nor loses precision -- no promoted copy.
+            # dtype is ignored for complex, keeping a complex mean.
             sumwx = ak.operations.ak_sum._impl(
                 x,
                 axis,
@@ -242,6 +245,7 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 highlevel=True,
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
+                dtype=np.float64,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -252,6 +256,7 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 highlevel=True,
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
+                dtype=np.float64,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x * weight,
@@ -261,6 +266,7 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 highlevel=True,
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
+                dtype=np.float64,
             )
 
         out = sumwx / sumw

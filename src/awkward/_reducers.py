@@ -334,8 +334,15 @@ class Sum(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    def __init__(self, dtype: DTypeLike | None = None):
+        # Internal-only forced accumulator dtype (NumPy's umr_sum(dtype=...)).
+        # ak.mean/ak.var use dtype=float64 so integer/float32 input accumulates
+        # in double precision without materialising a promoted copy. Not exposed
+        # on ak.sum.
+        self._dtype = None if dtype is None else np.dtype(dtype)
+
     def axis_none_reducer(self) -> AxisNoneSum:
-        return AxisNoneSum()
+        return AxisNoneSum(self._dtype)
 
     def apply(
         self,
@@ -386,14 +393,30 @@ class Sum(KernelReducer):
                 )
             else:
                 raise NotImplementedError
+            # bool sums can't overflow; if a float accumulator was requested,
+            # cast the small (outlength) result.
+            if self._dtype is not None:
+                result = result.astype(self._dtype)
             return ak.contents.NumpyArray(result, backend=array.backend)
         else:
+            is_complex = array.dtype.type in (np.complex128, np.complex64)
+            # A forced float accumulator (self._dtype) sums directly into that
+            # dtype via awkward_reduce_sum_<out>_<in>_64 -- no promoted input
+            # copy. Not applied to complex, datetime, or timedelta (kinds c/M/m),
+            # which must keep their own dtype (e.g. mean of timedelta must stay
+            # timedelta, not become float64 tick counts). Mirrors the jax guard.
+            use_forced = self._dtype is not None and array.dtype.kind not in "cmM"
             kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
+            result_dtype = (
+                self._dtype
+                if use_forced
+                else self._promote_integer_rank(kernel_array_data.dtype)
+            )
             result = array.backend.nplike.empty(
                 self._length_for_kernel(array.dtype.type, outlength),
-                dtype=self._promote_integer_rank(kernel_array_data.dtype),
+                dtype=result_dtype,
             )
-            if array.dtype.type in (np.complex128, np.complex64):
+            if is_complex:
                 assert offsets.nplike is array.backend.nplike
                 array.backend.maybe_kernel_error(
                     array.backend[
@@ -424,6 +447,8 @@ class Sum(KernelReducer):
                     )
                 )
 
+            if use_forced:
+                return ak.contents.NumpyArray(result, backend=array.backend)
             return ak.contents.NumpyArray(
                 result.view(self._promote_integer_rank(array.dtype)),
                 backend=array.backend,
@@ -445,10 +470,150 @@ class AxisNoneSum(Sum):
 
         nplike = array.backend.nplike
         reduce_fn = getattr(nplike, self.name)
-        result_scalar = reduce_fn(array.data, axis=None)
+        if self._dtype is not None and array.dtype.kind != "c":
+            result_scalar = reduce_fn(array.data, axis=None, dtype=self._dtype)
+        else:
+            result_scalar = reduce_fn(array.data, axis=None)
         result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
 
         return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
+class SumOfSquares(KernelReducer):
+    """Per-segment ``sum(x**2)`` accumulated directly in ``float64``.
+
+    Reads the input in its native dtype and squares each element in ``float64``
+    inside the kernel, so integer and ``float32`` inputs neither overflow nor
+    lose precision, and no intermediate ``x*x`` buffer is allocated. Used by
+    ``ak.var``/``ak.std``/``ak.moment`` in place of ``ak.sum(x * x)``.
+    """
+
+    name: Final = "sumofsquares"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    def axis_none_reducer(self) -> AxisNoneSumOfSquares:
+        # For a full reduction on a concrete backend, route through NumPy/CuPy's
+        # optimized (SIMD/BLAS-class) reduction instead of the scalar per-element
+        # kernel loop -- a large speedup for big arrays.
+        return AxisNoneSumOfSquares()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        offsets: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "c":
+            raise TypeError(
+                f"cannot compute the sum-of-squares (ak.var/ak.std) of {array.dtype!r}"
+            )
+        if array.dtype.kind == "M":
+            raise ValueError(f"cannot compute the sum-of-squares of {array.dtype!r}")
+        result = array.backend.nplike.empty(outlength, dtype=np.float64)
+        assert offsets.nplike is array.backend.nplike
+        array.backend.maybe_kernel_error(
+            array.backend[
+                "awkward_reduce_sumofsquares",
+                np.float64,
+                array.dtype.type,
+                offsets.dtype.type,
+            ](
+                result,
+                array.data,
+                offsets.data,
+                outlength,
+            )
+        )
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+class AxisNoneSumOfSquares(SumOfSquares):
+    """``axis=None`` specialization of :class:`SumOfSquares`.
+
+    Widens to ``float64`` and squares with the backend's ufunc, then reduces via
+    ``nplike.sum`` (NumPy/CuPy's optimized reduction) rather than the scalar
+    kernel loop. The whole computation stays on the backend's device; only the
+    final scalar returns to the host, as for every ``axis=None`` reduction.
+    """
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _offsets: ak.index.Index,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "c":
+            raise TypeError(
+                f"cannot compute the sum-of-squares (ak.var/ak.std) of {array.dtype!r}"
+            )
+        if array.dtype.kind == "M":
+            raise ValueError(f"cannot compute the sum-of-squares of {array.dtype!r}")
+        nplike = array.backend.nplike
+        data = array.data
+        widened = (
+            data if data.dtype == np.dtype(np.float64) else data.astype(np.float64)
+        )
+        result_scalar = nplike.sum(widened * widened, axis=None, dtype=np.float64)
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
+
+
+class SumOfPowers(KernelReducer):
+    """Per-segment ``sum(x**n)`` accumulated directly in ``float64``.
+
+    Like :class:`SumOfSquares` but for an arbitrary (runtime) integer power
+    ``n``: each element is widened to ``float64`` and raised to the power inside
+    the kernel, so integer/``float32`` powers neither overflow nor lose precision
+    and no ``x**n`` buffer is allocated. Used by ``ak.moment`` in place of
+    ``ak.sum(x ** n)``.
+    """
+
+    name: Final = "sumofpowers"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    def __init__(self, n: int):
+        self._n = int(n)
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        offsets: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "c":
+            raise TypeError(
+                f"cannot compute the sum-of-powers (ak.moment) of {array.dtype!r}"
+            )
+        if array.dtype.kind == "M":
+            raise ValueError(f"cannot compute the sum-of-powers of {array.dtype!r}")
+        result = array.backend.nplike.empty(outlength, dtype=np.float64)
+        assert offsets.nplike is array.backend.nplike
+        array.backend.maybe_kernel_error(
+            array.backend[
+                "awkward_reduce_sumofpowers",
+                np.float64,
+                array.dtype.type,
+                offsets.dtype.type,
+            ](
+                result,
+                array.data,
+                offsets.data,
+                outlength,
+                self._n,
+            )
+        )
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 class Prod(KernelReducer):

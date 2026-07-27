@@ -289,7 +289,10 @@ def nansum(
     )
 
 
-def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
+def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs, dtype=None):
+    # `dtype` is an internal-only accumulator dtype (not exposed on ak.sum);
+    # ak.mean/ak.var pass float64 so integer/float32 input accumulates in double
+    # precision without a promoted copy.
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
@@ -310,7 +313,7 @@ def _impl(array, axis, keepdims, mask_identity, highlevel, behavior, attrs):
 
     axis = regularize_axis(axis, none_allowed=True)
 
-    reducer = ak._reducers.Sum()
+    reducer = ak._reducers.Sum(dtype=dtype)
 
     out = ak._do.reduce(
         layout,
