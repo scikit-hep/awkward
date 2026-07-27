@@ -18,7 +18,7 @@ ak.numba.register_and_check()
         ak.Array([1, 2, 3]),
         ak.Array([1.5, 2.5, 3.5]),
         ak.Array([[1, 2], [], [3]]),
-        ak.Array(["hello", "日本語"]),
+        ak.Array(["hello", "world"]),
         ak.Array([b"hello", b"\x00\xff"]),
     ],
 )
