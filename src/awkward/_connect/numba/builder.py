@@ -587,7 +587,7 @@ def lower_string(context, builder, sig, args):
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()
 
-    _is_ok, out, length = pyapi.string_as_string_and_size(xval.value)
+    _is_ok, out, length = pyapi.string_as_string_and_size(xval)
     length = ak._connect.numba.layout.castint(
         context, builder, numba.ssize_t, numba.int64, length
     )
