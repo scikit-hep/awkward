@@ -37,6 +37,11 @@ def combinations(
     these represent the "upper triangle" of sets without repetition. If
     `replacement=True`, the diagonal of this "upper triangle" is included.
 
+    To get list index positions in the tuples/records, rather than data from
+    the original `array`, use #ak.argcombinations instead of #ak.combinations.
+    The #ak.argcombinations form can be particularly useful as nested indexing
+    in #ak.Array.__getitem__.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         n (int): The number of items to choose in each list: `2` chooses
@@ -191,11 +196,6 @@ def combinations(
 
         but it is frequently needed for data analysis, and the logic of which
         indexes to `keep` (above) gets increasingly complicated for large `n`.
-
-        To get list index positions in the tuples/records, rather than data from
-        the original `array`, use #ak.argcombinations instead of #ak.combinations.
-        The #ak.argcombinations form can be particularly useful as nested indexing
-        in #ak.Array.__getitem__.
     """
     # Dispatch
     yield (array,)
