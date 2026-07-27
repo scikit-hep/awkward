@@ -257,10 +257,19 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
         xmean = ak.operations.ak_without_named_axis._impl(
             xmean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
         )
-        try:
-            dev = x - xmean
-        except ValueError:
-            dev = None
+        if axis is None:
+            # axis=None collapses to a scalar mean. Subtracting that scalar
+            # centres the flat content directly; broadcasting the length-1
+            # keepdims mean against a ragged array instead goes through awkward's
+            # nested broadcast, which is far slower and higher-memory and is the
+            # bulk of a large axis=None var/std. (Empty -> None mean -> one-pass.)
+            m_scalar = xmean[(0,) * xmean.ndim]
+            dev = None if m_scalar is None else (x - m_scalar)
+        else:
+            try:
+                dev = x - xmean
+            except ValueError:
+                dev = None
 
         if dev is not None:
             if is_complex:
