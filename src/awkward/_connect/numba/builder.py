@@ -8,6 +8,7 @@ import numba.core.typing.ctypes_utils
 import numpy
 from awkward_cpp import libawkward
 from numba.core.errors import NumbaTypeError
+from numba.cpython.unicode import _get_code_point
 
 import awkward as ak
 
@@ -530,6 +531,46 @@ def lower_complex_from_integer_or_float(context, builder, sig, args):
     return context.get_dummy_value()
 
 
+def _unicode_to_utf8(value):
+    # UTF-8 uses at most four bytes per Unicode code point (RFC 3629),
+    # so allocating 4 * len(value) bytes guarantees sufficient space.
+    output = numpy.empty(len(value) * 4, dtype=numpy.uint8)
+    position = 0
+
+    for i in range(len(value)):
+        codepoint = _get_code_point(value, i)
+
+        if codepoint <= 0x7F:
+            output[position] = codepoint
+            position += 1
+
+        elif codepoint <= 0x7FF:
+            output[position] = 0xC0 | (codepoint >> 6)
+            output[position + 1] = 0x80 | (codepoint & 0x3F)
+            position += 2
+
+        elif 0xD800 <= codepoint <= 0xDFFF:
+            raise ValueError("cannot encode surrogate code point as UTF-8")
+
+        elif codepoint <= 0xFFFF:
+            output[position] = 0xE0 | (codepoint >> 12)
+            output[position + 1] = 0x80 | ((codepoint >> 6) & 0x3F)
+            output[position + 2] = 0x80 | (codepoint & 0x3F)
+            position += 3
+
+        elif codepoint <= 0x10FFFF:
+            output[position] = 0xF0 | (codepoint >> 18)
+            output[position + 1] = 0x80 | ((codepoint >> 12) & 0x3F)
+            output[position + 2] = 0x80 | ((codepoint >> 6) & 0x3F)
+            output[position + 3] = 0x80 | (codepoint & 0x3F)
+            position += 4
+
+        else:
+            raise ValueError("invalid Unicode code point")
+
+    return output[:position]
+
+
 @numba.extending.lower_builtin("complex", ArrayBuilderType, numba.types.Complex)
 def lower_complex(context, builder, sig, args):
     arraybuildertype, xtype = sig.args
@@ -580,25 +621,56 @@ def lower_timedelta(context, builder, sig, args):
 
 @numba.extending.lower_builtin("string", ArrayBuilderType, numba.types.UnicodeType)
 def lower_string(context, builder, sig, args):
-    arraybuildertype, _xtype = sig.args
-    arraybuilderval, xval = args
-    proxyin = context.make_helper(builder, arraybuildertype, arraybuilderval)
+    arraybuildertype, unicodetype = sig.args
+    arraybuilderval, unicodeval = args
 
-    pyapi = context.get_python_api(builder)
-    gil = pyapi.gil_ensure()
+    proxyin = context.make_helper(
+        builder,
+        arraybuildertype,
+        arraybuilderval,
+    )
 
-    _is_ok, out, length = pyapi.string_as_string_and_size(xval.value)
+    utf8_array_type = numba.types.Array(
+        numba.types.uint8,
+        1,
+        "C",
+    )
+
+    utf8_array = context.compile_internal(
+        builder,
+        _unicode_to_utf8,
+        utf8_array_type(unicodetype),
+        (unicodeval,),
+    )
+
+    utf8 = context.make_array(utf8_array_type)(
+        context,
+        builder,
+        value=utf8_array,
+    )
     length = ak._connect.numba.layout.castint(
-        context, builder, numba.ssize_t, numba.int64, length
+        context,
+        builder,
+        numba.intp,
+        numba.int64,
+        utf8.nitems,
     )
     call(
         context,
         builder,
         libawkward.ArrayBuilder_string_length,
-        (proxyin.rawptr, out, length),
+        (
+            proxyin.rawptr,
+            utf8.data,
+            length,
+        ),
     )
 
-    pyapi.gil_release(gil)
+    context.nrt.decref(
+        builder,
+        utf8_array_type,
+        utf8_array,
+    )
 
     return context.get_dummy_value()
 
