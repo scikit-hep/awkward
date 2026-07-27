@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 
-import llvmlite.ir
 import numba
 from numba.core.errors import NumbaTypeError, NumbaValueError
 
@@ -58,25 +57,30 @@ def string_numba_lower(
     baseptr = ak._connect.numba.layout.getat(
         context, builder, viewproxy.arrayptrs, whichnextpos
     )
-    rawptr = builder.add(
-        baseptr,
-        ak._connect.numba.layout.castint(
-            context, builder, viewtype.type.indextype.dtype, numba.intp, start
-        ),
-    )
-    rawptr_cast = builder.inttoptr(
-        rawptr,
-        llvmlite.ir.PointerType(llvmlite.ir.IntType(numba.intp.bitwidth // 8)),
+    start_cast = ak._connect.numba.layout.castint(
+        context, builder, viewtype.type.indextype.dtype, numba.intp, start
     )
     strsize = builder.sub(stop, start)
     strsize_cast = ak._connect.numba.layout.castint(
         context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
     )
+    # ``baseptr`` is stored in the Awkward lookup table as an integer
+    # address. Reconstruct a typed pointer explicitly before applying
+    # pointer arithmetic with GEP.
+    uint8_pointer_type = context.get_value_type(numba.types.CPointer(numba.types.uint8))
+    typed_baseptr = builder.inttoptr(
+        baseptr,
+        uint8_pointer_type,
+    )
+    rawptr = builder.gep(
+        typed_baseptr,
+        [start_cast],
+    )
 
     pyapi = context.get_python_api(builder)
     gil = pyapi.gil_ensure()
 
-    strptr = builder.bitcast(rawptr_cast, pyapi.cstring)
+    strptr = builder.bitcast(rawptr, pyapi.cstring)
 
     if viewtype.type.parameters["__array__"] == "string":
         kind = context.get_constant(numba.types.int32, pyapi.py_unicode_1byte_kind)
@@ -353,24 +357,33 @@ def posat(context, builder, pos, offset):
 
 
 def getat(context, builder, baseptr, offset, rettype=None):
-    ptrtype = None
-    if rettype is not None:
-        ptrtype = context.get_value_type(numba.types.CPointer(rettype))
-        bitwidth = type_bitwidth(rettype)
-    else:
-        bitwidth = numba.intp.bitwidth
-    byteoffset = builder.mul(offset, context.get_constant(numba.intp, bitwidth // 8))
-    out = builder.load(
-        numba.core.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype)
+    """
+    Load an element from an external buffer address.
+
+    Awkward's lookup table stores buffer pointers as integer addresses.
+    Convert the address explicitly to a typed pointer before using GEP.
+    """
+    element_type = numba.intp if rettype is None else rettype
+    pointer_type = context.get_value_type(numba.types.CPointer(element_type))
+    typed_baseptr = builder.inttoptr(
+        baseptr,
+        pointer_type,
     )
+
+    element_ptr = builder.gep(
+        typed_baseptr,
+        [offset],
+    )
+
+    out = builder.load(element_ptr)
+
     if rettype is not None and isinstance(rettype, numba.types.Boolean):
         return builder.icmp_signed(
             "!=",
             out,
             context.get_constant(numba.int8, 0),
         )
-    else:
-        return out
+    return out
 
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
