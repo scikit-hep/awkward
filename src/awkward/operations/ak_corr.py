@@ -9,6 +9,7 @@ from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import _get_named_axis, _is_valid_named_axis
 from awkward._nplikes import ufuncs
@@ -138,66 +139,149 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
             behavior=ctx.behavior,
             attrs=ctx.attrs,
         )
-        xdiff = x - xmean
-        ydiff = y - ymean
-        if weight is None:
-            sumwxx = ak.operations.ak_sum._impl(
-                xdiff**2,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwyy = ak.operations.ak_sum._impl(
-                ydiff**2,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwxy = ak.operations.ak_sum._impl(
-                xdiff * ydiff,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-        else:
-            sumwxx = ak.operations.ak_sum._impl(
-                (xdiff**2) * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwyy = ak.operations.ak_sum._impl(
-                (ydiff**2) * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwxy = ak.operations.ak_sum._impl(
-                (xdiff * ydiff) * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+        # Centring is internal; strip named axes from the means so the
+        # subtractions are not rejected by the named-axis compatibility check.
+        xmean = ak.operations.ak_without_named_axis._impl(
+            xmean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+        )
+        ymean = ak.operations.ak_without_named_axis._impl(
+            ymean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+        )
 
-        out = sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
+        # Two-pass (stable), with a one-pass fallback when `x - xmean` cannot
+        # broadcast (a non-innermost axis over a ragged array). The 1/sumw factor
+        # cancels in the ratio, so the fallback uses centred raw sums directly.
+        # For axis=None the mean is a scalar, so subtract it directly instead of
+        # broadcasting the length-1 keepdims mean against a ragged array (slow).
+        if axis is None:
+            xm = xmean[(0,) * xmean.ndim]
+            ym = ymean[(0,) * ymean.ndim]
+            if xm is None or ym is None:
+                xdiff = ydiff = None
+            else:
+                xdiff = x - xm
+                ydiff = y - ym
+        else:
+            try:
+                xdiff = x - xmean
+                ydiff = y - ymean
+            except ValueError:
+                xdiff = ydiff = None
+
+        if xdiff is not None:
+            if weight is None:
+                sw = (axis, keepdims, mask_identity)
+                sumwxx = ak.operations.ak_sum._impl(
+                    xdiff**2,
+                    *sw,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+                sumwyy = ak.operations.ak_sum._impl(
+                    ydiff**2,
+                    *sw,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+                sumwxy = ak.operations.ak_sum._impl(
+                    xdiff * ydiff,
+                    *sw,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            else:
+                sw = (axis, keepdims, mask_identity)
+                sumwxx = ak.operations.ak_sum._impl(
+                    (xdiff**2) * weight,
+                    *sw,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+                sumwyy = ak.operations.ak_sum._impl(
+                    (ydiff**2) * weight,
+                    *sw,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+                sumwxy = ak.operations.ak_sum._impl(
+                    (xdiff * ydiff) * weight,
+                    *sw,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            out = sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
+        else:
+            if not keepdims:
+                xmean = ak.operations.ak_mean._impl(
+                    x,
+                    weight,
+                    axis,
+                    False,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+                ymean = ak.operations.ak_mean._impl(
+                    y,
+                    weight,
+                    axis,
+                    False,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+                xmean = ak.operations.ak_without_named_axis._impl(
+                    xmean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+                )
+                ymean = ak.operations.ak_without_named_axis._impl(
+                    ymean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+                )
+
+            sw = (axis, keepdims, mask_identity)
+            if weight is None:
+                sumw = ak.operations.ak_count._impl(
+                    x, *sw, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+                )
+            else:
+                sumw = ak.operations.ak_sum._impl(
+                    x * 0 + weight,
+                    *sw,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            xp = promote_integral_to_float64(x)
+            yp = promote_integral_to_float64(y)
+            wxx = xp * xp if weight is None else xp * xp * weight
+            wyy = yp * yp if weight is None else yp * yp * weight
+            wxy = xp * yp if weight is None else xp * yp * weight
+            sumwxx = (
+                ak.operations.ak_sum._impl(
+                    wxx, *sw, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+                )
+                - sumw * xmean * xmean
+            )
+            sumwyy = (
+                ak.operations.ak_sum._impl(
+                    wyy, *sw, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+                )
+                - sumw * ymean * ymean
+            )
+            sumwxy = (
+                ak.operations.ak_sum._impl(
+                    wxy, *sw, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+                )
+                - sumw * xmean * ymean
+            )
+            out = sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
 
         wrapped = ctx.wrap(
             maybe_highlevel_to_lowlevel(out),
