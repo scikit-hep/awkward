@@ -651,7 +651,7 @@ def lower_string(context, builder, sig, args):
         builder,
         numba.intp,
         numba.int64,
-        utf8.shape[0],
+        utf8.nitems,
     )
     call(
         context,
