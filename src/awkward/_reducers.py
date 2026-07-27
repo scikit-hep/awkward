@@ -402,8 +402,10 @@ class Sum(KernelReducer):
             is_complex = array.dtype.type in (np.complex128, np.complex64)
             # A forced float accumulator (self._dtype) sums directly into that
             # dtype via awkward_reduce_sum_<out>_<in>_64 -- no promoted input
-            # copy. Not applied to complex.
-            use_forced = self._dtype is not None and not is_complex
+            # copy. Not applied to complex, datetime, or timedelta (kinds c/M/m),
+            # which must keep their own dtype (e.g. mean of timedelta must stay
+            # timedelta, not become float64 tick counts). Mirrors the jax guard.
+            use_forced = self._dtype is not None and array.dtype.kind not in "cmM"
             kernel_array_data = array.data.view(self._dtype_for_kernel(array.dtype))
             result_dtype = (
                 self._dtype

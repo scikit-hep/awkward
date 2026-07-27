@@ -139,7 +139,19 @@ def _impl(
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            if n == 2 and not is_complex:
+            if is_complex:
+                # The sum-of-squares/powers reducers are float64-only, so complex
+                # input uses sum(x**n) (matching NumPy's complex moment).
+                sumwxn = ak.operations.ak_sum._impl(
+                    x**n,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            elif n == 2:
                 # E[x**2]: sum of squares accumulated in float64 directly from
                 # the input -- no x**2 buffer, no integer/float32 overflow.
                 sumwxn = ak.operations.ak_sumofsquares._impl(
