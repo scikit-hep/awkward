@@ -151,9 +151,24 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
         # Two-pass (stable), with a one-pass fallback when `x - xmean` cannot
         # broadcast (a non-innermost axis over a ragged array). The 1/sumw factor
         # cancels in the ratio, so the fallback uses centred raw sums directly.
-        try:
-            xdiff = x - xmean
-            ydiff = y - ymean
+        # For axis=None the mean is a scalar, so subtract it directly instead of
+        # broadcasting the length-1 keepdims mean against a ragged array (slow).
+        if axis is None:
+            xm = xmean[(0,) * xmean.ndim]
+            ym = ymean[(0,) * ymean.ndim]
+            if xm is None or ym is None:
+                xdiff = ydiff = None
+            else:
+                xdiff = x - xm
+                ydiff = y - ym
+        else:
+            try:
+                xdiff = x - xmean
+                ydiff = y - ymean
+            except ValueError:
+                xdiff = ydiff = None
+
+        if xdiff is not None:
             if weight is None:
                 sw = (axis, keepdims, mask_identity)
                 sumwxx = ak.operations.ak_sum._impl(
@@ -201,7 +216,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                     attrs=ctx.attrs,
                 )
             out = sumwxy / ufuncs.sqrt(sumwxx * sumwyy)
-        except ValueError:
+        else:
             if not keepdims:
                 xmean = ak.operations.ak_mean._impl(
                     x,

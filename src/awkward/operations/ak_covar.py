@@ -165,11 +165,23 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
             ymean, highlevel=True, behavior=None, attrs=None
         )
 
-        # Two-pass, centring on the (float64) means -- numerically stable. Falls
-        # back to the one-pass E[xy]-E[x]E[y] form only when `x - xmean` cannot
-        # broadcast (a non-innermost axis over a ragged array).
-        try:
-            prod = (x - xmean) * (y - ymean)
+        # Centring on the (float64) means -- numerically stable. For axis=None the
+        # mean is a scalar, so subtract it directly; broadcasting the length-1
+        # keepdims mean against a ragged array instead is far slower and heavier.
+        # Otherwise two-pass, falling back to the one-pass E[xy]-E[x]E[y] form when
+        # `x - xmean` cannot broadcast (a non-innermost axis over a ragged array,
+        # or an empty axis=None).
+        if axis is None:
+            xm = xmean[(0,) * xmean.ndim]
+            ym = ymean[(0,) * ymean.ndim]
+            prod = None if (xm is None or ym is None) else (x - xm) * (y - ym)
+        else:
+            try:
+                prod = (x - xmean) * (y - ymean)
+            except ValueError:
+                prod = None
+
+        if prod is not None:
             if weight is not None:
                 prod = prod * weight
             sumwxy = ak.operations.ak_sum._impl(
@@ -182,7 +194,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 attrs=None,
             )
             out = sumwxy / sumw
-        except ValueError:
+        else:
             xp = promote_integral_to_float64(x)
             yp = promote_integral_to_float64(y)
             xy = xp * yp if weight is None else xp * yp * weight
