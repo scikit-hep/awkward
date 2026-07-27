@@ -62,6 +62,53 @@ def from_json(
     line-delimited documents must adhere to the strict
     [JSON schema](https://www.json.org/).
 
+    If this function opens a file or network connection (because it is passed as
+    a `pathlib.Path`), then this function will also close that file or connection.
+
+    If this function is provided a file-like object with a `read(num_bytes)` method,
+    this function will not close it. (It might not even have a `close` method.)
+
+    Note that JSON interpreted with `line_delimited` doesn't actually need delimiters
+    between JSON documents or an absence of delimiters within each document. Parsing
+    with `line_delimited=True` continues to the end of a JSON document and starts
+    again with the next JSON document. It may be necessary to require actual delimiters
+    between and never within JSON documents to split a large source for
+    parallel-processing, but that consideration is beyond this function.
+
+    JSONSchemas
+    ===========
+
+    This function supports a subset of JSONSchema (see the
+    [JSONSchema specification](https://json-schema.org/)). The schemas may be passed
+    as JSON text or as Python lists and dicts representing JSON, but the following
+    conditions apply:
+
+    * The root of the schema must be `"type": "array"` or `"type": "object"`.
+    * Every level must have a `"type"`, which can only name one type (as a string
+      or length-1 list) or one type and `"null"` (as a length-2 list).
+    * `"type": "boolean"` \u2192 1-byte boolean values.
+    * `"type": "integer"` \u2192 8-byte integer values. If a part of the schema
+      is declared to have integer type but the JSON numbers are expressed as
+      floating-point, such as `3.14`, `3.0`, or `3e0`, this function raises an
+      error.
+    * `"type": "number"` \u2192 8-byte floating-point values. If used with
+      this function's `nan_string`, `posinf_string`, and/or `neginf_string`, the
+      value in the JSON could be a string, as long as it matches one of these
+      three.
+    * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
+      supported. Remember that the `source` data are ASCII; Unicode is derived from
+      "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
+      as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
+    * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
+      `"minItems"` and `"maxItems"` are specified and equal to each other, the
+      list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
+      type (#ak.types.ListType).
+    * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
+      and any properties in the data not described by `"properties"` will not
+      appear in the output.
+
+    See also #ak.to_json.
+
     Args:
         source (bytes/str, pathlib.Path, or file-like object): Data source of the
             JSON-formatted string(s). If bytes/str, the string is parsed. If a
@@ -139,12 +186,6 @@ def from_json(
         >>> ak.from_json(filelike_obj)
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
-        If this function opens a file or network connection (because it is passed as
-        a `pathlib.Path`), then this function will also close that file or connection.
-
-        If this function is provided a file-like object with a `read(num_bytes)` method,
-        this function will not close it. (It might not even have a `close` method.)
-
         Data structures
         ===============
 
@@ -184,13 +225,6 @@ def from_json(
         >>> ak.from_json("", line_delimited=True)
         <Array [] type='0 * unknown'>
 
-        Note that JSON interpreted with `line_delimited` doesn't actually need delimiters
-        between JSON documents or an absence of delimiters within each document. Parsing
-        with `line_delimited=True` continues to the end of a JSON document and starts
-        again with the next JSON document. It may be necessary to require actual delimiters
-        between and never within JSON documents to split a large source for
-        parallel-processing, but that consideration is beyond this function.
-
         If a JSONSchema is provided, the schema describes the structure of the JSON
         document, regardless of whether there's only one of them (may be an #ak.Record)
         or many of them (must be an #ak.Array).
@@ -218,38 +252,6 @@ def from_json(
         <Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type='3 * {x: float64, y: var...'>
 
         All numbers in the final array are signed 64-bit (integers and floating-point).
-
-        JSONSchemas
-        ===========
-
-        This function supports a subset of JSONSchema (see the
-        [JSONSchema specification](https://json-schema.org/)). The schemas may be passed
-        as JSON text or as Python lists and dicts representing JSON, but the following
-        conditions apply:
-
-        * The root of the schema must be `"type": "array"` or `"type": "object"`.
-        * Every level must have a `"type"`, which can only name one type (as a string
-          or length-1 list) or one type and `"null"` (as a length-2 list).
-        * `"type": "boolean"` \u2192 1-byte boolean values.
-        * `"type": "integer"` \u2192 8-byte integer values. If a part of the schema
-          is declared to have integer type but the JSON numbers are expressed as
-          floating-point, such as `3.14`, `3.0`, or `3e0`, this function raises an
-          error.
-        * `"type": "number"` \u2192 8-byte floating-point values. If used with
-          this function's `nan_string`, `posinf_string`, and/or `neginf_string`, the
-          value in the JSON could be a string, as long as it matches one of these
-          three.
-        * `"type": "string"` \u2192 UTF-8 encoded strings. All JSON escape sequences are
-          supported. Remember that the `source` data are ASCII; Unicode is derived from
-          "`\\uXXXX`" escape sequences. If an `"enum"` is given, strings are represented
-          as categorical values (#ak.contents.IndexedArray or #ak.contents.IndexedOptionArray).
-        * `"type": "array"` \u2192 nested lists. The `"items"` must be specified. If
-          `"minItems"` and `"maxItems"` are specified and equal to each other, the
-          list has regular-type (#ak.types.RegularType); otherwise, it has variable-length
-          type (#ak.types.ListType).
-        * `"type": "object"` \u2192 nested records. The `"properties"` must be specified,
-          and any properties in the data not described by `"properties"` will not
-          appear in the output.
 
         Substitutions for non-finite and complex numbers
         ================================================
@@ -332,8 +334,6 @@ def from_json(
         ...     },
         ... )
         <Array [1+1.1j, 2+2.2j] type='2 * complex128'>
-
-        See also #ak.to_json.
     """
     if schema is None:
         return _no_schema(

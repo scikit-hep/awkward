@@ -36,6 +36,8 @@ def zip_no_broadcast(
     #ak.Array.__getitem__, which extracts fields one at a time, or #ak.unzip,
     which extracts them all in one call.
 
+    See also #ak.zip and #ak.unzip.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -77,8 +79,6 @@ def zip_no_broadcast(
          [],
          [(4.4, 'd')],
          []]
-
-        See also #ak.zip and #ak.unzip.
     """
     # Dispatch
     if isinstance(arrays, Mapping):
