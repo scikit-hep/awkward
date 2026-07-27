@@ -532,6 +532,8 @@ def lower_complex_from_integer_or_float(context, builder, sig, args):
 
 
 def _unicode_to_utf8(value):
+    # UTF-8 uses at most four bytes per Unicode code point (RFC 3629),
+    # so allocating 4 * len(value) bytes guarantees sufficient space.
     output = numpy.empty(len(value) * 4, dtype=numpy.uint8)
     position = 0
 
