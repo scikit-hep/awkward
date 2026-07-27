@@ -28,7 +28,7 @@ def test_numba_getitem_after_pointer_conversion(array):
         return array[index]
 
     for index, expected in enumerate(array.to_list()):
-        assert getitem(array, index) == expected
+        assert ak.to_list(getitem(array, index)) == expected
 
 
 def test_numba_ragged_string_membership():
