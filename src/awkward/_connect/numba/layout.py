@@ -219,11 +219,10 @@ def string_numba_lower(
         output.parent = cgutils.get_null_value(
             output.parent.type,
         )
-        output.shape = cgutils.get_null_value(
-            output.shape.type,
-        )
-        output.strides = cgutils.get_null_value(
-            output.strides.type,
+        output.shape = cgutils.pack_array(builder, [byte_length])
+        output.strides = cgutils.pack_array(
+            builder,
+            [context.get_constant(numba.intp, 1)],
         )
         cgutils.memcpy(
             builder,
