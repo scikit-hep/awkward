@@ -149,12 +149,33 @@ def _make_power_to_float64(in_type, n):
     Widens each element to ``float64`` and raises it to the runtime power ``n``
     on the fly, so a downstream segmented_reduce accumulates ``sum(x**n)`` in
     double precision with no materialised ``x**n`` buffer and no overflow.
+
+    For the non-negative integer ``n`` that ak.moment passes, the power is done
+    by exponentiation-by-squaring (a few multiplies) rather than a transcendental
+    ``pow`` call per element. ``n`` is baked in as a constant so the loop is
+    fully unrolled by the device compiler.
     """
 
     n_int = int(n)
 
-    def _pow(x):
-        return float(x) ** n_int
+    if n_int < 0:
+        # Unusual; keep the generic path.
+        def _pow(x):
+            return float(x) ** n_int
+
+    else:
+
+        def _pow(x):
+            base = float(x)
+            result = 1.0
+            e = n_int
+            while e > 0:
+                if e & 1:
+                    result = result * base
+                e = e >> 1
+                if e > 0:
+                    base = base * base
+            return result
 
     _pow.__annotations__ = {"x": in_type, "return": np.float64}
     return _pow

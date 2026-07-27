@@ -490,9 +490,11 @@ class SumOfSquares(KernelReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
-    # No axis=None specialization: `_do.reduce` passes a single [0, length]
-    # segment for axis=None, so `apply` below handles it directly (and there is
-    # no optimized NumPy sum-of-squares to route to, unlike plain Sum).
+    def axis_none_reducer(self) -> AxisNoneSumOfSquares:
+        # For a full reduction on a concrete backend, route through NumPy/CuPy's
+        # optimized (SIMD/BLAS-class) reduction instead of the scalar per-element
+        # kernel loop -- a large speedup for big arrays.
+        return AxisNoneSumOfSquares()
 
     def apply(
         self,
@@ -525,6 +527,40 @@ class SumOfSquares(KernelReducer):
             )
         )
         return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+class AxisNoneSumOfSquares(SumOfSquares):
+    """``axis=None`` specialization of :class:`SumOfSquares`.
+
+    Widens to ``float64`` and squares with the backend's ufunc, then reduces via
+    ``nplike.sum`` (NumPy/CuPy's optimized reduction) rather than the scalar
+    kernel loop. The whole computation stays on the backend's device; only the
+    final scalar returns to the host, as for every ``axis=None`` reduction.
+    """
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        _offsets: ak.index.Index,
+        _starts: ak.index.Index,
+        _shifts: ak.index.Index | None,
+        _outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "c":
+            raise TypeError(
+                f"cannot compute the sum-of-squares (ak.var/ak.std) of {array.dtype!r}"
+            )
+        if array.dtype.kind == "M":
+            raise ValueError(f"cannot compute the sum-of-squares of {array.dtype!r}")
+        nplike = array.backend.nplike
+        data = array.data
+        widened = (
+            data if data.dtype == np.dtype(np.float64) else data.astype(np.float64)
+        )
+        result_scalar = nplike.sum(widened * widened, axis=None, dtype=np.float64)
+        result_array = nplike.reshape(nplike.asarray(result_scalar), (1,))
+        return ak.contents.NumpyArray(result_array, backend=array.backend)
 
 
 class SumOfPowers(KernelReducer):
