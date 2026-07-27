@@ -13,8 +13,11 @@ to_list = ak.operations.to_list
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
+    try:
+        cp.cuda.Device().synchronize()  # wait for all kernels
+    except cp.cuda.runtime.CUDARuntimeError as e:
+        print("GPU error during sync:", e)
     cp._default_memory_pool.free_all_blocks()
-    cp.cuda.Device().synchronize()
 
 
 def test_2651_parameter_union():
@@ -252,7 +255,7 @@ def test_0049_distinguish_record_and_recordarray_behaviors():
     assert repr(cuda_array[0]) == "<Array [<1 [1.1]>, <2 [2.0, 0.2]>] type='2 * P'>"
     assert (
         repr(cuda_array)
-        == "<Array [[<1 [1.1]>, <2 [2.0, 0.2]>], ..., [{...}]] type='3 * var * P'>"
+        == "<Array [[<1 [1.1]>, <2 [2.0, 0.2]>], [], [{x: 3, ...}]] type='3 * var * P'>"
     )
 
 

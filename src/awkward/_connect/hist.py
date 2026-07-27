@@ -19,14 +19,14 @@ def unpack(array: ak.Array) -> dict[str, ak.Array] | None:
     if not ak.fields(array):
         return None
     else:
-        return dict(zip(ak.fields(array), ak.unzip(array)))
+        return dict(zip(ak.fields(array), ak.unzip(array), strict=True))
 
 
 def broadcast_and_flatten(args: Sequence[Any]) -> tuple[np.ndarray]:
     try:
         arrays = [ak.Array(x, backend=numpy) for x in args]
     except TypeError:
-        return NotImplementedError
+        return NotImplemented
 
     if any(x.fields for x in arrays):
         raise ValueError("cannot broadcast-and-flatten array with structure (fields)")

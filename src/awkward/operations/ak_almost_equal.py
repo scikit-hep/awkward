@@ -30,7 +30,15 @@ def almost_equal(
     check_regular: bool = True,
     check_named_axis: bool = True,
 ):
-    """
+    """Returns True if two arrays are equal within the given tolerances and options.
+
+    The relative difference (`rtol * abs(b)`) and the absolute difference
+    `atol` are added together to compare against the absolute difference
+    between `left` and `right`.
+
+    TypeTracer arrays are not supported, as there is very little information
+    to be compared.
+
     Args:
         left: Array-like data (anything #ak.to_layout recognizes).
         right: Array-like data (anything #ak.to_layout recognizes).
@@ -43,15 +51,9 @@ def almost_equal(
             unequal.
         check_named_axis: bool (default=True) whether to consider named axes as unequal.
 
-    Return True if the two array-like arguments are considered equal for the
-    given options. Otherwise, return False.
-
-    The relative difference (`rtol * abs(b)`) and the absolute difference `atol`
-    are added together to compare against the absolute difference between `left`
-    and `right`.
-
-    TypeTracer arrays are not supported, as there is very little information to
-    be compared.
+    Returns:
+        True if the two array-like arguments are equal within the given options
+        and tolerances, False otherwise.
     """
     # Dispatch
     yield left, right
@@ -107,7 +109,7 @@ def _impl(
 
     def is_approx_dtype(left, right) -> bool:
         if not dtype_exact:
-            for family in np.integer, np.floating:
+            for family in np.integer, np.floating, np.complexfloating:
                 if np.issubdtype(left, family):
                     return np.issubdtype(right, family)
         return left == right
@@ -132,6 +134,34 @@ def _impl(
             left = left.to_IndexedOptionArray64()
         if right.is_option:
             right = right.to_IndexedOptionArray64()
+
+        # Simplify union types
+        if left.is_union:
+            left = left.simplified(
+                left.tags,
+                left.index,
+                left.contents,
+                parameters=left.parameters,
+                mergebool=False,
+                mergecastable="equiv" if dtype_exact else "family",
+                dropunused=True,
+            )
+            # UnionArray simplifications can produce IndexedArrays
+            if left.is_indexed and not left.is_option:
+                left = left.project()
+        if right.is_union:
+            right = right.simplified(
+                right.tags,
+                right.index,
+                right.contents,
+                parameters=right.parameters,
+                mergebool=False,
+                mergecastable="equiv" if dtype_exact else "family",
+                dropunused=True,
+            )
+            # UnionArray simplifications can produce IndexedArrays
+            if right.is_indexed and not right.is_option:
+                right = right.project()
 
         # Simplify regular NumPy types
         if left.is_numpy and left.purelist_depth > 1:
@@ -193,7 +223,11 @@ def _impl(
             ):
                 return (
                     (left.dtype == right.dtype)
-                    and backend.nplike.all(left.data == right.data)
+                    and backend.nplike.array_equal(
+                        left.data,
+                        right.data,
+                        equal_nan=equal_nan,
+                    )
                     and left.shape == right.shape
                 )
             elif exact_eq:
@@ -225,6 +259,10 @@ def _impl(
                 left.mask_as_bool(True), right.mask_as_bool(True)
             ) and visitor(left.project(), right.project())
         elif left.is_union and right.is_union:
+            # After simplification, both unions should have the same number of contents
+            if len(left.contents) != len(right.contents):
+                return False
+
             # For two unions with different content orderings to match, the tags should be equal at each index
             # Therefore, we can order the contents by index appearance
             def ordered_unique_values(values):
@@ -255,7 +293,7 @@ def _impl(
                 return False
 
             # Now project out the contents, and check for equality
-            for i, j in zip(left_tag_order, right_tag_order):
+            for i, j in zip(left_tag_order, right_tag_order, strict=True):
                 if not visitor(left.project(i), right.project(j)):
                     return False
             return True
@@ -268,7 +306,8 @@ def _impl(
                     or not check_parameters
                 )
                 and left.is_tuple == right.is_tuple
-                and (left.is_tuple or (len(left.fields) == len(right.fields)))
+                and len(left.fields) == len(right.fields)
+                and (left.is_tuple or set(left.fields) == set(right.fields))
                 and all(visitor(left.content(f), right.content(f)) for f in left.fields)
             )
         elif left.is_unknown and right.is_unknown:

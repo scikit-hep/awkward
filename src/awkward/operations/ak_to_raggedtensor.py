@@ -15,9 +15,7 @@ np = NumpyMetadata.instance()
 def to_raggedtensor(array):
     """
     Args:
-        array: Array-like data. May be a high level #ak.Array,
-            or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
-            #ak.contents.RegularArray, #ak.contents.NumpyArray
+        array: Array-like data (anything #ak.to_layout recognizes).
 
     Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
     into a ragged tensor, if possible.

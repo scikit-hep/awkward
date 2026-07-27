@@ -35,16 +35,22 @@ __all__ = list(
 AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)  # noqa: F405
 
 if sys.version_info < (3, 11):
-    from typing import ClassVar, Final, SupportsIndex, final, runtime_checkable
+    from typing import (
+        ClassVar,
+        Final,
+        Literal,
+        SupportsIndex,
+        TypeAlias,
+        TypeGuard,
+        final,
+        runtime_checkable,
+    )
 
     from typing_extensions import (
-        Literal,
         ParamSpec,
         Protocol,
         Self,
-        TypeAlias,
         TypedDict,
-        TypeGuard,
         Unpack,
     )
 

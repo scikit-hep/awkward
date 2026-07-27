@@ -11,6 +11,7 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     NAMED_AXIS_KEY,
@@ -37,18 +38,39 @@ def mean(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the mean over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation is
+    not a reducer and has no identity. It is the same as NumPy's
+    [mean](https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    Passing all arguments to the reducers, the mean is calculated as::
+
+        ak.sum(x*weight) / ak.sum(weight)
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers.
+
+    See also #ak.nanmean.
+
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
             weight. Weighting values equally is the same as no weights;
             weighting some values higher increases the significance of those
             values. Weights can be zero or negative.
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -64,46 +86,33 @@ def mean(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the mean in each group of elements from `x` (many
-    types supported, including all Awkward Arrays and Records). The grouping
-    is performed the same way as for reducers, though this operation is not a
-    reducer and has no identity. It is the same as NumPy's
-    [mean](https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
+    Returns:
+        The mean in each group of elements from `x`.
 
-    Passing all arguments to the reducers, the mean is calculated as
-
-        ak.sum(x*weight) / ak.sum(weight)
-
-    For example, with an `array` like
+    Examples:
+        For example, with an `array` like
 
         >>> array = ak.Array([[0, 1, 2, 3],
                               [          ],
                               [4, 5      ]])
 
-    The mean of the innermost lists is
+        The mean of the innermost lists is
 
         >>> ak.mean(array, axis=-1)
         <Array [1.5, nan, 4.5] type='3 * float64'>
 
-    because there are three lists, the first has mean `1.5`, the second is
-    empty, and the third has mean `4.5`.
+        because there are three lists, the first has mean `1.5`, the second is
+        empty, and the third has mean `4.5`.
 
-    The mean of the outermost lists is
+        The mean of the outermost lists is
 
         >>> ak.mean(array, axis=0)
         <Array [2, 3, 2, 3] type='4 * float64'>
 
-    because the longest list has length 4, the mean of `0` and `4` is `2.0`,
-    the mean of `1` and `5` is `3.0`, the mean of `2` (by itself) is `2.0`,
-    and the mean of `3` (by itself) is `3.0`. This follows the same grouping
-    behavior as reducers.
-
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers.
-
-    See also #ak.nanmean.
+        because the longest list has length 4, the mean of `0` and `4` is `2.0`,
+        the mean of `1` and `5` is `3.0`, the mean of `2` (by itself) is `2.0`,
+        and the mean of `3` (by itself) is `3.0`. This follows the same grouping
+        behavior as reducers.
     """
     # Dispatch
     yield x, weight
@@ -124,18 +133,31 @@ def nanmean(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the mean, treating NaN values as missing.
+
+    Equivalent to::
+
+        ak.mean(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.mean.
+
     Args:
         x: The data on which to compute the mean (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
             weight. Weighting values equally is the same as no weights;
             weighting some values higher increases the significance of those
             values. Weights can be zero or negative.
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -151,15 +173,8 @@ def nanmean(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Like #ak.mean, but treating NaN ("not a number") values as missing.
-
-    Equivalent to
-
-        ak.mean(ak.nan_to_none(array))
-
-    with all other arguments unchanged.
-
-    See also #ak.mean.
+    Returns:
+        Like #ak.mean, but treating NaN ("not a number") values as missing.
     """
     # Dispatch
     yield x, weight
@@ -168,7 +183,7 @@ def nanmean(
         weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
 
     return _impl(
-        ak.operations.ak_nan_to_none._impl(x, False, behavior, attrs),
+        ak.operations.ak_nan_to_none._impl(x, True, behavior, attrs),
         weight,
         axis,
         keepdims,
@@ -194,6 +209,12 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
 
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
+
+    # The weighted mean forms x * weight, which overflows for integer inputs;
+    # promote integral data to float64 (no-op and zero copy for floats). The
+    # unweighted path reduces in int64 and needs no promotion.
+    if weight is not None:
+        x = promote_integral_to_float64(x)
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)

@@ -5,9 +5,9 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
-  int64_t* maxcount,
-  int64_t* offsetscopy,
-  const int64_t* offsets,
+  int64_t* __restrict__ maxcount,
+  int64_t* __restrict__ offsetscopy,
+  const int64_t* __restrict__ offsets,
   int64_t length) {
   *maxcount = 0;
   offsetscopy[0] = offsets[0];

@@ -6,8 +6,8 @@
 
 template <typename C>
 ERROR awkward_IndexedArray_numnull(
-  int64_t* numnull,
-  const C* fromindex,
+  int64_t* __restrict__ numnull,
+  const C* __restrict__ fromindex,
   int64_t lenindex) {
   *numnull = 0;
   for (int64_t i = 0;  i < lenindex;  i++) {
@@ -17,30 +17,12 @@ ERROR awkward_IndexedArray_numnull(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_numnull(
-  int64_t* numnull,
-  const int32_t* fromindex,
-  int64_t lenindex) {
-  return awkward_IndexedArray_numnull<int32_t>(
-    numnull,
-    fromindex,
-    lenindex);
-}
-ERROR awkward_IndexedArrayU32_numnull(
-  int64_t* numnull,
-  const uint32_t* fromindex,
-  int64_t lenindex) {
-  return awkward_IndexedArray_numnull<uint32_t>(
-    numnull,
-    fromindex,
-    lenindex);
-}
-ERROR awkward_IndexedArray64_numnull(
-  int64_t* numnull,
-  const int64_t* fromindex,
-  int64_t lenindex) {
-  return awkward_IndexedArray_numnull<int64_t>(
-    numnull,
-    fromindex,
-    lenindex);
-}
+
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t* numnull, const C* fromindex, int64_t lenindex) { \
+    return awkward_IndexedArray_numnull<C>(numnull, fromindex, lenindex); \
+  }
+
+WRAPPER(awkward_IndexedArray32_numnull, int32_t)
+WRAPPER(awkward_IndexedArrayU32_numnull, uint32_t)
+WRAPPER(awkward_IndexedArray64_numnull, int64_t)

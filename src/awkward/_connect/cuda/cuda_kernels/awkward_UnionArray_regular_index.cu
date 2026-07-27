@@ -64,7 +64,7 @@ awkward_UnionArray_regular_index_c(
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
     int64_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (thread_id < length) {
+    if (thread_id < size) {
       current[thread_id] = (C)atomicAdd_toptr[thread_id];
     }
   }

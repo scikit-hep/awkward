@@ -15,7 +15,10 @@ np = NumpyMetadata.instance()
 @ak._connect.numpy.implements("imag")
 @high_level_function()
 def imag(val, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns the imaginary components of the given array elements.
+
+    If the arrays have complex elements, the returned arrays are floats.
+
     Args:
         val : array_like
             Input array.
@@ -26,8 +29,8 @@ def imag(val, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns the imaginary components of the given array elements.
-    If the arrays have complex elements, the returned arrays are floats.
+    Returns:
+        The imaginary components of the given array elements.
     """
     # Dispatch
     yield (val,)

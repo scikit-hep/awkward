@@ -39,7 +39,26 @@ def std(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the standard deviation over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation
+    is not a reducer and has no identity. It is the same as NumPy's
+    [std](https://docs.scipy.org/doc/numpy/reference/generated/numpy.std.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    Passing all arguments to the reducers, the standard deviation is
+    calculated as::
+
+        np.sqrt(ak.var(x, weight))
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
+    See also #ak.nanstd.
+
     Args:
         x: The data on which to compute the standard deviation (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -49,11 +68,15 @@ def std(
         ddof (int): "delta degrees of freedom": the divisor used in the
             calculation is `sum(weights) - ddof`. Use this for "reduced
             standard deviation."
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -69,24 +92,8 @@ def std(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the standard deviation in each group of elements from `x`
-    (many types supported, including all Awkward Arrays and Records). The
-    grouping is performed the same way as for reducers, though this operation
-    is not a reducer and has no identity. It is the same as NumPy's
-    [std](https://docs.scipy.org/doc/numpy/reference/generated/numpy.std.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
-
-    Passing all arguments to the reducers, the standard deviation is
-    calculated as
-
-        np.sqrt(ak.var(x, weight))
-
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
-
-    See also #ak.nanstd.
+    Returns:
+        The standard deviation in each group of elements from `x`.
     """
     # Dispatch
     yield x, weight
@@ -110,7 +117,16 @@ def nanstd(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the standard deviation, treating NaN values as missing.
+
+    Equivalent to::
+
+        ak.std(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.std.
+
     Args:
         x: The data on which to compute the standard deviation (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -120,11 +136,15 @@ def nanstd(
         ddof (int): "delta degrees of freedom": the divisor used in the
             calculation is `sum(weights) - ddof`. Use this for "reduced
             standard deviation."
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -140,15 +160,8 @@ def nanstd(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Like #ak.std, but treating NaN ("not a number") values as missing.
-
-    Equivalent to
-
-        ak.std(ak.nan_to_none(array))
-
-    with all other arguments unchanged.
-
-    See also #ak.std.
+    Returns:
+        Like #ak.std, but treating NaN ("not a number") values as missing.
     """
     # Dispatch
     yield x, weight

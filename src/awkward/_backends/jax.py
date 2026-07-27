@@ -36,6 +36,7 @@ class JaxBackend(Backend):
             DeprecationWarning,
             stacklevel=2,
         )
+        ak.jax.ensure_jax_config()
         self._jax = Jax.instance()
 
     def __getitem__(self, index: KernelKeyType) -> JaxKernel:

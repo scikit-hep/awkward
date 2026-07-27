@@ -6,12 +6,13 @@
 #include "awkward/unicode.h"
 
 
+template <typename T>
 ERROR awkward_NumpyArray_utf8_to_utf32_padded(
-  const uint8_t *fromptr,
-  const int64_t *fromoffsets,
+  const uint8_t* __restrict__ fromptr,
+  const T* __restrict__ fromoffsets,
   int64_t offsetslength,
   int64_t maxcodepoints,
-  uint32_t *toptr) {
+  uint32_t* __restrict__ toptr) {
 
   int64_t i_code_unit = fromoffsets[0];
   int64_t code_point_width;
@@ -71,3 +72,12 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
 
   return success();
 }
+
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(const uint8_t *fromptr, const T *fromoffsets, int64_t offsetslength, int64_t maxcodepoints, uint32_t *toptr) { \
+    return awkward_NumpyArray_utf8_to_utf32_padded<T>(fromptr, fromoffsets, offsetslength, maxcodepoints, toptr); \
+  }
+
+WRAPPER(awkward_NumpyArray_utf8_to_utf32_padded_int32, int32_t)
+WRAPPER(awkward_NumpyArray_utf8_to_utf32_padded_uint32, uint32_t)
+WRAPPER(awkward_NumpyArray_utf8_to_utf32_padded_int64, int64_t)

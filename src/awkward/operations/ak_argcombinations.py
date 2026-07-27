@@ -28,7 +28,12 @@ def argcombinations(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes combinations of `n` items from an array, returning integer indexes.
+
+    The motivation and uses of this function are similar to those of
+    #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
+    complete description.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         n (int): The number of items to choose from each list: `2` chooses
@@ -36,10 +41,15 @@ def argcombinations(
         replacement (bool): If True, combinations that include the same
             item more than once are allowed; otherwise each item in a
             combinations is strictly unique.
-        axis (int): The dimension at which this operation is applied. The
+        axis (int or str): The dimension at which this operation is applied. The
             outermost dimension is `0`, followed by `1`, etc., and negative
             values count backward from the innermost: `-1` is the innermost
             dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps
+            to an int if named axes are present. Named axes are attached
+            to an array using #ak.with_named_axis and removed with
+            #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         fields (None or list of str): If None, the pairs/triples/etc. are
             tuples with unnamed fields; otherwise, these `fields` name the
             fields. The number of `fields` must be equal to `n`.
@@ -55,14 +65,10 @@ def argcombinations(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes a Cartesian product (i.e. cross product) of `array` with itself
-    that is restricted to combinations sampled without replacement,
-    like #ak.combinations, but returning integer indexes for
-    #ak.Array.__getitem__.
-
-    The motivation and uses of this function are similar to those of
-    #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
-    complete description.
+    Returns:
+        An array of integer indexes into the combinations of `array` with
+        itself (sampled without replacement), like #ak.combinations but for use
+        with #ak.Array.__getitem__.
     """
     # Dispatch
     yield (array,)

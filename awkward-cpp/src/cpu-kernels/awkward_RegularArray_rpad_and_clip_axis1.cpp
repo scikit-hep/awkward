@@ -6,7 +6,7 @@
 
 template <typename T>
 ERROR awkward_RegularArray_rpad_and_clip_axis1(
-  T* toindex,
+  T* __restrict__ toindex,
   int64_t target,
   int64_t size,
   int64_t length) {
@@ -22,7 +22,7 @@ ERROR awkward_RegularArray_rpad_and_clip_axis1(
   return success();
 }
 ERROR awkward_RegularArray_rpad_and_clip_axis1_64(
-  int64_t* toindex,
+  int64_t* __restrict__ toindex,
   int64_t target,
   int64_t size,
   int64_t length) {

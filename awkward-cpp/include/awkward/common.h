@@ -9,6 +9,7 @@
 #ifdef _MSC_VER
   #define EXPORT_SYMBOL __declspec(dllexport)
   #define ERROR Error
+  #define __restrict__ __restrict
   using ssize_t = std::ptrdiff_t;
 #else
   #define EXPORT_SYMBOL __attribute__((visibility("default")))

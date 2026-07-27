@@ -6,22 +6,26 @@
 
 template <typename T>
 ERROR awkward_missing_repeat(
-  T* outindex,
-  const T* index,
+  T* __restrict__ outindex,
+  const T* __restrict__ index,
   int64_t indexlength,
   int64_t repetitions,
   int64_t regularsize) {
   for (int64_t i = 0;  i < repetitions;  i++) {
+    int64_t out_offset = i * indexlength;
+    int64_t val_offset = i * regularsize;
+
     for (int64_t j = 0;  j < indexlength;  j++) {
       T base = index[j];
-      outindex[i*indexlength + j] = base + (base >= 0 ? i*regularsize : 0);
+      T adjustment = (base >= 0) ? val_offset : 0;
+      outindex[out_offset + j] = base + adjustment;
     }
   }
   return success();
 }
 ERROR awkward_missing_repeat_64(
-  int64_t* outindex,
-  const int64_t* index,
+  int64_t* __restrict__ outindex,
+  const int64_t* __restrict__ index,
   int64_t indexlength,
   int64_t repetitions,
   int64_t regularsize) {

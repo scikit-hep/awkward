@@ -32,7 +32,7 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None, attrs=N
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array for which
+    Returns an array for which::
 
         output[i] = array[i] if mask[i] == valid_when else None
 
@@ -88,11 +88,11 @@ def mask(array, mask, *, valid_when=True, highlevel=True, behavior=None, attrs=N
     See #ak.broadcast_arrays for details about broadcasting and the generalized
     set of broadcasting rules.
 
-    Another syntax for
+    Another syntax for::
 
         ak.mask(array, array_of_booleans)
 
-    is
+    is::
 
         array.mask[array_of_booleans]
 

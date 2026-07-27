@@ -9,6 +9,7 @@ from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     AxisName,
@@ -27,7 +28,7 @@ def moment(
     x,
     n,
     weight=None,
-    axis: AxisName = None,
+    axis=None,
     *,
     keepdims: bool = False,
     mask_identity: bool = False,
@@ -35,7 +36,25 @@ def moment(
     behavior: Mapping | None = None,
     attrs: Mapping | None = None,
 ):
-    """
+    """Computes the `n`th moment over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation is
+    not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the moment is calculated as::
+
+        ak.sum(x**n * weight) / ak.sum(weight)
+
+    The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
+    mean (the `n=1` moment).
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
     Args:
         x: The data on which to compute the moment (anything #ak.to_layout recognizes).
         n (int): The choice of moment: `0` is a sum of weights, `1` is
@@ -44,11 +63,15 @@ def moment(
             weight. Weighting values equally is the same as no weights;
             weighting some values higher increases the significance of those
             values. Weights can be zero or negative.
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -64,23 +87,8 @@ def moment(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the `n`th moment in each group of elements from `x` (many
-    types supported, including all Awkward Arrays and Records). The grouping
-    is performed the same way as for reducers, though this operation is not a
-    reducer and has no identity.
-
-    This function has no NumPy equivalent.
-
-    Passing all arguments to the reducers, the moment is calculated as
-
-        ak.sum((x*weight)**n) / ak.sum(weight)
-
-    The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
-    mean (the `n=1` moment).
-
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
+    Returns:
+        The `n`th moment in each group of elements from `x`.
     """
     # Dispatch
     yield x, weight
@@ -117,6 +125,10 @@ def _impl(
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
+    # Integer powers (x ** n) overflow before reduction; promote integral data
+    # to float64 once (no-op and zero copy for floating inputs), matching NumPy.
+    x = promote_integral_to_float64(x)
+
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
@@ -148,7 +160,7 @@ def _impl(
                 attrs=ctx.attrs,
             )
             sumwxn = ak.operations.ak_sum._impl(
-                (x * weight) ** n,
+                (x**n) * weight,
                 axis,
                 keepdims,
                 mask_identity,

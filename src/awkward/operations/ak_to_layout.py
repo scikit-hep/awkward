@@ -44,7 +44,7 @@ def to_layout(
         array: Array-like data. May be a high level #ak.Array, #ak.Record (if `allow_record`),
             #ak.ArrayBuilder, or low-level #ak.contents.Content, #ak.record.Record (if `allow_record`),
             or a supported backend array (NumPy `ndarray`, CuPy `ndarray`,
-            JAX DeviceArray), data-less TypeTracer, Arrow object, or an arbitrary Python
+            JAX Array), data-less TypeTracer, Arrow object, or an arbitrary Python
             iterable (for #ak.from_iter to convert).
         allow_record (bool): If True, allow #ak.record.Record as an output;
             otherwise, if the output would be a scalar record, raise an error.
@@ -259,7 +259,7 @@ def _impl(
             )
         else:
             raise ValueError(
-                f"Encountered an invalid string policy value {primitive_policy!r}. "
+                f"Encountered an invalid string policy value {string_policy!r}. "
                 f'The permitted values are "pass-through", "as-characters", "promote", and "error".'
             )
     elif isinstance(obj, (datetime, date, time, Number, bool)):

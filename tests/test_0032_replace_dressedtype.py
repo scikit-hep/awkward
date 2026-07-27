@@ -75,10 +75,11 @@ def test_dress():
         x,
     )
     a2 = ak.highlevel.Array(x2, behavior=ns, check_valid=True)
-    # columns limit changed from 40 to 80 in v2
+    # The custom __str__ is treated as an atomic token whose full width counts
+    # against the column budget; here it does not fit, so the values collapse.
     assert (
         repr(a2)
-        == "<Array [<Dummy [[1.1, 2.2, 3.3], [4.4, 5.5, 6]]>, <Dummy []>, <Dummy []>] type='...'>"
+        == '<Array [...] type=\'3 * var * [3 * float64, parameters={"__list__": "Dummy"}]\'>'
     )
     assert str(a2[0]) == "<Dummy [[1.1, 2.2, 3.3], [4.4, 5.5, 6]]>"
     assert str(a2[1]) == "<Dummy []>"

@@ -5,7 +5,7 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_IndexedArray_numnull_unique_64(
-  int64_t* toindex,
+  int64_t* __restrict__ toindex,
   int64_t lenindex) {
   for (int64_t i = 0;  i < lenindex;  i++) {
     toindex[i] = i;

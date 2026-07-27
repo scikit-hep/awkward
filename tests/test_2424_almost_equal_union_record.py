@@ -12,14 +12,14 @@ def test_records_almost_equal():
     first = ak.contents.RecordArray(
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0], dtype=np.dtype("M8[s]"))),
         ],
         ["x", "y"],
     )
 
     second = ak.contents.RecordArray(
         [
-            ak.contents.NumpyArray(np.array([0], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
         ],
         ["y", "x"],
@@ -35,7 +35,7 @@ def test_unions_almost_equal():
         ak.index.Index64([0, 1, 0, 0, 1]),
         [
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
         ],
     )
@@ -45,7 +45,7 @@ def test_unions_almost_equal():
         [
             ak.contents.NumpyArray(np.array([0, 1, 0, 1], dtype=np.bool_)),
             ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("<M8[s]"))),
+            ak.contents.NumpyArray(np.array([0, 1], dtype=np.dtype("M8[s]"))),
         ],
     )
     assert ak.almost_equal(first, second)

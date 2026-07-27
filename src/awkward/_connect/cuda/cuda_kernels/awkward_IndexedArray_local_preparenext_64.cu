@@ -2,9 +2,32 @@
 
 // BEGIN PYTHON
 // def f(grid, block, args):
-//     (tocarry, starts, parents, parentslength, nextparents, nextlen, invocation_index, err_code) = args
+//     (tocarry, starts, offsets, nextoffsets, outlength, invocation_index, err_code) = args
+//     # Offsets-pipeline: derive parents/parentslength and nextparents/nextlen
+//     # from offsets/nextoffsets so the (parents-driven) kernel body runs
+//     # unchanged.
+//     parentslength = int(offsets[int(outlength)].item())
+//     nextlen = int(nextoffsets[int(outlength)].item())
+//     # CuPy refuses cupy.ndarray as `repeats`; use searchsorted to derive
+//     # parents/nextparents on-device with the same result.
+//     if int(outlength) > 0 and parentslength > 0:
+//         parents = cupy.searchsorted(
+//             offsets[1:int(outlength) + 1],
+//             cupy.arange(int(parentslength), dtype=cupy.int64),
+//             side='right',
+//         ).astype(cupy.int64)
+//     else:
+//         parents = cupy.zeros(0, dtype=cupy.int64)
+//     if int(outlength) > 0 and nextlen > 0:
+//         nextparents = cupy.searchsorted(
+//             nextoffsets[1:int(outlength) + 1],
+//             cupy.arange(int(nextlen), dtype=cupy.int64),
+//             side='right',
+//         ).astype(cupy.int64)
+//     else:
+//         nextparents = cupy.zeros(0, dtype=cupy.int64)
 //     if nextlen < 1024:
-//         block_size = nextlen
+//         block_size = nextlen if nextlen > 0 else 1
 //     else:
 //         block_size = 1024
 //     if block_size > 0:

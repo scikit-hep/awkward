@@ -142,7 +142,9 @@ def native_arrow_field_to_akarraytype(
         if len(sub_meta) == len(fields):
             awkwardized_fields = [
                 native_arrow_field_to_akarraytype(field, meta)  # Recurse
-                for field, meta in zip(fields, metadata["subfield_metadata"])
+                for field, meta in zip(
+                    fields, metadata["subfield_metadata"], strict=True
+                )
             ]
         elif len(fields) < len(sub_meta):
             # If a user has read a partial column, we can have fewer Arrow fields than the original.
@@ -233,7 +235,7 @@ def replace_schema(table: pyarrow.Table, new_schema: pyarrow.Schema) -> pyarrow.
     new_batches = []
     for batch in table.to_batches():
         columns = []
-        for col, new_field in zip(batch.columns, new_schema):
+        for col, new_field in zip(batch.columns, new_schema, strict=True):
             columns.append(array_with_replacement_type(col, new_field.type))
         new_batches.append(
             pyarrow.RecordBatch.from_arrays(arrays=columns, schema=new_schema)
@@ -257,7 +259,7 @@ def array_with_replacement_type(
         )
     children_new = [
         array_with_replacement_type(child, new_child_type.type)
-        for child, new_child_type in zip(children_orig, new_fields)
+        for child, new_child_type in zip(children_orig, new_fields, strict=True)
     ]
     own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
     if isinstance(native_type, pyarrow.lib.DictionaryType):

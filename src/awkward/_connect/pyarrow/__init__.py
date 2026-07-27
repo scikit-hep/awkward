@@ -46,9 +46,9 @@ or
 """
 
 else:
-    if parse_version(pyarrow.__version__) < parse_version("7.0.0"):
+    if parse_version(pyarrow.__version__) < parse_version("17.0.0"):
         pyarrow = None
-        error_message = "pyarrow 7.0.0 or later required for {0}"
+        error_message = "pyarrow 17.0.0 or later required for {0}"
 
 if error_message is None:
     from .conversions import (

@@ -47,8 +47,6 @@ def test_add_column():
 
     rdf = add_column(rdf, arr_val, "values")
 
-    ROOT.ROOT.DisableImplicitMT()
-
     rdf.Display().Print()
 
 
@@ -85,7 +83,5 @@ def test_add_numpy():
     arr_val = np.array([10, 20, 30])
 
     rdf = add_numpy_column(rdf, arr_val, "values")
-
-    ROOT.ROOT.DisableImplicitMT()
 
     rdf.Display().Print()

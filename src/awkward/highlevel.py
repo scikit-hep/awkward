@@ -38,13 +38,13 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._operators import NDArrayOperatorsMixin
 from awkward._pickle import (
     custom_reduce,
-    unpickle_array_schema_1,
-    unpickle_record_schema_1,
+    unpickle_array_schema_2,
+    unpickle_record_schema_2,
 )
 from awkward._regularize import is_non_string_like_iterable
 from awkward._typing import Any, TypeVar
 from awkward._util import STDOUT
-from awkward.prettyprint import Formatter, highlevel_array_show_rows
+from awkward.prettyprint import highlevel_array_show_rows
 from awkward.prettyprint import valuestr as prettyprint_valuestr
 
 __all__ = ("Array", "ArrayBuilder", "Record")
@@ -164,14 +164,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     For most users, this is the only class in Awkward Array that matters: it
     is the entry point for data analysis with an emphasis on usability. It
     intentionally has a minimum of methods, preferring standalone functions
-    like
+    like::
 
         ak.num(array1)
         ak.combinations(array1)
         ak.cartesian([array1, array2])
         ak.zip({"x": array1, "y": array2, "z": array3})
 
-    instead of bound methods like
+    instead of bound methods like::
 
         array1.num()
         array1.combinations()
@@ -180,11 +180,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     because its namespace is valuable for domain-specific parameters and
     functionality. For example, if records contain a field named `"num"`,
-    they can be accessed as
+    they can be accessed as::
 
         array1.num
 
-    instead of
+    instead of::
 
         array1["num"]
 
@@ -192,7 +192,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     for domain-specific methods that have been attached to the data. For
     instance, an analysis of mailing addresses might have a function that
     computes zip codes, which can be attached to the data with a method
-    like
+    like::
 
         latlon.zip()
 
@@ -225,11 +225,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     Some NumPy functions other than ufuncs are also handled properly in
     NumPy >= 1.17 (see
     [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html))
-    and if an Awkward override exists. That is,
+    and if an Awkward override exists. That is,::
 
         np.concatenate
 
-    can be used on an Awkward Array because
+    can be used on an Awkward Array because::
 
         ak.concatenate
 
@@ -356,7 +356,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         self._layout = layout
         self._behavior = behavior
-        self._attrs = attrs
+        self._attrs = None if attrs is None else Attrs(attrs)
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
@@ -377,9 +377,22 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __dask_tokenize__(self):
         return id(self)
 
-    def _update_class(self):
+    def _update_class(self, restore=None):
         self._numbaview = None
+        # invalidate the cached cppyy type, generator, and lookup: they hold raw
+        # pointers into the old buffers, which are stale after the layout changes
+        self._cpp_type = self._generator = self._lookup = None
+        previous_class = self.__class__
         self.__class__ = get_array_class(self._layout, self._behavior)
+        if hasattr(self, "__awkward_validation__"):
+            try:
+                self.__awkward_validation__()
+            except Exception:
+                # a rejected assignment must not be left applied
+                if restore is not None:
+                    self.__dict__.update(restore)
+                    self.__class__ = previous_class
+                raise
 
     @property
     def attrs(self) -> Attrs:
@@ -422,15 +435,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         its layout.
 
         Layouts are rendered as XML instead of a nested list. For example,
-        the following `array`
+        the following `array`::
 
             ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
-        is presented as
+        is presented as::
 
             <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
 
-        but `array.layout` is presented as
+        but `array.layout` is presented as::
 
             <ListOffsetArray len='3'>
                 <offsets><Index dtype='int64' len='4'>
@@ -448,8 +461,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @layout.setter
     def layout(self, layout):
         if isinstance(layout, ak.contents.Content):
+            restore = {"_layout": self._layout}
             self._layout = layout
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("layout must be a subclass of ak.contents.Content")
 
@@ -475,8 +489,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
+            restore = {"_behavior": self._behavior}
             self._behavior = behavior
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -508,11 +523,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @property
     def mask(self):
         """
-        Whereas
+        Whereas::
 
             array[array_of_booleans]
 
-        removes elements from `array` in which `array_of_booleans` is False,
+        removes elements from `array` in which `array_of_booleans` is False,::
 
             array.mask[array_of_booleans]
 
@@ -586,7 +601,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         See also #ak.fields.
         """
-        return self._layout.fields
+        return self._layout.fields.copy()
 
     @property
     def is_tuple(self):
@@ -626,7 +641,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         The length of this Array, only counting the outermost structure.
 
-        For example, the length of
+        For example, the length of::
 
             ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
 
@@ -826,11 +841,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             >>> ak.mask(array, ak.num(array) > 1)[:, 1]
             <Array [2.2, None, 5.5, None, None, 8.8] type='6 * ?float64'>
 
-        Another syntax for
+        Another syntax for::
 
             ak.mask(array, array_of_booleans)
 
-        is
+        is::
 
             array.mask[array_of_booleans]
 
@@ -1201,15 +1216,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             ):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
-            self._layout = ak.operations.with_field(
-                self._layout,
+            # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
+            self.layout = ak.operations.with_field(
+                self.layout,
                 what,
                 where,
                 highlevel=False,
                 attrs=self._attrs,
                 behavior=self._behavior,
             )
-            self._numbaview = None
 
     def __delitem__(self, where):
         """
@@ -1238,14 +1253,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             ):
                 raise TypeError("only fields may be removed in-place (by field name)")
 
-            self._layout = ak.operations.ak_without_field._impl(
-                self._layout,
+            # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
+            self.layout = ak.operations.ak_without_field._impl(
+                self.layout,
                 where,
                 highlevel=False,
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self._numbaview = None
 
     def __getattr__(self, where):
         """
@@ -1307,15 +1322,15 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         Only existing public attributes e.g. #ak.Array.layout, or private
         attributes (with leading underscores), can be set.
 
-        Fields are not assignable to as attributes, i.e. the following doesn't work:
+        Fields are not assignable to as attributes, i.e. the following doesn't work::
 
             array.z = new_field
 
-        Instead, always use #ak.Array.__setitem__:
+        Instead, always use #ak.Array.__setitem__::
 
             array["z"] = new_field
 
-        or #ak.with_field:
+        or #ak.with_field::
 
             array = ak.with_field(array, new_field, "z")
 
@@ -1456,6 +1471,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             # it's always the second row (after the array)
             type_line = rows.pop(0)
             out_io.write(type_line)
+            out_io.write("\n")
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from shortest to longest contrary to _repr_mimebundle_
@@ -1666,6 +1682,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return numba.typeof(self._numbaview)
 
     def __reduce_ex__(self, protocol: int) -> tuple:
+        # Allow third-party libraries to customise pickling
         result = custom_reduce(self, protocol)
         if result is not NotImplemented:
             return result
@@ -1675,7 +1692,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             packed_layout,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
 
         # For pickle >= 5, we can avoid copying the buffers
@@ -1692,10 +1709,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         else:
             attrs = without_transient_attrs(self._attrs)
 
-        return unpickle_array_schema_1, (
+        return unpickle_array_schema_2, (
             form.to_dict(),
             length,
             container,
+            ak._util.native_byteorder,
             behavior,
             attrs,
         )
@@ -1712,7 +1730,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     container,
                     highlevel=False,
                     buffer_key="{form_key}-{attribute}",
-                    byteorder="<",
+                    byteorder=ak._util.native_byteorder,
                 )
                 for i, part_length in enumerate(length)
             ]
@@ -1727,7 +1745,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 container,
                 highlevel=False,
                 buffer_key="{form_key}-{attribute}",
-                byteorder="<",
+                byteorder=ak._util.native_byteorder,
             )
         self._layout = layout
         self._behavior = behavior
@@ -1757,7 +1775,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @non_inspectable_property
     def cpp_type(self):
         """
-        The C++ type of this Array when it is used in cppyy.
+        The C++ type of this Array when it is used in cppyy.::
 
             cpp_type (None or str): Generated on demand when the Array needs to be passed
                 to a C++ (possibly templated) function defined by a `cppyy` compiler.
@@ -1845,7 +1863,8 @@ class Record(NDArrayOperatorsMixin):
 
         elif isinstance(data, Record):
             layout = data._layout
-            attrs = data.attrs
+            behavior = behavior_of(data, behavior=behavior)
+            attrs = attrs_of(data, attrs=attrs)
 
         elif isinstance(data, str):
             layout = ak.operations.from_json(data, highlevel=False)
@@ -1855,7 +1874,8 @@ class Record(NDArrayOperatorsMixin):
             contents = []
             for k, v in data.items():
                 fields.append(k)
-                if is_non_string_like_iterable(v):
+                # avoid dictionaries here, see issue #3723
+                if (not isinstance(v, dict)) and is_non_string_like_iterable(v):
                     contents.append(Array(v).layout[np.newaxis])
                 else:
                     contents.append(Array([v]).layout)
@@ -1898,7 +1918,7 @@ class Record(NDArrayOperatorsMixin):
 
         self._layout = layout
         self._behavior = behavior
-        self._attrs = attrs
+        self._attrs = None if attrs is None else Attrs(attrs)
 
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
@@ -1914,9 +1934,19 @@ class Record(NDArrayOperatorsMixin):
 
         ak.jax.register_behavior_class(cls)
 
-    def _update_class(self):
+    def _update_class(self, restore=None):
         self._numbaview = None
+        previous_class = self.__class__
         self.__class__ = get_record_class(self._layout, self._behavior)
+        if hasattr(self, "__awkward_validation__"):
+            try:
+                self.__awkward_validation__()
+            except Exception:
+                # a rejected assignment must not be left applied
+                if restore is not None:
+                    self.__dict__.update(restore)
+                    self.__class__ = previous_class
+                raise
 
     @property
     def attrs(self) -> Attrs:
@@ -1979,8 +2009,9 @@ class Record(NDArrayOperatorsMixin):
     @layout.setter
     def layout(self, layout):
         if isinstance(layout, ak.record.Record):
+            restore = {"_layout": self._layout}
             self._layout = layout
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("layout must be a subclass of ak.record.Record")
 
@@ -2006,8 +2037,9 @@ class Record(NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
+            restore = {"_behavior": self._behavior}
             self._behavior = behavior
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -2057,7 +2089,7 @@ class Record(NDArrayOperatorsMixin):
 
         See also #ak.fields.
         """
-        return self._layout.array.fields
+        return self._layout.array.fields.copy()
 
     @property
     def is_tuple(self):
@@ -2157,15 +2189,19 @@ class Record(NDArrayOperatorsMixin):
             ):
                 raise TypeError("only fields may be assigned in-place (by field name)")
 
-            self._layout._array = ak.operations.ak_with_field._impl(
-                self._layout.array,
+            # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
+            layout = self.layout
+            new_array = ak.operations.ak_with_field._impl(
+                layout._array,
                 what,
                 where,
                 highlevel=False,
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self._numbaview = None
+            # rebind to a fresh record rather than mutating the shared layout
+            # in place (Records constructed from another Record share _layout)
+            self.layout = ak.record.Record(new_array, layout._at)
 
     def __delitem__(self, where):
         """
@@ -2195,14 +2231,14 @@ class Record(NDArrayOperatorsMixin):
             ):
                 raise TypeError("only fields may be removed in-place (by field name)")
 
-            self._layout = ak.operations.ak_without_field._impl(
-                self._layout,
+            # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
+            self.layout = ak.operations.ak_without_field._impl(
+                self.layout,
                 where,
                 highlevel=False,
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self._numbaview = None
 
     def __getattr__(self, where):
         """
@@ -2256,15 +2292,15 @@ class Record(NDArrayOperatorsMixin):
         Only existing public attributes e.g. #ak.Record.layout, or private
         attributes (with leading underscores), can be set.
 
-        Fields are not assignable to as attributes, i.e. the following doesn't work:
+        Fields are not assignable to as attributes, i.e. the following doesn't work::
 
             record.z = new_field
 
-        Instead, always use #ak.Record.__setitem__:
+        Instead, always use #ak.Record.__setitem__::
 
             record["z"] = new_field
 
-        or #ak.with_field:
+        or #ak.with_field::
 
             record = ak.with_field(record, new_field, "z")
 
@@ -2375,7 +2411,7 @@ class Record(NDArrayOperatorsMixin):
             formatter (Mapping or None): Mapping of types/type-classes to string formatters.
                 If None, use the default formatter.
 
-        Display the contents of the array within `limit_rows` and `limit_cols`, using
+        Display the contents of the record within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
 
         The `formatter` argument controls the formatting of individual values, c.f.
@@ -2402,6 +2438,7 @@ class Record(NDArrayOperatorsMixin):
             # it's always the second row (after the array)
             type_line = rows.pop(0)
             out_io.write(type_line)
+            out_io.write("\n")
 
         # the rest of the rows we sort by the length of their '<prefix>:'
         # but we sort it from shortest to longest contrary to _repr_mimebundle_
@@ -2509,7 +2546,7 @@ class Record(NDArrayOperatorsMixin):
             packed_layout.array,
             buffer_key="{form_key}-{attribute}",
             form_key="node{id}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
 
         # For pickle >= 5, we can avoid copying the buffers
@@ -2526,10 +2563,11 @@ class Record(NDArrayOperatorsMixin):
         else:
             attrs = without_transient_attrs(self._attrs)
 
-        return unpickle_record_schema_1, (
+        return unpickle_record_schema_2, (
             form.to_dict(),
             length,
             container,
+            ak._util.native_byteorder,
             behavior,
             attrs,
             packed_layout.at,
@@ -2544,7 +2582,7 @@ class Record(NDArrayOperatorsMixin):
             container,
             highlevel=False,
             buffer_key="{form_key}-{attribute}",
-            byteorder="<",
+            byteorder=ak._util.native_byteorder,
         )
         layout = ak.record.Record(layout, at)
         self._layout = layout
@@ -2583,7 +2621,7 @@ class ArrayBuilder(Sized):
     of commands. Most data types can be constructed by calling commands in the
     right order, similar to printing tokens to construct JSON output.
 
-    To illustrate how this works, consider the following example.
+    To illustrate how this works, consider the following example.::
 
         b = ak.ArrayBuilder()
 
@@ -2706,9 +2744,12 @@ class ArrayBuilder(Sized):
         if behavior is not None and not isinstance(behavior, Mapping):
             raise TypeError("behavior must be None or mapping")
 
+        if attrs is not None and not isinstance(attrs, Mapping):
+            raise TypeError("attrs must be None or a mapping")
+
         self._layout = _ext.ArrayBuilder(initial=initial, resize=resize)
         self._behavior = behavior
-        self._attrs = attrs
+        self._attrs = None if attrs is None else Attrs(attrs)
 
     @classmethod
     def _wrap(cls, layout, behavior=None, attrs=None):
@@ -2729,7 +2770,7 @@ class ArrayBuilder(Sized):
         out = cls.__new__(cls)
         out._layout = layout
         out._behavior = behavior
-        out._attrs = attrs
+        out._attrs = None if attrs is None else Attrs(attrs)
         return out
 
     @property
@@ -2845,9 +2886,13 @@ class ArrayBuilder(Sized):
         self,
         limit_rows=20,
         limit_cols=80,
-        type=False,
-        stream=STDOUT,
         *,
+        type=False,
+        named_axis=False,
+        nbytes=False,
+        backend=False,
+        all=False,
+        stream=STDOUT,
         formatter=None,
         precision=3,
     ):
@@ -2857,12 +2902,20 @@ class ArrayBuilder(Sized):
             limit_cols (int): Maximum number of columns (characters wide).
             type (bool): If True, print the type as well. (Doesn't count toward number
                 of rows/lines limit.)
+            named_axis (bool): If True, print the named axis as well. (Doesn't count toward number
+                of rows/lines limit.)
+            nbytes (bool): If True, print the number of bytes as well. (Doesn't count toward number
+                of rows/lines limit.)
+            backend (bool): If True, print the backend of the array as well. (Doesn't count toward number
+                of rows/lines limit.)
+            all (bool): If True, print the 'type', 'named axis', 'nbytes', and 'backend' of the array. (Doesn't count toward number
+                of rows/lines limit.)
             stream (object with a ``write(str)`` method or None): Stream to write the
                 output to. If None, return a string instead of writing to a stream.
             formatter (Mapping or None): Mapping of types/type-classes to string formatters.
                 If None, use the default formatter.
 
-        Display the contents of the array within `limit_rows` and `limit_cols`, using
+        Display the contents of the array builder within `limit_rows` and `limit_cols`, using
         ellipsis (`...`) for hidden nested data.
 
         The `formatter` argument controls the formatting of individual values, c.f.
@@ -2874,13 +2927,17 @@ class ArrayBuilder(Sized):
         This method takes a snapshot of the data and calls show on it, and a snapshot
         copies data.
         """
-        formatter_impl = Formatter(formatter, precision=precision)
         return self.snapshot().show(
             limit_rows=limit_rows,
             limit_cols=limit_cols,
             type=type,
+            named_axis=named_axis,
+            nbytes=nbytes,
+            backend=backend,
+            all=all,
             stream=stream,
-            formatter=formatter_impl,
+            formatter=formatter,
+            precision=precision,
         )
 
     def __array__(self, dtype=None, copy=None):
@@ -2921,7 +2978,7 @@ class ArrayBuilder(Sized):
 
     def __bool__(self):
         if len(self) == 1:
-            return bool(self[0])
+            return bool(self.snapshot()[0])
         else:
             raise ValueError(
                 "the truth value of an array whose length is not 1 is ambiguous; "
@@ -2945,6 +3002,7 @@ class ArrayBuilder(Sized):
                 backend="cpu",
                 byteorder=ak._util.native_byteorder,
                 simplify=True,
+                enable_virtualarray_caching=True,
                 highlevel=True,
                 behavior=self._behavior,
                 attrs=self._attrs,
@@ -3279,10 +3337,12 @@ class ArrayBuilder(Sized):
 
         def __init__(self, arraybuilder, name):
             super().__init__(arraybuilder)
-            self._name = name
+            # stored separately so it does not shadow the class-level ``_name``
+            # display label used by ``_Nested.__repr__``
+            self._record_name = name
 
         def __enter__(self):
-            self._arraybuilder.begin_record(name=self._name)
+            self._arraybuilder.begin_record(name=self._record_name)
 
         def __exit__(self, type, value, traceback):
             self._arraybuilder.end_record()

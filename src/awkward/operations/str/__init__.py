@@ -83,6 +83,12 @@ from awkward.operations.str.akstr_trim import *
 from awkward.operations.str.akstr_trim_whitespace import *
 from awkward.operations.str.akstr_upper import *
 
+__all__ = [k for k in locals() if not k.startswith("akstr_")]
+
+
+def __dir__():
+    return __all__
+
 
 def _drop_option_preserving_form(layout, ensure_empty_mask: bool = False):
     from awkward._do import recursively_apply

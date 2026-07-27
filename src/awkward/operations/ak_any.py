@@ -31,14 +31,30 @@ def any(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns whether any elements are True over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records. Thus,
+    it represents reduction over the "logical or" operation, whose identity is
+    False (i.e. asking if there are any True values in an empty list results in
+    False). This operation is the same as NumPy's
+    [any](https://docs.scipy.org/doc/numpy/reference/generated/numpy.any.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this reducer decreases the number of
             dimensions by 1; if True, the reduced values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -53,17 +69,9 @@ def any(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns True in each group of elements from `array` (many types supported,
-    including all Awkward Arrays and Records) if any values are True; False
-    otherwise. Thus, it represents reduction over the "logical or" operation,
-    whose identity is False (i.e. asking if there are any True values in an
-    empty list results in False). This operation is the same as NumPy's
-    [any](https://docs.scipy.org/doc/numpy/reference/generated/numpy.any.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
-
-    See #ak.sum for a more complete description of nested list and missing
-    value (None) handling in reducers.
+    Returns:
+        True in each group of elements from `array` if any values are True;
+        False otherwise.
     """
     # Dispatch
     yield (array,)

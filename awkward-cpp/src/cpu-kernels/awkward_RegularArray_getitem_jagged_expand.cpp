@@ -6,9 +6,9 @@
 
 template <typename T>
 ERROR awkward_RegularArray_getitem_jagged_expand(
-  T* multistarts,
-  T* multistops,
-  const T* singleoffsets,
+  T* __restrict__ multistarts,
+  T* __restrict__ multistops,
+  const T* __restrict__ singleoffsets,
   int64_t regularsize,
   int64_t regularlength) {
   for (int64_t i = 0;  i < regularlength;  i++) {
@@ -20,9 +20,9 @@ ERROR awkward_RegularArray_getitem_jagged_expand(
   return success();
 }
 ERROR awkward_RegularArray_getitem_jagged_expand_64(
-  int64_t* multistarts,
-  int64_t* multistops,
-  const int64_t* singleoffsets,
+  int64_t* __restrict__ multistarts,
+  int64_t* __restrict__ multistops,
+  const int64_t* __restrict__ singleoffsets,
   int64_t regularsize,
   int64_t regularlength) {
   return awkward_RegularArray_getitem_jagged_expand<int64_t>(

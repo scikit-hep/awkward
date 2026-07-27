@@ -6,7 +6,7 @@
 
 template <typename TO>
 ERROR awkward_UnionArray_fillindex_count(
-  TO* toindex,
+  TO* __restrict__ toindex,
   int64_t toindexoffset,
   int64_t length) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -15,7 +15,7 @@ ERROR awkward_UnionArray_fillindex_count(
   return success();
 }
 ERROR awkward_UnionArray_fillindex_to64_count(
-  int64_t* toindex,
+  int64_t* __restrict__ toindex,
   int64_t toindexoffset,
   int64_t length) {
   return awkward_UnionArray_fillindex_count<int64_t>(

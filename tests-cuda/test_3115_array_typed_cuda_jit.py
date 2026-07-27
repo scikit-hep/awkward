@@ -11,8 +11,8 @@ nb_cuda = pytest.importorskip("numba.cuda")
 
 from numba import types  # noqa: E402
 
-nb.config.CUDA_LOW_OCCUPANCY_WARNINGS = False
-nb.config.CUDA_WARN_ON_IMPLICIT_COPY = False
+nb_cuda.config.CUDA_LOW_OCCUPANCY_WARNINGS = False
+nb_cuda.config.CUDA_WARN_ON_IMPLICIT_COPY = False
 
 
 try:

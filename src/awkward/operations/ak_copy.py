@@ -16,32 +16,15 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def copy(array):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-
-    Returns a deep copy of the array (no memory shared with original).
+    """Returns a deep copy of the array (no memory shared with original).
 
     This is identical to `np.copy` and `copy.deepcopy`.
 
     It's only useful to explicitly copy an array if you're going to change it
     in-place. This doesn't come up often because Awkward Arrays are immutable.
     That is to say, the Awkward Array library doesn't have any operations that
-    change an array in-place, but the data in the array might be owned by another
-    library that can change it in-place.
-
-    For example, if the array comes from NumPy:
-
-        >>> underlying_array = np.array([1.1, 2.2, 3.3, 4.4, 5.5])
-        >>> wrapper = ak.Array(underlying_array)
-        >>> duplicate = ak.copy(wrapper)
-        >>> underlying_array[2] = 123
-        >>> underlying_array
-        array([  1.1,   2.2, 123. ,   4.4,   5.5])
-        >>> wrapper
-        <Array [1.1, 2.2, 123, 4.4, 5.5] type='5 * float64'>
-        >>> duplicate
-        <Array [1.1, 2.2, 3.3, 4.4, 5.5] type='5 * float64'>
+    change an array in-place, but the data in the array might be owned by
+    another library that can change it in-place.
 
     There is an exception to this rule: you can add fields to records in an
     #ak.Array in-place. However, this changes the #ak.Array wrapper without
@@ -62,6 +45,26 @@ def copy(array):
     sharing"). Changing data in-place would result in many surprising long-distance
     changes, so we don't support it. However, an #ak.Array's data might come from
     a mutable third-party library, so this function allows you to make a true copy.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
+    Returns:
+        A deep copy of the array (no memory shared with original).
+
+    Examples:
+        For example, if the array comes from NumPy:
+
+        >>> underlying_array = np.array([1.1, 2.2, 3.3, 4.4, 5.5])
+        >>> wrapper = ak.Array(underlying_array)
+        >>> duplicate = ak.copy(wrapper)
+        >>> underlying_array[2] = 123
+        >>> underlying_array
+        array([  1.1,   2.2, 123. ,   4.4,   5.5])
+        >>> wrapper
+        <Array [1.1, 2.2, 123, 4.4, 5.5] type='5 * float64'>
+        >>> duplicate
+        <Array [1.1, 2.2, 3.3, 4.4, 5.5] type='5 * float64'>
     """
     # Dispatch
     yield (array,)

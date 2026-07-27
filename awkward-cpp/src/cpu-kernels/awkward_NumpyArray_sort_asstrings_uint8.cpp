@@ -12,11 +12,11 @@
 // This function relies on std::sort to do the right
 // thing with std::strings
 ERROR awkward_NumpyArray_sort_asstrings_uint8(
-    uint8_t* toptr,
-    const uint8_t* fromptr,
-    const int64_t* offsets,
+    uint8_t* __restrict__ toptr,
+    const uint8_t* __restrict__ fromptr,
+    const int64_t* __restrict__ offsets,
     int64_t offsetslength,
-    int64_t* outoffsets,
+    int64_t* __restrict__ outoffsets,
     bool ascending,
     bool stable) {
 
@@ -27,10 +27,8 @@ ERROR awkward_NumpyArray_sort_asstrings_uint8(
   for (int64_t k = 0;  k < offsetslength - 1;  k++) {
     int64_t start = offsets[k];
     int64_t stop = offsets[k + 1];
-    int64_t slen = start;
     std::string strvar;
-    for (uint8_t i = (uint8_t)start;  slen < stop;  i++) {
-      slen++;
+    for (int64_t i = start;  i < stop;  i++) {
       strvar += (char)fromptr[i];
     }
     words.emplace_back(strvar);

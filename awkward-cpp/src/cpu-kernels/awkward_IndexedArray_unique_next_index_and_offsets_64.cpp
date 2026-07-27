@@ -5,10 +5,10 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_IndexedArray_unique_next_index_and_offsets_64(
-  int64_t* toindex,
-  int64_t* tooffsets,
-  const int64_t* fromoffsets,
-  const int64_t* fromnulls,
+  int64_t* __restrict__ toindex,
+  int64_t* __restrict__ tooffsets,
+  const int64_t* __restrict__ fromoffsets,
+  const int64_t* __restrict__ fromnulls,
   int64_t startslength) {
   int64_t k = 0;
   int64_t ll = 0;

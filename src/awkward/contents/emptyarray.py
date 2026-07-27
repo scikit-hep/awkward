@@ -21,6 +21,7 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
+    Literal,
     Self,
     SupportsIndex,
     final,
@@ -59,7 +60,7 @@ class EmptyArray(EmptyMeta, Content):
     EmptyArray has no equivalent in Apache Arrow.
 
     To illustrate how the constructor arguments are interpreted, the following is a
-    simplified implementation of `__init__`, `__len__`, and `__getitem__`:
+    simplified implementation of `__init__`, `__len__`, and `__getitem__`::
 
         class EmptyArray(Content):
             def __init__(self):
@@ -270,7 +271,12 @@ class EmptyArray(EmptyMeta, Content):
                 EmptyArray(backend=self._backend),
             )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         return True
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
@@ -302,21 +308,21 @@ class EmptyArray(EmptyMeta, Content):
         else:
             return self
 
-    def _is_unique(self, negaxis, starts, parents, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         return True
 
-    def _unique(self, negaxis, starts, parents, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         return self
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         as_numpy = self.to_NumpyArray(np.float64)
         return as_numpy._argsort_next(
-            negaxis, starts, shifts, parents, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(self, negaxis, starts, parents, outlength, ascending, stable):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -328,7 +334,7 @@ class EmptyArray(EmptyMeta, Content):
         negaxis,
         starts,
         shifts,
-        parents,
+        offsets,
         outlength,
         mask,
         keepdims,
@@ -340,7 +346,7 @@ class EmptyArray(EmptyMeta, Content):
             negaxis,
             starts,
             shifts,
-            parents,
+            offsets,
             outlength,
             mask,
             keepdims,

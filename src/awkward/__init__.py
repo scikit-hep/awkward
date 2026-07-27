@@ -54,8 +54,15 @@ behavior: dict = {}
 # operations
 from awkward.operations import *
 
-# version
-__all__ = [x for x in globals() if not x.startswith("_")]
+# filter out private modules starting with "_" and exclude "ak_" modules from src/awkward/operations
+__all__ = [
+    k
+    for k, v in locals().items()
+    if not (
+        k.startswith("_")
+        or (k.startswith("ak_") and v.__package__ == "awkward.operations")
+    )
+]
 
 
 def __dir__():

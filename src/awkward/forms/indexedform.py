@@ -26,7 +26,7 @@ class IndexedForm(IndexedMeta[Form], Form):
     def __init__(
         self,
         index,
-        content=None,
+        content,
         *,
         parameters=None,
         form_key=None,

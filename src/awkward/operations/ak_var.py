@@ -11,6 +11,7 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     NAMED_AXIS_KEY,
@@ -38,7 +39,32 @@ def var(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the variance over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation is
+    not a reducer and has no identity. It is the same as NumPy's
+    [var](https://docs.scipy.org/doc/numpy/reference/generated/numpy.var.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    Passing all arguments to the reducers, the variance is calculated as::
+
+        ak.sum((x - ak.mean(x))**2 * weight) / ak.sum(weight)
+
+    If `ddof` is not zero, the above is further corrected by a factor of::
+
+        ak.sum(weight) / (ak.sum(weight) - ddof)
+
+    Even without `ddof`, #ak.var differs from #ak.moment with `n=2` because
+    the mean is subtracted from all points before summing their squares.
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
+    See also #ak.nanvar.
+
     Args:
         x: The data on which to compute the variance (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -48,11 +74,15 @@ def var(
         ddof (int): "delta degrees of freedom": the divisor used in the
             calculation is `sum(weights) - ddof`. Use this for "reduced
             variance."
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -68,30 +98,8 @@ def var(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the variance in each group of elements from `x` (many
-    types supported, including all Awkward Arrays and Records). The grouping
-    is performed the same way as for reducers, though this operation is not a
-    reducer and has no identity. It is the same as NumPy's
-    [var](https://docs.scipy.org/doc/numpy/reference/generated/numpy.var.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
-
-    Passing all arguments to the reducers, the variance is calculated as
-
-        ak.sum((x - ak.mean(x))**2 * weight) / ak.sum(weight)
-
-    If `ddof` is not zero, the above is further corrected by a factor of
-
-        ak.sum(weight) / (ak.sum(weight) - ddof)
-
-    Even without `ddof`, #ak.var differs from #ak.moment with `n=2` because
-    the mean is subtracted from all points before summing their squares.
-
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
-
-    See also #ak.nanvar.
+    Returns:
+        The variance in each group of elements from `x`.
     """
     # Dispatch
     yield x, weight
@@ -115,7 +123,16 @@ def nanvar(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the variance, treating NaN values as missing.
+
+    Equivalent to::
+
+        ak.var(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.var.
+
     Args:
         x: The data on which to compute the variance (anything #ak.to_layout recognizes).
         weight: Data that can be broadcasted to `x` to give each value a
@@ -125,11 +142,15 @@ def nanvar(
         ddof (int): "delta degrees of freedom": the divisor used in the
             calculation is `sum(weights) - ddof`. Use this for "reduced
             variance."
-        axis (None or int): If None, combine all values from the array into
+        axis (None or int or str): If None, combine all values from the array into
             a single scalar result; if an int, group by that axis: `0` is the
             outermost, `1` is the first level of nested lists, etc., and
             negative `axis` counts from the innermost: `-1` is the innermost,
-            `-2` is the next level up, etc.
+            `-2` is the next level up, etc; if a str, it is interpreted as the
+            name of the axis which maps to an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         keepdims (bool): If False, this function decreases the number of
             dimensions by 1; if True, the output values are wrapped in a new
             length-1 dimension so that the result of this operation may be
@@ -145,15 +166,8 @@ def nanvar(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Like #ak.var, but treating NaN ("not a number") values as missing.
-
-    Equivalent to
-
-        ak.var(ak.nan_to_none(array))
-
-    with all other arguments unchanged.
-
-    See also #ak.var.
+    Returns:
+        Like #ak.var, but treating NaN ("not a number") values as missing.
     """
     # Dispatch
     yield x, weight
@@ -163,7 +177,7 @@ def nanvar(
         weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
 
     return _impl(
-        ak.operations.ak_nan_to_none._impl(x, highlevel, behavior, attrs),
+        ak.operations.ak_nan_to_none._impl(x, True, behavior, attrs),
         weight,
         ddof,
         axis,
@@ -190,6 +204,10 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
 
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
+
+    # Integer squares (x * x) overflow before reduction; promote integral data
+    # to float64 once (no-op and zero copy for floating inputs), matching NumPy.
+    x = promote_integral_to_float64(x)
 
     # Handle named axis
     named_axis = _get_named_axis(ctx)

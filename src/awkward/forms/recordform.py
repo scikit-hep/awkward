@@ -110,13 +110,13 @@ class RecordForm(RecordMeta[Form], Form):
         )
 
     def _columns(self, path, output, list_indicator):
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             content._columns((*path, field), output, list_indicator)
 
     def _prune_columns(self, is_inside_record_or_union: bool) -> Self | None:
         contents = []
         fields = []
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             next_content = content._prune_columns(True)
             if next_content is None:
                 continue
@@ -134,7 +134,7 @@ class RecordForm(RecordMeta[Form], Form):
     def _select_columns(self, match_specifier: _SpecifierMatcher) -> Self:
         contents = []
         fields = []
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             # Try and match this field, allowing derived matcher to match any field if empty
             next_match_specifier = match_specifier(field, next_match_if_empty=True)
             if next_match_specifier is None:
@@ -177,15 +177,22 @@ class RecordForm(RecordMeta[Form], Form):
                 yield from content._expected_from_buffers(getkey, recursive)
 
     def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
-        computed_fields_set = set(self.fields)
+        if not self._is_equal_to_generic(other, all_parameters, form_key):
+            return False
+        if self.is_tuple != other.is_tuple:
+            return False
+        if len(self._contents) != len(other._contents):
+            return False
 
-        return (
-            self._is_equal_to_generic(other, all_parameters, form_key)
-            and self.is_tuple == other.is_tuple
-            and len(self._contents) == len(other._contents)
-            and all(f in computed_fields_set for f in other.fields)
-            and all(
-                content._is_equal_to(other.content(field), all_parameters, form_key)
-                for field, content in zip(self.fields, self._contents)
+        computed_fields_set = set(self.fields)
+        if not all(f in computed_fields_set for f in other.fields):
+            return False
+
+        # Build a field->content dict for other to avoid O(n²) list.index lookups
+        other_field_to_content = dict(zip(other.fields, other._contents, strict=True))
+        return all(
+            content._is_equal_to(
+                other_field_to_content[field], all_parameters, form_key
             )
+            for field, content in zip(self.fields, self._contents, strict=True)
         )

@@ -32,7 +32,7 @@ def _add_necessary_unit(dtype_name: str) -> str:
     return dtype_name
 
 
-# (dtype('bool'), dtype('int8'), dtype('<M8[15us]'), ...) Supported dtypes
+# (dtype('bool'), dtype('int8'), dtype('M8[15us]'), ...) Supported dtypes
 DTYPES = tuple(
     primitive_to_dtype(_add_necessary_unit(k)) for k in _primitive_to_dtype_dict.keys()
 )
@@ -87,3 +87,21 @@ def test_empty_index(a: ak.Array, idx: Iterable) -> None:
     # e.g., "0 * complex128", "0 * var * union[complex128, datetime64[us]]"
     expected_typestr = str(ak.types.ArrayType(a.type.content, 0))
     assert result.typestr == expected_typestr
+
+
+def test_flatten_empty_array() -> None:
+    """Assert empty arrays can be flattened unless its type forbids it."""
+
+    # An empty array of unknown type can be flattened as unknown type can be
+    # flattened, e.g., an empty array of nested arrays.
+    a = ak.Array([])  #  type='0 * unknown'
+    assert ak.flatten(a).to_list() == []
+
+    # The empty sub-array is an empty array of arrays of integers.
+    a = ak.Array([[[1]], []])  # type='2 * var * var * int64'
+    assert ak.flatten(a, axis=2).to_list() == [[1], []]
+
+    # The type forbids flattening.
+    a = ak.from_numpy(np.array([], dtype=int))  #  type='0 * int64'
+    with pytest.raises(ak.errors.AxisError):
+        ak.flatten(a)

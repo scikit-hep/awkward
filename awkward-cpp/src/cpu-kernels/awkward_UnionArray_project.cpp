@@ -6,10 +6,10 @@
 
 template <typename T, typename C, typename I>
 ERROR awkward_UnionArray_project(
-  int64_t* lenout,
-  T* tocarry,
-  const C* fromtags,
-  const I* fromindex,
+  int64_t* __restrict__ lenout,
+  T* __restrict__ tocarry,
+  const C* __restrict__ fromtags,
+  const I* __restrict__ fromindex,
   int64_t length,
   int64_t which) {
   *lenout = 0;
@@ -21,48 +21,12 @@ ERROR awkward_UnionArray_project(
   }
   return success();
 }
-ERROR awkward_UnionArray8_32_project_64(
-  int64_t* lenout,
-  int64_t* tocarry,
-  const int8_t* fromtags,
-  const int32_t* fromindex,
-  int64_t length,
-  int64_t which) {
-  return awkward_UnionArray_project<int64_t, int8_t, int32_t>(
-    lenout,
-    tocarry,
-    fromtags,
-    fromindex,
-    length,
-    which);
-}
-ERROR awkward_UnionArray8_U32_project_64(
-  int64_t* lenout,
-  int64_t* tocarry,
-  const int8_t* fromtags,
-  const uint32_t* fromindex,
-  int64_t length,
-  int64_t which) {
-  return awkward_UnionArray_project<int64_t, int8_t, uint32_t>(
-    lenout,
-    tocarry,
-    fromtags,
-    fromindex,
-    length,
-    which);
-}
-ERROR awkward_UnionArray8_64_project_64(
-  int64_t* lenout,
-  int64_t* tocarry,
-  const int8_t* fromtags,
-  const int64_t* fromindex,
-  int64_t length,
-  int64_t which) {
-  return awkward_UnionArray_project<int64_t, int8_t, int64_t>(
-    lenout,
-    tocarry,
-    fromtags,
-    fromindex,
-    length,
-    which);
-}
+
+#define WRAPPER(FUNC, T, C, I) \
+  ERROR FUNC(int64_t* lenout, T* tocarry, const C* fromtags, const I* fromindex, int64_t length, int64_t which) { \
+    return awkward_UnionArray_project<T, C, I>(lenout, tocarry, fromtags, fromindex, length, which); \
+  }
+
+WRAPPER(awkward_UnionArray8_32_project_64, int64_t, int8_t, int32_t)
+WRAPPER(awkward_UnionArray8_U32_project_64, int64_t, int8_t, uint32_t)
+WRAPPER(awkward_UnionArray8_64_project_64, int64_t, int8_t, int64_t)

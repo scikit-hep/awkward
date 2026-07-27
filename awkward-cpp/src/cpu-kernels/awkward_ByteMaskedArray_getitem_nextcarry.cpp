@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_ByteMaskedArray_getitem_nextcarry(
-  T* tocarry,
-  const int8_t* mask,
+  T* __restrict__ tocarry,
+  const int8_t* __restrict__ mask,
   int64_t length,
   bool validwhen) {
   int64_t k = 0;
@@ -20,8 +20,8 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry(
   return success();
 }
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_64(
-  int64_t* tocarry,
-  const int8_t* mask,
+  int64_t* __restrict__ tocarry,
+  const int8_t* __restrict__ mask,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_getitem_nextcarry<int64_t>(
