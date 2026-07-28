@@ -65,6 +65,7 @@ class CupyBackend(Backend):
             # core reducers
             "awkward_reduce_sum",
             "awkward_reduce_sumofsquares",
+            "awkward_reduce_centered_sumofsquares",
             "awkward_reduce_sumofpowers",
             "awkward_reduce_sum_bool",
             "awkward_reduce_sum_bool_complex",
@@ -188,6 +189,7 @@ class CupyBackend(Backend):
             "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
             "awkward_reduce_sumofsquares": cuda_compute.awkward_reduce_sumofsquares,
+            "awkward_reduce_centered_sumofsquares": cuda_compute.awkward_reduce_centered_sumofsquares,
             "awkward_reduce_sumofpowers": cuda_compute.awkward_reduce_sumofpowers,
             "awkward_reduce_sum_bool": cuda_compute.awkward_reduce_sum_bool,
             "awkward_reduce_sum_int32_bool_64": cuda_compute.awkward_reduce_sum_int32_bool_64,

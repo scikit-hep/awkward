@@ -256,7 +256,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
             and axis is not None
             and depth_min == depth_max
             and posaxis == depth_max - 1
-            and ak.backend(x) == "cpu"
+            and ak.backend(x) in ("cpu", "cuda")
         ):
             # Fused centered sum-of-squares: Sigma (x - mean)**2 per segment in a
             # single pass -- no materialised deviation buffer and no back-broadcast
@@ -286,7 +286,8 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
             # Two-pass, like NumPy and ak.covar: centre on the (float64) mean, then
             # sum the squared deviations. Numerically stable (the one-pass
             # E[x**2]-E[x]**2 form catastrophically cancels) and overflow-safe.
-            # Used for weighted, complex, axis=None, and non-numpy backends.
+            # Used for weighted, complex, axis=None, a non-innermost axis, and
+            # non-cpu/cuda backends (typetracer, jax).
             # Centring needs `x - xmean` to broadcast, which is undefined when the
             # reduced axis is not the innermost one of a *ragged* array; there the
             # one-pass form is used instead.

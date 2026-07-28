@@ -656,6 +656,48 @@ def awkward_reduce_sumofsquares(
     )
 
 
+def awkward_reduce_centered_sumofsquares(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+    means,
+):
+    # sum((x - mean)**2) per segment, the two-pass variance numerator, in float64.
+    # `means` holds one (float64) mean per segment, aligned to `offsets`. Each
+    # element's segment mean is gathered (means[segment_id]) and a
+    # ZipIterator + TransformIterator forms (x - mean)**2 on the fly, feeding a
+    # PLUS segmented_reduce -- the subtraction is done in float64 (means is
+    # double), so integer/float32 inputs neither overflow nor lose precision, and
+    # no (x - mean) deviation buffer feeds the reduction. `result` is float64.
+    counts = offsets_data[1:] - offsets_data[:-1]
+    segment_ids = cp.repeat(cp.arange(outlength, dtype=offsets_data.dtype), counts)
+    mean_per_element = means[segment_ids]
+
+    def _centered_square(pair):
+        # field_0 is x (its dtype); field_1 is the float64 mean, so the
+        # subtraction promotes to float64 -- no overflow / precision loss.
+        d = pair.field_0 - pair.field_1
+        return d * d
+
+    d_input = TransformIterator(
+        ZipIterator(input_data, mean_per_element), _centered_square
+    )
+    start_o, end_o = make_segment_views(offsets_data)
+
+    h_init = np.asarray(0, dtype=result.dtype)
+
+    segmented_reduce(
+        d_in=d_input,
+        d_out=result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=h_init,
+    )
+
+
 def awkward_reduce_sumofpowers(
     result,
     input_data,

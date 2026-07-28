@@ -575,8 +575,8 @@ class CenteredSumOfSquares(KernelReducer):
     descent, and hence the bin order, is reducer-independent), so bin ``b`` here
     corresponds to element ``b`` of the flattened mean. Fusing the centring into
     the reduction removes the materialised ``x - mean`` deviation buffer and the
-    mean's back-broadcast onto every element. Concrete (numpy) backend only;
-    backs ``ak.var``/``ak.std`` for a grouped (non-``None``) axis.
+    mean's back-broadcast onto every element. Concrete (numpy/cupy) backends
+    only; backs ``ak.var``/``ak.std`` at the innermost axis.
     """
 
     name: Final = "sumofsquares"
