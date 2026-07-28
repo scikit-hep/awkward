@@ -241,73 +241,101 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
         else:
             sumw = ak.operations.ak_sum._impl(x * 0 + weight, axis, **kw)
 
-        # Two-pass, like NumPy and ak.covar: centre on the (float64) mean, then
-        # sum the squared deviations. This is numerically stable (the one-pass
-        # E[x**2]-E[x]**2 form catastrophically cancels) and overflow-safe, since
-        # the mean is float64 so the deviations are float64.
-        #
-        # Centring needs `x - xmean` to broadcast, which is undefined when the
-        # reduced axis is not the innermost one of a *ragged* array (short
-        # sublists cannot broadcast to the column width). There the one-pass form
-        # is used instead -- correct, and not a large-mean cancellation setting.
-        xmean = ak.operations.ak_mean._impl(x, weight, axis, **kw)
-        # Centring is an internal step; strip named axes from the mean so the
-        # subtraction is not rejected by the named-axis compatibility check (the
-        # output's named axis is propagated from `x`, not `xmean`).
-        xmean = ak.operations.ak_without_named_axis._impl(
-            xmean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
-        )
-        if axis is None:
-            # axis=None collapses to a scalar mean. Subtracting that scalar
-            # centres the flat content directly; broadcasting the length-1
-            # keepdims mean against a ragged array instead goes through awkward's
-            # nested broadcast, which is far slower and higher-memory and is the
-            # bulk of a large axis=None var/std. (Empty -> None mean -> one-pass.)
-            m_scalar = xmean[(0,) * xmean.ndim]
-            dev = None if m_scalar is None else (x - m_scalar)
-        else:
-            try:
-                dev = x - xmean
-            except ValueError:
-                dev = None
-
-        if dev is not None:
-            if is_complex:
-                # Variance of complex data is E[|x - mean|**2], a real number.
-                squared_dev = abs(dev) ** 2
-                if weight is not None:
-                    squared_dev = squared_dev * weight
-                sumwxx = ak.operations.ak_sum._impl(squared_dev, axis, **kw)
-            elif weight is None:
-                # float64 deviations -> fused sum-of-squares, no (x-mean)**2 buffer.
-                sumwxx = ak.operations.ak_sumofsquares._impl(dev, axis, **kw)
-            else:
-                sumwxx = ak.operations.ak_sum._impl(weight * dev * dev, axis, **kw)
+        if (
+            weight is None
+            and not is_complex
+            and axis is not None
+            and ak.backend(x) == "cpu"
+        ):
+            # Fused centered sum-of-squares: Sigma (x - mean)**2 per segment in a
+            # single pass -- no materialised deviation buffer and no back-broadcast
+            # of the mean (the dominant cost of the plain two-pass at a grouped
+            # axis). It also handles a non-innermost ragged axis directly, so no
+            # one-pass fallback is needed there. `means_flat` is one float64 mean
+            # per output bin, in bin order: it comes from the same _do.reduce(axis)
+            # descent as the reduction, so bins align. Overflow-safe and stable
+            # (deviations are formed in float64 inside the kernel).
+            means_flat = ak.operations.ak_ravel._impl(
+                ak.operations.ak_mean._impl(
+                    x,
+                    None,
+                    axis,
+                    keepdims=True,
+                    mask_identity=False,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                ),
+                highlevel=True,
+                behavior=ctx.behavior,
+                attrs=ctx.attrs,
+            )
+            sumwxx = ak.operations.ak_centered_sumofsquares._impl(
+                x, means_flat, axis, **kw
+            )
             out = sumwxx / sumw
         else:
-            # One-pass fallback (non-innermost ragged axis). For complex data the
-            # variance is E[|x - mean|**2] = E[|x|**2] - |E[x]|**2, so the second
-            # moment and the mean-correction use the (real) squared modulus --
-            # matching NumPy and the innermost complex path, not E[x**2]-E[x]**2.
-            if weight is None:
-                sumwx = ak.operations.ak_sum._impl(x, axis, dtype=np.float64, **kw)
-                if is_complex:
-                    sumwxx = ak.operations.ak_sum._impl(abs(x) ** 2, axis, **kw)
-                else:
-                    sumwxx = ak.operations.ak_sumofsquares._impl(x, axis, **kw)
+            # Two-pass, like NumPy and ak.covar: centre on the (float64) mean, then
+            # sum the squared deviations. Numerically stable (the one-pass
+            # E[x**2]-E[x]**2 form catastrophically cancels) and overflow-safe.
+            # Used for weighted, complex, axis=None, and non-numpy backends.
+            # Centring needs `x - xmean` to broadcast, which is undefined when the
+            # reduced axis is not the innermost one of a *ragged* array; there the
+            # one-pass form is used instead.
+            xmean = ak.operations.ak_mean._impl(x, weight, axis, **kw)
+            # Strip named axes so the subtraction is not rejected by the named-axis
+            # check (the output's named axis is propagated from `x`, not `xmean`).
+            xmean = ak.operations.ak_without_named_axis._impl(
+                xmean, highlevel=True, behavior=ctx.behavior, attrs=ctx.attrs
+            )
+            if axis is None:
+                # axis=None collapses to a scalar mean; subtract the scalar so
+                # centring hits the flat content instead of a slow ragged
+                # broadcast. (Empty -> None mean -> one-pass.)
+                m_scalar = xmean[(0,) * xmean.ndim]
+                dev = None if m_scalar is None else (x - m_scalar)
             else:
-                xp = x if is_complex else promote_integral_to_float64(x)
-                sumwx = ak.operations.ak_sum._impl(
-                    xp * weight, axis, dtype=np.float64, **kw
-                )
+                try:
+                    dev = x - xmean
+                except ValueError:
+                    dev = None
+
+            if dev is not None:
                 if is_complex:
-                    sumwxx = ak.operations.ak_sum._impl(
-                        abs(xp) ** 2 * weight, axis, **kw
-                    )
+                    # Variance of complex data is E[|x - mean|**2], a real number.
+                    squared_dev = abs(dev) ** 2
+                    if weight is not None:
+                        squared_dev = squared_dev * weight
+                    sumwxx = ak.operations.ak_sum._impl(squared_dev, axis, **kw)
+                elif weight is None:
+                    sumwxx = ak.operations.ak_sumofsquares._impl(dev, axis, **kw)
                 else:
-                    sumwxx = ak.operations.ak_sum._impl(xp * xp * weight, axis, **kw)
-            mean = sumwx / sumw
-            out = sumwxx / sumw - (abs(mean) ** 2 if is_complex else mean * mean)
+                    sumwxx = ak.operations.ak_sum._impl(weight * dev * dev, axis, **kw)
+                out = sumwxx / sumw
+            else:
+                # One-pass fallback (non-innermost ragged axis). Complex variance
+                # is E[|x|**2] - |E[x]|**2 (real), matching the innermost path.
+                if weight is None:
+                    sumwx = ak.operations.ak_sum._impl(x, axis, dtype=np.float64, **kw)
+                    if is_complex:
+                        sumwxx = ak.operations.ak_sum._impl(abs(x) ** 2, axis, **kw)
+                    else:
+                        sumwxx = ak.operations.ak_sumofsquares._impl(x, axis, **kw)
+                else:
+                    xp = x if is_complex else promote_integral_to_float64(x)
+                    sumwx = ak.operations.ak_sum._impl(
+                        xp * weight, axis, dtype=np.float64, **kw
+                    )
+                    if is_complex:
+                        sumwxx = ak.operations.ak_sum._impl(
+                            abs(xp) ** 2 * weight, axis, **kw
+                        )
+                    else:
+                        sumwxx = ak.operations.ak_sum._impl(
+                            xp * xp * weight, axis, **kw
+                        )
+                mean = sumwx / sumw
+                out = sumwxx / sumw - (abs(mean) ** 2 if is_complex else mean * mean)
 
         if ddof != 0:
             out = out * (sumw / (sumw - ddof))
