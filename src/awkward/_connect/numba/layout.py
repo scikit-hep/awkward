@@ -58,45 +58,16 @@ def _decode_utf8_codepoint(data, position, length):
         fourth = data[position + 3]
 
         if second < 0x80 or second > 0xBF:
-            raise UnicodeDecodeError(
-                "utf-8",
-                data,
-                position + 1,
-                position + 2,
-                "invalid continuation byte",
-            )
+            raise ValueError("invalid UTF-8 continuation byte")
         if third < 0x80 or third > 0xBF:
-            raise UnicodeDecodeError(
-                "utf-8",
-                data,
-                position + 2,
-                position + 3,
-                "invalid continuation byte",
-            )
+            raise ValueError("invalid UTF-8 continuation byte")
         if fourth < 0x80 or fourth > 0xBF:
-            raise UnicodeDecodeError(
-                "utf-8",
-                data,
-                position + 3,
-                position + 4,
-                "invalid continuation byte",
-            )
+            raise ValueError("invalid UTF-8 continuation byte")
         if first == 0xF0 and second < 0x90:
-            raise UnicodeDecodeError(
-                "utf-8",
-                data,
-                position,
-                position + 4,
-                "invalid start byte",
-            )
+            raise ValueError("overlong UTF-8 sequence")
         if first == 0xF4 and second > 0x8F:
-            raise UnicodeDecodeError(
-                "utf-8",
-                data,
-                position,
-                position + 4,
-                "code point not in range(0x110000)",
-            )
+            raise ValueError("UTF-8 code point exceeds U+10FFFF")
+
         codepoint = (
             ((first & 0x07) << 18)
             | ((second & 0x3F) << 12)

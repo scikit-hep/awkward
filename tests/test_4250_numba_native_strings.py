@@ -125,7 +125,7 @@ def test_numba_string_getitem_rejects_invalid_utf8(data):
     def getitem(array):
         return array[0]
 
-    with pytest.raises(UnicodeDecodeError):
+    with pytest.raises(ValueError):
         getitem(array)
 
 
