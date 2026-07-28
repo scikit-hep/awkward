@@ -607,9 +607,10 @@ class CenteredSumOfSquares(KernelReducer):
         array.backend.maybe_kernel_error(
             array.backend[
                 "awkward_reduce_centered_sumofsquares",
-                np.float64,
-                array.dtype.type,
-                offsets.dtype.type,
+                np.float64,  # toptr
+                array.dtype.type,  # fromptr
+                offsets.dtype.type,  # offsets
+                np.float64,  # means (a List arg, so it is part of the kernel key)
             ](
                 result,
                 array.data,

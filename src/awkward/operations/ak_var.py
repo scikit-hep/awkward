@@ -241,20 +241,28 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
         else:
             sumw = ak.operations.ak_sum._impl(x * 0 + weight, axis, **kw)
 
+        # Fuse only for the *innermost* axis. There the reduce descends through
+        # the outer lists without transposing, so each innermost sublist becomes a
+        # bin in depth-first order -- exactly the order of
+        # ravel(mean(axis, keepdims)), so `means_flat` aligns bin-for-bin. For a
+        # non-innermost axis the descent rearranges the content (a carry/transpose)
+        # and that alignment no longer holds, so those axes use the (correct)
+        # two-pass/broadcast path below instead.
+        depth_min, depth_max = x.layout.minmax_depth
+        posaxis = maybe_posaxis(x.layout, axis, 1) if axis is not None else None
         if (
             weight is None
             and not is_complex
             and axis is not None
+            and depth_min == depth_max
+            and posaxis == depth_max - 1
             and ak.backend(x) == "cpu"
         ):
             # Fused centered sum-of-squares: Sigma (x - mean)**2 per segment in a
             # single pass -- no materialised deviation buffer and no back-broadcast
-            # of the mean (the dominant cost of the plain two-pass at a grouped
-            # axis). It also handles a non-innermost ragged axis directly, so no
-            # one-pass fallback is needed there. `means_flat` is one float64 mean
-            # per output bin, in bin order: it comes from the same _do.reduce(axis)
-            # descent as the reduction, so bins align. Overflow-safe and stable
-            # (deviations are formed in float64 inside the kernel).
+            # of the mean (the dominant cost of the plain two-pass at the innermost
+            # axis). Overflow-safe and stable (deviations are formed in float64
+            # inside the kernel).
             means_flat = ak.operations.ak_ravel._impl(
                 ak.operations.ak_mean._impl(
                     x,

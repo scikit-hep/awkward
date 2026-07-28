@@ -7,13 +7,14 @@ import pytest
 
 import awkward as ak
 
-# ak.var/ak.std on the numpy backend, unweighted, at a grouped (non-None) axis
-# use the fused centered sum-of-squares reducer: Sigma (x - mean)**2 per segment
-# in one pass -- no deviation buffer, no mean back-broadcast, and it handles a
-# non-innermost ragged axis directly (no one-pass fallback). Deviations are formed
-# in float64 inside the kernel, so it is overflow-safe and cancellation-stable.
-# These reductions need the awkward_reduce_centered_sumofsquares kernel (built
-# with awkward-cpp).
+# ak.var/ak.std on the numpy backend, unweighted, at the *innermost* axis use the
+# fused centered sum-of-squares reducer: Sigma (x - mean)**2 per segment in one
+# pass -- no deviation buffer and no mean back-broadcast. Deviations are formed in
+# float64 inside the kernel, so it is overflow-safe and cancellation-stable. Only
+# the innermost axis is fused: for a non-innermost axis the reduce transposes the
+# content, which would misalign the per-bin means, so those use the two-pass path
+# (still asserted correct here). Fused cases need the
+# awkward_reduce_centered_sumofsquares kernel (built with awkward-cpp).
 
 
 DTYPES = [
@@ -66,13 +67,32 @@ def _colwise(rows, fn):
 
 
 def test_var_non_innermost_ragged_axis0():
-    # axis=0 over a ragged array: the fused kernel handles this directly (the
-    # broadcast two-pass would fall back to one-pass here).
+    # axis=0 over a ragged array is NOT innermost, so it does not use the fused
+    # kernel (the reduce transposes the content there, which would misalign the
+    # per-bin means); it uses the two-pass/one-pass path. Result must still match.
     rows = [[1, 2, 3], [4, 5, 6], [7, 8]]
     arr = ak.values_astype(ak.Array(rows), np.int32)
     got = ak.to_list(ak.var(arr, axis=0))
     for g, e in zip(got, _colwise(rows, np.var), strict=True):
         assert g == pytest.approx(e)
+
+
+def test_var_three_deep_axis0_regression():
+    # Regression for a means-misalignment bug: the fused kernel must NOT be used
+    # for axis=0 on a deeply-ragged array (see test_2918). Values must be right.
+    data = ak.Array(
+        [[[0, 1.1, 2.2], []], [], [[3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]]]
+    )
+    assert ak.var(data, axis=0).to_list() == [
+        [pytest.approx(2.7225), pytest.approx(2.7225), pytest.approx(0.0)],
+        [pytest.approx(0.0)],
+        [
+            pytest.approx(0.0),
+            pytest.approx(0.0),
+            pytest.approx(0.0),
+            pytest.approx(0.0),
+        ],
+    ]
 
 
 def test_var_three_deep_middle_axis():
