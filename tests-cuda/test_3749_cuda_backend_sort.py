@@ -105,7 +105,7 @@ def test_sort_cuda_unsupported_axis():
         "cuda",
     )
 
-    ak.sort(gpu_data, axis=-2)
+    result = ak.sort(gpu_data, axis=-2)
     assert ak.all(result == expected)
 
 
