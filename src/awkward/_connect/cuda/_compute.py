@@ -62,6 +62,137 @@ def make_segment_views(offsets):
     return offsets[:-1], offsets[1:]
 
 
+def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
+    nextcarry,
+    nextoffsets,
+    nextlen,
+    maxnextparents,
+    distincts,
+    distinctslen,
+    offsetscopy,
+    offsets,
+    length,
+    outer_offsets,
+    outlength,
+    maxcount,
+):
+    # Transpose a ragged 2-level structure for a non-innermost reduction: group
+    # the elements by (outer_bin, column) instead of by row. For each column
+    # `col` of each outer bin, gather one element from every row in that outer
+    # bin whose sub-list reaches `col`. Output nextbin = outer_bin*maxcount + col.
+    #
+    # Vectorized equivalent of the reference kernel: assign each element its
+    # nextbin, stably sort by nextbin (so rows stay in order within a bin), and
+    # build nextoffsets as the per-bin cumulative count. Matches the CPU kernel
+    # (validated against its reference definition).
+    nextlen = int(nextlen)
+    distinctslen = int(distinctslen)
+    length = int(length)
+    outlength = int(outlength)
+    maxcount = int(maxcount)
+    nbins = outlength * maxcount
+    idt = offsets.dtype
+
+    # Initialize outputs (empty input leaves these as the -1 / 0 sentinels).
+    maxnextparents[0] = -1
+    if distinctslen > 0:
+        distincts[:distinctslen] = -1
+    nextoffsets[0] = 0
+    if nbins > 0:
+        nextoffsets[1 : nbins + 1] = 0
+    if nextlen == 0 or nbins == 0:
+        return
+
+    counts = offsets[1 : length + 1] - offsets[:length]  # per-row sub-list length
+    row = cp.repeat(cp.arange(length, dtype=idt), counts)  # row of each element
+    cum = cp.zeros(length + 1, dtype=idt)
+    cp.cumsum(counts, out=cum[1:])
+    elem = cp.arange(nextlen, dtype=idt)
+    col = elem - cum[row]  # column within the row
+    pos = offsets[row] + col  # source content index (= nextcarry value)
+
+    outer_counts = outer_offsets[1 : outlength + 1] - outer_offsets[:outlength]
+    outer_bin_of_row = cp.repeat(cp.arange(outlength, dtype=idt), outer_counts)
+    nextbin = outer_bin_of_row[row] * maxcount + col
+
+    # Stable sort by nextbin (elem is the row-major order, so lexsort with elem as
+    # the secondary key keeps rows ordered within each bin -- a stable sort).
+    order = cp.lexsort(cp.stack((elem, nextbin)))
+    nextcarry[:nextlen] = pos[order]
+
+    bincounts = cp.bincount(nextbin, minlength=nbins)[:nbins]
+    cp.cumsum(bincounts, out=nextoffsets[1 : nbins + 1])
+
+    if distinctslen > 0:
+        idx = cp.arange(distinctslen, dtype=idt)
+        distincts[:distinctslen] = cp.where(bincounts[:distinctslen] > 0, idx, -1)
+
+    nonzero_bins = cp.nonzero(bincounts > 0)[0]
+    if nonzero_bins.shape[0] > 0:
+        maxnextparents[0] = nonzero_bins[-1]
+
+
+def awkward_ListOffsetArray_reduce_local_outoffsets_64(
+    outoffsets,
+    parents,
+    lenparents,
+    outlength,
+):
+    # parents -> offsets: outoffsets[p] is the first index whose parent >= p (with
+    # the tail filled by lenparents). `parents` is non-decreasing, so this is a
+    # searchsorted. (Deprecated in the offsets pipeline, kept for compatibility.)
+    lenparents = int(lenparents)
+    outlength = int(outlength)
+    ramp = cp.arange(outlength + 1, dtype=outoffsets.dtype)
+    outoffsets[: outlength + 1] = cp.searchsorted(
+        parents[:lenparents], ramp, side="left"
+    )
+
+
+def awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
+    nextstarts,
+    nextparents,
+    nextlen,
+):
+    # nextparents -> nextstarts: the start index of each next-bin, i.e.
+    # nextoffsets[:-1]. `nextparents` is non-decreasing, so this is a searchsorted
+    # (empty bins get their offset, matching the offsets-pipeline semantics).
+    nextlen = int(nextlen)
+    nlen = nextstarts.shape[0]
+    ramp = cp.arange(nlen, dtype=nextstarts.dtype)
+    nextstarts[:nlen] = cp.searchsorted(nextparents[:nextlen], ramp, side="left")
+
+
+def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
+    outstarts,
+    outstops,
+    distincts,
+    lendistincts,
+    outlength,
+):
+    # Build the output list's starts/stops from `distincts` (one length-`maxcount`
+    # block per outer bin, with -1 marking absent columns). Each bin k spans
+    # [k*maxcount, k*maxcount + n_present), where n_present is the number of
+    # non-(-1) entries in the block (its present columns are contiguous from 0).
+    lendistincts = int(lendistincts)
+    outlength = int(outlength)
+    if outlength == 0:
+        return
+    if lendistincts == 0:
+        outstarts[:outlength] = 0
+        outstops[:outlength] = 0
+        return
+    maxcount = lendistincts // outlength
+    starts = cp.arange(outlength, dtype=outstarts.dtype) * maxcount
+    outstarts[:outlength] = starts
+    if maxcount == 0:
+        outstops[:outlength] = 0
+        return
+    present = (distincts[:lendistincts] != -1).reshape(outlength, maxcount)
+    counts = present.sum(axis=1).astype(outstops.dtype)
+    outstops[:outlength] = starts + counts
+
+
 def segmented_reduce(*, max_segment_size=None, **kwargs):
     """Thin wrapper over ``cuda.compute.segmented_reduce`` that supplies the
     ``max_segment_size`` hint (number of elements in the largest segment) when a
