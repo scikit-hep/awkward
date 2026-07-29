@@ -173,6 +173,13 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
     """
     if known_issues.has_issue_4259(a):
         return True
+
+    axis = kwargs.get("axis", DEFAULTS["axis"])
+
+    match axis:
+        case int():
+            if known_issues.has_issue_4264(a):
+                return True
     return False
 
 

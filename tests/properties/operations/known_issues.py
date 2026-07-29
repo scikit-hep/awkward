@@ -84,10 +84,12 @@ def has_issue_4261(a: ak.Array) -> bool:
     `ak.flatten(axis=None)` and `ak.ravel` flatten every branch to
     its leaves and merge them with `ak._do.mergemany`. A record or
     union in the form can combine leaves from different families:
-    integers (with bool), floats (with complex), linear-unit
-    timedeltas, calendar-unit timedeltas (months, years), datetimes
-    (all units), and strings (with bytestrings). Integers promote
-    with floats and with either timedelta family; any other
+    integers (with bool, without `uint64`), `uint64` on its own,
+    floats (with complex), linear-unit timedeltas, calendar-unit
+    timedeltas (months, years), datetimes (all units), and strings
+    (with bytestrings). Integers promote with floats and with either
+    timedelta family; `uint64` promotes with the integers and the
+    floats but with neither timedelta family; any other
     combination of two or more families makes the merge fail with a
     bare `AssertionError` ("cannot merge NumpyArray with
     ListOffsetArray"), an `AttributeError`, NumPy's
@@ -98,9 +100,10 @@ def has_issue_4261(a: ak.Array) -> bool:
     The families are modeled on NumPy's documented promotion rules,
     not on the current implementation, except that datetimes with
     timedeltas, which NumPy promotes, are grouped as non-promotable;
-    `np.result_type` is not a substitute (it also refuses `uint64`
-    with timedeltas). Unprobed combinations may still fail the tests;
-    such a failure indicates this trigger is missing a combination.
+    `np.result_type` is still not a substitute (it fails on extreme
+    unit pairs that merge). Unprobed combinations may still fail the
+    tests; such a failure indicates this trigger is missing a
+    combination.
     Reported: https://github.com/scikit-hep/awkward/issues/4261
     """
     form = a.layout.form
@@ -108,7 +111,7 @@ def has_issue_4261(a: ak.Array) -> bool:
         return False
     families = _leaf_families(form)
     promotable_pairs = (
-        {"integer", "float"},
+        {"integer", "uint64", "float"},
         {"integer", "timedelta"},
         {"integer", "timedelta-calendar"},
     )
@@ -170,6 +173,39 @@ def has_issue_4263(a: ak.Array) -> bool:
     return _reaches_empty_union(a.layout)
 
 
+def has_issue_4264(a: ak.Array) -> bool:
+    """Return `True` if an option type sits under an untrimmed regular list.
+
+    The caller applies the option condition (for `ak.all`, an integer
+    `axis`). A `RegularArray` may validly carry content longer than
+    `size * length`, and the reducers mishandle an option node inside
+    such untrimmed content: an option directly above a list fails a
+    bare `AssertionError` in `RegularArray._reduce_next` on every
+    run, and an option above a leaf raises `IndexError` from an
+    out-of-range carry index nondeterministically (`ak.all`,
+    `ak.any`, `ak.sum`, `ak.count`, and `ak.min` are all affected).
+    With content trimmed to `size * length` the same reductions
+    succeed. Reported:
+    https://github.com/scikit-hep/awkward/issues/4264
+    """
+    stack = [(a.layout, False)]
+    while stack:
+        node, in_untrimmed = stack.pop()
+        if node.is_numpy or node.is_unknown:
+            continue
+        if node.parameter("__array__") in ("string", "bytestring"):
+            continue
+        if node.is_option and in_untrimmed:
+            return True
+        if node.is_regular and node.content.length > node.size * node.length:
+            in_untrimmed = True
+        if node.is_record or node.is_union:
+            stack.extend((c, in_untrimmed) for c in node.contents)
+        else:
+            stack.append((node.content, in_untrimmed))
+    return False
+
+
 def _is_variable_length_list(form: ak.forms.Form) -> bool:
     """Return `True` if the node has `var` type.
 
@@ -217,7 +253,9 @@ def _leaf_families(form: ak.forms.Form) -> set[str]:
         elif node.is_record or node.is_union:
             stack.extend(node.contents)
         elif node.is_numpy:
-            if node.primitive.startswith("datetime64"):
+            if node.primitive == "uint64":
+                families.add("uint64")
+            elif node.primitive.startswith("datetime64"):
                 families.add("datetime")
             elif node.primitive.startswith("timedelta64"):
                 if node.primitive.endswith(("[M]", "[Y]")):
