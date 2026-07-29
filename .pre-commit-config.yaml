@@ -20,6 +20,7 @@ repos:
   - id: trailing-whitespace
   - id: name-tests-test
     args: ["--pytest-test-first"]
+    exclude: ^tests/properties/
 
 - repo: https://github.com/cheshirekow/cmake-format-precommit
   rev: e2c2116d86a80e72e7146a06e68b7c228afc6319  # frozen: v0.6.13
