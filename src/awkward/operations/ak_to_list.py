@@ -18,13 +18,9 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_list(array):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
+    """Converts an Awkward Array into Python objects.
 
-    Converts `array` (many types supported, including all Awkward Arrays and
-    Records) into Python objects. If `array` is not recognized as an array, it
-    is passed through as-is.
+    If `array` is not recognized as an array, it is passed through as-is.
 
     Awkward Array types have the following Pythonic translations.
 
@@ -43,6 +39,12 @@ def to_list(array):
     * #ak.types.UnionArray: Python data are naturally heterogeneous.
 
     See also #ak.from_iter and #ak.Array.tolist.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
+    Returns:
+        The contents of `array` as Python objects (lists, dicts, numbers, etc.).
     """
     # Dispatch
     yield (array,)
