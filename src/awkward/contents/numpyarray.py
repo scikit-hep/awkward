@@ -59,6 +59,27 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+def _kernel_unsupported_cast(dtype):
+    """Map a dtype that has no compiled kernel onto the nearest supported one, or
+    return ``None`` if the dtype is already supported.
+
+    ``float16`` -> ``float32`` (lossless); extended ``float128``/``longdouble``
+    -> ``float64`` and ``complex256``/``clongdouble`` -> ``complex128`` (these
+    lose precision -- there is no native kernel for them). Detected by kind and
+    itemsize so it is platform-independent (on systems where ``longdouble`` is
+    ``float64`` there is nothing wider than 8 bytes, so nothing is remapped).
+    """
+    if dtype.kind == "f":
+        if dtype.itemsize == 2:  # float16
+            return np.dtype(np.float32)
+        if dtype.itemsize > 8:  # float128 / longdouble
+            return np.dtype(np.float64)
+    elif dtype.kind == "c":
+        if dtype.itemsize > 16:  # complex256 / clongdouble
+            return np.dtype(np.complex128)
+    return None
+
+
 @final
 class NumpyArray(NumpyMeta, Content):
     """
@@ -913,6 +934,25 @@ class NumpyArray(NumpyMeta, Content):
                 negaxis, starts, shifts, offsets, outlength, ascending, stable
             )
         else:
+            if self._data.dtype.kind == "c":
+                raise TypeError(
+                    f"cannot argsort {self._data.dtype!r}: complex numbers have no "
+                    "total order (this applies to complex64/128/256 alike)"
+                )
+            # No argsort kernel for float16/float128/complex256: argsort through
+            # the nearest supported dtype. The positions are unchanged (the cast
+            # is order-preserving/monotonic), so no cast-back is needed.
+            cast = _kernel_unsupported_cast(self._data.dtype)
+            if cast is not None:
+                casted = NumpyArray(
+                    self._backend.nplike.astype(self._data, cast),
+                    parameters=self._parameters,
+                    backend=self._backend,
+                )
+                return casted._argsort_next(
+                    negaxis, starts, shifts, offsets, outlength, ascending, stable
+                )
+
             offsets_length = offsets.length
 
             dtype = (
@@ -1001,6 +1041,30 @@ class NumpyArray(NumpyMeta, Content):
             )
 
         else:
+            if self._data.dtype.kind == "c":
+                raise TypeError(
+                    f"cannot sort {self._data.dtype!r}: complex numbers have no "
+                    "total order (this applies to complex64/128/256 alike)"
+                )
+            # No sort kernel for float16/float128/complex256: sort through the
+            # nearest supported dtype, then cast the sorted values back (the cast
+            # is order-preserving for float16, monotonic for the rest).
+            cast = _kernel_unsupported_cast(self._data.dtype)
+            if cast is not None:
+                casted = NumpyArray(
+                    self._backend.nplike.astype(self._data, cast),
+                    parameters=self._parameters,
+                    backend=self._backend,
+                )
+                out = casted._sort_next(
+                    negaxis, starts, offsets, outlength, ascending, stable
+                )
+                return NumpyArray(
+                    self._backend.nplike.astype(out.data, self._data.dtype),
+                    parameters=None,
+                    backend=self._backend,
+                )
+
             offsets_length = offsets.length
 
             dtype = (
@@ -1083,6 +1147,40 @@ class NumpyArray(NumpyMeta, Content):
         # Yes, we've just tested these, but we need to be explicit that they are invariants
         assert self.is_contiguous
         assert self._data.ndim == 1
+
+        # Dtypes with no compiled reducer kernel (float16, float128, complex256)
+        # are reduced through the nearest supported dtype and the value-preserving
+        # result is cast back, so `ak.sum`/`prod`/`min`/`max`/... work on them.
+        cast = _kernel_unsupported_cast(self._data.dtype)
+        if cast is not None:
+            original = self._data.dtype
+            casted = NumpyArray(
+                self._backend.nplike.astype(self._data, cast),
+                parameters=self._parameters,
+                backend=self._backend,
+            )
+            out = casted._reduce_next(
+                reducer,
+                negaxis,
+                starts,
+                shifts,
+                offsets,
+                outlength,
+                mask,
+                keepdims,
+                behavior,
+            )
+
+            def _restore(node, **kwargs):
+                if node.is_numpy and node.dtype == cast:
+                    return NumpyArray(
+                        node.backend.nplike.astype(node.data, original),
+                        parameters=node._parameters,
+                        backend=node.backend,
+                    )
+                return None
+
+            return ak._do.recursively_apply(out, _restore, return_array=True)
 
         # No more `parents_to_offsets_aligned` round-trip — `offsets` is the
         # bin descriptor we receive directly.
