@@ -34,7 +34,29 @@ def to_parquet_row_groups(
     parquet_extra_options=None,
     storage_options=None,
 ):
-    """
+    """Writes a sequence of Awkward Arrays to a Parquet file as row groups.
+
+    As in #ak.to_parquet, the arrays' #ak.Array.attrs are written into the file's
+    metadata. The file-level `attrs` are defined by the first array, just as the
+    schema is, and the `attrs` of subsequent arrays are not merged into them. If
+    you need the `attrs` of every array to be combined, do so explicitly before
+    passing the iterator to this function.
+
+    If the `array` does not contain records at top-level, the Arrow table will consist
+    of one field whose name is `""` iff. `extensionarray` is False.
+
+    If `extensionarray` is True`, use a custom Arrow extension to store this array.
+    Otherwise, generic Arrow arrays are used, and if the `array` does not
+    contain records at top-level, the Arrow table will consist of one field whose
+    name is `""`. See #ak.to_arrow_table for more details.
+
+    Parquet files can maintain the distinction between "option-type but no elements are
+    missing" and "not option-type" at all levels, including the top level. However,
+    there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
+    Be aware of these type distinctions when passing data through Arrow or Parquet.
+
+    See also #ak.to_arrow, which is used as an intermediate step.
+
     Args:
         iterator: Generator object that iterates over awkward arrays.
         destination (path-like): Name of the output file, file path, or
@@ -142,10 +164,9 @@ def to_parquet_row_groups(
             to open a remote file for writing.
 
     Returns:
-    `pyarrow._parquet.FileMetaData` instance
+        A `pyarrow._parquet.FileMetaData` describing the written Parquet file.
 
-    Writes an iterator over an Awkward Array to a Parquet file in batches (through pyarrow).
-
+    Examples:
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
         >>> ak.to_parquet_row_groups((batch for batch in array1), "array1.parquet")
         <pyarrow._parquet.FileMetaData object at 0x7f646c38ff40>
@@ -155,27 +176,6 @@ def to_parquet_row_groups(
           num_row_groups: 1
           format_version: 2.6
           serialized_size: 0
-
-    As in #ak.to_parquet, the arrays' #ak.Array.attrs are written into the file's
-    metadata. The file-level `attrs` are defined by the first array, just as the
-    schema is, and the `attrs` of subsequent arrays are not merged into them. If
-    you need the `attrs` of every array to be combined, do so explicitly before
-    passing the iterator to this function.
-
-    If the `array` does not contain records at top-level, the Arrow table will consist
-    of one field whose name is `""` iff. `extensionarray` is False.
-
-    If `extensionarray` is True`, use a custom Arrow extension to store this array.
-    Otherwise, generic Arrow arrays are used, and if the `array` does not
-    contain records at top-level, the Arrow table will consist of one field whose
-    name is `""`. See #ak.to_arrow_table for more details.
-
-    Parquet files can maintain the distinction between "option-type but no elements are
-    missing" and "not option-type" at all levels, including the top level. However,
-    there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
-    Be aware of these type distinctions when passing data through Arrow or Parquet.
-
-    See also #ak.to_arrow, which is used as an intermediate step.
     """
     # Dispatch
     yield (iterator,)

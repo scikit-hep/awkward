@@ -23,42 +23,7 @@ def to_buffers(
     backend=None,
     byteorder=ak._util.native_byteorder,
 ):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-        container (None or MutableMapping): The str \u2192 NumPy arrays (or
-            Python buffers) that represent the decomposed Awkward Array. This
-            `container` is only assumed to have a `__setitem__` method that
-            accepts strings as keys.
-        buffer_key (str or callable): Python format string containing
-            `"{form_key}"` and/or `"{attribute}"` or a function that takes these
-            (and/or `layout`) as keyword arguments and returns a string to use
-            as a key for a buffer in the `container`. The `form_key` is the result
-            of applying `form_key` (below), and the `attribute` is a hard-coded
-            string representing the buffer's function (e.g. `"data"`, `"offsets"`,
-            `"index"`).
-        form_key (str, callable): Python format string containing
-            `"{id}"` or a function that takes this (and/or `layout`) as a keyword
-            argument and returns a string to use as a key for a Form node.
-            Together, the `buffer_key` and `form_key` links attributes of each Form
-            node to data in the `container`.
-        id_start (int): Starting `id` to use in `form_key` and hence `buffer_key`.
-            This integer increases in a depth-first walk over the `array` nodes and
-            can be used to generate unique keys for each Form.
-        backend (`"cpu"`, `"cuda"`, `"jax"`, None): Backend to use to
-            generate values that are put into the `container`. The default,
-            `"cpu"`, makes NumPy arrays, which are in main memory
-            (e.g. not GPU) and satisfy Python's Buffer protocol. If all the
-            buffers in `array` have the same `backend` as this, they won't be
-            copied. If the backend is None, then the backend of the layout
-            will be used to generate the buffers.
-        byteorder (`"<"`, `">"`): Endianness of buffers written to `container`.
-            If the byteorder does not match the current system byteorder, the
-            arrays will be copied.
-
-    Decomposes an Awkward Array into a Form and a collection of memory buffers,
-    so that data can be losslessly written to file formats and storage devices
-    that only map names to binary blobs (such as a filesystem directory).
+    """Decomposes an Awkward Array into a Form, length, and memory buffers.
 
     This function returns a 3-tuple::
 
@@ -94,7 +59,50 @@ def to_buffers(
     Dask, but partition numbers can be emulated by prepending a fixed `"partN-"`
     string to the `buffer_key`. The `array` represents exactly one partition.
 
-    Here is a simple example:
+    If you intend to use this function for saving data, you may want to pack it
+    first with #ak.to_packed.
+
+    See also #ak.from_buffers and #ak.to_packed.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        container (None or MutableMapping): The str \u2192 NumPy arrays (or
+            Python buffers) that represent the decomposed Awkward Array. This
+            `container` is only assumed to have a `__setitem__` method that
+            accepts strings as keys.
+        buffer_key (str or callable): Python format string containing
+            `"{form_key}"` and/or `"{attribute}"` or a function that takes these
+            (and/or `layout`) as keyword arguments and returns a string to use
+            as a key for a buffer in the `container`. The `form_key` is the result
+            of applying `form_key` (below), and the `attribute` is a hard-coded
+            string representing the buffer's function (e.g. `"data"`, `"offsets"`,
+            `"index"`).
+        form_key (str, callable): Python format string containing
+            `"{id}"` or a function that takes this (and/or `layout`) as a keyword
+            argument and returns a string to use as a key for a Form node.
+            Together, the `buffer_key` and `form_key` links attributes of each Form
+            node to data in the `container`.
+        id_start (int): Starting `id` to use in `form_key` and hence `buffer_key`.
+            This integer increases in a depth-first walk over the `array` nodes and
+            can be used to generate unique keys for each Form.
+        backend (`"cpu"`, `"cuda"`, `"jax"`, None): Backend to use to
+            generate values that are put into the `container`. The default,
+            `"cpu"`, makes NumPy arrays, which are in main memory
+            (e.g. not GPU) and satisfy Python's Buffer protocol. If all the
+            buffers in `array` have the same `backend` as this, they won't be
+            copied. If the backend is None, then the backend of the layout
+            will be used to generate the buffers.
+        byteorder (`"<"`, `">"`): Endianness of buffers written to `container`.
+            If the byteorder does not match the current system byteorder, the
+            arrays will be copied.
+
+    Returns:
+        A 3-tuple `(form, length, container)` decomposed from `array`,
+        so that data can be losslessly written to file formats and storage devices
+        that only map names to binary blobs (such as a filesystem directory).
+
+    Examples:
+        Here is a simple example:
 
         >>> original = ak.Array([[1, 2, 3], [], [4, 5]])
         >>> form, length, container = ak.to_buffers(original)
@@ -114,15 +122,10 @@ def to_buffers(
         >>> container
         {'node0-offsets': array([0, 3, 3, 5]), 'node1-data': array([1, 2, 3, 4, 5])}
 
-    which may be read back with
+        which may be read back with
 
         >>> ak.from_buffers(form, length, container)
         <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
-
-    If you intend to use this function for saving data, you may want to pack it
-    first with #ak.to_packed.
-
-    See also #ak.from_buffers and #ak.to_packed.
     """
     # Dispatch
     yield (array,)
