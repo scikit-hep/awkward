@@ -51,11 +51,19 @@ if(AWKWARD_PREPARE AND EXISTS "${AWKWARD_REPO_ROOT}/kernel-specification.yml")
   set(prepare_scripts "dev/copy-cpp-headers.py" "dev/generate-kernel-signatures.py")
   set(prepare_inputs "${AWKWARD_REPO_ROOT}/kernel-specification.yml")
 
-  # The kernel tests are only shipped in the sdist, not the wheel; generating them additionally
-  # needs numpy, which some cross-compiling build environments (pyodide) cannot provide.
-  if(SKBUILD_STATE STREQUAL "sdist")
+  # The kernel tests are not needed to build a wheel; generating them additionally needs numpy,
+  # which pyodide's cross-compiling build environment cannot import host-side, so skip them there.
+  execute_process(
+    COMMAND "${Python_EXECUTABLE}" -c "import numpy"
+    RESULT_VARIABLE numpy_missing
+    OUTPUT_QUIET ERROR_QUIET)
+  if(numpy_missing EQUAL 0)
     list(APPEND prepare_scripts "dev/generate-tests.py")
     list(APPEND prepare_inputs "${AWKWARD_REPO_ROOT}/kernel-test-data.json")
+  elseif(SKBUILD_STATE STREQUAL "sdist")
+    message(FATAL_ERROR "numpy is required to generate the kernel tests shipped in the sdist")
+  else()
+    message(STATUS "numpy is not importable; skipping kernel test generation")
   endif()
 
   # Rerun configure (and hence generation) when any generation input changes
@@ -79,8 +87,8 @@ if(AWKWARD_PREPARE AND EXISTS "${AWKWARD_REPO_ROOT}/kernel-specification.yml")
       message(
         FATAL_ERROR
           "${script} failed (exit code ${prepare_result}). Generating awkward-cpp's kernel \
-artefacts requires 'pyyaml' (plus 'numpy' when generating the kernel tests for an sdist) in the \
-build environment; these are installed automatically for isolated builds. Pass \
+artefacts requires 'pyyaml' and 'numpy' in the build environment; these are installed \
+automatically for isolated builds. Pass \
 -DAWKWARD_PREPARE=OFF to skip generation if the artefacts already exist.")
     endif()
   endforeach()
