@@ -222,6 +222,8 @@ python -m pytest tests/test_XXXX-yyyy.py
 
 and it makes it easier to figure out why a particular test was added. The easiest way to make a new testing file is to copy an existing one and replace its `test_zzzz` functions with your own. The previous tests should also give you a sense of the way we test things and the kinds of things that are constrained in tests.
 
+The property-based tests in `tests/properties/` (using [Hypothesis](https://hypothesis.readthedocs.io/) and [hypothesis-awkward](https://github.com/scikit-hep/hypothesis-awkward)) do not follow this naming convention; their directory structure roughly mirrors the source layout (e.g., `tests/properties/operations/` corresponds to `src/awkward/operations/`).
+
 ### Building documentation locally
 
 Documentation is automatically built by each pull request. You usually won't need to build the documentation locally, but if you do, this section describes how.
