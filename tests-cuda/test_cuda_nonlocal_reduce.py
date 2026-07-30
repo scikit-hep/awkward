@@ -10,11 +10,13 @@ import awkward as ak
 cp = pytest.importorskip("cupy")
 
 # Non-innermost (axis=0, axis=1 on deeper) reductions on the cuda backend go
-# through the "non-local" reduce path, which needs the ListOffsetArray reduce
-# transpose kernels: reduce_nonlocal_{maxcount_offsetscopy,preparenext,nextstarts,
-# outstartsstops} and reduce_local_outoffsets. These are implemented via
-# cuda.compute in _connect/cuda/_compute.py; here we cross-check GPU vs CPU for
-# the non-positional reducers (sum/count/mean/var/std) that use them.
+# through the "non-local" reduce path. In the offsets pipeline that path invokes
+# three ListOffsetArray transpose kernels -- reduce_nonlocal_maxcount_offsetscopy,
+# reduce_nonlocal_preparenext, reduce_nonlocal_outstartsstops -- implemented via
+# cuda.compute in _connect/cuda/_compute.py (outoffsets/nextstarts are taken
+# directly from the offsets, so the old parents->offsets converters are not
+# called). Here we cross-check GPU vs CPU for the non-positional reducers
+# (sum/count/mean/var/std) that use them.
 
 
 def _match(gpu_result, cpu_result):

@@ -132,37 +132,6 @@ def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
         maxnextparents[0] = nonzero_bins[-1]
 
 
-def awkward_ListOffsetArray_reduce_local_outoffsets_64(
-    outoffsets,
-    parents,
-    lenparents,
-    outlength,
-):
-    # parents -> offsets: outoffsets[p] is the first index whose parent >= p (with
-    # the tail filled by lenparents). `parents` is non-decreasing, so this is a
-    # searchsorted. (Deprecated in the offsets pipeline, kept for compatibility.)
-    lenparents = int(lenparents)
-    outlength = int(outlength)
-    ramp = cp.arange(outlength + 1, dtype=outoffsets.dtype)
-    outoffsets[: outlength + 1] = cp.searchsorted(
-        parents[:lenparents], ramp, side="left"
-    )
-
-
-def awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
-    nextstarts,
-    nextparents,
-    nextlen,
-):
-    # nextparents -> nextstarts: the start index of each next-bin, i.e.
-    # nextoffsets[:-1]. `nextparents` is non-decreasing, so this is a searchsorted
-    # (empty bins get their offset, matching the offsets-pipeline semantics).
-    nextlen = int(nextlen)
-    nlen = nextstarts.shape[0]
-    ramp = cp.arange(nlen, dtype=nextstarts.dtype)
-    nextstarts[:nlen] = cp.searchsorted(nextparents[:nextlen], ramp, side="left")
-
-
 def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
     outstarts,
     outstops,
