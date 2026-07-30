@@ -50,7 +50,7 @@ def has_issue_4260(a: ak.Array) -> bool:
 
 
 def has_issue_4259(a: ak.Array) -> bool:
-    """Return `True` if a `float16` or `float128` leaf is in the array.
+    """Return `True` if a `float16`, `float128`, or `complex256` leaf is in the array.
 
     `ak.sort`, `ak.argsort`, and every reducer except `ak.count`
     raise `KeyError` from the kernel-table lookup when a `float16`
@@ -60,19 +60,19 @@ def has_issue_4259(a: ak.Array) -> bool:
     is neither mapped onto an existing kernel
     (`KernelReducer._dtype_for_kernel` does this for datetimes and
     complex numbers) nor refused with a documented error. `float128`
-    fails the same lookup (as `numpy.longdouble` in the kernel key)
-    on the platforms where NumPy provides it — continuous
-    integration on Linux found it; macOS NumPy has no `float128`.
-    Which leaves reach a kernel depends on the operation and the
-    layout, so every matching leaf counts here, although one that
-    never reaches a kernel works. Reported:
+    and `complex256` fail the same lookup (as `numpy.longdouble` and
+    `numpy.clongdouble` in the kernel key) on the platforms where
+    NumPy provides them — continuous integration on Linux found both;
+    macOS NumPy has neither. Which leaves reach a kernel depends on
+    the operation and the layout, so every matching leaf counts here,
+    although one that never reaches a kernel works. Reported:
     https://github.com/scikit-hep/awkward/issues/4259
     """
     stack = [a.layout.form]
     while stack:
         node = stack.pop()
         if node.is_numpy:
-            if node.primitive in ("float16", "float128"):
+            if node.primitive in ("float16", "float128", "complex256"):
                 return True
         elif node.is_record or node.is_union:
             stack.extend(node.contents)
