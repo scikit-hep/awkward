@@ -65,8 +65,7 @@ def has_issue_4259(a: ak.Array) -> bool:
     integration on Linux found it; macOS NumPy has no `float128`.
     Which leaves reach a kernel depends on the operation and the
     layout, so every matching leaf counts here, although one that
-    never reaches a kernel works. Reported (for `float16`; the #392
-    roadmap pairs the two dtypes):
+    never reaches a kernel works. Reported:
     https://github.com/scikit-hep/awkward/issues/4259
     """
     stack = [a.layout.form]
