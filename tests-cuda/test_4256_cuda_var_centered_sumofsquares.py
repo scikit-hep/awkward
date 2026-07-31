@@ -14,8 +14,9 @@ cp = pytest.importorskip("cupy")
 # _connect/cuda/_compute.py): the per-segment mean is gathered to each element
 # and a ZipIterator + TransformIterator forms (x - mean)**2 in float64 on the fly,
 # feeding a PLUS segmented_reduce -- no deviation buffer and no mean back-broadcast.
-# Cross-checked against the CPU backend. A non-innermost axis is NOT fused (it uses
-# the two-pass path); it is exercised here too for parity.
+# Cross-checked against the CPU backend. This file covers only the innermost
+# (fused) path; the non-innermost axis (not fused, two-pass) is covered by
+# tests-cuda/test_cuda_nonlocal_reduce.py.
 
 DTYPES = [
     "int8",
@@ -88,10 +89,10 @@ def test_var_three_deep_innermost_matches_cpu():
 
 
 # NB: a non-innermost axis (e.g. axis=0) is not fused; it uses the general
-# two-pass reduce, whose non-local reduce kernels are not available on the CUDA
-# backend (awkward_ListOffsetArray_reduce_nonlocal_preparenext_64 and friends) --
-# a pre-existing limitation, independent of the centered kernel added here. So we
-# only exercise the innermost (fused) path on GPU.
+# two-pass reduce. That path's non-local reduce kernel
+# (awkward_ListOffsetArray_reduce_nonlocal_preparenext_64) is implemented on the
+# CUDA backend by this PR and exercised in test_cuda_nonlocal_reduce.py. This
+# file focuses on the innermost (fused) centered-sum-of-squares path.
 
 
 def test_var_std_stay_on_device():

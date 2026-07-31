@@ -11,15 +11,13 @@ cp = pytest.importorskip("cupy")
 
 # Coverage for the cuda.compute helpers in _connect/cuda/_compute.py:
 #   * awkward_ListOffsetArray_reduce_nonlocal_preparenext_64 -- the empty-input
-#     early return (nextlen == 0 or nbins == 0), line ~104.
-#   * awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64 -- all branches,
-#     lines ~146-162 (outlength==0 / lendistincts==0 returns, and the main
-#     starts/stops computation).
+#     early return (nextlen == 0 or nbins == 0) and the main path.
 #   * awkward_reduce_centered_sumofsquares._centered_square -- the (x-mean)**2
-#     device op, lines ~780-781.
-# The non-local kernels run for a NON-innermost reduce (axis=0); the centered op
-# runs for an innermost ak.var/ak.std. All results are cross-checked vs the CPU
-# backend.
+#     device op.
+# The preparenext kernel runs for a NON-innermost reduce (axis=0); these tests
+# also exercise the axis=0 reduce end-to-end (its outstartsstops step is served
+# by the compiled .cu template kernel). The centered op runs for an innermost
+# ak.var/ak.std. All results are cross-checked vs the CPU backend.
 
 
 def _match(gpu_out, cpu_out):
@@ -28,8 +26,7 @@ def _match(gpu_out, cpu_out):
 
 @pytest.mark.parametrize("op", [ak.sum, ak.count, ak.mean])
 def test_nonlocal_axis0_ragged_main(op):
-    # Ragged axis=0 -> preparenext main path + outstartsstops main path
-    # (lines 146-147, 154-156, 160-162).
+    # Ragged axis=0 -> preparenext main path, then the axis=0 reduce end-to-end.
     rows = [[1.0, 2.0, 3.0], [4.0, 5.0], [6.0, 7.0, 8.0, 9.0]]
     cpu = ak.Array(rows)
     gpu = ak.to_backend(cpu, "cuda")
@@ -38,8 +35,7 @@ def test_nonlocal_axis0_ragged_main(op):
 
 def test_nonlocal_axis0_all_empty():
     # All-empty sublists axis=0 -> maxcount == 0, so preparenext hits the
-    # `nextlen == 0 or nbins == 0` early return (line ~104) and outstartsstops
-    # hits the lendistincts == 0 branch (lines ~150-153). Result is empty.
+    # `nextlen == 0 or nbins == 0` early return. Result is empty.
     cpu = ak.Array([[], [], []])
     gpu = ak.to_backend(cpu, "cuda")
     out = ak.sum(gpu, axis=0)
@@ -50,7 +46,7 @@ def test_nonlocal_axis0_all_empty():
 
 def test_nonlocal_axis0_some_empty_rows():
     # Empty rows interleaved with non-empty -> preparenext with a zero-length
-    # segment and outstartsstops with a bin whose present-count differs.
+    # segment, then the axis=0 reduce with a bin whose present-count differs.
     rows = [[1.0, 2.0], [], [3.0, 4.0, 5.0]]
     cpu = ak.Array(rows)
     gpu = ak.to_backend(cpu, "cuda")
@@ -59,8 +55,8 @@ def test_nonlocal_axis0_some_empty_rows():
 
 
 def test_nonlocal_axis0_single_row():
-    # outlength == 1: exercises the outstartsstops main path with a minimal bin
-    # count and the preparenext single-outer-bin path.
+    # outlength == 1: exercises the preparenext single-outer-bin path and the
+    # minimal axis=0 reduce.
     cpu = ak.Array([[1.0, 2.0, 3.0]])
     gpu = ak.to_backend(cpu, "cuda")
     assert _match(ak.sum(gpu, axis=0), ak.sum(cpu, axis=0))

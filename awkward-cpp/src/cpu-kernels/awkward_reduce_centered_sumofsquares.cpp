@@ -9,7 +9,8 @@
 // `offsets`/`outlength` (produced by the same reduce descent as the sum, so bin
 // order matches). Each element is widened to the (double) output type before
 // centring, so integer/float32 inputs neither overflow nor lose precision, and
-// no (x - mean) deviation buffer is materialised. Empty bins never read means[bin].
+// no (x - mean) deviation buffer is materialised. For an empty bin means[bin] is
+// still loaded (it is in bounds), but unused, since the inner loop runs zero times.
 template <typename OUT, typename IN>
 ERROR awkward_reduce_centered_sumofsquares(
   OUT* __restrict__ toptr,

@@ -132,36 +132,6 @@ def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
         maxnextparents[0] = nonzero_bins[-1]
 
 
-def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
-    outstarts,
-    outstops,
-    distincts,
-    lendistincts,
-    outlength,
-):
-    # Build the output list's starts/stops from `distincts` (one length-`maxcount`
-    # block per outer bin, with -1 marking absent columns). Each bin k spans
-    # [k*maxcount, k*maxcount + n_present), where n_present is the number of
-    # non-(-1) entries in the block (its present columns are contiguous from 0).
-    lendistincts = int(lendistincts)
-    outlength = int(outlength)
-    if outlength == 0:
-        return
-    if lendistincts == 0:
-        outstarts[:outlength] = 0
-        outstops[:outlength] = 0
-        return
-    maxcount = lendistincts // outlength
-    starts = cp.arange(outlength, dtype=outstarts.dtype) * maxcount
-    outstarts[:outlength] = starts
-    if maxcount == 0:
-        outstops[:outlength] = 0
-        return
-    present = (distincts[:lendistincts] != -1).reshape(outlength, maxcount)
-    counts = present.sum(axis=1).astype(outstops.dtype)
-    outstops[:outlength] = starts + counts
-
-
 def segmented_reduce(*, max_segment_size=None, **kwargs):
     """Thin wrapper over ``cuda.compute.segmented_reduce`` that supplies the
     ``max_segment_size`` hint (number of elements in the largest segment) when a
