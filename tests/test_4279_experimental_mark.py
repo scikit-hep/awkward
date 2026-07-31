@@ -1,5 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+import inspect
 import types
 import warnings
 
@@ -7,7 +8,7 @@ import pytest
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._experimental import experimental
+from awkward._experimental import _find_stack_level, experimental
 from awkward.errors import ExperimentalWarning
 
 
@@ -330,3 +331,18 @@ def test_dispatch_interception_still_warns():
 
     assert any(x is sentinel for x in sentinel.captured)
     assert len(_experimental_warnings(caught)) == 1
+
+
+def test_find_stack_level_without_frame_introspection(monkeypatch):
+    # currentframe() is documented to return None on implementations without
+    # stack-frame support; attribution then degrades to the warn call itself.
+    monkeypatch.setattr("awkward._experimental.currentframe", lambda: None)
+    assert _find_stack_level() == 1
+
+
+def test_find_stack_level_when_every_frame_is_inside_the_package(monkeypatch):
+    # An empty package-dir prefix makes every frame count as awkward's own:
+    # the walk runs off the top of the stack and must attribute the warning
+    # to the outermost real frame, not one past it.
+    monkeypatch.setattr("awkward._experimental._PACKAGE_DIR", "")
+    assert _find_stack_level() == len(inspect.stack())
