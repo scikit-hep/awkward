@@ -29,6 +29,15 @@ jobs:
     env:
       PIP_ONLY_BINARY: cmake
       PYTHON_VERSION: "3.10"
+      # The runner has many cores; without these limits, JAX/XLA, OpenBLAS,
+      # OpenMP, and numexpr each spawn a worker thread per core in the one
+      # test process. PJRT_NPROC caps the XLA CPU client's thread pools
+      # (xla/pjrt/utils.cc, DefaultThreadPoolSize).
+      PJRT_NPROC: "2"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_MAX_THREADS: "4"
 
     # Required for miniconda to activate conda
     defaults:
