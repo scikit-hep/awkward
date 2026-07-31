@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import numpy
 
-__all__ = ("AxisError", "FieldNotFoundError")
+__all__ = ("AxisError", "ExperimentalWarning", "FieldNotFoundError")
+
+
+class ExperimentalWarning(UserWarning):
+    """Issued on first use of an API that may change or be removed in any
+    release, without a deprecation period."""
 
 
 class FieldNotFoundError(IndexError):
