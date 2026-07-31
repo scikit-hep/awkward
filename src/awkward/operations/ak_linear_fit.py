@@ -136,12 +136,13 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
     # Promote integer x, y to float64 before forming x**2 and x*y, so the
     # products (and the sums that feed delta = sumw*sumwxx - sumwx*sumwx) are
     # accumulated in float64 rather than wrapping at the input integer dtype --
-    # e.g. int32 `100000**2` overflows. Float and complex data pass through
-    # unchanged (no copy). Matches how ak.covar/ak.corr promote in their
-    # one-pass paths.
-    is_complex = "complex" in str(x.type) or "complex" in str(y.type)
-    xp = x if is_complex else promote_integral_to_float64(x)
-    yp = y if is_complex else promote_integral_to_float64(y)
+    # e.g. int32 `100000**2` overflows. promote_integral_to_float64 casts only
+    # integer/bool leaves, so float and complex data pass through unchanged (no
+    # copy); promoting each array independently also keeps a mixed integer/complex
+    # pair (int x, complex y) from wrapping. Matches how ak.covar/ak.corr promote
+    # unconditionally in their one-pass paths.
+    xp = promote_integral_to_float64(x)
+    yp = promote_integral_to_float64(y)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:

@@ -33,11 +33,16 @@ def test_linear_fit_int32_overflow():
 
 
 def test_linear_fit_int64_overflow():
-    x = np.array([3_000_000, 4_000_000, 5_000_000], dtype=np.int64)
-    y = 3 * x - 7
+    # sumwx = sum(x) and sumwxx = sum(x*x) must exceed int64 before promotion for
+    # this test to exercise the fix: x ~ 3-5e9 so x*x ~ 1-2.5e19 wraps int64 (max
+    # ~9.2e18). On main these inputs give slope -0.0745; promoted they give 3.0.
+    # intercept magnitude is kept large (-7e6) so its float64 rounding
+    # (-7000000.000018) stays within pytest.approx's default relative tolerance.
+    x = np.array([3_000_000_000, 4_000_000_000, 5_000_000_000], dtype=np.int64)
+    y = 3 * x - 7_000_000
     fit = _fit(x, y)
     assert fit["slope"] == pytest.approx(3.0)
-    assert fit["intercept"] == pytest.approx(-7.0)
+    assert fit["intercept"] == pytest.approx(-7_000_000.0)
 
 
 def test_linear_fit_uint_and_negative():
@@ -47,6 +52,25 @@ def test_linear_fit_uint_and_negative():
         fit = _fit(x, y)
         assert fit["slope"] == pytest.approx(2.0)
         assert fit["intercept"] == pytest.approx(5.0)
+
+    # signed input with genuinely negative x (the uint loop above cannot).
+    x = np.array([-300000, -100000, 200000, 400000], dtype=np.int32)
+    y = (2 * x + 5).astype(np.int32)
+    fit = _fit(x, y)
+    assert fit["slope"] == pytest.approx(2.0)
+    assert fit["intercept"] == pytest.approx(5.0)
+
+
+def test_linear_fit_mixed_integer_complex_overflow():
+    # int x and complex y: promoting each array independently keeps x*x in float64
+    # (int32 100000**2 would otherwise wrap) while y stays complex. Before the fix
+    # the complex-guard skipped promotion of both arrays, giving slope (-0.4059-0j).
+    xi = np.array([100000, 200000, 300000, 400000], dtype=np.int32)
+    x = ak.Array(xi)
+    y = ak.Array((2 * xi + 1).astype(np.complex128))
+    fit = ak.linear_fit(x, y)
+    assert fit["slope"] == pytest.approx(2 + 0j)
+    assert fit["intercept"] == pytest.approx(1 + 0j)
 
 
 def test_linear_fit_weighted_int32_overflow():
@@ -77,10 +101,14 @@ def test_linear_fit_float64_unchanged():
 
 
 def test_linear_fit_complex_not_regressed():
-    # Complex inputs pass through unchanged (x**2/x*y don't overflow); the fit
-    # must still be produced (a LinearFit record), not raise.
-    fit = _fit([1 + 1j, 2 + 0j, 3 - 1j], [2 + 0j, 4 + 1j, 6 - 2j])
-    assert fit["slope"] is not None
+    # Complex inputs pass through unchanged (promote_integral_to_float64 is a
+    # no-op for complex leaves). Points lie exactly on y = (2+1j)*x + (1-1j), so
+    # the least-squares fit recovers those coefficients exactly.
+    x = [1 + 0j, 2 + 0j, 3 + 0j]
+    y = [(2 + 1j) * xi + (1 - 1j) for xi in x]
+    fit = _fit(x, y)
+    assert fit["slope"] == pytest.approx(2 + 1j)
+    assert fit["intercept"] == pytest.approx(1 - 1j)
 
 
 def test_linear_fit_jagged_axis1_overflow():
