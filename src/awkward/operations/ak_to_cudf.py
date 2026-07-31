@@ -9,20 +9,23 @@ __all__ = ("to_cudf",)
 
 @high_level_function()
 def to_cudf(array):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-
-    Converts an Awkward Array into a cuDF Series.
+    """Converts an Awkward Array into a cuDF Series.
 
     Buffers that are not already in GPU memory will be transferred, and some
-    structural reformatting may happen to account for differences in architecture.
+    structural reformatting may happen to account for differences in
+    architecture.
 
-    This function requires the `cudf` library (< 25.12.00) and a compatible GPU.
-    cuDF versions 25.12.00 and later are not currently supported due to
+    This function requires the `cudf` library (< 25.12.00) and a compatible
+    GPU. cuDF versions 25.12.00 and later are not currently supported due to
     incompatible changes in cuDF internals.
 
     See also #ak.to_cupy, #ak.from_cupy, #ak.to_dataframe.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
+    Returns:
+        A cuDF Series with the same data as `array`.
     """
     # Dispatch
     yield (array,)

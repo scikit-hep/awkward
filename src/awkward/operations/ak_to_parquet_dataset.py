@@ -13,7 +13,14 @@ def to_parquet_dataset(
     filenames=None,
     storage_options=None,
 ):
-    """
+    """Creates a `_common_metadata` and a `_metadata` in a directory of Parquet files.
+
+    The `_common_metadata` contains the schema that all files share. (If the files
+    have different schemas, this function raises an exception.)
+
+    The `_metadata` contains row-group metadata used to seek to specific row-groups
+    within the multi-file dataset.
+
     Args:
         directory (str or Path): A directory in which to write `_common_metadata`
             and `_metadata`, making the directory of Parquet files into a dataset.
@@ -25,17 +32,15 @@ def to_parquet_dataset(
         filename_extension (str): Filename extension (including `.`) to use to
             search for files recursively. Ignored if `filenames` is None.
 
-    Creates a `_common_metadata` and a `_metadata` in a directory of Parquet files.
+    Returns:
+        A 2-tuple `(common_metadata_path, metadata_path)` with the paths to the
+        `_common_metadata` and `_metadata` files created in the given directory
+        of Parquet files.
 
+    Examples:
         >>> ak.to_parquet(array1, "/directory/arr1.parquet", parquet_compliant_nested=True)
         >>> ak.to_parquet(array2, "/directory/arr2.parquet", parquet_compliant_nested=True)
         >>> ak.to_parquet_dataset("/directory")
-
-    The `_common_metadata` contains the schema that all files share. (If the files
-    have different schemas, this function raises an exception.)
-
-    The `_metadata` contains row-group metadata used to seek to specific row-groups
-    within the multi-file dataset.
     """
 
     return _impl(directory, filenames, storage_options)

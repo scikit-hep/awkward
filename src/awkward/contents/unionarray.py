@@ -54,6 +54,18 @@ numpy = Numpy.instance()
 MAX_UNION_CONTENTS = 2**7  # We use int8 tags, 0-127
 
 
+def _contains_union(content: Content) -> bool:
+    """True if ``content`` is, or contains at any depth, a union."""
+    if content.is_union:
+        return True
+    elif content.is_record:
+        return any(_contains_union(c) for c in content.contents)
+    elif content.is_numpy or content.is_unknown:
+        return False
+    else:
+        return _contains_union(content.content)
+
+
 @final
 class UnionArray(UnionMeta[Content], Content):
     """
@@ -1656,7 +1668,15 @@ class UnionArray(UnionMeta[Content], Content):
         # mergeable ``NumpyArray``: multi-part contents (records) and whole-kept
         # contents (strings) are order-sensitive in ways the reorder cannot
         # reproduce, so they fall back to the element-wise loop below.
-        if not options["keepdims"]:
+        # Branches whose subtree contains a nested union also fall back:
+        # ``ak.broadcast_arrays`` does not reliably broadcast the position
+        # marker into union branches (mixed-depth unions report a degenerate
+        # ``purelist_depth`` that stops the broadcast early, and
+        # ``broadcast_any_union`` regroups tags/index), so marker and values
+        # can flatten to different lengths or orders (#4214).
+        if not options["keepdims"] and not any(
+            _contains_union(content) for content in self._contents
+        ):
             value_parts: list[Content] = []
             position_parts: list[Content] = []
             fast_path = True
