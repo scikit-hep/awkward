@@ -165,13 +165,11 @@ class Record:
         elif isinstance(where, tuple) and isinstance(where[0], str):
             return self._getitem_field(where[0])._getitem(where[1:])
 
-        elif isinstance(where, ak.highlevel.Array):
-            raise IndexError("scalar Record cannot be sliced by an array")
-
-        elif isinstance(where, ak.contents.Content):
-            raise IndexError("scalar Record cannot be sliced by an array")
-
-        elif isinstance(where, Content):
+        elif (
+            isinstance(where, ak.highlevel.Array)
+            or isinstance(where, ak.contents.Content)
+            or isinstance(where, Content)
+        ):
             raise IndexError("scalar Record cannot be sliced by an array")
 
         elif isinstance(where, Iterable) and all(isinstance(x, str) for x in where):

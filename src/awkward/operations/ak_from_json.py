@@ -680,7 +680,7 @@ def _build_assembly(schema, container, instructions):
         if "items" not in schema:
             raise TypeError("JSONSchema type is not concrete: array without 'items'")
 
-        if schema.get("minItems") == schema.get("maxItems") != None:  # noqa: E711
+        if schema.get("minItems") == schema.get("maxItems") != None:
             assert is_integer(schema.get("minItems"))
 
             if is_optional:

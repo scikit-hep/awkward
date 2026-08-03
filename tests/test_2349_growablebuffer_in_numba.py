@@ -7,7 +7,7 @@ import pytest
 
 numba = pytest.importorskip("numba")
 
-from awkward._connect.numba.growablebuffer import (  # noqa: E402
+from awkward._connect.numba.growablebuffer import (
     GrowableBuffer,
     _from_data,
 )

@@ -363,46 +363,46 @@ class type_methods(numba.core.typing.templates.AttributeTemplate):
     @numba.core.typing.templates.bound_function("append")
     def resolve_append(self, arraybuildertype, args, kwargs):
         if (
-            len(args) == 1
-            and len(kwargs) == 0
-            and isinstance(
-                args[0],
-                (
-                    ak._connect.numba.arrayview.ArrayViewType,
-                    ak._connect.numba.arrayview.RecordViewType,
-                    numba.types.Boolean,
-                    numba.types.Integer,
-                    numba.types.Float,
-                    numba.types.Complex,
-                    numba.types.NPDatetime,
-                    numba.types.NPTimedelta,
-                    numba.types.UnicodeType,
-                ),
+            (
+                len(args) == 1
+                and len(kwargs) == 0
+                and isinstance(
+                    args[0],
+                    (
+                        ak._connect.numba.arrayview.ArrayViewType,
+                        ak._connect.numba.arrayview.RecordViewType,
+                        numba.types.Boolean,
+                        numba.types.Integer,
+                        numba.types.Float,
+                        numba.types.Complex,
+                        numba.types.NPDatetime,
+                        numba.types.NPTimedelta,
+                        numba.types.UnicodeType,
+                    ),
+                )
             )
-        ):
-            return numba.types.none(args[0])
-        elif (
-            len(args) == 1
-            and len(kwargs) == 0
-            and isinstance(args[0], numba.types.Optional)
-            and isinstance(
-                args[0].type,
-                (
-                    numba.types.Boolean,
-                    numba.types.Integer,
-                    numba.types.Float,
-                    numba.types.Complex,
-                    numba.types.NPDatetime,
-                    numba.types.NPTimedelta,
-                    numba.types.UnicodeType,
-                ),
+            or (
+                len(args) == 1
+                and len(kwargs) == 0
+                and isinstance(args[0], numba.types.Optional)
+                and isinstance(
+                    args[0].type,
+                    (
+                        numba.types.Boolean,
+                        numba.types.Integer,
+                        numba.types.Float,
+                        numba.types.Complex,
+                        numba.types.NPDatetime,
+                        numba.types.NPTimedelta,
+                        numba.types.UnicodeType,
+                    ),
+                )
             )
-        ):
-            return numba.types.none(args[0])
-        elif (
-            len(args) == 1
-            and len(kwargs) == 0
-            and isinstance(args[0], numba.types.NoneType)
+            or (
+                len(args) == 1
+                and len(kwargs) == 0
+                and isinstance(args[0], numba.types.NoneType)
+            )
         ):
             return numba.types.none(args[0])
         else:

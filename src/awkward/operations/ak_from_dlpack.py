@@ -69,9 +69,10 @@ def from_dlpack(
         nplike = Numpy.instance()
     elif device_type == DLPackDevice.ROCM:
         nplike = Cupy.instance()
-    elif device_type == DLPackDevice.ROCM_PINNED:
-        nplike = (Numpy if prefer_cpu else Cupy).instance()
-    elif device_type == DLPackDevice.CUDA_MANAGED:
+    elif (
+        device_type == DLPackDevice.ROCM_PINNED
+        or device_type == DLPackDevice.CUDA_MANAGED
+    ):
         nplike = (Numpy if prefer_cpu else Cupy).instance()
     else:
         raise AssertionError

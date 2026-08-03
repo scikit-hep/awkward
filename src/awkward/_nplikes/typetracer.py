@@ -543,7 +543,7 @@ class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
         | EllipsisType
         | tuple[SupportsIndex | slice | EllipsisType | ArrayLike, ...]
         | ArrayLike,
-        value: int | float | bool | complex | ArrayLike,
+        value: bool | complex | ArrayLike,
     ):
         existing_value = self.__getitem__(key)
         if isinstance(value, TypeTracerArray) and value.ndim > existing_value.ndim:
@@ -623,9 +623,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         else:
             return self._apply_ufunc_legacy(ufunc, method, args, kwargs)
 
-    def _get_nep_50_dtype(
-        self, obj: Any
-    ) -> DType | type[int] | type[complex] | type[float]:
+    def _get_nep_50_dtype(self, obj: Any) -> type[int | complex | float] | DType:
         if hasattr(obj, "dtype"):
             return obj.dtype
         elif isinstance(obj, bool):
@@ -954,9 +952,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
 
     def arange(
         self,
-        start: float | int,
-        stop: float | int | None = None,
-        step: float | int = 1,
+        start: float,
+        stop: float | None = None,
+        step: float = 1,
         *,
         dtype: DTypeLike | None = None,
     ) -> TypeTracerArray:
@@ -1492,9 +1490,9 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         x: TypeTracerArray,
         *,
         copy: bool = True,
-        nan: int | float | None = 0.0,
-        posinf: int | float | None = None,
-        neginf: int | float | None = None,
+        nan: float | None = 0.0,
+        posinf: float | None = None,
+        neginf: float | None = None,
     ) -> TypeTracerArray:
         assert isinstance(x, TypeTracerArray)
         try_touch_data(x)
@@ -1766,13 +1764,7 @@ def _broadcast_shapes(*shapes):
             if is_unknown_length(item):
                 result[i] = item
             # Existing item is unknown, keep it
-            elif is_unknown_length(result[i]):
-                continue
-            # Items match, continue
-            elif result[i] == item:
-                continue
-            # Item is broadcastable, take existing
-            elif item == 1:
+            elif is_unknown_length(result[i]) or result[i] == item or item == 1:
                 continue
             # Existing is broadcastable, take it
             elif result[i] == 1:
