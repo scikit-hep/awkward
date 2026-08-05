@@ -1416,10 +1416,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 behavior,
             )
 
-            # outoffsets used to come from
-            # `awkward_ListOffsetArray_reduce_local_outoffsets_64(parents, ...)`,
-            # which produced the offsets-rep of `parents`. With offsets already
-            # in hand, we just use them.
+            # In the offsets representation the output offsets are the offsets we
+            # already hold (the old parents->offsets conversion is unnecessary).
             outoffsets = offsets
 
             # Same "is the reduction immediately below us?" handling as before.
@@ -1514,8 +1512,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         if maxnextparents is not unknown_length:
             nextoffsets = nextoffsets[: maxnextparents + 2]
 
-        # In the offsets representation, nextstarts is just nextoffsets[:-1];
-        # the awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64 call disappears.
+        # In the offsets representation, nextstarts is just nextoffsets[:-1]
+        # (no parents->nextstarts derivation needed).
         nextstarts = nextoffsets[:-1]
 
         return (

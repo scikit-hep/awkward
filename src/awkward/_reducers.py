@@ -565,6 +565,63 @@ class AxisNoneSumOfSquares(SumOfSquares):
         return ak.contents.NumpyArray(result_array, backend=array.backend)
 
 
+class CenteredSumOfSquares(KernelReducer):
+    """Per-segment ``sum((x - mean)**2)`` -- the two-pass variance numerator --
+    accumulated directly in ``float64`` in a single pass.
+
+    ``means`` is one ``float64`` mean per output bin, aligned to the reducer's
+    ``offsets``/``outlength``. That alignment holds because the per-bin means are
+    produced by the *same* ``_do.reduce(axis)`` descent as this reduction (the
+    descent, and hence the bin order, is reducer-independent), so bin ``b`` here
+    corresponds to element ``b`` of the flattened mean. Fusing the centring into
+    the reduction removes the materialised ``x - mean`` deviation buffer and the
+    mean's back-broadcast onto every element. Concrete (numpy/cupy) backends
+    only; backs ``ak.var``/``ak.std`` at the innermost axis.
+    """
+
+    name: Final = "sumofsquares"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    def __init__(self, means):
+        # Raw float64 nplike array; length == outlength, in bin order.
+        self._means = means
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        offsets: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "c":
+            raise TypeError(
+                f"cannot compute the sum-of-squares (ak.var/ak.std) of {array.dtype!r}"
+            )
+        if array.dtype.kind == "M":
+            raise ValueError(f"cannot compute the sum-of-squares of {array.dtype!r}")
+        result = array.backend.nplike.empty(outlength, dtype=np.float64)
+        assert offsets.nplike is array.backend.nplike
+        array.backend.maybe_kernel_error(
+            array.backend[
+                "awkward_reduce_centered_sumofsquares",
+                np.float64,  # toptr
+                array.dtype.type,  # fromptr
+                offsets.dtype.type,  # offsets
+                np.float64,  # means (a List arg, so it is part of the kernel key)
+            ](
+                result,
+                array.data,
+                offsets.data,
+                outlength,
+                self._means,
+            )
+        )
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
 class SumOfPowers(KernelReducer):
     """Per-segment ``sum(x**n)`` accumulated directly in ``float64``.
 
