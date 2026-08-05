@@ -169,6 +169,8 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
                 return True
             if known_issues.has_issue_4280(a):
                 return True
+            if known_issues.has_issue_4282(a):
+                return True
         case int() if axis < 0:
             if known_issues.has_issue_4260(a):
                 return True
