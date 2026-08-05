@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import os
-import warnings
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -164,17 +163,6 @@ def _impl(
             f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message="pyarrow.feather.write_feather is deprecated.*",
-            category=FutureWarning,
-        )
-        pyarrow.feather.write_feather(
-            table,
-            destination,
-            compression,
-            compression_level,
-            chunksize,
-            feather_version,
-        )
+    pyarrow.feather.write_feather(
+        table, destination, compression, compression_level, chunksize, feather_version
+    )
