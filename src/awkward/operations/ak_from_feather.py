@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
-
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -77,19 +75,7 @@ def _impl(
 ):
     import pyarrow.feather
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore",
-            message=r".*pyarrow\.feather\.(write_feather|read_table) is deprecated.*",
-            category=FutureWarning,
-        )
-
-        arrow_table = pyarrow.feather.read_table(
-            path,
-            columns,
-            use_threads,
-            memory_map,
-        )
+    arrow_table = pyarrow.feather.read_table(path, columns, memory_map, use_threads)
 
     return ak.operations.ak_from_arrow._impl(
         arrow_table,
