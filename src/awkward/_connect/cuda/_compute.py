@@ -62,6 +62,76 @@ def make_segment_views(offsets):
     return offsets[:-1], offsets[1:]
 
 
+def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
+    nextcarry,
+    nextoffsets,
+    nextlen,
+    maxnextparents,
+    distincts,
+    distinctslen,
+    offsetscopy,
+    offsets,
+    length,
+    outer_offsets,
+    outlength,
+    maxcount,
+):
+    # Transpose a ragged 2-level structure for a non-innermost reduction: group
+    # the elements by (outer_bin, column) instead of by row. For each column
+    # `col` of each outer bin, gather one element from every row in that outer
+    # bin whose sub-list reaches `col`. Output nextbin = outer_bin*maxcount + col.
+    #
+    # Vectorized equivalent of the reference kernel: assign each element its
+    # nextbin, stably sort by nextbin (so rows stay in order within a bin), and
+    # build nextoffsets as the per-bin cumulative count. Matches the CPU kernel
+    # (validated against its reference definition).
+    nextlen = int(nextlen)
+    distinctslen = int(distinctslen)
+    length = int(length)
+    outlength = int(outlength)
+    maxcount = int(maxcount)
+    nbins = outlength * maxcount
+    idt = offsets.dtype
+
+    # Initialize outputs (empty input leaves these as the -1 / 0 sentinels).
+    maxnextparents[0] = -1
+    if distinctslen > 0:
+        distincts[:distinctslen] = -1
+    nextoffsets[0] = 0
+    if nbins > 0:
+        nextoffsets[1 : nbins + 1] = 0
+    if nextlen == 0 or nbins == 0:
+        return
+
+    counts = offsets[1 : length + 1] - offsets[:length]  # per-row sub-list length
+    row = cp.repeat(cp.arange(length, dtype=idt), counts)  # row of each element
+    cum = cp.zeros(length + 1, dtype=idt)
+    cp.cumsum(counts, out=cum[1:])
+    elem = cp.arange(nextlen, dtype=idt)
+    col = elem - cum[row]  # column within the row
+    pos = offsets[row] + col  # source content index (= nextcarry value)
+
+    outer_counts = outer_offsets[1 : outlength + 1] - outer_offsets[:outlength]
+    outer_bin_of_row = cp.repeat(cp.arange(outlength, dtype=idt), outer_counts)
+    nextbin = outer_bin_of_row[row] * maxcount + col
+
+    # Stable sort by nextbin (elem is the row-major order, so lexsort with elem as
+    # the secondary key keeps rows ordered within each bin -- a stable sort).
+    order = cp.lexsort(cp.stack((elem, nextbin)))
+    nextcarry[:nextlen] = pos[order]
+
+    bincounts = cp.bincount(nextbin, minlength=nbins)[:nbins]
+    cp.cumsum(bincounts, out=nextoffsets[1 : nbins + 1])
+
+    if distinctslen > 0:
+        idx = cp.arange(distinctslen, dtype=idt)
+        distincts[:distinctslen] = cp.where(bincounts[:distinctslen] > 0, idx, -1)
+
+    nonzero_bins = cp.nonzero(bincounts > 0)[0]
+    if nonzero_bins.shape[0] > 0:
+        maxnextparents[0] = nonzero_bins[-1]
+
+
 def segmented_reduce(*, max_segment_size=None, **kwargs):
     """Thin wrapper over ``cuda.compute.segmented_reduce`` that supplies the
     ``max_segment_size`` hint (number of elements in the largest segment) when a
@@ -640,6 +710,48 @@ def awkward_reduce_sumofsquares(
     # buffer, no integer/float32 overflow. `result` is float64 (SumOfSquares).
     d_input = TransformIterator(
         input_data, _make_square_to_float64(input_data.dtype.type)
+    )
+    start_o, end_o = make_segment_views(offsets_data)
+
+    h_init = np.asarray(0, dtype=result.dtype)
+
+    segmented_reduce(
+        d_in=d_input,
+        d_out=result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=h_init,
+    )
+
+
+def awkward_reduce_centered_sumofsquares(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+    means,
+):
+    # sum((x - mean)**2) per segment, the two-pass variance numerator, in float64.
+    # `means` holds one (float64) mean per segment, aligned to `offsets`. Each
+    # element's segment mean is gathered (means[segment_id]) and a
+    # ZipIterator + TransformIterator forms (x - mean)**2 on the fly, feeding a
+    # PLUS segmented_reduce -- the subtraction is done in float64 (means is
+    # double), so integer/float32 inputs neither overflow nor lose precision, and
+    # no (x - mean) deviation buffer feeds the reduction. `result` is float64.
+    counts = offsets_data[1:] - offsets_data[:-1]
+    segment_ids = cp.repeat(cp.arange(outlength, dtype=offsets_data.dtype), counts)
+    mean_per_element = means[segment_ids]
+
+    def _centered_square(pair):
+        # field_0 is x (its dtype); field_1 is the float64 mean, so the
+        # subtraction promotes to float64 -- no overflow / precision loss.
+        d = pair.field_0 - pair.field_1
+        return d * d
+
+    d_input = TransformIterator(
+        ZipIterator(input_data, mean_per_element), _centered_square
     )
     start_o, end_o = make_segment_views(offsets_data)
 

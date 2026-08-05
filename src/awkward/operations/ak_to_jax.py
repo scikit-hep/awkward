@@ -11,14 +11,10 @@ __all__ = ("to_jax",)
 
 @high_level_function()
 def to_jax(array):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
+    """Converts an Awkward Array into a JAX Array, if possible.
 
-    Converts `array` (many types supported) into a JAX Device Array, if possible.
-
-    If the data are numerical and regular (nested lists have equal lengths
-    in each dimension, as described by the #ak.Array.type), they can be losslessly
+    If the data are numerical and regular (nested lists have equal lengths in
+    each dimension, as described by the #ak.Array.type), they can be losslessly
     converted to a JAX array and this function returns without an error.
 
     Otherwise, the function raises an error.
@@ -26,6 +22,12 @@ def to_jax(array):
     If `array` is a scalar, it is converted into a JAX scalar.
 
     See also #ak.from_jax and #ak.to_numpy.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+
+    Returns:
+        A JAX array with the same data as `array`, if the conversion is possible.
     """
     # Dispatch
     yield (array,)

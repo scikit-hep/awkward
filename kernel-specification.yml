@@ -2194,32 +2194,6 @@ kernels:
                   j = j + 1
     automatic-tests: false
 
-  - name: awkward_ListOffsetArray_reduce_local_outoffsets_64
-    specializations:
-      - name: awkward_ListOffsetArray_reduce_local_outoffsets_64
-        args:
-          - {name: outoffsets, type: "List[int64_t]", dir: out}
-          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: reducer-parents}
-          - {name: lenparents, type: "int64_t", dir: in, role: reducer-lenparents}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: "DEPRECATED: parents -> offsets converter (output side). The offsets-pipeline migration assigns outoffsets = offsets directly without invoking this kernel. Kept for ABI compatibility."
-    definition: |
-      def awkward_ListOffsetArray_reduce_local_outoffsets_64(
-          outoffsets, parents, lenparents, outlength
-      ):
-          k = 0
-          last = -1
-          for i in range(lenparents):
-              while last < parents[i]:
-                  outoffsets[k] = i
-                  k = k + 1
-                  last = last + 1
-
-          while k <= outlength:
-              outoffsets[k] = lenparents
-              k = k + 1
-    automatic-tests: true
-
   - name: awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
     specializations:
       - name: awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64
@@ -2279,25 +2253,6 @@ kernels:
           for j in range(nextlen):
               nextshifts[j] = missing[nextcarry[j]]
     automatic-tests: true
-  - name: awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64
-    specializations:
-      - name: awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64
-        args:
-          - {name: nextstarts, type: "List[int64_t]", dir: out}
-          - {name: nextparents, type: "Const[List[int64_t]]", dir: in, role: reducer-nextparents}
-          - {name: nextlen, type: "int64_t", dir: in, role: reducer-nextlen}
-    description: "DEPRECATED: nextparents -> nextstarts derivation. In the offsets-pipeline migration, nextstarts is just nextoffsets[:-1]. Kept for ABI compatibility."
-    definition: |
-      def awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64(
-          nextstarts, nextparents, nextlen
-      ):
-          lastnextparent = -1
-          for i in range(nextlen):
-              if nextparents[i] != lastnextparent:
-                  nextstarts[nextparents[i]] = i
-              lastnextparent = nextparents[i]
-    automatic-tests: true
-
   - name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
     specializations:
       - name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
@@ -5403,6 +5358,96 @@ kernels:
                   acc += fromptr[i] ** n
               toptr[bin] = acc
     automatic-tests: true
+  - name: awkward_reduce_centered_sumofsquares
+    specializations:
+      - name: awkward_reduce_centered_sumofsquares_float64_int8_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_uint8_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_int16_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_uint16_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_int32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_uint32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_int64_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_uint64_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_bool_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_float32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_float64_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+    description: null
+    definition: |
+      def awkward_reduce_centered_sumofsquares(toptr, fromptr, offsets, outlength, means):
+          for bin in range(outlength):
+              acc = 0
+              m = means[bin]
+              for i in range(offsets[bin], offsets[bin + 1]):
+                  d = fromptr[i] - m
+                  acc += d * d
+              toptr[bin] = acc
+    automatic-tests: false
   - name: awkward_reduce_sum_complex
     specializations:
       - name: awkward_reduce_sum_complex64_complex64_64
