@@ -25,7 +25,19 @@ def from_safetensors(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Reads a safetensors file as an Awkward Array.
+
+    Ref: https://huggingface.co/docs/safetensors/.
+
+    This function reads data serialized in the safetensors format and
+    reconstructs an Awkward Array (or low-level layout) from it. Buffers in the
+    safetensors file are mapped to Awkward buffers according to the
+    `buffer_key` template, and optional behavior or attributes can be attached
+    to the returned array.
+
+    The safetensors file **must contain** `form` and `length` entries in its
+    metadata, which define the structure and length of the reconstructed array.
+
     Args:
         source (path-like): Name of the input file, file path, or
             remote URL passed to [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
@@ -50,20 +62,7 @@ def from_safetensors(
         ak.Array or ak.layout.Content: An Awkward Array (or layout) reconstructed
         from the safetensors buffers.
 
-    Load a safetensors file as an Awkward Array.
-
-    Ref: https://huggingface.co/docs/safetensors/.
-
-    This function reads data serialized in the safetensors format and reconstructs
-    an Awkward Array (or low-level layout) from it. Buffers in the safetensors file
-    are mapped to Awkward buffers according to the `buffer_key` template, and
-    optional behavior or attributes can be attached to the returned array.
-
-    The safetensors file **must contain** `form` and `length` entries in its
-    metadata, which define the structure and length of the reconstructed array.
-
-    Example:
-
+    Examples:
         >>> import awkward as ak
         >>> arr = ak.from_safetensors("out.safetensors")
         >>> arr  # doctest: +SKIP
@@ -109,7 +108,7 @@ def _impl(
         from safetensors import _safe_open_handle
     except ImportError as err:
         raise ImportError(
-            """to use ak.from_tensorflow, you must install the 'safetensors' package with:
+            """to use ak.from_safetensors, you must install the 'safetensors' package with:
 
         pip install safetensors
 or

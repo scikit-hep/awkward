@@ -255,7 +255,7 @@ def test_0049_distinguish_record_and_recordarray_behaviors():
     assert repr(cuda_array[0]) == "<Array [<1 [1.1]>, <2 [2.0, 0.2]>] type='2 * P'>"
     assert (
         repr(cuda_array)
-        == "<Array [[<1 [1.1]>, <2 [2.0, 0.2]>], ..., [{...}]] type='3 * var * P'>"
+        == "<Array [[<1 [1.1]>, <2 [2.0, 0.2]>], [], [{x: 3, ...}]] type='3 * var * P'>"
     )
 
 

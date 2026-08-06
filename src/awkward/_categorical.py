@@ -28,7 +28,7 @@ class HashableDict:
 
 class HashableList:
     def __init__(self, obj):
-        self.values = tuple(obj)
+        self.values = tuple(as_hashable(x) for x in obj)
         self.hash = hash((HashableList, *self.values))
 
     def __hash__(self):

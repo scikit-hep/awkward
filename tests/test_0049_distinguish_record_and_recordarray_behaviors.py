@@ -31,5 +31,5 @@ def test():
     assert repr(array[0]) == "<Array [<1 [1.1]>, <2 [2, 0.2]>] type='2 * P'>"
     assert (
         repr(array)
-        == "<Array [[<1 [1.1]>, <2 [2, 0.2]>], ..., [{...}]] type='3 * var * P'>"
+        == "<Array [[<1 [1.1]>, <2 [2, 0.2]>], [], [{x: 3, ...}]] type='3 * var * P'>"
     )

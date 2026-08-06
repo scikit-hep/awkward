@@ -31,6 +31,9 @@ CUDA_COMPUTE_KERNELS = {
     "awkward_IndexedArray_getitem_nextcarry_outindex",
     "awkward_IndexedArray_getitem_nextcarry",
     "awkward_IndexedArray_flatten_none2empty",
+    "awkward_ListArray_getitem_jagged_descend",
+    "awkward_ListArray_getitem_jagged_numvalid",
+    "awkward_IndexedArray_flatten_nextcarry",
     "awkward_UnionArray_validity",
 }
 
@@ -937,7 +940,6 @@ cuda_kernels_tests = [
     "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",
     "awkward_UnionArray_regular_index",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_ListArray_localindex",
     "awkward_NumpyArray_pad_zero_to_length",
@@ -979,7 +981,6 @@ cuda_kernels_tests = [
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
-    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",

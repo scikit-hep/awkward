@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import operator
+
 import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._nplikes import to_nplike
@@ -185,7 +187,7 @@ def normalize_integer_like(x) -> int | ArrayLike:
         else:
             raise TypeError("only 0D integer arrays are considered integral")
     else:
-        return int(x)
+        return operator.index(x)
 
 
 def normalise_item(item, backend: Backend) -> SliceItem:

@@ -13,14 +13,17 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_raggedtensor(array):
-    """
+    """Converts an Awkward Array into a TensorFlow RaggedTensor, if possible.
+
+    If `array` contains any other data types (RecordArray for example) the
+    function raises an error.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
-    Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
-    into a ragged tensor, if possible.
-
-    If `array` contains any other data types (RecordArray for example) the function raises an error.
+    Returns:
+        A TensorFlow RaggedTensor with the same data as `array`, if the conversion is
+        possible.
     """
 
     # Dispatch

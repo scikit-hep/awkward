@@ -33,6 +33,15 @@ def combinations(
 ):
     """Computes combinations of `n` items from an array, without replacement.
 
+    If the normal Cartesian product is thought of as an `n` dimensional tensor,
+    these represent the "upper triangle" of sets without repetition. If
+    `replacement=True`, the diagonal of this "upper triangle" is included.
+
+    To get list index positions in the tuples/records, rather than data from
+    the original `array`, use #ak.argcombinations instead of #ak.combinations.
+    The #ak.argcombinations form can be particularly useful as nested indexing
+    in #ak.Array.__getitem__.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         n (int): The number of items to choose in each list: `2` chooses
@@ -65,11 +74,8 @@ def combinations(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of `array` with itself
-        that is restricted to combinations sampled without replacement. If the
-        normal Cartesian product is thought of as an `n` dimensional tensor, these
-        represent the "upper triangle" of sets without repetition. If
-        `replacement=True`, the diagonal of this "upper triangle" is included.
+        An array holding the Cartesian product (i.e. cross product) of `array`
+        with itself, restricted to combinations sampled without replacement.
 
     Examples:
         As a simple example with `axis=0`, consider the following
@@ -190,11 +196,6 @@ def combinations(
 
         but it is frequently needed for data analysis, and the logic of which
         indexes to `keep` (above) gets increasingly complicated for large `n`.
-
-        To get list index positions in the tuples/records, rather than data from
-        the original `array`, use #ak.argcombinations instead of #ak.combinations.
-        The #ak.argcombinations form can be particularly useful as nested indexing
-        in #ak.Array.__getitem__.
     """
     # Dispatch
     yield (array,)

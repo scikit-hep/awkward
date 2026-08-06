@@ -229,3 +229,15 @@ def test_params(tmp_path):
         [1, 14],
         [9, 2],
     ]
+
+
+def test_attrs(tmp_path):
+    # the attrs are those of the first array; the rest only add row groups
+    arrays = [
+        ak.Array([[1, 2, 3], [4]], attrs={"property": "value"}),
+        ak.Array([[5], [6, 7]], attrs={"property": "ignored"}),
+    ]
+    filename = os.path.join(tmp_path, "attrs.parquet")
+    ak.to_parquet_row_groups(iter(arrays), filename)
+
+    assert ak.from_parquet(filename).attrs == {"property": "value"}

@@ -30,6 +30,10 @@ def argcombinations(
 ):
     """Computes combinations of `n` items from an array, returning integer indexes.
 
+    The motivation and uses of this function are similar to those of
+    #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
+    complete description.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         n (int): The number of items to choose from each list: `2` chooses
@@ -62,14 +66,9 @@ def argcombinations(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of `array` with itself
-        that is restricted to combinations sampled without replacement,
-        like #ak.combinations, but returning integer indexes for
-        #ak.Array.__getitem__.
-
-        The motivation and uses of this function are similar to those of
-        #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
-        complete description.
+        An array of integer indexes into the combinations of `array` with
+        itself (sampled without replacement), like #ak.combinations but for use
+        with #ak.Array.__getitem__.
     """
     # Dispatch
     yield (array,)

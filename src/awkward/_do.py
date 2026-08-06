@@ -63,6 +63,7 @@ def recursively_apply(
             return_simplified,
             return_array,
             function_name,
+            regular_to_jagged,
         )
 
         if return_array:

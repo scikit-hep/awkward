@@ -17,6 +17,9 @@ np = NumpyMetadata.instance()
 def ravel(array, *, highlevel=True, behavior=None, attrs=None):
     """Returns an array with all levels of nesting removed.
 
+    Missing values are not eliminated by flattening. See #ak.flatten with
+    `axis=None` for an equivalent function that eliminates the option type.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -56,9 +59,6 @@ def ravel(array, *, highlevel=True, behavior=None, attrs=None):
          7.7,
          8.8,
          9.9]
-
-        Missing values are not eliminated by flattening. See #ak.flatten with
-        `axis=None` for an equivalent function that eliminates the option type.
     """
     # Dispatch
     yield (array,)

@@ -177,15 +177,22 @@ class RecordForm(RecordMeta[Form], Form):
                 yield from content._expected_from_buffers(getkey, recursive)
 
     def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
-        computed_fields_set = set(self.fields)
+        if not self._is_equal_to_generic(other, all_parameters, form_key):
+            return False
+        if self.is_tuple != other.is_tuple:
+            return False
+        if len(self._contents) != len(other._contents):
+            return False
 
-        return (
-            self._is_equal_to_generic(other, all_parameters, form_key)
-            and self.is_tuple == other.is_tuple
-            and len(self._contents) == len(other._contents)
-            and all(f in computed_fields_set for f in other.fields)
-            and all(
-                content._is_equal_to(other.content(field), all_parameters, form_key)
-                for field, content in zip(self.fields, self._contents, strict=True)
+        computed_fields_set = set(self.fields)
+        if not all(f in computed_fields_set for f in other.fields):
+            return False
+
+        # Build a field->content dict for other to avoid O(n²) list.index lookups
+        other_field_to_content = dict(zip(other.fields, other._contents, strict=True))
+        return all(
+            content._is_equal_to(
+                other_field_to_content[field], all_parameters, form_key
             )
+            for field, content in zip(self.fields, self._contents, strict=True)
         )

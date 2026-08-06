@@ -37,46 +37,7 @@ def to_json(
     convert_bytes=None,
     convert_other=None,
 ):
-    """
-    Args:
-        array: Array-like data (anything #ak.to_layout recognizes).
-        file (None, path-like, or file-like object): If None, this function returns
-            JSON-encoded bytes. Otherwise, this function has no return value.
-            If a string/pathlib.Path, this function opens a file with that name, writes JSON
-            data, and closes the file. If that path has a URI protocol (like
-            "https://" or "s3://"), this function attempts to open the file with
-            the fsspec library. If a file-like object with a `write` method,
-            this function writes to the object, but does not close it.
-        line_delimited (bool or str): If False, a single JSON document is written,
-            representing the entire array or record. If True, each element of the
-            array (or just the one record) is written on a separate line of text,
-            separated by `"\\n"`. If a string, such as `"\\r\\n"`, it is taken as a
-            custom line delimiter. (Use `os.linesep` for a platform-dependent
-            line delimiter.)
-        num_indent_spaces (None or nonnegative int): Number of spaces to indent nested
-            elements, for pretty-printed JSON. If None, the JSON output is written
-            on one line of text. Ignored if `line_delimited` is True or a string.
-        num_readability_spaces (nonnegative int): Number of spaces to include after
-            commas (`,`) and colons (`:`), for pretty-printed JSON.
-        nan_string (None or str): If not None, floating-point NaN values will be
-            replaced with this string instead of a JSON number.
-        posinf_string (None or str): If not None, floating-point positive infinity
-            values will be replaced with this string instead of a JSON number.
-        neginf_string (None or str): If not None, floating-point negative infinity
-            values will be replaced with this string instead of a JSON number.
-        complex_record_fields (None or (str, str)): If not None, defines a pair of
-            field names to interpret records as complex numbers, such as
-            `("real", "imag")`.
-        convert_bytes (None or function): If not None, this function is applied to
-            all Python 3 bytes objects to produce something JSON serializable,
-            such as a string using UTF-8 or Base64 encoding, lists of integers, etc.
-        convert_other (None or function): Passed to `json.dump` or `json.dumps`
-            as `default` to convert any other objects that #ak.to_list would return
-            but are not JSON serializable.
-
-    Converts `array` (many types supported, including all Awkward Arrays and
-    Records) into JSON text. Returns bytes (encoded JSON) if `file` is None;
-    otherwise, this function returns nothing and writes to a file.
+    """Converts an Awkward Array into JSON text, as a string or to a file.
 
     This function converts the array into Python objects with #ak.to_list, performs
     some conversions to make the data JSON serializable (`nan_string`,
@@ -117,6 +78,46 @@ def to_json(
     `convert_other` to detect these types and convert them.
 
     See also #ak.from_json.
+
+    Args:
+        array: Array-like data (anything #ak.to_layout recognizes).
+        file (None, path-like, or file-like object): If None, this function returns
+            JSON-encoded bytes. Otherwise, this function has no return value.
+            If a string/pathlib.Path, this function opens a file with that name, writes JSON
+            data, and closes the file. If that path has a URI protocol (like
+            "https://" or "s3://"), this function attempts to open the file with
+            the fsspec library. If a file-like object with a `write` method,
+            this function writes to the object, but does not close it.
+        line_delimited (bool or str): If False, a single JSON document is written,
+            representing the entire array or record. If True, each element of the
+            array (or just the one record) is written on a separate line of text,
+            separated by `"\\n"`. If a string, such as `"\\r\\n"`, it is taken as a
+            custom line delimiter. (Use `os.linesep` for a platform-dependent
+            line delimiter.)
+        num_indent_spaces (None or nonnegative int): Number of spaces to indent nested
+            elements, for pretty-printed JSON. If None, the JSON output is written
+            on one line of text. Ignored if `line_delimited` is True or a string.
+        num_readability_spaces (nonnegative int): Number of spaces to include after
+            commas (`,`) and colons (`:`), for pretty-printed JSON.
+        nan_string (None or str): If not None, floating-point NaN values will be
+            replaced with this string instead of a JSON number.
+        posinf_string (None or str): If not None, floating-point positive infinity
+            values will be replaced with this string instead of a JSON number.
+        neginf_string (None or str): If not None, floating-point negative infinity
+            values will be replaced with this string instead of a JSON number.
+        complex_record_fields (None or (str, str)): If not None, defines a pair of
+            field names to interpret records as complex numbers, such as
+            `("real", "imag")`.
+        convert_bytes (None or function): If not None, this function is applied to
+            all Python 3 bytes objects to produce something JSON serializable,
+            such as a string using UTF-8 or Base64 encoding, lists of integers, etc.
+        convert_other (None or function): Passed to `json.dump` or `json.dumps`
+            as `default` to convert any other objects that #ak.to_list would return
+            but are not JSON serializable.
+
+    Returns:
+        The JSON text as bytes when `file` is None; otherwise None, and the JSON
+        is written to `file`.
     """
     # Dispatch
     yield (array,)
@@ -217,51 +218,64 @@ def _impl(
             def opener():
                 return _NoContextManager(file)
 
-    try:
-        if line_delimited:
-            if file is None:
-                out = []
-                for datum in jsondata:
-                    out.append(
-                        json.dumps(
-                            datum,
-                            skipkeys=True,
-                            ensure_ascii=True,
-                            check_circular=False,
-                            allow_nan=False,
-                            indent=None,
-                            separators=separators,
-                            default=convert_other,
-                            sort_keys=False,
-                        )
+    if line_delimited:
+        if file is None:
+            out = []
+            for datum in jsondata:
+                out.append(
+                    json.dumps(
+                        datum,
+                        skipkeys=True,
+                        ensure_ascii=True,
+                        check_circular=False,
+                        allow_nan=False,
+                        indent=None,
+                        separators=separators,
+                        default=convert_other,
+                        sort_keys=False,
                     )
-                    out.append(line_delimited)
-                return "".join(out)
-
-            else:
-                with opener() as openfile:
-                    for datum in jsondata:
-                        json.dump(
-                            datum,
-                            openfile,
-                            skipkeys=True,
-                            ensure_ascii=True,
-                            check_circular=False,
-                            allow_nan=False,
-                            indent=None,
-                            separators=separators,
-                            default=convert_other,
-                            sort_keys=False,
-                        )
-                        openfile.write(line_delimited)
+                )
+                out.append(line_delimited)
+            return "".join(out)
 
         else:
-            if isinstance(array, (ak.highlevel.Record, ak.record.Record)):
-                jsondata = jsondata[0]
+            with opener() as openfile:
+                for datum in jsondata:
+                    json.dump(
+                        datum,
+                        openfile,
+                        skipkeys=True,
+                        ensure_ascii=True,
+                        check_circular=False,
+                        allow_nan=False,
+                        indent=None,
+                        separators=separators,
+                        default=convert_other,
+                        sort_keys=False,
+                    )
+                    openfile.write(line_delimited)
 
-            if file is None:
-                return json.dumps(
+    else:
+        if isinstance(array, (ak.highlevel.Record, ak.record.Record)):
+            jsondata = jsondata[0]
+
+        if file is None:
+            return json.dumps(
+                jsondata,
+                skipkeys=True,
+                ensure_ascii=True,
+                check_circular=False,
+                allow_nan=False,
+                indent=num_indent_spaces,
+                separators=separators,
+                default=convert_other,
+                sort_keys=False,
+            )
+        else:
+            with opener() as openfile:
+                return json.dump(
                     jsondata,
+                    openfile,
                     skipkeys=True,
                     ensure_ascii=True,
                     check_circular=False,
@@ -271,23 +285,6 @@ def _impl(
                     default=convert_other,
                     sort_keys=False,
                 )
-            else:
-                with opener() as openfile:
-                    return json.dump(
-                        jsondata,
-                        openfile,
-                        skipkeys=True,
-                        ensure_ascii=True,
-                        check_circular=False,
-                        allow_nan=False,
-                        indent=num_indent_spaces,
-                        separators=separators,
-                        default=convert_other,
-                        sort_keys=False,
-                    )
-
-    except Exception as err:
-        raise err from err
 
 
 class _NoContextManager:

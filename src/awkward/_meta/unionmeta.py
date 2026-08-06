@@ -27,8 +27,10 @@ class UnionMeta(Meta, Generic[T]):
             for content in self._contents[1:]:
                 tmp = content.purelist_parameter(key)
                 if out != tmp:
-                    return None
-            return out
+                    out = None
+                    break
+            if out is not None:
+                return out
 
         return None
 

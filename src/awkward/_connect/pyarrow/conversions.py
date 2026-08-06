@@ -24,6 +24,48 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+def arrow_to_numpy_dtype(storage_type):
+    """Map an Arrow primitive ``DataType`` to a NumPy ``dtype``.
+
+    This avoids ``pyarrow.DataType.to_pandas_dtype()``, which hard-imports
+    pandas in pyarrow >= 22 and therefore raises ``ModuleNotFoundError`` in
+    pandas-free environments. Only the primitive types that can actually reach
+    the ``DataType`` fallback branch of (``form_``)``popbuffers`` need to be
+    covered here; richer types (dates, times, timestamps, durations) are mapped
+    earlier via ``_pyarrow_to_numpy_dtype``.
+    """
+    pat = pyarrow.types
+    if pat.is_boolean(storage_type):
+        return np.dtype(np.bool_)
+    elif pat.is_int8(storage_type):
+        return np.dtype(np.int8)
+    elif pat.is_int16(storage_type):
+        return np.dtype(np.int16)
+    elif pat.is_int32(storage_type):
+        return np.dtype(np.int32)
+    elif pat.is_int64(storage_type):
+        return np.dtype(np.int64)
+    elif pat.is_uint8(storage_type):
+        return np.dtype(np.uint8)
+    elif pat.is_uint16(storage_type):
+        return np.dtype(np.uint16)
+    elif pat.is_uint32(storage_type):
+        return np.dtype(np.uint32)
+    elif pat.is_uint64(storage_type):
+        return np.dtype(np.uint64)
+    elif pat.is_float16(storage_type):
+        return np.dtype(np.float16)
+    elif pat.is_float32(storage_type):
+        return np.dtype(np.float32)
+    elif pat.is_float64(storage_type):
+        return np.dtype(np.float64)
+    else:
+        # Fall back to pyarrow's mapping for anything not covered above; this
+        # may import pandas (pyarrow >= 22) but should be unreachable for the
+        # primitive types handled in popbuffers.
+        return np.dtype(storage_type.to_pandas_dtype())
+
+
 def and_validbytes(validbytes1, validbytes2):
     if validbytes1 is None:
         return validbytes2
@@ -480,7 +522,9 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if dt is None:
             if getattr(storage_type, "tz", None) is not None:
                 storage_type = pyarrow.lib.timestamp(storage_type.unit)
-            dt = storage_type.to_pandas_dtype()
+                dt = _pyarrow_to_numpy_dtype[str(storage_type)][1]
+            else:
+                dt = arrow_to_numpy_dtype(storage_type)
 
         out = ak.contents.NumpyArray(
             numpy.frombuffer(data, dtype=dt),
@@ -687,7 +731,9 @@ def form_popbuffers(awkwardarrow_type, storage_type):
         if dt is None:
             if getattr(storage_type, "tz", None) is not None:
                 storage_type = pyarrow.lib.timestamp(storage_type.unit)
-            dt = np.dtype(storage_type.to_pandas_dtype())
+                dt = _pyarrow_to_numpy_dtype[str(storage_type)][1]
+            else:
+                dt = arrow_to_numpy_dtype(storage_type)
 
         out = ak.forms.NumpyForm(
             ak.types.numpytype.dtype_to_primitive(dt),
@@ -780,7 +826,12 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
     elif isinstance(obj, pyarrow.lib.ChunkedArray):
         layouts = [handle_arrow(x, generate_bitmasks) for x in obj.chunks if len(x) > 0]
 
-        if len(layouts) == 1:
+        if len(layouts) == 0:
+            # zero chunks, or every chunk empty: build a length-zero array
+            # following the input type (concatenate([]) would raise).
+            awkwardarrow_type, storage_type = to_awkwardarrow_storage_types(obj.type)
+            return form_popbuffers(awkwardarrow_type, storage_type).length_zero_array()
+        elif len(layouts) == 1:
             return layouts[0]
         elif any(is_revertable(arr) for arr in layouts):
             assert all(is_revertable(arr) for arr in layouts)
@@ -882,33 +933,19 @@ def handle_arrow(obj, generate_bitmasks=False, pass_empty_field=False):
                 return out
 
     elif isinstance(obj, pyarrow.lib.Table):
+        # `combine_chunks()` unifies per-batch dictionaries (categoricals) into a
+        # single dictionary, which the per-batch concatenation path cannot do;
+        # it therefore yields at most one record batch, so there is no
+        # multi-batch case to handle here.
         batches = obj.combine_chunks().to_batches()
         if len(batches) == 0:
             # create an empty array following the input schema
             return form_handle_arrow(
                 obj.schema, pass_empty_field=pass_empty_field
             ).length_zero_array()
-        elif len(batches) == 1:
-            return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
         else:
-            arrays = [
-                handle_arrow(batch, generate_bitmasks, pass_empty_field)
-                for batch in batches
-                if len(batch) > 0
-            ]
-            if any(is_revertable(arr) for arr in arrays):
-                assert all(is_revertable(arr) for arr in arrays)
-                # TODO: the callable argument to revertable is a premature(?) optimisation.
-                #       it would be better to obviate the need to compute both revertable and non revertable branches
-                #       e.g. by requesting a particular layout kind from the next `frombuffers` operation
-                return revertable(
-                    ak.operations.concatenate(arrays, highlevel=False),
-                    lambda: ak.operations.concatenate(
-                        [remove_optiontype(x) for x in arrays], highlevel=False
-                    ),
-                )
-            else:
-                return ak.operations.concatenate(arrays, highlevel=False)
+            assert len(batches) == 1
+            return handle_arrow(batches[0], generate_bitmasks, pass_empty_field)
 
     elif (
         isinstance(obj, Iterable)

@@ -54,6 +54,18 @@ numpy = Numpy.instance()
 MAX_UNION_CONTENTS = 2**7  # We use int8 tags, 0-127
 
 
+def _contains_union(content: Content) -> bool:
+    """True if ``content`` is, or contains at any depth, a union."""
+    if content.is_union:
+        return True
+    elif content.is_record:
+        return any(_contains_union(c) for c in content.contents)
+    elif content.is_numpy or content.is_unknown:
+        return False
+    else:
+        return _contains_union(content.content)
+
+
 @final
 class UnionArray(UnionMeta[Content], Content):
     """
@@ -115,10 +127,14 @@ class UnionArray(UnionMeta[Content], Content):
                 f"{type(self).__name__} 'tags' must be an Index with dtype=int8, not {tags!r}"
             )
 
-        if not isinstance(index, Index) and index.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not (
+            isinstance(index, Index)
+            and index.dtype
+            in (
+                np.dtype(np.int32),
+                np.dtype(np.uint32),
+                np.dtype(np.int64),
+            )
         ):
             raise TypeError(
                 f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
@@ -451,7 +467,7 @@ class UnionArray(UnionMeta[Content], Content):
 
                 if isinstance(backend.nplike, Jax):
                     # function-composition of this part of the UnionArray.index with the IndexedArray.index
-                    index._data = content.index.data.at[selection].set(
+                    index._data = index.data.at[selection].set(
                         content.index.data[index.data[selection]]
                     )
                     # now we don't have an IndexedArray anymore, but we want to preserve its parameters
@@ -585,8 +601,8 @@ class UnionArray(UnionMeta[Content], Content):
         return self._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._tags, PlaceholderArray) or isinstance(
-            self._index, PlaceholderArray
+        if isinstance(self._tags.data, PlaceholderArray) or isinstance(
+            self._index.data, PlaceholderArray
         ):
             return True
         for content in self._contents:
@@ -1640,6 +1656,68 @@ class UnionArray(UnionMeta[Content], Content):
             return out
 
         # backends with concrete data
+        nplike = self._backend.nplike
+        tags = self._tags.data
+        index = self._index.data[: self._tags.length]
+
+        # Fast path: recurse once per content rather than once per element,
+        # restoring the original interleaving with a stable argsort over a
+        # broadcast position marker flattened through the *same* recursion as
+        # the values (so per-leaf dropping, e.g. ``drop_nones``, applies
+        # identically). Only valid when every content flattens to a single
+        # mergeable ``NumpyArray``: multi-part contents (records) and whole-kept
+        # contents (strings) are order-sensitive in ways the reorder cannot
+        # reproduce, so they fall back to the element-wise loop below.
+        # Branches whose subtree contains a nested union also fall back:
+        # ``ak.broadcast_arrays`` does not reliably broadcast the position
+        # marker into union branches (mixed-depth unions report a degenerate
+        # ``purelist_depth`` that stops the broadcast early, and
+        # ``broadcast_any_union`` regroups tags/index), so marker and values
+        # can flatten to different lengths or orders (#4214).
+        if not options["keepdims"] and not any(
+            _contains_union(content) for content in self._contents
+        ):
+            value_parts: list[Content] = []
+            position_parts: list[Content] = []
+            fast_path = True
+            for tag in range(len(self._contents)):
+                selection = tags == tag
+                sub = self._contents[tag]._carry(
+                    ak.index.Index(index[selection]), False
+                )
+                sub_parts = sub._remove_structure(backend, options)
+                if len(sub_parts) != 1 or not isinstance(
+                    sub_parts[0], ak.contents.NumpyArray
+                ):
+                    fast_path = False
+                    break
+
+                positions = nplike.nonzero(selection)[0]
+                marker = ak.operations.broadcast_arrays(
+                    sub,
+                    ak.contents.NumpyArray(positions, backend=backend),
+                    highlevel=False,
+                )[1]
+                marker_parts = marker._remove_structure(backend, options)
+                if len(marker_parts) != 1 or not isinstance(
+                    marker_parts[0], ak.contents.NumpyArray
+                ):
+                    fast_path = False
+                    break
+
+                value_parts.append(sub_parts[0])
+                position_parts.append(marker_parts[0])
+
+            if fast_path:
+                if len(value_parts) == 0:
+                    return out
+                merged_values = ak._do.mergemany(value_parts)
+                merged_positions = nplike.concat([part.data for part in position_parts])
+                order = nplike._module.argsort(merged_positions, kind="stable")
+                out.append(merged_values._carry(ak.index.Index(order), False))
+                return out
+
+        # Fallback: order-sensitive multi-part / string contents.
         for i in range(self._tags.length):
             content = (
                 self._contents[self._tags[i]]

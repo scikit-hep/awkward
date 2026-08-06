@@ -27,6 +27,9 @@ def argcartesian(
 ):
     """Computes the Cartesian product of arrays, returning integer indexes.
 
+    All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
+    so see the #ak.cartesian documentation for a more complete description.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -59,8 +62,8 @@ def argcartesian(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of data from a set of
-        `arrays`, like #ak.cartesian, but returning integer indexes for
+        An array of integer indexes into the Cartesian product (i.e. cross product)
+        of a set of `arrays`, like #ak.cartesian but for use with
         #ak.Array.__getitem__.
 
     Examples:
@@ -97,9 +100,6 @@ def argcartesian(
         <Array [1.1, 1.1, 2.2, 2.2, 3.3, 3.3] type='6 * float64'>
         >>> two[two_index]
         <Array ['a', 'b', 'a', 'b', 'a', 'b'] type='6 * string'>
-
-        All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
-        so see the #ak.cartesian documentation for a more complete description.
     """
     # Dispatch
     if isinstance(arrays, Mapping):
@@ -118,7 +118,7 @@ def _impl(arrays, axis, nested, parameters, with_name, highlevel, behavior, attr
     if isinstance(arrays, Mapping):
         index_arrays = {n: ak.local_index(x, axis) for n, x in arrays.items()}
     else:
-        index_arrays = [ak.local_index(x) for x in arrays]
+        index_arrays = [ak.local_index(x, axis) for x in arrays]
 
     if with_name is not None:
         if parameters is None:

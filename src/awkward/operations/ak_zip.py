@@ -31,6 +31,18 @@ def zip(
 ):
     """Combines arrays into records or tuples, broadcasting them together.
 
+    If the `arrays` have nested structure, they are broadcasted with one
+    another to form the records or tuples as deeply as possible, though this
+    can be limited by `depth_limit`.
+
+    This operation may be thought of as the opposite of projection in
+    #ak.Array.__getitem__, which extracts fields one at a time, or #ak.unzip,
+    which extracts them all in one call.
+
+    As an extreme, `depth_limit=1` is a handy way to make a record structure
+    at the outermost level, regardless of whether the fields have matching
+    structure or not.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -55,15 +67,8 @@ def zip(
             high-level.
 
     Returns:
-        Combines `arrays` into a single structure as the fields of a collection
-        of records or the slots of a collection of tuples. If the `arrays` have
-        nested structure, they are broadcasted with one another to form the
-        records or tuples as deeply as possible, though this can be limited by
-        `depth_limit`.
-
-        This operation may be thought of as the opposite of projection in
-        #ak.Array.__getitem__, which extracts fields one at a time, or
-        #ak.unzip, which extracts them all in one call.
+        An array of records (or tuples) whose fields (or slots) are the
+        `arrays`, combined into a single structure.
 
     Examples:
         Consider the following arrays, `one` and `two`.
@@ -125,10 +130,6 @@ def zip(
         [([[1, 2, 3], [], [4, ...], [6]], [[1.1, ...], ...]),
          ([], []),
          ([[7, 8]], [[6.6]])]
-
-        As an extreme, `depth_limit=1` is a handy way to make a record structure
-        at the outermost level, regardless of whether the fields have matching
-        structure or not.
 
         When zipping together arrays with optional values, it can be useful to create
         the #ak.contents.RecordArray node after the option types. By default, #ak.zip

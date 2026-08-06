@@ -271,11 +271,6 @@ html_theme_options = {
             "url": "https://pypi.org/project/awkward",
             "icon": "fa-brands fa-python",
         },
-        {
-            "name": "Gitter",
-            "url": "https://gitter.im/Scikit-HEP/awkward-array",
-            "icon": "fa-brands fa-gitter",
-        },
     ],
     "use_edit_page_button": True,
     "external_links": [
