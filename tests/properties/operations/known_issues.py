@@ -304,6 +304,99 @@ def has_issue_4280(a: ak.Array) -> bool:
     return False
 
 
+def has_issue_4282(a: ak.Array) -> bool:
+    """Return `True` if a regular list with no variable-length dimension below it is under a union.
+
+    To restore the interleaving order of a union,
+    `UnionArray._remove_structure` broadcasts each branch against its
+    rows' positions (`ak.flatten(axis=None)`, `ak.ravel`, and
+    `axis=None` reductions reach it), which relies on the
+    replicate-per-row semantics of variable-length broadcasting; a
+    branch with only regular dimensions broadcasts by NumPy's
+    right-aligned rules instead, treating the flat positions as one
+    inner vector. An innermost regular size of 1 raises `IndexError`
+    ("cannot slice NumpyArray ...") from a position marker longer
+    than the values, another innermost size differing from the
+    branch's row count raises `ValueError` ("cannot broadcast
+    RegularArray ..."), and an innermost size equal to the row count
+    succeeds with a silently wrong order, which a no-raise test does
+    not observe. The trigger is a regular list with no
+    variable-length list anywhere below it, itself anywhere under a
+    union node, descending through list, option, indexed, and
+    record nodes; a regular list of variable-length lists is
+    `has_issue_4262`'s trigger. Which configurations reach the
+    broadcast depends on the current implementation's internals, so
+    every such regular list counts here, although multi-field-record
+    or string content, or a single-row or innermost-size-0 branch,
+    happens to work (a single-field record still flattens to one
+    leaf and stays on the affected path).
+    Reported: https://github.com/scikit-hep/awkward/issues/4282
+    """
+    stack = [(a.layout.form, False)]
+    while stack:
+        node, in_union = stack.pop()
+        if node.parameter("__array__") in ("string", "bytestring"):
+            continue
+        if node.is_union:
+            stack.extend((c, True) for c in node.contents)
+        elif node.is_record:
+            stack.extend((c, in_union) for c in node.contents)
+        elif node.is_numpy or node.is_unknown:
+            continue
+        else:
+            if (
+                in_union
+                and node.is_regular
+                and not _contains_variable_length_list(node.content)
+            ):
+                return True
+            stack.append((node.content, in_union))
+    return False
+
+
+def has_issue_4283(a: ak.Array) -> bool:
+    """Return `True` if a record sits directly under an option node.
+
+    `ak.ravel` removes structure with `drop_nones=False`, and an
+    option node then keeps itself whole when its content does not
+    branch and has depth 1 — a test meant to identify a leaf, which
+    a record of leaves also passes. The record then survives into
+    the merge inside the kept option, and a leaf part beside it
+    makes `ak._do.mergemany` fail, depending on the first part's
+    type, with `AssertionError` ("cannot merge NumpyArray with
+    RecordArray"; with the record part first, "cannot merge
+    RecordArray with NumpyArray") or `ValueError` ("cannot merge
+    ListArray with RecordArray."). With only record parts the merge succeeds and the record
+    layer survives the flattening, which a no-raise test does not
+    observe. `ak.flatten(axis=None)` projects options away
+    (`drop_nones=True`) and is unaffected, so `test_flatten` does
+    not use this predicate. The trigger is a record as the direct
+    content of an option node, anywhere in the form (an option
+    cannot hold an indexed node, so nothing sits between); an
+    option above a list is descended and its records split into
+    their fields. Every such record counts here, although one with
+    a non-leaf field gives the option a depth above 1, so the
+    option projects and the call happens to work.
+    Reported: https://github.com/scikit-hep/awkward/issues/4283
+    """
+    stack = [a.layout.form]
+    while stack:
+        node = stack.pop()
+        if node.parameter("__array__") in ("string", "bytestring"):
+            continue
+        if node.is_option:
+            if node.content.is_record:
+                return True
+            stack.append(node.content)
+        elif node.is_record or node.is_union:
+            stack.extend(node.contents)
+        elif node.is_numpy or node.is_unknown:
+            continue
+        else:
+            stack.append(node.content)
+    return False
+
+
 def _is_variable_length_list(form: ak.forms.Form) -> bool:
     """Return `True` if the node has `var` type.
 
@@ -316,6 +409,25 @@ def _is_variable_length_list(form: ak.forms.Form) -> bool:
     if node.parameter("__array__") in ("string", "bytestring"):
         return False
     return node.is_list and not node.is_regular
+
+
+def _contains_variable_length_list(form: ak.forms.Form) -> bool:
+    """Return `True` if a `var`-type list is somewhere in the tree.
+
+    A string node is a leaf, not a list: the descent stops there.
+    """
+    stack = [form]
+    while stack:
+        node = stack.pop()
+        if node.parameter("__array__") in ("string", "bytestring"):
+            continue
+        if node.is_list and not node.is_regular:
+            return True
+        if node.is_record or node.is_union:
+            stack.extend(node.contents)
+        elif not (node.is_numpy or node.is_unknown):
+            stack.append(node.content)
+    return False
 
 
 def _contains_record_or_union(form: ak.forms.Form) -> bool:
