@@ -33,7 +33,7 @@ kMaxLevels = 48
 
 _memory_size_pattern = re.compile(
     r"^\s*([+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?)\s*([kmgtpezy]?i?b)\s*$",
-    re.I,
+    re.IGNORECASE,
 )
 
 _memory_size_units = {

@@ -9,8 +9,8 @@ import awkward as ak
 
 ROOT = pytest.importorskip("ROOT")
 
-import awkward._connect.cling  # noqa: E402
-import awkward._lookup  # noqa: E402
+import awkward._connect.cling
+import awkward._lookup
 
 compiler = ROOT.gInterpreter.Declare
 cpp17 = hasattr(ROOT.std, "optional")

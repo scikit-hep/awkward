@@ -188,15 +188,13 @@ class ReadAvroFT:
         return (n >> 1) ^ (-(n & 1))
 
     def dum_dat(self, dtype, count):
-        if dtype["type"] == "int":
-            return f"0 node{count}-data <- stack "
-        elif dtype["type"] == "long":
-            return f"0 node{count}-data <- stack "
-        elif dtype["type"] == "float":
-            return f"0 node{count}-data <- stack "
-        elif dtype["type"] == "double":
-            return f"0 node{count}-data <- stack "
-        elif dtype["type"] == "boolean":
+        if (
+            dtype["type"] == "int"
+            or dtype["type"] == "long"
+            or dtype["type"] == "float"
+            or dtype["type"] == "double"
+            or dtype["type"] == "boolean"
+        ):
             return f"0 node{count}-data <- stack "
         elif dtype["type"] == "bytes":
             return f"1 node{count}-offsets +<- stack 97 node{count + 1}-data <- stack "

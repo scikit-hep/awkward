@@ -499,12 +499,7 @@ class AxisNoneSum(JAXReducer):
         result_scalar = jax.numpy.sum(data)
         result = jax.numpy.reshape(result_scalar, (1,))
 
-        if array.dtype.kind == "m":
-            return ak.contents.NumpyArray(
-                array.backend.nplike.asarray(result, dtype=array.dtype),
-                backend=array.backend,
-            )
-        elif np.issubdtype(array.dtype, np.complexfloating):
+        if array.dtype.kind == "m" or np.issubdtype(array.dtype, np.complexfloating):
             return ak.contents.NumpyArray(
                 array.backend.nplike.asarray(result, dtype=array.dtype),
                 backend=array.backend,

@@ -1756,10 +1756,7 @@ def optiontype_of_form(form):
             ak.forms.IndexedForm,
             ak.forms.RecordForm,
         ),
-    ):
-        return False
-
-    elif isinstance(
+    ) or isinstance(
         form,
         (
             ak.forms.IndexedOptionForm,

@@ -11,7 +11,7 @@ import awkward as ak
 
 pyarrow = pytest.importorskip("pyarrow")
 
-from awkward._connect.pyarrow.conversions import arrow_to_numpy_dtype  # noqa: E402
+from awkward._connect.pyarrow.conversions import arrow_to_numpy_dtype
 
 
 def test_from_arrow_primitive():

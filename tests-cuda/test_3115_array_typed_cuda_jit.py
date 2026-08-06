@@ -9,7 +9,7 @@ import awkward as ak
 nb = pytest.importorskip("numba")
 nb_cuda = pytest.importorskip("numba.cuda")
 
-from numba import types  # noqa: E402
+from numba import types
 
 nb_cuda.config.CUDA_LOW_OCCUPANCY_WARNINGS = False
 nb_cuda.config.CUDA_WARN_ON_IMPLICIT_COPY = False

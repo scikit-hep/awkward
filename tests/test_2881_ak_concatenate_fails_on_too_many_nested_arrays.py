@@ -18,7 +18,7 @@ def test_concatenate_as_reported():
 
 def test_concatenate_inner_union_simplify_one():
     a = ak.Array([[99]])
-    astr = ak.Array(["a b c d".split()])
+    astr = ak.Array([["a", "b", "c", "d"]])
     aa = [a for i in range(129)] + [astr]
 
     cu = ak.concatenate(aa, axis=1)
