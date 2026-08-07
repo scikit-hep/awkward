@@ -33,9 +33,10 @@ def test_linear_fit_int32_overflow():
 
 
 def test_linear_fit_int64_overflow():
-    # sumwx = sum(x) and sumwxx = sum(x*x) must exceed int64 before promotion for
-    # this test to exercise the fix: x ~ 3-5e9 so x*x ~ 1-2.5e19 wraps int64 (max
-    # ~9.2e18). On main these inputs give slope -0.0745; promoted they give 3.0.
+    # The elementwise x*x products must exceed int64 before promotion for this test
+    # to exercise the fix: x ~ 3-5e9 so the 4e9 and 5e9 squares (1.6e19, 2.5e19) wrap
+    # int64 (max ~9.2e18), and the delta-stage products wrap too. On main these inputs
+    # give slope -0.0745; promoted they give 3.0.
     # intercept magnitude is kept large (-7e6) so its float64 rounding
     # (-7000000.000018) stays within pytest.approx's default relative tolerance.
     x = np.array([3_000_000_000, 4_000_000_000, 5_000_000_000], dtype=np.int64)
@@ -63,8 +64,8 @@ def test_linear_fit_uint_and_negative():
 
 def test_linear_fit_mixed_integer_complex_overflow():
     # int x and complex y: promoting each array independently keeps x*x in float64
-    # (int32 100000**2 would otherwise wrap) while y stays complex. Before the fix
-    # the complex-guard skipped promotion of both arrays, giving slope (-0.4059-0j).
+    # (int32 100000**2 would otherwise wrap) while y stays complex. Without the
+    # promotion the int32 x*x products wrap, giving slope (-0.4059-0j).
     xi = np.array([100000, 200000, 300000, 400000], dtype=np.int32)
     x = ak.Array(xi)
     y = ak.Array((2 * xi + 1).astype(np.complex128))

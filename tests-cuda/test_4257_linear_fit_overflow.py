@@ -36,7 +36,7 @@ def test_linear_fit_int32_overflow_gpu():
 def test_linear_fit_gpu_matches_cpu():
     cases = [
         (np.array([100000, 200000, 300000], dtype=np.int32), None),
-        (np.array([3_000_000, 4_000_000, 5_000_000], dtype=np.int64), None),
+        (np.array([3_000_000_000, 4_000_000_000, 5_000_000_000], dtype=np.int64), None),
         (np.array([1.0, 2.0, 3.0, 4.0], dtype=np.float64), None),
         (np.array([100000, 200000, 300000], dtype=np.int32), np.array([1.0, 2.0, 3.0])),
     ]

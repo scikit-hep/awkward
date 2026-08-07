@@ -160,7 +160,7 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
             sumwxx = _sum(xp * xp)
             sumwxy = _sum(xp * yp)
         else:
-            sumw = _sum(x * 0 + weight)
+            sumw = _sum(xp * 0 + weight)
             sumwx = _sum(xp * weight)
             sumwy = _sum(yp * weight)
             sumwxx = _sum(xp * xp * weight)
