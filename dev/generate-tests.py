@@ -37,10 +37,12 @@ CUDA_COMPUTE_KERNELS = {
     "awkward_UnionArray_validity",
 }
 
-try:
-    yaml_loader = yaml.CSafeLoader if sys._is_gil_enabled() else yaml.SafeLoader
-except AttributeError:
-    yaml_loader = yaml.CSafeLoader
+# The C loader may be missing (pyyaml built without libyaml) and is avoided on
+# free-threaded builds.
+if getattr(sys, "_is_gil_enabled", lambda: True)():
+    yaml_loader = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+else:
+    yaml_loader = yaml.SafeLoader
 
 
 def reproducible_datetime():

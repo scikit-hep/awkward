@@ -20,9 +20,10 @@ if __name__ == "__main__":
     if connect_path.exists():
         shutil.rmtree(connect_path)
     connect_path.mkdir(parents=True)
+    # copy2 preserves source mtimes, so re-running doesn't trigger rebuilds
     for path in header_only_path.rglob("*/awkward/*.h"):
         dest_path = connect_path / path.name
-        shutil.copy(path, dest_path)
+        shutil.copy2(path, dest_path)
 
     # Copy to C++ package
     cpp_path = root_path / "awkward-cpp" / "header-only"
@@ -39,6 +40,6 @@ if __name__ == "__main__":
     for component in components:
         src_path = header_only_path / component
         if src_path.is_file():
-            shutil.copy(src_path, cpp_path / component)
+            shutil.copy2(src_path, cpp_path / component)
         else:
             shutil.copytree(src_path, cpp_path / component)
