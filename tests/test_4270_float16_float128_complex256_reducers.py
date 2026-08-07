@@ -93,10 +93,27 @@ def test_float16_flat_sort_from_issue():
 @pytest.mark.parametrize("width", ["complex64", "complex128"])
 def test_complex_sort_argsort_raise_typeerror(width):
     arr = ak.values_astype(ak.Array([[1 + 1j, 2 + 0j], [3 - 1j]]), getattr(np, width))
-    with pytest.raises(TypeError, match="total order"):
+    with pytest.raises(TypeError, match="not supported"):
         ak.sort(arr, axis=1)
-    with pytest.raises(TypeError, match="total order"):
+    with pytest.raises(TypeError, match="not supported"):
         ak.argsort(arr, axis=1)
+
+
+def test_float16_nan_inf_sort_and_reducers():
+    # awkward's (arg)sort is NaN-aware and pushes NaN to the low end (ascending),
+    # which differs from NumPy. The carry-based sort gathers the original float16
+    # values, so the NaN and both infinities survive intact.
+    data = np.array([2.0, np.nan, 1.0, np.inf, -np.inf], dtype=np.float16)
+    out = ak.sort(ak.Array(data))
+    vals = np.asarray(out.layout.data)
+    assert np.isnan(vals[0])
+    assert vals[1] == -np.inf
+    assert vals[-1] == np.inf
+    assert "float16" in str(out.type)
+    # reducers propagate inf like NumPy's float32 accumulation
+    assert ak.max(ak.Array(np.array([1.0, 2.0, np.inf], dtype=np.float16))) == np.inf
+    assert ak.min(ak.Array(np.array([1.0, 2.0, -np.inf], dtype=np.float16))) == -np.inf
+    assert np.isinf(float(ak.sum(ak.Array(np.array([np.inf, 1.0], dtype=np.float16)))))
 
 
 # --- extended precision (platform-gated) ------------------------------------
@@ -129,12 +146,52 @@ def test_float128_sort_preserves_dtype():
     assert "float128" in str(ak.sort(arr, axis=1).type)
 
 
+@pytest.mark.skipif(not hasattr(np, "float128"), reason="no float128 on this platform")
+def test_float128_sort_preserves_exact_values():
+    # `a` differs from 1.0 only at float128 precision: 2**-60 is below float64's
+    # ~2**-52 resolution, so casting `a` to float64 rounds it to exactly 1.0. A
+    # cast-back sort would return two 1.0s; the carry-based sort must return the
+    # original multiset with both values still distinct.
+    one = np.float128(1)
+    a = one + np.float128(2) ** -60
+    assert a != one  # distinct at float128 precision
+    assert np.float64(a) == np.float64(one)  # indistinguishable in float64
+
+    out = ak.sort(ak.Array(np.array([a, one], dtype=np.float128)))
+    vals = np.asarray(out.layout.data)
+    # `a` and `one` are equal after the float64 cast, so the stable sort keeps
+    # their input order; the point is that `a` survives *exactly* (a cast-back
+    # sort would return [1.0, 1.0], dropping the sub-float64 difference).
+    assert vals[0] == a
+    assert vals[1] == one
+    assert vals[0] != one  # the extended-precision value was not rounded away
+    assert "float128" in str(out.type)
+
+
+@pytest.mark.skipif(not hasattr(np, "float128"), reason="no float128 on this platform")
+def test_float128_argsort_ties_by_position():
+    # Two values equal after the float64 cast but distinct at float128: argsort is
+    # stable-by-position, so the earlier index comes first regardless of true order.
+    one = np.float128(1)
+    a = one + np.float128(2) ** -60  # a > one, but == one in float64
+    arr = ak.Array(np.array([a, one], dtype=np.float128))
+    assert ak.to_list(ak.argsort(arr)) == [0, 1]
+
+
 @pytest.mark.skipif(
     not hasattr(np, "complex256"), reason="no complex256 on this platform"
 )
 @pytest.mark.parametrize(
     ("op", "npop"),
-    [(ak.sum, np.sum), (ak.prod, np.prod), (ak.count_nonzero, np.count_nonzero)],
+    [
+        (ak.sum, np.sum),
+        (ak.prod, np.prod),
+        (ak.count_nonzero, np.count_nonzero),
+        (ak.min, np.min),
+        (ak.max, np.max),
+        (ak.argmin, np.argmin),
+        (ak.argmax, np.argmax),
+    ],
 )
 def test_complex256_reducers_axis1(op, npop):
     arr = ak.values_astype(ak.Array(ROWS), np.complex256)
@@ -146,7 +203,19 @@ def test_complex256_reducers_axis1(op, npop):
 @pytest.mark.skipif(
     not hasattr(np, "complex256"), reason="no complex256 on this platform"
 )
+def test_complex256_all_any():
+    # all/any go through the complex256 -> complex128 cast and return bool.
+    arr = ak.values_astype(
+        ak.Array([[1 + 0j, 2 + 0j], [0 + 0j, 0 + 0j]]), np.complex256
+    )
+    assert ak.to_list(ak.all(arr, axis=1)) == [True, False]
+    assert ak.to_list(ak.any(arr, axis=1)) == [True, False]
+
+
+@pytest.mark.skipif(
+    not hasattr(np, "complex256"), reason="no complex256 on this platform"
+)
 def test_complex256_sort_raises_like_complex128():
     arr = ak.values_astype(ak.Array([[1 + 1j, 2 + 0j], [3 - 1j]]), np.complex256)
-    with pytest.raises(TypeError, match="total order"):
+    with pytest.raises(TypeError, match="not supported"):
         ak.sort(arr, axis=1)

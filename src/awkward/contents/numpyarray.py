@@ -777,6 +777,31 @@ class NumpyArray(NumpyMeta, Content):
         elif len(self.shape) == 0:
             return self
 
+        elif (cast := _kernel_unsupported_cast(self._data.dtype)) is not None:
+            # No sort/unique kernel for float16/float128/complex256 (reached e.g.
+            # by ak.validity_error on categorical float16 content). Compute the
+            # unique values through the nearest supported dtype, then cast the
+            # result back. float16 <-> float32 is exact; float128/complex256 round
+            # to the lower precision, the same caveat as _sort_next.
+            original = self._data.dtype
+            casted = NumpyArray(
+                self._backend.nplike.astype(self._data, cast),
+                parameters=self._parameters,
+                backend=self._backend,
+            )
+            out = casted._unique(negaxis, starts, offsets, outlength)
+
+            def _restore(node, **kwargs):
+                if node.is_numpy and node.dtype == cast:
+                    return NumpyArray(
+                        node.backend.nplike.astype(node.data, original),
+                        parameters=node._parameters,
+                        backend=node.backend,
+                    )
+                return None
+
+            return ak._do.recursively_apply(out, _restore, return_array=True)
+
         elif negaxis is None:
             contiguous_self = self.to_contiguous()
 
@@ -936,12 +961,14 @@ class NumpyArray(NumpyMeta, Content):
         else:
             if self._data.dtype.kind == "c":
                 raise TypeError(
-                    f"cannot argsort {self._data.dtype!r}: complex numbers have no "
-                    "total order (this applies to complex64/128/256 alike)"
+                    f"cannot argsort {self._data.dtype!r}: sorting complex numbers "
+                    "is not supported"
                 )
             # No argsort kernel for float16/float128/complex256: argsort through
             # the nearest supported dtype. The positions are unchanged (the cast
-            # is order-preserving/monotonic), so no cast-back is needed.
+            # is order-preserving/monotonic), so no cast-back is needed. Values
+            # distinct in the true dtype but equal after the cast are ordered by
+            # input position (stable-by-position), not by true value.
             cast = _kernel_unsupported_cast(self._data.dtype)
             if cast is not None:
                 casted = NumpyArray(
@@ -1043,27 +1070,47 @@ class NumpyArray(NumpyMeta, Content):
         else:
             if self._data.dtype.kind == "c":
                 raise TypeError(
-                    f"cannot sort {self._data.dtype!r}: complex numbers have no "
-                    "total order (this applies to complex64/128/256 alike)"
+                    f"cannot sort {self._data.dtype!r}: sorting complex numbers "
+                    "is not supported"
                 )
-            # No sort kernel for float16/float128/complex256: sort through the
-            # nearest supported dtype, then cast the sorted values back (the cast
-            # is order-preserving for float16, monotonic for the rest).
+            # No sort kernel for float16/float128/complex256. We must not sort the
+            # cast-down values and cast them back: that would round every element
+            # to the lower precision (e.g. float128 -> float64) and relabel it,
+            # changing the multiset the sort returns. Instead argsort the cast-down
+            # values to get the permutation, then gather the ORIGINAL values
+            # through it, so the exact input precision is preserved.
+            #
+            # Ties that are distinct in the true dtype but equal after the cast
+            # keep their original relative order (argsort is stable-by-position),
+            # so they are ordered by input position rather than by true value.
             cast = _kernel_unsupported_cast(self._data.dtype)
             if cast is not None:
+                nplike = self._backend.nplike
                 casted = NumpyArray(
-                    self._backend.nplike.astype(self._data, cast),
+                    nplike.astype(self._data, cast),
                     parameters=self._parameters,
                     backend=self._backend,
                 )
-                out = casted._sort_next(
-                    negaxis, starts, offsets, outlength, ascending, stable
+                # awkward_argsort writes per-bin *local* indices (each bin's start
+                # is subtracted), laid out bin after bin following `offsets`.
+                local = casted._argsort_next(
+                    negaxis, starts, None, offsets, outlength, ascending, stable
                 )
-                return NumpyArray(
-                    self._backend.nplike.astype(out.data, self._data.dtype),
-                    parameters=None,
-                    backend=self._backend,
+                # Convert local indices to global by adding each position's bin
+                # start: parents[p] is the bin of position p, so offsets[parents]
+                # gives the start to add.
+                counts = offsets.data[1:] - offsets.data[:-1]
+                parents = nplike.repeat(
+                    nplike.arange(
+                        nplike.shape_item_as_index(outlength), dtype=np.int64
+                    ),
+                    nplike.astype(counts, np.intp),
                 )
+                global_index = ak.index.Index64(
+                    local.data + offsets.data[:-1][parents], nplike=nplike
+                )
+                nextdata = self._data[global_index.data]
+                return NumpyArray(nextdata, parameters=None, backend=self._backend)
 
             offsets_length = offsets.length
 
