@@ -1762,7 +1762,7 @@ def awkward_ListArray_combinations(
     )
     length_arr = cp.asarray([length], dtype=length_dtype)
 
-    def make_pass(k, carry_k):
+    def make_pass(k):
         def fill_pos(g):
             # a) Find source list i via binary search on offsets
             lo = 0
@@ -1802,9 +1802,8 @@ def awkward_ListArray_combinations(
                     if remaining < count:
                         # c) j is the value at position pos
                         if pos == k:
-                            # d) write absolute content index and exit early
-                            carry_k[g] = (j - pos if replacement else j) + start
-                            return 0
+                            # d) return absolute content index and exit early
+                            return (j - pos if replacement else j) + start
                         lower = j + 1  # next position must be >= j+1 (no repeat)
                         break
                     remaining -= count
@@ -1816,8 +1815,8 @@ def awkward_ListArray_combinations(
     for k in range(n):
         unary_transform(
             d_in=CountingIterator(cp.int64(0)),
-            d_out=DiscardIterator(),
-            op=make_pass(k, carry_arrays[k]),
+            d_out=carry_arrays[k],
+            op=make_pass(k),
             num_items=totallen,
         )
 
