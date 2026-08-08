@@ -14,7 +14,18 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def with_name(array, name, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns an array or record with the `__record__` parameter set to the given name.
+
+    This function does not change the array in-place. If the new name is None,
+    then an array without a name is returned.
+
+    The records or tuples may be nested within multiple levels of nested lists.
+    If records are nested within records, only the outermost are affected.
+
+    Setting the `"__record__"` parameter makes it possible to add behaviors
+    to the data; see #ak.Array and #ak.behavior for a more complete
+    description.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         name (str or None): Name to give to the records or tuples; this assigns
@@ -26,17 +37,9 @@ def with_name(array, name, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
-    `highlevel=False`) with a new name. This function does not change the
-    array in-place. If the new name is None, then an array without a name is
-    returned.
-
-    The records or tuples may be nested within multiple levels of nested lists.
-    If records are nested within records, only the outermost are affected.
-
-    Setting the `"__record__"` parameter makes it possible to add behaviors
-    to the data; see #ak.Array and #ak.behavior for a more complete
-    description.
+    Returns:
+        An #ak.Array or #ak.Record (or low-level equivalent, if
+        `highlevel=False`) with a new name.
     """
     # Dispatch
     yield (array,)

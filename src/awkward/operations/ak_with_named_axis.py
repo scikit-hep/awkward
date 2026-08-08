@@ -26,7 +26,11 @@ def with_named_axis(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns an array with named axes attached.
+
+    This function does not change the array in-place. If the new name is None,
+    then the array is returned as it is.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         named_axis: AxisTuple | AxisMapping: Names to give to the array axis; this assigns
@@ -38,9 +42,9 @@ def with_named_axis(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an #ak.Array or #ak.Record (or low-level equivalent, if
-    `highlevel=False`) with a new name. This function does not change the
-    array in-place. If the new name is None, then the array is returned as it is.
+    Returns:
+        An #ak.Array or #ak.Record (or low-level equivalent, if
+        `highlevel=False`) with named axes attached.
     """
     # Dispatch
     yield (array,)
