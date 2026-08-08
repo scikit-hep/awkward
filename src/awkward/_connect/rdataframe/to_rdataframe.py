@@ -54,7 +54,7 @@ class DataSourceGenerator:
 
     def data_frame(self, layouts):
         cpp_code_declare_slots = ""
-        cpp_code_define_readers = ""
+        cpp_code_retrieve_col_reader = ""
         cpp_code_column_names = ""
         cpp_code_column_type_names = ""
         cpp_code_column_types_map = ""
@@ -63,6 +63,8 @@ class DataSourceGenerator:
         cpp_code_entries = ""
 
         k = 0
+
+        array_data_source = self.class_type()
 
         for key in layouts:
             self.generators[key] = ak._connect.cling.togenerator(
@@ -136,18 +138,17 @@ class DataSourceGenerator:
         """
                 )
 
-            cpp_code_define_readers = (
-                cpp_code_define_readers
+            cpp_code_retrieve_col_reader = (
+                cpp_code_retrieve_col_reader
                 + f"""
-        if (name == "{key}") {{
-            for (auto i : ROOT::TSeqU(fNSlots)) {{
-                addrs_{key}[i] = &slots_{key}[i];
-                reader.emplace_back((void *)(&addrs_{key}[i]));
-            }}
-        }}
-    """
+                    if (colName == "{key}") {{
+
+                    addrs_{key}[slot] = &slots_{key}[slot];
+                    return std::make_unique<{array_data_source}_column_reader>(addrs_{key}[slot]);
+                    }}
+                """
             )
-            cpp_code_define_readers = cpp_code_define_readers + "else "
+            cpp_code_retrieve_col_reader += "else "
 
             cpp_code_column_names = (
                 cpp_code_column_names
@@ -198,8 +199,6 @@ class DataSourceGenerator:
                 cpp_code_column_type_names = cpp_code_column_type_names + ", "
                 cpp_code_column_types_map = cpp_code_column_types_map + ", "
 
-        array_data_source = self.class_type()
-
         if self.use_cached:
             cpp_code = cache.get(array_data_source)
         else:
@@ -212,8 +211,17 @@ class DataSourceGenerator:
         )
 
         if cpp_code is None:
+            err_col_not_found = r'throw std::runtime_error("Could not find column \"" + std::string(colName) + "\" in the available columns.");'
             cpp_code = f"""
 namespace awkward {{
+
+    class {array_data_source}_column_reader final : public ROOT::Detail::RDF::RColumnReaderBase {{
+        void *fValuePtr;
+        void *GetImpl(Long64_t) final {{ return fValuePtr; }}
+
+        public:
+        {array_data_source}_column_reader(void *valuePtr) : fValuePtr(valuePtr) {{}}
+    }};
 
     class {array_data_source} final
       : public ROOT::RDF::RDataSource {{
@@ -232,15 +240,7 @@ namespace awkward {{
 
         Record_t
         GetColumnReadersImpl(std::string_view name, const std::type_info &id) {{
-            Record_t reader;
-
-            {cpp_code_define_readers}
-            {{
-                for (auto i : ROOT::TSeqU(fNSlots)) {{
-                    reader.emplace_back(nullptr);
-                }}
-            }}
-            return reader;
+            return {{}};
         }}
 
     public:
@@ -307,6 +307,13 @@ namespace awkward {{
             return true;
         }}
 
+        std::unique_ptr<ROOT::Detail::RDF::RColumnReaderBase>
+        GetColumnReaders(unsigned int slot, std::string_view colName, const std::type_info &tid) final
+        {{
+            {cpp_code_retrieve_col_reader}
+
+            {err_col_not_found}
+        }}
     }};
 
     ROOT::RDataFrame* MakeAwkwardArrayDS_{array_data_source}(PyObject* lookup, ULong64_t size, std::initializer_list<ULong64_t> ptrs_list) {{
