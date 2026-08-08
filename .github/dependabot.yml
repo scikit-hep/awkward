@@ -23,5 +23,3 @@ updates:
       interval: "weekly"
     allow:
       - dependency-name: "hypothesis-awkward"
-    cooldown:
-      default-days: 7
