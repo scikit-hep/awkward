@@ -18,7 +18,16 @@ def from_cupy(
     primitive_policy="error",
     attrs=None,
 ):
-    """
+    """Converts a CuPy array into an Awkward Array.
+
+    The resulting layout may involve the following #ak.contents.Content types
+    (only):
+
+    * #ak.contents.NumpyArray
+    * #ak.contents.RegularArray if `regulararray=True`.
+
+    See also #ak.to_cupy, #ak.from_numpy and #ak.from_jax.
+
     Args:
         array (cp.ndarray): The CuPy array to convert into an Awkward Array.
         regulararray (bool): If True and the array is multidimensional,
@@ -33,15 +42,8 @@ def from_cupy(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a CuPy array into an Awkward Array.
-
-    The resulting layout may involve the following #ak.contents.Content types
-    (only):
-
-    * #ak.contents.NumpyArray
-    * #ak.contents.RegularArray if `regulararray=True`.
-
-    See also #ak.to_cupy, #ak.from_numpy and #ak.from_jax.
+    Returns:
+        An #ak.Array built from the given CuPy array.
     """
     return wrap_layout(
         from_arraylib(array, regulararray, False, primitive_policy=primitive_policy),
