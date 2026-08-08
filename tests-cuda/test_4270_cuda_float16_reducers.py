@@ -64,7 +64,7 @@ def test_float16_reducers_stay_on_device():
 
 def test_complex_sort_raises_typeerror_on_gpu():
     gpu = ak.to_backend(ak.Array([[1 + 1j, 2 + 0j], [3 - 1j]]), "cuda")
-    with pytest.raises(TypeError, match="total order"):
+    with pytest.raises(TypeError, match="not supported"):
         ak.sort(gpu, axis=1)
-    with pytest.raises(TypeError, match="total order"):
+    with pytest.raises(TypeError, match="not supported"):
         ak.argsort(gpu, axis=1)

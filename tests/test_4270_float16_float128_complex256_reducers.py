@@ -8,11 +8,12 @@ import pytest
 import awkward as ak
 
 # float16, float128 and complex256 have no compiled reducer/sort kernels. They
-# are now reduced/sorted through the nearest supported dtype (float16 -> float32,
-# float128 -> float64, complex256 -> complex128) and value-preserving results are
-# cast back, so every reducer and ak.sort/ak.argsort work instead of raising
-# KeyError. Complex arrays (any width) give a clear TypeError from sort/argsort,
-# since complex numbers have no total order.
+# are now reduced through the nearest supported dtype (float16 -> float32,
+# float128 -> float64, complex256 -> complex128) with the value-preserving result
+# cast back; sort/argsort instead gather the original values through the cast-down
+# permutation, so exact precision is kept. Every reducer and ak.sort/ak.argsort
+# work instead of raising KeyError. Complex arrays (any width) give a clear
+# TypeError from sort/argsort, which awkward does not support.
 #
 # float128/complex256 are platform-dependent (e.g. macOS arm64 has neither); the
 # tests for them skip where NumPy doesn't provide them.
