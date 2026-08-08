@@ -1750,16 +1750,23 @@ def awkward_ListArray_combinations(
     #      convert from a within-list index to an absolute content index.
     #      For replacement, subtract pos to undo the stars-and-bars shift.
     # -------------------------------------------------------------------------
-    # Coerce `length` to a numpy scalar so the fill_pos closure below is
-    # cache-stable: cuda.compute keys plain Python ints by id() (fresh every
-    # call -> JIT rebuild each call), but numpy scalars by dtype+value.
-    length = np.int64(length)
+    # Wrap `length` in a 1-element device array so the fill_pos closure below
+    # is cache-stable. cuda.compute's op cache special-cases device arrays
+    # closed over by a JIT'd function: it keys on (dtype, shape) and patches
+    # in the new pointer on each call instead of recompiling. A bare Python int or
+    # numpy scalar is keyed by id(), which is fresh
+    # every call, so the kernel would be rebuilt from scratch on every
+    # ak.combinations() call.
+    length_dtype = (
+        length.dtype if hasattr(length, "dtype") else np.min_scalar_type(length)
+    )
+    length_arr = cp.asarray([length], dtype=length_dtype)
 
-    def make_pass(k, carry_k):
+    def make_pass(k):
         def fill_pos(g):
             # a) Find source list i via binary search on offsets
             lo = 0
-            hi = length - 1
+            hi = length_arr[0] - 1
             while lo < hi:
                 mid = (lo + hi) >> 1
                 if offsets[mid + 1] <= g:
@@ -1795,9 +1802,8 @@ def awkward_ListArray_combinations(
                     if remaining < count:
                         # c) j is the value at position pos
                         if pos == k:
-                            # d) write absolute content index and exit early
-                            carry_k[g] = (j - pos if replacement else j) + start
-                            return 0
+                            # d) return absolute content index and exit early
+                            return (j - pos if replacement else j) + start
                         lower = j + 1  # next position must be >= j+1 (no repeat)
                         break
                     remaining -= count
@@ -1809,8 +1815,8 @@ def awkward_ListArray_combinations(
     for k in range(n):
         unary_transform(
             d_in=CountingIterator(cp.int64(0)),
-            d_out=DiscardIterator(),
-            op=make_pass(k, carry_arrays[k]),
+            d_out=carry_arrays[k],
+            op=make_pass(k),
             num_items=totallen,
         )
 
