@@ -17,9 +17,17 @@ updates:
   # samples, so existing tests might fail. Pinning + dependabot ensures
   # those failures surface in a dedicated upgrade PR rather than
   # randomly in unrelated CI runs.
+  #
+  # The cooldown is set to zero, not omitted: with no cooldown option,
+  # version updates get dependabot's default cooldown of three days.
+  # A cooldown also applies to a manually triggered run, so it does not
+  # merely postpone the upgrade PR: while it lasts, dependabot opens no
+  # PR even on request, and the upgrade has to be made by hand instead.
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
     allow:
       - dependency-name: "hypothesis-awkward"
+    cooldown:
+      default-days: 0 # zizmor: ignore[dependabot-cooldown]
