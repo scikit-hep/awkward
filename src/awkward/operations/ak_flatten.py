@@ -212,7 +212,11 @@ def _impl(array, axis, highlevel, behavior, attrs):
             isinstance(x, ak.contents.Content) for x in out
         )
 
-        out = ak._do.mergemany(out)
+        if len(out) == 0:
+            # A zero-field record or a union that no values reach
+            out = ak.contents.EmptyArray(backend=layout.backend)
+        else:
+            out = ak._do.mergemany(out)
 
     elif axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
 
