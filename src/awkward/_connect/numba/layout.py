@@ -4,12 +4,119 @@ from __future__ import annotations
 
 import json
 
-import llvmlite.ir
 import numba
+from numba.core import cgutils
 from numba.core.errors import NumbaTypeError, NumbaValueError
+from numba.cpython import unicode as numba_unicode
 
 import awkward as ak
 from awkward._behavior import overlay_behavior
+
+
+@numba.extending.register_jitable
+def _decode_utf8_codepoint(data, position, length):
+    first = data[position]
+
+    if first <= 0x7F:
+        return first, 1
+
+    if 0xC2 <= first <= 0xDF:
+        if position + 1 >= length:
+            raise ValueError("unexpected end of UTF-8 sequence")
+
+        second = data[position + 1]
+        if second < 0x80 or second > 0xBF:
+            raise ValueError("invalid UTF-8 continuation byte")
+
+        return ((first & 0x1F) << 6) | (second & 0x3F), 2
+
+    if 0xE0 <= first <= 0xEF:
+        if position + 2 >= length:
+            raise ValueError("unexpected end of UTF-8 sequence")
+
+        second = data[position + 1]
+        third = data[position + 2]
+
+        if second < 0x80 or second > 0xBF:
+            raise ValueError("invalid UTF-8 continuation byte")
+        if third < 0x80 or third > 0xBF:
+            raise ValueError("invalid UTF-8 continuation byte")
+        if first == 0xE0 and second < 0xA0:
+            raise ValueError("overlong UTF-8 sequence")
+        if first == 0xED and second >= 0xA0:
+            raise ValueError("UTF-8 sequence encodes a surrogate code point")
+
+        codepoint = ((first & 0x0F) << 12) | ((second & 0x3F) << 6) | (third & 0x3F)
+        return codepoint, 3
+
+    if 0xF0 <= first <= 0xF4:
+        if position + 3 >= length:
+            raise ValueError("unexpected end of UTF-8 sequence")
+
+        second = data[position + 1]
+        third = data[position + 2]
+        fourth = data[position + 3]
+
+        if second < 0x80 or second > 0xBF:
+            raise ValueError("invalid UTF-8 continuation byte")
+        if third < 0x80 or third > 0xBF:
+            raise ValueError("invalid UTF-8 continuation byte")
+        if fourth < 0x80 or fourth > 0xBF:
+            raise ValueError("invalid UTF-8 continuation byte")
+        if first == 0xF0 and second < 0x90:
+            raise ValueError("overlong UTF-8 sequence")
+        if first == 0xF4 and second > 0x8F:
+            raise ValueError("UTF-8 code point exceeds U+10FFFF")
+
+        codepoint = (
+            ((first & 0x07) << 18)
+            | ((second & 0x3F) << 12)
+            | ((third & 0x3F) << 6)
+            | (fourth & 0x3F)
+        )
+        return codepoint, 4
+
+    raise ValueError("invalid UTF-8 leading byte")
+
+
+@numba.extending.register_jitable
+def _utf8_to_unicode(data, byte_length):
+    position = 0
+    codepoint_length = 0
+    max_codepoint = 0
+    is_ascii = 1
+
+    while position < byte_length:
+        codepoint, width = _decode_utf8_codepoint(data, position, byte_length)
+
+        max_codepoint = max(max_codepoint, codepoint)
+        if codepoint > 0x7F:
+            is_ascii = 0
+
+        codepoint_length += 1
+        position += width
+
+    kind = numba_unicode._codepoint_to_kind(max_codepoint)
+    result = numba_unicode._empty_string(
+        kind,
+        codepoint_length,
+        is_ascii,
+    )
+
+    position = 0
+    output_position = 0
+
+    while position < byte_length:
+        codepoint, width = _decode_utf8_codepoint(data, position, byte_length)
+        numba_unicode._set_code_point(
+            result,
+            output_position,
+            codepoint,
+        )
+        output_position += 1
+        position += width
+
+    return result
 
 
 def string_numba_typer(viewtype):
@@ -58,39 +165,73 @@ def string_numba_lower(
     baseptr = ak._connect.numba.layout.getat(
         context, builder, viewproxy.arrayptrs, whichnextpos
     )
-    rawptr = builder.add(
-        baseptr,
-        ak._connect.numba.layout.castint(
-            context, builder, viewtype.type.indextype.dtype, numba.intp, start
-        ),
+    start_cast = ak._connect.numba.layout.castint(
+        context,
+        builder,
+        viewtype.type.indextype.dtype,
+        numba.intp,
+        start,
     )
-    rawptr_cast = builder.inttoptr(
-        rawptr,
-        llvmlite.ir.PointerType(llvmlite.ir.IntType(numba.intp.bitwidth // 8)),
-    )
-    strsize = builder.sub(stop, start)
-    strsize_cast = ak._connect.numba.layout.castint(
-        context, builder, viewtype.type.indextype.dtype, numba.intp, strsize
+    byte_length = ak._connect.numba.layout.castint(
+        context,
+        builder,
+        viewtype.type.indextype.dtype,
+        numba.intp,
+        builder.sub(stop, start),
     )
 
-    pyapi = context.get_python_api(builder)
-    gil = pyapi.gil_ensure()
-
-    strptr = builder.bitcast(rawptr_cast, pyapi.cstring)
+    raw_address = builder.add(baseptr, start_cast)
+    uint8_pointer_type = numba.types.CPointer(numba.types.uint8)
+    uint8_pointer = builder.inttoptr(
+        raw_address,
+        context.get_value_type(uint8_pointer_type),
+    )
 
     if viewtype.type.parameters["__array__"] == "string":
-        kind = context.get_constant(numba.types.int32, pyapi.py_unicode_1byte_kind)
-        pystr = pyapi.string_from_kind_and_data(kind, strptr, strsize_cast)
+        return context.compile_internal(
+            builder,
+            _utf8_to_unicode,
+            numba.types.unicode_type(
+                uint8_pointer_type,
+                numba.intp,
+            ),
+            (
+                uint8_pointer,
+                byte_length,
+            ),
+        )
     else:
-        pystr = pyapi.bytes_from_string_and_size(strptr, strsize_cast)
+        output = cgutils.create_struct_proxy(rettype)(
+            context,
+            builder,
+        )
 
-    out = pyapi.to_native_value(rettype, pystr).value
+        output.meminfo = context.nrt.meminfo_alloc(
+            builder,
+            byte_length,
+        )
+        output.nitems = byte_length
+        output.itemsize = context.get_constant(numba.intp, 1)
+        output.data = context.nrt.meminfo_data(
+            builder,
+            output.meminfo,
+        )
+        output.parent = cgutils.get_null_value(
+            output.parent.type,
+        )
+        output.shape = cgutils.pack_array(builder, [byte_length])
+        output.strides = cgutils.pack_array(
+            builder,
+            [context.get_constant(numba.intp, 1)],
+        )
+        cgutils.memcpy(
+            builder,
+            output.data,
+            uint8_pointer,
+            byte_length,
+        )
 
-    pyapi.decref(pystr)
-
-    pyapi.gil_release(gil)
-
-    return out
+    return output._getvalue()
 
 
 def find_numba_array_typer(layouttype, behavior):

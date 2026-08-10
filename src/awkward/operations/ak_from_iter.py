@@ -26,28 +26,12 @@ def from_iter(
     initial=1024,
     resize=8,
 ):
-    """
-    Args:
-        iterable (Python iterable): Data to convert into an Awkward Array.
-        allow_record (bool): If True, the outermost element may be a record
-            (returning #ak.Record or #ak.record.Record type, depending on
-            `highlevel`); if False, the outermost element must be an array.
-        highlevel (bool): If True, return an #ak.Array; otherwise, return
-            a low-level #ak.contents.Content subclass.
-        behavior (None or dict): Custom #ak.behavior for the output array, if
-            high-level.
-        attrs (None or dict): Custom attributes for the output array, if
-            high-level.
-        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
-        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
-            should be strictly greater than 1.
+    """Converts Python data into an Awkward Array.
 
-    Converts Python data into an Awkward Array.
-
-    Any heterogeneous and deeply nested Python data can be converted, but the output
-    will never have regular-typed array lengths. Internally, this function uses
-    `ak::ArrayBuilder` (see the high-level #ak.ArrayBuilder documentation for a
-    more complete description).
+    Any heterogeneous and deeply nested Python data can be converted, but the
+    output will never have regular-typed array lengths. Internally, this
+    function uses `ak::ArrayBuilder` (see the high-level #ak.ArrayBuilder
+    documentation for a more complete description).
 
     The following Python types are supported.
 
@@ -66,6 +50,24 @@ def from_iter(
       #ak.contents.ListOffsetArray.
 
     See also #ak.to_list.
+
+    Args:
+        iterable (Python iterable): Data to convert into an Awkward Array.
+        allow_record (bool): If True, the outermost element may be a record
+            (returning #ak.Record or #ak.record.Record type, depending on
+            `highlevel`); if False, the outermost element must be an array.
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
+        initial (int): Initial size (in bytes) of buffers used by the `ak::ArrayBuilder`.
+        resize (float): Resize multiplier for buffers used by the `ak::ArrayBuilder`;
+            should be strictly greater than 1.
+
+    Returns:
+        An #ak.Array built from the given Python data.
     """
     return _impl(iterable, highlevel, behavior, allow_record, initial, resize, attrs)
 

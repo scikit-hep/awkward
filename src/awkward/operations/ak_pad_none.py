@@ -23,6 +23,18 @@ def pad_none(
 ):
     """Increases the lengths of lists to a target length by adding None values.
 
+    Note that the `clip` parameter not only determines whether the lengths are
+    at least `target` or exactly `target`, it also determines the type of the
+    output:
+
+    * `clip=True` returns regular lists (#ak.types.RegularType), and
+    * `clip=False` returns in-principle variable lengths
+      (#ak.types.ListType).
+
+    The in-principle variable-length lists might, in fact, all have the same
+    length, but the type difference is significant, for instance in
+    broadcasting rules (see #ak.broadcast_arrays).
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         target (int): The intended length of the lists. If `clip=True`,
@@ -86,18 +98,6 @@ def pad_none(
         [[[1.1, 2.2, 3.3], [None, None], [4.4, 5.5], [6.6, None]],
          [],
          [[7.7, None], [8.8, 9.9]]]
-
-        Note that the `clip` parameter not only determines whether the lengths are
-        at least `target` or exactly `target`, it also determines the type of the
-        output:
-
-        * `clip=True` returns regular lists (#ak.types.RegularType), and
-        * `clip=False` returns in-principle variable lengths
-          (#ak.types.ListType).
-
-        The in-principle variable-length lists might, in fact, all have the same
-        length, but the type difference is significant, for instance in
-        broadcasting rules (see #ak.broadcast_arrays).
 
         The difference between
 

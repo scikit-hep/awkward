@@ -10,6 +10,7 @@ import fsspec
 
 import awkward as ak
 import awkward._connect.pyarrow
+from awkward._attrs import without_transient_attrs
 from awkward._connect.pyarrow import convert_awkward_arrow_table_to_native
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -47,7 +48,28 @@ def to_parquet(
     parquet_extra_options=None,
     storage_options=None,
 ):
-    """
+    """Writes an Awkward Array to a Parquet file (through pyarrow).
+
+    The array's #ak.Array.attrs are written into the file's metadata, so that
+    #ak.from_parquet can restore them. They must therefore be JSON-compatible.
+    Transient attrs (those whose keys start with `"@"`) are not written, just as
+    they are not written when pickling.
+
+    If the `array` does not contain records at top-level, the Arrow table will consist
+    of one field whose name is `""` iff. `extensionarray` is False.
+
+    If `extensionarray` is True, use a custom Arrow extension to store this array.
+    Otherwise, generic Arrow arrays are used, and if the `array` does not
+    contain records at top-level, the Arrow table will consist of one field whose
+    name is `""`. See #ak.to_arrow_table for more details.
+
+    Parquet files can maintain the distinction between "option-type but no elements are
+    missing" and "not option-type" at all levels, including the top level. However,
+    there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
+    Be aware of these type distinctions when passing data through Arrow or Parquet.
+
+    See also #ak.to_arrow, which is used as an intermediate step.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         destination (path-like): Name of the output file, file path, or
@@ -155,10 +177,9 @@ def to_parquet(
             to open a remote file for writing.
 
     Returns:
-    `pyarrow._parquet.FileMetaData` instance
+        A `pyarrow._parquet.FileMetaData` describing the written Parquet file.
 
-    Writes an Awkward Array to a Parquet file (through pyarrow).
-
+    Examples:
         >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
         >>> ak.to_parquet(array1, "array1.parquet")
         <pyarrow._parquet.FileMetaData object at 0x7f646c38ff40>
@@ -168,21 +189,6 @@ def to_parquet(
           num_row_groups: 1
           format_version: 2.6
           serialized_size: 0
-
-    If the `array` does not contain records at top-level, the Arrow table will consist
-    of one field whose name is `""` iff. `extensionarray` is False.
-
-    If `extensionarray` is True`, use a custom Arrow extension to store this array.
-    Otherwise, generic Arrow arrays are used, and if the `array` does not
-    contain records at top-level, the Arrow table will consist of one field whose
-    name is `""`. See #ak.to_arrow_table for more details.
-
-    Parquet files can maintain the distinction between "option-type but no elements are
-    missing" and "not option-type" at all levels, including the top level. However,
-    there is no distinction between `?union[X, Y, Z]]` type and `union[?X, ?Y, ?Z]` type.
-    Be aware of these type distinctions when passing data through Arrow or Parquet.
-
-    See also #ak.to_arrow, which is used as an intermediate step.
     """
     # Dispatch
     yield (array,)
@@ -410,11 +416,19 @@ def _impl(
     if extensionarray:
         table = convert_awkward_arrow_table_to_native(table)
 
-    if hasattr(array, "attrs") and array.attrs:
-        df_metadata = {"AWKWARD_ATTRS": json.dumps(array.attrs.to_dict())}
-        existing_metadata = table.schema.metadata
-        merged_metadata = {**existing_metadata, **df_metadata}
-        table = table.replace_schema_metadata(merged_metadata)
+    # when writing row groups iteratively, the attrs are those of the first array
+    attrs_from = first_array if write_iteratively else array
+    if hasattr(attrs_from, "attrs") and attrs_from.attrs:
+        serializable_attrs = without_transient_attrs(attrs_from.attrs.to_dict())
+
+        # Only modify table metadata if there are actual non-transient attrs
+        if serializable_attrs:
+            existing_metadata = table.schema.metadata or {}
+            merged_metadata = {
+                **existing_metadata,
+                b"AWKWARD_ATTRS": json.dumps(serializable_attrs).encode("utf-8"),
+            }
+            table = table.replace_schema_metadata(merged_metadata)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}

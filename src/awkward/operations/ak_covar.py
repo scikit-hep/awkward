@@ -9,6 +9,7 @@ from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import _get_named_axis, _is_valid_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -32,7 +33,22 @@ def covar(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the covariance of x and y over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records, which
+    must be broadcastable to each other. The grouping is performed the same way
+    as for reducers, though this operation is not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the covariance is calculated as::
+
+        ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight) / ak.sum(weight)
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
     Args:
         x: One coordinate to use in the covariance calculation (anything #ak.to_layout recognizes).
         y: The other coordinate to use in the covariance calculation (anything #ak.to_layout recognizes).
@@ -64,20 +80,8 @@ def covar(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the covariance of `x` and `y` (many types supported, including
-    all Awkward Arrays and Records, must be broadcastable to each other).
-    The grouping is performed the same way as for reducers, though this
-    operation is not a reducer and has no identity.
-
-    This function has no NumPy equivalent.
-
-    Passing all arguments to the reducers, the covariance is calculated as::
-
-        ak.sum((x - ak.mean(x))*(y - ak.mean(y))*weight) / ak.sum(weight)
-
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
+    Returns:
+        The covariance of `x` and `y`.
     """
     # Dispatch
     yield x, y, weight
@@ -141,15 +145,6 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=None,
                 attrs=None,
             )
-            sumwxy = ak.operations.ak_sum._impl(
-                (x - xmean) * (y - ymean),
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=None,
-                attrs=None,
-            )
         else:
             sumw = ak.operations.ak_sum._impl(
                 x * 0 + weight,
@@ -160,8 +155,51 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=None,
                 attrs=None,
             )
+
+        # Centring is internal; strip named axes from the means so the
+        # subtractions are not rejected by the named-axis compatibility check.
+        xmean = ak.operations.ak_without_named_axis._impl(
+            xmean, highlevel=True, behavior=None, attrs=None
+        )
+        ymean = ak.operations.ak_without_named_axis._impl(
+            ymean, highlevel=True, behavior=None, attrs=None
+        )
+
+        # Centring on the (float64) means -- numerically stable. For axis=None the
+        # mean is a scalar, so subtract it directly; broadcasting the length-1
+        # keepdims mean against a ragged array instead is far slower and heavier.
+        # Otherwise two-pass, falling back to the one-pass E[xy]-E[x]E[y] form when
+        # `x - xmean` cannot broadcast (a non-innermost axis over a ragged array,
+        # or an empty axis=None).
+        if axis is None:
+            xm = xmean[(0,) * xmean.ndim]
+            ym = ymean[(0,) * ymean.ndim]
+            prod = None if (xm is None or ym is None) else (x - xm) * (y - ym)
+        else:
+            try:
+                prod = (x - xmean) * (y - ymean)
+            except ValueError:
+                prod = None
+
+        if prod is not None:
+            if weight is not None:
+                prod = prod * weight
             sumwxy = ak.operations.ak_sum._impl(
-                (x - xmean) * (y - ymean) * weight,
+                prod,
+                axis,
+                keepdims,
+                mask_identity,
+                highlevel=True,
+                behavior=None,
+                attrs=None,
+            )
+            out = sumwxy / sumw
+        else:
+            xp = promote_integral_to_float64(x)
+            yp = promote_integral_to_float64(y)
+            xy = xp * yp if weight is None else xp * yp * weight
+            sumwxy = ak.operations.ak_sum._impl(
+                xy,
                 axis,
                 keepdims,
                 mask_identity,
@@ -170,7 +208,37 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 attrs=None,
             )
 
-        out = sumwxy / sumw
+            # xmean and ymean were forced to keepdims=True earlier for the try block.
+            # If keepdims=False, we must recalculate them so they match the dimensions of sumwxy.
+            if not keepdims:
+                xmean = ak.operations.ak_mean._impl(
+                    x,
+                    weight,
+                    axis,
+                    False,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=None,
+                    attrs=None,
+                )
+                ymean = ak.operations.ak_mean._impl(
+                    y,
+                    weight,
+                    axis,
+                    False,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=None,
+                    attrs=None,
+                )
+                xmean = ak.operations.ak_without_named_axis._impl(
+                    xmean, highlevel=True, behavior=None, attrs=None
+                )
+                ymean = ak.operations.ak_without_named_axis._impl(
+                    ymean, highlevel=True, behavior=None, attrs=None
+                )
+
+            out = sumwxy / sumw - xmean * ymean
 
         wrapped = ctx.wrap(
             maybe_highlevel_to_lowlevel(out),

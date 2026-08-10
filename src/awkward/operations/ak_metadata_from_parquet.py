@@ -27,18 +27,7 @@ def metadata_from_parquet(
     ignore_metadata=False,
     scan_files=True,
 ):
-    """
-    Args:
-        path (str): Local filename or remote URL, passed to fsspec for resolution.
-            May contain glob patterns. A list of paths is also allowed, but they
-            must be data files, not directories.
-        storage_options: Passed to `fsspec.parquet.open_parquet_file`.
-        row_groups (None or set of int): Row groups to read; must be non-negative.
-            Order is ignored: the output array is presented in the order specified
-            by Parquet metadata. If None, all row groups/all rows are read.
-        ignore_metadata (bool): ignore the dedicated _metadata file if found
-            and instead derive metadata from the first data file.
-        scan_files (bool): TODO
+    """Reads metadata from a Parquet file or dataset without reading the data.
 
     This function differs from ak.from_parquet._metadata as follows:
 
@@ -47,7 +36,7 @@ def metadata_from_parquet(
       the first data file
     * the total number of rows is always known
 
-    Returns dict containing
+    A dict containing
 
     * `form`: an Awkward Form representing the low-level type of the data
       (use `.type` to get a high-level type),
@@ -60,6 +49,22 @@ def metadata_from_parquet(
       argument).
 
     See also #ak.from_parquet, #ak.to_parquet.
+
+    Args:
+        path (str): Local filename or remote URL, passed to fsspec for resolution.
+            May contain glob patterns. A list of paths is also allowed, but they
+            must be data files, not directories.
+        storage_options: Passed to `fsspec.parquet.open_parquet_file`.
+        row_groups (None or set of int): Row groups to read; must be non-negative.
+            Order is ignored: the output array is presented in the order specified
+            by Parquet metadata. If None, all row groups/all rows are read.
+        ignore_metadata (bool): ignore the dedicated _metadata file if found
+            and instead derive metadata from the first data file.
+        scan_files (bool): TODO
+
+    Returns:
+        A dict of metadata describing the Parquet dataset (its form, filesystem,
+        paths, row counts, and columns), read without reading the array data.
     """
     import awkward._connect.pyarrow  # noqa: F401
 

@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
-from awkward._layout import HighLevelContext, ensure_same_backend
+from awkward._layout import (
+    HighLevelContext,
+    ensure_same_backend,
+    promote_integral_to_float64,
+)
 from awkward._nplikes import ufuncs
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -26,7 +30,37 @@ def linear_fit(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Computes the linear fit of y against x over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records, which
+    must be broadcastable to each other. The grouping is performed the same way
+    as for reducers, though this operation is not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the linear fit is calculated as::
+
+        sumw            = ak.sum(weight)
+        sumwx           = ak.sum(weight * x)
+        sumwy           = ak.sum(weight * y)
+        sumwxx          = ak.sum(weight * x**2)
+        sumwxy          = ak.sum(weight * x * y)
+        delta           = (sumw*sumwxx) - (sumwx*sumwx)
+
+        intercept       = ((sumwxx*sumwy) - (sumwx*sumwxy)) / delta
+        slope           = ((sumw*sumwxy) - (sumwx*sumwy))   / delta
+        intercept_error = np.sqrt(sumwxx / delta)
+        slope_error     = np.sqrt(sumw   / delta)
+
+    The results, `intercept`, `slope`, `intercept_error`, and `slope_error`,
+    are given as an #ak.Record with four fields. The values of these fields
+    might be arrays or even nested arrays; they match the structure of `x` and
+    `y`.
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
     Args:
         x: One coordinate to use in the linear fit (anything #ak.to_layout recognizes).
         y: The other coordinate to use in the linear fit (anything #ak.to_layout recognizes).
@@ -58,35 +92,8 @@ def linear_fit(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the linear fit of `y` with respect to `x` (many types supported,
-    including all Awkward Arrays and Records, must be broadcastable to each
-    other). The grouping is performed the same way as for reducers, though
-    this operation is not a reducer and has no identity.
-
-    This function has no NumPy equivalent.
-
-    Passing all arguments to the reducers, the linear fit is calculated as::
-
-        sumw            = ak.sum(weight)
-        sumwx           = ak.sum(weight * x)
-        sumwy           = ak.sum(weight * y)
-        sumwxx          = ak.sum(weight * x**2)
-        sumwxy          = ak.sum(weight * x * y)
-        delta           = (sumw*sumwxx) - (sumwx*sumwx)
-
-        intercept       = ((sumwxx*sumwy) - (sumwx*sumwxy)) / delta
-        slope           = ((sumw*sumwxy) - (sumwx*sumwy))   / delta
-        intercept_error = np.sqrt(sumwxx / delta)
-        slope_error     = np.sqrt(sumw   / delta)
-
-    The results, `intercept`, `slope`, `intercept_error`, and `slope_error`,
-    are given as an #ak.Record with four fields. The values of these fields
-    might be arrays or even nested arrays; they match the structure of `x` and
-    `y`.
-
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
+    Returns:
+        The linear fit of `y` with respect to `x`.
     """
     # Dispatch
     yield x, y, weight
@@ -115,6 +122,28 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
     y = ctx.wrap(y_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
+    def _sum(a):
+        return ak.operations.ak_sum._impl(
+            a,
+            axis,
+            keepdims,
+            mask_identity,
+            highlevel=True,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+
+    # Promote integer x, y to float64 before forming x**2 and x*y, so the
+    # products (and the sums that feed delta = sumw*sumwxx - sumwx*sumwx) are
+    # accumulated in float64 rather than wrapping at the input integer dtype --
+    # e.g. int32 `100000**2` overflows. promote_integral_to_float64 casts only
+    # integer/bool leaves, so float and complex data pass through unchanged (no
+    # copy); promoting each array independently also keeps a mixed integer/complex
+    # pair (int x, complex y) from wrapping. Matches how ak.covar/ak.corr promote
+    # unconditionally in their one-pass paths.
+    xp = promote_integral_to_float64(x)
+    yp = promote_integral_to_float64(y)
+
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
@@ -126,88 +155,16 @@ def _impl(x, y, weight, axis, keepdims, mask_identity, highlevel, behavior, attr
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            sumwx = ak.operations.ak_sum._impl(
-                x,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwy = ak.operations.ak_sum._impl(
-                y,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwxx = ak.operations.ak_sum._impl(
-                x**2,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwxy = ak.operations.ak_sum._impl(
-                x * y,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            sumwx = _sum(xp)
+            sumwy = _sum(yp)
+            sumwxx = _sum(xp * xp)
+            sumwxy = _sum(xp * yp)
         else:
-            sumw = ak.operations.ak_sum._impl(
-                x * 0 + weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwx = ak.operations.ak_sum._impl(
-                x * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwy = ak.operations.ak_sum._impl(
-                y * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwxx = ak.operations.ak_sum._impl(
-                (x**2) * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
-            sumwxy = ak.operations.ak_sum._impl(
-                x * y * weight,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            sumw = _sum(xp * 0 + weight)
+            sumwx = _sum(xp * weight)
+            sumwy = _sum(yp * weight)
+            sumwxx = _sum(xp * xp * weight)
+            sumwxy = _sum(xp * yp * weight)
         delta = (sumw * sumwxx) - (sumwx * sumwx)
         intercept = ((sumwxx * sumwy) - (sumwx * sumwxy)) / delta
         slope = ((sumw * sumwxy) - (sumwx * sumwy)) / delta

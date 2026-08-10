@@ -31,7 +31,18 @@ def from_parquet(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Reads data from a local or remote Parquet file or collection of files.
+
+    The data are eagerly (not lazily) read and must fit into memory. Use
+    `columns` and/or `row_groups` to select and filter manageable subsets of
+    the data, and use #ak.metadata_from_parquet to find column names and the
+    range of row groups that a dataset has.
+
+    Any attrs that #ak.to_parquet stored in the file are restored (as are those
+    written by pandas), unless overridden by the `attrs` argument.
+
+    See also #ak.to_parquet, #ak.metadata_from_parquet.
+
     Args:
         path (str): Local filename or remote URL, passed to fsspec for resolution.
             May contain glob patterns.
@@ -56,16 +67,10 @@ def from_parquet(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         attrs (None or dict): Custom attributes for the output array, if
-            high-level.
+            high-level. These take precedence over any `attrs` stored in the file.
 
-    Reads data from a local or remote Parquet file or collection of files.
-
-    The data are eagerly (not lazily) read and must fit into memory. Use `columns`
-    and/or `row_groups` to select and filter manageable subsets of the data, and
-    use #ak.metadata_from_parquet to find column names and the range of row groups
-    that a dataset has.
-
-    See also #ak.to_parquet, #ak.metadata_from_parquet.
+    Returns:
+        An #ak.Array read from the given local or remote Parquet file(s).
     """
 
     parquet_columns, subform, actual_paths, fs, subrg, _row_counts, _meta, _uuid = (
@@ -270,7 +275,7 @@ def _load(
         return wrap_layout(
             arrays[0],
             highlevel=highlevel,
-            attrs=(attrs if attrs else {}) | arrays[0].attrs,
+            attrs=arrays[0].attrs | (attrs if attrs else {}),
             behavior=behavior,
         )
     else:
@@ -281,7 +286,7 @@ def _load(
         file_attrs = {}
         for array in arrays:
             file_attrs |= getattr(array, "attrs", None) or {}
-        merged_attrs = (attrs if attrs else {}) | file_attrs
+        merged_attrs = file_attrs | (attrs if attrs else {})
         return ak.operations.ak_concatenate._impl(
             arrays,
             axis=0,

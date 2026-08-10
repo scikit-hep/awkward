@@ -185,8 +185,11 @@ class OperationErrorContext(ErrorContext):
             backend = backend_of_obj(obj, default=None)
             # Do we not recognise this as an object with a backend?
             if backend is None:
-                # Is this an iterable object, and are we permitted to recurse?
-                if isinstance(obj, Collection) and depth != depth_limit:
+                # Only recurse into list/tuple (e.g. the arrays passed to
+                # ak.concatenate/ak.zip), never arbitrary containers: a Mapping
+                # yields only keys, and a user container (e.g. from_buffers'
+                # `container`) may not be iterable or may trigger data reads.
+                if isinstance(obj, (list, tuple)) and depth != depth_limit:
                     if self.any_backend_is_delayed(
                         obj, depth=depth + 1, depth_limit=depth_limit
                     ):

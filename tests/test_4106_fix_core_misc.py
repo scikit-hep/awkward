@@ -56,6 +56,54 @@ def test_any_backend_is_delayed_nested_non_delayed_continues():
     assert result is False
 
 
+def test_any_backend_is_delayed_only_iterates_list_and_tuple(monkeypatch):
+    import awkward._backends.dispatch as dispatch
+
+    class Delayed:
+        pass
+
+    class FakeBackend:
+        class nplike:
+            is_eager = False
+
+    def fake_backend_of_obj(obj, default=None):
+        return FakeBackend if isinstance(obj, Delayed) else default
+
+    monkeypatch.setattr(dispatch, "backend_of_obj", fake_backend_of_obj)
+
+    ctx = OperationErrorContext.__new__(OperationErrorContext)
+    # list/tuple are recursed into, so a nested delayed backend is detected
+    assert ctx.any_backend_is_delayed([[Delayed()]]) is True
+    assert ctx.any_backend_is_delayed([(Delayed(),)]) is True
+    # a Mapping is not recursed: iterating it yields keys, never the values
+    assert ctx.any_backend_is_delayed([{"key": Delayed()}]) is False
+
+
+def test_any_backend_is_delayed_does_not_iterate_foreign_containers():
+    from collections.abc import Mapping, Sequence
+
+    class RaisingMapping(Mapping):
+        def __getitem__(self, key):
+            raise AssertionError("must not be accessed")
+
+        def __iter__(self):
+            raise AssertionError("must not be iterated")
+
+        def __len__(self):
+            return 0
+
+    class RaisingSequence(Sequence):
+        def __getitem__(self, index):
+            raise AssertionError("must not be accessed")
+
+        def __len__(self):
+            raise AssertionError("must not be measured")
+
+    ctx = OperationErrorContext.__new__(OperationErrorContext)
+    assert ctx.any_backend_is_delayed([RaisingMapping()]) is False
+    assert ctx.any_backend_is_delayed([RaisingSequence()]) is False
+
+
 def _make_custom_str_array(n=5):
     class MyPoint(ak.Record):
         def __str__(self):

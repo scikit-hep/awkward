@@ -62,6 +62,76 @@ def make_segment_views(offsets):
     return offsets[:-1], offsets[1:]
 
 
+def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
+    nextcarry,
+    nextoffsets,
+    nextlen,
+    maxnextparents,
+    distincts,
+    distinctslen,
+    offsetscopy,
+    offsets,
+    length,
+    outer_offsets,
+    outlength,
+    maxcount,
+):
+    # Transpose a ragged 2-level structure for a non-innermost reduction: group
+    # the elements by (outer_bin, column) instead of by row. For each column
+    # `col` of each outer bin, gather one element from every row in that outer
+    # bin whose sub-list reaches `col`. Output nextbin = outer_bin*maxcount + col.
+    #
+    # Vectorized equivalent of the reference kernel: assign each element its
+    # nextbin, stably sort by nextbin (so rows stay in order within a bin), and
+    # build nextoffsets as the per-bin cumulative count. Matches the CPU kernel
+    # (validated against its reference definition).
+    nextlen = int(nextlen)
+    distinctslen = int(distinctslen)
+    length = int(length)
+    outlength = int(outlength)
+    maxcount = int(maxcount)
+    nbins = outlength * maxcount
+    idt = offsets.dtype
+
+    # Initialize outputs (empty input leaves these as the -1 / 0 sentinels).
+    maxnextparents[0] = -1
+    if distinctslen > 0:
+        distincts[:distinctslen] = -1
+    nextoffsets[0] = 0
+    if nbins > 0:
+        nextoffsets[1 : nbins + 1] = 0
+    if nextlen == 0 or nbins == 0:
+        return
+
+    counts = offsets[1 : length + 1] - offsets[:length]  # per-row sub-list length
+    row = cp.repeat(cp.arange(length, dtype=idt), counts)  # row of each element
+    cum = cp.zeros(length + 1, dtype=idt)
+    cp.cumsum(counts, out=cum[1:])
+    elem = cp.arange(nextlen, dtype=idt)
+    col = elem - cum[row]  # column within the row
+    pos = offsets[row] + col  # source content index (= nextcarry value)
+
+    outer_counts = outer_offsets[1 : outlength + 1] - outer_offsets[:outlength]
+    outer_bin_of_row = cp.repeat(cp.arange(outlength, dtype=idt), outer_counts)
+    nextbin = outer_bin_of_row[row] * maxcount + col
+
+    # Stable sort by nextbin (elem is the row-major order, so lexsort with elem as
+    # the secondary key keeps rows ordered within each bin -- a stable sort).
+    order = cp.lexsort(cp.stack((elem, nextbin)))
+    nextcarry[:nextlen] = pos[order]
+
+    bincounts = cp.bincount(nextbin, minlength=nbins)[:nbins]
+    cp.cumsum(bincounts, out=nextoffsets[1 : nbins + 1])
+
+    if distinctslen > 0:
+        idx = cp.arange(distinctslen, dtype=idt)
+        distincts[:distinctslen] = cp.where(bincounts[:distinctslen] > 0, idx, -1)
+
+    nonzero_bins = cp.nonzero(bincounts > 0)[0]
+    if nonzero_bins.shape[0] > 0:
+        maxnextparents[0] = nonzero_bins[-1]
+
+
 def segmented_reduce(*, max_segment_size=None, **kwargs):
     """Thin wrapper over ``cuda.compute.segmented_reduce`` that supplies the
     ``max_segment_size`` hint (number of elements in the largest segment) when a
@@ -124,6 +194,63 @@ def _make_widening_cast(in_type, out_type):
     return _cast
 
 
+@functools.cache
+def _make_square_to_float64(in_type):
+    """Interned ``x -> (double)x * (double)x`` map op.
+
+    Widens each element to ``float64`` and squares it on the fly, so a
+    downstream segmented_reduce accumulates ``sum(x**2)`` in double precision
+    with no materialised ``x*x`` buffer and no integer/float32 overflow. Cached
+    per input dtype so cuda.compute builds one kernel per type.
+    """
+
+    def _sq(x):
+        v = float(x)
+        return v * v
+
+    _sq.__annotations__ = {"x": in_type, "return": np.float64}
+    return _sq
+
+
+@functools.cache
+def _make_power_to_float64(in_type, n):
+    """Interned ``x -> (double)x ** n`` map op (cached per (in_type, n)).
+
+    Widens each element to ``float64`` and raises it to the runtime power ``n``
+    on the fly, so a downstream segmented_reduce accumulates ``sum(x**n)`` in
+    double precision with no materialised ``x**n`` buffer and no overflow.
+
+    For the non-negative integer ``n`` that ak.moment passes, the power is done
+    by exponentiation-by-squaring (a few multiplies) rather than a transcendental
+    ``pow`` call per element. ``n`` is baked in as a constant so the loop is
+    fully unrolled by the device compiler.
+    """
+
+    n_int = int(n)
+
+    if n_int < 0:
+        # Unusual; keep the generic path.
+        def _pow(x):
+            return float(x) ** n_int
+
+    else:
+
+        def _pow(x):
+            base = float(x)
+            result = 1.0
+            e = n_int
+            while e > 0:
+                if e & 1:
+                    result = result * base
+                e = e >> 1
+                if e > 0:
+                    base = base * base
+            return result
+
+    _pow.__annotations__ = {"x": in_type, "return": np.float64}
+    return _pow
+
+
 def _widen_for_reduce(input_data, out_dtype):
     """Fuse a widening cast into a downstream segmented_reduce.
 
@@ -167,6 +294,82 @@ def _nonzero_for_reduce(input_data, out_dtype):
     )
 
 
+# Fused elementwise kernels that turn IEEE float bits into an order-preserving
+# unsigned key in a single launch (built lazily, once, per float width). See
+# `_float_order_keys` for the semantics. Working on the raw uint bit-view means
+# the whole transform -- signed-zero canonicalisation, bit-based NaN detection,
+# sign transform, and NaN sentinel -- is pure integer arithmetic with no
+# temporaries.
+_FLOAT_ORDER_KEY_KERNELS: dict[int, object] = {}
+
+_FLOAT_ORDER_KEY_SOURCE = {
+    64: (
+        "uint64",
+        "unsigned long long",
+        "0x8000000000000000ULL",
+        "0x7FF0000000000000ULL",
+        "0x000FFFFFFFFFFFFFULL",
+        "0ULL",
+        63,
+    ),
+    32: (
+        "uint32",
+        "unsigned int",
+        "0x80000000U",
+        "0x7F800000U",
+        "0x007FFFFFU",
+        "0U",
+        31,
+    ),
+}
+
+
+def _float_order_key_kernel(cp, width):
+    kernel = _FLOAT_ORDER_KEY_KERNELS.get(width)
+    if kernel is None:
+        ctype, c, signbit, exp, mant, zero, top = _FLOAT_ORDER_KEY_SOURCE[width]
+        kernel = cp.ElementwiseKernel(
+            f"{ctype} u_in, {ctype} nan_sentinel",
+            f"{ctype} out",
+            f"""
+            {c} u = u_in;
+            if (u == {signbit}) u = {zero};              // -0.0 -> +0.0
+            bool is_nan = ((u & {exp}) == {exp}) && ((u & {mant}) != {zero});
+            {c} key = (u >> {top}) ? (~u) : (u ^ {signbit});
+            out = is_nan ? nan_sentinel : key;
+            """,
+            f"awkward_float{width}_order_key",
+        )
+        _FLOAT_ORDER_KEY_KERNELS[width] = kernel
+    return kernel
+
+
+def _float_order_keys(cp, values, ascending):
+    """Order-preserving unsigned keys that reproduce the CPU float ordering.
+
+    A plain radix sort of raw float bits mis-orders NaNs (by bit pattern) and,
+    with a simple sentinel remap, cannot place NaN *strictly before* a real
+    ``-inf`` (there is no float below ``-inf``). This maps each float to an
+    unsigned integer whose ascending order is the exact CPU ordering:
+
+    * ``-0.0`` is canonicalised to ``+0.0`` (they compare equal on the CPU).
+    * The bit pattern is transformed so signed floats sort in true numeric order
+      (negatives flip all bits; others flip only the sign bit).
+    * NaNs are sent to the *front* in both directions: their transform is the
+      unique maximum, so they are remapped to 0 for ascending (unique minimum)
+      or all-ones for descending (unique maximum, first under DESCENDING order).
+
+    The keys are sorted; the actual values/indices are carried separately, so the
+    sentinels never appear in the output. The transform is a single fused
+    elementwise kernel over the (zero-copy) uint bit-view -- no temporaries.
+    """
+    width = values.dtype.itemsize * 8
+    uint_dtype = cp.uint32 if width == 32 else cp.uint64
+    u = values.view(uint_dtype)  # zero-copy bit reinterpretation
+    nan_sentinel = uint_dtype(0) if ascending else uint_dtype((1 << width) - 1)
+    return _float_order_key_kernel(cp, width)(u, nan_sentinel)
+
+
 def segmented_sort(
     toptr,
     fromptr,
@@ -192,6 +395,27 @@ def segmented_sort(
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
 
+    # Float parity with the CPU kernel: sort by an order-preserving unsigned key
+    # (correct NaN placement, -0.0 == +0.0) while carrying the *original* values,
+    # so the output keeps real NaNs but positions everything as the CPU does.
+    # Non-float dtypes sort natively (CCCL handles signed integers correctly).
+    if num_items > 0 and fromptr.dtype.kind == "f":
+        keys = _float_order_keys(cp, fromptr, ascending)
+        keys_out = cp.empty_like(keys)
+        segmented_sort(
+            d_in_keys=keys,
+            d_out_keys=keys_out,
+            d_in_values=fromptr,
+            d_out_values=toptr,
+            num_items=num_items,
+            num_segments=num_segments,
+            start_offsets_in=start_o,
+            end_offsets_in=end_o,
+            order=order,
+            stream=None,
+        )
+        return
+
     segmented_sort(
         d_in_keys=fromptr,
         d_out_keys=toptr,
@@ -204,6 +428,90 @@ def segmented_sort(
         order=order,
         stream=None,
     )
+
+
+def segmented_argsort(
+    toptr,
+    fromptr,
+    length,
+    offsets,
+    offsetslength,
+    ascending,
+    stable,
+):
+    """Per-segment argsort on the ``cuda.compute`` path.
+
+    Runs a key--value ``segmented_sort`` where the keys are the data and the
+    values are global element indices; the permuted values are the argsort
+    carry. Indices are then made segment-local, matching the CPU
+    ``awkward_argsort`` kernel (which does ``iota`` then ``j - start_off``).
+
+    Notes on parity with the CPU kernel:
+
+    * Floating-point keys go through :func:`_float_order_keys`, an
+      order-preserving unsigned transform that places NaNs at the *front* in both
+      directions and treats ``-0.0 == +0.0`` -- a plain sentinel cannot do this
+      because NaN must sort strictly below a real ``-inf``. The transformed keys
+      are sorted; the indices are carried separately, so the transform never
+      reaches the output.
+    * CCCL's segmented radix sort is stable on keys; because the seeded values
+      are strictly increasing indices, equal keys retain their original order,
+      so ``stable=True`` is satisfied inherently and ``stable=False`` is still
+      deterministic.
+    """
+    from cuda.compute import SortOrder, segmented_sort
+
+    cupy_nplike = Cupy.instance()
+    cp = cupy_nplike._module
+
+    # Ensure offsets are int64 as expected by segmented_sort
+    if offsets.dtype != cp.int64:
+        offsets = offsets.astype(cp.int64, copy=False)
+
+    num_segments = offsetslength - 1
+    num_items = int(offsets[-1]) if len(offsets) > 0 else 0
+    if num_items == 0:
+        return
+
+    start_o, end_o = make_segment_views(offsets)
+    order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
+
+    # Keys to sort by. Floats use an order-preserving unsigned key so NaNs land
+    # at the front (both directions) and -0.0 == +0.0, matching the CPU kernel;
+    # a plain sentinel remap cannot place NaN below a real -inf. datetime and
+    # timedelta compare as their int64 payload (the layout already reports int64
+    # for the kernel signature). Signed integers sort natively (CCCL handles the
+    # sign correctly).
+    keys_in = fromptr
+    if keys_in.dtype.kind in "Mm":
+        keys_in = keys_in.view(cp.int64)
+    elif keys_in.dtype.kind == "f":
+        keys_in = _float_order_keys(cp, keys_in, ascending)
+
+    # Values = global indices; after the sort these are the argsort carry.
+    values_in = cp.arange(num_items, dtype=cp.int64)
+
+    # segmented_sort also emits sorted keys, which we discard; the API still
+    # requires an output buffer, so hand it scratch.
+    keys_out = cp.empty_like(keys_in)
+
+    segmented_sort(
+        d_in_keys=keys_in,
+        d_out_keys=keys_out,
+        d_in_values=values_in,
+        d_out_values=toptr,
+        num_items=num_items,
+        num_segments=num_segments,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        order=order,
+        stream=None,
+    )
+
+    # Convert global indices to segment-local (CPU kernel does `j - start_off`).
+    seg_sizes = end_o - start_o
+    seg_start_per_position = cp.repeat(start_o, seg_sizes)
+    toptr -= seg_start_per_position
 
 
 def awkward_reduce_argmax(
@@ -376,6 +684,103 @@ def awkward_reduce_sum(
     outlength,
 ):
     d_input = _widen_for_reduce(input_data, result.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
+
+    h_init = np.asarray(0, dtype=result.dtype)
+
+    segmented_reduce(
+        d_in=d_input,
+        d_out=result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=h_init,
+    )
+
+
+def awkward_reduce_sumofsquares(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+):
+    # sum(x**2) accumulated in float64. A TransformIterator squares each element
+    # (widened to double) on the fly, feeding a PLUS segmented_reduce -- no x*x
+    # buffer, no integer/float32 overflow. `result` is float64 (SumOfSquares).
+    d_input = TransformIterator(
+        input_data, _make_square_to_float64(input_data.dtype.type)
+    )
+    start_o, end_o = make_segment_views(offsets_data)
+
+    h_init = np.asarray(0, dtype=result.dtype)
+
+    segmented_reduce(
+        d_in=d_input,
+        d_out=result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=h_init,
+    )
+
+
+def awkward_reduce_centered_sumofsquares(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+    means,
+):
+    # sum((x - mean)**2) per segment, the two-pass variance numerator, in float64.
+    # `means` holds one (float64) mean per segment, aligned to `offsets`. Each
+    # element's segment mean is gathered (means[segment_id]) and a
+    # ZipIterator + TransformIterator forms (x - mean)**2 on the fly, feeding a
+    # PLUS segmented_reduce -- the subtraction is done in float64 (means is
+    # double), so integer/float32 inputs neither overflow nor lose precision, and
+    # no (x - mean) deviation buffer feeds the reduction. `result` is float64.
+    counts = offsets_data[1:] - offsets_data[:-1]
+    segment_ids = cp.repeat(cp.arange(outlength, dtype=offsets_data.dtype), counts)
+    mean_per_element = means[segment_ids]
+
+    def _centered_square(pair):
+        # field_0 is x (its dtype); field_1 is the float64 mean, so the
+        # subtraction promotes to float64 -- no overflow / precision loss.
+        d = pair.field_0 - pair.field_1
+        return d * d
+
+    d_input = TransformIterator(
+        ZipIterator(input_data, mean_per_element), _centered_square
+    )
+    start_o, end_o = make_segment_views(offsets_data)
+
+    h_init = np.asarray(0, dtype=result.dtype)
+
+    segmented_reduce(
+        d_in=d_input,
+        d_out=result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=h_init,
+    )
+
+
+def awkward_reduce_sumofpowers(
+    result,
+    input_data,
+    offsets_data,
+    outlength,
+    n,
+):
+    # sum(x**n) accumulated in float64. A TransformIterator raises each element
+    # (widened to double) to the runtime power n on the fly, feeding a PLUS
+    # segmented_reduce -- no x**n buffer, no integer/float32 overflow.
+    d_input = TransformIterator(
+        input_data, _make_power_to_float64(input_data.dtype.type, int(n))
+    )
     start_o, end_o = make_segment_views(offsets_data)
 
     h_init = np.asarray(0, dtype=result.dtype)

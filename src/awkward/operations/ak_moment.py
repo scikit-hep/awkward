@@ -9,6 +9,7 @@ from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     AxisName,
@@ -35,7 +36,25 @@ def moment(
     behavior: Mapping | None = None,
     attrs: Mapping | None = None,
 ):
-    """
+    """Computes the `n`th moment over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records. The
+    grouping is performed the same way as for reducers, though this operation is
+    not a reducer and has no identity.
+
+    This function has no NumPy equivalent.
+
+    Passing all arguments to the reducers, the moment is calculated as::
+
+        ak.sum(x**n * weight) / ak.sum(weight)
+
+    The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
+    mean (the `n=1` moment).
+
+    See #ak.sum for a complete description of handling nested lists and
+    missing values (None) in reducers, and #ak.mean for an example with another
+    non-reducer.
+
     Args:
         x: The data on which to compute the moment (anything #ak.to_layout recognizes).
         n (int): The choice of moment: `0` is a sum of weights, `1` is
@@ -68,23 +87,8 @@ def moment(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Computes the `n`th moment in each group of elements from `x` (many
-    types supported, including all Awkward Arrays and Records). The grouping
-    is performed the same way as for reducers, though this operation is not a
-    reducer and has no identity.
-
-    This function has no NumPy equivalent.
-
-    Passing all arguments to the reducers, the moment is calculated as::
-
-        ak.sum(x**n * weight) / ak.sum(weight)
-
-    The `n=2` moment differs from #ak.var in that #ak.var also subtracts the
-    mean (the `n=1` moment).
-
-    See #ak.sum for a complete description of handling nested lists and
-    missing values (None) in reducers, and #ak.mean for an example with another
-    non-reducer.
+    Returns:
+        The `n`th moment in each group of elements from `x`.
     """
     # Dispatch
     yield x, weight
@@ -121,6 +125,9 @@ def _impl(
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
+    # sum-of-squares is float64-only, so complex falls back to the sum(x**n) path.
+    is_complex = "complex" in str(ak.type(x))
+
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
@@ -132,18 +139,48 @@ def _impl(
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            sumwxn = ak.operations.ak_sum._impl(
-                x**n,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            if is_complex:
+                # The sum-of-squares/powers reducers are float64-only, so complex
+                # input uses sum(x**n) (matching NumPy's complex moment).
+                sumwxn = ak.operations.ak_sum._impl(
+                    x**n,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            elif n == 2:
+                # E[x**2]: sum of squares accumulated in float64 directly from
+                # the input -- no x**2 buffer, no integer/float32 overflow.
+                sumwxn = ak.operations.ak_sumofsquares._impl(
+                    x,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            else:
+                # Other powers: sum(x**n) accumulated in float64 directly from
+                # the input -- no x**n buffer, no integer/float32 overflow.
+                sumwxn = ak.operations.ak_sumofpowers._impl(
+                    x,
+                    n,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
         else:
+            # Promote so (x**n) * weight does not overflow for integer input.
+            xp = promote_integral_to_float64(x)
             sumw = ak.operations.ak_sum._impl(
-                x * 0 + weight,
+                xp * 0 + weight,
                 axis,
                 keepdims,
                 mask_identity,
@@ -152,7 +189,7 @@ def _impl(
                 attrs=ctx.attrs,
             )
             sumwxn = ak.operations.ak_sum._impl(
-                (x**n) * weight,
+                (xp**n) * weight,
                 axis,
                 keepdims,
                 mask_identity,

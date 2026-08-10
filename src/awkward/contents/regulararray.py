@@ -1076,9 +1076,8 @@ class RegularArray(RegularMeta[Content], Content):
                 )
             )
 
-            # In the offsets representation, nextstarts is just nextoffsets[:-1].
-            # The original `awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64`
-            # kernel call is no longer needed.
+            # In the offsets representation, nextstarts is just nextoffsets[:-1]
+            # (no parents->nextstarts derivation needed).
             nextstarts = nextoffsets[:-1]
 
             if reducer.needs_position:
@@ -1152,10 +1151,8 @@ class RegularArray(RegularMeta[Content], Content):
                 else:
                     assert outcontent.is_regular
 
-            # outoffsets used to come from
-            # `awkward_ListOffsetArray_reduce_local_outoffsets_64(parents, ...)`,
-            # which produced the offsets-rep of `parents`. With offsets already in
-            # hand, we just use them.
+            # In the offsets representation the output offsets are the offsets we
+            # already hold (the old parents->offsets conversion is unnecessary).
             assert (
                 offsets.length is unknown_length
                 or outlength is unknown_length

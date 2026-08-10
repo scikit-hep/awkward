@@ -270,15 +270,7 @@ namespace awkward {
   }
 
   template <typename T, typename I>
-  ForthMachineOf<T, I>::~ForthMachineOf() {
-    delete [] stack_buffer_;
-    delete [] string_buffer_;
-    delete [] current_which_;
-    delete [] current_where_;
-    delete [] do_recursion_depth_;
-    delete [] do_stop_;
-    delete [] do_i_;
-  }
+  ForthMachineOf<T, I>::~ForthMachineOf() = default;
 
   template <typename T, typename I>
   int64_t
@@ -842,7 +834,7 @@ namespace awkward {
   template <typename T, typename I>
   T
   ForthMachineOf<T, I>::stack_at(int64_t from_top) const noexcept {
-    return stack_buffer_[stack_depth_ - from_top];
+    return stack_buffer_[stack_depth_ - 1 - from_top];
   }
 
   template <typename T, typename I>
@@ -1428,22 +1420,33 @@ namespace awkward {
   bool
   ForthMachineOf<T, I>::is_integer(const std::string& word, int64_t& value) const {
     if (word.size() >= 2  &&  word.substr(0, 2) == std::string("0x")) {
+      std::string digits = word.substr(2, word.size() - 2);
+      std::size_t pos = 0;
       try {
-        value = (int64_t)std::stoul(word.substr(2, word.size() - 2), nullptr, 16);
+        value = (int64_t)std::stoll(digits, &pos, 16);
       }
       catch (std::invalid_argument& err) {
         return false;
       }
-      return true;
+      catch (std::out_of_range& err) {
+        return false;
+      }
+      // reject trailing junk (e.g. "0x12zz")
+      return pos == digits.size();
     }
     else {
+      std::size_t pos = 0;
       try {
-        value = (int64_t)std::stoul(word, nullptr, 10);
+        value = (int64_t)std::stoll(word, &pos, 10);
       }
       catch (std::invalid_argument& err) {
         return false;
       }
-      return true;
+      catch (std::out_of_range& err) {
+        return false;
+      }
+      // reject trailing junk (e.g. "123abc")
+      return pos == word.size();
     }
   }
 
@@ -2541,7 +2544,10 @@ namespace awkward {
           }
 
           if (strings_.size() == start_size) {
-            if (tokenized[(IndexTypeOf<std::string>)pos + 1] == "enum") {
+            // the "enum"/"enumonly" keyword is at pos - 1 here (pos was
+            // advanced by 2 from the input-name token at line 2526); reading
+            // pos + 1 could be out of bounds when no s" strings follow.
+            if (pos >= 1  &&  tokenized[(IndexTypeOf<std::string>)pos - 1] == "enum") {
               throw std::invalid_argument(
                 err_linecol(linecol, pos - 2, pos + 1, "need at least one string (s\" word) after \"enum\"")
                 + FILENAME(__LINE__)
@@ -3065,7 +3071,7 @@ namespace awkward {
               output = current_outputs_[(IndexTypeOf<int64_t>)out_num].get();
             }
 
-            uint64_t mask = (1 << bit_width) - 1;
+            uint64_t mask = (bit_width >= 64) ? ~(uint64_t)0 : ((uint64_t)1 << bit_width) - 1;
             uint64_t bits_wnd_l = 8;
             uint64_t bits_wnd_r = 0;
             int64_t items_remaining = num_items;
@@ -3191,7 +3197,7 @@ namespace awkward {
                 input->skipws();
               }
               int64_t length;
-              input->read_quotedstr(string_buffer_, string_buffer_size_, length, current_error_);
+              input->read_quotedstr(string_buffer_.get(), string_buffer_size_, length, current_error_);
               if (current_error_ != util::ForthError::none) {
                 return;
               }
@@ -3201,7 +3207,7 @@ namespace awkward {
               }
               stack_push((T)length);   // note: pushing length
               if (length != 0) {
-                output->write_one_string(string_buffer_, length);   // note: copying string
+                output->write_one_string(string_buffer_.get(), length);   // note: copying string
               }
             }
           }

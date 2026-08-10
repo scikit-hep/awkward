@@ -31,7 +31,20 @@ def prod(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Multiplies an array's elements over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records. The
+    identity of multiplication is `1` and it is usually not masked. This
+    operation is the same as NumPy's
+    [prod](https://docs.scipy.org/doc/numpy/reference/generated/numpy.prod.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+
+    See also #ak.nanprod.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -57,17 +70,8 @@ def prod(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Multiplies elements of `array` (many types supported, including all
-    Awkward Arrays and Records). The identity of multiplication is `1` and it
-    is usually not masked. This operation is the same as NumPy's
-    [prod](https://docs.scipy.org/doc/numpy/reference/generated/numpy.prod.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
-
-    See #ak.sum for a more complete description of nested list and missing
-    value (None) handling in reducers.
-
-    See also #ak.nanprod.
+    Returns:
+        The product of the elements of `array`.
     """
     # Dispatch
     yield (array,)
@@ -87,7 +91,16 @@ def nanprod(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Multiplies an array's elements, treating NaN values as missing.
+
+    Equivalent to::
+
+        ak.prod(ak.nan_to_none(array))
+
+    with all other arguments unchanged.
+
+    See also #ak.prod.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -107,15 +120,8 @@ def nanprod(
             None (an option type); otherwise, reducing over empty lists
             results in the operation's identity.
 
-    Like #ak.prod, but treating NaN ("not a number") values as missing.
-
-    Equivalent to::
-
-        ak.prod(ak.nan_to_none(array))
-
-    with all other arguments unchanged.
-
-    See also #ak.prod.
+    Returns:
+        Like #ak.prod, but treating NaN ("not a number") values as missing.
     """
     # Dispatch
     yield (array,)
