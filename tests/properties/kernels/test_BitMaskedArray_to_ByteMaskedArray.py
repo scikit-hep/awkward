@@ -14,8 +14,6 @@ straight from ``kernel-specification.yml`` (the single source of truth),
 so the test never depends on the generated ``awkward-cpp/tests-spec/kernels.py``.
 """
 
-from __future__ import annotations
-
 import ctypes
 from pathlib import Path
 
