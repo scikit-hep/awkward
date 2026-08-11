@@ -12,8 +12,6 @@ from automatic test generation):
     segment, and must not perturb neighbouring segments.
 """
 
-from __future__ import annotations
-
 import math
 
 import awkward as ak
