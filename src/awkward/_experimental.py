@@ -28,15 +28,60 @@ def experimental(
 ) -> Callable[P, T] | Callable[[Callable[P, T]], Callable[P, T]]:
     """Mark a public function, method, or property accessor as experimental.
 
-    Usable as ``@experimental`` or ``@experimental()``; the parenthesized form
-    takes no arguments and is where configuration options can be added later.
-    Place the mark directly above the ``def``, below ``@property``,
-    ``@classmethod``, ``@staticmethod``, and ``@high_level_function()``, so
-    that it always receives a plain function.
+    An experimental API is public and usable, but exempt from the stability
+    guarantee: it may change or be removed in any release, without a
+    deprecation period. The mark makes that status visible at runtime, so that
+    users learn it from the code they run, not only from the documentation.
+    The policy behind the mark is described in
+    https://github.com/scikit-hep/awkward/issues/4197.
+
+    Use it as ``@experimental`` or ``@experimental()``; the parenthesized form
+    takes no arguments and is reserved for future configuration options.
+    Place the mark directly above the ``def``, below other decorators such as
+    ``@property``, ``@classmethod``, ``@staticmethod``, and
+    ``@high_level_function()``, so that it always receives a plain function.
 
     The wrapper issues :class:`awkward.errors.ExperimentalWarning` once per
-    process per marked function, on its first call — for a property, on its
-    first access — independent of the ``warnings`` filter state.
+    process per marked function, on the first call — for a property, on the
+    first access. This once-only behavior does not depend on the ``warnings``
+    filter state: even a filter that turns the warning into an error leaves
+    the marked API usable from the second call on.
+
+    Args:
+        func (callable or None): The function to mark, in the
+            ``@experimental`` form; None, in the ``@experimental()`` form.
+
+    Returns:
+        The function wrapped to warn on first use, with the signature, name,
+        and docstring of ``func`` preserved; in the parenthesized form, the
+        decorator itself.
+
+    Examples:
+        Mark a function:
+
+        >>> @experimental
+        ... def fuse(*arrays): ...
+
+        The first call issues the warning; later calls are silent:
+
+        >>> fuse()
+        <stdin>:1: ExperimentalWarning: fuse is experimental.
+            It may change or be removed in any release, without a deprecation period.
+            Defined in: __main__
+
+        Mark a property accessor, below ``@property`` so that the mark
+        receives the plain getter; the warning is issued on first access:
+
+        >>> class Plan:
+        ...     @property
+        ...     @experimental
+        ...     def cache(self):
+        ...         return self._cache
+
+        Users who accept the instability can silence the warning:
+
+        >>> import warnings
+        >>> warnings.filterwarnings("ignore", category=ak.errors.ExperimentalWarning)
     """
     if func is None:
         # @experimental() -- the parenthesized form
