@@ -39,8 +39,6 @@ source so a stable program compiles each kernel once (cache-stable, per the
 plan's hard constraint).
 """
 
-from __future__ import annotations
-
 import functools
 
 import numpy as np
