@@ -75,7 +75,11 @@ def _impl(array, highlevel, behavior, attrs):
         isinstance(x, ak.contents.Content) for x in out
     )
 
-    result = ak._do.mergemany(out)
+    if len(out) == 0:
+        # A zero-field record or a union that no values reach
+        result = ak.contents.EmptyArray(backend=layout.backend)
+    else:
+        result = ak._do.mergemany(out)
 
     wrapped_out = ctx.wrap(result, highlevel=highlevel)
 
