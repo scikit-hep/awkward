@@ -711,7 +711,8 @@ def _reconstitute(
     elif isinstance(form, ak.forms.RecordForm):
 
         def _length_generator():
-            return length
+            (result,) = shape_generator()
+            return result
 
         contents = [
             _reconstitute(
