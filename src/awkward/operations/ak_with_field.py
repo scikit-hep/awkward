@@ -20,12 +20,10 @@ np = NumpyMetadata.instance()
 def with_field(array, what, where=None, *, highlevel=True, behavior=None, attrs=None):
     """Returns an array or record with a new field added, or an existing field replaced.
 
-    This function does not change the array in-place.
-
-    See #ak.Array.__setitem__ and #ak.Record.__setitem__ for a variant that
-    changes the high-level object in-place. (These methods internally use
-    #ak.with_field, so performance is not a factor in choosing one over the
-    other.)
+    This function returns a new array or record; see #ak.Array.__setitem__
+    and #ak.Record.__setitem__ for a variant that changes the high-level
+    object in-place. (These methods internally use #ak.with_field, so
+    performance is not a factor in choosing one over the other.)
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
