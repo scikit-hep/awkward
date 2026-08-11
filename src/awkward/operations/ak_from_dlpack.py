@@ -25,6 +25,8 @@ def from_dlpack(
 ):
     """Converts a DLPack-aware array into an Awkward Array.
 
+    The data is not copied: the buffer is shared through the DLPack protocol.
+
     The resulting layout may involve the following #ak.contents.Content types
     (only):
 

@@ -20,6 +20,9 @@ def from_cupy(
 ):
     """Converts a CuPy array into an Awkward Array.
 
+    The data is not copied: the Awkward Array shares the CuPy array's GPU
+    buffer.
+
     The resulting layout may involve the following #ak.contents.Content types
     (only):
 

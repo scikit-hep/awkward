@@ -21,6 +21,11 @@ def from_numpy(
 ):
     """Converts a NumPy array into an Awkward Array.
 
+    The data is not copied: the Awkward Array shares the NumPy array's
+    buffers. There are two exceptions: the mask of a `np.ma.MaskedArray` is
+    converted, although its data buffer is still shared, and an array of
+    Unicode strings is re-encoded as UTF-8.
+
     The resulting layout can only involve the following #ak.contents.Content types:
 
     * #ak.contents.NumpyArray

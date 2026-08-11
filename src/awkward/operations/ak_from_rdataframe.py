@@ -25,6 +25,9 @@ def from_rdataframe(
 ):
     """Converts ROOT RDataFrame columns into an Awkward Array.
 
+    The data is copied: the conversion runs the RDataFrame event loop and
+    writes the selected columns into newly allocated buffers.
+
     If `columns` is a string, the return value represents a single RDataFrame
     column. If `columns` is any other iterable, the return value is a record
     array, in which each field corresponds to an RDataFrame column. In

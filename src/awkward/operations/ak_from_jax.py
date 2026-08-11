@@ -21,6 +21,8 @@ def from_jax(
 ):
     """Converts a JAX Array into an Awkward Array.
 
+    The data is not copied: the Awkward Array shares the JAX array's buffer.
+
     The resulting layout may involve the following #ak.contents.Content types
     (only):
 

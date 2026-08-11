@@ -12,6 +12,9 @@ __all__ = ("from_torch",)
 def from_torch(array):
     """Converts a PyTorch Tensor into an Awkward Array.
 
+    The data is not copied: a CPU tensor shares its buffer with the Awkward
+    Array, and a CUDA tensor's buffer is shared through DLPack.
+
     If `array` contains any other data types the function raises an error.
 
     Args:

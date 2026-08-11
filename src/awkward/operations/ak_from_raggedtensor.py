@@ -14,6 +14,9 @@ __all__ = ("from_raggedtensor",)
 def from_raggedtensor(array):
     """Converts a TensorFlow RaggedTensor into an Awkward Array.
 
+    The underlying buffers (flat values and row splits) are shared through
+    DLPack if the RaggedTensor is on a GPU; on a CPU, they are copied.
+
     If `array` contains any other data types the function raises an error.
 
     Args:
