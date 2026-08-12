@@ -1535,7 +1535,23 @@ class ListArray(ListMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        return self.to_ListOffsetArray64(False)._to_arrow(
+        if validbytes is not None:
+            nplike = self._backend.nplike
+            starts = self._starts.data
+            stops = self._stops.data
+            zeros = nplike.zeros_like(starts)
+            condition = validbytes == 0
+            starts = nplike.where(condition, zeros, starts)
+            stops = nplike.where(condition, zeros, stops)
+            layout = ListArray(
+                ak.index.Index(starts),
+                ak.index.Index(stops),
+                self._content,
+                parameters=self._parameters,
+            )
+        else:
+            layout = self
+        return layout.to_ListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
 
