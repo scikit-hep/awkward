@@ -322,6 +322,8 @@ def _finalize(layout: Content, col: plc.Column) -> Content:
     libcudf uses Arrow-style packed validity bits, where 1 means valid.
     Awkward's BitMaskedArray can wrap these packed bits directly.
     """
+    import cupy as cp
+
     offset = _get_offset(col)
     size = _get_size(col)
     stop = offset + size
@@ -337,8 +339,10 @@ def _finalize(layout: Content, col: plc.Column) -> Content:
     if _get_null_count(col) != 0:
         mask = _get_attr_or_call(col, "null_mask")
         if mask is not None:
+            if not isinstance(mask, cp.ndarray):
+                mask = _buf_to_cupy(mask, "uint8")
             layout = BitMaskedArray.simplified(
-                IndexU8(_buf_to_cupy(mask, "uint8")),
+                IndexU8(mask),
                 layout,
                 valid_when=True,
                 length=stop,
