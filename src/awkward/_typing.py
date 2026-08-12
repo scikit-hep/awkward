@@ -2,7 +2,6 @@
 
 # pylint: disable=wildcard-import, unused-wildcard-import
 # ruff: noqa: PLE0604
-from __future__ import annotations
 
 import sys
 import typing

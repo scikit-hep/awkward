@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import itertools
 
@@ -104,7 +103,11 @@ def has_issues(a: ak.Array) -> bool:
         return True
     if _has_issue_4228(a.layout):
         return True
-    return bool(_has_issue_4229(a.layout))
+    if _has_issue_4229(a.layout):
+        return True
+    if _has_issue_4255(a.layout):
+        return True
+    return bool(_has_issue_4274(a.layout))
 
 
 def _has_issue_4221(layout: ak.contents.Content) -> bool:
@@ -193,6 +196,46 @@ def _has_issue_4229(layout: ak.contents.Content) -> bool:
     if layout.is_regular and layout.size == 0:
         return True
     return any(_has_issue_4229(x) for x in _children(layout))
+
+
+def _has_issue_4255(layout: ak.contents.Content, nullable: bool = False) -> bool:
+    """`to_arrow` writes an indexed node over unknown-type content below
+    an enclosing option as a nullable Arrow null type without the
+    revertable stamp, so `from_arrow` cannot strip the option the field
+    metadata says it must (AttributeError in `remove_optiontype`, #4255).
+
+    `nullable` tracks validity bytes as in `_has_issue_4222`.
+    """
+    if layout.is_union:
+        return any(_has_issue_4255(x, False) for x in layout.contents)
+    if layout.is_record:
+        return any(_has_issue_4255(x, nullable) for x in layout.contents)
+    if layout.is_regular:
+        return _has_issue_4255(layout.content, False)
+    if layout.is_option:
+        return _has_issue_4255(layout.content, True)
+    if layout.is_indexed:
+        if nullable and layout.content.is_unknown:
+            return True
+        return _has_issue_4255(layout.content, nullable)
+    if layout.is_list:
+        return _has_issue_4255(layout.content, False)
+    return False
+
+
+def _has_issue_4274(layout: ak.contents.Content) -> bool:
+    """`to_arrow_table` projects each record field through a root
+    `UnmaskedArray` with `to_IndexedOptionArray64`, which passes an
+    `IndexedArray`'s uint32 index into `IndexedOptionArray` unconverted
+    (TypeError, #4274). Only the root takes this path: nested layouts
+    convert through `_to_arrow`, which projects the indexed node away.
+    """
+    if not (isinstance(layout, ak.contents.UnmaskedArray) and layout.content.is_record):
+        return False
+    return any(
+        isinstance(x, ak.contents.IndexedArray) and x.index.dtype == np.dtype(np.uint32)
+        for x in layout.content.contents
+    )
 
 
 def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:

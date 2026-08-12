@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import threading
 
@@ -62,6 +61,16 @@ def parquet_dtypes() -> st.SearchStrategy[np.dtype]:
 
 
 def parquet_writable(a: ak.Array) -> bool:
+    if isinstance(a.layout, ak.contents.UnmaskedArray) and a.layout.content.is_record:
+        if any(
+            isinstance(x, ak.contents.IndexedArray)
+            and x.index.dtype == np.dtype(np.uint32)
+            for x in a.layout.content.contents
+        ):
+            # `to_parquet` projects each record field through the root
+            # `UnmaskedArray` with `to_IndexedOptionArray64`, which passes
+            # the uint32 index through unconverted (TypeError, #4274)
+            return False
     layout, is_option = a.layout, False
     while layout.is_option or layout.is_indexed:
         is_option = is_option or layout.is_option

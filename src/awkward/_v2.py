@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 raise ModuleNotFoundError(
     """The awkward._v2 submodule was provided for early access to awkward>=2, as it developed.
