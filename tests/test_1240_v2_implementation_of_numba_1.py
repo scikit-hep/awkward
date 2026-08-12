@@ -17,7 +17,7 @@ ak_numba_layout = pytest.importorskip("awkward._connect.numba.layout")
 
 ak_numba.register_and_check()
 
-from awkward._connect.numba.arrayview import NumbaLookup
+from awkward._connect.numba.arrayview import NumbaLookup  # noqa: E402
 
 
 def roundtrip(layout):

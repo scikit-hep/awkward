@@ -88,7 +88,9 @@ class Specification:
                     arg["role"] if "role" in arg.keys() else "default",
                 )
             )
-        if blacklisted or templatized_kernel_name in no_role_kernels:
+        if blacklisted:
+            self.tests = []
+        elif templatized_kernel_name in no_role_kernels:
             self.tests = []
         else:
             self.tests = self.gettests(testdata)
@@ -148,7 +150,7 @@ class Specification:
             funcpassdict[arg.name] = []
             if arg.role == "default":
                 group = str(count)
-                assert group not in instancedict
+                assert group not in instancedict.keys()
                 instancedict[group] = [arg.name]
                 if arg.direction == "out":
                     funcpassdict[arg.name].append({})
@@ -158,7 +160,7 @@ class Specification:
                 count += 1
             else:
                 group = arg.role[: arg.role.find("-")]
-                if group not in instancedict:
+                if group not in instancedict.keys():
                     instancedict[group] = []
                 instancedict[group].append(arg.name)
                 if group not in testdata.keys() and group[:-1] in testdata.keys():
@@ -262,7 +264,9 @@ def getdtypes(args):
                 typename = typename + "_"
             if typename == "float":
                 typename = typename + "32"
-            if count == 1 or count == 2:
+            if count == 1:
+                dtypes.append("cupy." + typename)
+            elif count == 2:
                 dtypes.append("cupy." + typename)
     return dtypes
 
@@ -324,7 +328,8 @@ def getunittests(test_inputs, test_outputs):
 
 def gettypename(spectype):
     typename = spectype.replace("List", "").replace("[", "").replace("]", "")
-    typename = typename.removesuffix("_t")
+    if typename.endswith("_t"):
+        typename = typename[:-2]
     return typename
 
 
@@ -416,10 +421,10 @@ def awkward_ListArray_combinations_step(
             for spec in indspec:
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
-                    outfile.writelines(
-                        "{} = {}\n".format(childfunc["name"], spec["name"])
-                        for childfunc in spec["specializations"]
-                    )
+                    for childfunc in spec["specializations"]:
+                        outfile.write(
+                            "{} = {}\n".format(childfunc["name"], spec["name"])
+                        )
                     outfile.write("\n\n")
 
     unit_tests = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit")
@@ -488,10 +493,8 @@ def genspectests(specdict):
                     f.write("def test_py" + spec.name + "_" + str(num) + "():\n")
                     num += 1
                     args = ""
-                    f.writelines(
-                        " " * 4 + arg + " = " + str(val) + "\n"
-                        for arg, val in test["inargs"].items()
-                    )
+                    for arg, val in test["inargs"].items():
+                        f.write(" " * 4 + arg + " = " + str(val) + "\n")
                     f.write(
                         " " * 4 + "funcPy = getattr(kernels, '" + spec.name + "')\n"
                     )

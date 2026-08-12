@@ -122,10 +122,11 @@ or
     def maybe_virtualize(x):
         return (lambda: x) if virtual else x
 
-    with fs.open(source, "rb") as f, _safe_open_handle(f, framework="np") as g:
-        metadata = g.metadata()
-        for k in g.offset_keys():
-            buffers[k] = maybe_virtualize(g.get_tensor(k))
+    with fs.open(source, "rb") as f:
+        with _safe_open_handle(f, framework="np") as g:
+            metadata = g.metadata()
+            for k in g.offset_keys():
+                buffers[k] = maybe_virtualize(g.get_tensor(k))
 
     if "form" not in metadata or "length" not in metadata:
         raise RuntimeError(

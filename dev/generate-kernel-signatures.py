@@ -230,7 +230,8 @@ def type_to_pytype(typename, special):
     while "List[" in typename:
         count += 1
         typename = typename[len("List[") : -1]
-    typename = typename.removesuffix("_t")
+    if typename.endswith("_t"):
+        typename = typename[:-2]
     if count != 0:
         special.append(type_to_dtype[typename])
     return ("POINTER(" * count) + ("c_" + typename) + (")" * count)

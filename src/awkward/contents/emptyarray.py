@@ -227,7 +227,10 @@ class EmptyArray(EmptyMeta, Content):
         if head is NO_HEAD:
             return self
 
-        elif is_integer_like(head) or isinstance(head, slice):
+        elif is_integer_like(head):
+            raise ak._errors.index_error(self, head, "array is empty")
+
+        elif isinstance(head, slice):
             raise ak._errors.index_error(self, head, "array is empty")
 
         elif isinstance(head, str):
@@ -248,9 +251,10 @@ class EmptyArray(EmptyMeta, Content):
             else:
                 raise ak._errors.index_error(self, head.data, "array is empty")
 
-        elif isinstance(head, ak.contents.ListOffsetArray) or isinstance(
-            head, ak.contents.IndexedOptionArray
-        ):
+        elif isinstance(head, ak.contents.ListOffsetArray):
+            raise ak._errors.index_error(self, head, "array is empty")
+
+        elif isinstance(head, ak.contents.IndexedOptionArray):
             raise ak._errors.index_error(self, head, "array is empty")
 
         else:

@@ -14,7 +14,7 @@ if packaging.version.Version(np.__version__) < packaging.version.Version("1.24.0
 
 def test_bool():
     array = ak.Array([[True, False], [True, False, False]])
-    assert (array == False).to_list() == [[False, True], [False, True, True]]
+    assert (array == False).to_list() == [[False, True], [False, True, True]]  # noqa: E712
 
 
 def test_int():

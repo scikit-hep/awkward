@@ -235,7 +235,8 @@ def valuestr_horiz(
             else:
                 if is_identifier.match(key) is None:
                     key_str = repr(key) + ": "
-                    key_str = key_str.removeprefix("u")
+                    if key_str.startswith("u"):
+                        key_str = key_str[1:]
                 else:
                     key_str = key + ": "
 
@@ -415,7 +416,8 @@ def valuestr(
             else:
                 if is_identifier.match(key) is None:
                     key_str = repr(key) + ": "
-                    key_str = key_str.removeprefix("u")
+                    if key_str.startswith("u"):
+                        key_str = key_str[1:]
                 else:
                     key_str = key + ": "
             _, strs = valuestr_horiz(

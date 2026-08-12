@@ -407,7 +407,9 @@ def _keep_named_axis_up_to(
     axis = _neg2pos_axis(axis, total)
     out = {}
     for k, v in named_axis.items():
-        if (v >= 0 and v <= axis) or (v < 0 and v >= -axis - 1):
+        if v >= 0 and v <= axis:
+            out[k] = v
+        elif v < 0 and v >= -axis - 1:
             out[k] = v
     return out
 

@@ -552,7 +552,10 @@ class Content(Meta):
         elif isinstance(where, str):
             return self._getitem_field(where)
 
-        elif where is np.newaxis or where is Ellipsis:
+        elif where is np.newaxis:
+            return self._getitem((where,), named_axis)
+
+        elif where is Ellipsis:
             return self._getitem((where,), named_axis)
 
         elif isinstance(where, tuple):

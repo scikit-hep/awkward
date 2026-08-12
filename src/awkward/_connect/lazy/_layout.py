@@ -120,7 +120,9 @@ def validate_iterator_layout(layout):
 
 
 def _as_layout(array):
-    if isinstance(array, ak.Array) or hasattr(array, "layout"):
+    if isinstance(array, ak.Array):
+        return array.layout
+    elif hasattr(array, "layout"):
         return array.layout
     elif isinstance(array, ak.contents.Content):
         return array

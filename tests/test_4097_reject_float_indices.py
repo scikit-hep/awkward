@@ -20,7 +20,7 @@ def test_decimal_index_raises():
     # Decimal has __int__ but not __index__; the fix uses __index__ protocol
     arr = ak.Array([10, 20, 30])
     with pytest.raises(TypeError):
-        arr[Decimal(1)]
+        arr[Decimal("1")]
 
 
 def test_custom_index_object_works():

@@ -157,7 +157,7 @@ def test_recursively_apply_record_regular_to_jagged_forwarded():
 
     def action(layout, **kwargs):
         seen_options.append(kwargs.get("options", {}))
-        return
+        return None
 
     recursively_apply(low_rec, action, regular_to_jagged=True)
     assert any(opts.get("regular_to_jagged") is True for opts in seen_options)
@@ -176,7 +176,7 @@ def test_recursively_apply_record_regular_to_jagged_converts_type():
 
     def action(layout, **kwargs):
         seen_types.append(type(layout).__name__)
-        return
+        return None
 
     recursively_apply(low_rec, action, regular_to_jagged=True)
 

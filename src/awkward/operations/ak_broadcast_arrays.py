@@ -243,7 +243,10 @@ def _impl(
     def action(inputs, depth, **kwargs):
         # The depth limit is the depth at which we must return, i.e.
         # the _first_ layout at that depth
-        if depth == depth_limit or all(
+        if depth == depth_limit:
+            return tuple(inputs)
+        # Walk through non-leaf nodes
+        elif all(
             x.purelist_depth == 1 and not (x.is_option or x.is_indexed) for x in inputs
         ):
             return tuple(inputs)

@@ -102,9 +102,9 @@ def _convert_to_tensor_if_cupy(array):
 def _recursive_call(layout, offsets_arr):
     try:
         # change all the possible layout types to ListOffsetArray
-        if isinstance(layout, ak.contents.listarray.ListArray) or isinstance(
-            layout, ak.contents.regulararray.RegularArray
-        ):
+        if isinstance(layout, ak.contents.listarray.ListArray):
+            layout = layout.to_ListOffsetArray64()
+        elif isinstance(layout, ak.contents.regulararray.RegularArray):
             layout = layout.to_ListOffsetArray64()
         elif not isinstance(
             layout,

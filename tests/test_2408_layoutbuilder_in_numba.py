@@ -9,9 +9,9 @@ import awkward as ak
 
 numba = pytest.importorskip("numba")
 
-from numba.core.errors import NumbaTypeError
+from numba.core.errors import NumbaTypeError  # noqa: E402
 
-import awkward.numba.layoutbuilder as lb
+import awkward.numba.layoutbuilder as lb  # noqa: E402
 
 ak.numba.register_and_check()
 

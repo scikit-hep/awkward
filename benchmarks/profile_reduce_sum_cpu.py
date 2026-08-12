@@ -180,9 +180,9 @@ def main():
             new_p = getattr(lib_omp, f"new_{name}")
             new_p.argtypes = [c_t, c_f, c_i, ctypes.c_int64]
 
-            run_a = lambda: old(out_a, data, parents, total, n_bins)  # noqa: B023
-            run_b = lambda: new_s(out_b, data, offsets, n_bins)  # noqa: B023
-            run_c = lambda: new_p(out_c, data, offsets, n_bins)  # noqa: B023
+            run_a = lambda: old(out_a, data, parents, total, n_bins)  # noqa: E731,B023
+            run_b = lambda: new_s(out_b, data, offsets, n_bins)  # noqa: E731,B023
+            run_c = lambda: new_p(out_c, data, offsets, n_bins)  # noqa: E731,B023
 
             # correctness (cumsum-based segmented reference)
             csum = np.zeros(

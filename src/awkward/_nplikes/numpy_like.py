@@ -104,7 +104,7 @@ class UfuncLike(Protocol):
     nout: int
 
     def resolve_dtypes(
-        self, dtypes: tuple[type[int | complex | float] | DType | None, ...]
+        self, dtypes: tuple[DType | type[int] | type[complex] | type[float] | None, ...]
     ) -> tuple[DType, ...]: ...
 
     def __call__(self, *args: ArrayLikeT, **kwargs) -> ArrayLikeT: ...
@@ -225,9 +225,9 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
     @abstractmethod
     def arange(
         self,
-        start: float,
-        stop: float | None = None,
-        step: float = 1,
+        start: float | int,
+        stop: float | int | None = None,
+        step: float | int = 1,
         *,
         dtype: DTypeLike | None = None,
     ) -> ArrayLikeT: ...
@@ -418,9 +418,9 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         x: ArrayLikeT,
         *,
         copy: bool = True,
-        nan: float | None = 0.0,
-        posinf: float | None = None,
-        neginf: float | None = None,
+        nan: int | float | None = 0.0,
+        posinf: int | float | None = None,
+        neginf: int | float | None = None,
     ) -> ArrayLikeT: ...
 
     @abstractmethod

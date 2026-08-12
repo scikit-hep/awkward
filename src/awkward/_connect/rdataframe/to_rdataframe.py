@@ -73,44 +73,43 @@ class DataSourceGenerator:
 
             self.entry_types[key] = self.generators[key].entry_type()
 
-            if (
-                isinstance(self.generators[key], ak._connect.cling.NumpyArrayGenerator)
+            if isinstance(self.generators[key], ak._connect.cling.NumpyArrayGenerator):
+                pass
+            elif isinstance(
+                self.generators[key], ak._connect.cling.ListArrayGenerator
+            ) and (
+                self.generators[key].is_string
                 or (
-                    isinstance(
-                        self.generators[key], ak._connect.cling.ListArrayGenerator
-                    )
-                    and (
-                        self.generators[key].is_string
-                        or (
-                            self.generators[key].flatlist_as_rvec
-                            and self.generators[key].is_flatlist
-                        )
-                    )
+                    self.generators[key].flatlist_as_rvec
+                    and self.generators[key].is_flatlist
                 )
-                or (
-                    isinstance(
-                        self.generators[key], ak._connect.cling.RegularArrayGenerator
-                    )
-                    and (
-                        self.generators[key].flatlist_as_rvec
-                        and self.generators[key].is_flatlist
-                    )
-                )
-                or isinstance(
-                    self.generators[key], ak._connect.cling.IndexedOptionArrayGenerator
-                )
-                or isinstance(
-                    self.generators[key], ak._connect.cling.IndexedArrayGenerator
-                )
-                or isinstance(
-                    self.generators[key], ak._connect.cling.ByteMaskedArrayGenerator
-                )
-                or isinstance(
-                    self.generators[key], ak._connect.cling.BitMaskedArrayGenerator
-                )
-                or isinstance(
-                    self.generators[key], ak._connect.cling.UnmaskedArrayGenerator
-                )
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._connect.cling.RegularArrayGenerator
+            ) and (
+                self.generators[key].flatlist_as_rvec
+                and self.generators[key].is_flatlist
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._connect.cling.IndexedOptionArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._connect.cling.IndexedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._connect.cling.ByteMaskedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._connect.cling.BitMaskedArrayGenerator
+            ):
+                pass
+            elif isinstance(
+                self.generators[key], ak._connect.cling.UnmaskedArrayGenerator
             ):
                 pass
             else:

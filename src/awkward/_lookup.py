@@ -62,9 +62,10 @@ def tolookup(layout, positions):
     elif isinstance(layout, ak.contents.UnmaskedArray):
         return UnmaskedLookup.tolookup(layout, positions)
 
-    elif isinstance(layout, ak.contents.RecordArray) or isinstance(
-        layout, ak.record.Record
-    ):
+    elif isinstance(layout, ak.contents.RecordArray):
+        return RecordLookup.tolookup(layout, positions)
+
+    elif isinstance(layout, ak.record.Record):
         return RecordLookup.tolookup(layout, positions)
 
     elif isinstance(layout, ak.contents.UnionArray):
