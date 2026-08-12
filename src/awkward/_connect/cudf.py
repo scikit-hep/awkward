@@ -361,12 +361,22 @@ def _column_to_layout(col: plc.Column, dtype: Any = None) -> Content:
     because ``pylibcudf.Column`` objects carry no field-name metadata — names
     live exclusively in the Python-level dtype objects.
     """
+    import numpy as np
+
     _, plc_module, _ = _ensure_deps()
     type_id = col.type().id()
     primitive_dtypes = _primitive_dtypes(plc_module)
 
     if type_id in primitive_dtypes:
-        layout = NumpyArray(_data_to_cupy(col, primitive_dtypes[type_id]))
+        np_dtype_str = primitive_dtypes[type_id]
+        np_dtype = np.dtype(np_dtype_str)
+        if np_dtype.kind in ("M", "m"):
+            # CuPy does not support *creating* datetime64/timedelta64 arrays,
+            # but for some reason, views are fine
+            int64_cp = _data_to_cupy(col, "int64")
+            layout = NumpyArray(int64_cp.view(np_dtype))
+        else:
+            layout = NumpyArray(_data_to_cupy(col, np_dtype_str))
 
     elif type_id == _type_id(plc_module, "LIST"):
         offsets_col, content_col = _list_offsets_and_content(col)

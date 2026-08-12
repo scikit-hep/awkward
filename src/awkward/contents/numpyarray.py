@@ -1188,11 +1188,42 @@ class NumpyArray(NumpyMeta, Content):
 
         import pylibcudf as plc
         from cudf.core.column.column import ColumnBase
+        from cudf.utils.dtypes import dtype_to_pylibcudf_type
         from pylibcudf.gpumemoryview import gpumemoryview
         from rmm.pylibrmm.device_buffer import DeviceBuffer
 
-        data_cp = cupy.asarray(*maybe_materialize(self._data))
+        (raw_data,) = maybe_materialize(self._data)
+
+        # CuPy does not support datetime64/timedelta64 dtypes; cupy.asarray
+        # raises "Unsupported dtype" for them. libcudf also forbids casting
+        # an integer column directly to a timestamp (only duration→timestamp
+        # is allowed). The correct path is:
+        #   1. View the data as raw int64 *before* uploading to GPU.
+        #   2. Upload the int64 array via cupy.asarray.
+        #   3. Build a pylibcudf int64 column via from_cuda_array_interface.
+        #   4. Cast int64 → duration (timedelta64) first.
+        #   5. If the target is datetime64, cast duration → timestamp.
+        np_dtype = np.dtype(raw_data.dtype)
+        is_temporal = np_dtype.kind in ("M", "m")
+        if is_temporal:
+            raw_as_int = raw_data.view(np.int64)
+            data_cp = cupy.asarray(raw_as_int)
+        else:
+            data_cp = cupy.asarray(raw_data)
+
         plc_col = plc.Column.from_cuda_array_interface(data_cp)
+
+        if is_temporal:
+            # Step 1: cast int64 to the corresponding duration (timedelta) type.
+            # libcudf requires int64 → duration; direct int64 → timestamp is
+            # forbidden ("Timestamps cannot be converted to numeric without
+            # converting it to a duration").
+            unit = np.datetime_data(np_dtype)[0]  # e.g. "us", "s", "ms", "ns"
+            td_dtype = np.dtype(f"timedelta64[{unit}]")
+            plc_col = plc.unary.cast(plc_col, dtype_to_pylibcudf_type(td_dtype))
+            # Step 2: if target was datetime64, cast duration → timestamp.
+            if np_dtype.kind == "M":
+                plc_col = plc.unary.cast(plc_col, dtype_to_pylibcudf_type(np_dtype))
 
         if mask is not None:
             m = cupy.packbits(cupy.asarray(mask), bitorder="little")
