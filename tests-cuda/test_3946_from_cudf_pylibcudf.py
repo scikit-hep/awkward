@@ -21,10 +21,15 @@ pytestmark = pytest.mark.skipif(
 def _device_values(series):
     plc_column = series.to_pylibcudf()
     plc_column = plc_column[0] if isinstance(plc_column, tuple) else plc_column
-    data = cp.asarray(plc_column.data_buffer(), dtype=series.dtype)
+    buffer = (getattr(plc_column, "data", None) or plc_column.data_buffer)()
+    data = cp.asarray(buffer, dtype=series.dtype)
     if plc_column.offset() != 0 or data.shape[0] != plc_column.size():
         data = data[plc_column.offset() : plc_column.offset() + plc_column.size()]
     return data
+
+
+def _ptr(series):
+    return series.to_pylibcudf()[0].data().ptr
 
 
 def test_from_cudf_int64():
@@ -147,7 +152,7 @@ def test_from_cudf_respects_arrow_offset():
 def test_from_cudf_zero_copy():
     series = cudf.Series([10, 20, 30, 40], dtype=np.int32)
     result = ak.from_cudf(series)
-    assert cp.shares_memory(result.layout.data, _device_values(series))
+    assert result.layout.data.data.ptr == _ptr(series)
 
 
 def test_from_cudf_highlevel_false():

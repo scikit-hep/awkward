@@ -1071,6 +1071,8 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        from packaging.version import parse as parse_version
+
         cp = Cupy.instance()._module
 
         assert mask is None  # this class has its own mask
@@ -1079,10 +1081,19 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         )
         if m.nbytes % 64:
             m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
-        m = cudf.core.buffer.as_buffer(m)
+
         inner = self._content._to_cudf(cudf, mask=None, length=length)
-        inner = inner.set_mask(m)
-        return inner
+
+        if parse_version(cudf.__version__) >= parse_version("25.12.00"):
+            # set_mask(buf, null_count) — null_count is required in >= 25.12
+            null_count = int(
+                length - int(cp.unpackbits(m, bitorder="little")[:length].sum())
+            )
+            return inner.set_mask(cudf.core.buffer.as_buffer(m), null_count)
+        else:
+            # set_mask(value) — single-arg form for < 25.12; returns new col or None
+            result = inner.set_mask(cudf.core.buffer.as_buffer(m))
+            return result if result is not None else inner
 
     def _to_backend_array(self, allow_missing, backend):
         return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)

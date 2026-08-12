@@ -1175,12 +1175,39 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        from packaging.version import parse as parse_version
+
         children = tuple(
             c._to_cudf(cudf, mask=None, length=length) for c in self.contents
         )
         dt = cudf.core.dtypes.StructDtype(
             {field: c.dtype for field, c in zip(self.fields, children, strict=True)}
         )
+
+        if parse_version(cudf.__version__) >= parse_version("25.12.00"):
+            import pylibcudf as plc
+            from cudf.core.column.column import ColumnBase
+
+            # Use to_pylibcudf() to unwrap already-validated ColumnBase objects
+            # back to raw plc.Column spans before passing them as children, so
+            # that ColumnBase.create does a single clean _wrap_and_validate pass
+            # without double-wrapping previously-wrapped Buffer objects.
+            # Pass dt explicitly to preserve field names (from_pylibcudf would
+            # use positional names since plc.Column doesn't carry field metadata).
+            plc_col = plc.Column(
+                data_type=plc.DataType(plc.TypeId.STRUCT),
+                size=length,
+                data=None,
+                mask=None,
+                null_count=0,
+                offset=0,
+                children=[c.to_pylibcudf() for c in children],
+            )
+            return ColumnBase.create(plc_col, dt)
+
+        # --- Legacy path: cudf < 25.12 ---
+        # NOTE: mask is always None here in practice; StructColumn mask support
+        # was never exercised through this path.
         m = mask._to_cudf(cudf, None, length) if mask else None
         return cudf.core.column.struct.StructColumn(
             data=None,

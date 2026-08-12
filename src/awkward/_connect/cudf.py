@@ -21,9 +21,6 @@ if TYPE_CHECKING:
     from awkward.contents.content import Content
 
 
-__all__ = ("from_cudf",)
-
-
 _ISSUE_URL = "https://github.com/scikit-hep/awkward/issues"
 
 
@@ -191,17 +188,17 @@ def _buf_to_cupy(buf: Any, dtype: str) -> cp.ndarray:
     length = int(buf.size) // dtype.itemsize
     # cp.ndarray accepts memptr= (unlike np.ndarray); shape=()
     # form silences linters that conflate the two APIs.
-    return cp.ndarray(shape=(length,), dtype=dtype, memptr=memptr)  # type: ignore[call-arg]
+    return cp.ndarray(shape=(length,), dtype=dtype, memptr=memptr)  # type: ignore[call-arg]  # pylint: disable=unexpected-keyword-arg
 
 
 def _data_to_cupy(col: plc.Column, dtype: str) -> cp.ndarray:
     _, _, cp = _ensure_deps()
-    buffer = _get_attr_or_call(col, "data_buffer")
+    buffer = _get_attr_or_call(col, "data_buffer") or _get_attr_or_call(col, "data")
     offset = _get_offset(col)
     size = _get_size(col)
     length = offset + size
 
-    if buffer is None:
+    if buffer is None or buffer.nbytes == 0:
         if size == 0:
             return cp.empty(0, dtype=dtype)
         if _get_null_count(col) == size:
@@ -244,7 +241,9 @@ def _offsets_to_index(offsets_col: plc.Column | None, parent_col: plc.Column) ->
     if offsets_col is None:
         offsets = cp.zeros(fallback_length, dtype="int32")
     else:
-        buffer = _get_attr_or_call(offsets_col, "data_buffer")
+        buffer = _get_attr_or_call(offsets_col, "data_buffer") or _get_attr_or_call(
+            offsets_col, "data"
+        )
         if buffer is None:
             if _get_size(offsets_col) == 0:
                 offsets = cp.zeros(fallback_length, dtype="int32")
@@ -393,7 +392,16 @@ def _column_to_layout(col: plc.Column) -> Content:
 
 
 def _series_to_layout(series: Any) -> Content:
-    return _column_to_layout(_to_pylibcudf_column(series))
+    lay = _column_to_layout(_to_pylibcudf_column(series))
+    # apply field names
+    fields = getattr(series.dtype, "fields", None)
+    if fields:
+        lay0 = lay
+        # account for outer index/mask types
+        while not isinstance(lay0, RecordArray):
+            lay0 = lay0._content
+        lay0._fields = list(fields)
+    return lay
 
 
 def _dataframe_to_layout(dataframe: Any) -> Content:
@@ -407,34 +415,3 @@ def _dataframe_to_layout(dataframe: Any) -> Content:
     fields = list(dataframe.columns)
     contents = [_series_to_layout(dataframe[name]) for name in fields]
     return RecordArray(contents, fields, length=len(dataframe))
-
-
-def from_cudf(obj: Any) -> Content:
-    """
-    Args:
-        obj (cudf.Series or cudf.DataFrame): The cuDF object to convert into a
-            low-level Awkward layout.
-
-    Converts a cuDF Series or DataFrame into a low-level Awkward layout by
-    recursively traversing pylibcudf columns and wrapping GPU buffers with
-    CuPy.
-
-    Primitive, boolean, list, struct, string, dictionary, and nullable columns
-    are supported. Other column types raise ``NotImplementedError``.
-
-    Note: DataFrame column names and order are preserved. Arrow/cuDF column
-    metadata beyond field names (e.g. time-zone annotations,
-    extension-type metadata) is not yet propagated and will be addressed in a
-    follow-up.
-    """
-    cudf, _, _ = _ensure_deps()
-
-    if isinstance(obj, cudf.Series):
-        return _series_to_layout(obj)
-    elif isinstance(obj, cudf.DataFrame):
-        return _dataframe_to_layout(obj)
-    else:
-        raise TypeError(
-            "ak.from_cudf accepts only cudf.Series or cudf.DataFrame, "
-            f"not {type(obj).__name__!r}"
-        )
