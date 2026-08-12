@@ -735,8 +735,6 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        from packaging.version import parse as parse_version
-
         cp = Cupy.instance()._module
 
         assert mask is None  # this class has its own mask
@@ -751,20 +749,10 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
 
         inner = self._content._to_cudf(cudf, mask=None, length=length)
 
-        if parse_version(cudf.__version__) >= parse_version("25.12.00"):
-            from cudf.core.column.column import ColumnBase
-            from pylibcudf.gpumemoryview import gpumemoryview
-            from rmm.pylibrmm.device_buffer import DeviceBuffer
-
-            null_count = int(
-                length - int(cp.unpackbits(m, bitorder="little")[:length].sum())
-            )
-            mask_gmv = gpumemoryview(DeviceBuffer.from_cuda_array_interface(m))
-            plc_col = inner.to_pylibcudf().with_mask(mask_gmv, null_count)
-            return ColumnBase.from_pylibcudf(plc_col)
-        else:
-            result = inner.set_mask(cudf.core.buffer.as_buffer(m))
-            return result if result is not None else inner
+        null_count = int(
+            length - int(cp.unpackbits(m, bitorder="little")[:length].sum())
+        )
+        return inner.set_mask(cudf.core.buffer.as_buffer(m), null_count)
 
     def _to_backend_array(self, allow_missing, backend):
         return self.to_ByteMaskedArray()._to_backend_array(allow_missing, backend)

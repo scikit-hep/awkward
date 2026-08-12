@@ -1778,141 +1778,78 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        from packaging.version import parse as parse_version
-
         cupy = Cupy.instance()
         index = maybe_materialize(self._offsets.raw(cupy))[0].astype("int32")
 
-        if parse_version(cudf.__version__) >= parse_version("25.12.00"):
-            import pylibcudf as plc
-            from cudf.core.column.column import ColumnBase
+        import pylibcudf as plc
+        from cudf.core.buffer import as_buffer
+        from cudf.core.column.column import ColumnBase, as_column
+
+        offsets_col = as_column(index)
+        # Build the packed bitmask as a CuPy array (LSB order, 64-byte aligned)
+        if mask is not None:
+            m_arr = np._module.packbits(mask, bitorder="little")
+            if m_arr.nbytes % 64:
+                m_arr = cupy.resize(m_arr, ((m_arr.nbytes // 64) + 1) * 64)
+            m_arr = cupy.asarray(m_arr)
+        else:
+            m_arr = None
+
+        if self.parameters.get("__array__") == "string":
+            # String columns: chars in the data buffer, offsets as child[0].
+            # Wrap via pylibcudf so that cudf can own/validate the buffers.
             from pylibcudf.gpumemoryview import gpumemoryview
-            from rmm.pylibrmm.device_buffer import DeviceBuffer
 
-            # Build the offsets plc.Column directly — no cudf.core.column needed.
-            offsets_plc = plc.Column.from_cuda_array_interface(index)
+            chars_cp = cupy.asarray(self._content.data)
+            chars_gmv = gpumemoryview(chars_cp)
+            offsets_gmv = gpumemoryview(index)
 
-            # Build the packed bitmask as a CuPy array (LSB order, 64-byte aligned)
-            if mask is not None:
-                m_arr = np._module.packbits(mask, bitorder="little")
-                if m_arr.nbytes % 64:
-                    m_arr = cupy.resize(m_arr, ((m_arr.nbytes // 64) + 1) * 64)
-                m_arr = cupy.asarray(m_arr)
-            else:
-                m_arr = None
-
-            if self.parameters.get("__array__") == "string":
-                # String columns: chars in the data buffer, offsets as child[0].
-                chars_cp = cupy.asarray(self._content.data)
-                chars_gmv = gpumemoryview(
-                    DeviceBuffer.from_cuda_array_interface(chars_cp)
-                )
-                offsets_gmv = gpumemoryview(
-                    DeviceBuffer.from_cuda_array_interface(index)
-                )
-
-                n = length
-                offsets_plc_str = plc.Column(
-                    data_type=plc.DataType(plc.TypeId.INT32),
-                    size=n + 1,
-                    data=offsets_gmv,
-                    mask=None,
-                    null_count=0,
-                    offset=0,
-                    children=[],
-                )
-
-                if m_arr is not None:
-                    mask_gmv = gpumemoryview(
-                        DeviceBuffer.from_cuda_array_interface(m_arr)
-                    )
-                    null_count = -1  # let pylibcudf compute it
-                else:
-                    mask_gmv = None
-                    null_count = 0
-
-                string_plc = plc.Column(
-                    data_type=plc.DataType(plc.TypeId.STRING),
-                    size=n,
-                    data=chars_gmv,
-                    mask=mask_gmv,
-                    null_count=null_count,
-                    offset=0,
-                    children=[offsets_plc_str],
-                )
-                return ColumnBase.from_pylibcudf(string_plc)
-
-            # List column: children = [offsets, content].
-            # cont is a ColumnBase; unwrap it to a raw plc.Column via to_pylibcudf()
-            # so that from_pylibcudf does a single clean _wrap_and_validate pass.
-            cont = self._content._to_cudf(cudf, None, len(self._content))
-            plc_col = plc.Column(
-                data_type=plc.DataType(plc.TypeId.LIST),
-                size=length,
-                data=None,
+            n = length
+            offsets_plc = plc.Column(
+                data_type=plc.DataType(plc.TypeId.INT32),
+                size=n + 1,
+                data=offsets_gmv,
                 mask=None,
                 null_count=0,
                 offset=0,
-                children=[offsets_plc, cont.to_pylibcudf()],
+                children=[],
             )
 
             if m_arr is not None:
-                null_count = int(
-                    length
-                    - int(cupy.unpackbits(m_arr, bitorder="little")[:length].sum())
-                )
-                mask_gmv = gpumemoryview(DeviceBuffer.from_cuda_array_interface(m_arr))
-                plc_col = plc_col.with_mask(mask_gmv, null_count)
+                mask_gmv = gpumemoryview(m_arr)
+                null_count = -1  # let pylibcudf compute it
+            else:
+                mask_gmv = None
+                null_count = 0
 
-            return ColumnBase.from_pylibcudf(plc_col)
-
-        # --- Legacy path: cudf < 25.12 ---
-        buf = cudf.core.buffer.as_buffer(index)
-
-        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
-            ind_buf = cudf.core.column.numerical.NumericalColumn(
-                data=buf, dtype=index.dtype, mask=None, size=len(index)
+            string_plc = plc.Column(
+                data_type=plc.DataType(plc.TypeId.STRING),
+                size=n,
+                data=chars_gmv,
+                mask=mask_gmv,
+                null_count=null_count,
+                offset=0,
+                children=[offsets_plc],
             )
-        else:
-            ind_buf = cudf.core.column.numerical.NumericalColumn(
-                buf, index.dtype, None, size=len(index)
-            )
+            return ColumnBase.from_pylibcudf(string_plc)
+
         cont = self._content._to_cudf(cudf, None, len(self._content))
-        if mask is not None:
-            m = cupy._module.packbits(mask, bitorder="little")
-            if m.nbytes % 64:
-                m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
-            m = cudf.core.buffer.as_buffer(cupy.asarray(m))
-        else:
-            m = None
-        if self.parameters.get("__array__") == "string":
-            from cudf.core.column.string import StringColumn
-            from cudf.utils.dtypes import CUDF_STRING_DTYPE
-
-            data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
-            return StringColumn(
-                data=data,
-                size=len(ind_buf) - 1,
-                dtype=CUDF_STRING_DTYPE,
-                mask=m,
-                children=(ind_buf,),
+        plc_col = plc.Column(
+            data_type=plc.DataType(plc.TypeId.LIST),
+            size=length,
+            data=None,
+            mask=None,
+            null_count=0,
+            offset=0,
+            children=[offsets_col.to_pylibcudf(), cont.to_pylibcudf()],
+        )
+        list_col = ColumnBase.from_pylibcudf(plc_col)
+        if m_arr is not None:
+            null_count = int(
+                length - int(cupy.unpackbits(m_arr, bitorder="little")[:length].sum())
             )
-
-        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
-            return cudf.core.column.lists.ListColumn(
-                size=length,
-                data=None,
-                mask=m,
-                children=(ind_buf, cont),
-                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
-            )
-        else:
-            return cudf.core.column.lists.ListColumn(
-                length,
-                mask=m,
-                children=(ind_buf, cont),
-                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
-            )
+            return list_col.set_mask(as_buffer(m_arr), null_count)
+        return list_col
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")
