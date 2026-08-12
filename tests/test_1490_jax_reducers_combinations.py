@@ -17,7 +17,7 @@ ak.jax.register_and_check()
 
 @pytest.mark.parametrize("axis", [0, 1, None])
 @pytest.mark.parametrize(
-    "func_ak", [ak.sum, ak.prod, ak.min, ak.max, ak.mean, ak.prod, ak.ptp, ak.std]
+    "func_ak", [ak.sum, ak.prod, ak.min, ak.max, ak.mean, ak.ptp, ak.std]
 )
 def test_reducer(func_ak, axis):
     test_regulararray = ak.Array(

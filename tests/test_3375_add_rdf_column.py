@@ -18,10 +18,7 @@ compiler = ROOT.gInterpreter.Declare
 def add_column(rdf: ROOT.RDataFrame, arr_val: np.ndarray, name: str):
     v_col_org = rdf.GetColumnNames()
     l_col_org = [name.c_str() for name in v_col_org]
-    l_col = []
-
-    for col in l_col_org:
-        l_col.append(col)
+    l_col = list(l_col_org)
 
     data = ak.from_rdataframe(rdf, columns=l_col)
     d_data = {col: data[col] for col in l_col}
@@ -54,10 +51,7 @@ def test_add_column():
 def add_numpy_column(rdf: ROOT.RDataFrame, arr_val: np.ndarray, name: str):
     v_col_org = rdf.GetColumnNames()
     l_col_org = [name.c_str() for name in v_col_org]
-    l_col = []
-
-    for col in l_col_org:
-        l_col.append(col)
+    l_col = list(l_col_org)
 
     data = ak.from_rdataframe(rdf, columns=l_col)
     d_data = {col: data[col] for col in l_col}

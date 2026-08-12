@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Collection, Iterator, Sequence, Set
+from collections.abc import Callable, Collection, Iterator, Sequence
+from collections.abc import Set as AbstractSet
 from functools import lru_cache
 from numbers import Number
 
@@ -117,7 +118,7 @@ class OneOf:
         )
 
 
-class ImmutableBitSet(Set):
+class ImmutableBitSet(AbstractSet):
     def __init__(self, byteset: FillableByteSet):
         self._labels: dict[str, int] = byteset._labels
         if not byteset._is_filled.any():
@@ -146,7 +147,7 @@ class ImmutableBitSet(Set):
             return int(numpy.unpackbits(self._is_filled).sum())
 
 
-class FillableByteSet(Set):
+class FillableByteSet(AbstractSet):
     # friend class ImmutableBitSet
 
     def __init__(self, labels: Collection[str]):
@@ -623,9 +624,7 @@ class TypeTracer(NumpyLike[TypeTracerArray]):
         else:
             return self._apply_ufunc_legacy(ufunc, method, args, kwargs)
 
-    def _get_nep_50_dtype(
-        self, obj: Any
-    ) -> DType | type[int] | type[complex] | type[float]:
+    def _get_nep_50_dtype(self, obj: Any) -> type[int | complex | float] | DType:
         if hasattr(obj, "dtype"):
             return obj.dtype
         elif isinstance(obj, bool):

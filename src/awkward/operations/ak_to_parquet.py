@@ -521,10 +521,10 @@ def write_metadata(dir_path, fs, *metas, global_metadata=True):
     """Generate metadata file(s) from list of arrow metadata instances"""
     assert metas
     md = metas[0]
-    with fs.open("/".join([dir_path, "_common_metadata"]), "wb") as fil:
+    with fs.open(f"{dir_path}/_common_metadata", "wb") as fil:
         md.write_metadata_file(fil)
     if global_metadata:
         for meta in metas[1:]:
             md.append_row_groups(meta)
-        with fs.open("/".join([dir_path, "_metadata"]), "wb") as fil:
+        with fs.open(f"{dir_path}/_metadata", "wb") as fil:
             md.write_metadata_file(fil)

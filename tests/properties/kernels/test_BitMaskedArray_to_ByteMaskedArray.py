@@ -16,6 +16,7 @@ so the test never depends on the generated ``awkward-cpp/tests-spec/kernels.py``
 
 from __future__ import annotations
 
+import contextlib
 import ctypes
 from pathlib import Path
 
@@ -85,13 +86,11 @@ def _run_cuda(
 def _available_backends():
     """CPU always; CUDA only when a GPU device is actually present."""
     backends = [pytest.param(_run_cpu, id="cpu")]
-    try:
+    with contextlib.suppress(Exception):
         import cupy
 
         if cupy.cuda.runtime.getDeviceCount() > 0:
             backends.append(pytest.param(_run_cuda, id="cuda", marks=pytest.mark.cuda))
-    except Exception:
-        pass
     return backends
 
 

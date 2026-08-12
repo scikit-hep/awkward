@@ -271,10 +271,10 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-# Ruff 0.16 enables a much larger set of rules by default; keep the previous
-# default selection so that only the rules listed below are enforced.
-select = ["E4", "E7", "E9", "F"]
 extend-select = [
+    # Ruff 0.16 dropped these from its default set; they were enforced before,
+    # so keep them (this is ruff's pre-0.16 default selection).
+    "E4", "E7", "E9", "F",
     "B",           # flake8-bugbear
     "I",           # isort
     "C4",          # flake8-comprehensions
@@ -303,6 +303,19 @@ ignore = [
     "ISC001",  # Conflicts with the formatter in 0.1.2
     "PLC0415", # imports outside top level
     "PLW1641", # __eq__ without __hash__
+    # Enabled by ruff 0.16's expanded default rule set, but each needs a
+    # repo-wide cleanup; they can be adopted one at a time later.
+    "BLE001",  # Do not catch blind exception
+    "DTZ001",  # `datetime.datetime()` without `tzinfo`
+    "N999",    # Invalid module name (test files are `test_XXXX-description.py`)
+    "PERF102", # Use `.values()`/`.keys()` instead of `.items()`
+    "PYI041",  # Use `float` instead of `int | float`
+    "S102",    # Use of `exec`
+    "SIM102",  # Collapsible `if`
+    "SIM113",  # Use `enumerate()`
+    "SIM114",  # Combine `if` branches using logical `or`
+    "SIM118",  # Use `key in dict` instead of `key in dict.keys()`
+    "TRY004",  # Prefer `TypeError` for invalid type
 ]
 typing-modules = ["awkward._typing"]
 external = []

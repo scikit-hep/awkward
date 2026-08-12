@@ -38,7 +38,8 @@ def test_primitives():
     with pytest.raises(TypeError, match=r"scalar conversion/promotion is disabled"):
         ak.to_layout(False, primitive_policy="error")
     with pytest.raises(TypeError, match=r"scalar conversion/promotion is disabled"):
-        ak.to_layout(datetime.now(), primitive_policy="error")
+        # must be naive: a tz-aware datetime fails earlier, in numpy conversion
+        ak.to_layout(datetime.now(), primitive_policy="error")  # noqa: DTZ005
 
     with pytest.raises(TypeError, match=r"scalar conversion/promotion is disabled"):
         ak.to_layout(1, primitive_policy="error")

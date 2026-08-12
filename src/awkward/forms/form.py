@@ -477,8 +477,7 @@ class Form(Meta):
             next_specifier = []
             for item in specifier:
                 if isinstance(item, str):
-                    for result in _expand_braces(item):
-                        next_specifier.append(result)
+                    next_specifier.extend(_expand_braces(item))
                 else:
                     next_specifier.append(item)
             specifier = next_specifier

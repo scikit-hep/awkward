@@ -1000,9 +1000,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
     def _unique(self, negaxis, starts, offsets, outlength):
         branch, depth = self.branch_depth
 
-        inject_nones = (
-            True if not branch and (negaxis is not None and negaxis != depth) else False
-        )
+        inject_nones = bool(not branch and (negaxis is not None and negaxis != depth))
 
         index_length = self._index.length
 
@@ -1325,14 +1323,10 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                 nextoutindex, out, parameters=self._parameters
             )
 
-        inject_nones = (
-            True
-            if (
-                (numnull is not unknown_length and numnull > 0)
-                and not branch
-                and negaxis != depth
-            )
-            else False
+        inject_nones = bool(
+            (numnull is not unknown_length and numnull > 0)
+            and not branch
+            and negaxis != depth
         )
 
         if inject_nones:
@@ -1380,7 +1374,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             nextoutindex, out, parameters=self._parameters
         )
 
-        inject_nones = True if not branch and negaxis != depth else False
+        inject_nones = bool(not branch and negaxis != depth)
 
         if inject_nones:
             return ak.contents.IndexedOptionArray.simplified(

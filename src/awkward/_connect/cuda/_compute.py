@@ -3851,7 +3851,7 @@ def awkward_NumpyArray_rearrange_shifted(
     if outlength == 0:
         return
     total = int(fromoffsets[outlength])
-    n = total if total > length else length
+    n = max(length, total)
     if n == 0:
         return
 
@@ -4270,7 +4270,7 @@ def awkward_UnionArray_fillna(toindex, fromindex, length):
         return
 
     def fill(x):
-        return x if x >= toindex.dtype.type(0) else toindex.dtype.type(0)
+        return max(x, toindex.dtype.type(0))
 
     unary_transform(
         d_in=fromindex[:length],

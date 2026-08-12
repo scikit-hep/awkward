@@ -97,19 +97,19 @@ def main() -> None:
 
     print("== branch run (this interpreter) ==", flush=True)
     branch_json = args.branch_json or os.path.join(tmp, "branch.json")
-    branch = (
-        json.load(open(branch_json))
-        if args.branch_json
-        else run_bench(sys.executable, branch_json)
-    )
+    if args.branch_json:
+        with open(branch_json) as f:
+            branch = json.load(f)
+    else:
+        branch = run_bench(sys.executable, branch_json)
 
     print(f"== pip run ({pip_spec}, isolated venv) ==", flush=True)
     pip_json = args.pip_json or os.path.join(tmp, "pip.json")
-    pip = (
-        json.load(open(pip_json))
-        if args.pip_json
-        else run_pip_baseline(pip_json, pip_spec)
-    )
+    if args.pip_json:
+        with open(pip_json) as f:
+            pip = json.load(f)
+    else:
+        pip = run_pip_baseline(pip_json, pip_spec)
 
     keys = sorted(set(pip) | set(branch))
     header = (

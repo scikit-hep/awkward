@@ -129,16 +129,9 @@ cuda_kernels_impl = [
 
 
 def reproducible_datetime():
-    import sys
-
     timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
 
-    if sys.version_info >= (3, 11):
-        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
-    else:
-        build_date = datetime.datetime.utcfromtimestamp(
-            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-        )
+    build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 
@@ -230,8 +223,7 @@ def type_to_pytype(typename, special):
     while "List[" in typename:
         count += 1
         typename = typename[len("List[") : -1]
-    if typename.endswith("_t"):
-        typename = typename[:-2]
+    typename = typename.removesuffix("_t")
     if count != 0:
         special.append(type_to_dtype[typename])
     return ("POINTER(" * count) + ("c_" + typename) + (")" * count)

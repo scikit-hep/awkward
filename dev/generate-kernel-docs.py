@@ -28,50 +28,52 @@ All of the kernel functions that Awkward Array uses are documented below. These 
     generated_dir = os.path.join(CURRENT_DIR, "..", "docs", "reference", "generated")
     os.makedirs(generated_dir, exist_ok=True)
 
-    with open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile:
-        with open(
+    with (
+        open(os.path.join(CURRENT_DIR, "..", "kernel-specification.yml")) as specfile,
+        open(
             os.path.join(
                 generated_dir,
                 "kernels.rst",
             ),
             "w",
-        ) as outfile:
-            outfile.write(prefix)
-            indspec = yaml.safe_load(specfile)["kernels"]
-            for spec in indspec:
-                outfile.write(spec["name"] + "\n")
-                print("Generating doc for " + spec["name"])
-                outfile.write(
-                    "========================================================================\n"
-                )
-                for childfunc in spec["specializations"]:
-                    outfile.write(".. py:function:: " + childfunc["name"])
-                    outfile.write("(")
-                    for i in range(len(childfunc["args"])):
-                        if i != 0:
-                            outfile.write(
-                                ", "
-                                + childfunc["args"][i]["name"]
-                                + ": "
-                                + childfunc["args"][i]["type"]
-                            )
-                        else:
-                            outfile.write(
-                                childfunc["args"][i]["name"]
-                                + ": "
-                                + childfunc["args"][i]["type"]
-                            )
-                    outfile.write(")\n")
-                outfile.write(".. code-block:: python\n\n")
-                # Remove conditional at the end of dev
-                if "def" in spec["definition"]:
-                    outfile.write(
-                        indent_code(
-                            spec["definition"],
-                            4,
+        ) as outfile,
+    ):
+        outfile.write(prefix)
+        indspec = yaml.safe_load(specfile)["kernels"]
+        for spec in indspec:
+            outfile.write(spec["name"] + "\n")
+            print("Generating doc for " + spec["name"])
+            outfile.write(
+                "========================================================================\n"
+            )
+            for childfunc in spec["specializations"]:
+                outfile.write(".. py:function:: " + childfunc["name"])
+                outfile.write("(")
+                for i in range(len(childfunc["args"])):
+                    if i != 0:
+                        outfile.write(
+                            ", "
+                            + childfunc["args"][i]["name"]
+                            + ": "
+                            + childfunc["args"][i]["type"]
                         )
-                        + "\n\n"
+                    else:
+                        outfile.write(
+                            childfunc["args"][i]["name"]
+                            + ": "
+                            + childfunc["args"][i]["type"]
+                        )
+                outfile.write(")\n")
+            outfile.write(".. code-block:: python\n\n")
+            # Remove conditional at the end of dev
+            if "def" in spec["definition"]:
+                outfile.write(
+                    indent_code(
+                        spec["definition"],
+                        4,
                     )
+                    + "\n\n"
+                )
 
 
 if __name__ == "__main__":
