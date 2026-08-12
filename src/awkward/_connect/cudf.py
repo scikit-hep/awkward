@@ -265,28 +265,17 @@ def _offsets_to_index(offsets_col: plc.Column | None, parent_col: plc.Column) ->
 
 
 def _struct_field_names(col: plc.Column) -> list[str]:
-    # pylibcudf >= 25.04 exposes child_names() directly.
-    num_children = _get_num_children(col)
-    if hasattr(col, "child_names"):
-        names = _get_attr_or_call(col, "child_names")
-        if names is not None:
-            names = list(names)
-            if len(names) < num_children:
-                names.extend(str(i) for i in range(len(names), num_children))
-            return names[:num_children]
+    """
+    Return struct field names from a raw pylibcudf Column.
 
-    # Older versions: read from the Arrow-like schema when exposed.
-    schema = col.type()
-    names = []
-    for i in range(num_children):
-        child = getattr(schema, "child", None)
-        if callable(child):
-            field = child(i)
-            name = _get_attr_or_call(field, "name")
-        else:
-            name = None
-        names.append(str(i) if name is None else name)
-    return names
+    pylibcudf Column objects carry no field-name metadata — names live only in
+    the Python-level cudf dtype objects.  This function is therefore a pure
+    positional fallback used when no cudf dtype is available.  Callers that
+    have access to the Python-level cudf dtype should pass it via the ``dtype``
+    parameter of ``_column_to_layout`` instead of relying on this function.
+    """
+    num_children = _get_num_children(col)
+    return [str(i) for i in range(num_children)]
 
 
 def _list_offsets_and_content(
@@ -301,10 +290,29 @@ def _list_offsets_and_content(
 def _string_offsets_and_chars(
     col: plc.Column,
 ) -> tuple[plc.Column | None, plc.Column]:
-    if _get_num_children(col) >= 2:
+    """
+    Return (offsets_col, chars_source) for a STRING column.
+
+    pylibcudf STRING columns have exactly 1 child: the offsets column.
+    The character bytes live in the parent column's own data buffer, so
+    ``chars_source`` is the parent column ``col`` itself — callers extract
+    chars via ``_data_to_cupy(chars_source, "uint8")``.
+
+    The ``>= 2`` branch is defensive dead code against hypothetical future
+    API changes; in all current pylibcudf versions ``num_children == 1``.
+    If a degenerate column with 0 children is encountered (e.g. from an
+    internal intermediate result) we return ``(None, col)`` so the caller
+    still gets an empty chars buffer from the column's own data.
+    """
+    num_children = _get_num_children(col)
+    if num_children >= 2:
         return col.child(0), col.child(1)
-    else:
+    elif num_children == 1:
+        # Normal case: child(0) is offsets, chars are in col.data_buffer().
         return col.child(0), col
+    else:
+        # Degenerate: no children, no offsets — treat as empty.
+        return None, col
 
 
 def _finalize(layout: Content, col: plc.Column) -> Content:
@@ -343,7 +351,16 @@ def _finalize(layout: Content, col: plc.Column) -> Content:
     return layout
 
 
-def _column_to_layout(col: plc.Column) -> Content:
+def _column_to_layout(col: plc.Column, dtype: Any = None) -> Content:
+    """
+    Convert a pylibcudf Column into an Awkward layout.
+
+    ``dtype`` is the Python-level cudf dtype for this column (e.g.
+    ``cudf.StructDtype``, ``cudf.ListDtype``, or a numpy dtype).  When
+    provided it is used to recover struct field names and list element dtypes,
+    because ``pylibcudf.Column`` objects carry no field-name metadata — names
+    live exclusively in the Python-level dtype objects.
+    """
     _, plc_module, _ = _ensure_deps()
     type_id = col.type().id()
     primitive_dtypes = _primitive_dtypes(plc_module)
@@ -353,15 +370,29 @@ def _column_to_layout(col: plc.Column) -> Content:
 
     elif type_id == _type_id(plc_module, "LIST"):
         offsets_col, content_col = _list_offsets_and_content(col)
+        # Propagate the element dtype (if known) so nested struct names survive.
+        child_dtype = getattr(dtype, "element_type", None)
         layout = ListOffsetArray(
             _offsets_to_index(offsets_col, col),
-            _column_to_layout(content_col),
+            _column_to_layout(content_col, child_dtype),
         )
 
     elif type_id == _type_id(plc_module, "STRUCT"):
+        # pylibcudf Column objects carry no field names; recover them from the
+        # Python-level StructDtype when available, falling back to positional
+        # string indices ("0", "1", ...) only when no dtype was supplied.
+        if dtype is not None and hasattr(dtype, "fields"):
+            field_names = list(dtype.fields.keys())
+            field_dtypes = list(dtype.fields.values())
+        else:
+            field_names = _struct_field_names(col)
+            field_dtypes = [None] * len(field_names)
         layout = RecordArray(
-            [_column_to_layout(col.child(i)) for i in range(_get_num_children(col))],
-            _struct_field_names(col),
+            [
+                _column_to_layout(col.child(i), field_dtypes[i])
+                for i in range(_get_num_children(col))
+            ],
+            field_names,
             length=_get_offset(col) + _get_size(col),
         )
 
@@ -392,16 +423,10 @@ def _column_to_layout(col: plc.Column) -> Content:
 
 
 def _series_to_layout(series: Any) -> Content:
-    lay = _column_to_layout(_to_pylibcudf_column(series))
-    # apply field names
-    fields = getattr(series.dtype, "fields", None)
-    if fields:
-        lay0 = lay
-        # account for outer index/mask types
-        while not isinstance(lay0, RecordArray):
-            lay0 = lay0._content
-        lay0._fields = list(fields)
-    return lay
+    # Pass the Python-level cudf dtype so that _column_to_layout can recover
+    # struct field names at every nesting level.  pylibcudf Column objects
+    # carry no field-name metadata; all name information lives in the dtype.
+    return _column_to_layout(_to_pylibcudf_column(series), series.dtype)
 
 
 def _dataframe_to_layout(dataframe: Any) -> Content:

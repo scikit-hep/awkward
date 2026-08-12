@@ -1843,7 +1843,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             offset=0,
             children=[offsets_col.to_pylibcudf(), cont.to_pylibcudf()],
         )
-        list_col = ColumnBase.from_pylibcudf(plc_col)
+        list_dt = cudf.ListDtype(cont.dtype)
+        list_col = ColumnBase.create(plc_col, list_dt)
         if m_arr is not None:
             null_count = int(
                 length - int(cupy.unpackbits(m_arr, bitorder="little")[:length].sum())
