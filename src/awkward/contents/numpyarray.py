@@ -1183,10 +1183,17 @@ class NumpyArray(NumpyMeta, Content):
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
         cupy = Cupy.instance()
-        from cudf.core.column.column import as_column
 
         assert self._backend.nplike.known_data
-        data = as_column(*maybe_materialize(self._data))
+
+        import pylibcudf as plc
+        from cudf.core.column.column import ColumnBase
+        from pylibcudf.gpumemoryview import gpumemoryview
+        from rmm.pylibrmm.device_buffer import DeviceBuffer
+
+        data_cp = cupy.asarray(*maybe_materialize(self._data))
+        plc_col = plc.Column.from_cuda_array_interface(data_cp)
+
         if mask is not None:
             m = cupy.packbits(cupy.asarray(mask), bitorder="little")
             if m.nbytes % 64:
@@ -1194,9 +1201,10 @@ class NumpyArray(NumpyMeta, Content):
             null_count = int(
                 length - int(cupy.unpackbits(m, bitorder="little")[:length].sum())
             )
-            data = data.set_mask(cudf.core.buffer.as_buffer(m), null_count)
+            mask_gmv = gpumemoryview(DeviceBuffer.from_cuda_array_interface(m))
+            plc_col = plc_col.with_mask(mask_gmv, null_count)
 
-        return data
+        return ColumnBase.from_pylibcudf(plc_col)
 
     def _to_backend_array(self, allow_missing, backend):
         return to_nplike(
