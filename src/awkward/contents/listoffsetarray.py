@@ -1785,11 +1785,12 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
         if parse_version(cudf.__version__) >= parse_version("25.12.00"):
             import pylibcudf as plc
-            from cudf.core.buffer import as_buffer
-            from cudf.core.column.column import ColumnBase, as_column
+            from cudf.core.column.column import ColumnBase
+            from pylibcudf.gpumemoryview import gpumemoryview
+            from rmm.pylibrmm.device_buffer import DeviceBuffer
 
-            # Build the offsets column via as_column (zero-copy CuPy→plc path)
-            offsets_col = as_column(index)
+            # Build the offsets plc.Column directly — no cudf.core.column needed.
+            offsets_plc = plc.Column.from_cuda_array_interface(index)
 
             # Build the packed bitmask as a CuPy array (LSB order, 64-byte aligned)
             if mask is not None:
@@ -1802,19 +1803,16 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
             if self.parameters.get("__array__") == "string":
                 # String columns: chars in the data buffer, offsets as child[0].
-                # Wrap via pylibcudf so that cudf can own/validate the buffers.
-                from pylibcudf.gpumemoryview import gpumemoryview
-                from rmm.pylibrmm.device_buffer import DeviceBuffer
-
                 chars_cp = cupy.asarray(self._content.data)
-                chars_buf = DeviceBuffer.from_cuda_array_interface(chars_cp)
-                chars_gmv = gpumemoryview(chars_buf)
-
-                offsets_buf_rmm = DeviceBuffer.from_cuda_array_interface(index)
-                offsets_gmv = gpumemoryview(offsets_buf_rmm)
+                chars_gmv = gpumemoryview(
+                    DeviceBuffer.from_cuda_array_interface(chars_cp)
+                )
+                offsets_gmv = gpumemoryview(
+                    DeviceBuffer.from_cuda_array_interface(index)
+                )
 
                 n = length
-                offsets_plc = plc.Column(
+                offsets_plc_str = plc.Column(
                     data_type=plc.DataType(plc.TypeId.INT32),
                     size=n + 1,
                     data=offsets_gmv,
@@ -1840,15 +1838,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     mask=mask_gmv,
                     null_count=null_count,
                     offset=0,
-                    children=[offsets_plc],
+                    children=[offsets_plc_str],
                 )
                 return ColumnBase.from_pylibcudf(string_plc)
 
-            # List column: no data buffer, children = [offsets, content].
-            # Use to_pylibcudf() to unwrap already-validated ColumnBase objects
-            # back to raw plc.Column spans before passing them as children, so
-            # that ColumnBase.create does a single clean _wrap_and_validate pass
-            # without double-wrapping previously-wrapped Buffer objects.
+            # List column: children = [offsets, content].
+            # cont is a ColumnBase; unwrap it to a raw plc.Column via to_pylibcudf()
+            # so that from_pylibcudf does a single clean _wrap_and_validate pass.
             cont = self._content._to_cudf(cudf, None, len(self._content))
             plc_col = plc.Column(
                 data_type=plc.DataType(plc.TypeId.LIST),
@@ -1857,16 +1853,18 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 mask=None,
                 null_count=0,
                 offset=0,
-                children=[offsets_col.to_pylibcudf(), cont.to_pylibcudf()],
+                children=[offsets_plc, cont.to_pylibcudf()],
             )
-            list_col = ColumnBase.from_pylibcudf(plc_col)
+
             if m_arr is not None:
                 null_count = int(
                     length
                     - int(cupy.unpackbits(m_arr, bitorder="little")[:length].sum())
                 )
-                return list_col.set_mask(as_buffer(m_arr), null_count)
-            return list_col
+                mask_gmv = gpumemoryview(DeviceBuffer.from_cuda_array_interface(m_arr))
+                plc_col = plc_col.with_mask(mask_gmv, null_count)
+
+            return ColumnBase.from_pylibcudf(plc_col)
 
         # --- Legacy path: cudf < 25.12 ---
         buf = cudf.core.buffer.as_buffer(index)

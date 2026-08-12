@@ -752,13 +752,17 @@ class BitMaskedArray(BitMaskedMeta[Content], Content):
         inner = self._content._to_cudf(cudf, mask=None, length=length)
 
         if parse_version(cudf.__version__) >= parse_version("25.12.00"):
-            # set_mask(buf, null_count) — null_count is required in >= 25.12
+            from cudf.core.column.column import ColumnBase
+            from pylibcudf.gpumemoryview import gpumemoryview
+            from rmm.pylibrmm.device_buffer import DeviceBuffer
+
             null_count = int(
                 length - int(cp.unpackbits(m, bitorder="little")[:length].sum())
             )
-            return inner.set_mask(cudf.core.buffer.as_buffer(m), null_count)
+            mask_gmv = gpumemoryview(DeviceBuffer.from_cuda_array_interface(m))
+            plc_col = inner.to_pylibcudf().with_mask(mask_gmv, null_count)
+            return ColumnBase.from_pylibcudf(plc_col)
         else:
-            # set_mask(value) — single-arg form for < 25.12; returns new col or None
             result = inner.set_mask(cudf.core.buffer.as_buffer(m))
             return result if result is not None else inner
 
