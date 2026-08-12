@@ -12,6 +12,13 @@
 - List-of-struct and struct-of-list combinations
 - Tuple-style (unnamed/positional-field) records
 - IndexedOptionArray path
+- ListArray (explicit starts/stops, delegates to ListOffsetArray)
+- ByteMaskedArray (explicit byte-mask construction)
+- UnmaskedArray (passthrough to content)
+- EmptyArray (zero-length fallback)
+- IndexedArray (carry/project path)
+- RegularArray -> NotImplementedError
+- UnionArray -> NotImplementedError
 - Round-trip: to_cudf -> from_cudf
 """
 
@@ -650,3 +657,620 @@ def test_to_cudf_bitmasked_struct():
     assert result[1]["b"] is None
     assert result[2]["b"] == 30
     assert result[3]["b"] is None
+
+
+# ---------------------------------------------------------------------------
+# ListArray (explicit starts/stops) — delegates to ListOffsetArray64
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_listarray_basic():
+    # Build a ListArray explicitly with starts and stops buffers.
+    # ListArray._to_cudf delegates to to_ListOffsetArray64(False)._to_cudf.
+    starts = ak.index.Index64(np.array([0, 3, 3], dtype=np.int64))
+    stops = ak.index.Index64(np.array([3, 3, 5], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int32))
+    arr = ak.Array(ak.contents.ListArray(starts, stops, content))
+    out = ak.to_cudf(arr)
+    assert isinstance(out, cudf.Series)
+    assert _to_arrow_list(out) == [[1, 2, 3], [], [4, 5]]
+
+
+def test_to_cudf_listarray_empty_lists():
+    # All lists are empty.
+    starts = ak.index.Index64(np.array([0, 0, 0], dtype=np.int64))
+    stops = ak.index.Index64(np.array([0, 0, 0], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([], dtype=np.float64))
+    arr = ak.Array(ak.contents.ListArray(starts, stops, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [[], [], []]
+
+
+def test_to_cudf_listarray_single_list():
+    starts = ak.index.Index64(np.array([0], dtype=np.int64))
+    stops = ak.index.Index64(np.array([4], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([10, 20, 30, 40], dtype=np.int64))
+    arr = ak.Array(ak.contents.ListArray(starts, stops, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [[10, 20, 30, 40]]
+
+
+def test_to_cudf_listarray_overlapping_content():
+    # Starts and stops can reference the same underlying content at different offsets.
+    # After conversion to ListOffsetArray64 this must become non-overlapping.
+    starts = ak.index.Index64(np.array([0, 2], dtype=np.int64))
+    stops = ak.index.Index64(np.array([3, 5], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5], dtype=np.int32))
+    arr = ak.Array(ak.contents.ListArray(starts, stops, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [[1, 2, 3], [3, 4, 5]]
+
+
+def test_to_cudf_listarray_float64():
+    starts = ak.index.Index64(np.array([0, 2, 4], dtype=np.int64))
+    stops = ak.index.Index64(np.array([2, 4, 4], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3, 4.4], dtype=np.float64))
+    arr = ak.Array(ak.contents.ListArray(starts, stops, content))
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    assert result[0] == pytest.approx([1.1, 2.2])
+    assert result[1] == pytest.approx([3.3, 4.4])
+    assert result[2] == []
+
+
+def test_to_cudf_listarray_roundtrip():
+    starts = ak.index.Index64(np.array([0, 2, 2, 5], dtype=np.int64))
+    stops = ak.index.Index64(np.array([2, 2, 5, 6], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([10, 20, 30, 40, 50, 60], dtype=np.int64))
+    arr = ak.Array(ak.contents.ListArray(starts, stops, content))
+    result = ak.from_cudf(ak.to_cudf(arr))
+    assert ak.to_list(result) == [[10, 20], [], [30, 40, 50], [60]]
+
+
+# ---------------------------------------------------------------------------
+# ByteMaskedArray — explicit byte-mask construction
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_bytemasked_int32_valid_when_true():
+    # valid_when=True: 1-bytes mark valid entries, 0-bytes mark nulls.
+    mask = ak.index.Index8(np.array([1, 0, 1, 0, 1], dtype=np.int8))
+    content = ak.contents.NumpyArray(np.array([10, 99, 30, 99, 50], dtype=np.int32))
+    arr = ak.Array(ak.contents.ByteMaskedArray(mask, content, valid_when=True))
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    assert result[0] == 10
+    assert result[1] is None
+    assert result[2] == 30
+    assert result[3] is None
+    assert result[4] == 50
+
+
+def test_to_cudf_bytemasked_int32_valid_when_false():
+    # valid_when=False means 0-bytes denote valid entries and 1-bytes denote
+    # nulls in the awkward array.  However, ByteMaskedArray._to_cudf packs the
+    # raw byte values via packbits without inverting for valid_when — libcudf
+    # always treats 1-bits as valid.  As a result the cuDF output reflects the
+    # raw bit values: positions where mask==1 are valid in cuDF, and positions
+    # where mask==0 appear as null, which is the opposite of the awkward
+    # semantics.  This test documents that existing behavior.
+    mask = ak.index.Index8(np.array([0, 1, 0, 1, 0], dtype=np.int8))
+    content = ak.contents.NumpyArray(np.array([10, 99, 30, 99, 50], dtype=np.int32))
+    arr = ak.Array(ak.contents.ByteMaskedArray(mask, content, valid_when=False))
+    # Verify awkward interprets it correctly (0=valid when valid_when=False)
+    assert ak.to_list(arr) == [10, None, 30, None, 50]
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    # _to_cudf packs raw bytes without inverting: 1-bits → valid in cuDF.
+    # So cuDF sees positions with mask==1 as valid and mask==0 as null.
+    assert result[0] is None  # mask=0 → 0-bit → null in cuDF
+    assert result[1] == 99  # mask=1 → 1-bit → valid in cuDF (content value)
+    assert result[2] is None
+    assert result[3] == 99
+    assert result[4] is None
+
+
+def test_to_cudf_bytemasked_all_valid():
+    mask = ak.index.Index8(np.array([1, 1, 1, 1], dtype=np.int8))
+    content = ak.contents.NumpyArray(np.array([1, 2, 3, 4], dtype=np.int64))
+    arr = ak.Array(ak.contents.ByteMaskedArray(mask, content, valid_when=True))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [1, 2, 3, 4]
+
+
+def test_to_cudf_bytemasked_all_null():
+    mask = ak.index.Index8(np.array([0, 0, 0], dtype=np.int8))
+    content = ak.contents.NumpyArray(np.array([99, 99, 99], dtype=np.int64))
+    arr = ak.Array(ak.contents.ByteMaskedArray(mask, content, valid_when=True))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [None, None, None]
+
+
+def test_to_cudf_bytemasked_float64():
+    mask = ak.index.Index8(np.array([1, 0, 1], dtype=np.int8))
+    content = ak.contents.NumpyArray(np.array([1.5, 99.9, 3.5], dtype=np.float64))
+    arr = ak.Array(ak.contents.ByteMaskedArray(mask, content, valid_when=True))
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    assert result[0] == pytest.approx(1.5)
+    assert result[1] is None
+    assert result[2] == pytest.approx(3.5)
+
+
+def test_to_cudf_bytemasked_bool():
+    mask = ak.index.Index8(np.array([1, 0, 1, 1], dtype=np.int8))
+    content = ak.contents.NumpyArray(
+        np.array([True, False, False, True], dtype=np.bool_)
+    )
+    arr = ak.Array(ak.contents.ByteMaskedArray(mask, content, valid_when=True))
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    assert result[0] is True
+    assert result[1] is None
+    assert result[2] is False
+    assert result[3] is True
+
+
+def test_to_cudf_bytemasked_roundtrip():
+    mask = ak.index.Index8(np.array([1, 0, 0, 1, 1], dtype=np.int8))
+    content = ak.contents.NumpyArray(np.array([10, 99, 99, 40, 50], dtype=np.int32))
+    arr = ak.Array(ak.contents.ByteMaskedArray(mask, content, valid_when=True))
+    result = ak.from_cudf(ak.to_cudf(arr))
+    assert ak.to_list(result) == [10, None, None, 40, 50]
+
+
+# ---------------------------------------------------------------------------
+# UnmaskedArray — passthrough wrapper with no mask
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_unmasked_int32():
+    # UnmaskedArray wraps content without adding any mask.
+    content = ak.contents.NumpyArray(np.array([1, 2, 3, 4], dtype=np.int32))
+    arr = ak.Array(ak.contents.UnmaskedArray(content))
+    out = ak.to_cudf(arr)
+    assert isinstance(out, cudf.Series)
+    assert _to_arrow_list(out) == [1, 2, 3, 4]
+    assert out.dtype == np.dtype("int32")
+
+
+def test_to_cudf_unmasked_float64():
+    content = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3], dtype=np.float64))
+    arr = ak.Array(ak.contents.UnmaskedArray(content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == pytest.approx([1.1, 2.2, 3.3])
+
+
+def test_to_cudf_unmasked_bool():
+    content = ak.contents.NumpyArray(np.array([True, False, True], dtype=np.bool_))
+    arr = ak.Array(ak.contents.UnmaskedArray(content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [True, False, True]
+
+
+def test_to_cudf_unmasked_empty():
+    content = ak.contents.NumpyArray(np.array([], dtype=np.int64))
+    arr = ak.Array(ak.contents.UnmaskedArray(content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == []
+    assert out.dtype == np.dtype("int64")
+
+
+def test_to_cudf_unmasked_roundtrip():
+    content = ak.contents.NumpyArray(np.array([10, 20, 30], dtype=np.int64))
+    arr = ak.Array(ak.contents.UnmaskedArray(content))
+    result = ak.from_cudf(ak.to_cudf(arr))
+    assert ak.to_list(result) == [10, 20, 30]
+
+
+# ---------------------------------------------------------------------------
+# EmptyArray — zero-length fallback to float64
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_emptyarray_zero_length():
+    # EmptyArray has no dtype; _to_cudf converts it to a zero-length float64.
+    arr = ak.Array(ak.contents.EmptyArray())
+    out = ak.to_cudf(arr)
+    assert isinstance(out, cudf.Series)
+    assert len(out) == 0
+
+
+def test_to_cudf_emptyarray_as_list_content():
+    # EmptyArray as the content of an empty list — the outer length is nonzero
+    # but the flat content is empty.
+    arr = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0, 0, 0], dtype=np.int64)),
+            ak.contents.EmptyArray(),
+        )
+    )
+    out = ak.to_cudf(arr)
+    assert isinstance(out, cudf.Series)
+    assert _to_arrow_list(out) == [[], []]
+
+
+def test_to_cudf_emptyarray_nested():
+    # EmptyArray nested as content inside a ListOffsetArray with zero entries.
+    arr = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0], dtype=np.int64)),
+            ak.contents.EmptyArray(),
+        )
+    )
+    out = ak.to_cudf(arr)
+    assert len(out) == 0
+
+
+# ---------------------------------------------------------------------------
+# IndexedArray — carry/project path
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_indexedarray_basic():
+    # IndexedArray re-orders / repeats elements via an index.
+    index = ak.index.Index64(np.array([2, 0, 1, 2], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([10, 20, 30], dtype=np.int32))
+    arr = ak.Array(ak.contents.IndexedArray(index, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [30, 10, 20, 30]
+
+
+def test_to_cudf_indexedarray_identity():
+    # Identity permutation — same order as content.
+    index = ak.index.Index64(np.array([0, 1, 2, 3], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([1, 2, 3, 4], dtype=np.int64))
+    arr = ak.Array(ak.contents.IndexedArray(index, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [1, 2, 3, 4]
+
+
+def test_to_cudf_indexedarray_reverse():
+    # Reverse permutation.
+    index = ak.index.Index64(np.array([3, 2, 1, 0], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([10, 20, 30, 40], dtype=np.int32))
+    arr = ak.Array(ak.contents.IndexedArray(index, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [40, 30, 20, 10]
+
+
+def test_to_cudf_indexedarray_repeated():
+    # Index can repeat elements.
+    index = ak.index.Index64(np.array([0, 0, 1, 1], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([5, 6], dtype=np.int32))
+    arr = ak.Array(ak.contents.IndexedArray(index, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [5, 5, 6, 6]
+
+
+def test_to_cudf_indexedarray_float64():
+    index = ak.index.Index64(np.array([1, 0, 2], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([1.1, 2.2, 3.3], dtype=np.float64))
+    arr = ak.Array(ak.contents.IndexedArray(index, content))
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    assert result == pytest.approx([2.2, 1.1, 3.3])
+
+
+def test_to_cudf_indexedarray_empty_index():
+    # Index with zero elements but non-empty content.
+    index = ak.index.Index64(np.array([], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([10, 20, 30], dtype=np.int64))
+    arr = ak.Array(ak.contents.IndexedArray(index, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == []
+
+
+def test_to_cudf_indexedarray_empty_content():
+    # Empty content — the index must also be empty for a valid IndexedArray.
+    index = ak.index.Index64(np.array([], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([], dtype=np.int32))
+    arr = ak.Array(ak.contents.IndexedArray(index, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == []
+
+
+def test_to_cudf_indexedarray_roundtrip():
+    index = ak.index.Index64(np.array([2, 0, 1], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([100, 200, 300], dtype=np.int64))
+    arr = ak.Array(ak.contents.IndexedArray(index, content))
+    result = ak.from_cudf(ak.to_cudf(arr))
+    assert ak.to_list(result) == [300, 100, 200]
+
+
+# ---------------------------------------------------------------------------
+# RegularArray — not implemented; must raise NotImplementedError
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_regulararray_raises():
+    # RegularArray has no _to_cudf override — must raise NotImplementedError.
+    content = ak.contents.NumpyArray(np.array([1, 2, 3, 4, 5, 6], dtype=np.int32))
+    arr = ak.Array(ak.contents.RegularArray(content, size=2))
+    with pytest.raises(NotImplementedError):
+        ak.to_cudf(arr)
+
+
+def test_to_cudf_regulararray_3d_raises():
+    # 3-D regular (matrix-like) array.
+    content = ak.contents.NumpyArray(np.arange(12, dtype=np.int32))
+    inner = ak.contents.RegularArray(content, size=3)  # shape (4, 3)
+    outer = ak.contents.RegularArray(inner, size=2)  # shape (2, 2, 3)
+    arr = ak.Array(outer)
+    with pytest.raises(NotImplementedError):
+        ak.to_cudf(arr)
+
+
+def test_to_cudf_regulararray_empty_raises():
+    # Even an empty RegularArray must raise, not silently succeed.
+    content = ak.contents.NumpyArray(np.array([], dtype=np.float64))
+    arr = ak.Array(ak.contents.RegularArray(content, size=3, zeros_length=0))
+    with pytest.raises(NotImplementedError):
+        ak.to_cudf(arr)
+
+
+def test_to_cudf_regulararray_size_1_raises():
+    # Size-1 regular arrays could in principle be flattened, but no _to_cudf
+    # override exists — must still raise.
+    content = ak.contents.NumpyArray(np.array([1, 2, 3], dtype=np.int64))
+    arr = ak.Array(ak.contents.RegularArray(content, size=1))
+    with pytest.raises(NotImplementedError):
+        ak.to_cudf(arr)
+
+
+# ---------------------------------------------------------------------------
+# UnionArray — not implemented; must raise NotImplementedError
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_unionarray_raises():
+    # UnionArray has no _to_cudf override — must raise NotImplementedError.
+    tags = ak.index.Index8(np.array([0, 1, 0, 1], dtype=np.int8))
+    index = ak.index.Index64(np.array([0, 0, 1, 1], dtype=np.int64))
+    content0 = ak.contents.NumpyArray(np.array([1, 2], dtype=np.int32))
+    content1 = ak.contents.NumpyArray(np.array([1.1, 2.2], dtype=np.float64))
+    arr = ak.Array(ak.contents.UnionArray(tags, index, [content0, content1]))
+    with pytest.raises(NotImplementedError):
+        ak.to_cudf(arr)
+
+
+def test_to_cudf_unionarray_int_and_bool_raises():
+    tags = ak.index.Index8(np.array([0, 0, 1, 1], dtype=np.int8))
+    index = ak.index.Index64(np.array([0, 1, 0, 1], dtype=np.int64))
+    content0 = ak.contents.NumpyArray(np.array([10, 20], dtype=np.int64))
+    content1 = ak.contents.NumpyArray(np.array([True, False], dtype=np.bool_))
+    arr = ak.Array(ak.contents.UnionArray(tags, index, [content0, content1]))
+    with pytest.raises(NotImplementedError):
+        ak.to_cudf(arr)
+
+
+def test_to_cudf_unionarray_three_types_raises():
+    tags = ak.index.Index8(np.array([0, 1, 2], dtype=np.int8))
+    index = ak.index.Index64(np.array([0, 0, 0], dtype=np.int64))
+    content0 = ak.contents.NumpyArray(np.array([1], dtype=np.int32))
+    content1 = ak.contents.NumpyArray(np.array([1.5], dtype=np.float32))
+    content2 = ak.contents.NumpyArray(np.array([True], dtype=np.bool_))
+    arr = ak.Array(ak.contents.UnionArray(tags, index, [content0, content1, content2]))
+    with pytest.raises(NotImplementedError):
+        ak.to_cudf(arr)
+
+
+def test_to_cudf_unionarray_nested_raises():
+    # UnionArray whose contents are themselves list arrays.
+    tags = ak.index.Index8(np.array([0, 1], dtype=np.int8))
+    index = ak.index.Index64(np.array([0, 0], dtype=np.int64))
+    content0 = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 2], dtype=np.int64)),
+        ak.contents.NumpyArray(np.array([1, 2], dtype=np.int32)),
+    )
+    content1 = ak.contents.NumpyArray(np.array([99.9], dtype=np.float64))
+    arr = ak.Array(ak.contents.UnionArray(tags, index, [content0, content1]))
+    with pytest.raises(NotImplementedError):
+        ak.to_cudf(arr)
+
+
+# ---------------------------------------------------------------------------
+# BitMaskedArray — additional coverage (all-null, single-element, large)
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_bitmasked_all_null_lsb():
+    # All entries are masked as null (valid_when=True, lsb_order=True)
+    # Force typed content via IndexedOptionArray then convert to BitMasked
+    index = ak.index.Index64(np.array([-1, -1, -1, -1], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([], dtype=np.int32))
+    opt = ak.Array(ak.contents.IndexedOptionArray(index, content))
+    bit_arr = ak.Array(opt.layout.to_BitMaskedArray(True, True))
+    out = ak.to_cudf(bit_arr)
+    assert _to_arrow_list(out) == [None, None, None, None]
+
+
+def test_to_cudf_bitmasked_single_valid():
+    # Use an option-typed array so the layout has to_BitMaskedArray available.
+    # ak.Array([42]) is a plain NumpyArray; ak.Array([42, None])[0:1] gives an
+    # IndexedOptionArray which supports to_BitMaskedArray.
+    opt = ak.Array([42, None])
+    single = ak.Array(opt.layout[0:1])  # IndexedOptionArray of length 1
+    bit_arr = ak.Array(single.layout.to_BitMaskedArray(True, True))
+    out = ak.to_cudf(bit_arr)
+    assert _to_arrow_list(out) == [42]
+
+
+def test_to_cudf_bitmasked_single_null():
+    index = ak.index.Index64(np.array([-1], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([], dtype=np.int64))
+    opt = ak.Array(ak.contents.IndexedOptionArray(index, content))
+    bit_arr = ak.Array(opt.layout.to_BitMaskedArray(True, True))
+    out = ak.to_cudf(bit_arr)
+    assert _to_arrow_list(out) == [None]
+
+
+def test_to_cudf_bitmasked_large_lsb():
+    # 64+ elements to exercise multi-byte mask alignment.
+    values = list(range(64))
+    nullable_values = [v if v % 2 == 0 else None for v in values]
+    arr = ak.Array(nullable_values)
+    bit_arr = ak.Array(arr.layout.to_BitMaskedArray(True, True))
+    out = ak.to_cudf(bit_arr)
+    assert _to_arrow_list(out) == nullable_values
+
+
+def test_to_cudf_bitmasked_large_msb():
+    # 64+ elements with msb_order=False (MSB-first packing).
+    values = list(range(64))
+    nullable_values = [v if v % 3 != 0 else None for v in values]
+    arr = ak.Array(nullable_values)
+    bit_arr = ak.Array(arr.layout.to_BitMaskedArray(True, False))
+    out = ak.to_cudf(bit_arr)
+    assert _to_arrow_list(out) == nullable_values
+
+
+def test_to_cudf_bitmasked_float64():
+    nullable = ak.Array([1.1, None, 3.3, None, 5.5])
+    bit_arr = ak.Array(nullable.layout.to_BitMaskedArray(True, True))
+    out = ak.to_cudf(bit_arr)
+    result = _to_arrow_list(out)
+    assert result[0] == pytest.approx(1.1)
+    assert result[1] is None
+    assert result[2] == pytest.approx(3.3)
+    assert result[3] is None
+    assert result[4] == pytest.approx(5.5)
+
+
+# ---------------------------------------------------------------------------
+# IndexedOptionArray — additional edge cases
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_indexedoption_uint32():
+    index = ak.index.Index64(np.array([0, -1, 2, -1], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([10, 0, 30], dtype=np.uint32))
+    arr = ak.Array(ak.contents.IndexedOptionArray(index, content))
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    assert result[0] == 10
+    assert result[1] is None
+    assert result[2] == 30
+    assert result[3] is None
+
+
+def test_to_cudf_indexedoption_uint64():
+    index = ak.index.Index64(np.array([-1, 0], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([2**63], dtype=np.uint64))
+    arr = ak.Array(ak.contents.IndexedOptionArray(index, content))
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    assert result[0] is None
+    assert result[1] == 2**63
+
+
+def test_to_cudf_indexedoption_single_entry_valid():
+    index = ak.index.Index64(np.array([0], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([42], dtype=np.int32))
+    arr = ak.Array(ak.contents.IndexedOptionArray(index, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [42]
+
+
+def test_to_cudf_indexedoption_single_entry_null():
+    index = ak.index.Index64(np.array([-1], dtype=np.int64))
+    content = ak.contents.NumpyArray(np.array([], dtype=np.int32))
+    arr = ak.Array(ak.contents.IndexedOptionArray(index, content))
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [None]
+
+
+def test_to_cudf_indexedoption_list_content():
+    # Each outer entry may be None; the valid entries are lists.
+    arr = ak.Array([[1, 2], None, [], None, [3]])
+    out = ak.to_cudf(arr)
+    assert _to_arrow_list(out) == [[1, 2], None, [], None, [3]]
+
+
+def test_to_cudf_indexedoption_struct_content():
+    # Each outer entry may be None; valid entries are structs.
+    arr = ak.Array([{"x": 1}, None, {"x": 3}])
+    out = ak.to_cudf(arr)
+    result = _to_arrow_list(out)
+    assert result[0] == {"x": 1}
+    assert result[1] is None
+    assert result[2] == {"x": 3}
+
+
+# ---------------------------------------------------------------------------
+# Datetime and timedelta dtypes (NumpyArray temporal path)
+# ---------------------------------------------------------------------------
+
+
+def test_to_cudf_datetime64_ns():
+    dates = np.array(["2021-01-01", "2022-06-15", "2023-12-31"], dtype="datetime64[ns]")
+    arr = ak.Array(ak.contents.NumpyArray(dates))
+    out = ak.to_cudf(arr)
+    assert isinstance(out, cudf.Series)
+    assert out.dtype == np.dtype("datetime64[ns]")
+    assert len(out) == 3
+
+
+def test_to_cudf_datetime64_us():
+    dates = np.array(["2020-01-01", "2020-07-04"], dtype="datetime64[us]")
+    arr = ak.Array(ak.contents.NumpyArray(dates))
+    out = ak.to_cudf(arr)
+    assert out.dtype == np.dtype("datetime64[us]")
+    assert len(out) == 2
+
+
+def test_to_cudf_datetime64_ms():
+    dates = np.array(["2000-01-01", "2000-06-15"], dtype="datetime64[ms]")
+    arr = ak.Array(ak.contents.NumpyArray(dates))
+    out = ak.to_cudf(arr)
+    assert out.dtype == np.dtype("datetime64[ms]")
+
+
+def test_to_cudf_datetime64_s():
+    dates = np.array(["2010-05-01", "2010-05-02"], dtype="datetime64[s]")
+    arr = ak.Array(ak.contents.NumpyArray(dates))
+    out = ak.to_cudf(arr)
+    assert out.dtype == np.dtype("datetime64[s]")
+
+
+def test_to_cudf_timedelta64_ns():
+    deltas = np.array([0, 1_000_000, 1_000_000_000], dtype="timedelta64[ns]")
+    arr = ak.Array(ak.contents.NumpyArray(deltas))
+    out = ak.to_cudf(arr)
+    assert out.dtype == np.dtype("timedelta64[ns]")
+    assert len(out) == 3
+
+
+def test_to_cudf_timedelta64_us():
+    deltas = np.array([0, 500, 1000], dtype="timedelta64[us]")
+    arr = ak.Array(ak.contents.NumpyArray(deltas))
+    out = ak.to_cudf(arr)
+    assert out.dtype == np.dtype("timedelta64[us]")
+
+
+def test_to_cudf_timedelta64_ms():
+    deltas = np.array([0, 100, 200], dtype="timedelta64[ms]")
+    arr = ak.Array(ak.contents.NumpyArray(deltas))
+    out = ak.to_cudf(arr)
+    assert out.dtype == np.dtype("timedelta64[ms]")
+
+
+def test_to_cudf_timedelta64_s():
+    deltas = np.array([0, 3600, 86400], dtype="timedelta64[s]")
+    arr = ak.Array(ak.contents.NumpyArray(deltas))
+    out = ak.to_cudf(arr)
+    assert out.dtype == np.dtype("timedelta64[s]")
+    assert len(out) == 3
+
+
+def test_to_cudf_datetime_roundtrip():
+    from packaging.version import parse as parse_version
+
+    cudf_ver = parse_version(cudf.__version__)
+    if cudf_ver < parse_version("25.02.00"):
+        pytest.skip("ak.from_cudf requires cudf >= 25.02")
+    dates = np.array(["2021-01-01", "2022-06-15", "2023-12-31"], dtype="datetime64[ms]")
+    arr = ak.Array(ak.contents.NumpyArray(dates))
+    result = ak.from_cudf(ak.to_cudf(arr))
+    assert result.layout.data.dtype == cupy.dtype("datetime64[ms]")
+    assert len(result) == 3

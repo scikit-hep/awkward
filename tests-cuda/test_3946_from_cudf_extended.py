@@ -13,6 +13,9 @@
 - Sliced struct and list columns (zero-copy offset handling)
 - Round-trip from_cudf -> to_cudf
 - highlevel=False for complex layouts
+- FIXED_SIZE_LIST columns -> NotImplementedError
+- Unsupported pylibcudf TypeId -> NotImplementedError
+- Layout type checks (NumpyArray, ListOffsetArray, RecordArray, BitMaskedArray, IndexedArray)
 """
 
 from __future__ import annotations
@@ -776,3 +779,535 @@ def test_roundtrip_strings():
     series = cudf.Series(["hello", "world", "awkward"])
     result = ak.from_cudf(series)
     assert ak.to_list(result) == ["hello", "world", "awkward"]
+
+
+# ---------------------------------------------------------------------------
+# Layout type assertions for from_cudf outputs
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_primitive_produces_numpyarray():
+    series = cudf.Series([1, 2, 3], dtype=np.int32)
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.NumpyArray)
+    assert ak.backend(layout) == "cuda"
+
+
+def test_from_cudf_list_produces_listoffsetarray():
+    series = cudf.Series([[1, 2], [3], []])
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.ListOffsetArray)
+    assert ak.backend(layout) == "cuda"
+
+
+def test_from_cudf_struct_produces_recordarray():
+    series = cudf.Series([{"x": 1, "y": 2}, {"x": 3, "y": 4}])
+    layout = ak.from_cudf(series, highlevel=False)
+    # May be wrapped in BitMaskedArray if cudf adds a validity mask.
+    assert isinstance(layout, (ak.contents.RecordArray, ak.contents.BitMaskedArray))
+    if isinstance(layout, ak.contents.BitMaskedArray):
+        assert isinstance(layout.content, ak.contents.RecordArray)
+    assert ak.backend(layout) == "cuda"
+
+
+def test_from_cudf_nullable_int_produces_bitmaskedarray():
+    series = cudf.Series([1, None, 3], dtype="Int64")
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.BitMaskedArray)
+    assert isinstance(layout.content, ak.contents.NumpyArray)
+    assert ak.backend(layout) == "cuda"
+
+
+def test_from_cudf_nullable_list_produces_bitmasked_listoffset():
+    series = cudf.Series([[1, 2], None, [3]])
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.BitMaskedArray)
+    assert isinstance(layout.content, ak.contents.ListOffsetArray)
+
+
+def test_from_cudf_nullable_struct_produces_bitmasked_record():
+    series = cudf.Series([{"a": 1}, None, {"a": 3}])
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.BitMaskedArray)
+    assert isinstance(layout.content, ak.contents.RecordArray)
+
+
+def test_from_cudf_string_produces_listoffsetarray_with_parameter():
+    series = cudf.Series(["hello", "world"])
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.ListOffsetArray)
+    assert layout.parameter("__array__") == "string"
+    assert layout.content.parameter("__array__") == "char"
+
+
+def test_from_cudf_dictionary_produces_indexedarray():
+    # When a categorical Series is passed to to_pylibcudf(), cuDF may return
+    # either a DICTIONARY32-encoded column (producing IndexedArray or
+    # BitMaskedArray) or the raw codes column (producing NumpyArray).  Both are
+    # valid GPU-backed representations of the categorical data.
+    series = cudf.Series(["a", "b", "a", "c"]).astype("category")
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(
+        layout,
+        (ak.contents.IndexedArray, ak.contents.BitMaskedArray, ak.contents.NumpyArray),
+    )
+    assert ak.backend(layout) == "cuda"
+
+
+def test_from_cudf_nested_list_produces_listoffset_of_listoffset():
+    series = cudf.Series([[[1, 2], [3]], [[4]]])
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.ListOffsetArray)
+    assert isinstance(layout.content, ak.contents.ListOffsetArray)
+
+
+def test_from_cudf_list_of_struct_layout_types():
+    series = cudf.Series([[{"x": 1}], [{"x": 2}, {"x": 3}]])
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.ListOffsetArray)
+    inner = layout.content
+    # Inner may be wrapped in BitMaskedArray
+    if isinstance(inner, ak.contents.BitMaskedArray):
+        inner = inner.content
+    assert isinstance(inner, ak.contents.RecordArray)
+
+
+def test_from_cudf_struct_of_list_layout_types():
+    series = cudf.Series([{"pts": [1, 2]}, {"pts": [3]}])
+    layout = ak.from_cudf(series, highlevel=False)
+    actual = layout
+    if isinstance(actual, ak.contents.BitMaskedArray):
+        actual = actual.content
+    assert isinstance(actual, ak.contents.RecordArray)
+    field_layout = actual["pts"]
+    if isinstance(field_layout, ak.contents.BitMaskedArray):
+        field_layout = field_layout.content
+    assert isinstance(field_layout, ak.contents.ListOffsetArray)
+
+
+# ---------------------------------------------------------------------------
+# FIXED_SIZE_LIST columns -> NotImplementedError
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_fixed_size_list_raises():
+    # cudf uses FIXED_SIZE_LIST as the internal type for fixed-width list columns.
+    # ak.from_cudf does not implement this type yet; it must raise NotImplementedError.
+    try:
+        series = cudf.Series(
+            np.array([[1, 2], [3, 4], [5, 6]], dtype=np.int32),
+            dtype=cudf.ListDtype("int32"),
+        )
+    except Exception:
+        # If cudf cannot construct this fixed-size series, skip the test.
+        pytest.skip("cannot construct a fixed-size list column with this cudf version")
+    # Only proceed if pylibcudf exposes FIXED_SIZE_LIST as a distinct TypeId.
+    import pylibcudf as plc
+
+    plc_col = series.to_pylibcudf()
+    if isinstance(plc_col, tuple):
+        plc_col = plc_col[0]
+    TypeId = getattr(plc, "TypeId", None) or plc.types.TypeId
+    if not hasattr(TypeId, "FIXED_SIZE_LIST"):
+        pytest.skip("pylibcudf does not expose FIXED_SIZE_LIST TypeId in this version")
+    if plc_col.type().id() != TypeId.FIXED_SIZE_LIST:
+        pytest.skip("column is not actually FIXED_SIZE_LIST in this cudf version")
+    with pytest.raises(NotImplementedError):
+        ak.from_cudf(series)
+
+
+def test_from_cudf_fixed_size_list_via_pylibcudf_raises():
+    # Build a FIXED_SIZE_LIST column directly via pylibcudf and confirm
+    # that _column_to_layout raises NotImplementedError for it.
+    import pylibcudf as plc
+
+    from awkward._connect.cudf import _column_to_layout
+
+    TypeId = getattr(plc, "TypeId", None) or plc.types.TypeId
+    if not hasattr(TypeId, "FIXED_SIZE_LIST"):
+        pytest.skip("pylibcudf does not expose FIXED_SIZE_LIST in this version")
+
+    # Build a minimal FIXED_SIZE_LIST column (size=2) over int32 data.
+    data_cp = cp.array([1, 2, 3, 4], dtype=np.int32)
+    data_col = plc.Column.from_cuda_array_interface(data_cp)
+    try:
+        fixed_col = plc.Column(
+            data_type=plc.DataType(TypeId.FIXED_SIZE_LIST),
+            size=2,
+            data=None,
+            mask=None,
+            null_count=0,
+            offset=0,
+            children=[data_col],
+        )
+    except Exception:
+        pytest.skip("cannot build FIXED_SIZE_LIST column with this pylibcudf version")
+
+    with pytest.raises(NotImplementedError):
+        _column_to_layout(fixed_col)
+
+
+# ---------------------------------------------------------------------------
+# Unsupported pylibcudf TypeId -> NotImplementedError
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_unsupported_type_raises():
+    # Directly call _column_to_layout with a mock/invalid type id to confirm
+    # that unsupported TypeIds produce NotImplementedError.
+    import pylibcudf as plc
+
+    from awkward._connect.cudf import _column_to_layout
+
+    # Use EMPTY type which is a valid TypeId but not handled by from_cudf.
+    TypeId = getattr(plc, "TypeId", None) or plc.types.TypeId
+    if not hasattr(TypeId, "EMPTY"):
+        pytest.skip("pylibcudf does not expose EMPTY TypeId in this version")
+
+    try:
+        empty_col = plc.Column(
+            data_type=plc.DataType(TypeId.EMPTY),
+            size=0,
+            data=None,
+            mask=None,
+            null_count=0,
+            offset=0,
+            children=[],
+        )
+    except Exception:
+        pytest.skip("cannot build EMPTY column with this pylibcudf version")
+
+    with pytest.raises(NotImplementedError):
+        _column_to_layout(empty_col)
+
+
+# ---------------------------------------------------------------------------
+# Backend correctness for all from_cudf outputs
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_all_primitives_cuda_backend():
+    dtypes = [
+        ("int8", [-1, 0, 127]),
+        ("int16", [-100, 0, 100]),
+        ("int32", [-1000, 0, 1000]),
+        ("int64", [-(2**40), 0, 2**40]),
+        ("uint8", [0, 128, 255]),
+        ("uint16", [0, 1000, 65535]),
+        ("uint32", [0, 2**30, 2**32 - 1]),
+        ("float32", [-1.5, 0.0, 1.5]),
+        ("float64", [-1.23, 0.0, 1.23]),
+        ("bool", [True, False, True]),
+    ]
+    for dtype, values in dtypes:
+        series = cudf.Series(values, dtype=dtype)
+        result = ak.from_cudf(series)
+        assert ak.backend(result) == "cuda", f"Failed for dtype={dtype}"
+
+
+def test_from_cudf_all_nullable_cuda_backend():
+    dtypes_and_values = [
+        ("Int8", [1, None, -1]),
+        ("Int16", [100, None, -100]),
+        ("Int32", [1000, None, -1000]),
+        ("Int64", [2**40, None, -(2**40)]),
+        ("UInt8", [0, None, 255]),
+        ("UInt16", [0, None, 65535]),
+        ("UInt32", [0, None, 2**31]),
+        ("float32", [1.5, None, -1.5]),
+        ("float64", [1.23, None, -1.23]),
+    ]
+    for dtype, values in dtypes_and_values:
+        series = cudf.Series(values, dtype=dtype)
+        result = ak.from_cudf(series)
+        assert ak.backend(result) == "cuda", f"Failed for dtype={dtype}"
+        assert isinstance(result.layout, ak.contents.BitMaskedArray), (
+            f"Expected BitMaskedArray for nullable dtype={dtype}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Struct field name preservation
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_struct_field_names_preserved():
+    series = cudf.Series([{"alpha": 1, "beta": 2, "gamma": 3}])
+    result = ak.from_cudf(series)
+    assert ak.fields(result) == ["alpha", "beta", "gamma"]
+
+
+def test_from_cudf_nested_struct_field_names():
+    series = cudf.Series([{"outer": {"inner_a": 1, "inner_b": 2}}])
+    result = ak.from_cudf(series)
+    assert "outer" in ak.fields(result)
+    inner = result["outer"]
+    assert "inner_a" in ak.fields(inner)
+    assert "inner_b" in ak.fields(inner)
+
+
+def test_from_cudf_dataframe_field_names_preserved():
+    df = cudf.DataFrame({"foo": [1, 2], "bar": [3, 4], "baz": [5, 6]})
+    result = ak.from_cudf(df)
+    assert ak.fields(result) == ["foo", "bar", "baz"]
+
+
+# ---------------------------------------------------------------------------
+# Zero-length (empty) columns for all types
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_empty_struct():
+    series = cudf.Series(
+        [{"x": 1, "y": 2}][:0],
+        dtype=cudf.StructDtype({"x": np.dtype("int32"), "y": np.dtype("int32")}),
+    )
+    result = ak.from_cudf(series)
+    assert len(result) == 0
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_empty_list_cuda_backend():
+    series = cudf.Series([], dtype=cudf.ListDtype("int32"))
+    result = ak.from_cudf(series)
+    assert len(result) == 0
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_empty_string_cuda_backend():
+    series = cudf.Series([], dtype="str")
+    result = ak.from_cudf(series)
+    assert len(result) == 0
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_empty_bool():
+    series = cudf.Series([], dtype="bool")
+    result = ak.from_cudf(series)
+    assert len(result) == 0
+
+
+def test_from_cudf_empty_datetime():
+    series = cudf.Series([], dtype="datetime64[ns]")
+    result = ak.from_cudf(series)
+    assert len(result) == 0
+    assert result.layout.data.dtype == cp.dtype("datetime64[ns]")
+
+
+# ---------------------------------------------------------------------------
+# Single-element columns
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_single_int():
+    series = cudf.Series([42], dtype=np.int32)
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [42]
+
+
+def test_from_cudf_single_null():
+    series = cudf.Series([None], dtype="Int64")
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [None]
+
+
+def test_from_cudf_single_string():
+    series = cudf.Series(["hello"])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == ["hello"]
+
+
+def test_from_cudf_single_list():
+    series = cudf.Series([[1, 2, 3]])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [[1, 2, 3]]
+
+
+def test_from_cudf_single_struct():
+    series = cudf.Series([{"x": 10, "y": 20}])
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [{"x": 10, "y": 20}]
+
+
+# ---------------------------------------------------------------------------
+# Sliced primitive columns
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_sliced_int():
+    series = cudf.Series([10, 20, 30, 40, 50], dtype=np.int32)
+    sliced = series[2:4]
+    result = ak.from_cudf(sliced)
+    assert ak.to_list(result) == [30, 40]
+
+
+def test_from_cudf_sliced_float():
+    series = cudf.Series([1.1, 2.2, 3.3, 4.4], dtype=np.float64)
+    sliced = series[1:]
+    result = ak.from_cudf(sliced)
+    assert ak.to_list(result) == pytest.approx([2.2, 3.3, 4.4])
+
+
+def test_from_cudf_sliced_bool():
+    series = cudf.Series([True, False, True, False, True])
+    sliced = series[1:4]
+    result = ak.from_cudf(sliced)
+    assert ak.to_list(result) == [False, True, False]
+
+
+def test_from_cudf_sliced_nullable():
+    series = cudf.Series([1, None, 3, None, 5], dtype="Int64")
+    sliced = series[1:4]
+    result = ak.from_cudf(sliced)
+    assert ak.to_list(result) == [None, 3, None]
+
+
+# ---------------------------------------------------------------------------
+# Large arrays (stress: > 8 elements to exercise multi-byte bitmasks)
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_large_nullable_int():
+    values = [i if i % 3 != 0 else None for i in range(100)]
+    series = cudf.Series(values, dtype="Int32")
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == values
+    assert ak.backend(result) == "cuda"
+
+
+def test_from_cudf_large_list():
+    # 50 lists of varying lengths
+    data = [list(range(i % 5)) for i in range(50)]
+    series = cudf.Series(data)
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == data
+
+
+def test_from_cudf_large_struct():
+    n = 100
+    data = [{"a": i, "b": float(i) * 0.5} for i in range(n)]
+    series = cudf.Series(data)
+    result = ak.from_cudf(series)
+    vals = ak.to_list(result)
+    assert vals[0]["a"] == 0
+    assert vals[-1]["a"] == n - 1
+
+
+# ---------------------------------------------------------------------------
+# Nullable bitmask edge cases: all-valid, all-null, alternating
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_all_valid_produces_no_bitmask():
+    # A non-nullable series must not be wrapped in BitMaskedArray.
+    series = cudf.Series([1, 2, 3, 4, 5], dtype=np.int64)
+    layout = ak.from_cudf(series, highlevel=False)
+    assert isinstance(layout, ak.contents.NumpyArray)
+
+
+def test_from_cudf_all_null_int():
+    series = cudf.Series([None, None, None], dtype="Int32")
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == [None, None, None]
+
+
+def test_from_cudf_alternating_null_int():
+    values = [1 if i % 2 == 0 else None for i in range(16)]
+    series = cudf.Series(values, dtype="Int64")
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == values
+
+
+def test_from_cudf_alternating_null_float():
+    values = [float(i) if i % 2 == 0 else None for i in range(16)]
+    series = cudf.Series(values, dtype="float64")
+    result = ak.from_cudf(series)
+    assert ak.to_list(result) == pytest.approx(
+        [v if v is not None else None for v in values]
+    )
+
+
+# ---------------------------------------------------------------------------
+# DataFrame edge cases
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_dataframe_zero_rows():
+    df = cudf.DataFrame(
+        {
+            "x": cudf.Series([], dtype=np.int32),
+            "y": cudf.Series([], dtype=np.float64),
+            "z": cudf.Series([], dtype="str"),
+        }
+    )
+    result = ak.from_cudf(df)
+    assert len(result) == 0
+    assert ak.fields(result) == ["x", "y", "z"]
+
+
+def test_from_cudf_dataframe_single_row():
+    df = cudf.DataFrame({"a": [42], "b": [3.14]})
+    result = ak.from_cudf(df)
+    assert len(result) == 1
+    vals = ak.to_list(result)
+    assert vals[0]["a"] == 42
+    assert vals[0]["b"] == pytest.approx(3.14)
+
+
+def test_from_cudf_dataframe_mixed_nullable():
+    df = cudf.DataFrame(
+        {
+            "a": cudf.Series([1, None, 3], dtype="Int64"),
+            "b": cudf.Series([None, 2.0, 3.0], dtype="float64"),
+            "c": cudf.Series([True, False, None]),
+        }
+    )
+    result = ak.from_cudf(df)
+    vals = ak.to_list(result)
+    assert vals[0]["a"] == 1
+    assert vals[1]["a"] is None
+    assert vals[0]["b"] is None
+    assert vals[1]["b"] == pytest.approx(2.0)
+    assert vals[2]["c"] is None
+
+
+def test_from_cudf_dataframe_with_list_and_struct_columns():
+    df = cudf.DataFrame(
+        {
+            "flat": [1, 2, 3],
+            "lists": cudf.Series([[1, 2], [3], []], dtype=cudf.ListDtype("int32")),
+        }
+    )
+    result = ak.from_cudf(df)
+    vals = ak.to_list(result)
+    assert vals[0]["flat"] == 1
+    assert vals[0]["lists"] == [1, 2]
+    assert vals[2]["lists"] == []
+
+
+# ---------------------------------------------------------------------------
+# Behavior and attrs propagation
+# ---------------------------------------------------------------------------
+
+
+def test_from_cudf_behavior_propagated():
+    series = cudf.Series([1, 2, 3], dtype=np.int64)
+    behavior = {"custom": True}
+    result = ak.from_cudf(series, behavior=behavior)
+    assert result.behavior is behavior
+
+
+def test_from_cudf_attrs_propagated():
+    series = cudf.Series([1, 2, 3], dtype=np.int64)
+    attrs = {"source": "test", "version": 1}
+    result = ak.from_cudf(series, attrs=attrs)
+    assert result.attrs == attrs
+
+
+def test_from_cudf_behavior_and_attrs_propagated_together():
+    series = cudf.Series([1.5, 2.5], dtype=np.float32)
+    behavior = {}
+    attrs = {"key": "value"}
+    result = ak.from_cudf(series, behavior=behavior, attrs=attrs)
+    assert result.behavior is behavior
+    assert result.attrs == attrs
