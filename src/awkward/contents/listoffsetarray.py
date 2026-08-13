@@ -1834,16 +1834,18 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         if array_param == "string":
             # Determine the widest string (in code points)
             _max_code_points = backend.nplike.empty(1, dtype=np.int64)
-            backend[
-                "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
-                self._content.dtype.type,
-                self._offsets.dtype.type,
-                _max_code_points.dtype.type,
-            ](
-                self._content.data,
-                self._offsets.data,
-                self._offsets.length,
-                _max_code_points,
+            backend.maybe_kernel_error(
+                backend[
+                    "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
+                    self._content.dtype.type,
+                    self._offsets.dtype.type,
+                    _max_code_points.dtype.type,
+                ](
+                    self._content.data,
+                    self._offsets.data,
+                    self._offsets.length,
+                    _max_code_points,
+                )
             )
             max_code_points = backend.nplike.index_as_shape_item(_max_code_points[0])
             # Ensure that we have at-least length-1 bytestrings
@@ -1855,17 +1857,19 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             buffer = backend.nplike.empty(total_code_points, dtype=np.uint32)
 
             # Fill buffer with new uint32_t
-            self.backend[
-                "awkward_NumpyArray_utf8_to_utf32_padded",
-                self._content.dtype.type,
-                self._offsets.dtype.type,
-                buffer.dtype.type,
-            ](
-                self._content.data,
-                self._offsets.data,
-                self._offsets.length,
-                max_code_points,
-                buffer,
+            self.backend.maybe_kernel_error(
+                self.backend[
+                    "awkward_NumpyArray_utf8_to_utf32_padded",
+                    self._content.dtype.type,
+                    self._offsets.dtype.type,
+                    buffer.dtype.type,
+                ](
+                    self._content.data,
+                    self._offsets.data,
+                    self._offsets.length,
+                    max_code_points,
+                    buffer,
+                )
             )
             return buffer.view(np.dtype(("U", max_code_points)))
         elif array_param == "bytestring":
