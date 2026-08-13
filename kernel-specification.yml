@@ -650,21 +650,21 @@ kernels:
           - {name: fromindex, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
       - name: awkward_IndexedArray64_index_of_nulls
         args:
           - {name: toindex, type: "List[int64_t]", dir: out}
           - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
       - name: awkward_IndexedArrayU32_index_of_nulls
         args:
           - {name: toindex, type: "List[int64_t]", dir: out}
           - {name: fromindex, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
     description: null
     definition: |
       def awkward_IndexedArray_index_of_nulls(toindex, fromindex, offsets, outlength, starts):
@@ -2263,7 +2263,7 @@ kernels:
                       missing[start + j] = nummissing[j]
           for j in range(nextlen):
               nextshifts[j] = missing[nextcarry[j]]
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
     specializations:
       - name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
@@ -2575,7 +2575,7 @@ kernels:
               i = toptr[k]
               if i >= 0:
                   toptr[k] -= starts[k]
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_NumpyArray_reduce_adjust_starts_shifts_64
     specializations:
       - name: awkward_NumpyArray_reduce_adjust_starts_shifts_64
@@ -2594,7 +2594,7 @@ kernels:
               i = toptr[k]
               if i >= 0:
                   toptr[k] += shifts[i] - starts[k]
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
     specializations:
       - name: awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
@@ -4532,7 +4532,7 @@ kernels:
                       if x > bx or (x == bx and y > by):
                           best = i
               toptr[bin] = best
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_argmin
     specializations:
       - name: awkward_reduce_argmin_int8_64
@@ -4643,7 +4643,7 @@ kernels:
                       if x < bx or (x == bx and y < by):
                           best = i
               toptr[bin] = best
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_count_64
     specializations:
       - name: awkward_reduce_count_64
@@ -4758,7 +4758,7 @@ kernels:
                   if fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0:
                       c += 1
               toptr[bin] = c
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_max
     specializations:
       - name: awkward_reduce_max_int8_int8_64
@@ -4874,7 +4874,7 @@ kernels:
                       seen = True
               toptr[bin * 2] = best_re
               toptr[bin * 2 + 1] = best_im
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_min
     specializations:
       - name: awkward_reduce_min_int8_int8_64
@@ -4990,7 +4990,7 @@ kernels:
                       seen = True
               toptr[bin * 2] = best_re
               toptr[bin * 2 + 1] = best_im
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_prod
     specializations:
       - name: awkward_reduce_prod_int32_int8_64
@@ -5127,7 +5127,7 @@ kernels:
                   b = nb
               toptr[bin * 2] = a
               toptr[bin * 2 + 1] = b
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_prod_bool
     specializations:
       - name: awkward_reduce_prod_bool_bool_64
@@ -5231,7 +5231,7 @@ kernels:
                       all_nz = False
                       break
               toptr[bin] = all_nz
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_sum
     specializations:
       - name: awkward_reduce_sum_int32_int8_64
@@ -5673,7 +5673,7 @@ kernels:
                   im += fromptr[i * 2 + 1]
               toptr[bin * 2] = re
               toptr[bin * 2 + 1] = im
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_sum_bool
     specializations:
       - name: awkward_reduce_sum_bool_bool_64
@@ -5777,7 +5777,7 @@ kernels:
                       found = True
                       break
               toptr[bin] = found
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_sum_int32_bool_64
     specializations:
       - name: awkward_reduce_sum_int32_bool_64

@@ -95,14 +95,20 @@ class Specification:
             self.tests = self.gettests(testdata)
 
     def validateoverflow(self, testvals):
+        def negative(value):
+            # A `uint` argument may be a scalar rather than a buffer
+            if isinstance(value, (list, tuple)):
+                return any(n < 0 for n in value)
+            return value < 0
+
         flag = True
         for arg in self.args:
             if "uint" in arg.typename and (
-                any(n < 0 for n in testvals["inargs"][arg.name])
+                negative(testvals["inargs"][arg.name])
                 or (
                     "outargs" in testvals.keys()
                     and arg.name in testvals["outargs"].keys()
-                    and any(n < 0 for n in testvals["outargs"][arg.name])
+                    and negative(testvals["outargs"][arg.name])
                 )
             ):
                 flag = False
