@@ -1074,11 +1074,12 @@ def lower_asarray(context, builder, sig, args):
     bitwidth = ak._connect.numba.layout.type_bitwidth(rettype.dtype)
     itemsize = context.get_constant(numba.intp, bitwidth // 8)
 
+    dataptrtype = context.get_value_type(numba.types.CPointer(rettype.dtype))
     data = numba.core.cgutils.pointer_add(
         builder,
-        arrayptr,
+        ak._connect.numba.layout.castptr(builder, arrayptr, dataptrtype),
         builder.mul(viewproxy.start, itemsize),
-        context.get_value_type(numba.types.CPointer(rettype.dtype)),
+        dataptrtype,
     )
 
     shape = context.make_tuple(

@@ -492,6 +492,17 @@ def posat(context, builder, pos, offset):
     return builder.add(pos, context.get_constant(numba.intp, offset))
 
 
+def castptr(builder, addr, ptrtype):
+    import llvmlite.ir.types
+
+    # The lookup table stores buffer addresses as integers, but LLVM only
+    # allows offsetting a real pointer, so convert with inttoptr rather than
+    # letting cgutils.pointer_add emit an invalid `bitcast i64 to ptr`.
+    if isinstance(addr.type, llvmlite.ir.types.IntType):
+        return builder.inttoptr(addr, ptrtype)
+    return addr
+
+
 def getat(context, builder, baseptr, offset, rettype=None):
     ptrtype = None
     if rettype is not None:
@@ -499,6 +510,11 @@ def getat(context, builder, baseptr, offset, rettype=None):
         bitwidth = type_bitwidth(rettype)
     else:
         bitwidth = numba.intp.bitwidth
+    baseptr = castptr(
+        builder,
+        baseptr,
+        ptrtype or context.get_value_type(numba.types.CPointer(numba.intp)),
+    )
     byteoffset = builder.mul(offset, context.get_constant(numba.intp, bitwidth // 8))
     out = builder.load(
         numba.core.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype)
