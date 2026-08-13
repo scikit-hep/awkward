@@ -24,7 +24,11 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
           size_t right_n = stringstops[right] - stringstarts[right];
           const char* left_str = &stringdata[stringstarts[left]];
           const char* right_str = &stringdata[stringstarts[right]];
-          int cmp = strncmp(left_str, right_str, std::min(left_n, right_n));
+          // `memcmp`, not `strncmp`: these are length-delimited byte ranges,
+          // and a string may legitimately contain an embedded NUL, which
+          // `strncmp` would treat as a terminator. Both compare as
+          // `unsigned char`, so the ordering is otherwise identical.
+          int cmp = std::memcmp(left_str, right_str, std::min(left_n, right_n));
           bool out;
           if (cmp == 0) {
             out = left_n < right_n;
