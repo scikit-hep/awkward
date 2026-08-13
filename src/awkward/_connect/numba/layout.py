@@ -455,9 +455,7 @@ class ContentType(numba.types.Type):
 
 
 def castint(context, builder, fromtype, totype, val):
-    import llvmlite.ir.types
-
-    if isinstance(fromtype, llvmlite.ir.types.IntType):
+    if isinstance(fromtype, llvmlite.ir.IntType):
         if fromtype.width == 8:
             fromtype = numba.int8
         elif fromtype.width == 16:
