@@ -27217,6 +27217,689 @@
           }
         }
       ]
+    },
+    {
+      "name": "awkward_reduce_sumofsquares",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4
+          },
+          "outputs": {
+            "toptr": [1,0,1,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1
+          },
+          "outputs": {
+            "toptr": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1
+          },
+          "outputs": {
+            "toptr": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2
+          },
+          "outputs": {
+            "toptr": [1,2]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_sumofpowers",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [3,0,2,1]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [1,0,1,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [1,0,1,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [1,0,1,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [2,3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [1,2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [1,2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [1,2]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_centered_sumofsquares",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "means": []
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "means": []
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "means": []
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "means": [0.0,0.0]
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "means": [0.5,0.5]
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "means": [99.0,99.0]
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "means": [0.0]
+          },
+          "outputs": {
+            "toptr": [4.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "means": [0.5]
+          },
+          "outputs": {
+            "toptr": [1.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "means": [99.0]
+          },
+          "outputs": {
+            "toptr": [38416.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "means": [0.0,0.0,0.0,0.0]
+          },
+          "outputs": {
+            "toptr": [1.0,0,1.0,0.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "means": [0.5,0.5,0.5,0.5]
+          },
+          "outputs": {
+            "toptr": [0.75,0,0.5,0.25]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "means": [99.0,99.0,99.0,99.0]
+          },
+          "outputs": {
+            "toptr": [29206.0,0,19405.0,9801.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "means": [0.0]
+          },
+          "outputs": {
+            "toptr": [2.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "means": [0.5]
+          },
+          "outputs": {
+            "toptr": [0.75]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "means": [99.0]
+          },
+          "outputs": {
+            "toptr": [29009.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "means": [0.0]
+          },
+          "outputs": {
+            "toptr": [0.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "means": [0.5]
+          },
+          "outputs": {
+            "toptr": [0.75]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "means": [99.0]
+          },
+          "outputs": {
+            "toptr": [29403.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "means": [0.0,0.0]
+          },
+          "outputs": {
+            "toptr": [1.0,2.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "means": [0.5,0.5]
+          },
+          "outputs": {
+            "toptr": [0.5,0.75]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "means": [99.0,99.0]
+          },
+          "outputs": {
+            "toptr": [19405.0,29009.0]
+          },
+          "error": false
+        }
+      ]
     }
   ]
 }
