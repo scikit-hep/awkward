@@ -16,9 +16,6 @@ ERROR awkward_ListOffsetArray_drop_none_indexes(
   int64_t offset2 = 0;
 
   for (int64_t i = 0; i < length_offsets; i++) {
-    // Check every offset, not just the last one: `fromoffsets` need not be
-    // monotonic, so a large intermediate entry would read past the end of
-    // `noneindexes` even when the final offset is in range
     if ((int64_t)fromoffsets[i] > length_indexes) {
       return failure("offsets[i] > len(content)", i, kSliceNone, FILENAME(__LINE__));
     }

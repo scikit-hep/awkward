@@ -12,8 +12,6 @@ ERROR awkward_UnionArray_nestedfill_tags_index(
   T tag,
   const C* __restrict__ fromcounts,
   int64_t length) {
-  // Counts positions across the whole output, so it must not be typed as the
-  // (possibly 32-bit) output index type
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
     C start = tmpstarts[i];

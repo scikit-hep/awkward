@@ -5,7 +5,6 @@
 #include "awkward/kernels.h"
 #include "awkward/unicode.h"
 
-
 template <typename T>
 ERROR awkward_NumpyArray_utf8_to_utf32_padded(
   const uint8_t* __restrict__ fromptr,
@@ -18,8 +17,6 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
 
   // For each sublist of code units
   for (int64_t k_sublist = 0;  k_sublist < offsetslength - 1;  k_sublist++) {
-    // Anchor each sublist at its own offset, so that a malformed sublist
-    // cannot shift the ones that follow it
     int64_t i_code_unit = (int64_t)fromoffsets[k_sublist];
     int64_t j_code_unit_last = (int64_t)fromoffsets[k_sublist + 1];
     int64_t n_code_point_sublist = 0;
@@ -29,13 +26,9 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
       // Parse a single codepoint
       int64_t code_point_width = (int64_t)utf8_codepoint_size(fromptr[i_code_unit]);
 
-      // A sequence that runs past the end of its sublist would read into the
-      // next string, or past the end of the buffer entirely. Checked before
-      // the decode below, which reads up to `code_point_width` bytes.
       if (code_point_width != 0  &&  i_code_unit + code_point_width > j_code_unit_last) {
         return failure("could not convert UTF8 code point to UTF32: truncated UTF8 sequence", kSliceNone, fromptr[i_code_unit], FILENAME(__LINE__));
       }
-      // More code points than the buffer was sized for
       if (n_code_point_sublist >= maxcodepoints) {
         return failure("could not convert UTF8 code point to UTF32: string is longer than maxcodepoints", kSliceNone, n_code_point_sublist, FILENAME(__LINE__));
       }

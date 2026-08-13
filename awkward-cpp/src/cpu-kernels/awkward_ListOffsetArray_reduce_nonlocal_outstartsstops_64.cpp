@@ -14,9 +14,6 @@ awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
     const int64_t* __restrict__ distincts,
     int64_t lendistincts,
     int64_t outlength) {
-  // `distincts` must hold exactly `outlength` equal-length sublists. Without
-  // this the truncated `maxcount` below lets `k` run past `outlength`, writing
-  // off the end of `outstarts`/`outstops`.
   if (outlength > 0 && lendistincts % outlength != 0) {
     return failure("lendistincts is not a multiple of outlength", kSliceNone, lendistincts, FILENAME(__LINE__));
   }

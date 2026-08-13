@@ -10,13 +10,9 @@ ERROR awkward_ListArray_min_range(
   const C* __restrict__ fromstarts,
   const C* __restrict__ fromstops,
   int64_t lenstarts) {
-  // With no lists there is no minimum to report, and `fromstarts`/`fromstops`
-  // may be empty buffers: leave `tomin` untouched, as the specification does
   if (lenstarts == 0) {
     return success();
   }
-  // Widen before subtracting: for the unsigned specialization a malformed
-  // `stops < starts` would otherwise wrap instead of going negative
   int64_t shorter = (int64_t)fromstops[0] - (int64_t)fromstarts[0];
   for (int64_t i = 1;  i < lenstarts;  i++) {
     int64_t rangeval = (int64_t)fromstops[i] - (int64_t)fromstarts[i];
