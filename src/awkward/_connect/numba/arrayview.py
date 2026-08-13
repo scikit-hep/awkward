@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import operator
 
@@ -1078,7 +1077,9 @@ def lower_asarray(context, builder, sig, args):
     dataptrtype = context.get_value_type(numba.types.CPointer(rettype.dtype))
     data = numba.core.cgutils.pointer_add(
         builder,
-        ak._connect.numba.layout.castptr(builder, arrayptr, dataptrtype),
+        # `arrayptr` is a raw address held as intp; pointer_add byte-GEPs
+        # from its argument, so it needs a pointer.
+        builder.inttoptr(arrayptr, dataptrtype),
         builder.mul(viewproxy.start, itemsize),
         dataptrtype,
     )

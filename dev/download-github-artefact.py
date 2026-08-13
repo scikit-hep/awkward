@@ -4,8 +4,6 @@
 
 """Download and extract a GitHub asset by name and SHA"""
 
-from __future__ import annotations
-
 import argparse
 import io
 import os

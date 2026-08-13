@@ -1,9 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import json
 
+import llvmlite.ir
 import numba
 from numba.core import cgutils
 from numba.core.errors import NumbaTypeError, NumbaValueError
@@ -455,9 +455,7 @@ class ContentType(numba.types.Type):
 
 
 def castint(context, builder, fromtype, totype, val):
-    import llvmlite.ir.types
-
-    if isinstance(fromtype, llvmlite.ir.types.IntType):
+    if isinstance(fromtype, llvmlite.ir.IntType):
         if fromtype.width == 8:
             fromtype = numba.int8
         elif fromtype.width == 16:
@@ -493,29 +491,18 @@ def posat(context, builder, pos, offset):
     return builder.add(pos, context.get_constant(numba.intp, offset))
 
 
-def castptr(builder, addr, ptrtype):
-    import llvmlite.ir.types
-
-    # The lookup table stores buffer addresses as integers, but LLVM only
-    # allows offsetting a real pointer, so convert with inttoptr rather than
-    # letting cgutils.pointer_add emit an invalid `bitcast i64 to ptr`.
-    if isinstance(addr.type, llvmlite.ir.types.IntType):
-        return builder.inttoptr(addr, ptrtype)
-    return addr
-
-
 def getat(context, builder, baseptr, offset, rettype=None):
-    ptrtype = None
     if rettype is not None:
         ptrtype = context.get_value_type(numba.types.CPointer(rettype))
         bitwidth = type_bitwidth(rettype)
     else:
+        ptrtype = context.get_value_type(numba.types.CPointer(numba.intp))
         bitwidth = numba.intp.bitwidth
-    baseptr = castptr(
-        builder,
-        baseptr,
-        ptrtype or context.get_value_type(numba.types.CPointer(numba.intp)),
-    )
+    if isinstance(baseptr.type, llvmlite.ir.IntType):
+        # Entries of `arrayptrs` are raw addresses held as intp, but
+        # cgutils.pointer_add byte-GEPs from its argument, so it needs a
+        # pointer: numba >=0.67 no longer accepts the integer.
+        baseptr = builder.inttoptr(baseptr, ptrtype)
     byteoffset = builder.mul(offset, context.get_constant(numba.intp, bitwidth // 8))
     out = builder.load(
         numba.core.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype)

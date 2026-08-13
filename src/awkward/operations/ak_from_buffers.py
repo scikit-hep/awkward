@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import math
 from functools import lru_cache, partial
@@ -711,7 +710,8 @@ def _reconstitute(
     elif isinstance(form, ak.forms.RecordForm):
 
         def _length_generator():
-            return length
+            (result,) = shape_generator()
+            return result
 
         contents = [
             _reconstitute(

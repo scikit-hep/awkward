@@ -165,23 +165,6 @@ def has_issue_4262(a: ak.Array) -> bool:
     return False
 
 
-def has_issue_4263(a: ak.Array) -> bool:
-    """Return `True` if a union that no values reach is in the array.
-
-    `ak.flatten(axis=None)` and `ak.ravel` collect the values of
-    every branch and merge them with `ak._do.mergemany`; a union that
-    no values reach — judged on reachable values, so an option mask
-    or an empty list above the union counts — contributes no parts,
-    and the merge fails its `assert len(contents) != 0` instead of
-    returning an empty result. Which branch types the collection
-    keeps depends on the current implementation's internals, so every
-    such union matches here, although one with only plain numeric
-    branches happens to work. Reported:
-    https://github.com/scikit-hep/awkward/issues/4263
-    """
-    return _reaches_empty_union(a.layout)
-
-
 def has_issue_4264(a: ak.Array) -> bool:
     """Return `True` if an option type sits under an untrimmed regular list.
 
@@ -558,28 +541,3 @@ def _overflowing_unit_span(form: ak.forms.Form) -> bool:
         for units in spans.values()
         if units
     )
-
-
-def _reaches_empty_union(layout: ak.contents.Content) -> bool:
-    """Return `True` if a union that no values reach is in the layout.
-
-    Descends through reachable values only: option and indexed nodes
-    are projected, union branches are projected one by one, and
-    record, regular, and list contents are trimmed to the range their
-    parent references.
-    """
-    if layout.is_union:
-        return layout.length == 0 or any(
-            _reaches_empty_union(layout.project(i)) for i in range(len(layout.contents))
-        )
-    if layout.is_record:
-        return any(_reaches_empty_union(c[: layout.length]) for c in layout.contents)
-    if layout.is_option or layout.is_indexed:
-        return _reaches_empty_union(layout.project())
-    # A RegularArray is also a list, so this branch must come first.
-    if layout.is_regular:
-        return _reaches_empty_union(layout.content[: layout.length * layout.size])
-    if layout.is_list:
-        lst = layout.to_ListOffsetArray64(False)
-        return _reaches_empty_union(lst.content[lst.offsets[0] : lst.offsets[-1]])
-    return False
