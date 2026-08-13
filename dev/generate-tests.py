@@ -368,6 +368,19 @@ def awkward_regularize_rangeslice(
         if stop > start:         stop = start
     return start, stop
 
+def utf8_codepoint_size(byte):
+    # Mirrors utf8_codepoint_size in awkward-cpp/src/cpu-kernels/unicode.cpp.
+    # Returns 0 for a byte that cannot begin a sequence.
+    if (byte & 0x80) == 0x00:
+        return 1
+    if (byte & 0xE0) == 0xC0:
+        return 2
+    if (byte & 0xF0) == 0xE0:
+        return 3
+    if (byte & 0xF8) == 0xF0:
+        return 4
+    return 0
+
 def awkward_ListArray_combinations_step(
     tocarry, toindex, fromindex, j, stop, n, replacement
 ):

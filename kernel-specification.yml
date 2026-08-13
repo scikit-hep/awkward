@@ -2627,9 +2627,52 @@ kernels:
           - {name: is_stable, type: "bool", dir: in}
           - {name: is_ascending, type: "bool", dir: in}
           - {name: is_local, type: "bool", dir: in}
-    description: null
+    description: "Argsorts the strings of each run of equal `fromparents` independently. Strings compare as byte sequences, and a string that is a prefix of another sorts first. `is_local` writes indices relative to the start of each run rather than absolute ones. When `is_stable` is false the order of equal strings is unspecified; the reference produces the stable order, which is one valid result."
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_argsort_strings(
+          tocarry, fromparents, length, stringdata, stringstarts, stringstops,
+          is_stable, is_ascending, is_local
+      ):
+          def as_bytes(i):
+              return [stringdata[k] for k in range(stringstarts[i], stringstops[i])]
+
+          def less(i, j):
+              # Byte-wise comparison over the whole range: a string may contain an
+              # embedded zero byte, which is data like any other
+              left, right = as_bytes(i), as_bytes(j)
+              n = min(len(left), len(right))
+              for k in range(n):
+                  if left[k] != right[k]:
+                      return left[k] < right[k]
+              return len(left) < len(right)
+
+          import functools
+
+          def compare(i, j):
+              if less(i, j):
+                  return -1
+              if less(j, i):
+                  return 1
+              return 0
+
+          firstindex = 0
+          lastparent = -1
+          index = []
+          for i in range(length + 1):
+              if i == length or fromparents[i] != lastparent:
+                  ordered = sorted(index, key=functools.cmp_to_key(compare),
+                                   reverse=not is_ascending)
+                  for j in range(len(ordered)):
+                      if is_local:
+                          tocarry[firstindex + j] = ordered[j] - firstindex
+                      else:
+                          tocarry[firstindex + j] = ordered[j]
+                  index = []
+              if i != length:
+                  if len(index) == 0:
+                      firstindex = i
+                  index.append(i)
+                  lastparent = fromparents[i]
     automatic-tests: false
 
   - name: awkward_NumpyArray_sort_asstrings_uint8
@@ -2643,9 +2686,26 @@ kernels:
           - {name: outoffsets, type: "List[int64_t]", dir: out}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: "Sorts the strings delimited by `offsets` and writes them back out contiguously, with `outoffsets` giving the new boundaries. Strings compare as byte sequences, so an embedded zero byte is data like any other. `stable` does not change the result -- sorting whole strings cannot expose tie order."
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_sort_asstrings_uint8(
+          toptr, fromptr, offsets, offsetslength, outoffsets, ascending, stable
+      ):
+          words = []
+          for k in range(offsetslength - 1):
+              words.append([fromptr[i] for i in range(offsets[k], offsets[k + 1])])
+
+          words.sort(reverse=not ascending)
+
+          k = 0
+          for word in words:
+              for c in word:
+                  toptr[k] = c
+                  k += 1
+
+          outoffsets[0] = 0
+          for o, word in enumerate(words):
+              outoffsets[o + 1] = outoffsets[o] + len(word)
     automatic-tests: true
 
   - name: awkward_NumpyArray_unique_strings
@@ -2657,9 +2717,42 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: outoffsets, type: "List[int64_t]", dir: out}
           - {name: tolength, type: "List[int64_t]", dir: out}
-    description: null
+    description: "Compacts `toptr` in place, dropping every string equal to the one before it, so the input must already be sorted. `tolength` receives the number of entries written to `outoffsets`, which is one more than the number of distinct strings."
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_unique_strings(toptr, offsets, offsetslength, outoffsets, tolength):
+          if offsetslength == 0:
+              tolength[0] = 0
+              return
+
+          laststart = 0
+          lastlen = -1
+          index = 0
+          counter = 0
+          # Positions in the compacted output, which always starts at zero
+          outoffsets[counter] = 0
+          counter += 1
+          for i in range(offsetslength - 1):
+              slen = offsets[i + 1] - offsets[i]
+              differ = False
+              if slen != lastlen:
+                  differ = True
+              else:
+                  for k in range(slen):
+                      # Compare against the kept string at its position in the
+                      # already-compacted output, not at its original offset, which
+                      # the compaction may have overwritten
+                      if toptr[laststart + k] != toptr[offsets[i] + k]:
+                          differ = True
+                          break
+              if differ:
+                  laststart = index
+                  for j in range(offsets[i], offsets[i + 1]):
+                      toptr[index] = toptr[j]
+                      index += 1
+                  lastlen = slen
+                  outoffsets[counter] = index
+                  counter += 1
+          tolength[0] = counter
     automatic-tests: false
 
   - name: awkward_NumpyArray_prepare_utf8_to_utf32_padded
@@ -2682,9 +2775,37 @@ kernels:
           - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: outmaxcodepoints, type: "List[int64_t]", dir: out}
-    description: null
+    description: "Counts the UTF-8 code points in the widest sublist, which sizes the buffer that `awkward_NumpyArray_utf8_to_utf32_padded` then fills. Rejects an invalid leading byte and a sequence that runs past the end of its sublist."
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_prepare_utf8_to_utf32_padded(
+          fromptr, fromoffsets, offsetslength, outmaxcodepoints
+      ):
+          outmaxcodepoints[0] = 0
+
+          for k_sublist in range(offsetslength - 1):
+              # Anchor each sublist at its own offset, so that a malformed sublist
+              # cannot shift the ones that follow it
+              i_code_unit = fromoffsets[k_sublist]
+              j_code_unit_last = fromoffsets[k_sublist + 1]
+              n_code_point_sublist = 0
+
+              while i_code_unit < j_code_unit_last:
+                  code_point_width = utf8_codepoint_size(fromptr[i_code_unit])
+                  if code_point_width == 0:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "invalid byte in UTF8 string"
+                      )
+                  if i_code_unit + code_point_width > j_code_unit_last:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "truncated UTF8 sequence"
+                      )
+                  i_code_unit += code_point_width
+                  n_code_point_sublist += 1
+
+              if outmaxcodepoints[0] < n_code_point_sublist:
+                  outmaxcodepoints[0] = n_code_point_sublist
     automatic-tests: false
 
   - name: awkward_NumpyArray_utf8_to_utf32_padded
@@ -2710,9 +2831,66 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: maxcodepoints, type: "int64_t", dir: in,  role: default}
           - {name: toptr, type: "List[uint32_t]", dir: out}
-    description: null
+    description: "Decodes each sublist of UTF-8 code units into `maxcodepoints` UTF-32 code points, zero-padding the tail of each. `maxcodepoints` comes from `awkward_NumpyArray_prepare_utf8_to_utf32_padded`."
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_utf8_to_utf32_padded(
+          fromptr, fromoffsets, offsetslength, maxcodepoints, toptr
+      ):
+          n_code_point = 0
+
+          for k_sublist in range(offsetslength - 1):
+              # Anchor each sublist at its own offset, so that a malformed sublist
+              # cannot shift the ones that follow it
+              i_code_unit = fromoffsets[k_sublist]
+              j_code_unit_last = fromoffsets[k_sublist + 1]
+              n_code_point_sublist = 0
+
+              while i_code_unit < j_code_unit_last:
+                  code_point_width = utf8_codepoint_size(fromptr[i_code_unit])
+                  if code_point_width == 0:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "invalid byte in UTF8 string"
+                      )
+                  if i_code_unit + code_point_width > j_code_unit_last:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "truncated UTF8 sequence"
+                      )
+                  if n_code_point_sublist >= maxcodepoints:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "string is longer than maxcodepoints"
+                      )
+
+                  if code_point_width == 1:
+                      toptr[n_code_point] = fromptr[i_code_unit] & 0x7F
+                  elif code_point_width == 2:
+                      toptr[n_code_point] = (
+                          (fromptr[i_code_unit] & 0x1F) << 6
+                          | (fromptr[i_code_unit + 1] & 0x3F)
+                      )
+                  elif code_point_width == 3:
+                      toptr[n_code_point] = (
+                          (fromptr[i_code_unit] & 0x0F) << 12
+                          | (fromptr[i_code_unit + 1] & 0x3F) << 6
+                          | (fromptr[i_code_unit + 2] & 0x3F)
+                      )
+                  else:
+                      toptr[n_code_point] = (
+                          (fromptr[i_code_unit] & 0x07) << 18
+                          | (fromptr[i_code_unit + 1] & 0x3F) << 12
+                          | (fromptr[i_code_unit + 2] & 0x3F) << 6
+                          | (fromptr[i_code_unit + 3] & 0x3F)
+                      )
+
+                  n_code_point += 1
+                  i_code_unit += code_point_width
+                  n_code_point_sublist += 1
+
+              for _ in range(maxcodepoints - n_code_point_sublist):
+                  toptr[n_code_point] = 0
+                  n_code_point += 1
     automatic-tests: false
 
   - name: awkward_NumpyArray_pad_zero_to_length

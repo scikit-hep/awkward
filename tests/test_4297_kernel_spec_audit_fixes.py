@@ -10,6 +10,7 @@ import pytest
 
 import awkward as ak
 
+
 def string_array(raw_bytes, offsets):
     """Build a string array over a raw byte buffer, which a list of `str`
     cannot express."""
