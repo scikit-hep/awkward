@@ -219,7 +219,7 @@ kernels:
           - {name: mymask, type: "Const[List[int8_t]]", dir: in, role: ByteMaskedArray2-mask}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: validwhen, type: "bool", dir: in, role: ByteMaskedArray-valid_when}
-    description: null
+    description: "`tomask` is a validity mask and is always exactly 0 or 1, even when `theirmask` holds another value."
     definition: |
       def awkward_ByteMaskedArray_overlay_mask(tomask, theirmask, mymask, length, validwhen):
           for i in range(length):
@@ -632,12 +632,14 @@ kernels:
         args:
           - {name: toindex, type: "List[int64_t]", dir: out}
           - {name: lenindex, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "`toindex` must be allocated with `lenindex + 1` entries: the trailing entry is set to -1."
     definition: |
       def awkward_IndexedArray_numnull_unique_64(toindex, lenindex):
           for i in range(lenindex):
               toindex[i] = i
-          toindex[-1] = -1
+          # Position `lenindex`, not "the last element of whatever buffer was
+          # passed": `toindex` is allocated with `lenindex + 1` entries
+          toindex[lenindex] = -1
     automatic-tests: false
 
   - name: awkward_IndexedArray_index_of_nulls
@@ -772,7 +774,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: fromnulls, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: startslength, type: "int64_t", dir: in, role: reducer-startslength}
-    description: null
+    description: "Appends at most one null (-1) per sublist, after that sublist's elements, and shifts every subsequent offset by the number of nulls appended so far."
     definition: |
       def awkward_IndexedArray_unique_next_index_and_offsets_64(
           toindex, tooffsets, fromoffsets, fromnulls, startslength
@@ -787,11 +789,13 @@ kernels:
                   toindex[k] = ll
                   k += 1
                   ll += 1
-                  if fromnulls[k] == 1:
-                      toindex[k] = -1
-                      k += 1
-                      shift += 1
-                  tooffsets[i + 1] = fromoffsets[i + 1] + shift
+              # At most one null is appended per sublist, after its elements --
+              # not once per element
+              if fromnulls[k] == 1:
+                  toindex[k] = -1
+                  k += 1
+                  shift += 1
+              tooffsets[i + 1] = fromoffsets[i + 1] + shift
     automatic-tests: false
 
   - name: awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64
@@ -1226,7 +1230,10 @@ kernels:
                       j = 2
                       while j <= thisn:
                           combinationslen *= (size - j) + 1
-                          combinationslen /= j
+                          # Exact integer division: the running product is
+                          # always divisible by `j`, and true division would
+                          # lose precision past 2**53
+                          combinationslen //= j
                           j = j + 1
               totallen[0] = totallen[0] + combinationslen
               tooffsets[i + 1] = tooffsets[i] + combinationslen
@@ -1963,7 +1970,7 @@ kernels:
           - {name: fromstarts, type: "Const[List[uint32_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[uint32_t]]", dir: in, role: ListArray-stops}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "Leaves `tomin` untouched when `lenstarts` is 0, since there is no minimum to report and `fromstarts`/`fromstops` may be empty buffers."
     definition: |
       def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
           if lenstarts > 0:
@@ -2106,11 +2113,13 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: length_offsets, type: "int64_t", dir: in, role: default}
           - {name: length_indexes, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "Every entry of `fromoffsets` must be within `length_indexes`; offsets need not be monotonic, so each is checked rather than only the last."
     definition: |
       def awkward_ListOffsetArray_drop_none_indexes(tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes):
           nr_of_nones, offset1, offset2 = 0, 0, 0
           for i in range(length_offsets):
+            if fromoffsets[i] > length_indexes:
+              raise ValueError("offsets[i] > len(content)")
             offset2 = fromoffsets[i]
             for j in range(offset1, offset2):
               if (noneindexes[j] < 0):
@@ -2139,7 +2148,7 @@ kernels:
           - {name: outeroffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-    description: null
+    description: "`outeroffsets` must index within `inneroffsets`; this is not validated, because the length of `inneroffsets` is not passed."
     definition: |
       def awkward_ListOffsetArray_flatten_offsets(
           tooffsets, outeroffsets, outeroffsetslen, inneroffsets
@@ -2155,10 +2164,12 @@ kernels:
           - {name: tocarry, type: "List[int64_t]", dir: out}
           - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "Stably argsorts the first `length` entries of `fromindex`, so equal keys keep their original order."
     definition: |
       def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
-          array = numpy.argsort(fromindex)
+          # Sort only the first `length` entries, and do it stably, so that
+          # equal keys keep their original order
+          array = numpy.argsort(fromindex[:length], kind="stable")
           for i in range(length):
               tocarry[i] = array[i]
     automatic-tests: false
@@ -2202,7 +2213,7 @@ kernels:
           - {name: offsetscopy, type: "List[int64_t]", dir: out}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: length, type: "int64_t", dir: in, role: reducer-length}
-    description: null
+    description: "`offsets` must hold `length + 1` entries; `offsets[0]` is read before the loop, so `length` may be 0 but `offsets` may not be empty."
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
           maxcount, offsetscopy, offsets, length
@@ -2262,11 +2273,13 @@ kernels:
           - {name: distincts, type: "Const[List[int64_t]]", dir: in, role: reducer-distincts}
           - {name: lendistincts, type: "int64_t", dir: in, role: reducer-lendistincts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "`distincts` must hold exactly `outlength` equal-length sublists, i.e. `lendistincts` must be a multiple of `outlength`; otherwise more than `outlength` sublists would be written to `outstarts`/`outstops`."
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
           outstarts, outstops, distincts, lendistincts, outlength
       ):
+          if outlength > 0 and lendistincts % outlength != 0:
+              raise ValueError("lendistincts is not a multiple of outlength")
           maxcount = lendistincts if (outlength == 0) else int(lendistincts // outlength)
           if outlength > 0 and lendistincts > 0:
               # The sublist index
@@ -3702,7 +3715,7 @@ kernels:
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: numcontents, type: "int64_t", dir: in, role: UnionArray-length}
           - {name: lencontents, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-    description: null
+    description: "`lencontents` must hold at least `numcontents` entries; this is not validated, because the length of `lencontents` is not passed."
     definition: |
       def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
           for i in range(length):
@@ -4117,7 +4130,7 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: "Argsorts each segment `offsets[i]:offsets[i+1]` independently, writing segment-local indices. NaNs sort to the low end in both directions (unlike NumPy, which sorts them high). When `stable` is false the relative order of equal elements is unspecified; the reference produces the stable order, which is one valid result."
     definition: |
       def awkward_argsort(
         toptr, fromptr, length, offsets, offsetslength, ascending, stable
@@ -4126,8 +4139,13 @@ kernels:
           indices = list(range(length))
           for i in range(offsetslength - 1):
               sub_indices = indices[offsets[i]:offsets[i+1]]
-              sorted_indices = sorted(
-                  sub_indices,
+              # NaNs compare "less" than everything in both directions, so
+              # they are pushed to the low end. `x != x` is only true for NaN,
+              # and is false for every integral type.
+              nan_indices = [x for x in sub_indices if fromptr[x] != fromptr[x]]
+              num_indices = [x for x in sub_indices if fromptr[x] == fromptr[x]]
+              sorted_indices = nan_indices + sorted(
+                  num_indices,
                   key=lambda x: fromptr[x],
                   reverse=not ascending
               )
@@ -4213,13 +4231,17 @@ kernels:
           - {name: indexlength, type: "int64_t", dir: in, role: default}
           - {name: repetitions, type: "int64_t", dir: in, role: default}
           - {name: regularsize, type: "int64_t", dir: in, role: RegularArray-size}
-    description: null
+    description: "A missing entry (-1) is repeated as -1 rather than being shifted, so that it stays missing in the resulting IndexedOptionArray."
     definition: |
       def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
           for i in range(repetitions):
               for j in range(indexlength):
                   base = index[j]
-                  outindex[(i * indexlength) + j] = base + i * regularsize if base >= 0 else 0
+                  # A missing entry (-1) must stay missing: the result feeds
+                  # IndexedOptionArray.simplified, where a non-negative value
+                  # would turn a None into real data
+                  adjustment = i * regularsize if base >= 0 else 0
+                  outindex[(i * indexlength) + j] = base + adjustment
     automatic-tests: true
 
   - name: awkward_reduce_argmax
@@ -4294,7 +4316,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Returns the index of the *first* maximum in each bin, or -1 for an empty bin. NaN is skipped. `starts` is unused: the offset adjustment happens later, in `awkward_NumpyArray_reduce_adjust_starts_64`."
     definition: |
       def awkward_reduce_argmax(toptr, fromptr, offsets, starts, outlength):
           for bin in range(outlength):
@@ -4405,7 +4427,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Returns the index of the *first* minimum in each bin, or -1 for an empty bin. NaN is skipped. `starts` is unused: the offset adjustment happens later, in `awkward_NumpyArray_reduce_adjust_starts_64`."
     definition: |
       def awkward_reduce_argmin(toptr, fromptr, offsets, starts, outlength):
           for bin in range(outlength):
@@ -4631,7 +4653,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
-    description: null
+    description: "`identity` is supplied by the caller (the type's minimum), not derived here. NaN is skipped rather than propagated, so a bin of all-NaN yields `identity`."
     definition: |
       def awkward_reduce_max(toptr, fromptr, offsets, outlength, identity):
           for bin in range(outlength):
@@ -4658,7 +4680,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
-    description: null
+    description: "Compares lexicographically by (real, imaginary). Only the real identity is supplied by the caller; the imaginary identity is 0, so an empty bin yields (identity, 0)."
     definition: |
       def awkward_reduce_max_complex(toptr, fromptr, offsets, outlength, identity):
           for bin in range(outlength):
@@ -4747,7 +4769,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
-    description: null
+    description: "`identity` is supplied by the caller (the type's maximum), not derived here. NaN is skipped rather than propagated, so a bin of all-NaN yields `identity`."
     definition: |
       def awkward_reduce_min(toptr, fromptr, offsets, outlength, identity):
           for bin in range(outlength):
@@ -4774,7 +4796,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
-    description: null
+    description: "Compares lexicographically by (real, imaginary). Only the real identity is supplied by the caller; the imaginary identity is 0, so an empty bin yields (identity, 0)."
     definition: |
       def awkward_reduce_min_complex(toptr, fromptr, offsets, outlength, identity):
           for bin in range(outlength):
@@ -4889,7 +4911,7 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Accumulates in the *output* type, so the product is taken modulo the output width. An empty bin yields 1."
     definition: |
       def awkward_reduce_prod(toptr, fromptr, offsets, outlength):
           for bin in range(outlength):
@@ -4912,7 +4934,7 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Accumulates in the *output* type, so a complex64 output multiplies in single precision. An empty bin yields (1, 0)."
     definition: |
       def awkward_reduce_prod_complex(toptr, fromptr, offsets, outlength):
           for bin in range(outlength):
@@ -5184,7 +5206,7 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Accumulates in the *output* type, so a 32-bit output accumulates in 32 bits and signed overflow wraps. An empty bin yields 0."
     definition: |
       def awkward_reduce_sum(toptr, fromptr, offsets, outlength):
           for bin in range(outlength):
@@ -5261,7 +5283,7 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Accumulates in the *output* type: each element is widened to the output type before squaring, so an integral output wraps on overflow rather than growing without bound."
     definition: |
       def awkward_reduce_sumofsquares(toptr, fromptr, offsets, outlength):
           for bin in range(outlength):
@@ -5349,7 +5371,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: n, type: "int64_t", dir: in}
-    description: null
+    description: "Accumulates in the *output* type. The compiled kernels raise to the power by repeated squaring rather than calling `pow`, which may differ from a correctly-rounded `pow` by an ULP for `n >= 3`. An empty bin yields 0."
     definition: |
       def awkward_reduce_sumofpowers(toptr, fromptr, offsets, outlength, n):
           for bin in range(outlength):
@@ -5437,7 +5459,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: means, type: "Const[List[double]]", dir: in}
-    description: null
+    description: "Accumulates in the *output* type. `means[bin]` is loaded for every bin but is unused when the bin is empty, which yields 0."
     definition: |
       def awkward_reduce_centered_sumofsquares(toptr, fromptr, offsets, outlength, means):
           for bin in range(outlength):
@@ -5715,20 +5737,31 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: "Sorts each segment `offsets[i]:offsets[i+1]` independently, in place, so `offsets[0]` must be 0 and `offsets` must be monotonic. NaNs sort to the low end in both directions (unlike NumPy, which sorts them high). `stable` does not affect the result -- sorting values rather than indices cannot expose tie order -- and is accepted only to mirror `awkward_argsort`. Only the first `offsets[offsetslength - 1]` entries of `toptr` are written."
     definition: |
       def awkward_sort(
           toptr, fromptr, length, offsets, offsetslength, ascending, stable
       ):
-          result = []
+          index = list(range(length))
           for i in range(offsetslength - 1):
-              sub_list = sorted(fromptr[offsets[i]:offsets[i+1]], reverse=not ascending)
-              if stable:
-                  result += sub_list
-              else:
-                  result += sorted(sub_list, reverse=not ascending)
-          for i in range(len(result)):
-              toptr[i] = result[i]
+              # Clamp against `length` so malformed offsets cannot index past
+              # the end of `index`
+              start = min(int(offsets[i]), length)
+              stop = min(int(offsets[i + 1]), length)
+              if start >= stop:
+                  continue
+              segment = index[start:stop]
+              # NaNs compare "less" than everything in both directions, so
+              # they are pushed to the low end. `x != x` is only true for NaN,
+              # and is false for every integral type.
+              nans = [x for x in segment if fromptr[x] != fromptr[x]]
+              nums = [x for x in segment if fromptr[x] == fromptr[x]]
+              index[start:stop] = nans + sorted(
+                  nums, key=lambda x: fromptr[x], reverse=not ascending
+              )
+          total = offsets[offsetslength - 1] if offsetslength > 0 else 0
+          for i in range(min(int(total), length)):
+              toptr[i] = fromptr[index[i]]
     automatic-tests: false
 
   - name: awkward_unique_offsets
@@ -5761,7 +5794,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: startslength, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "Writes the trailing offset only when `length` is greater than 0."
     definition: |
       def awkward_unique_offsets(
         tooffsets, length, fromoffsets, starts, startslength
@@ -5774,7 +5807,10 @@ kernels:
                     tooffsets[j + 1] = fromoffsets[i]
                     j += 1
             j += 1
-        tooffsets[startslength] = fromoffsets[length - 1]
+        # `fromoffsets[length - 1]` would wrap to the last element when
+        # `length` is 0, which is an out-of-bounds read in the compiled kernel
+        if length > 0:
+            tooffsets[startslength] = fromoffsets[length - 1]
     automatic-tests: false
 
   - name: awkward_unique_ranges_bool
@@ -5785,7 +5821,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
-    description: null
+    description: "`toptr` is read as well as written -- it holds the sorted values on entry and is compacted in place. A zero-length range still emits one element, so callers must compact the offsets first."
     definition: |
       def awkward_unique_ranges_bool(
         toptr, fromoffsets, offsetslength, tooffsets
@@ -5864,7 +5900,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
-    description: null
+    description: "`toptr` is read as well as written -- it holds the sorted values on entry and is compacted in place. A zero-length range still emits one element, so callers must compact the offsets first."
     definition: |
       def awkward_unique_ranges(
         toptr, fromoffsets, offsetslength, tooffsets

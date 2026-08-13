@@ -15,12 +15,21 @@ ERROR awkward_NumpyArray_unique_strings_uint8(
   // candidate string must be compared against the previously kept string at
   // its location in the (already compacted) output, not at its original
   // offset which may have been overwritten by the compaction.
+  // No sublists means no offsets to emit, and `offsets[0]` below would be an
+  // out-of-bounds read
+  if (offsetslength == 0) {
+    *tolength = 0;
+    return success();
+  }
+
   int64_t laststart = 0;
   int64_t lastlen = -1;
   int64_t index = 0;
   int64_t counter = 0;
   bool differ = false;
-  outoffsets[counter++] = offsets[0];
+  // The compacted output always starts at zero, like every later entry, which
+  // is a position in the compacted buffer rather than in the input
+  outoffsets[counter++] = 0;
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
     int64_t slen = offsets[i + 1] - offsets[i];
     differ = false;

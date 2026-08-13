@@ -13,8 +13,10 @@ ERROR awkward_ListOffsetArray_local_preparenext_64(
   const int64_t* __restrict__ fromindex,
   int64_t length) {
   std::vector<int64_t> result(length);
-  std::iota(result.begin(), result.end(), 0);
-  std::sort(result.begin(), result.end(),
+  std::iota(result.begin(), result.end(), int64_t{0});
+  // Stable, so that equal keys keep their original order and the result is
+  // reproducible across backends
+  std::stable_sort(result.begin(), result.end(),
     [&fromindex](int64_t i1, int64_t i2) {
       return fromindex[i1] < fromindex[i2];
     });

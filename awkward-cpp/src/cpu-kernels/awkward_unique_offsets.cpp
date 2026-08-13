@@ -22,7 +22,10 @@ ERROR awkward_unique_offsets(
     }
     j++;
   }
-  tooffsets[startslength] = fromoffsets[length - 1];
+  // `fromoffsets[length - 1]` would read out of bounds when `length` is 0
+  if (length > 0) {
+    tooffsets[startslength] = fromoffsets[length - 1];
+  }
 
   return success();
 }

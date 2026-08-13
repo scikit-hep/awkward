@@ -12,8 +12,11 @@ ERROR awkward_ByteMaskedArray_overlay_mask(
   int64_t length,
   bool validwhen) {
   for (int64_t i = 0;  i < length;  i++) {
-    uint8_t mine = (uint8_t)((mymask[i] != 0) != validwhen);
-    tomask[i] = (int8_t)((uint8_t)theirmask[i] | mine);
+    bool mine = (mymask[i] != 0) != validwhen;
+    // Normalize to a 0/1 flag rather than emitting the raw bitwise OR: this
+    // is a validity mask, and both the specification and the CUDA kernel
+    // produce exactly 0 or 1 for a `theirmask` entry outside {0, 1}
+    tomask[i] = (M)(((theirmask[i] != 0) || mine) ? 1 : 0);
   }
   return success();
 }
