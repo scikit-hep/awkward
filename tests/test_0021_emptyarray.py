@@ -45,7 +45,7 @@ def test_unknown_arraybuilder():
     assert ak.operations.type(a) == ak.types.ArrayType(
         ak.types.ListType(ak.types.UnknownType()), 3
     )
-    assert not ak.operations.type(a) == ak.types.NumpyType("float64")
+    assert ak.operations.type(a) != ak.types.NumpyType("float64")
 
     a = a.snapshot()
     assert to_list(a) == [[], [], []]
@@ -53,9 +53,7 @@ def test_unknown_arraybuilder():
     assert ak.operations.type(a) == ak.types.ArrayType(
         ak.types.ListType(ak.types.UnknownType()), 3
     )
-    assert not ak.operations.type(a) == ak.types.ArrayType(
-        ak.types.NumpyType("float64"), 3
-    )
+    assert ak.operations.type(a) != ak.types.ArrayType(ak.types.NumpyType("float64"), 3)
 
 
 def test_getitem():
@@ -110,7 +108,7 @@ def test_unknown2():
     assert a.to_list() == [[], [], []]
     assert str(a.form.type) == "var * unknown"
     assert a.form.type == ak.types.ListType(ak.types.UnknownType())
-    assert not a.form.type == ak.types.NumpyType("float64")
+    assert a.form.type != ak.types.NumpyType("float64")
 
     a = ak.operations.from_json("[[], [[], []], [[], [], []]]", highlevel=False)
     assert a.to_list() == [[], [[], []], [[], [], []]]
@@ -127,13 +125,13 @@ def test_unknown2():
     assert a.to_list() == [[], [], []]
     assert str(a.type) == "3 * var * unknown"
     assert a.type == ak.types.ArrayType(ak.types.ListType(ak.types.UnknownType()), 3)
-    assert not a.type == ak.types.NumpyType("float64")
+    assert a.type != ak.types.NumpyType("float64")
 
     a = a.snapshot()
     assert a.to_list() == [[], [], []]
     assert str(a.type) == "3 * var * unknown"
     assert a.type == ak.types.ArrayType(ak.types.ListType(ak.types.UnknownType()), 3)
-    assert not a.type == ak.types.NumpyType("float64")
+    assert a.type != ak.types.NumpyType("float64")
 
 
 def test_from_json_getitem():

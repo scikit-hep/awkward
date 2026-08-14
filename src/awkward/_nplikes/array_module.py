@@ -268,9 +268,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         else:
             return self._apply_ufunc_legacy(ufunc, method, args, kwargs)
 
-    def _get_nep_50_dtype(
-        self, obj: Any
-    ) -> DType | type[int] | type[complex] | type[float]:
+    def _get_nep_50_dtype(self, obj: Any) -> type[int | complex | float] | DType:
         if hasattr(obj, "dtype"):
             return obj.dtype
         elif isinstance(obj, bool):

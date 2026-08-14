@@ -107,9 +107,7 @@ def has_issues(a: ak.Array) -> bool:
         return True
     if _has_issue_4255(a.layout):
         return True
-    if _has_issue_4274(a.layout):
-        return True
-    return False
+    return bool(_has_issue_4274(a.layout))
 
 
 def _has_issue_4221(layout: ak.contents.Content) -> bool:

@@ -104,9 +104,8 @@ REGIMES = {
 
 
 def compile_lib(openmp):
-    src = tempfile.NamedTemporaryFile(suffix=".cpp", delete=False, mode="w")
-    src.write(SOURCE)
-    src.close()
+    with tempfile.NamedTemporaryFile(suffix=".cpp", delete=False, mode="w") as src:
+        src.write(SOURCE)
     out = src.name.replace(".cpp", "_omp.so" if openmp else ".so")
     cmd = ["g++", "-O3", "-shared", "-fPIC", "-o", out, src.name]
     if openmp:

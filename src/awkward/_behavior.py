@@ -130,8 +130,8 @@ def find_ufunc(behavior: Mapping | None, signature: tuple) -> UfuncLike | None:
 
 
 def find_record_typestr(
-    behavior: None | Mapping,
-    parameters: None | Mapping[str, Any],
+    behavior: Mapping | None,
+    parameters: Mapping[str, Any] | None,
     default: str | None = None,
 ) -> str | None:
     if parameters is None:
@@ -141,8 +141,8 @@ def find_record_typestr(
 
 
 def find_array_typestr(
-    behavior: None | Mapping,
-    parameters: None | Mapping[str, Any],
+    behavior: Mapping | None,
+    parameters: Mapping[str, Any] | None,
     default: str | None = None,
 ) -> str | None:
     if parameters is None:

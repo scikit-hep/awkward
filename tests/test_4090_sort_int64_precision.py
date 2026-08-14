@@ -43,7 +43,7 @@ def test_sort_float_nan_ascending():
     result = ak.sort(arr, ascending=True)
     values = result.tolist()[0]
     # NaNs go last; non-NaN values sorted ascending
-    non_nan = [v for v in values if not (v != v)]
+    non_nan = [v for v in values if v == v]
     nans = [v for v in values if v != v]
     assert non_nan == sorted(non_nan)
     assert len(nans) == 2

@@ -43,16 +43,9 @@ except AttributeError:
 
 
 def reproducible_datetime():
-    import sys
-
     timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
 
-    if sys.version_info >= (3, 11):
-        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
-    else:
-        build_date = datetime.datetime.utcfromtimestamp(
-            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-        )
+    build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 
@@ -327,8 +320,7 @@ def getunittests(test_inputs, test_outputs):
 
 def gettypename(spectype):
     typename = spectype.replace("List", "").replace("[", "").replace("]", "")
-    if typename.endswith("_t"):
-        typename = typename[:-2]
+    typename = typename.removesuffix("_t")
     return typename
 
 
@@ -420,10 +412,10 @@ def awkward_ListArray_combinations_step(
             for spec in indspec:
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
-                    for childfunc in spec["specializations"]:
-                        outfile.write(
-                            "{} = {}\n".format(childfunc["name"], spec["name"])
-                        )
+                    outfile.writelines(
+                        "{} = {}\n".format(childfunc["name"], spec["name"])
+                        for childfunc in spec["specializations"]
+                    )
                     outfile.write("\n\n")
 
     unit_tests = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit")
@@ -492,8 +484,10 @@ def genspectests(specdict):
                     f.write("def test_py" + spec.name + "_" + str(num) + "():\n")
                     num += 1
                     args = ""
-                    for arg, val in test["inargs"].items():
-                        f.write(" " * 4 + arg + " = " + str(val) + "\n")
+                    f.writelines(
+                        " " * 4 + arg + " = " + str(val) + "\n"
+                        for arg, val in test["inargs"].items()
+                    )
                     f.write(
                         " " * 4 + "funcPy = getattr(kernels, '" + spec.name + "')\n"
                     )

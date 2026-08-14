@@ -309,10 +309,6 @@ def _impl(
                 and (left.is_tuple or set(left.fields) == set(right.fields))
                 and all(visitor(left.content(f), right.content(f)) for f in left.fields)
             )
-        elif left.is_unknown and right.is_unknown:
-            return True
-
-        else:
-            return False
+        return bool(left.is_unknown and right.is_unknown)
 
     return visitor(left_layout, right_layout)

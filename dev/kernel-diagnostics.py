@@ -76,7 +76,7 @@ def check_specorder(kerneldict):
         if dictkernel != kernelnames[count]:
             print("Order in specification: ", kerneldict.keys())
             print("Sorted order: ", kernelnames)
-            raise Exception("Kernels not sorted in specification")
+            raise ValueError("Kernels not sorted in specification")
         count += 1
     for kernel, specializations in kerneldict.items():
         display = []
@@ -104,7 +104,7 @@ def check_specorder(kerneldict):
             print("For kernel: " + kernel)
             print("Order in specification = ", specializations)
             print("Sorted order = ", display)
-            raise Exception("Kernel specializations not sorted in specification")
+            raise ValueError("Kernel specializations not sorted in specification")
     print("Kernel specification file is properly sorted")
 
 

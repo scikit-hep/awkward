@@ -21,11 +21,9 @@ def json_dtype(dtype: np.dtype) -> bool:
         # that `tolist` leaves behind on platforms that have them (e.g.
         # float128 on Linux)
         return False
-    if dtype.kind in "Mm":
-        # json.dumps cannot serialize the datetime/timedelta objects that
-        # datetime64/timedelta64 values become (TypeError)
-        return False
-    return True
+    # json.dumps cannot serialize the datetime/timedelta objects that
+    # datetime64/timedelta64 values become (TypeError)
+    return dtype.kind not in "Mm"
 
 
 SUPPORTED_JSON_DTYPES = tuple(d for d in SUPPORTED_DTYPES if json_dtype(d))
@@ -140,9 +138,7 @@ def has_issues(a: ak.Array) -> bool:
     """
     if _has_issue_4241(a.layout):
         return True
-    if _has_issue_4242(a.layout):
-        return True
-    return False
+    return bool(_has_issue_4242(a.layout))
 
 
 def _has_issue_4241(layout: ak.contents.Content) -> bool:

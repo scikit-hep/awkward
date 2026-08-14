@@ -204,7 +204,7 @@ class Content(Meta):
         return self.form_with_key(None)
 
     def form_with_key(
-        self, form_key: str | None | Callable = "node{id}", id_start: int = 0
+        self, form_key: str | Callable | None = "node{id}", id_start: int = 0
     ) -> Form:
         hold_id = [id_start]
 
