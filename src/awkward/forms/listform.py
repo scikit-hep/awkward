@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Callable
 
@@ -35,7 +34,7 @@ class ListForm(ListMeta[Form], Form):
             )
         if not isinstance(stops, str):
             raise TypeError(
-                f"{type(self).__name__} 'starts' must be of type str, not {starts!r}"
+                f"{type(self).__name__} 'stops' must be of type str, not {stops!r}"
             )
         if not isinstance(content, Form):
             raise TypeError(

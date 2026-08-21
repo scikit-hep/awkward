@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np  # noqa: F401
 import pytest  # noqa: F401
@@ -31,5 +30,5 @@ def test():
     assert repr(array[0]) == "<Array [<1 [1.1]>, <2 [2, 0.2]>] type='2 * P'>"
     assert (
         repr(array)
-        == "<Array [[<1 [1.1]>, <2 [2, 0.2]>], ..., [{...}]] type='3 * var * P'>"
+        == "<Array [[<1 [1.1]>, <2 [2, 0.2]>], [], [{x: 3, ...}]] type='3 * var * P'>"
     )

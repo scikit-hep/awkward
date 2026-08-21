@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -53,11 +52,20 @@ def from_rdataframe(
 
     See also #ak.to_rdataframe.
     """
-    return _impl(rdf, columns, highlevel, behavior, with_name, offsets_type, keep_order)
+    return _impl(
+        rdf,
+        columns,
+        highlevel,
+        behavior,
+        attrs,
+        with_name,
+        offsets_type,
+        keep_order,
+    )
 
 
 def _impl(
-    data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order
+    data_frame, columns, highlevel, behavior, attrs, with_name, offsets_type, keep_order
 ):
     import awkward._connect.rdataframe.from_rdataframe  # noqa: F401
 
@@ -90,6 +98,7 @@ def _impl(
         columns,
         highlevel=highlevel,
         behavior=behavior,
+        attrs=attrs,
         with_name=with_name,
         offsets_type=offsets_type,
         keep_order=keep_order,
