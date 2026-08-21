@@ -3,8 +3,8 @@
 """Property tests for awkward operations, one module per operation.
 
 The operation modules (`test_flatten.py`, `test_all.py`,
-`test_ravel.py`) follow one template, and each is a complete example
-to copy. The identifiers
+`test_any.py`, `test_ravel.py`) follow one template, and each is a
+complete example to copy. The identifiers
 are operation-invariant — only the module name and the called
 operation say what is under test. `Kwargs`, `DEFAULTS`, and
 `RelatedKwargs` declare the operation's options;
