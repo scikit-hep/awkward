@@ -12,7 +12,6 @@
 [![Scikit-HEP](https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg)](https://scikit-hep.org/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4341376.svg)](https://doi.org/10.5281/zenodo.4341376)
 [![Documentation](https://img.shields.io/badge/docs-online-success)](https://awkward-array.org/)
-[![Gitter](https://img.shields.io/badge/chat-online-success)](https://gitter.im/Scikit-HEP/awkward-array)
 
 [![NSF-1836650](https://img.shields.io/badge/NSF-1836650-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=1836650)
 [![NSF-2103945](https://img.shields.io/badge/NSF-2103945-blue.svg)](https://nsf.gov/awardsearch/showAward?AWD_ID=2103945)
@@ -81,8 +80,6 @@ See the [Getting started](https://awkward-array.org/doc/main/getting-started/ind
    * View the documentation on [awkward-array.org](https://awkward-array.org/).
    * Report bugs, request features, and ask for additional documentation on [GitHub Issues](https://github.com/scikit-hep/awkward/issues).
    * If you have a "How do I...?" question, start a [GitHub Discussion](https://github.com/scikit-hep/awkward/discussions) with category "Q&A".
-   * Alternatively, ask about it on [StackOverflow with the [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array). Be sure to include tags for any other libraries that you use, such as Pandas or PyTorch.
-   * To ask questions in real time, try the Gitter [Scikit-HEP/awkward-array](https://gitter.im/Scikit-HEP/awkward-array) chat room.
 
 # Installation
 
@@ -256,6 +253,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="http://shwina.github.io"><img src="https://avatars.githubusercontent.com/u/3190405?v=4?s=100" width="100px;" alt="Ashwin Srinath"/><br /><sub><b>Ashwin Srinath</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=shwina" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/X0708a"><img src="https://avatars.githubusercontent.com/u/148707922?v=4?s=100" width="100px;" alt="aashirvad"/><br /><sub><b>aashirvad</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=X0708a" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/albert-physics"><img src="https://avatars.githubusercontent.com/u/166818822?v=4?s=100" width="100px;" alt="albert-physics"/><br /><sub><b>albert-physics</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=albert-physics" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/5U5H4NTH006"><img src="https://avatars.githubusercontent.com/u/85297765?v=4?s=100" width="100px;" alt="Sushanth Mantrala"/><br /><sub><b>Sushanth Mantrala</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=5U5H4NTH006" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

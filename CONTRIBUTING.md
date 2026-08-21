@@ -37,12 +37,11 @@ Pull requests that do not meet these expectations may be closed without review.
 
 ### Getting your pull request reviewed
 
-Currently, we have four regular reviewers of pull requests:
+Currently, we have three regular reviewers of pull requests:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
-  * Peter Fackeldey ([pfackeldey](https://github.com/pfackeldey))
+  * Tai Sakuma ([TaiSakuma](https://github.com/TaiSakuma))
   * Andres Rios Tascon ([ariostas](https://github.com/ariostas))
-  * Iason Krommydas ([ikrommyd](https://github.com/ikrommyd))
 
 You can request a review from one of us or just comment in GitHub that you want a review and we'll see it. Only one review is required to be allowed to merge a pull request. We'll work with you to get it into shape.
 
@@ -116,7 +115,7 @@ python -m pip install ./awkward-cpp
 If you are working on the C++ components of Awkward Array, it might be more convenient to skip the build isolation step, which involves creating an isolated build environment. First, you must install the build requirements:
 
 ```bash
-python -m pip install "scikit-build-core[pyproject,color]" pybind11 ninja cmake
+python -m pip install "scikit-build-core>=1.0" pybind11 ninja cmake
 ```
 
 Then the installation can be performed without build isolation:
@@ -223,6 +222,14 @@ python -m pytest tests/test_XXXX-yyyy.py
 
 and it makes it easier to figure out why a particular test was added. The easiest way to make a new testing file is to copy an existing one and replace its `test_zzzz` functions with your own. The previous tests should also give you a sense of the way we test things and the kinds of things that are constrained in tests.
 
+The property-based tests in `tests/properties/` (using [Hypothesis](https://hypothesis.readthedocs.io/) and [hypothesis-awkward](https://github.com/scikit-hep/hypothesis-awkward)) do not follow this naming convention; their directory structure roughly mirrors the source layout (e.g., `tests/properties/operations/` corresponds to `src/awkward/operations/`).
+
+### Introducing new public APIs
+
+Every new public function, method, and property accessor must be marked with the `@experimental` decorator in `src/awkward/_experimental.py`, whose docstring states what the mark promises and how to apply it. When the mark is removed has not been decided yet.
+
+Marks for classes, modules, module-level constants, and keyword arguments are not implemented yet. The rule behind the mark is being decided in [discussion #4197](https://github.com/scikit-hep/awkward/discussions/4197).
+
 ### Building documentation locally
 
 Documentation is automatically built by each pull request. You usually won't need to build the documentation locally, but if you do, this section describes how.
@@ -299,9 +306,10 @@ The `main-v1` branch was split from `main` just before Awkward 1.x code was remo
 
 ### Releases
 
-Currently, only one person can deploy releases:
+Currently, two people can deploy releases:
 
   * Ianna Osborne ([ianna](https://github.com/ianna))
+  * Tai Sakuma ([TaiSakuma](https://github.com/TaiSakuma))
 
 There are two kinds of releases: (1) `awkward-cpp` updates, which only occur when the C++ is updated (rare) and involves compilation on many platforms (takes hours), and (2) `awkward` updates, which can happen with any bug-fix. The [releases listed in GitHub](https://github.com/scikit-hep/awkward/releases) are `awkward` releases, not `awkward-cpp`.
 

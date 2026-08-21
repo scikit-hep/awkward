@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Callable
 
@@ -26,7 +25,7 @@ class IndexedForm(IndexedMeta[Form], Form):
     def __init__(
         self,
         index,
-        content=None,
+        content,
         *,
         parameters=None,
         form_key=None,

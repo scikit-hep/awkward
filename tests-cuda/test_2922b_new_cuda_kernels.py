@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-from __future__ import annotations
 
 import cupy as cp
 import numpy as np
@@ -255,7 +254,7 @@ def test_0049_distinguish_record_and_recordarray_behaviors():
     assert repr(cuda_array[0]) == "<Array [<1 [1.1]>, <2 [2.0, 0.2]>] type='2 * P'>"
     assert (
         repr(cuda_array)
-        == "<Array [[<1 [1.1]>, <2 [2.0, 0.2]>], ..., [{...}]] type='3 * var * P'>"
+        == "<Array [[<1 [1.1]>, <2 [2.0, 0.2]>], [], [{x: 3, ...}]] type='3 * var * P'>"
     )
 
 

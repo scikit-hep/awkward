@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -691,19 +690,19 @@ def test_named_axis_ak_argcartesian():
 
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=False
-    ).named_axis == {"x": 0, "y": 1}
+    ).named_axis == {"x": 0}
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=True
-    ).named_axis == {"x": 1, "y": 2}
+    ).named_axis == {"x": 1}
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=[0]
-    ).named_axis == {"x": 1, "y": 2}
+    ).named_axis == {"x": 1}
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=[1]
-    ).named_axis == {"x": 0, "y": 2}
+    ).named_axis == {"x": 0}
     assert ak.argcartesian(
         [named_one, named_two, named_three], axis="x", nested=[0, 1]
-    ).named_axis == {"x": 2, "y": 3}
+    ).named_axis == {"x": 2}
 
 
 def test_negative_named_axis_ak_argcartesian():

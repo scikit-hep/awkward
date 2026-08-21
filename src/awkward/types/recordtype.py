@@ -205,8 +205,12 @@ class RecordType(Type):
             if set(self._fields) != set(other._fields):
                 return False
 
+            # Build a field->content dict for other to avoid O(n²) list.index lookups
+            other_field_to_content = dict(
+                zip(other._fields, other._contents, strict=True)
+            )
             return all(
-                content._is_equal_to(other.content(field), all_parameters)
+                content._is_equal_to(other_field_to_content[field], all_parameters)
                 for field, content in zip(self._fields, self._contents, strict=True)
             )
 

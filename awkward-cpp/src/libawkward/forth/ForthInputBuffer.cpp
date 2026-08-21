@@ -16,7 +16,9 @@ namespace awkward {
 
   uint8_t
   ForthInputBuffer::peek_byte(int64_t after, util::ForthError& err) noexcept {
-    if (pos_ + after + 1 > length_) {
+    int64_t next = pos_ + after + 1;
+    // reject negative offsets and overflow (next wrapping below pos_)
+    if (after < 0  ||  next < pos_  ||  next > length_) {
       err = util::ForthError::read_beyond;
       return 0;
     }
@@ -28,7 +30,9 @@ namespace awkward {
   void*
   ForthInputBuffer::read(int64_t num_bytes, util::ForthError& err) noexcept {
     int64_t next = pos_ + num_bytes;
-    if (next > length_) {
+    // reject negative/overflowed sizes (num_bytes is derived from a
+    // stack-supplied item count times sizeof(TYPE) and can wrap negative)
+    if (num_bytes < 0  ||  next < pos_  ||  next > length_) {
       err = util::ForthError::read_beyond;
       return nullptr;
     }
@@ -294,14 +298,31 @@ namespace awkward {
       return 0.0;
     }
 
+    // Accumulate the integral mantissa in int64_t while it fits (up to 18
+    // digits, which always fits in a signed 64-bit integer), then switch to
+    // double to avoid signed-integer-overflow UB on long literals.
     int64_t integral = 0;
+    double integral_d = 0.0;
+    int64_t integral_digits = 0;
+    bool integral_overflowed = false;
     do {
-      integral *= 10;
-      integral += ptr[pos_] - '0';
+      if (!integral_overflowed && integral_digits < 18) {
+        integral *= 10;
+        integral += ptr[pos_] - '0';
+        integral_digits++;
+      }
+      else {
+        if (!integral_overflowed) {
+          integral_d = (double)integral;
+          integral_overflowed = true;
+        }
+        integral_d *= 10.0;
+        integral_d += (double)(ptr[pos_] - '0');
+      }
       pos_++;
     } while (pos_ != length_ && ptr[pos_] >= '0' && ptr[pos_] <= '9');
 
-    double result = (double)integral;
+    double result = integral_overflowed ? integral_d : (double)integral;
 
     if (pos_ != length_ && ptr[pos_] == '.') {
       pos_++;
