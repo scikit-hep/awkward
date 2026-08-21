@@ -224,6 +224,12 @@ and it makes it easier to figure out why a particular test was added. The easies
 
 The property-based tests in `tests/properties/` (using [Hypothesis](https://hypothesis.readthedocs.io/) and [hypothesis-awkward](https://github.com/scikit-hep/hypothesis-awkward)) do not follow this naming convention; their directory structure roughly mirrors the source layout (e.g., `tests/properties/operations/` corresponds to `src/awkward/operations/`).
 
+### Introducing new public APIs
+
+Every new public function, method, and property accessor must be marked with the `@experimental` decorator in `src/awkward/_experimental.py`, whose docstring states what the mark promises and how to apply it. When the mark is removed has not been decided yet.
+
+Marks for classes, modules, module-level constants, and keyword arguments are not implemented yet. The rule behind the mark is being decided in [discussion #4197](https://github.com/scikit-hep/awkward/discussions/4197).
+
 ### Building documentation locally
 
 Documentation is automatically built by each pull request. You usually won't need to build the documentation locally, but if you do, this section describes how.

@@ -351,6 +351,11 @@
     generated/ak.jax.register_behavior_class
 
 .. toctree::
+    :caption: Warnings
+
+    generated/ak.errors.ExperimentalWarning
+
+.. toctree::
     :caption: High-level data types
 
     generated/ak.types.Type
