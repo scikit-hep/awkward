@@ -29,6 +29,15 @@ jobs:
     env:
       PIP_ONLY_BINARY: cmake
       PYTHON_VERSION: "3.10"
+      # The runner has many cores; without these limits, JAX/XLA, OpenBLAS,
+      # OpenMP, and numexpr each spawn a worker thread per core in the one
+      # test process. PJRT_NPROC caps the XLA CPU client's thread pools
+      # (xla/pjrt/utils.cc, DefaultThreadPoolSize).
+      PJRT_NPROC: "2"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_MAX_THREADS: "4"
 
     # Required for miniconda to activate conda
     defaults:
@@ -41,13 +50,13 @@ jobs:
           rm -rf * .[!.]* || echo "Nothing to clean"
           rm -rf ~/micromamba* || echo "Nothing to clean"
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
           persist-credentials: false
 
       - name: Get micromamba
-        uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
+        uses: mamba-org/setup-micromamba@ce51e99f4bb8a82ab7158c4dc59ef4634c59c4f9 # v3.1.0
         with:
           environment-name: test-env
           init-shell: bash

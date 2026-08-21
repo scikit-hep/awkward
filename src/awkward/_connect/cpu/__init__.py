@@ -7,8 +7,6 @@ Mirrors ``awkward._connect.cuda``: ``lazy()`` wraps a cpu-backed array in a
 paths corresponding to the CCCL ones.
 """
 
-from __future__ import annotations
-
 
 def lazy(array):
     """Wrap a CPU-backed array for lazy, fused execution.

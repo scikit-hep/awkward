@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import glob
 import math
@@ -121,7 +120,6 @@ def fetch_template_specializations(kernel_dict):
         "awkward_ListOffsetArray_drop_none_indexes",
         "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
         "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
-        "awkward_ListOffsetArray_reduce_local_outoffsets_64",
         "awkward_UnionArray_regular_index",
         "awkward_ListOffsetArray_rpad_axis1",
         "awkward_ListOffsetArray_rpad_length_axis1",

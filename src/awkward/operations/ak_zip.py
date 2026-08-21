@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Mapping
 from functools import reduce
@@ -38,6 +37,10 @@ def zip(
     This operation may be thought of as the opposite of projection in
     #ak.Array.__getitem__, which extracts fields one at a time, or #ak.unzip,
     which extracts them all in one call.
+
+    As an extreme, `depth_limit=1` is a handy way to make a record structure
+    at the outermost level, regardless of whether the fields have matching
+    structure or not.
 
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
@@ -126,10 +129,6 @@ def zip(
         [([[1, 2, 3], [], [4, ...], [6]], [[1.1, ...], ...]),
          ([], []),
          ([[7, 8]], [[6.6]])]
-
-        As an extreme, `depth_limit=1` is a handy way to make a record structure
-        at the outermost level, regardless of whether the fields have matching
-        structure or not.
 
         When zipping together arrays with optional values, it can be useful to create
         the #ak.contents.RecordArray node after the option types. By default, #ak.zip
