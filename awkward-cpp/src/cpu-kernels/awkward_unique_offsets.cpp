@@ -22,7 +22,9 @@ ERROR awkward_unique_offsets(
     }
     j++;
   }
-  tooffsets[startslength] = fromoffsets[length - 1];
+  if (length > 0) {
+    tooffsets[startslength] = fromoffsets[length - 1];
+  }
 
   return success();
 }
