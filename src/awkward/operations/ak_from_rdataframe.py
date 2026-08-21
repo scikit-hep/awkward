@@ -22,7 +22,19 @@ def from_rdataframe(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Converts ROOT RDataFrame columns into an Awkward Array.
+
+    The data is copied: the conversion runs the RDataFrame event loop and
+    writes the selected columns into newly allocated buffers.
+
+    If `columns` is a string, the return value represents a single RDataFrame
+    column. If `columns` is any other iterable, the return value is a record
+    array, in which each field corresponds to an RDataFrame column. In
+    particular, if the `columns` iterable contains only one string, it is still
+    a record array, which has only one field.
+
+    See also #ak.to_rdataframe.
+
     Args:
         rdf (`ROOT.RDataFrame`): ROOT RDataFrame to convert into an
             Awkward Array.
@@ -41,16 +53,8 @@ def from_rdataframe(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts ROOT RDataFrame columns into an Awkward Array.
-
-    If `columns` is a string, the return value represents a single RDataFrame column.
-
-    If `columns` is any other iterable, the return value is a record array, in which
-    each field corresponds to an RDataFrame column. In particular, if the `columns`
-    iterable contains only one string, it is still a record array, which has only
-    one field.
-
-    See also #ak.to_rdataframe.
+    Returns:
+        An #ak.Array built from the given ROOT RDataFrame columns.
     """
     return _impl(
         rdf,

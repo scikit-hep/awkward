@@ -18,7 +18,23 @@ def from_numpy(
     primitive_policy="error",
     attrs=None,
 ):
-    """
+    """Converts a NumPy array into an Awkward Array.
+
+    The data is not copied: the Awkward Array shares the NumPy array's
+    buffers. There are two exceptions: the mask of a `np.ma.MaskedArray` is
+    converted, although its data buffer is still shared, and an array of
+    Unicode strings is re-encoded as UTF-8.
+
+    The resulting layout can only involve the following #ak.contents.Content types:
+
+    * #ak.contents.NumpyArray
+    * #ak.contents.ByteMaskedArray or #ak.contents.UnmaskedArray if the
+      `array` is an np.ma.MaskedArray.
+    * #ak.contents.RegularArray if `regulararray=True`.
+    * #ak.contents.RecordArray if `recordarray=True`.
+
+    See also #ak.to_numpy and #ak.from_cupy.
+
     Args:
         array (np.ndarray): The NumPy array to convert into an Awkward Array.
             This array can be a np.ma.MaskedArray.
@@ -39,17 +55,8 @@ def from_numpy(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a NumPy array into an Awkward Array.
-
-    The resulting layout can only involve the following #ak.contents.Content types:
-
-    * #ak.contents.NumpyArray
-    * #ak.contents.ByteMaskedArray or #ak.contents.UnmaskedArray if the
-      `array` is an np.ma.MaskedArray.
-    * #ak.contents.RegularArray if `regulararray=True`.
-    * #ak.contents.RecordArray if `recordarray=True`.
-
-    See also #ak.to_numpy and #ak.from_cupy.
+    Returns:
+        An #ak.Array built from the given NumPy array.
     """
     return wrap_layout(
         from_arraylib(
