@@ -1,5 +1,4 @@
 import pytest
-from packaging.version import parse as parse_version
 
 import awkward as ak
 
@@ -7,10 +6,6 @@ cudf = pytest.importorskip("cudf", exc_type=ImportError)
 cupy = pytest.importorskip("cupy")
 
 
-@pytest.mark.xfail(
-    parse_version(cudf.__version__) >= parse_version("25.12.00"),
-    reason="cudf internals changed since v25.12.00",
-)
 def test_jagged():
     arr = ak.Array([[[1, 2, 3], [], [3, 4]], []])
     out = ak.to_cudf(arr)
@@ -18,10 +13,6 @@ def test_jagged():
     assert out.to_arrow().tolist() == [[[1, 2, 3], [], [3, 4]], []]
 
 
-@pytest.mark.xfail(
-    parse_version(cudf.__version__) >= parse_version("25.12.00"),
-    reason="cudf internals changed since v25.12.00",
-)
 def test_nested():
     arr = ak.Array(
         [{"a": 0, "b": 1.0, "c": {"d": 0}}, {"a": 1, "b": 0.0, "c": {"d": 1}}]
@@ -34,10 +25,6 @@ def test_nested():
     ]
 
 
-@pytest.mark.xfail(
-    parse_version(cudf.__version__) >= parse_version("25.12.00"),
-    reason="cudf internals changed since v25.12.00",
-)
 def test_null():
     arr = ak.Array([12, None, 21, 12])
     # calls ByteMaskedArray._to_cudf not NumpyArray
@@ -58,10 +45,6 @@ def test_null():
     assert out.to_arrow().tolist() == [12, None, 21, 12]
 
 
-@pytest.mark.xfail(
-    parse_version(cudf.__version__) >= parse_version("25.12.00"),
-    reason="cudf internals changed since v25.12.00",
-)
 def test_strings():
     arr = ak.Array(["hey", "hi", "hum"])
     out = ak.to_cudf(arr)
