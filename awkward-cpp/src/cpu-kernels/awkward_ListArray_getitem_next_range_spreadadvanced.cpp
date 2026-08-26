@@ -11,7 +11,7 @@ ERROR awkward_ListArray_getitem_next_range_spreadadvanced(
   const C* __restrict__ fromoffsets,
   int64_t lenstarts) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    C count = fromoffsets[i + 1] - fromoffsets[i];
+    int64_t count = (int64_t)fromoffsets[i + 1] - (int64_t)fromoffsets[i];
     for (int64_t j = 0;  j < count;  j++) {
       toadvanced[fromoffsets[i] + j] = fromadvanced[i];
     }

@@ -787,6 +787,11 @@ class ListArray(ListMeta[Content], Content):
             start, stop, step = head.start, head.stop, head.step
 
             step = 1 if step is None else step
+            # The kernels advance with `j += step`, so a zero step never
+            # terminates. RegularArray reaches the same condition through
+            # `derive_slice_for_length`, which raises this for us.
+            if step == 0:
+                raise ValueError("slice step cannot be zero")
             start = ak._util.kSliceNone if start is None else start
             stop = ak._util.kSliceNone if stop is None else stop
 

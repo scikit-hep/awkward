@@ -95,14 +95,20 @@ class Specification:
             self.tests = self.gettests(testdata)
 
     def validateoverflow(self, testvals):
+        def negative(value):
+            # A `uint` argument may be a scalar rather than a buffer
+            if isinstance(value, (list, tuple)):
+                return any(n < 0 for n in value)
+            return value < 0
+
         flag = True
         for arg in self.args:
             if "uint" in arg.typename and (
-                any(n < 0 for n in testvals["inargs"][arg.name])
+                negative(testvals["inargs"][arg.name])
                 or (
                     "outargs" in testvals.keys()
                     and arg.name in testvals["outargs"].keys()
-                    and any(n < 0 for n in testvals["outargs"][arg.name])
+                    and negative(testvals["outargs"][arg.name])
                 )
             ):
                 flag = False
@@ -368,6 +374,19 @@ def awkward_regularize_rangeslice(
         if stop > start:         stop = start
     return start, stop
 
+def utf8_codepoint_size(byte):
+    # Mirrors utf8_codepoint_size in awkward-cpp/src/cpu-kernels/unicode.cpp.
+    # Returns 0 for a byte that cannot begin a sequence.
+    if (byte & 0x80) == 0x00:
+        return 1
+    if (byte & 0xE0) == 0xC0:
+        return 2
+    if (byte & 0xF0) == 0xE0:
+        return 3
+    if (byte & 0xF8) == 0xF0:
+        return 4
+    return 0
+
 def awkward_ListArray_combinations_step(
     tocarry, toindex, fromindex, j, stop, n, replacement
 ):
@@ -521,6 +540,30 @@ def genspectests(specdict):
                     f.write("\n")
 
 
+def normalize_testval(val, typename):
+    """Render an expected output using its argument's declared type.
+
+    The Python reference implementations return numpy scalars, and produce
+    `bool` for kernels whose output buffer is actually integral (e.g.
+    `awkward_BitMaskedArray_to_ByteMaskedArray` writes `List[int8_t]`).
+    `pytest.approx` reports an infinite relative difference when comparing
+    those against the ints read back from a ctypes buffer, so coerce to the
+    declared type before emitting the literal.
+    """
+    isbool = gettypename(remove_const(typename)) == "bool"
+
+    def convert(value):
+        if isinstance(value, (list, tuple)):
+            return [convert(item) for item in value]
+        if hasattr(value, "item"):
+            value = value.item()
+        if isinstance(value, bool) and not isbool:
+            value = int(value)
+        return value
+
+    return convert(val)
+
+
 def remove_const(typename):
     if "Const[" in typename:
         typename = typename.replace("Const[", "", 1).rstrip("]")
@@ -638,9 +681,13 @@ def gencpukerneltests(specdict):
                 if test["success"]:
                     f.write(" " * 4 + "ret_pass = funcC(" + args + ")\n")
                     for arg, val in test["outargs"].items():
+                        # Both of these must come from *this* argument, not from
+                        # the `typename` left over by the input loop above.
+                        out_typename = gettype(arg, spec.args)
+                        val = normalize_testval(val, out_typename)
                         f.write(" " * 4 + "pytest_" + arg + " = " + str(val) + "\n")
                         if isinstance(val, list):
-                            count = typename.count("List")
+                            count = out_typename.count("List")
                             if count == 1:
                                 f.write(
                                     " " * 4
