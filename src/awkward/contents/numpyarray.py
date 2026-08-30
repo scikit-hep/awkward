@@ -1190,7 +1190,6 @@ class NumpyArray(NumpyMeta, Content):
         from cudf.core.column.column import ColumnBase
         from cudf.utils.dtypes import dtype_to_pylibcudf_type
         from pylibcudf.gpumemoryview import gpumemoryview
-        from rmm.pylibrmm.device_buffer import DeviceBuffer
 
         (raw_data,) = maybe_materialize(self._data)
 
@@ -1226,13 +1225,11 @@ class NumpyArray(NumpyMeta, Content):
                 plc_col = plc.unary.cast(plc_col, dtype_to_pylibcudf_type(np_dtype))
 
         if mask is not None:
-            m = cupy.packbits(cupy.asarray(mask), bitorder="little")
+            m = cupy._module.packbits(cupy.asarray(mask), bitorder="little")
             if m.nbytes % 64:
-                m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
-            null_count = int(
-                length - int(cupy.unpackbits(m, bitorder="little")[:length].sum())
-            )
-            mask_gmv = gpumemoryview(DeviceBuffer.from_cuda_array_interface(m))
+                m = cupy._module.resize(m, ((m.nbytes // 64) + 1) * 64)
+            null_count = int(len(self) - mask.sum())
+            mask_gmv = gpumemoryview(m)
             plc_col = plc_col.with_mask(mask_gmv, null_count)
 
         return ColumnBase.from_pylibcudf(plc_col)

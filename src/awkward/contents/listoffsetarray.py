@@ -1788,12 +1788,13 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         offsets_col = as_column(index)
         # Build the packed bitmask as a CuPy array (LSB order, 64-byte aligned)
         if mask is not None:
-            m_arr = np._module.packbits(mask, bitorder="little")
+            m_arr = cupy._module.packbits(cupy.asarray(mask), bitorder="little")
             if m_arr.nbytes % 64:
-                m_arr = cupy.resize(m_arr, ((m_arr.nbytes // 64) + 1) * 64)
-            m_arr = cupy.asarray(m_arr)
+                m_arr = cupy._module.resize(m_arr, ((m_arr.nbytes // 64) + 1) * 64)
+            null_count = int(len(self) - mask.sum())
         else:
             m_arr = None
+            null_count = 0
 
         if self.parameters.get("__array__") == "string":
             # String columns: chars in the data buffer, offsets as child[0].
@@ -1815,23 +1816,24 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 children=[],
             )
 
-            if m_arr is not None:
-                mask_gmv = gpumemoryview(m_arr)
-                null_count = -1  # let pylibcudf compute it
-            else:
-                mask_gmv = None
-                null_count = 0
-
             string_plc = plc.Column(
                 data_type=plc.DataType(plc.TypeId.STRING),
                 size=n,
                 data=chars_gmv,
-                mask=mask_gmv,
-                null_count=null_count,
+                mask=None,
+                null_count=0,
                 offset=0,
                 children=[offsets_plc],
             )
-            return ColumnBase.from_pylibcudf(string_plc)
+            string_col = ColumnBase.from_pylibcudf(string_plc)
+            if m_arr is not None:
+                # Attach the validity bitmap through cudf, exactly as the
+                # ByteMaskedArray/BitMaskedArray paths do. Handing the mask to
+                # the pylibcudf constructor instead yields a string column that
+                # cudf cannot convert back to Arrow (its character buffer comes
+                # out with size 0).
+                return string_col.set_mask(as_buffer(m_arr), null_count)
+            return string_col
 
         cont = self._content._to_cudf(cudf, None, len(self._content))
         plc_col = plc.Column(
@@ -1846,9 +1848,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         list_dt = cudf.ListDtype(cont.dtype)
         list_col = ColumnBase.create(plc_col, list_dt)
         if m_arr is not None:
-            null_count = int(
-                length - int(cupy.unpackbits(m_arr, bitorder="little")[:length].sum())
-            )
             return list_col.set_mask(as_buffer(m_arr), null_count)
         return list_col
 

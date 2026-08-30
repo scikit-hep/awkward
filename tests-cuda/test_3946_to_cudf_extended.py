@@ -2,6 +2,7 @@
 
 """Extended tests for ak.to_cudf covering:
 - All primitive dtypes (int8/16/32/64, uint8/16/32/64, float32/64, bool)
+- Direct NumpyArray and ListOffsetArray conversion, including explicit masks
 - Datetime and timedelta dtypes
 - Empty arrays of various types
 - Deeply nested structs (3+ levels)
@@ -127,6 +128,43 @@ def test_to_cudf_bool():
     out = ak.to_cudf(arr)
     assert _to_arrow_list(out) == [True, False, True, True, False]
     assert out.dtype == np.dtype("bool")
+
+
+# ---------------------------------------------------------------------------
+# Direct layout conversion with explicit masks
+# ---------------------------------------------------------------------------
+
+
+def test_numpyarray_to_cudf_with_mask():
+    layout = ak.contents.NumpyArray(np.array([10, 99, 30, 99], dtype=np.int32))
+    mask = np.array([True, False, True, False])
+
+    column = layout._to_cudf(cudf, mask, len(layout))
+    out = cudf.Series._from_column(column)
+
+    assert _to_arrow_list(out) == [10, None, 30, None]
+
+
+def test_listoffsetarray_to_cudf_with_mask():
+    layout = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 2, 3, 5], dtype=np.int64)),
+        ak.contents.NumpyArray(np.array([10, 20, 30, 40, 50], dtype=np.int32)),
+    )
+    mask = np.array([True, False, True])
+
+    column = layout._to_cudf(cudf, mask, len(layout))
+    out = cudf.Series._from_column(column)
+
+    assert _to_arrow_list(out) == [[10, 20], None, [40, 50]]
+
+    string_layout = ak.Array(["one", "two", "three"]).layout
+    column = string_layout._to_cudf(cudf, mask, len(string_layout))
+    out = cudf.Series._from_column(column)
+
+    assert out.iloc[0] == "one"
+    assert out.isnull().iloc[1]
+    assert out.iloc[2] == "three"
+    assert _to_arrow_list(out) == ["one", None, "three"]
 
 
 # ---------------------------------------------------------------------------
