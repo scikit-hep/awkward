@@ -24,6 +24,12 @@ def from_cudf(obj, *, highlevel=True, behavior=None, attrs=None):
     Converts a cuDF Series or DataFrame into an Awkward Array by recursively
     traversing pylibcudf columns and wrapping GPU buffers with CuPy.
 
+    Categorical columns become a `"categorical"` #ak.contents.IndexedArray
+    over the distinct categories, just as #ak.from_arrow does for Arrow
+    dictionary types.  Their codes are widened to `int64` on the device
+    (Awkward's index cannot hold cuDF's narrower code dtypes), so this is the
+    one column type that is not wrapped zero-copy.
+
     Note: DataFrame column names and order are preserved. Arrow/cuDF column
     metadata beyond field names (e.g. time-zone annotations,
     extension-type metadata) is not yet propagated and will be addressed in a

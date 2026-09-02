@@ -19,6 +19,16 @@ def _to_pylibcudf_column(series):
     return col[0] if isinstance(col, tuple) else col
 
 
+def _data_buffer(plc_column):
+    """pylibcudf spells the data buffer `data_buffer` or `data`, as a property
+    or a method, depending on the release."""
+    for name in ("data_buffer", "data"):
+        value = getattr(plc_column, name, None)
+        if value is not None:
+            return value() if callable(value) else value
+    raise AssertionError("pylibcudf column exposes no data buffer")
+
+
 class TestPrimitives:
     @pytest.mark.parametrize(
         ("dtype", "values"),
@@ -47,11 +57,23 @@ class TestPrimitives:
         assert result.layout.data.dtype == cp.dtype("int64")
 
     def test_float_nan_passthrough(self):
-        result = ak.from_cudf(cudf.Series([1.0, math.nan, 3.0], dtype="float64"))
+        # cuDF's default nan_as_null=True would turn the NaN into a null, so
+        # it has to be switched off to get a NaN payload into the column.
+        result = ak.from_cudf(
+            cudf.Series([1.0, math.nan, 3.0], dtype="float64", nan_as_null=False)
+        )
         values = ak.to_list(result)
         assert values[0] == 1.0
         assert math.isnan(values[1])
         assert values[2] == 3.0
+        assert not result.layout.is_option
+
+    def test_float_nan_as_null(self):
+        # With cuDF's default nan_as_null=True the NaN is a null in the column
+        # itself, and from_cudf reports it as a missing value.
+        result = ak.from_cudf(cudf.Series([1.0, math.nan, 3.0], dtype="float64"))
+        assert ak.to_list(result) == [1.0, None, 3.0]
+        assert result.layout.is_option
 
 
 class TestNullable:
@@ -127,6 +149,15 @@ class TestStrings:
         result = ak.from_cudf(cudf.Series(["", "x", ""]))
         assert ak.to_list(result) == ["", "x", ""]
 
+    def test_all_empty_strings(self):
+        # A column of only empty strings has no character buffer at all.
+        result = ak.from_cudf(cudf.Series(["", "", ""]))
+        assert ak.to_list(result) == ["", "", ""]
+
+    def test_empty_strings_with_nulls(self):
+        result = ak.from_cudf(cudf.Series(["", None, ""]))
+        assert ak.to_list(result) == ["", None, ""]
+
     def test_unicode(self):
         result = ak.from_cudf(cudf.Series(["alpha", "emoji \U0001f600", "delta"]))
         assert ak.to_list(result) == ["alpha", "emoji \U0001f600", "delta"]
@@ -136,10 +167,42 @@ class TestDictionary:
     def test_category_encoded_ints(self):
         result = ak.from_cudf(cudf.Series([1, 2, 1], dtype="category"))
         assert ak.to_list(result) == [1, 2, 1]
+        assert result.layout.parameter("__array__") == "categorical"
 
     def test_category_encoded_strings(self):
         result = ak.from_cudf(cudf.Series(["a", "b", "a"], dtype="category"))
         assert ak.to_list(result) == ["a", "b", "a"]
+        assert result.layout.parameter("__array__") == "categorical"
+
+    def test_category_with_nulls(self):
+        result = ak.from_cudf(cudf.Series(["a", None, "b"], dtype="category"))
+        assert ak.to_list(result) == ["a", None, "b"]
+        assert result.layout.is_option
+        assert result.layout.parameter("__array__") == "categorical"
+
+    def test_category_is_indexed_and_on_device(self):
+        layout = ak.from_cudf(
+            cudf.Series(["a", "b", "a"], dtype="category"), highlevel=False
+        )
+        assert isinstance(layout, ak.contents.IndexedArray)
+        assert ak.backend(layout) == "cuda"
+        # The content holds the distinct categories, not one entry per row.
+        assert ak.to_list(ak.Array(layout.content)) == ["a", "b"]
+
+    def test_category_empty(self):
+        result = ak.from_cudf(cudf.Series([], dtype="category"))
+        assert ak.to_list(result) == []
+
+    def test_category_sliced(self):
+        series = cudf.Series(["a", "b", "a", "c"], dtype="category")
+        result = ak.from_cudf(series.iloc[1:3])
+        assert ak.to_list(result) == ["b", "a"]
+
+    def test_category_in_dataframe(self):
+        result = ak.from_cudf(
+            cudf.DataFrame({"x": cudf.Series(["a", "b", "a"], dtype="category")})
+        )
+        assert ak.to_list(result) == [{"x": "a"}, {"x": "b"}, {"x": "a"}]
 
 
 class TestDataFrame:
@@ -187,7 +250,7 @@ class TestZeroCopy:
         series = cudf.Series([1, 2, 3], dtype="int64")
         plc_col = _to_pylibcudf_column(series)
         layout = ak.from_cudf(series, highlevel=False)
-        assert layout.data.data.ptr == plc_col.data_buffer().ptr
+        assert layout.data.data.ptr == _data_buffer(plc_col).ptr
 
 
 def test_dataframe_basic():

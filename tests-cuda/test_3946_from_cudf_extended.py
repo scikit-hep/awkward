@@ -588,15 +588,14 @@ def test_from_cudf_dataframe_empty():
 
 
 def test_from_cudf_dictionary_int():
-    # When a categorical Series is passed to to_pylibcudf(), cuDF returns the
-    # codes (integer indices) column rather than a dictionary-encoded column.
-    # from_cudf therefore produces a GPU-backed NumpyArray of uint8 category
-    # codes, not decoded values.
+    # A categorical Series carries its codes in the pylibcudf column and its
+    # categories on the Python-level dtype; from_cudf recombines the two into
+    # a categorical IndexedArray, so the decoded values come back.
     series = cudf.Series([1, 2, 1, 3, 2]).astype("category")
     result = ak.from_cudf(series)
     assert ak.backend(result) == "cuda"
     assert len(result) == 5
-    # Codes are non-negative integers; categories are on the original series
+    assert ak.to_list(result) == [1, 2, 1, 3, 2]
     assert set(series.cat.categories.to_arrow().tolist()) == {1, 2, 3}
 
 
@@ -605,6 +604,7 @@ def test_from_cudf_dictionary_string():
     result = ak.from_cudf(series)
     assert ak.backend(result) == "cuda"
     assert len(result) == 5
+    assert ak.to_list(result) == ["a", "b", "a", "c", "b"]
     assert set(series.cat.categories.to_arrow().tolist()) == {"a", "b", "c"}
 
 
@@ -614,6 +614,7 @@ def test_from_cudf_dictionary_roundtrip_values():
     result = ak.from_cudf(series)
     assert ak.backend(result) == "cuda"
     assert len(result) == len(values)
+    assert ak.to_list(result) == values
     # The categories (distinct values) are preserved on the original series
     assert set(series.cat.categories.to_arrow().tolist()) == {"foo", "bar", "baz"}
 
@@ -841,16 +842,14 @@ def test_from_cudf_string_produces_listoffsetarray_with_parameter():
 
 
 def test_from_cudf_dictionary_produces_indexedarray():
-    # When a categorical Series is passed to to_pylibcudf(), cuDF may return
-    # either a DICTIONARY32-encoded column (producing IndexedArray or
-    # BitMaskedArray) or the raw codes column (producing NumpyArray).  Both are
-    # valid GPU-backed representations of the categorical data.
+    # Categoricals become an index into the distinct categories, the same
+    # layout ak.from_arrow builds for an Arrow dictionary type.
     series = cudf.Series(["a", "b", "a", "c"]).astype("category")
     layout = ak.from_cudf(series, highlevel=False)
     assert isinstance(
-        layout,
-        (ak.contents.IndexedArray, ak.contents.BitMaskedArray, ak.contents.NumpyArray),
+        layout, (ak.contents.IndexedArray, ak.contents.IndexedOptionArray)
     )
+    assert layout.parameter("__array__") == "categorical"
     assert ak.backend(layout) == "cuda"
 
 

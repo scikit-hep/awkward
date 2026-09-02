@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from awkward.contents import (
     BitMaskedArray,
     IndexedArray,
+    IndexedOptionArray,
     ListOffsetArray,
     NumpyArray,
     RecordArray,
@@ -296,7 +297,7 @@ def _string_offsets_and_chars(
     pylibcudf STRING columns have exactly 1 child: the offsets column.
     The character bytes live in the parent column's own data buffer, so
     ``chars_source`` is the parent column ``col`` itself — callers extract
-    chars via ``_data_to_cupy(chars_source, "uint8")``.
+    chars via ``_string_chars_to_cupy(col, chars_source, offsets)``.
 
     The ``>= 2`` branch is defensive dead code against hypothetical future
     API changes; in all current pylibcudf versions ``num_children == 1``.
@@ -313,6 +314,47 @@ def _string_offsets_and_chars(
     else:
         # Degenerate: no children, no offsets — treat as empty.
         return None, col
+
+
+def _string_chars_to_cupy(
+    col: plc.Column, chars_col: plc.Column, offsets: cp.ndarray
+) -> cp.ndarray:
+    """
+    Return the character bytes of a STRING column as a uint8 CuPy array.
+
+    A STRING column's ``size`` counts strings rather than bytes, so its
+    character buffer cannot go through ``_data_to_cupy``: ``["", "x", ""]``
+    is three elements but only one byte, and ``["", ""]`` has no character
+    buffer at all.  The number of bytes the strings actually occupy is
+    recorded only in the final offset, so that is what is checked here.
+    """
+    _, _, cp = _ensure_deps()
+
+    buffer = _get_attr_or_call(chars_col, "data_buffer") or _get_attr_or_call(
+        chars_col, "data"
+    )
+    if buffer is None or buffer.nbytes == 0:
+        # A column of empty strings has no character bytes at all.
+        chars = cp.empty(0, dtype="uint8")
+    else:
+        chars = _buf_to_cupy(buffer, "uint8")
+
+    # Reading the last offset costs one small device-to-host copy, but it is
+    # the only place the required number of character bytes is recorded.
+    stop = _get_offset(col) + _get_size(col)
+    num_chars = int(offsets[stop]) if int(offsets.size) > stop else 0
+
+    # Invariant: the character buffer must cover every byte the offsets
+    # address, otherwise reading the strings would run past the allocation.
+    if int(chars.size) < num_chars:
+        raise RuntimeError(
+            f"Buffer size mismatch: the string offsets address {num_chars} "
+            f"character bytes but the column's character buffer holds "
+            f"{int(chars.size)}.  This may indicate a sliced column where "
+            f"offset metadata was not propagated."
+        )
+
+    return chars
 
 
 def _finalize(layout: Content, col: plc.Column) -> Content:
@@ -412,10 +454,11 @@ def _column_to_layout(col: plc.Column, dtype: Any = None) -> Content:
 
     elif type_id == _type_id(plc_module, "STRING"):
         offsets_col, chars_col = _string_offsets_and_chars(col)
+        offsets = _offsets_to_index(offsets_col, col)
         layout = ListOffsetArray(
-            _offsets_to_index(offsets_col, col),
+            offsets,
             NumpyArray(
-                _data_to_cupy(chars_col, "uint8"),
+                _string_chars_to_cupy(col, chars_col, offsets.data),
                 parameters={"__array__": "char"},
             ),
             parameters={"__array__": "string"},
@@ -425,6 +468,7 @@ def _column_to_layout(col: plc.Column, dtype: Any = None) -> Content:
         layout = IndexedArray(
             Index32(_data_to_cupy(col.child(0), "int32")),
             _column_to_layout(col.child(1)),
+            parameters={"__array__": "categorical"},
         )
 
     else:
@@ -436,7 +480,46 @@ def _column_to_layout(col: plc.Column, dtype: Any = None) -> Content:
     return _finalize(layout, col)
 
 
+def _categorical_to_layout(series: Any) -> Content:
+    """
+    Convert a categorical cuDF Series into a categorical Awkward layout.
+
+    cuDF does not use libcudf's DICTIONARY32 type for categoricals: the
+    pylibcudf column of a categorical Series holds only the integer codes,
+    while the categories live on the Python-level ``CategoricalDtype``.  The
+    two halves are therefore converted separately and recombined here into
+    the same ``"categorical"``-parameterised layout that #ak.from_arrow
+    produces for Arrow dictionary types.
+    """
+    cudf, _, _ = _ensure_deps()
+
+    content = _series_to_layout(cudf.Series(series.dtype.categories))
+
+    # Awkward's Index cannot hold the narrow (e.g. int8) code dtypes cuDF
+    # picks, so the codes are widened to int64 on the device.
+    codes = series.cat.codes.astype("int64")
+
+    if series.null_count != 0:
+        # A null entry belongs to no category; -1 marks it missing to Awkward.
+        return IndexedOptionArray.simplified(
+            Index64(codes.fillna(-1).to_cupy()),
+            content,
+            parameters={"__array__": "categorical"},
+        )
+
+    return IndexedArray(
+        Index64(codes.to_cupy()),
+        content,
+        parameters={"__array__": "categorical"},
+    )
+
+
 def _series_to_layout(series: Any) -> Content:
+    cudf, _, _ = _ensure_deps()
+
+    if isinstance(series.dtype, cudf.CategoricalDtype):
+        return _categorical_to_layout(series)
+
     # Pass the Python-level cudf dtype so that _column_to_layout can recover
     # struct field names at every nesting level.  pylibcudf Column objects
     # carry no field-name metadata; all name information lives in the dtype.
