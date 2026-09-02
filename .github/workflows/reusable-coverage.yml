@@ -60,14 +60,15 @@ jobs:
         with:
           environment-name: test-env
           init-shell: bash
-          # cudf is published on the "rapidsai" channel, not conda-forge
-          # (a migration to conda-forge is expected).
+          # TODO: add cudf here once this environment can be created on the
+          # self-hosted runner; with cudf the create step fails before any
+          # test runs, so the cudf tests run in the GPU test jobs instead
+          # (see .github/actions/setup-gpu-env).
           create-args: >-
             -c rapidsai
             python=${{ env.PYTHON_VERSION }}
             pandas>=0.24.0
             cccl-python>=1.0.2
-            cudf>=25.02
             cupy>=14
             cuda-version=13
             cuda-toolkit
