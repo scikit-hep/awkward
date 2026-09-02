@@ -20,3 +20,7 @@ coverage:
 
 github_checks:
   annotations: false
+
+ignore:
+  - "src/awkward/_connect/cudf.py"
+  - "src/awkward/operations/ak_from_cudf.py"

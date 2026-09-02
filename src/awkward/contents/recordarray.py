@@ -1175,21 +1175,26 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        import pylibcudf as plc
+        from cudf.core.column.column import ColumnBase
+
         children = tuple(
             c._to_cudf(cudf, mask=None, length=length) for c in self.contents
         )
         dt = cudf.core.dtypes.StructDtype(
             {field: c.dtype for field, c in zip(self.fields, children, strict=True)}
         )
-        m = mask._to_cudf(cudf, None, length) if mask else None
-        return cudf.core.column.struct.StructColumn(
-            data=None,
-            children=children,
-            dtype=dt,
-            mask=m,
+
+        plc_col = plc.Column(
+            data_type=plc.DataType(plc.TypeId.STRUCT),
             size=length,
+            data=None,
+            mask=None,
+            null_count=0,
             offset=0,
+            children=[c.to_pylibcudf() for c in children],
         )
+        return ColumnBase.create(plc_col, dt)
 
     def _to_backend_array(self, allow_missing, backend):
         contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
