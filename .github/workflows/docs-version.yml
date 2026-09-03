@@ -20,25 +20,18 @@ jobs:
     runs-on: ubuntu-22.04
     name: Push version switcher
     permissions:
-      id-token: write # Required to assume the AWS deployment role through OIDC.
-      contents: read
-    env:
-      S3_BUCKET: "awkward-array.org"
-      CLOUDFRONT_ID: "EFM4QVENUIXHS"
+      contents: write # Required to push the version selector to the `gh-pages` branch.
     environment:
       name: docs
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
-        with:
-          aws-region: eu-west-2
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       # Pushes to main trigger latest
       - name: Push version selector
-        run: |
-          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/switcher.json"
-          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
-            --paths "/doc/switcher.json"
+        uses: ./.github/actions/deploy-to-gh-pages
+        with:
+          source: docs/switcher.json
+          target: doc/switcher.json
+          message: "Deploy version selector"
+          token: ${{ secrets.GITHUB_TOKEN }}
