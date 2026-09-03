@@ -1,0 +1,27 @@
+ak.round
+========
+
+Defined in `awkward.operations.ak_round <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_round.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_round.py#L19>`__.
+
+.. py:function:: ak.round(array, decimals: int = 0, out=UNSUPPORTED, highlevel=True, behavior=None, attrs=None)
+
+   :param array: array_like
+                 Input array.
+   :param decimals: int, optional
+                    Number of decimal places to round to (default: 0).  If
+                    decimals is negative, it specifies the number of positions to
+                    the left of the decimal point.
+   :param out: unsupported optional argument
+   :param highlevel: If True, return an :py:obj:`ak.Array`;
+                     otherwise, return a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool, default is True
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Returns the real components of the given array elements.
+   If the arrays have complex elements, the returned arrays are floats.
+

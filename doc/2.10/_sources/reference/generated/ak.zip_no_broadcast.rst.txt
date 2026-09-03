@@ -1,0 +1,66 @@
+ak.zip_no_broadcast
+===================
+
+Defined in `awkward.operations.ak_zip_no_broadcast <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_zip_no_broadcast.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_zip_no_broadcast.py#L20>`__.
+
+.. py:function:: ak.zip_no_broadcast(arrays, *, parameters=None, with_name=None, highlevel=True, behavior=None, attrs=None)
+
+   Combines arrays into a collection of records or tuples without broadcasting.
+
+   Caution: unlike :py:obj:`ak.zip` this function will _not_ broadcast the arrays
+   together. During typetracing, it assumes that the given arrays have already
+   the same layouts and lengths.
+
+   This operation may be thought of as the opposite of projection in
+   :py:obj:`ak.Array.__getitem__`, which extracts fields one at a time, or :py:obj:`ak.unzip`,
+   which extracts them all in one call.
+
+   :param arrays: Each value in this mapping or
+                  sequence can be any array-like data that :py:obj:`ak.to_layout` recognizes.
+   :type arrays: mapping or sequence of arrays
+   :param parameters: Parameters for the new
+                      :py:obj:`ak.contents.RecordArray` node that is created by this operation.
+   :type parameters: None or dict
+   :param with_name: Assigns a ``"__record__"`` name to the new
+                     :py:obj:`ak.contents.RecordArray` node that is created by this operation
+                     (overriding ``parameters``, if necessary).
+   :type with_name: None or str
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   :returns: An array of records (or tuples) whose fields (or slots) are the
+             ``arrays``, combined into a single structure.
+
+   .. rubric:: Examples
+
+   Consider the following arrays, ``one`` and ``two``.
+
+   >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
+   >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
+
+   Zipping them together using a dict creates a collection of records with
+   the same nesting structure as ``one`` and ``two``.
+
+   >>> ak.zip_no_broadcast({"x": one, "y": two}).show()
+   [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
+    [],
+    [{x: 4.4, y: 'd'}],
+    []]
+
+   Doing so with a list creates tuples, whose fields are not named.
+
+   >>> ak.zip_no_broadcast([one, two]).show()
+   [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
+    [],
+    [(4.4, 'd')],
+    []]
+
+   See also :py:obj:`ak.zip` and :py:obj:`ak.unzip`.
+

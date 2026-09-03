@@ -1,0 +1,23 @@
+ak.fields
+---------
+
+.. py:module: ak.fields
+
+Defined in `awkward.operations.ak_fields <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_fields.py>`__ on `line 11 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_fields.py#L11>`__.
+
+.. py:function:: ak.fields(array)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+
+Extracts record fields or tuple slot numbers from ``array`` (many types
+supported, including all Awkward Arrays and Records).
+
+If the array contains nested records, only the outermost record is
+queried. If it contains tuples instead of records, this function outputs
+string representations of integers, such as ``"0"``, ``"1"``, ``"2"``, etc.
+The records or tuples may be within multiple layers of nested lists.
+
+If the array contains neither tuples nor records, this returns an empty
+list.
+

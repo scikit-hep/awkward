@@ -1,0 +1,6 @@
+ak.typetracer.create_unknown_scalar
+===================================
+
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/typetracer.py>`__ on `line 260 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/typetracer.py#L260>`__.
+
+.. py:function:: ak.typetracer.create_unknown_scalar(dtype: numpy.typing.DTypeLike) -> awkward._nplikes.typetracer.TypeTracerArray

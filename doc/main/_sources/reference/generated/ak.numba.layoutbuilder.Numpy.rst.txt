@@ -1,0 +1,46 @@
+ak.numba.layoutbuilder.Numpy
+============================
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/numba/layoutbuilder.py>`__ on `line 39 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/numba/layoutbuilder.py#L39>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Numpy(dtype, *, parameters=None, initial=1024, resize=8.0)
+
+
+
+   .. py:attribute:: _data
+
+
+   .. py:method:: _from_buffer(data)
+      :classmethod:
+
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: numbatype()
+
+
+   .. py:method:: __len__()
+
+
+   .. py:property:: dtype
+
+
+   .. py:method:: append(x)
+
+
+   .. py:method:: extend(data)
+
+
+   .. py:property:: form
+
+
+   .. py:method:: clear()
+
+
+   .. py:method:: is_valid(error: str)
+
+
+   .. py:method:: snapshot() -> awkward.contents.Content
+

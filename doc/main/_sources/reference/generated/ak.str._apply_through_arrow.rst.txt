@@ -1,0 +1,6 @@
+ak.str._apply_through_arrow
+===========================
+
+Defined in `awkward.operations.str.__init__ <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/str/__init__.py>`__ on `line 121 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/str/__init__.py#L121>`__.
+
+.. py:function:: ak.str._apply_through_arrow(operation, /, *args, generate_bitmasks=False, expect_option_type=False, string_to32=False, bytestring_to32=False, ensure_empty_mask=False, **kwargs)

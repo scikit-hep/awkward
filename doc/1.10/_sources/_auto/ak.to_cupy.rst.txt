@@ -1,0 +1,19 @@
+ak.to_cupy
+----------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 427 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L427>`__.
+
+.. py:function:: ak.to_cupy(array)
+
+Converts ``array`` (many types supported) into a CuPy array, if possible.
+
+If the data are numerical and regular (nested lists have equal lengths
+in each dimension, as described by the #type), they can be losslessly
+converted to a CuPy array and this function returns without an error.
+
+Otherwise, the function raises an error.
+
+If ``array`` is a scalar, it is converted into a CuPy scalar.
+
+See also :py:obj:`ak.from_cupy` and :py:obj:`ak.to_numpy`.
+

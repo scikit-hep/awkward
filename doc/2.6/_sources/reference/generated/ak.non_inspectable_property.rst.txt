@@ -1,0 +1,11 @@
+ak.non_inspectable_property
+---------------------------
+
+.. py:module: ak.non_inspectable_property
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/highlevel.py>`__ on `line 61 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/highlevel.py#L61>`__.
+
+.. py:function:: ak.non_inspectable_property(impl)
+
+property factory that ensures IPython does not call the property during inspection
+

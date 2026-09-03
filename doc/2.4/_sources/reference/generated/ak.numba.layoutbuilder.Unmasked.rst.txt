@@ -1,0 +1,57 @@
+ak.numba.layoutbuilder.Unmasked
+-------------------------------
+
+.. py:module: ak.numba.layoutbuilder.Unmasked
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/numba/layoutbuilder.py>`__ on `line 591 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/numba/layoutbuilder.py#L591>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Unmasked(self, content, *, parameters=None)
+
+
+
+.. _ak-numba-layoutbuilder-unmasked-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.Unmasked.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-unmasked-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.Unmasked.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-unmasked-content:
+
+.. py:attribute:: ak.numba.layoutbuilder.Unmasked.content
+
+
+
+.. _ak-numba-layoutbuilder-unmasked-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.Unmasked.form
+
+
+
+.. _ak-numba-layoutbuilder-unmasked-clear:
+
+.. py:method:: ak.numba.layoutbuilder.Unmasked.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-unmasked-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.Unmasked.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-unmasked-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.Unmasked.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-unmasked-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.Unmasked.snapshot(self)
+

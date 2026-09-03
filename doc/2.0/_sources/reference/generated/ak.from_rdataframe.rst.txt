@@ -1,0 +1,28 @@
+ak.from_rdataframe
+------------------
+
+.. py:module: ak.from_rdataframe
+
+Defined in `awkward.operations.ak_from_rdataframe <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/operations/ak_from_rdataframe.py>`__ on `line 6 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/operations/ak_from_rdataframe.py#L6>`__.
+
+.. py:function:: ak.from_rdataframe(rdf, columns)
+
+
+    :param rdf: ROOT RDataFrame to convert into an
+            Awkward Array.
+    :type rdf: ``ROOT.RDataFrame``
+    :param columns: A column or multiple columns to be
+                converted to Awkward Array.
+    :type columns: str or iterable of str
+
+Converts ROOT RDataFrame columns into an Awkward Array.
+
+If ``columns`` is a string, the return value represents a single RDataFrame column.
+
+If ``columns`` is any other iterable, the return value is a record array, in which
+each field corresponds to an RDataFrame column. In particular, if the ``columns``
+iterable contains only one string, it is still a record array, which has only
+one field.
+
+See also :py:obj:`ak.to_rdataframe`.
+

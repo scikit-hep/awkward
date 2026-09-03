@@ -1,0 +1,57 @@
+ak.with_cache
+-------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 4264 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L4264>`__.
+
+.. py:function:: ak.with_cache(array, cache, highlevel=True, behavior=None)
+
+
+    :param array: Data to search for nested virtual arrays.
+    :param cache: If None, arrays are generated every
+              time they are needed; otherwise, generated arrays are stored in the
+              mapping with ``__setitem__``, retrieved with ``__getitem__``, and only
+              re-generated if ``__getitem__`` raises a ``KeyError``. This mapping may
+              evict elements according to any caching algorithm (LRU, LFR, RR,
+              TTL, etc.). If "new", a new dict (keep-forever cache) is created.
+    :type cache: None or MutableMapping
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Remove caches from all virtual arrays nested within ``array`` if ``cache`` is
+None; adds a cache otherwise.
+
+For example:
+
+.. code-block:: python
+
+
+    >>> cache1 = {}
+    >>> one = ak.virtual(lambda: [[1.1, 2.2, 3.3], [], [4.4, 5.5]], cache=cache1, length=3)
+    >>> two = ak.virtual(lambda: [100, 200, 300], cache=cache1, length=3)
+    >>> array1 = ak.zip({"x": one, "y": two}, depth_limit=1)
+    >>> len(cache1)
+    0
+
+creates an array of records with virtual fields that would fill ``cache1``.
+
+We can then switch every instance of ``cache1`` in ``array`` with ``cache2``:
+
+.. code-block:: python
+
+
+    >>> cache2 = {}
+    >>> array2 = ak.with_cache(array1, cache2)
+    >>> array2["x"]
+    <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+    >>>
+    >>> len(cache1), len(cache2)
+    (0, 1)
+
+Viewing the ``array2["x"]`` filled ``cache2`` and not ``cache1``.
+
+See :py:obj:`ak.virtual`.
+

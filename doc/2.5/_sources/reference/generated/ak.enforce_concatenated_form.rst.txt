@@ -1,0 +1,9 @@
+ak.enforce_concatenated_form
+----------------------------
+
+.. py:module: ak.enforce_concatenated_form
+
+Defined in `awkward.operations.ak_concatenate <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_concatenate.py>`__ on `line 416 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_concatenate.py#L416>`__.
+
+.. py:function:: ak.enforce_concatenated_form(layout, form)
+

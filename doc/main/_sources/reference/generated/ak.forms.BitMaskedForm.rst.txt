@@ -1,0 +1,91 @@
+ak.forms.BitMaskedForm
+======================
+
+Defined in `awkward.forms.bitmaskedform <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/bitmaskedform.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/bitmaskedform.py#L19>`__.
+
+.. py:class:: ak.forms.BitMaskedForm(mask, content, valid_when, lsb_order, *, parameters=None, form_key=None)
+
+
+
+   Abstract base class for generic types.
+
+   A generic type is typically declared by inheriting from
+   this class parameterized with one or more type variables.
+   For example, a generic mapping type might be defined as::
+
+     class Mapping(Generic[KT, VT]):
+         def __getitem__(self, key: KT) -> VT:
+             ...
+         # Etc.
+
+   This class can then be used as follows::
+
+     def lookup_name(mapping: Mapping[KT, VT], key: KT, default: VT) -> VT:
+         try:
+             return mapping[key]
+         except KeyError:
+             return default
+
+
+   .. py:attribute:: _content
+      :type:  awkward.forms.form.Form
+
+
+   .. py:attribute:: _mask
+
+
+   .. py:attribute:: _valid_when
+
+
+   .. py:attribute:: _lsb_order
+
+
+   .. py:property:: mask
+
+
+   .. py:property:: content
+
+
+   .. py:property:: valid_when
+
+
+   .. py:property:: lsb_order
+
+
+   .. py:method:: copy(mask=UNSET, content=UNSET, valid_when=UNSET, lsb_order=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+   .. py:method:: simplified(mask, content, valid_when, lsb_order, *, parameters=None, form_key=None)
+      :classmethod:
+
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _to_dict_part(verbose, toplevel)
+
+
+   .. py:property:: type
+
+
+   .. py:method:: _columns(path, output, list_indicator)
+
+
+   .. py:method:: _prune_columns(is_inside_record_or_union: bool) -> awkward._typing.Self | None
+
+
+   .. py:method:: _select_columns(match_specifier: awkward.forms.form._SpecifierMatcher) -> awkward._typing.Self
+
+
+   .. py:method:: _column_types()
+
+
+   .. py:method:: __setstate__(state)
+
+
+   .. py:method:: _expected_from_buffers(getkey: collections.abc.Callable[[awkward.forms.form.Form, str], str], recursive: bool) -> awkward._typing.Iterator[tuple[str, awkward._typing.DType]]
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool, form_key: bool) -> bool
+

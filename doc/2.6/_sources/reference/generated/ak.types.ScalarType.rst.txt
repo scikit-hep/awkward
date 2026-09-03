@@ -1,0 +1,58 @@
+ak.types.ScalarType
+-------------------
+
+.. py:module: ak.types.ScalarType
+
+Defined in `awkward.types.scalartype <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/types/scalartype.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/types/scalartype.py#L13>`__.
+
+.. py:class:: ak.types.ScalarType(self, content, behavior=None)
+
+
+
+.. _ak-types-scalartype-content:
+
+.. py:attribute:: ak.types.ScalarType.content
+
+
+
+.. _ak-types-scalartype-behavior:
+
+.. py:attribute:: ak.types.ScalarType.behavior
+
+
+
+.. _ak-types-scalartype-__str__:
+
+.. py:method:: ak.types.ScalarType.__str__(self)
+
+
+
+.. _ak-types-scalartype-show:
+
+.. py:method:: ak.types.ScalarType.show(self, stream=STDOUT)
+
+
+
+.. _ak-types-scalartype-_str:
+
+.. py:method:: ak.types.ScalarType._str(self, indent, compact)
+
+
+
+.. _ak-types-scalartype-__repr__:
+
+.. py:method:: ak.types.ScalarType.__repr__(self)
+
+
+
+.. _ak-types-scalartype-is_equal_to:
+
+.. py:method:: ak.types.ScalarType.is_equal_to(self, other, *, all_parameters=False)
+
+
+
+.. _ak-types-scalartype-__eq__:
+
+.. py:attribute:: ak.types.ScalarType.__eq__
+    :value: is_equal_to
+

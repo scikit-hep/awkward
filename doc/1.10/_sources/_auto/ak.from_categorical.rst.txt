@@ -1,0 +1,23 @@
+ak.from_categorical
+-------------------
+
+Defined in `awkward.behaviors.categorical <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/categorical.py>`__ on `line 306 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/categorical.py#L306>`__.
+
+.. py:function:: ak.from_categorical(array, highlevel=True)
+
+
+    :param array: Awkward Array from which to remove the 'categorical' parameter.
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+
+This function replaces categorical data with non-categorical data (by
+removing the label that declares it as such).
+
+This is a metadata-only operation; the running time does not scale with the
+size of the dataset. (Conversion to categorical is expensive; conversion
+from categorical is cheap.)
+
+See also :py:obj:`ak.is_categorical`, :py:obj:`ak.categories`, :py:obj:`ak.to_categorical`,
+:py:obj:`ak.from_categorical`.
+

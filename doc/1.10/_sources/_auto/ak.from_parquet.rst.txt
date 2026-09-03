@@ -1,0 +1,56 @@
+ak.from_parquet
+---------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 3849 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L3849>`__.
+
+.. py:function:: ak.from_parquet(source, columns=None, row_groups=None, use_threads=True, include_partition_columns=True, lazy=False, lazy_cache='new', lazy_cache_key=None, highlevel=True, behavior=None)
+
+
+    :param source: Where to
+               get the Parquet file. If ``source`` is the name of a local directory
+               (str or Path), then it is interpreted as a partitioned Parquet dataset.
+    :type source: str, Path, file-like object, pyarrow.NativeFile
+    :param columns: If None, read all columns; otherwise,
+                read a specified set of columns.
+    :type columns: None or list of str
+    :param row_groups: If None, read all row groups;
+                   otherwise, read a single or list of row groups.
+    :type row_groups: None, int, or list of int
+    :param use_threads: Passed to the pyarrow.parquet.ParquetFile.read
+                    functions; if True, do multithreaded reading.
+    :type use_threads: bool
+    :param include_partition_columns: If True and ``source`` is a partitioned
+                                  Parquet dataset with subdirectory names defining partition names
+                                  and values, include those special columns in the output.
+    :type include_partition_columns: bool
+    :param lazy: If True, read columns in row groups on demand (as
+             :py:obj:`ak.layout.VirtualArray`, possibly in :py:obj:`ak.partition.PartitionedArray`
+             if the file has more than one row group); if False, read all
+             requested data immediately.
+    :type lazy: bool
+    :param lazy_cache: If lazy, pass this
+                   cache to the VirtualArrays. If "new", a new dict (keep-forever cache)
+                   is created. If None, no cache is used.
+    :type lazy_cache: None, "new", or MutableMapping
+    :param lazy_cache_key: If lazy, pass this cache_key to the
+                       VirtualArrays. If None, a process-unique string is constructed.
+    :type lazy_cache_key: None or str
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param options: All other options are passed to pyarrow.parquet.ParquetFile.
+
+Reads a Parquet file into an Awkward Array (through pyarrow).
+
+.. code-block:: python
+
+
+    >>> ak.from_parquet("array1.parquet")
+    <Array [[1, 2, 3], [], ... [], [6, 7, 8, 9]] type='6 * var * ?int64'>
+
+See also :py:obj:`ak.from_arrow`, which is used as an intermediate step.
+See also :py:obj:`ak.to_parquet`.
+

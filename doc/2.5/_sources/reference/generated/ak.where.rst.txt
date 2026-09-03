@@ -1,0 +1,47 @@
+ak.where
+--------
+
+.. py:module: ak.where
+
+Defined in `awkward.operations.ak_where <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_where.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_where.py#L19>`__.
+
+.. py:function:: ak.where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs=None)
+
+
+    :param condition: Array-like data (anything :py:obj:`ak.to_layout` recognizes) of booleans.
+    :param x: Optional array-like data (anything :py:obj:`ak.to_layout` recognizes) with the same
+          length as ``condition``.
+    :param y: Optional array-like data (anything :py:obj:`ak.to_layout` recognizes) with the same
+          length as ``condition``.
+    :param mergebool: If True, boolean and numeric data
+                  can be combined into the same buffer, losing information about
+                  False vs ``0`` and True vs ``1``; otherwise, they are kept in separate
+                  buffers with distinct types (using an :py:obj:`ak.contents.UnionArray`).
+    :type mergebool: bool, default is True
+    :param highlevel: If True, return an :py:obj:`ak.Array`;
+                  otherwise, return a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool, default is True
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+This function has a one-argument form, ``condition`` without ``x`` or ``y``, and
+a three-argument form, ``condition``, ``x``, and ``y``. In the one-argument form,
+it is completely equivalent to NumPy's
+`nonzero <https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html>`__
+function.
+
+In the three-argument form, it acts as a vectorized ternary operator:
+``condition``, ``x``, and ``y`` must all have the same length and
+
+.. code-block:: python
+
+
+    output[i] = x[i] if condition[i] else y[i]
+
+for all ``i``. The structure of ``x`` and ``y`` do not need to be the same; if
+they are incompatible types, the output will have :py:obj:`ak.type.UnionType`.
+

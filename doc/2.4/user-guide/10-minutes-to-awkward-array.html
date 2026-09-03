@@ -1,0 +1,1584 @@
+
+
+<!DOCTYPE html>
+
+
+<html >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>10 minutes to Awkward Array &#8212; Awkward Array 2.4.10 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Vibur" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyterlite_sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/jupyterlite_sphinx.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script type="application/vnd.jupyter.widget-state+json">{"state": {"afa120adac294b1da4137b19d3885ac8": {"model_name": "LeafletTileLayerModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletTileLayerModel", "_view_count": null, "_view_module": "jupyter-leaflet", "_view_module_version": "^0.17", "_view_name": "LeafletTileLayerView", "attribution": "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>", "base": true, "bottom": true, "bounds": null, "detect_retina": false, "loading": false, "max_native_zoom": null, "max_zoom": 20, "min_native_zoom": null, "min_zoom": 1, "name": "CartoDB.Voyager", "no_wrap": false, "opacity": 1.0, "options": ["attribution", "bounds", "detect_retina", "max_native_zoom", "max_zoom", "min_native_zoom", "min_zoom", "no_wrap", "tile_size", "tms", "zoom_offset"], "pane": "", "popup": null, "popup_max_height": null, "popup_max_width": 300, "popup_min_width": 50, "show_loading": false, "subitems": [], "tile_size": 256, "tms": false, "url": "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png", "visible": true, "zoom_offset": 0}}, "cdca747bbddd47268c9c7d56ea2552fd": {"model_name": "LeafletMapStyleModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletMapStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "cursor": "grab"}}, "a8f532f79f56437baa95610c496978ca": {"model_name": "LeafletMapStyleModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletMapStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "cursor": "move"}}, "c0519ad97fd14080a8b2ec10f4fd552d": {"model_name": "LayoutModel", "model_module": "@jupyter-widgets/base", "model_module_version": "2.0.0", "state": {"_model_module": "@jupyter-widgets/base", "_model_module_version": "2.0.0", "_model_name": "LayoutModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "LayoutView", "align_content": null, "align_items": null, "align_self": null, "border_bottom": null, "border_left": null, "border_right": null, "border_top": null, "bottom": null, "display": null, "flex": null, "flex_flow": null, "grid_area": null, "grid_auto_columns": null, "grid_auto_flow": null, "grid_auto_rows": null, "grid_column": null, "grid_gap": null, "grid_row": null, "grid_template_areas": null, "grid_template_columns": null, "grid_template_rows": null, "height": null, "justify_content": null, "justify_items": null, "left": null, "margin": null, "max_height": null, "max_width": null, "min_height": null, "min_width": null, "object_fit": null, "object_position": null, "order": null, "overflow": null, "padding": null, "right": null, "top": null, "visibility": null, "width": null}}, "ace6d20e3963438b850aa34e3d824aca": {"model_name": "LeafletMapStyleModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletMapStyleModel", "_view_count": null, "_view_module": "@jupyter-widgets/base", "_view_module_version": "2.0.0", "_view_name": "StyleView", "cursor": "grab"}}, "7cb7261eceff4e49a81db38b42d41ca1": {"model_name": "LeafletMapModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_dom_classes": [], "_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletMapModel", "_view_count": null, "_view_module": "jupyter-leaflet", "_view_module_version": "^0.17", "_view_name": "LeafletMapView", "bottom": 0.0, "bounce_at_zoom_limits": true, "box_zoom": true, "center": [41.8921, -87.6623], "close_popup_on_click": true, "controls": ["IPY_MODEL_c4a76c991ba948f881852d0a7f03312c", "IPY_MODEL_9beaee3d3c0d448b848a4d07291e729c"], "crs": {"name": "EPSG3857", "custom": false}, "default_style": "IPY_MODEL_cdca747bbddd47268c9c7d56ea2552fd", "double_click_zoom": true, "dragging": true, "dragging_style": "IPY_MODEL_a8f532f79f56437baa95610c496978ca", "east": 0.0, "fullscreen": false, "inertia": true, "inertia_deceleration": 3000, "inertia_max_speed": 1500, "interpolation": "bilinear", "keyboard": true, "keyboard_pan_offset": 80, "keyboard_zoom_offset": 1, "layers": ["IPY_MODEL_afa120adac294b1da4137b19d3885ac8", "IPY_MODEL_89bbb1efbe91462eae21a96bb77f7cb7", "IPY_MODEL_58575a9c74d349a59a285aff97878af9", "IPY_MODEL_9dcd720be01245169f9681b8a4904140"], "layout": "IPY_MODEL_c0519ad97fd14080a8b2ec10f4fd552d", "left": 9007199254740991.0, "max_zoom": null, "min_zoom": null, "modisdate": "2023-11-08", "north": 0.0, "options": ["bounce_at_zoom_limits", "box_zoom", "center", "close_popup_on_click", "double_click_zoom", "dragging", "fullscreen", "inertia", "inertia_deceleration", "inertia_max_speed", "interpolation", "keyboard", "keyboard_pan_offset", "keyboard_zoom_offset", "max_zoom", "min_zoom", "prefer_canvas", "scroll_wheel_zoom", "tap", "tap_tolerance", "touch_zoom", "world_copy_jump", "zoom", "zoom_animation_threshold", "zoom_delta", "zoom_snap"], "panes": {}, "prefer_canvas": false, "right": 0.0, "scroll_wheel_zoom": false, "south": 0.0, "style": "IPY_MODEL_ace6d20e3963438b850aa34e3d824aca", "tabbable": null, "tap": true, "tap_tolerance": 15, "tooltip": null, "top": 9007199254740991.0, "touch_zoom": true, "west": 0.0, "window_url": "", "world_copy_jump": false, "zoom": 11.0, "zoom_animation_threshold": 4, "zoom_delta": 1.0, "zoom_snap": 1.0}}, "c4a76c991ba948f881852d0a7f03312c": {"model_name": "LeafletZoomControlModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletZoomControlModel", "_view_count": null, "_view_module": "jupyter-leaflet", "_view_module_version": "^0.17", "_view_name": "LeafletZoomControlView", "options": ["position", "zoom_in_text", "zoom_in_title", "zoom_out_text", "zoom_out_title"], "position": "topleft", "zoom_in_text": "+", "zoom_in_title": "Zoom in", "zoom_out_text": "-", "zoom_out_title": "Zoom out"}}, "9beaee3d3c0d448b848a4d07291e729c": {"model_name": "LeafletAttributionControlModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletAttributionControlModel", "_view_count": null, "_view_module": "jupyter-leaflet", "_view_module_version": "^0.17", "_view_name": "LeafletAttributionControlView", "options": ["position", "prefix"], "position": "bottomright", "prefix": "ipyleaflet"}}, "89bbb1efbe91462eae21a96bb77f7cb7": {"model_name": "LeafletAntPathModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletAntPathModel", "_view_count": null, "_view_module": "jupyter-leaflet", "_view_module_version": "^0.17", "_view_name": "LeafletAntPathView", "base": false, "bottom": false, "color": "#0000FF", "dash_array": [10, 20], "delay": 1000, "hardware_accelerated": false, "locations": [[41.791755000016295, -87.75306800000835], [41.79289000004401, -87.75248199997004], [41.793049999865346, -87.74275300016161], [41.79308499989902, -87.74206800030079], [41.81677700055634, -87.74330599994865], [41.81921600026881, -87.73607600030955], [41.82489299995696, -87.71802799885627], [41.82925399986898, -87.70418600102421], [41.832074998299234, -87.6951960000908], [41.835063999871366, -87.68566399922129], [41.83892299828922, -87.66454599907156], [41.845413001606815, -87.64945799966809], [41.847186999748104, -87.63850099702832], [41.84722199885046, -87.6363319989061], [41.84696199966466, -87.62759100010153], [41.84792600048577, -87.62020599951502], [41.849916996786945, -87.61222300042864], [41.85385500116145, -87.61418999840971], [41.863579998145454, -87.61869900038], [41.86497699690854, -87.61940300574061], [41.862404996881835, -87.6187029938912], [41.859335998425834, -87.61741200198885]], "name": "", "options": ["color", "dash_array", "delay", "hardware_accelerated", "paused", "pulse_color", "radius", "reverse", "use", "weight"], "pane": "", "paused": false, "popup": null, "popup_max_height": null, "popup_max_width": 300, "popup_min_width": 50, "pulse_color": "#FFFFFF", "radius": 10, "reverse": false, "subitems": [], "use": "polyline", "weight": 5}}, "58575a9c74d349a59a285aff97878af9": {"model_name": "LeafletAntPathModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletAntPathModel", "_view_count": null, "_view_module": "jupyter-leaflet", "_view_module_version": "^0.17", "_view_name": "LeafletAntPathView", "base": false, "bottom": false, "color": "#0000FF", "dash_array": [10, 20], "delay": 1000, "hardware_accelerated": false, "locations": [[41.79259599999993, -87.76961500000002], [41.79274700000171, -87.76230300011375], [41.79571900010562, -87.76239400010817], [41.796845000064806, -87.75508699964993], [41.79795999994023, -87.74779599931352], [41.79906799999519, -87.7404859999966], [41.800207999828146, -87.7331679987561], [41.80132699973403, -87.72584199931734], [41.805292000356005, -87.71861000012868], [41.80988599948107, -87.71114999827259], [41.814656000877605, -87.70336799722426], [41.82004899933456, -87.69456500213855], [41.824459998230324, -87.68734100114816], [41.82593700132786, -87.68489899885171], [41.8648240029019, -87.68591899823659], [41.87145499728142, -87.67796899777167], [41.87273699633299, -87.67646199863665], [41.90137299738346, -87.67721099805348], [41.90138099930702, -87.67659199636691], [41.90120299748598, -87.67658699702733]], "name": "", "options": ["color", "dash_array", "delay", "hardware_accelerated", "paused", "pulse_color", "radius", "reverse", "use", "weight"], "pane": "", "paused": false, "popup": null, "popup_max_height": null, "popup_max_width": 300, "popup_min_width": 50, "pulse_color": "#FFFFFF", "radius": 10, "reverse": false, "subitems": [], "use": "polyline", "weight": 5}}, "9dcd720be01245169f9681b8a4904140": {"model_name": "LeafletAntPathModel", "model_module": "jupyter-leaflet", "model_module_version": "^0.17", "state": {"_model_module": "jupyter-leaflet", "_model_module_version": "^0.17", "_model_name": "LeafletAntPathModel", "_view_count": null, "_view_module": "jupyter-leaflet", "_view_module_version": "^0.17", "_view_name": "LeafletAntPathView", "base": false, "bottom": false, "color": "#0000FF", "dash_array": [10, 20], "delay": 1000, "hardware_accelerated": false, "locations": [[41.97910400000017, -87.90301000000035], [41.978815000007835, -87.90244999999085], [41.98088300003854, -87.90076199988506], [41.981751999903445, -87.89977900008343], [41.981772000055734, -87.89789700018845], [41.980616999992144, -87.89525199983872], [41.97808899995123, -87.88553899968646], [41.98210400002261, -87.87586600030444], [41.98322900020701, -87.86726300115369], [41.9834360001534, -87.85678700054667], [41.983897999946, -87.84356999839328], [41.98443799986688, -87.8298260017731], [41.98322500017655, -87.81807700241588], [41.982226000020255, -87.80665199900649], [41.98230299990808, -87.79663899982951], [41.98205500011516, -87.78387000108741], [41.974502999886845, -87.77019899780534], [41.970909999769155, -87.76201900536797], [41.96642700032515, -87.75351200694821], [41.962414000269, -87.74574200505994], [41.95713599966091, -87.73730800742887], [41.9519589991234, -87.72796399588368], [41.94322799899799, -87.71683600241921], [41.939785998400275, -87.70925099844716], [41.934360001321856, -87.69995799357675], [41.92964499824864, -87.6915850012996], [41.92317600184304, -87.67992999846719], [41.91535499700529, -87.66810999507688], [41.91309399911386, -87.66672099823735], [41.910667002286736, -87.66567200119279], [41.910835996355836, -87.65409299428246], [41.91096600153667, -87.64585199649117], [41.91103900232536, -87.63857999141], [41.911170996811215, -87.63322299415849], [41.91222999998552, -87.62764799291871], [41.91230499752981, -87.6268979876735], [41.9103690014146, -87.62596898968003], [41.89875599750501, -87.61816700989984], [41.89370399722082, -87.61473700101159], [41.892390996303384, -87.61441999370835], [41.891889996912305, -87.61466398532174], [41.891802996482674, -87.62024700338624], [41.89099799850208, -87.6202070086696], [41.89102400102836, -87.61887201363824]], "name": "", "options": ["color", "dash_array", "delay", "hardware_accelerated", "paused", "pulse_color", "radius", "reverse", "use", "weight"], "pane": "", "paused": false, "popup": null, "popup_max_height": null, "popup_max_width": 300, "popup_min_width": 50, "pulse_color": "#FFFFFF", "radius": 10, "reverse": false, "subitems": [], "use": "polyline", "weight": 5}}}, "version_major": 2, "version_minor": 0}</script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script crossorigin="anonymous" data-jupyter-widgets-cdn="https://cdn.jsdelivr.net/npm/" src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@0.20.0/dist/embed-amd.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/10-minutes-to-awkward-array';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.4';
+        </script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/10-minutes-to-awkward-array.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Converting arrays" href="how-to-convert.html" />
+    <link rel="prev" title="User guide" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="None"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+      2.4  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">10 minutes to Awkward Array</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all) [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std) [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Using argmin/argmax [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">On GPUs [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-rename-records.html">Renaming records [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-sort.html">Sorting [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k" [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-arraybuilder.html">Building array output [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Specialized behavior</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-subclass.html">Subclassing Array/Record [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-override-numpy.html">Overriding NumPy functions [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-in-numba.html">In Numba [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-lorentz.html">For physics: Lorentz vectors [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">10 minutes to Awkward Array</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="minutes-to-awkward-array">
+<h1>10 minutes to Awkward Array<a class="headerlink" href="#minutes-to-awkward-array" title="Permalink to this headline">#</a></h1>
+<p>This is a short, tutorial-style introduction to Awkward Array, aimed towards new users. For details of how to perform specific operations in Awkward Array, e.g. <em>filtering data</em>, see the user-guide <a class="reference internal" href="index.html"><span class="doc std std-doc">index</span></a>, or use the search tool to identify relevant pages.</p>
+<p>The City of Chicago has a <a class="reference external" href="https://data.cityofchicago.org/">Data Portal</a> with lots of interesting datasets. This guide uses a dataset of <a class="reference external" href="https://data.cityofchicago.org/Transportation/Taxi-Trips/wrvz-psew">Chicago taxi trips</a> taken from 2019 through 2021 (3 years).</p>
+<p>The dataset that the Data Portal provides has trip start and stop points as longitude, latitude pairs, as well as start and end times (date-stamps), payment details, and the name of each taxi company. To make the example more interesting, an estimated route of each taxi trip has been computed by <a class="reference external" href="http://project-osrm.org/">Open Source Routing Machine (OSRM)</a> and added to the dataset.</p>
+<p>In this guide, we’ll look at how to manipulate a jagged dataset to plot taxi routes in Chicago.</p>
+<section id="loading-the-dataset">
+<h2>Loading the dataset<a class="headerlink" href="#loading-the-dataset" title="Permalink to this headline">#</a></h2>
+<p>Our dataset is formatted as a 611 MB <a class="reference external" href="https://parquet.apache.org/">Apache Parquet</a> file, provided <a class="reference external" href="https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet">here</a>. Alongside JSON, and raw buffers, Awkward can also read Parquet files and Arrow tables.</p>
+<p>Given that this file is so large, let’s first look at the <em>metadata</em> with <code class="docutils literal notranslate"><span class="pre">ak.metadata_from_parquet</span></code> to see what we’re working with:</p>
+<div class="cell tag_hide-cell docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell content</span>
+<span class="expanded">Hide code cell content</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">config</span> InteractiveShell.ast_node_interactivity = &quot;last_expr_or_assign&quot;
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">metadata_from_parquet</span><span class="p">(</span>
+    <span class="s2">&quot;https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;form&#39;: ListOffsetForm(&#39;i32&#39;, RecordForm([RecordForm([BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float32&#39;), True, True), BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float32&#39;), True, True), RecordForm([BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float64&#39;), True, True), BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float64&#39;), True, True), BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;datetime64[ms]&#39;), True, True)], [&#39;lon&#39;, &#39;lat&#39;, &#39;time&#39;]), RecordForm([BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float64&#39;), True, True), BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float64&#39;), True, True), BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;datetime64[ms]&#39;), True, True)], [&#39;lon&#39;, &#39;lat&#39;, &#39;time&#39;]), ListOffsetForm(&#39;i64&#39;, RecordForm([NumpyForm(&#39;float32&#39;), NumpyForm(&#39;float32&#39;)], [&#39;londiff&#39;, &#39;latdiff&#39;]))], [&#39;sec&#39;, &#39;km&#39;, &#39;begin&#39;, &#39;end&#39;, &#39;path&#39;]), RecordForm([BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float32&#39;), True, True), BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float32&#39;), True, True), BitMaskedForm(&#39;u8&#39;, NumpyForm(&#39;float32&#39;), True, True), IndexedForm(&#39;i32&#39;, ListOffsetForm(&#39;i32&#39;, NumpyForm(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;}), parameters={&#39;__array__&#39;: &#39;categorical&#39;})], [&#39;fare&#39;, &#39;tips&#39;, &#39;total&#39;, &#39;type&#39;]), IndexedForm(&#39;i32&#39;, ListOffsetForm(&#39;i32&#39;, NumpyForm(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;}), parameters={&#39;__array__&#39;: &#39;categorical&#39;})], [&#39;trip&#39;, &#39;payment&#39;, &#39;company&#39;])),
+ &#39;fs&#39;: &lt;fsspec.implementations.http.HTTPFileSystem at 0x7f4d580dfbb0&gt;,
+ &#39;paths&#39;: [&#39;https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet&#39;],
+ &#39;col_counts&#39;: [353,
+  351,
+  309,
+  316,
+  300,
+  322,
+  315,
+  305,
+  329,
+  320,
+  309,
+  322,
+  301,
+  334,
+  338,
+  294,
+  303,
+  300,
+  285,
+  318,
+  312,
+  334,
+  347,
+  327,
+  84],
+ &#39;columns&#39;: [&#39;.list.item.trip.sec&#39;,
+  &#39;.list.item.trip.km&#39;,
+  &#39;.list.item.trip.begin.lon&#39;,
+  &#39;.list.item.trip.begin.lat&#39;,
+  &#39;.list.item.trip.begin.time&#39;,
+  &#39;.list.item.trip.end.lon&#39;,
+  &#39;.list.item.trip.end.lat&#39;,
+  &#39;.list.item.trip.end.time&#39;,
+  &#39;.list.item.trip.path.list.item.londiff&#39;,
+  &#39;.list.item.trip.path.list.item.latdiff&#39;,
+  &#39;.list.item.payment.fare&#39;,
+  &#39;.list.item.payment.tips&#39;,
+  &#39;.list.item.payment.total&#39;,
+  &#39;.list.item.payment.type&#39;,
+  &#39;.list.item.company&#39;],
+ &#39;num_rows&#39;: 7728,
+ &#39;num_row_groups&#39;: 25}
+</pre></div>
+</div>
+</div>
+</div>
+<p>Of particular interest here is the <code class="docutils literal notranslate"><span class="pre">num_row_groups</span></code> value. Parquet has the concept of <em>row groups</em>: contiguous rows of data in the file, and the smallest granularity that can be read.</p>
+<p>We can also look at the <code class="docutils literal notranslate"><span class="pre">type</span></code> of the data to see the structure of the dataset:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;form&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>var * {
+    trip: {
+        sec: ?float32,
+        km: ?float32,
+        begin: {
+            lon: ?float64,
+            lat: ?float64,
+            time: ?datetime64[ms]
+        },
+        end: {
+            lon: ?float64,
+            lat: ?float64,
+            time: ?datetime64[ms]
+        },
+        path: var * {
+            londiff: float32,
+            latdiff: float32
+        }
+    },
+    payment: {
+        fare: ?float32,
+        tips: ?float32,
+        total: ?float32,
+        type: categorical[type=string]
+    },
+    company: categorical[type=string]
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>There are a lot of different columns here (<code class="docutils literal notranslate"><span class="pre">trip.sec</span></code>, <code class="docutils literal notranslate"><span class="pre">trip.begin.lon</span></code>, <code class="docutils literal notranslate"><span class="pre">trip.payment.fare</span></code>, etc.). For this example, we only want a small subset of them. Additionally, we don’t need to load <em>all</em> of the data, as we are only interested in a representative sample. Let’s use <code class="docutils literal notranslate"><span class="pre">ak.from_parquet</span></code> with the <code class="docutils literal notranslate"><span class="pre">row_groups</span></code> argument to read (download) only a single group, and the <code class="docutils literal notranslate"><span class="pre">columns</span></code> argument to read only the necessary columns.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_parquet</span><span class="p">(</span>
+    <span class="s2">&quot;https://pivarski-princeton.s3.amazonaws.com/chicago-taxi.parquet&quot;</span><span class="p">,</span>
+    <span class="n">row_groups</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;trip.km&quot;</span><span class="p">,</span> <span class="s2">&quot;trip.begin.l*&quot;</span><span class="p">,</span> <span class="s2">&quot;trip.end.l*&quot;</span><span class="p">,</span> <span class="s2">&quot;trip.path.*&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{trip: {km: 0, begin: {lon: -87.7, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: -87.7, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 0.966, begin: {lon: -87.6, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 1.29, begin: {lon: -87.6, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: -87.7, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 29.6, begin: {lon: -87.9, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 29.1, begin: {lon: -87.9, ...}, end: {...}, ...}}, ..., {...}],
+ [],
+ [{trip: {km: 2.74, begin: {lon: -87.6, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: -87.7, ...}, end: {...}, ...}}, ..., {...}],
+ ...,
+ [{trip: {km: 0.966, begin: {lon: -87.6, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: None, ...}, end: {...}, ...}}, {...}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: None, ...}, end: {...}, ...}}, {...}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: None, ...}, end: {...}, ...}}, {...}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: None, ...}, end: {...}, ...}}, {...}, ..., {...}],
+ [{trip: {km: 0.483, begin: {lon: -87.9, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: None, ...}, end: {...}, ...}}, {...}, ..., {...}],
+ [{trip: {km: 1.38, begin: {lon: -87.6, ...}, end: {...}, ...}}, ..., {...}],
+ [{trip: {km: 0, begin: {lon: -87.7, ...}, end: {...}, ...}}, ..., {...}]]
+--------------------------------------------------------------------------------
+type: 353 * var * ?{
+    trip: {
+        km: ?float32,
+        begin: {
+            lon: ?float64,
+            lat: ?float64
+        },
+        end: {
+            lon: ?float64,
+            lat: ?float64
+        },
+        path: var * {
+            londiff: float32,
+            latdiff: float32
+        }
+    }
+}</pre></div></div>
+</div>
+<p>We can look at the <code class="docutils literal notranslate"><span class="pre">type</span></code> of the array to see its structure</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>353 * var * ?{
+    trip: {
+        km: ?float32,
+        begin: {
+            lon: ?float64,
+            lat: ?float64
+        },
+        end: {
+            lon: ?float64,
+            lat: ?float64
+        },
+        path: var * {
+            londiff: float32,
+            latdiff: float32
+        }
+    }
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>According to the above, this is an array of <code class="docutils literal notranslate"><span class="pre">353</span></code> elements, and each element is a variable length list (<code class="docutils literal notranslate"><span class="pre">var</span></code>) of records. Each list represents one taxi and each record in each list is a taxi trip.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">trip</span></code> field contains a record with</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">km</span></code>: distance traveled in kilometers</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">begin</span></code>: record containing longitude and latitude of the trip start point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">end</span></code>: record containing longitude and latitude of the trip end point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code>: list of records containing the relative longitude and latitude of the trip waypoints</p></li>
+</ul>
+</section>
+<section id="reconstructing-the-routes">
+<h2>Reconstructing the routes<a class="headerlink" href="#reconstructing-the-routes" title="Permalink to this headline">#</a></h2>
+<p>In order to plot the taxi routes, we can use the waypoints given by the <code class="docutils literal notranslate"><span class="pre">path</span></code> field. However, these waypoints are relative to the trip start point; we need to add the starting position to these relative positions in order to plot them on a map.</p>
+<p>The fields of a record can be accessed with attribute notation:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0.966, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 1.29, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 29.6, begin: {lon: -87.9, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 29.1, begin: {lon: -87.9, ...}, end: {...}, path: [...]}, ..., {...}],
+ [],
+ [{km: 2.74, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}],
+ ...,
+ [{km: 0.966, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 0, ...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 10.1, ...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 0, ...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 0, ...}],
+ [{km: 0.483, begin: {lon: -87.9, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 0, ...}],
+ [{km: 1.38, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}]]
+--------------------------------------------------------------------------------
+type: 353 * var * ?{
+    km: ?float32,
+    begin: {
+        lon: ?float64,
+        lat: ?float64
+    },
+    end: {
+        lon: ?float64,
+        lat: ?float64
+    },
+    path: var * {
+        londiff: float32,
+        latdiff: float32
+    }
+}</pre></div></div>
+</div>
+<p>or using subscript notation:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="p">[</span><span class="s2">&quot;trip&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0.966, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 1.29, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 29.6, begin: {lon: -87.9, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 29.1, begin: {lon: -87.9, ...}, end: {...}, path: [...]}, ..., {...}],
+ [],
+ [{km: 2.74, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}],
+ ...,
+ [{km: 0.966, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 0, ...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 10.1, ...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 0, ...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 0, ...}],
+ [{km: 0.483, begin: {lon: -87.9, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: None, ...}, end: {...}, path: []}, ..., {km: 0, ...}],
+ [{km: 1.38, begin: {lon: -87.6, ...}, end: {...}, path: [...]}, ..., {...}],
+ [{km: 0, begin: {lon: -87.7, ...}, end: {...}, path: [...]}, ..., {...}]]
+--------------------------------------------------------------------------------
+type: 353 * var * ?{
+    km: ?float32,
+    begin: {
+        lon: ?float64,
+        lat: ?float64
+    },
+    end: {
+        lon: ?float64,
+        lat: ?float64
+    },
+    path: var * {
+        londiff: float32,
+        latdiff: float32
+    }
+}</pre></div></div>
+</div>
+<p>Field lookup can be nested, e.g. with attribute notation:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">path</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[{londiff: -2.41e-05, latdiff: -3.03e-07}, {londiff: ..., ...}], ..., [...]],
+ [[{londiff: -2.41e-05, latdiff: -3.03e-07}, {londiff: ..., ...}], ..., []],
+ [[{londiff: -5e-08, latdiff: -2.41e-05}, ..., {londiff: 0.0122, ...}], ...],
+ [[{londiff: -2.13e-06, latdiff: 0.000103}, ..., {londiff: ..., ...}], ...],
+ [[{londiff: -3.74e-05, latdiff: -1.96e-07}, {londiff: ..., ...}], ..., [...]],
+ [[{londiff: 2.97e-05, latdiff: 3.32e-05}, ..., {londiff: 0.282, ...}], ...],
+ [[{londiff: 2.97e-05, latdiff: 3.32e-05}, ..., {londiff: 0.277, ...}], ...],
+ [],
+ [[{londiff: -4e-05, latdiff: 0.000186}, ..., {londiff: -0.0433, ...}], ...],
+ [[{londiff: -2.41e-05, latdiff: -3.03e-07}, {londiff: ..., ...}], ..., [...]],
+ ...,
+ [[{londiff: -1.47e-06, latdiff: 1.84e-05}, ..., {londiff: 0.0065, ...}], ...],
+ [[], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [{...}, ...], ..., [], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [], [], ..., [], [], [], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []],
+ [[{londiff: 2.97e-05, latdiff: 3.32e-05}, {londiff: 2.97e-05, ...}], ...],
+ [[], [{londiff: -3.74e-05, latdiff: -1.96e-07}, {...}], ..., [{...}, ...], []],
+ [[{londiff: 6.05e-05, latdiff: 9.78e-07}, ..., {londiff: 0.0101, ...}], ...],
+ [[{londiff: 0.000149, latdiff: 1.97e-06}, {londiff: 0.000149, ...}], ...]]
+--------------------------------------------------------------------------------
+type: 353 * var * option[var * {
+    londiff: float32,
+    latdiff: float32
+}]</pre></div></div>
+</div>
+<p>or with subscript notation:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="p">[</span><span class="s2">&quot;trip&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[{londiff: -2.41e-05, latdiff: -3.03e-07}, {londiff: ..., ...}], ..., [...]],
+ [[{londiff: -2.41e-05, latdiff: -3.03e-07}, {londiff: ..., ...}], ..., []],
+ [[{londiff: -5e-08, latdiff: -2.41e-05}, ..., {londiff: 0.0122, ...}], ...],
+ [[{londiff: -2.13e-06, latdiff: 0.000103}, ..., {londiff: ..., ...}], ...],
+ [[{londiff: -3.74e-05, latdiff: -1.96e-07}, {londiff: ..., ...}], ..., [...]],
+ [[{londiff: 2.97e-05, latdiff: 3.32e-05}, ..., {londiff: 0.282, ...}], ...],
+ [[{londiff: 2.97e-05, latdiff: 3.32e-05}, ..., {londiff: 0.277, ...}], ...],
+ [],
+ [[{londiff: -4e-05, latdiff: 0.000186}, ..., {londiff: -0.0433, ...}], ...],
+ [[{londiff: -2.41e-05, latdiff: -3.03e-07}, {londiff: ..., ...}], ..., [...]],
+ ...,
+ [[{londiff: -1.47e-06, latdiff: 1.84e-05}, ..., {londiff: 0.0065, ...}], ...],
+ [[], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [{...}, ...], ..., [], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [], [], ..., [], [], [], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []],
+ [[{londiff: 2.97e-05, latdiff: 3.32e-05}, {londiff: 2.97e-05, ...}], ...],
+ [[], [{londiff: -3.74e-05, latdiff: -1.96e-07}, {...}], ..., [{...}, ...], []],
+ [[{londiff: 6.05e-05, latdiff: 9.78e-07}, ..., {londiff: 0.0101, ...}], ...],
+ [[{londiff: 0.000149, latdiff: 1.97e-06}, {londiff: 0.000149, ...}], ...]]
+--------------------------------------------------------------------------------
+type: 353 * var * option[var * {
+    londiff: float32,
+    latdiff: float32
+}]</pre></div></div>
+</div>
+<p>Let’s look at two fields of interest, <code class="docutils literal notranslate"><span class="pre">path.latdiff</span></code>, and <code class="docutils literal notranslate"><span class="pre">begin.lat</span></code>, and their types:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">latdiff</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[-3.03e-07, -3.03e-07], [-6.01e-07, ..., -0.0702], ..., [9.72e-05, 9.72e-05]],
+ [[-3.03e-07, -3.03e-07], [-3.03e-07, -3.03e-07], ..., [-0.001, ...], []],
+ [[-2.41e-05, -2.81e-05, 0.000381, ..., 0.00059, 0.003, 0.00297], ..., []],
+ [[0.000103, 5.72e-05, -0.00501, -0.00504, -0.00583, -0.00583], ..., [...]],
+ [[-1.96e-07, -1.96e-07], ..., [0.000336, 0.000681, ..., 0.0209, 0.0209]],
+ [[3.32e-05, -0.000256, 0.00181, 0.00268, ..., -0.0923, -0.0922, -0.0941], ...],
+ [[3.32e-05, -0.000256, 0.00181, 0.00268, ..., -0.0867, -0.0866, -0.0866], ...],
+ [],
+ [[0.000186, 0.000173, -0.00301, -0.00311, ..., 0.00177, 0.00178, 0.0016], ...],
+ [[-3.03e-07, -3.03e-07], ..., [0.000186, 0.000173, 0.00426, ..., 0.108, 0.11]],
+ ...,
+ [[1.84e-05, 5.24e-05, -0.00502, -0.00491, -0.00411, -0.00414], ..., [...]],
+ [[], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [3.32e-05, ...], ..., [], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [], [], ..., [], [], [], [], [], [], [], [], []],
+ [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []],
+ [[3.32e-05, 3.32e-05], [-0.001, ..., 0.00457], ..., [0.000102, 0.000102]],
+ [[], [-1.96e-07, -1.96e-07], [3.37e-05, ...], ..., [3.32e-05, 3.32e-05], []],
+ [[9.78e-07, 0.000411, 0.000433, 0.000435, -0.004, -0.004], [...], ..., [...]],
+ [[1.97e-06, 1.97e-06], [1.97e-06, 1.97e-06], ..., [...], [0.000186, 0.000186]]]
+--------------------------------------------------------------------------------
+type: 353 * var * option[var * float32]</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">latdiff</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>353 * var * option[var * float32]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">begin</span><span class="o">.</span><span class="n">lat</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[41.9, 41.9, 41.9, 41.9, 41.9, 41.9, ..., 41.9, 41.9, 41.9, 41.9, 41.9, 42],
+ [41.9, 41.9, 41.9, 41.9, 41.9, 41.9, ..., 41.9, 41.9, 41.9, 41.9, 42, 42],
+ [41.9, 41.9, 41.9, 41.9, 42, 41.9, 41.9, ..., 42, 42, 42, 41.9, 42, 42, None],
+ [41.9, 41.9, 41.9, 41.9, 41.9, 41.9, ..., 41.9, 41.9, 41.9, 41.9, 41.9, 41.9],
+ [41.9, 41.9, 41.9, 41.9, 41.9, 41.9, 42, ..., 42, 42, 42, 42, 42, 41.8, 41.9],
+ [42, 41.9, 41.9, 42, 41.8, 42, 42, ..., 41.9, 41.9, 41.9, 42, 42, 42, 41.9],
+ [42, 41.9, 41.9, 41.9, 41.9, 41.9, ..., 41.9, 41.9, 42, None, 41.9, 41.9],
+ [],
+ [41.9, 41.9, 41.9, 41.9, 41.9, 41.8, ..., 41.8, None, 41.8, 41.8, 41.8, 41.8],
+ [41.9, 41.9, 41.9, 42, 41.8, 41.8, ..., 41.8, 41.9, 42, 41.8, 41.7, 41.9],
+ ...,
+ [41.9, 41.9, 41.9, 41.9, 41.9, 41.9, ..., 41.9, 41.9, 41.9, 42, 41.9, 41.9],
+ [None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [42, 42, 42, 42, 42, 42, 42, 42, ..., 42, 41.9, 41.9, 41.9, 41.9, 41.9, 41.9],
+ [None, 41.9, 41.8, 41.8, 41.9, 41.9, 42, ..., 41.9, 41.8, 41.9, 42, 42, None],
+ [41.9, 41.9, 41.9, 41.9, 41.9, 41.9, ..., 41.9, 41.9, 41.9, 41.9, 41.9, 42],
+ [42, 42, 42, 41.9, 41.9, 41.9, 41.9, ..., 41.9, 41.9, 41.9, 41.9, 41.9, 41.9]]
+-------------------------------------------------------------------------------
+type: 353 * var * ?float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">begin</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>353 * var * ?float64
+</pre></div>
+</div>
+</div>
+</div>
+<p>Clearly, these two arrays have <em>different</em> dimensions. When we add them together, we want the operation to broadcast: each trip has one starting point, but multiple waypoints. In NumPy, broadcasting aligns <em>to the right</em>, which means that arrays with differing dimensions are made compatible against one another by adding length-1 dimensions to the front of the shape:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[array([[1, 2, 3],
+        [1, 2, 3]]),
+ array([[4, 5, 6],
+        [7, 8, 9]])]
+</pre></div>
+</div>
+</div>
+</div>
+<p>In Awkward, broadcasting aligns <em>to the left</em> by default, which means that length-1 dimensions are added <em>to the end</em> of the shape:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>  <span class="c1"># note the missing 3!</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">ak</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;Array [[1, 1, 1], [2, 2, 2]] type=&#39;2 * var * int64&#39;&gt;,
+ &lt;Array [[4, 5, 6], [7, 8, 9]] type=&#39;2 * var * int64&#39;&gt;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>In this instance, we also want broadcasting to align to the left: we want a single starting point to broadcast against multiple waypoints. We can simply add our two arrays together, and Awkward will broadast them correctly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi_trip_lat</span> <span class="o">=</span> <span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">begin</span><span class="o">.</span><span class="n">lat</span> <span class="o">+</span> <span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">latdiff</span>
+<span class="n">taxi_trip_lon</span> <span class="o">=</span> <span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">begin</span><span class="o">.</span><span class="n">lon</span> <span class="o">+</span> <span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">londiff</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[-87.7, -87.7], [-87.7, -87.7, ..., -87.7, -87.7], ..., [-87.7, -87.7]],
+ [[-87.7, -87.7], [-87.7, -87.7], ..., [-87.9, -87.9, ..., -87.7, -87.7], []],
+ [[-87.6, -87.6, -87.6, -87.6, -87.6, -87.6, -87.6], [-87.6, ...], ..., None],
+ [[-87.6, -87.6, -87.6, -87.6, -87.6, -87.6], ..., [-87.6, -87.6, ..., -87.7]],
+ [[-87.7, -87.7], ..., [-87.6, -87.6, -87.6, -87.6, -87.6, -87.6, -87.6]],
+ [[-87.9, -87.9, -87.9, -87.9, -87.9, ..., -87.6, -87.6, -87.6, -87.6], ...],
+ [[-87.9, -87.9, -87.9, -87.9, -87.9, ..., -87.6, -87.6, -87.6, -87.6], ...],
+ [],
+ [[-87.6, -87.6, -87.6, -87.6, -87.6, ..., -87.7, -87.7, -87.7, -87.7], ...],
+ [[-87.7, -87.7], ..., [-87.6, -87.6, -87.6, -87.6, ..., -87.7, -87.7, -87.7]],
+ ...,
+ [[-87.6, -87.6, -87.6, -87.6, -87.6, -87.6], ..., [-87.6, -87.6, ..., -87.6]],
+ [None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [[-87.9, -87.9], [-87.9, -87.9, ..., -87.8, -87.8], ..., [-87.6, -87.6]],
+ [None, [-87.7, -87.7], [-87.7, -87.7], ..., [...], [-87.9, -87.9], None],
+ [[-87.6, -87.6, -87.6, -87.6, -87.6, -87.6], ..., [-87.7, -87.7, ..., -87.7]],
+ [[-87.7, -87.7], [-87.7, -87.7], ..., [-87.6, ..., -87.7], [-87.6, -87.6]]]
+-------------------------------------------------------------------------------
+type: 353 * var * option[var * float64]</pre></div></div>
+</div>
+</section>
+<section id="storing-the-routes">
+<h2>Storing the routes<a class="headerlink" href="#storing-the-routes" title="Permalink to this headline">#</a></h2>
+<p>Having computed <code class="docutils literal notranslate"><span class="pre">taxi_trip_lat</span></code> and <code class="docutils literal notranslate"><span class="pre">taxi_trip_lon</span></code>, we might wish to add these as fields to our <code class="docutils literal notranslate"><span class="pre">taxi</span></code> dataset, so that later manipulations are also applied to these values. Here, we can use the subscript operator <code class="docutils literal notranslate"><span class="pre">[]</span></code> to add new fields to our dataset.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="p">[(</span><span class="s2">&quot;trip&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;lat&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">taxi_trip_lat</span>
+<span class="n">taxi</span><span class="p">[(</span><span class="s2">&quot;trip&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">taxi_trip_lon</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that fields cannot be set using attribute notation.</p>
+<p>We can see the result of adding these fields:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>353 * var * ?{
+    trip: {
+        km: ?float32,
+        begin: {
+            lon: ?float64,
+            lat: ?float64
+        },
+        end: {
+            lon: ?float64,
+            lat: ?float64
+        },
+        path: var * {
+            londiff: float32,
+            latdiff: float32,
+            lat: float64,
+            lon: float64
+        }
+    }
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>In Awkward, records are lightweight because they can be composed of existing arrays. We can see this with <code class="docutils literal notranslate"><span class="pre">ak.fields</span></code>, which returns a list containing the field names of a record:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;londiff&#39;, &#39;latdiff&#39;, &#39;lat&#39;, &#39;lon&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>and <code class="docutils literal notranslate"><span class="pre">ak.unzip</span></code>, which decomposes an array into the corresponding field values:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [[[-2.41e-05, ...], ..., [...]], ...] type=&#39;353 * var * option[var *...&#39;&gt;,
+ &lt;Array [[[-3.03e-07, ...], ..., [...]], ...] type=&#39;353 * var * option[var *...&#39;&gt;,
+ &lt;Array [[[41.9, 41.9], ..., [42, ...]], ...] type=&#39;353 * var * option[var *...&#39;&gt;,
+ &lt;Array [[[-87.7, -87.7], ..., [...]], ...] type=&#39;353 * var * option[var * f...&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="finding-the-longest-routes">
+<h2>Finding the longest routes<a class="headerlink" href="#finding-the-longest-routes" title="Permalink to this headline">#</a></h2>
+<p>Let’s imagine that we want to plot the three longest routes taken by any taxi in the city. The distance travelled by any taxi is given by <code class="docutils literal notranslate"><span class="pre">taxi.trip.km</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="o">.</span><span class="n">km</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ..., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, None, None, 0, ..., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0.966, 4.83, 3.38, 1.77, 5.31, 10.5, ..., 2.09, 2.25, 30.6, 0, 27.5, None],
+ [1.29, 1.77, 1.77, 8.69, 0, 0, 2.57, ..., 1.61, 0, 0, 1.77, 0, 10.6, 3.38],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, ..., 1.13, 1.29, 0, 0.322, 1.13, 1.45, 1.45, 0],
+ [29.6, 2, 2.46, 50.8, 27, 18.6, ..., 0.612, 14.4, 24.1, 33.4, 24.3, 1.83],
+ [29.1, 1.29, 2.11, 1.34, 1.66, 0.595, ..., 5.84, 26.4, None, 0.756, 1.56],
+ [],
+ [2.74, 5.47, 1.61, 4.35, 0.805, 21.1, ..., 20, None, 26.2, 51, 15.6, 22.5],
+ [0, 0, 0, 0, 0, 0, 0, 0, ..., 1.13, 0.966, 0.483, 0.805, 1.13, 0.966, 0.805],
+ ...,
+ [0.966, 1.45, 6.76, 7.24, 3.22, 1.61, ..., 2.74, 2.09, 28.3, 2.25, 5.15, 2.41],
+ [None, None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [None, None, None, None, None, None, ..., None, None, None, None, None, None],
+ [0.483, 11.3, 0.161, 13.4, 0.161, 0.161, ..., 2.03, 1.56, 2.4, 2.72, 4.76],
+ [None, 0, 0, 0, 0, 1.61, 0, None, 0, ..., 4.02, 3.06, 0, 0, 0, 19.5, 0, None],
+ [1.38, 28.1, 1.21, 2.32, 1.13, 0.821, ..., 0.869, 2.32, 1.87, 2.91, 4.78],
+ [0, 0, 15.1, 28.2, 2.74, 1.45, 1.61, ..., 7.24, 12.7, 2.25, 1.93, 5.47, 0.966]]
+--------------------------------------------------------------------------------
+type: 353 * var * ?float32</pre></div></div>
+</div>
+<p>This array has two dimensions: <code class="docutils literal notranslate"><span class="pre">353</span></code>, indicating the number of taxis, and <code class="docutils literal notranslate"><span class="pre">var</span></code> indicating the number of trips for each taxi. Because we want to find the longest trips amongst all taxis, we can flatten one of the dimensions using <code class="docutils literal notranslate"><span class="pre">ak.flatten</span></code> to produce a list of trips.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trip</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">taxi</span><span class="o">.</span><span class="n">trip</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{km: 0, begin: {lon: -87.7, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.7, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.6, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.6, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.6, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.7, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.6, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.6, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.6, lat: 41.9}, end: {...}, path: [...]},
+ {km: 0, begin: {lon: -87.6, lat: 41.9}, end: {...}, path: [...]},
+ ...,
+ {km: 6.12, begin: {lon: -87.6, lat: ..., ...}, end: {...}, path: [...]},
+ {km: 8.37, begin: {lon: -87.6, lat: ..., ...}, end: {...}, path: [...]},
+ {km: 2.9, begin: {lon: -87.6, lat: 41.9}, end: {...}, path: [...]},
+ {km: 7.24, begin: {lon: -87.6, lat: ..., ...}, end: {...}, path: [...]},
+ {km: 12.7, begin: {lon: -87.6, lat: ..., ...}, end: {...}, path: [...]},
+ {km: 2.25, begin: {lon: -87.6, lat: ..., ...}, end: {...}, path: [...]},
+ {km: 1.93, begin: {lon: -87.6, lat: ..., ...}, end: {...}, path: [...]},
+ {km: 5.47, begin: {lon: -87.6, lat: ..., ...}, end: {...}, path: [...]},
+ {km: 0.966, begin: {lon: -87.6, lat: ..., ...}, end: {...}, path: [...]}]
+--------------------------------------------------------------------------
+type: 1003517 * ?{
+    km: ?float32,
+    begin: {
+        lon: ?float64,
+        lat: ?float64
+    },
+    end: {
+        lon: ?float64,
+        lat: ?float64
+    },
+    path: var * {
+        londiff: float32,
+        latdiff: float32,
+        lat: float64,
+        lon: float64
+    }
+}</pre></div></div>
+</div>
+<p>From this list of 1003517 journeys, we can sort by length using <code class="docutils literal notranslate"><span class="pre">ak.argsort</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ix_length</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">trip</span><span class="o">.</span><span class="n">km</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[754734,
+ 939745,
+ 384624,
+ 554705,
+ 864957,
+ 550830,
+ 432129,
+ 677351,
+ 553068,
+ 863489,
+ ...,
+ 1003425,
+ 1003442,
+ 1003465,
+ 1003481,
+ 1003487,
+ 1003488,
+ 1003489,
+ 1003492,
+ 1003493]
+---------------------
+type: 1003517 * int64</pre></div></div>
+</div>
+<p>Now let’s take only the three largest trips.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trip_longest</span> <span class="o">=</span> <span class="n">trip</span><span class="p">[</span><span class="n">ix_length</span><span class="p">[:</span><span class="mi">3</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{km: 1.57e+03, begin: {lon: -87.8, ...}, end: {...}, path: [...]},
+ {km: 1.52e+03, begin: {lon: -87.8, ...}, end: {...}, path: [...]},
+ {km: 1.26e+03, begin: {lon: -87.9, ...}, end: {...}, path: [...]}]
+-------------------------------------------------------------------
+type: 3 * ?{
+    km: ?float32,
+    begin: {
+        lon: ?float64,
+        lat: ?float64
+    },
+    end: {
+        lon: ?float64,
+        lat: ?float64
+    },
+    path: var * {
+        londiff: float32,
+        latdiff: float32,
+        lat: float64,
+        lon: float64
+    }
+}</pre></div></div>
+</div>
+</section>
+<section id="plotting-the-longest-routes">
+<h2>Plotting the longest routes<a class="headerlink" href="#plotting-the-longest-routes" title="Permalink to this headline">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ipyleaflet</span></code> requires a list of coordinate tuples in order to plot a path. Let’s stack these two arrays together to build a <code class="docutils literal notranslate"><span class="pre">(16,</span> <span class="pre">2)</span></code> array.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lat_lon_taxi_75</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">trip_longest</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="n">trip_longest</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]),</span>
+    <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[41.8, -87.8], [41.8, -87.8], [41.8, ...], ..., [41.9, -87.6], [41.9, -87.6]],
+ [[41.8, -87.8], [41.8, -87.8], [41.8, ...], ..., [41.9, -87.7], [41.9, -87.7]],
+ [[42, -87.9], [42, -87.9], [42, ...], ..., [41.9, -87.6], [41.9, -87.6]]]
+--------------------------------------------------------------------------------
+type: 3 * option[var * 2 * float64]</pre></div></div>
+</div>
+<p>We can convert this to a list with <code class="docutils literal notranslate"><span class="pre">to_list()</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lat_lon_taxi_75</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[[41.791755000016295, -87.75306800000835],
+  [41.79289000004401, -87.75248199997004],
+  [41.793049999865346, -87.74275300016161],
+  [41.79308499989902, -87.74206800030079],
+  [41.81677700055634, -87.74330599994865],
+  [41.81921600026881, -87.73607600030955],
+  [41.82489299995696, -87.71802799885627],
+  [41.82925399986898, -87.70418600102421],
+  [41.832074998299234, -87.6951960000908],
+  [41.835063999871366, -87.68566399922129],
+  [41.83892299828922, -87.66454599907156],
+  [41.845413001606815, -87.64945799966809],
+  [41.847186999748104, -87.63850099702832],
+  [41.84722199885046, -87.6363319989061],
+  [41.84696199966466, -87.62759100010153],
+  [41.84792600048577, -87.62020599951502],
+  [41.849916996786945, -87.61222300042864],
+  [41.85385500116145, -87.61418999840971],
+  [41.863579998145454, -87.61869900038],
+  [41.86497699690854, -87.61940300574061],
+  [41.862404996881835, -87.6187029938912],
+  [41.859335998425834, -87.61741200198885]],
+ [[41.79259599999993, -87.76961500000002],
+  [41.79274700000171, -87.76230300011375],
+  [41.79571900010562, -87.76239400010817],
+  [41.796845000064806, -87.75508699964993],
+  [41.79795999994023, -87.74779599931352],
+  [41.79906799999519, -87.7404859999966],
+  [41.800207999828146, -87.7331679987561],
+  [41.80132699973403, -87.72584199931734],
+  [41.805292000356005, -87.71861000012868],
+  [41.80988599948107, -87.71114999827259],
+  [41.814656000877605, -87.70336799722426],
+  [41.82004899933456, -87.69456500213855],
+  [41.824459998230324, -87.68734100114816],
+  [41.82593700132786, -87.68489899885171],
+  [41.8648240029019, -87.68591899823659],
+  [41.87145499728142, -87.67796899777167],
+  [41.87273699633299, -87.67646199863665],
+  [41.90137299738346, -87.67721099805348],
+  [41.90138099930702, -87.67659199636691],
+  [41.90120299748598, -87.67658699702733]],
+ [[41.97910400000017, -87.90301000000035],
+  [41.978815000007835, -87.90244999999085],
+  [41.98088300003854, -87.90076199988506],
+  [41.981751999903445, -87.89977900008343],
+  [41.981772000055734, -87.89789700018845],
+  [41.980616999992144, -87.89525199983872],
+  [41.97808899995123, -87.88553899968646],
+  [41.98210400002261, -87.87586600030444],
+  [41.98322900020701, -87.86726300115369],
+  [41.9834360001534, -87.85678700054667],
+  [41.983897999946, -87.84356999839328],
+  [41.98443799986688, -87.8298260017731],
+  [41.98322500017655, -87.81807700241588],
+  [41.982226000020255, -87.80665199900649],
+  [41.98230299990808, -87.79663899982951],
+  [41.98205500011516, -87.78387000108741],
+  [41.974502999886845, -87.77019899780534],
+  [41.970909999769155, -87.76201900536797],
+  [41.96642700032515, -87.75351200694821],
+  [41.962414000269, -87.74574200505994],
+  [41.95713599966091, -87.73730800742887],
+  [41.9519589991234, -87.72796399588368],
+  [41.94322799899799, -87.71683600241921],
+  [41.939785998400275, -87.70925099844716],
+  [41.934360001321856, -87.69995799357675],
+  [41.92964499824864, -87.6915850012996],
+  [41.92317600184304, -87.67992999846719],
+  [41.91535499700529, -87.66810999507688],
+  [41.91309399911386, -87.66672099823735],
+  [41.910667002286736, -87.66567200119279],
+  [41.910835996355836, -87.65409299428246],
+  [41.91096600153667, -87.64585199649117],
+  [41.91103900232536, -87.63857999141],
+  [41.911170996811215, -87.63322299415849],
+  [41.91222999998552, -87.62764799291871],
+  [41.91230499752981, -87.6268979876735],
+  [41.9103690014146, -87.62596898968003],
+  [41.89875599750501, -87.61816700989984],
+  [41.89370399722082, -87.61473700101159],
+  [41.892390996303384, -87.61441999370835],
+  [41.891889996912305, -87.61466398532174],
+  [41.891802996482674, -87.62024700338624],
+  [41.89099799850208, -87.6202070086696],
+  [41.89102400102836, -87.61887201363824]]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>What does our route look like?</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ipyleaflet</span> <span class="k">as</span> <span class="nn">ipl</span>
+
+<span class="n">map_taxi_75</span> <span class="o">=</span> <span class="n">ipl</span><span class="o">.</span><span class="n">Map</span><span class="p">(</span>
+    <span class="n">basemap</span><span class="o">=</span><span class="n">ipl</span><span class="o">.</span><span class="n">basemap_to_tiles</span><span class="p">(</span><span class="n">ipl</span><span class="o">.</span><span class="n">basemaps</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">Voyager</span><span class="p">,</span> <span class="s2">&quot;2022-04-08&quot;</span><span class="p">),</span>
+    <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mf">41.8921</span><span class="p">,</span> <span class="o">-</span><span class="mf">87.6623</span><span class="p">),</span>
+    <span class="n">zoom</span><span class="o">=</span><span class="mi">11</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">lat_lon_taxi_75</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">ipl</span><span class="o">.</span><span class="n">AntPath</span><span class="p">(</span><span class="n">locations</span><span class="o">=</span><span class="n">route</span><span class="o">.</span><span class="n">to_list</span><span class="p">(),</span> <span class="n">delay</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="n">map_taxi_75</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">map_taxi_75</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "7cb7261eceff4e49a81db38b42d41ca1"}</script></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">User guide</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-convert.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Converting arrays</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#loading-the-dataset">Loading the dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reconstructing-the-routes">Reconstructing the routes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#storing-the-routes">Storing the routes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#finding-the-longest-routes">Finding the longest routes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-the-longest-routes">Plotting the longest routes</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/10-minutes-to-awkward-array.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/10-minutes-to-awkward-array.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

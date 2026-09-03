@@ -1,0 +1,40 @@
+ak.nanprod
+----------
+
+.. py:module: ak.nanprod
+
+Defined in `awkward.operations.ak_prod <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_prod.py>`__ on `line 64 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_prod.py#L64>`__.
+
+.. py:function:: ak.nanprod(array, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param axis: If None, combine all values from the array into
+             a single scalar result; if an int, group by that axis: ``0`` is the
+             outermost, ``1`` is the first level of nested lists, etc., and
+             negative ``axis`` counts from the innermost: ``-1`` is the innermost,
+             ``-2`` is the next level up, etc.
+    :type axis: None or int
+    :param keepdims: If False, this reducer decreases the number of
+                 dimensions by 1; if True, the reduced values are wrapped in a new
+                 length-1 dimension so that the result of this operation may be
+                 broadcasted with the original array.
+    :type keepdims: bool
+    :param mask_identity: If True, reducing over empty lists results in
+                      None (an option type); otherwise, reducing over empty lists
+                      results in the operation's identity.
+    :type mask_identity: bool
+
+Like :py:obj:`ak.prod`, but treating NaN ("not a number") values as missing.
+
+Equivalent to
+
+.. code-block:: python
+
+
+    ak.prod(ak.nan_to_none(array))
+
+with all other arguments unchanged.
+
+See also :py:obj:`ak.prod`.
+

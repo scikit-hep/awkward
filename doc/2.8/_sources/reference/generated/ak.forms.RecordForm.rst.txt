@@ -1,0 +1,93 @@
+ak.forms.RecordForm
+-------------------
+
+.. py:module: ak.forms.RecordForm
+
+Defined in `awkward.forms.recordform <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/forms/recordform.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/forms/recordform.py#L20>`__.
+
+.. py:class:: ak.forms.RecordForm(self, contents, fields, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-recordform-contents:
+
+.. py:attribute:: ak.forms.RecordForm.contents
+
+
+
+.. _ak-forms-recordform-fields:
+
+.. py:attribute:: ak.forms.RecordForm.fields
+
+
+
+.. _ak-forms-recordform-copy:
+
+.. py:method:: ak.forms.RecordForm.copy(self, contents=UNSET, fields=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-recordform-simplified:
+
+.. py:method:: ak.forms.RecordForm.simplified(cls, contents, fields, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-recordform-__repr__:
+
+.. py:method:: ak.forms.RecordForm.__repr__(self)
+
+
+
+.. _ak-forms-recordform-_to_dict_part:
+
+.. py:method:: ak.forms.RecordForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-recordform-type:
+
+.. py:attribute:: ak.forms.RecordForm.type
+
+
+
+.. _ak-forms-recordform-_columns:
+
+.. py:method:: ak.forms.RecordForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-recordform-_prune_columns:
+
+.. py:method:: ak.forms.RecordForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-recordform-_select_columns:
+
+.. py:method:: ak.forms.RecordForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-recordform-_column_types:
+
+.. py:method:: ak.forms.RecordForm._column_types(self)
+
+
+
+.. _ak-forms-recordform-__setstate__:
+
+.. py:method:: ak.forms.RecordForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-recordform-_expected_from_buffers:
+
+.. py:method:: ak.forms.RecordForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-recordform-_is_equal_to:
+
+.. py:method:: ak.forms.RecordForm._is_equal_to(self, other, all_parameters, form_key)
+

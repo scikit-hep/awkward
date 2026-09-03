@@ -1,0 +1,69 @@
+ak.type
+-------
+
+Defined in `awkward.operations.describe <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/describe.py>`__ on `line 77 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/describe.py#L77>`__.
+
+.. py:function:: ak.type(array)
+
+The high-level type of an ``array`` (many types supported, including all
+Awkward Arrays and Records) as :py:obj:`ak.types.Type` objects.
+
+The high-level type ignores #layout differences like
+:py:obj:`ak.layout.ListArray64` versus :py:obj:`ak.layout.ListOffsetArray64`, but
+not differences like "regular-sized lists" (i.e.
+:py:obj:`ak.layout.RegularArray`) versus "variable-sized lists" (i.e.
+:py:obj:`ak.layout.ListArray64` and similar).
+
+Types are rendered as `Datashape <https://datashape.readthedocs.io/>`__
+strings, which makes the same distinctions.
+
+For example,
+
+.. code-block:: python
+
+
+    ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+              [],
+              [{"x": 3.3, "y": [3, 3, 3]}]])
+
+has type
+
+.. code-block:: python
+
+
+    3 * var * {"x": float64, "y": var * int64}
+
+but
+
+.. code-block:: python
+
+
+    ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+
+has type
+
+.. code-block:: python
+
+
+    2 * 3 * 5 * int64
+
+Some cases, like heterogeneous data, require `extensions beyond the
+Datashape specification <https://github.com/blaze/datashape/issues/237>`__.
+For example,
+
+.. code-block:: python
+
+
+    ak.Array([1, "two", [3, 3, 3]])
+
+has type
+
+.. code-block:: python
+
+
+    3 * union[int64, string, var * int64]
+
+but "union" is not a Datashape type-constructor. (Its syntax is
+similar to existing type-constructors, so it's a plausible addition
+to the language.)
+

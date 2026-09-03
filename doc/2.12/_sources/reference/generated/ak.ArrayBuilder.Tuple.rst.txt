@@ -1,0 +1,22 @@
+ak.ArrayBuilder.Tuple
+=====================
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/highlevel.py>`__ on `line 3294 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/highlevel.py#L3294>`__.
+
+.. py:class:: ak.ArrayBuilder.Tuple(arraybuilder, numfields)
+
+
+
+   .. py:attribute:: _name
+      :value: 'tuple'
+
+
+
+   .. py:attribute:: _numfields
+
+
+   .. py:method:: __enter__()
+
+
+   .. py:method:: __exit__(type, value, traceback)
+

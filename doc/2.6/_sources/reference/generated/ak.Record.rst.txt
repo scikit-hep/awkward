@@ -1,0 +1,517 @@
+ak.Record
+---------
+
+.. py:module: ak.Record
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/highlevel.py>`__ on `line 1765 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/highlevel.py#L1765>`__.
+
+.. py:class:: ak.Record(self, data, *, behavior=None, with_name=None, check_valid=False, backend=None, attrs=None, named_axis=None)
+
+
+    :param data: Data to wrap or convert into a record.
+             If a string, the data are assumed to be JSON.
+             If a dict, calls :py:obj:`ak.from_iter`, which assumes all inner
+             dimensions have irregular lengths.
+    :type data: :py:obj:`ak.record.Record`, :py:obj:`ak.Record`, str, or dict
+    :param behavior: Custom :py:obj:`ak.behavior` for this Record only.
+    :type behavior: None or dict
+    :param with_name: Gives the record type a name that can be
+                  used to override its behavior (see below).
+    :type with_name: None or str
+    :param check_valid: If True, verify that the :py:meth:`layout <ak.Record.layout>` is valid.
+    :type check_valid: bool
+    :param backend: If ``"cpu"``, the Array will be placed in
+                main memory for use with other ``"cpu"`` Arrays and Records; if ``"cuda"``,
+                the Array will be placed in GPU global memory using CUDA; if ``"jax"``, the structure
+                is copied to the CPU for use with JAX. if None, the ``data`` are left untouched.
+    :type backend: None, ``"cpu"``, ``"jax"``, ``"cuda"``
+
+High-level record that can contain fields of any type.
+
+Most users won't be creating Records manually. This class primarily exists
+to be overridden in the same way as :py:obj:`ak.Array`.
+
+Records can be used in `Numba <http://numba.pydata.org/>`__: they can be
+passed as arguments to a Numba-compiled function or returned as return
+values. The only limitation is that they cannot be *created*
+inside the Numba-compiled function; to make outputs, consider
+:py:obj:`ak.ArrayBuilder`.
+
+See also :py:obj:`ak.Array` and :py:obj:`ak.behavior`.
+
+
+
+.. _ak-record-__init_subclass__:
+
+.. py:method:: ak.Record.__init_subclass__(cls)
+
+
+
+.. _ak-record-_update_class:
+
+.. py:method:: ak.Record._update_class(self)
+
+
+
+.. _ak-record-attrs:
+
+.. py:attribute:: ak.Record.attrs
+
+The mapping containing top-level metadata, which is serialised
+with the record during pickling.
+
+Keys prefixed with ``@`` are identified as "transient" attributes
+which are discarded prior to pickling, permitting the storage of
+non-pickleable types.
+
+
+
+.. _ak-record-layout:
+
+.. py:attribute:: ak.Record.layout
+
+The :py:obj:`ak.record.Record` that contains composable :py:obj:`ak.contents.Content`
+elements to determine how the array is structured.
+
+See :py:obj:`ak.Array.layout` for a more complete description.
+
+The :py:obj:`ak.record.Record` is not a subclass of :py:obj:`ak.contents.Content` in
+Python and it is not composable with them: :py:obj:`ak.record.Record` contains
+one :py:obj:`ak.contents.RecordArray` (which is a :py:obj:`ak.contents.Content`), but
+:py:obj:`ak.contents.Content` nodes cannot contain a :py:obj:`ak.record.Record`.
+
+A :py:obj:`ak.record.Record` is not an independent entity from its
+:py:obj:`ak.contents.RecordArray`; it's really just a marker indicating which
+element to select. The XML representation reflects that:
+
+.. code-block:: python
+
+
+    >>> vectors = ak.Array([{"x": 0.1, "y": 1.0, "z": 30.0},
+    ...                     {"x": 0.2, "y": 2.0, "z": 20.0},
+    ...                     {"x": 0.3, "y": 3.0, "z": 10.0}])
+    >>> vectors[1].layout
+    <Record at='1'>
+        <array><RecordArray is_tuple='false' len='3'>
+            <content index='0' field='x'>
+                <NumpyArray dtype='float64' len='3'>[0.1 0.2 0.3]</NumpyArray>
+            </content>
+            <content index='1' field='y'>
+                <NumpyArray dtype='float64' len='3'>[1. 2. 3.]</NumpyArray>
+            </content>
+            <content index='2' field='z'>
+                <NumpyArray dtype='float64' len='3'>[30. 20. 10.]</NumpyArray>
+            </content>
+        </RecordArray></array>
+    </Record>
+
+
+
+.. _ak-record-behavior:
+
+.. py:attribute:: ak.Record.behavior
+
+The ``behavior`` parameter passed into this Record's constructor.
+
+* If a dict, this ``behavior`` overrides the global :py:obj:`ak.behavior`.
+     Any keys in the global :py:obj:`ak.behavior` but not this ``behavior`` are
+     still valid, but any keys in both are overridden by this
+     ``behavior``. Keys with a None value are equivalent to missing keys,
+     so this ``behavior`` can effectively remove keys from the
+     global :py:obj:`ak.behavior`.
+
+* If None, the Record defaults to the global :py:obj:`ak.behavior`.
+
+See :py:obj:`ak.behavior` for a list of recognized key patterns and their
+meanings.
+
+
+
+.. _ak-record-positional_axis:
+
+.. py:attribute:: ak.Record.positional_axis
+
+
+
+.. _ak-record-named_axis:
+
+.. py:attribute:: ak.Record.named_axis
+
+
+
+.. _ak-record-tolist:
+
+.. py:method:: ak.Record.tolist(self)
+
+Converts this Record into Python objects; same as :py:obj:`ak.to_list`
+(but without the underscore, like NumPy's
+`tolist <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html>`__).
+
+
+
+.. _ak-record-to_list:
+
+.. py:method:: ak.Record.to_list(self)
+
+Converts this Record into Python objects; same as :py:obj:`ak.to_list`.
+
+
+
+.. _ak-record-nbytes:
+
+.. py:attribute:: ak.Record.nbytes
+
+The total number of bytes in all the :py:obj:`ak.index.Index`,
+and :py:obj:`ak.contents.NumpyArray` buffers in this array tree.
+
+It does not count buffers that must be kept in memory because
+of ownership, but are not directly used in the array. Nor does it count
+the (small) Python objects that reference the (large)
+array buffers.
+
+
+
+.. _ak-record-fields:
+
+.. py:attribute:: ak.Record.fields
+
+List of field names or tuple slot numbers (as strings) of this record.
+
+If this is actually a tuple its fields are string representations of
+integers, such as ``"0"``, ``"1"``, ``"2"``, etc.
+
+See also :py:obj:`ak.fields`.
+
+
+
+.. _ak-record-is_tuple:
+
+.. py:attribute:: ak.Record.is_tuple
+
+If True, the top-most record structure has no named fields, i.e. it's a tuple.
+
+
+
+.. _ak-record-_ipython_key_completions_:
+
+.. py:method:: ak.Record._ipython_key_completions_(self)
+
+
+
+.. _ak-record-__iter__:
+
+.. py:attribute:: ak.Record.__iter__
+    :value: None
+
+
+
+.. _ak-record-type:
+
+.. py:attribute:: ak.Record.type
+
+The high-level type of this Record; same as :py:obj:`ak.type`.
+
+Note that the outermost element of a Record's type is always an
+:py:obj:`ak.types.ScalarType`, which .
+
+The type of a :py:obj:`ak.record.Record` (from :py:obj:`ak.Array.layout`) is not
+wrapped by an :py:obj:`ak.types.ScalarType`.
+
+
+
+.. _ak-record-typestr:
+
+.. py:attribute:: ak.Record.typestr
+
+The high-level type of this Record, presented as a string.
+
+
+
+.. _ak-record-__getitem__:
+
+.. py:method:: ak.Record.__getitem__(self, where)
+
+
+    :param where: Index of positions to
+              select from this Record.
+    :type where: many types supported; see below
+
+Select items from the Record using an extension of NumPy's (already
+quite extensive) rules.
+
+See :py:obj:`ak.Array.__getitem__` for a more complete description. Since
+this is a record, the first item in the slice tuple must be a
+string, selecting a field.
+
+For example, with
+
+.. code-block:: python
+
+
+    >>> record = ak.Record({"x": 3.3, "y": [1, 2, 3]})
+
+we can select
+
+.. code-block:: python
+
+
+    >>> record["x"]
+    3.3
+    >>> record["y"]
+    <Array [1, 2, 3] type='3 * int64'>
+    >>> record["y", 1]
+    2
+
+
+
+.. _ak-record-__setitem__:
+
+.. py:method:: ak.Record.__setitem__(self, where, what)
+
+
+    :param where: Field name to add data to the record.
+    :type where: str or tuple of str
+    :param what: Data to add as the new field.
+
+For example:
+
+.. code-block:: python
+
+
+    >>> record = ak.Record({"x": 3.3})
+    >>> record["y"] = 4
+    >>> record["z"] = {"another": "record"}
+    >>> record.show()
+    {x: 3.3,
+     y: 4,
+     z: {another: 'record'}}
+
+See :py:obj:`ak.with_field` for a variant that does not change the :py:obj:`ak.Record`
+in-place. (Internally, this method uses :py:obj:`ak.with_field`, so performance
+is not a factor in choosing one over the other.)
+
+
+
+.. _ak-record-__delitem__:
+
+.. py:method:: ak.Record.__delitem__(self, where)
+
+
+    :param where: Field name to remove from the record.
+    :type where: str or tuple of str
+
+For example:
+
+.. code-block:: python
+
+
+    >>> record = ak.Record({"x": 3.3, "y": {"this": 10, "that": 20}})
+    >>> del record["y", "that"]
+    >>> record.show()
+    {x: 3.3,
+     y: {this: 10}}
+
+See :py:obj:`ak.without_field` for a variant that does not change the :py:obj:`ak.Record`
+in-place. (Internally, this method uses :py:obj:`ak.without_field`, so performance
+is not a factor in choosing one over the other.)
+
+
+
+.. _ak-record-__getattr__:
+
+.. py:method:: ak.Record.__getattr__(self, where)
+
+Whenever possible, fields can be accessed as attributes.
+
+For example, the fields of
+
+.. code-block:: python
+
+
+    >>> record = ak.Record({"x": 1.1, "y": [2, 2], "z": "three"})
+
+can be accessed as
+
+.. code-block:: python
+
+
+    >>> record.x
+    1.1
+    >>> record.y
+    <Array [2, 2] type='2 * int64'>
+    >>> record.z
+    'three'
+
+which are equivalent to ``record["x"]``, ``record["y"]``, and
+``record["z"]``.
+
+Fields can't be accessed as attributes when
+
+* :py:obj:`ak.Record` methods or properties take precedence,
+* a domain-specific behavior has methods or properties that take
+     precedence, or
+* the field name is not a valid Python identifier or is a Python
+     keyword.
+
+
+
+.. _ak-record-__setattr__:
+
+.. py:method:: ak.Record.__setattr__(self, name, value)
+
+
+    :param where: Attribute name to set
+    :type where: str
+
+Set an attribute on the record.
+
+Only existing public attributes e.g. :py:obj:`ak.Record.layout`, or private
+attributes (with leading underscores), can be set.
+
+Fields are not assignable to as attributes, i.e. the following doesn't work:
+
+.. code-block:: python
+
+
+    record.z = new_field
+
+Instead, always use :py:obj:`ak.Record.__setitem__`:
+
+.. code-block:: python
+
+
+    record["z"] = new_field
+
+or :py:obj:`ak.with_field`:
+
+.. code-block:: python
+
+
+    record = ak.with_field(record, new_field, "z")
+
+to add or modify a field.
+
+
+
+.. _ak-record-__dir__:
+
+.. py:method:: ak.Record.__dir__(self)
+
+Lists all methods, properties, and field names (see :py:meth:`__getattr__ <ak.Record.__getattr__>`)
+that can be accessed as attributes.
+
+
+
+.. _ak-record-__str__:
+
+.. py:method:: ak.Record.__str__(self)
+
+
+
+.. _ak-record-__repr__:
+
+.. py:method:: ak.Record.__repr__(self)
+
+
+
+.. _ak-record-_repr:
+
+.. py:method:: ak.Record._repr(self, limit_cols)
+
+
+
+.. _ak-record-show:
+
+.. py:method:: ak.Record.show(self, limit_rows=20, limit_cols=80, type=False, named_axis=False, stream=STDOUT, *, formatter=None, precision=3)
+
+
+    :param limit_rows: Maximum number of rows (lines) to use in the output.
+    :type limit_rows: int
+    :param limit_cols: Maximum number of columns (characters wide).
+    :type limit_cols: int
+    :param type: If True, print the type as well. (Doesn't count toward number
+             of rows/lines limit.)
+    :type type: bool
+    :param stream: Stream to write the
+               output to. If None, return a string instead of writing to a stream.
+    :type stream: object with a ````write(str)```` method or None
+    :param formatter: Mapping of types/type-classes to string formatters.
+                  If None, use the default formatter.
+    :type formatter: Mapping or None
+
+Display the contents of the array within ``limit_rows`` and ``limit_cols``, using
+ellipsis (``...``) for hidden nested data.
+
+The ``formatter`` argument controls the formatting of individual values, c.f.
+https://numpy.org/doc/stable/reference/generated/numpy.set_printoptions.html
+As Awkward Array does not implement strings as a NumPy dtype, the ``numpystr``
+key is ignored; instead, a ``"bytes"`` and/or ``"str"`` key is considered when formatting
+string values, falling back upon ``"str_kind"``.
+
+
+
+.. _ak-record-_repr_mimebundle_:
+
+.. py:method:: ak.Record._repr_mimebundle_(self, include=None, exclude=None)
+
+
+
+.. _ak-record-__array_ufunc__:
+
+.. py:method:: ak.Record.__array_ufunc__(self, ufunc, method, *inputs)
+
+Intercepts attempts to pass this Record to a NumPy
+`universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__
+(ufuncs) and passes it through the Record's structure.
+
+This method conforms to NumPy's
+`NEP 13 <https://numpy.org/neps/nep-0013-ufunc-overrides.html>`__
+for overriding ufuncs, which has been
+`available since NumPy 1.13 <https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added>`__
+(and thus NumPy 1.13 is the minimum allowed version).
+
+See :py:obj:`ak.Array.__array_ufunc__` for a more complete description.
+
+
+
+.. _ak-record-numba_type:
+
+.. py:attribute:: ak.Record.numba_type
+
+The type of this Record when it is used in Numba. It contains enough
+information to generate low-level code for accessing any element,
+down to the leaves.
+
+See `Numba documentation <https://numba.pydata.org/numba-doc/dev/reference/types.html>`__
+on types and signatures.
+
+
+
+.. _ak-record-__reduce_ex__:
+
+.. py:method:: ak.Record.__reduce_ex__(self, protocol)
+
+
+
+.. _ak-record-__setstate__:
+
+.. py:method:: ak.Record.__setstate__(self, state)
+
+
+
+.. _ak-record-__copy__:
+
+.. py:method:: ak.Record.__copy__(self)
+
+
+
+.. _ak-record-__deepcopy__:
+
+.. py:method:: ak.Record.__deepcopy__(self, memo)
+
+
+
+.. _ak-record-__bool__:
+
+.. py:method:: ak.Record.__bool__(self)
+

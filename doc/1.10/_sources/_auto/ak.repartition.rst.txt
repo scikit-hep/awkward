@@ -1,0 +1,35 @@
+ak.repartition
+--------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 3970 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L3970>`__.
+
+.. py:function:: ak.repartition(array, lengths, highlevel=True, behavior=None)
+
+
+    :param array: A possibly-partitioned array.
+    :param lengths: If None, concatenate the
+                pieces of a partitioned array into a non-partitioned array.
+                If an integer, split or repartition into partitions of the
+                given number of entries (except the last, if the length of the
+                array doesn't fit an integer number of equal-sized chunks).
+                If an iterable of integers, split or repartition into the given
+                sequence of lengths.
+    :type lengths: None, int, or iterable of int
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` or :py:obj:`ak.partition.PartitionedArray`
+                  subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Returns a possibly-partitioned array: unpartitioned if ``lengths`` is None;
+partitioned otherwise.
+
+Partitioning is an internal aspect of an array: it should behave
+identically to a non-partitioned array, but possibly with different
+performance characteristics.
+
+Arrays can only be partitioned in the first dimension; it is intended
+for performing calculations in memory-sized chunks.
+

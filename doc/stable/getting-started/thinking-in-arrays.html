@@ -1,0 +1,1933 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Thinking in arrays &#8212; Awkward Array 2.13.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=b9a6aa19" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=f5edd4dd"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'getting-started/thinking-in-arrays';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.13';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/getting-started/thinking-in-arrays.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Papers and talks, citations" href="papers-and-talks.html" />
+    <link rel="prev" title="Jagged, Ragged, Awkward Arrays!" href="jagged-ragged-awkward-arrays.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.13" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.13.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.13.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user-guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user-guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-awkward-array.html">What is an “Awkward” Array?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10-minutes-to-awkward-array.html">10 minutes to Awkward Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uproot-awkward-columnar-hats.html">Uproot Awkward Columnar HATS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jagged-ragged-awkward-arrays.html">Jagged, Ragged, Awkward Arrays!</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Thinking in arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="papers-and-talks.html">Papers and talks, citations</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Getting started</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Thinking in arrays</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="thinking-in-arrays">
+<h1>Thinking in arrays<a class="headerlink" href="#thinking-in-arrays" title="Link to this heading">#</a></h1>
+<p><em>Originally presented as <a class="reference external" href="https://github.com/jpivarski-talks/2023-12-18-hsf-india-tutorial-bhubaneswar/blob/main/lesson-3-awkward/lecture-slides.ipynb">part</a> of <a class="reference external" href="https://indico.cern.ch/event/1328624/">HSF-India training on December 18, 2023</a>.</em></p>
+<p><br><br><br></p>
+<p>So far, all the arrays we’ve dealt with have been rectangular (in $n$ dimensions; “rectilinear”).</p>
+<p><img alt="" src="../_images/8-layer_cube.jpg" /></p>
+<p>What if we had data like this?</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">1.84</span><span class="p">,</span><span class="w"> </span><span class="mf">0.324</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">-1.609</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.713</span><span class="p">,</span><span class="w"> </span><span class="mf">0.005</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.953</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.993</span><span class="p">,</span><span class="w"> </span><span class="mf">0.011</span><span class="p">,</span><span class="w"> </span><span class="mf">0.718</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">0.459</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.517</span><span class="p">,</span><span class="w"> </span><span class="mf">1.545</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.33</span><span class="p">,</span><span class="w"> </span><span class="mf">0.292</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">-0.376</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.46</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.206</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.65</span><span class="p">,</span><span class="w"> </span><span class="mf">1.278</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[[],</span><span class="w"> </span><span class="p">[],</span><span class="w"> </span><span class="p">[</span><span class="mf">1.617</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[]</span>
+<span class="p">]</span>
+<span class="p">[</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">-0.106</span><span class="p">,</span><span class="w"> </span><span class="mf">0.611</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">0.118</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.788</span><span class="p">,</span><span class="w"> </span><span class="mf">0.794</span><span class="p">,</span><span class="w"> </span><span class="mf">0.658</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">-0.105</span><span class="p">]]</span>
+<span class="p">]</span>
+<span class="p">[</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">-0.384</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">0.697</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.856</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">0.778</span><span class="p">,</span><span class="w"> </span><span class="mf">0.023</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.455</span><span class="p">,</span><span class="w"> </span><span class="mf">-2.289</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">-0.67</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">1.153</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.669</span><span class="p">,</span><span class="w"> </span><span class="mf">0.305</span><span class="p">,</span><span class="w"> </span><span class="mf">1.517</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.292</span><span class="p">]]</span>
+<span class="p">]</span>
+<span class="p">[</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">0.205</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.355</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">-0.265</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">1.042</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">-0.004</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="mf">-1.167</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.054</span><span class="p">,</span><span class="w"> </span><span class="mf">0.726</span><span class="p">,</span><span class="w"> </span><span class="mf">0.213</span><span class="p">]],</span>
+<span class="w">  </span><span class="p">[[</span><span class="mf">1.741</span><span class="p">,</span><span class="w"> </span><span class="mf">-0.199</span><span class="p">,</span><span class="w"> </span><span class="mf">0.827</span><span class="p">]]</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>What if we had data like this?</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;fill&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#b1b1b1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;stroke&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.27453</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.03276</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-3.51280</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.74849</span><span class="p">}]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;fill&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#b1b1b1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;stroke&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">8.21630</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.07844</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.79157</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.49478</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">16.38932</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.29399</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.38641</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.10832</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-2.07070</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">14.07140</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">9.57021</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.94823</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.97332</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.62380</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.66760</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">11.38001</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.25497</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.39276</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.86585</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6.22051</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.67393</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.20572</span><span class="p">}]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;fill&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#d0d0ff&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;stroke&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.59528</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">7.37191</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.59192</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.91503</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.02932</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-1.13601</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-1.01593</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.95894</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.03666</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.05251</span><span class="p">}]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;fill&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#d0d0ff&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;stroke&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-8.78510</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.00497</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-15.22688</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.90244</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.74593</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.12718</span><span class="p">}]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;fill&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;stroke&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#000000&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.40625</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-6.953125</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.34375</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-7.09375</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.3125</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-7.140625</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.140625</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-7.140625</span><span class="p">}]},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;fill&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;stroke&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#808080&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.46875</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.09375</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.46875</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.078125</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.46875</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.53125</span><span class="p">}]}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>What if we had data like this?</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;movie&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Evil Dead&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1981</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;actors&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="p">[</span><span class="s2">&quot;Bruce Campbell&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Ellen Sandweiss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Richard DeManincor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Betsy Baker&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;movie&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Darkman&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1900</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;actors&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="p">[</span><span class="s2">&quot;Liam Neeson&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Frances McDormand&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Larry Drake&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Bruce Campbell&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;movie&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Army of Darkness&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1992</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;actors&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="p">[</span><span class="s2">&quot;Bruce Campbell&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Embeth Davidtz&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Marcus Gilbert&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Bridget Fonda&quot;</span><span class="p">,</span>
+<span class="w">     </span><span class="s2">&quot;Ted Raimi&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Patricia Tallman&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;movie&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A Simple Plan&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1998</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;actors&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="p">[</span><span class="s2">&quot;Bill Paxton&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Billy Bob Thornton&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Bridget Fonda&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Brent Briscoe&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;movie&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spider-Man 2&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2004</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;actors&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="p">[</span><span class="s2">&quot;Tobey Maguire&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Kristen Dunst&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Alfred Molina&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;James Franco&quot;</span><span class="p">,</span>
+<span class="w">     </span><span class="s2">&quot;Rosemary Harris&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;J.K. Simmons&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Stan Lee&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Bruce Campbell&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;movie&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Drag Me to Hell&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;year&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2009</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;actors&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="p">[</span><span class="s2">&quot;Alison Lohman&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Justin Long&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Lorna Raver&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Dileep Rao&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;David Paymer&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>What if we had data like this?</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;run&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;luminosityBlock&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">156</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;event&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">46501</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;PV&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.243</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.393</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;z&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.451</span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;electron&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">   </span><span class="nt">&quot;muon&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">     </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">63.043</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;eta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.718</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.968</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;mass&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.105</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">     </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">38.120</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;eta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.879</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-1.032</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;mass&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.105</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span>
+<span class="w">     </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">4.048</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;eta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.320</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.038</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;mass&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.105</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">}</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;MET&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">21.929</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-2.730</span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="nt">&quot;run&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;luminosityBlock&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">156</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;event&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">46502</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;PV&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.244</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.395</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;z&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-2.879</span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;electron&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">     </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">21.902</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;eta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.702</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.133</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;mass&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.005</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">     </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">42.632</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;eta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.979</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-1.863</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;mass&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.008</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">     </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">78.012</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;eta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.933</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-2.207</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;mass&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.018</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">},</span>
+<span class="w">     </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">23.835</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;eta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-1.362</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.621</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;mass&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.008</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;charge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">}</span>
+<span class="w">   </span><span class="p">],</span>
+<span class="w">   </span><span class="nt">&quot;muon&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">   </span><span class="nt">&quot;MET&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;pt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">16.972</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;phi&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.866</span><span class="p">}},</span>
+<span class="w">  </span><span class="err">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>It might be possible to turn these datasets into tabular form using surrogate keys and database normalization, but</p>
+<ul class="simple">
+<li><p>they could be inconvenient or less efficient in that form, depending on what we want to do,</p></li>
+<li><p>they were very likely <em>given</em> in a ragged/untidy form. You can’t ignore the data-cleaning step!</p></li>
+</ul>
+<br><p>Dealing with these datasets as JSON or Python objects is inefficient for the same reason as for lists of numbers.</p>
+<br><p>We want arbitrary data structure with array-oriented interface and performance…</p>
+<p><img alt="" src="../_images/awkward-motivation-venn-diagram.svg" /></p>
+<section id="libraries-for-irregular-arrays">
+<h2>Libraries for irregular arrays<a class="headerlink" href="#libraries-for-irregular-arrays" title="Link to this heading">#</a></h2>
+<br><p><img alt="" src="../_images/logo-arrow.svg" /></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arrow_array</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]}],</span>
+    <span class="p">[],</span>
+    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">4.4</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]}]</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arrow_array</span><span class="o">.</span><span class="n">type</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ListType(list&lt;item: struct&lt;x: double, y: list&lt;item: int64&gt;&gt;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arrow_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;pyarrow.lib.ListArray object at 0x7f85847b3640&gt;
+[
+  -- is_valid: all not null
+  -- child 0 type: double
+    [
+      1.1,
+      2.2,
+      3.3
+    ]
+  -- child 1 type: list&lt;item: int64&gt;
+    [
+      [
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        3
+      ]
+    ],
+  -- is_valid: all not null
+  -- child 0 type: double
+    []
+  -- child 1 type: list&lt;item: int64&gt;
+    [],
+  -- is_valid: all not null
+  -- child 0 type: double
+    [
+      4.4,
+      5.5
+    ]
+  -- child 1 type: list&lt;item: int64&gt;
+    [
+      [
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    ]
+]
+</pre></div>
+</div>
+</div>
+</div>
+<br><p><img alt="" src="../_images/logo-awkward.svg" /></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">awkward_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">arrow_array</span><span class="p">)</span>
+<span class="n">awkward_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{x: 1.1, y: [1]}, {x: 2.2, y: [...]}, {x: 3.3, y: [1, 2, 3]}],
+ [],
+ [{x: 4.4, y: [1, 2, 3, 4]}, {x: 5.5, y: [1, ..., 5]}]]
+----------------------------------------------------------------
+backend: cpu
+nbytes: 200 B
+type: 3 * var * ?{
+    x: ?float64,
+    y: option[var * ?int64]
+}</pre></div></div>
+</div>
+<br><p><img alt="" src="../_images/logo-parquet.svg" /></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">awkward_array</span><span class="p">,</span> <span class="s2">&quot;/tmp/file.parquet&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;pyarrow._parquet.FileMetaData object at 0x7f8583d95c60&gt;
+  created_by: parquet-cpp-arrow version 25.0.0
+  num_columns: 2
+  num_rows: 3
+  num_row_groups: 1
+  format_version: 2.6
+  serialized_size: 0
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_parquet</span><span class="p">(</span><span class="s2">&quot;/tmp/file.parquet&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{x: 1.1, y: [1]}, {x: 2.2, y: [...]}, {x: 3.3, y: [1, 2, 3]}],
+ [],
+ [{x: 4.4, y: [1, 2, 3, 4]}, {x: 5.5, y: [1, ..., 5]}]]
+----------------------------------------------------------------
+backend: cpu
+nbytes: 200 B
+type: 3 * var * ?{
+    x: ?float64,
+    y: option[var * ?int64]
+}</pre></div></div>
+</div>
+</section>
+<section id="awkward-array">
+<h2>Awkward Array<a class="headerlink" href="#awkward-array" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ragged</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+    <span class="p">[</span>
+      <span class="p">[[</span><span class="mf">1.84</span><span class="p">,</span> <span class="mf">0.324</span><span class="p">]],</span>
+      <span class="p">[[</span><span class="o">-</span><span class="mf">1.609</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.713</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.953</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.993</span><span class="p">,</span> <span class="mf">0.011</span><span class="p">,</span> <span class="mf">0.718</span><span class="p">]],</span>
+      <span class="p">[[</span><span class="mf">0.459</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.517</span><span class="p">,</span> <span class="mf">1.545</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.33</span><span class="p">,</span> <span class="mf">0.292</span><span class="p">]],</span>
+      <span class="p">[[</span><span class="o">-</span><span class="mf">0.376</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.46</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.206</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.65</span><span class="p">,</span> <span class="mf">1.278</span><span class="p">]],</span>
+      <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">1.617</span><span class="p">]],</span>
+      <span class="p">[]</span>
+    <span class="p">],</span>
+    <span class="p">[</span>
+      <span class="p">[[</span><span class="o">-</span><span class="mf">0.106</span><span class="p">,</span> <span class="mf">0.611</span><span class="p">]],</span>
+      <span class="p">[[</span><span class="mf">0.118</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.788</span><span class="p">,</span> <span class="mf">0.794</span><span class="p">,</span> <span class="mf">0.658</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.105</span><span class="p">]]</span>
+    <span class="p">],</span>
+    <span class="p">[</span>
+      <span class="p">[[</span><span class="o">-</span><span class="mf">0.384</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.697</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.856</span><span class="p">]],</span>
+      <span class="p">[[</span><span class="mf">0.778</span><span class="p">,</span> <span class="mf">0.023</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.455</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.289</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.67</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.153</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.669</span><span class="p">,</span> <span class="mf">0.305</span><span class="p">,</span> <span class="mf">1.517</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.292</span><span class="p">]]</span>
+    <span class="p">],</span>
+    <span class="p">[</span>
+      <span class="p">[[</span><span class="mf">0.205</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.355</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.265</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.042</span><span class="p">]],</span>
+      <span class="p">[[</span><span class="o">-</span><span class="mf">0.004</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.167</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.054</span><span class="p">,</span> <span class="mf">0.726</span><span class="p">,</span> <span class="mf">0.213</span><span class="p">]],</span>
+      <span class="p">[[</span><span class="mf">1.741</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.199</span><span class="p">,</span> <span class="mf">0.827</span><span class="p">]]</span>
+    <span class="p">]</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Multidimensional indexing</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ragged</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.float64(0.726)
+</pre></div>
+</div>
+</div>
+</div>
+<br>
+<p><strong>Basic slicing</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ragged</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[-0.054, 0.726],
+ [-0.199, 0.827]]
+-----------------
+backend: cpu
+nbytes: 56 B
+type: 2 * var * float64</pre></div></div>
+</div>
+<br>
+<p><strong>Advanced slicing</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ragged</span><span class="p">[[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[-0.384,
+ 0.827]
+--------
+backend: cpu
+nbytes: 16 B
+type: 2 * float64</pre></div></div>
+</div>
+<p><strong>Awkward slicing</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ragged</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[[True, True]], [[False, False, True], [True, ..., True]], ..., [...], []],
+ [[[False, True]], [[True, False, True, True], [False]]],
+ [[[False], [True, False]], [[True, True, False, False], ..., [...]]],
+ [[[True, False], [False], [True]], [[False], ...], [[True, False, True]]]]
+-----------------------------------------------------------------------------
+backend: cpu
+nbytes: 404 B
+type: 4 * var * var * var * bool</pre></div></div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ragged</span><span class="p">[</span><span class="n">ragged</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[[1.84, 0.324]], [[0.005], [0.953, 0.011, 0.718]], [...], ..., [[], ...], []],
+ [[[0.611]], [[0.118, 0.794, 0.658], []]],
+ [[[], [0.697]], [[0.778, 0.023], [], [1.15, 0.305, 1.52]]],
+ [[[0.205], [], [1.04]], [[], [0.726, 0.213]], [[1.74, 0.827]]]]
+--------------------------------------------------------------------------------
+backend: cpu
+nbytes: 584 B
+type: 4 * var * var * var * float64</pre></div></div>
+</div>
+<p><strong>Reductions</strong></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ragged</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.float64(2.898)
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ragged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[2.16], [-2.32, 0.689], [0.487, 0.622], [-2.04, ...], [0, 0, 1.62], []],
+ [[0.505], [-0.218, -0.105]],
+ [[-0.384, -0.159], [-2.94, -0.67, 1.01]],
+ [[-0.15, -0.265, 1.04], [-0.004, -0.282], [2.37]]]
+--------------------------------------------------------------------------
+backend: cpu
+nbytes: 344 B
+type: 4 * var * var * float64</pre></div></div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ragged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[1.56, 0.58], [0.432, -0.856], [1.04]],
+ [[-0.717, -2.48, -0.656, -1.63], ..., [1.15, -1.67, 0.305, 1.52, -0.292]],
+ [[2.2, -1.72, 2.37], [0.33, 0.292]],
+ [[-0.376, -1.46, -0.206], [0.65, 1.28]],
+ [[], [], [1.62]],
+ []]
+---------------------------------------------------------------------------
+backend: cpu
+nbytes: 904 B
+type: 6 * var * var * float64</pre></div></div>
+</div>
+<p>How do we even define reductions on an array with variable length lists?</p>
+<p><img alt="" src="../_images/example-reducer-2d.svg" /></p>
+<p>How do we even define reductions on an array with variable length lists?</p>
+<p><img alt="" src="../_images/example-reducer-ragged.svg" /></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span>   <span class="mi">1</span><span class="p">,</span>    <span class="mi">2</span><span class="p">,</span>    <span class="mi">3</span><span class="p">,</span>    <span class="mi">4</span><span class="p">],</span>
+                  <span class="p">[</span>  <span class="mi">10</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>   <span class="mi">30</span>      <span class="p">],</span>
+                  <span class="p">[</span> <span class="mi">100</span><span class="p">,</span>  <span class="mi">200</span>            <span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[111, 202, 33, 4]
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[10, 40, 300]
+</pre></div>
+</div>
+</div>
+</div>
+<br><p>(You almost always want the deepest/maximum <code class="docutils literal notranslate"><span class="pre">axis</span></code>, which you can get with <code class="docutils literal notranslate"><span class="pre">axis=-1</span></code>.)</p>
+<br><section id="awkward-arrays-in-particle-physics">
+<h3>Awkward Arrays in particle physics<a class="headerlink" href="#awkward-arrays-in-particle-physics" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">uproot</span>
+
+<span class="n">file</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://github.com/jpivarski-talks/2023-12-18-hsf-india-tutorial-bhubaneswar/raw/main/data/SMHiggsToZZTo4L.root&quot;</span><span class="p">)</span>
+<span class="n">file</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ReadOnlyDirectory &#39;/&#39; at 0x7f8581a77610&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">file</span><span class="p">[</span><span class="s2">&quot;Events&quot;</span><span class="p">]</span>
+<span class="n">tree</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;TTree &#39;Events&#39; (32 branches) at 0x7f8581147950&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tree</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">entry_stop</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{run: 1, luminosityBlock: 156, event: 46501, PV_npvs: 15, PV_x: 0.244, ...},
+ {run: 1, luminosityBlock: 156, event: 46502, PV_npvs: 13, PV_x: 0.244, ...},
+ {run: 1, luminosityBlock: 156, event: 46503, PV_npvs: 11, PV_x: 0.242, ...},
+ {run: 1, luminosityBlock: 156, event: 46504, PV_npvs: 22, PV_x: 0.243, ...},
+ {run: 1, luminosityBlock: 156, event: 46505, PV_npvs: 18, PV_x: 0.24, ...},
+ {run: 1, luminosityBlock: 156, event: 46506, PV_npvs: 5, PV_x: 0.243, ...},
+ {run: 1, luminosityBlock: 156, event: 46507, PV_npvs: 11, PV_x: 0.242, ...},
+ {run: 1, luminosityBlock: 156, event: 46508, PV_npvs: 25, PV_x: 0.245, ...},
+ {run: 1, luminosityBlock: 156, event: 46509, PV_npvs: 12, PV_x: 0.246, ...},
+ {run: 1, luminosityBlock: 156, event: 46510, PV_npvs: 18, PV_x: 0.244, ...},
+ ...,
+ {run: 1, luminosityBlock: 156, event: 46592, PV_npvs: 26, PV_x: 0.243, ...},
+ {run: 1, luminosityBlock: 156, event: 46593, PV_npvs: 12, PV_x: 0.243, ...},
+ {run: 1, luminosityBlock: 156, event: 46594, PV_npvs: 8, PV_x: 0.246, ...},
+ {run: 1, luminosityBlock: 156, event: 46595, PV_npvs: 17, PV_x: 0.243, ...},
+ {run: 1, luminosityBlock: 156, event: 46596, PV_npvs: 17, PV_x: 0.245, ...},
+ {run: 1, luminosityBlock: 156, event: 46597, PV_npvs: 14, PV_x: 0.243, ...},
+ {run: 1, luminosityBlock: 156, event: 46598, PV_npvs: 22, PV_x: 0.243, ...},
+ {run: 1, luminosityBlock: 156, event: 46599, PV_npvs: 13, PV_x: 0.245, ...},
+ {run: 1, luminosityBlock: 156, event: 46600, PV_npvs: 21, PV_x: 0.246, ...}]
+-----------------------------------------------------------------------------
+backend: cpu
+nbytes: 35.0 kB
+type: 100 * {
+    run: int32,
+    luminosityBlock: uint32,
+    event: uint64,...</pre></div></div>
+</div>
+<p>The same data fits into Parquet files (a little more easily).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_parquet</span><span class="p">(</span><span class="s2">&quot;https://github.com/jpivarski-talks/2023-12-18-hsf-india-tutorial-bhubaneswar/raw/main/data/SMHiggsToZZTo4L.parquet&quot;</span><span class="p">)</span>
+<span class="n">events</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{run: 1, luminosityBlock: 156, event: 46501, PV: {...}, electron: [], ...},
+ {run: 1, luminosityBlock: 156, event: 46502, PV: {...}, electron: [...], ...},
+ {run: 1, luminosityBlock: 156, event: 46503, PV: {...}, electron: [...], ...},
+ {run: 1, luminosityBlock: 156, event: 46504, PV: {...}, electron: ..., ...},
+ {run: 1, luminosityBlock: 156, event: 46505, PV: {...}, electron: [...], ...},
+ {run: 1, luminosityBlock: 156, event: 46506, PV: {...}, electron: ..., ...},
+ {run: 1, luminosityBlock: 156, event: 46507, PV: {...}, electron: ..., ...},
+ {run: 1, luminosityBlock: 156, event: 46508, PV: {...}, electron: ..., ...},
+ {run: 1, luminosityBlock: 156, event: 46509, PV: {...}, electron: [...], ...},
+ {run: 1, luminosityBlock: 156, event: 46510, PV: {...}, electron: [], ...},
+ ...,
+ {run: 1, luminosityBlock: 996, event: 298792, PV: {...}, electron: [...], ...},
+ {run: 1, luminosityBlock: 996, event: 298793, PV: {...}, electron: ..., ...},
+ {run: 1, luminosityBlock: 996, event: 298794, PV: {...}, electron: [], ...},
+ {run: 1, luminosityBlock: 996, event: 298795, PV: {...}, electron: [...], ...},
+ {run: 1, luminosityBlock: 996, event: 298796, PV: {...}, electron: [], ...},
+ {run: 1, luminosityBlock: 996, event: 298797, PV: {...}, electron: ..., ...},
+ {run: 1, luminosityBlock: 996, event: 298798, PV: {...}, electron: [], ...},
+ {run: 1, luminosityBlock: 996, event: 298799, PV: {...}, electron: [...], ...},
+ {run: 1, luminosityBlock: 996, event: 298800, PV: {...}, electron: [...], ...}]
+--------------------------------------------------------------------------------
+backend: cpu
+nbytes: 53.2 MB
+type: 299973 * {
+    run: int32,
+    luminosityBlock: int64,
+    event: uint6...</pre></div></div>
+</div>
+<p>View the first event as Python lists and dicts (like JSON).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;run&#39;: 1,
+ &#39;luminosityBlock&#39;: 156,
+ &#39;event&#39;: 46501,
+ &#39;PV&#39;: {&#39;x&#39;: 0.24369880557060242,
+  &#39;y&#39;: 0.3936990201473236,
+  &#39;z&#39;: 1.451307773590088},
+ &#39;electron&#39;: [],
+ &#39;muon&#39;: [{&#39;pt&#39;: 63.04386901855469,
+   &#39;eta&#39;: -0.7186822295188904,
+   &#39;phi&#39;: 2.968005895614624,
+   &#39;mass&#39;: 0.10565836727619171,
+   &#39;charge&#39;: 1,
+   &#39;pfRelIso03_all&#39;: 0.0,
+   &#39;pfRelIso04_all&#39;: 0.0,
+   &#39;dxy&#39;: -0.004785160068422556,
+   &#39;dxyErr&#39;: 0.0060764215886592865,
+   &#39;dz&#39;: 0.09005985409021378,
+   &#39;dzErr&#39;: 0.044572051614522934},
+  {&#39;pt&#39;: 38.12034606933594,
+   &#39;eta&#39;: -0.8794569969177246,
+   &#39;phi&#39;: -1.0324749946594238,
+   &#39;mass&#39;: 0.10565836727619171,
+   &#39;charge&#39;: -1,
+   &#39;pfRelIso03_all&#39;: 0.0,
+   &#39;pfRelIso04_all&#39;: 0.0,
+   &#39;dxy&#39;: 0.0005746808601543307,
+   &#39;dxyErr&#39;: 0.0013040687190368772,
+   &#39;dz&#39;: -0.0032290113158524036,
+   &#39;dzErr&#39;: 0.003023269586265087},
+  {&#39;pt&#39;: 4.04868745803833,
+   &#39;eta&#39;: -0.320764422416687,
+   &#39;phi&#39;: 1.0385035276412964,
+   &#39;mass&#39;: 0.10565836727619171,
+   &#39;charge&#39;: 1,
+   &#39;pfRelIso03_all&#39;: 0.0,
+   &#39;pfRelIso04_all&#39;: 0.17997965216636658,
+   &#39;dxy&#39;: -0.00232272082939744,
+   &#39;dxyErr&#39;: 0.004343290813267231,
+   &#39;dz&#39;: -0.005162843037396669,
+   &#39;dzErr&#39;: 0.004190043080598116}],
+ &#39;MET&#39;: {&#39;pt&#39;: 21.929929733276367, &#39;phi&#39;: -2.7301223278045654}}
+</pre></div>
+</div>
+</div>
+</div>
+<p>Get one numeric field (also known as “column”).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [21.9, 42.6, 78, 23.8],
+ [11.6, 6.69],
+ [10.4],
+ [30.7, 29.2, 6.38, 6.24],
+ [16.1],
+ [5.32],
+ [6.99],
+ [41, 6.5, 13.1, 52.1],
+ [],
+ ...,
+ [19.1, 9.69],
+ [30.2],
+ [],
+ [37, 7.36, 48],
+ [],
+ [12.3],
+ [],
+ [17.9, 23.2],
+ [48.1, 38.7]]
+--------------------------
+backend: cpu
+nbytes: 4.1 MB
+type: 299973 * var * float32</pre></div></div>
+</div>
+<p>Compute something ($p_z = p_T \sinh\eta$).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">eta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [-16.7, -48.8, -83.9, -43.5],
+ [-11.1, 26],
+ [-0.237],
+ [-19.9, 47.5, -18, -15.1],
+ [5.58],
+ [-3.22],
+ [3.88],
+ [-8.92, -10.5, -23.8, -17.3],
+ [],
+ ...,
+ [26.4, 19.1],
+ [92.2],
+ [],
+ [-193, -2.78, -43.4],
+ [],
+ [-3.4],
+ [],
+ [80.1, 99.3],
+ [26.8, 74]]
+------------------------------
+backend: cpu
+nbytes: 4.1 MB
+type: 299973 * var * float32</pre></div></div>
+</div>
+<p>Note that the Vector library works with Awkward Arrays, if it is imported this way:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">vector</span>
+<span class="n">vector</span><span class="o">.</span><span class="n">register_awkward</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><p>Records with <code class="docutils literal notranslate"><span class="pre">name=&quot;Momentum4D&quot;</span></code> and fields with coordinate names (<code class="docutils literal notranslate"><span class="pre">px</span></code>, <code class="docutils literal notranslate"><span class="pre">py</span></code>, <code class="docutils literal notranslate"><span class="pre">pz</span></code>, <code class="docutils literal notranslate"><span class="pre">E</span></code> or <code class="docutils literal notranslate"><span class="pre">pt</span></code>, <code class="docutils literal notranslate"><span class="pre">phi</span></code>, <code class="docutils literal notranslate"><span class="pre">eta</span></code>, <code class="docutils literal notranslate"><span class="pre">m</span></code>) automatically get Vector properties and methods.</p>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>299973 * var * Momentum4D[
+    pt: float32,
+    eta: float32,
+    phi: float32,
+    mass: float32,
+    charge: int32,
+    pfRelIso03_all: float32,
+    dxy: float32,
+    dxyErr: float32,
+    dz: float32,
+    dzErr: float32
+]
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># implicitly computes pz = pt * sinh(eta)</span>
+<span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pz</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [-16.7, -48.8, -83.9, -43.5],
+ [-11.1, 26],
+ [-0.237],
+ [-19.9, 47.5, -18, -15.1],
+ [5.58],
+ [-3.22],
+ [3.88],
+ [-8.92, -10.5, -23.8, -17.3],
+ [],
+ ...,
+ [26.4, 19.1],
+ [92.2],
+ [],
+ [-193, -2.78, -43.4],
+ [],
+ [-3.4],
+ [],
+ [80.1, 99.3],
+ [26.8, 74]]
+------------------------------
+backend: cpu
+nbytes: 4.1 MB
+type: 299973 * var * float32</pre></div></div>
+</div>
+<p>To make histograms or other plots, we need numbers without structure, so <a class="reference internal" href="../reference/generated/ak.flatten.html#ak.flatten" title="ak.flatten"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.flatten()</span></code></a> the array.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">hist</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hist</span>
+
+<span class="n">Hist</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">Regular</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">Double</span><span class="p">()</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/6ade1bf1a2d25df468b0d08e9d21f529ad38736a47b8f32d17d37683fba8563f.png" src="../_images/6ade1bf1a2d25df468b0d08e9d21f529ad38736a47b8f32d17d37683fba8563f.png" />
+</div>
+</div>
+<p>Each event has a different number of electrons and muons (<a class="reference internal" href="../reference/generated/ak.num.html#ak.num" title="ak.num"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.num()</span></code></a> to check).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="p">),</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">muon</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [0, 4, 2, 1, 4, 1, 1, 1, ..., 0, 3, 0, 1, 0, 2, 2] type=&#39;299973 * int64&#39;&gt;,
+ &lt;Array [3, 0, 0, 7, 0, 2, 1, 0, ..., 2, 0, 2, 2, 4, 0, 0] type=&#39;299973 * int64&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<br>
+<p>So what happens if we try to compute something with the electrons’ $p_T$ and the muons’ $\eta$?</p>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">muon</span><span class="o">.</span><span class="n">eta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">33</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">muon</span><span class="o">.</span><span class="n">eta</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_operators.py:52,</span> in <span class="ni">_binary_method.&lt;locals&gt;.func</span><span class="nt">(self, other)</span>
+<span class="g g-Whitespace">     </span><span class="mi">49</span> <span class="k">if</span> <span class="n">_disables_array_ufunc</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">50</span>     <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="ne">---&gt; </span><span class="mi">52</span> <span class="k">return</span> <span class="n">ufunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1644,</span> in <span class="ni">Array.__array_ufunc__</span><span class="nt">(self, ufunc, method, *inputs, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1579</span><span class="w"> </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1580</span><span class="sd"> Intercepts attempts to pass this Array to a NumPy</span>
+<span class="g g-Whitespace">   </span><span class="mi">1581</span><span class="sd"> [universal functions](https://docs.scipy.org/doc/numpy/reference/ufuncs.html)</span>
+<span class="sd">   (...)   1641 See also #__array_function__.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1642</span><span class="sd"> &quot;&quot;&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1643</span> <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ufunc</span><span class="p">)</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">ufunc</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">method</span><span class="si">!s}</span><span class="s2">&quot;</span>
+<span class="ne">-&gt; </span><span class="mi">1644</span> <span class="k">with</span> <span class="n">ak</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">1645</span>     <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">_connect</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">array_ufunc</span><span class="p">(</span><span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:79,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
+<span class="g g-Whitespace">     </span><span class="mi">77</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">78</span>     <span class="c1"># Handle caught exception</span>
+<span class="ne">---&gt; </span><span class="mi">79</span>     <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorate_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">80</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1645,</span> in <span class="ni">Array.__array_ufunc__</span><span class="nt">(self, ufunc, method, *inputs, **kwargs)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1643</span> <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">ufunc</span><span class="p">)</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">ufunc</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">method</span><span class="si">!s}</span><span class="s2">&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1644</span> <span class="k">with</span> <span class="n">ak</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1645</span>     <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">_connect</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">array_ufunc</span><span class="p">(</span><span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_connect/numpy.py:484,</span> in <span class="ni">array_ufunc</span><span class="nt">(ufunc, method, inputs, kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">476</span>         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">477</span>             <span class="s2">&quot;no </span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2"> overloads for custom types: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">478</span>                 <span class="nb">type</span><span class="p">(</span><span class="n">ufunc</span><span class="p">)</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="n">ufunc</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">479</span>             <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">480</span>         <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">482</span>     <span class="k">return</span> <span class="kc">None</span>
+<span class="ne">--&gt; </span><span class="mi">484</span> <span class="n">out</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_broadcasting</span><span class="o">.</span><span class="n">broadcast_and_apply</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">485</span>     <span class="n">inputs</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">486</span>     <span class="n">action</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">487</span>     <span class="n">depth_context</span><span class="o">=</span><span class="n">depth_context</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">488</span>     <span class="n">lateral_context</span><span class="o">=</span><span class="n">lateral_context</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">489</span>     <span class="n">allow_records</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">490</span>     <span class="n">function_name</span><span class="o">=</span><span class="n">ufunc</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">491</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">493</span> <span class="n">out_named_axis</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">494</span>     <span class="n">_unify_named_axis</span><span class="p">,</span> <span class="n">lateral_context</span><span class="p">[</span><span class="n">NAMED_AXIS_KEY</span><span class="p">]</span><span class="o">.</span><span class="n">named_axis</span>
+<span class="g g-Whitespace">    </span><span class="mi">495</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">496</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_broadcasting.py:1223,</span> in <span class="ni">broadcast_and_apply</span><span class="nt">(inputs, action, depth_context, lateral_context, allow_records, left_broadcast, right_broadcast, numpy_to_regular, regular_to_jagged, function_name, broadcast_parameters_rule)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1221</span> <span class="n">backend</span> <span class="o">=</span> <span class="n">backend_of</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="n">coerce_to_common</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1222</span> <span class="n">isscalar</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="ne">-&gt; </span><span class="mi">1223</span> <span class="n">out</span> <span class="o">=</span> <span class="n">apply_step</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1224</span>     <span class="n">backend</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1225</span>     <span class="n">broadcast_pack</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">isscalar</span><span class="p">),</span>
+<span class="g g-Whitespace">   </span><span class="mi">1226</span>     <span class="n">action</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1227</span>     <span class="mi">0</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1228</span>     <span class="n">depth_context</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1229</span>     <span class="n">lateral_context</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1230</span>     <span class="p">{</span>
+<span class="g g-Whitespace">   </span><span class="mi">1231</span>         <span class="s2">&quot;allow_records&quot;</span><span class="p">:</span> <span class="n">allow_records</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1232</span>         <span class="s2">&quot;left_broadcast&quot;</span><span class="p">:</span> <span class="n">left_broadcast</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1233</span>         <span class="s2">&quot;right_broadcast&quot;</span><span class="p">:</span> <span class="n">right_broadcast</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1234</span>         <span class="s2">&quot;numpy_to_regular&quot;</span><span class="p">:</span> <span class="n">numpy_to_regular</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1235</span>         <span class="s2">&quot;regular_to_jagged&quot;</span><span class="p">:</span> <span class="n">regular_to_jagged</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1236</span>         <span class="s2">&quot;function_name&quot;</span><span class="p">:</span> <span class="n">function_name</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1237</span>         <span class="s2">&quot;broadcast_parameters_rule&quot;</span><span class="p">:</span> <span class="n">broadcast_parameters_rule</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1238</span>     <span class="p">},</span>
+<span class="g g-Whitespace">   </span><span class="mi">1239</span> <span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1240</span> <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1241</span> <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">broadcast_unpack</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">isscalar</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">out</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_broadcasting.py:1201,</span> in <span class="ni">apply_step</span><span class="nt">(backend, inputs, action, depth, depth_context, lateral_context, options)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1199</span>     <span class="k">return</span> <span class="n">result</span>
+<span class="g g-Whitespace">   </span><span class="mi">1200</span> <span class="k">elif</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1201</span>     <span class="k">return</span> <span class="n">continuation</span><span class="p">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">1202</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1203</span>     <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_broadcasting.py:1170,</span> in <span class="ni">apply_step.&lt;locals&gt;.continuation</span><span class="nt">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">1168</span> <span class="c1"># Any non-string list-types?</span>
+<span class="g g-Whitespace">   </span><span class="mi">1169</span> <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_list</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_string_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1170</span>     <span class="k">return</span> <span class="n">broadcast_any_list</span><span class="p">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">1172</span> <span class="c1"># Any RecordArrays?</span>
+<span class="g g-Whitespace">   </span><span class="mi">1173</span> <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_record</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_broadcasting.py:663,</span> in <span class="ni">apply_step.&lt;locals&gt;.broadcast_any_list</span><span class="nt">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">660</span>         <span class="n">nextinputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">661</span>         <span class="n">nextparameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">NO_PARAMETERS</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">663</span> <span class="n">outcontent</span> <span class="o">=</span> <span class="n">apply_step</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">664</span>     <span class="n">backend</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">665</span>     <span class="n">nextinputs</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">666</span>     <span class="n">action</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">667</span>     <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">668</span>     <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">depth_context</span><span class="p">),</span>
+<span class="g g-Whitespace">    </span><span class="mi">669</span>     <span class="n">lateral_context</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">670</span>     <span class="n">options</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">671</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">672</span> <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outcontent</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">673</span> <span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters_factory</span><span class="p">(</span><span class="n">nextparameters</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">outcontent</span><span class="p">))</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_broadcasting.py:1201,</span> in <span class="ni">apply_step</span><span class="nt">(backend, inputs, action, depth, depth_context, lateral_context, options)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1199</span>     <span class="k">return</span> <span class="n">result</span>
+<span class="g g-Whitespace">   </span><span class="mi">1200</span> <span class="k">elif</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1201</span>     <span class="k">return</span> <span class="n">continuation</span><span class="p">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">1202</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1203</span>     <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_broadcasting.py:1170,</span> in <span class="ni">apply_step.&lt;locals&gt;.continuation</span><span class="nt">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">1168</span> <span class="c1"># Any non-string list-types?</span>
+<span class="g g-Whitespace">   </span><span class="mi">1169</span> <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_list</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_string_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1170</span>     <span class="k">return</span> <span class="n">broadcast_any_list</span><span class="p">()</span>
+<span class="g g-Whitespace">   </span><span class="mi">1172</span> <span class="c1"># Any RecordArrays?</span>
+<span class="g g-Whitespace">   </span><span class="mi">1173</span> <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_record</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">contents</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_broadcasting.py:714,</span> in <span class="ni">apply_step.&lt;locals&gt;.broadcast_any_list</span><span class="nt">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">710</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">((</span><span class="n">named_axis</span><span class="p">,</span> <span class="n">ndim</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_is_string</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">711</span>     <span class="nb">zip</span><span class="p">(</span><span class="n">named_axes_with_ndims</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">input_is_string</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">712</span> <span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">713</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">listtypes</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">x_is_string</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">714</span>         <span class="n">next_content</span> <span class="o">=</span> <span class="n">broadcast_to_offsets_avoiding_carry</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">offsets</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">715</span>         <span class="n">nextinputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_content</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">716</span>         <span class="n">nextparameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_parameters</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_broadcasting.py:373,</span> in <span class="ni">broadcast_to_offsets_avoiding_carry</span><span class="nt">(list_content, offsets)</span>
+<span class="g g-Whitespace">    </span><span class="mi">371</span>         <span class="k">return</span> <span class="n">list_content</span><span class="o">.</span><span class="n">content</span><span class="p">[:</span><span class="n">next_length</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">372</span>     <span class="k">else</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">373</span>         <span class="k">return</span> <span class="n">list_content</span><span class="o">.</span><span class="n">_broadcast_tooffsets64</span><span class="p">(</span><span class="n">offsets</span><span class="p">)</span><span class="o">.</span><span class="n">content</span>
+<span class="g g-Whitespace">    </span><span class="mi">374</span> <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_content</span><span class="p">,</span> <span class="n">ListArray</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">375</span>     <span class="c1"># Is this list contiguous?</span>
+<span class="g g-Whitespace">    </span><span class="mi">376</span>     <span class="k">if</span> <span class="n">nplike</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">377</span>         <span class="n">list_content</span><span class="o">.</span><span class="n">starts</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">list_content</span><span class="o">.</span><span class="n">stops</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">378</span>     <span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">379</span>         <span class="c1"># Does this list match the offsets?</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/listoffsetarray.py:439,</span> in <span class="ni">ListOffsetArray._broadcast_tooffsets64</span><span class="nt">(self, offsets)</span>
+<span class="g g-Whitespace">    </span><span class="mi">434</span>     <span class="n">next_content</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="p">[</span><span class="n">this_start</span><span class="p">:]</span>
+<span class="g g-Whitespace">    </span><span class="mi">436</span> <span class="k">if</span> <span class="n">nplike</span><span class="o">.</span><span class="n">known_data</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">nplike</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">437</span>     <span class="n">this_zero_offsets</span><span class="p">,</span> <span class="n">offsets</span><span class="o">.</span><span class="n">data</span>
+<span class="g g-Whitespace">    </span><span class="mi">438</span> <span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">439</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cannot broadcast nested list&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">441</span> <span class="k">return</span> <span class="n">ListOffsetArray</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">442</span>     <span class="n">offsets</span><span class="p">,</span> <span class="n">next_content</span><span class="p">[:</span> <span class="n">offsets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span>
+<span class="g g-Whitespace">    </span><span class="mi">443</span> <span class="p">)</span>
+
+<span class="ne">ValueError</span>: cannot broadcast nested list
+
+<span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">calling</span>
+
+    <span class="n">numpy</span><span class="o">.</span><span class="n">multiply</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span>
+        <span class="o">&lt;</span><span class="n">Array</span> <span class="p">[[],</span> <span class="p">[</span><span class="mf">21.9</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">,</span> <span class="p">[</span><span class="mf">48.1</span><span class="p">,</span> <span class="mf">38.7</span><span class="p">]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;299973 * var * fl...&#39;</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="o">-</span><span class="mf">0.782</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.997</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.326</span><span class="p">],</span> <span class="o">...</span><span class="p">,</span> <span class="p">[]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;299973 * var * flo...&#39;</span><span class="o">&gt;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is data structure-aware, array-oriented programming.</p>
+<p><strong>Application:</strong> Filtering events with an array of booleans.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="o">.</span><span class="n">MET</span><span class="o">.</span><span class="n">pt</span><span class="p">,</span> <span class="n">events</span><span class="o">.</span><span class="n">MET</span><span class="o">.</span><span class="n">pt</span> <span class="o">&gt;</span> <span class="mi">20</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [21.9, 17, 19.1, 30.9, ..., 17.7, 24, 12.9] type=&#39;299973 * float32&#39;&gt;,
+ &lt;Array [True, False, False, True, ..., False, True, False] type=&#39;299973 * bool&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">MET</span><span class="o">.</span><span class="n">pt</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(299973, 163222)
+</pre></div>
+</div>
+</div>
+</div>
+<br>
+<p><strong>Application:</strong> Filtering particles with an array of lists of booleans.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span><span class="p">,</span> <span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span> <span class="o">&gt;</span> <span class="mi">30</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [[], [21.9, ..., 23.8], ..., [48.1, 38.7]] type=&#39;299973 * var * float32&#39;&gt;,
+ &lt;Array [[], [False, ..., False], ..., [True, True]] type=&#39;299973 * var * bool&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="p">),</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [0, 4, 2, 1, 4, 1, 1, 1, ..., 0, 3, 0, 1, 0, 2, 2] type=&#39;299973 * int64&#39;&gt;,
+ &lt;Array [0, 2, 0, 0, 1, 0, 0, 0, ..., 0, 2, 0, 0, 0, 0, 2] type=&#39;299973 * int64&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<p><strong>Quizlet:</strong> Using the reducer <a class="reference internal" href="../reference/generated/ak.any.html#ak.any" title="ak.any"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.any()</span></code></a>, how would we select <em>events</em> in which any electron has $p_T &gt; 30$ GeV/c$^2$?</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="o">.</span><span class="n">pt</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [{pt: 42.6, eta: -0.98, phi: -1.86, mass: 0.00867, charge: 1, ...}, ...],
+ [],
+ [],
+ [{pt: 30.7, eta: -0.61, phi: 1.01, mass: 0.0117, charge: -1, ...}],
+ [],
+ [],
+ [],
+ [{pt: 41, eta: -0.216, phi: 2.79, mass: -0.0128, charge: -1, ...}, {...}],
+ [],
+ ...,
+ [],
+ [{pt: 30.2, eta: 1.84, phi: 1.94, mass: -0.00882, charge: 1, ...}],
+ [],
+ [{pt: 37, eta: -2.35, phi: 0.903, mass: -0.0594, charge: 1, ...}, {...}],
+ [],
+ [],
+ [],
+ [],
+ [{pt: 48.1, eta: 0.532, phi: -1.61, mass: 0.0127, charge: -1, ...}, ...]]
+---------------------------------------------------------------------------
+backend: cpu
+nbytes: 20.5 MB
+type: 299973 * var * Momentum4D[
+    pt: float32,
+    eta: float32,
+    phi: ...</pre></div></div>
+</div>
+<br><p>Awkward Array has two combinatorial primitives:</p>
+<p><a class="reference internal" href="../reference/generated/ak.cartesian.html#ak.cartesian" title="ak.cartesian"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.cartesian()</span></code></a> takes a <a class="reference external" href="https://en.wikipedia.org/wiki/Cartesian_product">Cartesian product</a> of lists from $N$ different arrays, producing an array of lists of $N$-tuples.</p>
+<p><a class="reference internal" href="../reference/generated/ak.combinations.html#ak.combinations" title="ak.combinations"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.combinations()</span></code></a> takes $N$ <a class="reference external" href="http://prob140.org/sp18/textbook/notebooks-md/5_04_Sampling_Without_Replacement.html">samples without replacement</a> of lists from a single array, producing an array of lists of $N$-tuples.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">numbers</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">letters</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">cartesian</span><span class="p">([</span><span class="n">numbers</span><span class="p">,</span> <span class="n">letters</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[(1, &#x27;a&#x27;), (1, &#x27;b&#x27;), (2, &#x27;a&#x27;), (2, &#x27;b&#x27;), (3, &#x27;a&#x27;), (3, &#x27;b&#x27;)],
+ [],
+ [(4, &#x27;d&#x27;), (4, &#x27;e&#x27;)]]
+--------------------------------------------------------------
+backend: cpu
+nbytes: 229 B
+type: 3 * var * (
+    int64,
+    string
+)</pre></div></div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[(1.1, 2.2), (1.1, 3.3), (1.1, 4.4), (2.2, ...), (2.2, 4.4), (3.3, 4.4)],
+ [],
+ [(5.5, 6.6)]]
+--------------------------------------------------------------------------
+backend: cpu
+nbytes: 144 B
+type: 3 * var * (
+    float64,
+    float64
+)</pre></div></div>
+</div>
+<p>Often, it’s useful to separate the separate the left-hand sides and right-hand sides of these pairs with <a class="reference internal" href="../reference/generated/ak.unzip.html#ak.unzip" title="ak.unzip"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.unzip()</span></code></a>, so they can be used in mathematical expressions.</p>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">electron_muon_pairs</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">cartesian</span><span class="p">([</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="p">,</span> <span class="n">events</span><span class="o">.</span><span class="n">muon</span><span class="p">])</span>
+<span class="n">electron_muon_pairs</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>299973 * var * (
+    Momentum4D[
+        pt: float32,
+        eta: float32,
+        phi: float32,
+        mass: float32,
+        charge: int32,
+        pfRelIso03_all: float32,
+        dxy: float32,
+        dxyErr: float32,
+        dz: float32,
+        dzErr: float32
+    ],
+    Momentum4D[
+        pt: float32,
+        eta: float32,
+        phi: float32,
+        mass: float32,
+        charge: int32,
+        pfRelIso03_all: float32,
+        pfRelIso04_all: float32,
+        dxy: float32,
+        dxyErr: float32,
+        dz: float32,
+        dzErr: float32
+    ]
+)
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">electron_in_pair</span><span class="p">,</span> <span class="n">muon_in_pair</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">electron_muon_pairs</span><span class="p">)</span>
+<span class="n">electron_in_pair</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>299973 * var * Momentum4D[
+    pt: float32,
+    eta: float32,
+    phi: float32,
+    mass: float32,
+    charge: int32,
+    pfRelIso03_all: float32,
+    dxy: float32,
+    dxyErr: float32,
+    dz: float32,
+    dzErr: float32
+]
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">electron_in_pair</span><span class="o">.</span><span class="n">pt</span><span class="p">,</span> <span class="n">muon_in_pair</span><span class="o">.</span><span class="n">pt</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [[], [], [], [10.4, ...], ..., [], [], []] type=&#39;299973 * var * float32&#39;&gt;,
+ &lt;Array [[], [], [], [54.3, ...], ..., [], [], []] type=&#39;299973 * var * float32&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">electron_in_pair</span><span class="p">),</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">muon_in_pair</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [0, 0, 0, 7, 0, 2, 1, 0, ..., 0, 0, 0, 2, 0, 0, 0] type=&#39;299973 * int64&#39;&gt;,
+ &lt;Array [0, 0, 0, 7, 0, 2, 1, 0, ..., 0, 0, 0, 2, 0, 0, 0] type=&#39;299973 * int64&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>To use Vector’s <code class="docutils literal notranslate"><span class="pre">deltaR</span></code> method ($\Delta R = \sqrt{\Delta\phi^2 + \Delta\eta^2}$), we need to have the electrons and muons in separate arrays.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">electron_in_pair</span><span class="p">,</span> <span class="n">muon_in_pair</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">cartesian</span><span class="p">([</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="p">,</span> <span class="n">events</span><span class="o">.</span><span class="n">muon</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">electron_in_pair</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">muon_in_pair</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [],
+ [],
+ [1.07, 0.405, 1.97, 2.78, 1.01, 0.906, 2.79],
+ [],
+ [2.55, 0.8],
+ [2.63],
+ [],
+ [],
+ [],
+ ...,
+ [0.44, 3.16, 3.01, 1.05],
+ [3.06, 1.52],
+ [],
+ [],
+ [],
+ [2.54, 0.912],
+ [],
+ [],
+ []]
+----------------------------------------------
+backend: cpu
+nbytes: 3.9 MB
+type: 299973 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_electron_in_pair</span><span class="p">,</span> <span class="n">second_electron_in_pair</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">electron</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<br><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_electron_in_pair</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">second_electron_in_pair</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [2.02, 2.35, 1, 0.347, 1.3, 1.64],
+ [2.96],
+ [],
+ [3.31, 1.23, 2.39, 3.8, 3.19, 2.61],
+ [],
+ [],
+ [],
+ [1.18, 2.05, 2.98, 2.26, 2.59, 1.9],
+ [],
+ ...,
+ [2.87],
+ [],
+ [],
+ [2.05, 2.92, 3.02],
+ [],
+ [],
+ [],
+ [2.96],
+ [2.72]]
+-------------------------------------
+backend: cpu
+nbytes: 3.7 MB
+type: 299973 * var * float32</pre></div></div>
+</div>
+<p><strong>Quizlet:</strong> What’s this?</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">first_electron_in_pair</span> <span class="o">+</span> <span class="n">second_electron_in_pair</span><span class="p">)</span><span class="o">.</span><span class="n">mass</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [52.1, 76.8, 22.8, 19.9, 39.1, 64.2],
+ [36],
+ [],
+ [87.3, 18.1, 28.5, 63.9, 56.5, 12.2],
+ [],
+ [],
+ [],
+ [19.8, 44.7, 92.2, 16.7, 38.7, 46.9],
+ [],
+ ...,
+ [27.3],
+ [],
+ [],
+ [39.2, 107, 38.4],
+ [],
+ [],
+ [],
+ [40.6],
+ [91.5]]
+--------------------------------------
+backend: cpu
+nbytes: 3.7 MB
+type: 299973 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Hist</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">Reg</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mass (GeV)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">Double</span><span class="p">()</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">flatten</span><span class="p">((</span><span class="n">first_electron_in_pair</span> <span class="o">+</span> <span class="n">second_electron_in_pair</span><span class="p">)</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/628606115d006e2246f8851a1f94af18043d973606fbfdabdcfa4104bdfb0f1c.png" src="../_images/628606115d006e2246f8851a1f94af18043d973606fbfdabdcfa4104bdfb0f1c.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="jagged-ragged-awkward-arrays.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Jagged, Ragged, Awkward Arrays!</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="papers-and-talks.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Papers and talks, citations</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#libraries-for-irregular-arrays">Libraries for irregular arrays</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#awkward-array">Awkward Array</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#awkward-arrays-in-particle-physics">Awkward Arrays in particle physics</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/getting-started/thinking-in-arrays.ipynb">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/getting-started/thinking-in-arrays.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

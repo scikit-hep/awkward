@@ -1,0 +1,9 @@
+ak.ignore_in_to_list
+--------------------
+
+.. py:module: ak.ignore_in_to_list
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/highlevel.py>`__ on `line 2789 <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/highlevel.py#L2789>`__.
+
+.. py:function:: ak.ignore_in_to_list(getitem_function)
+

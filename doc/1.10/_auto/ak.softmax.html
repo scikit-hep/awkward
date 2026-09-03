@@ -1,0 +1,665 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="ak.softmax" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="_auto/ak.softmax.html" />
+<meta property="og:site_name" content="Awkward Array" />
+<meta property="og:description" content="Defined in awkward.operations.reducers on line 1470. Computes the softmax in each group of elements from x(many types supported, including all Awkward Arrays and Records). The grouping is performed..." />
+<meta property="og:image" content="/None" />
+<meta property="og:image:alt" content="Defined in awkward.operations.reducers on line 1470. Computes the softmax in each group of elements from x(many types supported, including all Awkward Arrays..." />
+<meta name="description" content="Defined in awkward.operations.reducers on line 1470. Computes the softmax in each group of elements from x(many types supported, including all Awkward Arrays and Records). The grouping is performed..." />
+<meta name="robots" content="noindex,nofollow">
+
+    <title>ak.softmax &#8212; Awkward Array 1.10.2 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_auto/ak.softmax';</script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/_auto/ak.softmax.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ak.CategoricalBehavior" href="ak.CategoricalBehavior.html" />
+    <link rel="prev" title="ak.linear_fit" href="ak.linear_fit.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../api-reference.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fab fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../api-reference.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fab fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Release history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.Array.html">ak.Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.Record.html">ak.Record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ArrayBuilder.html">ak.ArrayBuilder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.behavior.html">ak.behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_valid.html">ak.is_valid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.validity_error.html">ak.validity_error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.type.html">ak.type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.parameters.html">ak.parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.fields.html">ak.fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_tuple.html">ak.is_tuple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_numpy.html">ak.from_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_numpy.html">ak.to_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_cupy.html">ak.from_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_cupy.html">ak.to_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_jax.html">ak.from_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_jax.html">ak.to_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.kernels.html">ak.kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_kernels.html">ak.to_kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_iter.html">ak.from_iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_list.html">ak.to_list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_json.html">ak.from_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_json.html">ak.to_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_awkward0.html">ak.from_awkward0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_awkward0.html">ak.to_awkward0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_layout.html">ak.to_layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.regularize_numpyarray.html">ak.regularize_numpyarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_arrow.html">ak.to_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_arrow_table.html">ak.to_arrow_table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_arrow.html">ak.from_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_parquet.html">ak.to_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_parquet.html">ak.from_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_buffers.html">ak.to_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_buffers.html">ak.from_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_pandas.html">ak.to_pandas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.copy.html">ak.copy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mask.html">ak.mask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.num.html">ak.num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.run_lengths.html">ak.run_lengths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.zip.html">ak.zip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.unzip.html">ak.unzip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_regular.html">ak.to_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_regular.html">ak.from_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_name.html">ak.with_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_field.html">ak.with_field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_parameter.html">ak.with_parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.without_parameters.html">ak.without_parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.zeros_like.html">ak.zeros_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ones_like.html">ak.ones_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.full_like.html">ak.full_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.broadcast_arrays.html">ak.broadcast_arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.concatenate.html">ak.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.where.html">ak.where</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.flatten.html">ak.flatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.unflatten.html">ak.unflatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ravel.html">ak.ravel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.packed.html">ak.packed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.local_index.html">ak.local_index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.sort.html">ak.sort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argsort.html">ak.argsort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.pad_none.html">ak.pad_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.fill_none.html">ak.fill_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_none.html">ak.is_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.singletons.html">ak.singletons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.firsts.html">ak.firsts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.cartesian.html">ak.cartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argcartesian.html">ak.argcartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.combinations.html">ak.combinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argcombinations.html">ak.argcombinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partitions.html">ak.partitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partitioned.html">ak.partitioned</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.repartition.html">ak.repartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.virtual.html">ak.virtual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.materialized.html">ak.materialized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_cache.html">ak.with_cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.size.html">ak.size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.atleast_1d.html">ak.atleast_1d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nan_to_num.html">ak.nan_to_num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.isclose.html">ak.isclose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.values_astype.html">ak.values_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.strings_astype.html">ak.strings_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.count.html">ak.count</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.count_nonzero.html">ak.count_nonzero</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.sum.html">ak.sum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.prod.html">ak.prod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.any.html">ak.any</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.all.html">ak.all</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.min.html">ak.min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.max.html">ak.max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ptp.html">ak.ptp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argmin.html">ak.argmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argmax.html">ak.argmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.moment.html">ak.moment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mean.html">ak.mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.var.html">ak.var</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.std.html">ak.std</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.covar.html">ak.covar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.corr.html">ak.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.linear_fit.html">ak.linear_fit</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ak.softmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.CategoricalBehavior.html">ak.CategoricalBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_categorical.html">ak.is_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.categories.html">ak.categories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_categorical.html">ak.to_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_categorical.html">ak.from_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mixin_class.html">ak.mixin_class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mixin_class_method.html">ak.mixin_class_method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ByteBehavior.html">ak.ByteBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.CharBehavior.html">ak.CharBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ByteStringBehavior.html">ak.ByteStringBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.StringBehavior.html">ak.StringBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.numba.register.html">ak.numba.register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.single.html">ak.partition.single</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.first.html">ak.partition.first</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.every.html">ak.partition.every</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.partition_as.html">ak.partition.partition_as</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.iterate.html">ak.partition.iterate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.apply.html">ak.partition.apply</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.PartitionedArray.html">ak.partition.PartitionedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.IrregularlyPartitionedArray.html">ak.partition.IrregularlyPartitionedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.numba.register.html">ak.numba.register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.numexpr.evaluate.html">ak.numexpr.evaluate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.numexpr.re_evaluate.html">ak.numexpr.re_evaluate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.autograd.elementwise_grad.html">ak.autograd.elementwise_grad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Content.html">ak.layout.Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.EmptyArray.html">ak.layout.EmptyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.NumpyArray.html">ak.layout.NumpyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.RegularArray.html">ak.layout.RegularArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ListArray.html">ak.layout.ListArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ListOffsetArray.html">ak.layout.ListOffsetArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.RecordArray.html">ak.layout.RecordArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Record.html">ak.layout.Record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.IndexedArray.html">ak.layout.IndexedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.IndexedOptionArray.html">ak.layout.IndexedOptionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ByteMaskedArray.html">ak.layout.ByteMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.BitMaskedArray.html">ak.layout.BitMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.UnmaskedArray.html">ak.layout.UnmaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.UnionArray.html">ak.layout.UnionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.VirtualArray.html">ak.layout.VirtualArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ArrayGenerator.html">ak.layout.ArrayGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.SliceGenerator.html">ak.layout.SliceGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ArrayCache.html">ak.layout.ArrayCache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Iterator.html">ak.layout.Iterator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ArrayBuilder.html">ak.layout.ArrayBuilder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Index.html">ak.layout.Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Identities.html">ak.layout.Identities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.Type.html">ak.types.Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.ArrayType.html">ak.types.ArrayType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.UnknownType.html">ak.types.UnknownType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.PrimitiveType.html">ak.types.PrimitiveType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.RegularType.html">ak.types.RegularType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.ListType.html">ak.types.ListType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.RecordType.html">ak.types.RecordType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.OptionType.html">ak.types.OptionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.UnionType.html">ak.types.UnionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.Form.html">ak.forms.Form</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.EmptyForm.html">ak.forms.EmptyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.NumpyForm.html">ak.forms.NumpyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.RegularForm.html">ak.forms.RegularForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.ListForm.html">ak.forms.ListForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.ListOffsetForm.html">ak.forms.ListOffsetForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.RecordForm.html">ak.forms.RecordForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.IndexedForm.html">ak.forms.IndexedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.IndexedOptionForm.html">ak.forms.IndexedOptionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.ByteMaskedForm.html">ak.forms.ByteMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.BitMaskedForm.html">ak.forms.BitMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.UnmaskedForm.html">ak.forms.UnmaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.UnionForm.html">ak.forms.UnionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.VirtualForm.html">ak.forms.VirtualForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../awkwardforth.html">AwkwardForth virtual machines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernels.html">Kernel interface and specification</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="ak-softmax">
+<h1>ak.softmax<a class="headerlink" href="#ak-softmax" title="Permalink to this headline">#</a></h1>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/reducers.py">awkward.operations.reducers</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/reducers.py#L1470">line 1470</a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ak.softmax">
+<span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">softmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_identity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.softmax" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – the data on which to compute the softmax.</p></li>
+<li><p><strong>weight</strong> – data that can be broadcasted to <code class="docutils literal notranslate"><span class="pre">x</span></code> to give each value a
+weight. Weighting values equally is the same as no weights;
+weighting some values higher increases the significance of those
+values. Weights can be zero or negative.</p></li>
+<li><p><strong>axis</strong> (<em>None</em><em> or </em><em>int</em>) – If None, combine all values from the array into
+a single scalar result; if an int, group by that axis: <code class="docutils literal notranslate"><span class="pre">0</span></code> is the
+outermost, <code class="docutils literal notranslate"><span class="pre">1</span></code> is the first level of nested lists, etc., and
+negative <code class="docutils literal notranslate"><span class="pre">axis</span></code> counts from the innermost: <code class="docutils literal notranslate"><span class="pre">-1</span></code> is the innermost,
+<code class="docutils literal notranslate"><span class="pre">-2</span></code> is the next level up, etc.</p></li>
+<li><p><strong>keepdims</strong> (<em>bool</em>) – If False, this function decreases the number of
+dimensions by 1; if True, the output values are wrapped in a new
+length-1 dimension so that the result of this operation may be
+broadcasted with the original array.</p></li>
+<li><p><strong>mask_identity</strong> (<em>bool</em>) – If True, the application of this function on
+empty lists results in None (an option type); otherwise, the
+calculation is followed through with the reducers’ identities,
+usually resulting in floating-point <code class="docutils literal notranslate"><span class="pre">nan</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Computes the softmax in each group of elements from <code class="docutils literal notranslate"><span class="pre">x</span></code> (many
+types supported, including all Awkward Arrays and Records). The grouping
+is performed the same way as for reducers, though this operation is not a
+reducer and has no identity.</p>
+<p>This function has no NumPy equivalent.</p>
+<p>Passing all arguments to the reducers, the softmax is calculated as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="ak.sum.html#ak.sum" title="ak.sum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.sum</span></code></a> for a complete description of handling nested lists and
+missing values (None) in reducers, and <a class="reference internal" href="ak.mean.html#ak.mean" title="ak.mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.mean</span></code></a> for an example with another
+non-reducer.</p>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="ak.linear_fit.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">ak.linear_fit</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="ak.CategoricalBehavior.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">ak.CategoricalBehavior</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main-v1/docs-sphinx/_auto/ak.softmax.rst">
+        <i class="fa-solid fa-pencil"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/_auto/ak.softmax.rst.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2023, Awkward Array development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+ak.typetracer.length_one_if_typetracer
+--------------------------------------
+
+.. py:module: ak.typetracer.length_one_if_typetracer
+
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/e4be9febc76c610eea671ef3f0e3084cb206da49/src/awkward/typetracer.py>`__ on `line 112 <https://github.com/scikit-hep/awkward/blob/e4be9febc76c610eea671ef3f0e3084cb206da49/src/awkward/typetracer.py#L112>`__.
+
+.. py:function:: ak.typetracer.length_one_if_typetracer(array, *, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Recursively touches the data of an array, before returning a length-one
+NumPy-backed iff. the given array has a typetracer backend; otherwise, a
+shallow copy of the original array is returned.
+

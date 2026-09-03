@@ -1,0 +1,14 @@
+ak.str.akstr_is_in
+==================
+
+.. py:module:: awkward.operations.str.akstr_is_in
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_in.is_in
+
+

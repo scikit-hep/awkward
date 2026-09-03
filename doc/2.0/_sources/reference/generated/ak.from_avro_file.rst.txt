@@ -1,0 +1,28 @@
+ak.from_avro_file
+-----------------
+
+.. py:module: ak.from_avro_file
+
+Defined in `awkward.operations.ak_from_avro_file <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/operations/ak_from_avro_file.py>`__ on `line 11 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/operations/ak_from_avro_file.py#L11>`__.
+
+.. py:function:: ak.from_avro_file(file, limit_entries=None)
+
+
+    :param file: Avro file to be read as Awkward Array.
+    :type file: string or file-like object
+    :param limit_entries: The number of rows of the Avro file to be read into the Awkward Array.
+    :type limit_entries: int
+    :param debug_forth: If True, prints the generated Forth code for debugging.
+    :type debug_forth: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Reads Avro files as Awkward Arrays.
+
+Internally this function uses AwkwardForth DSL. The function recursively parses the Avro schema, generates
+Awkward form and Forth code for that specific Avro file and then reads it.
+

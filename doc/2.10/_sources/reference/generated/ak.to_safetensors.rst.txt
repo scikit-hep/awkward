@@ -1,0 +1,61 @@
+ak.to_safetensors
+=================
+
+Defined in `awkward.operations.ak_to_safetensors <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_to_safetensors.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_to_safetensors.py#L15>`__.
+
+.. py:function:: ak.to_safetensors(array, destination, *, storage_options=None, container=None, buffer_key='{form_key}-{attribute}', form_key='node{id}', id_start=0, backend=None, byteorder=ak._util.native_byteorder)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param destination: Name of the output file, file path, or
+                       remote URL passed to `fsspec.core.url_to_fs <https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs>`__
+                       for remote writing.
+   :type destination: path-like
+   :param storage_options: Any additional options to pass to
+                           `fsspec.core.url_to_fs <https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs>`__
+                           to open a remote file for writing.
+   :type storage_options: None or dict
+   :param container: Optional mapping to receive the generated buffer
+                     bytes. If None (default), a temporary container is used and discarded
+                     after writing.
+   :type container: dict, optional
+   :param buffer_key: Format string for naming buffers. May include
+                      ``{form_key}`` and ``{attribute}`` placeholders. Defaults to
+                      ``"{form_key}-{attribute}"``.
+   :type buffer_key: str, optional
+   :param form_key: Format string for node forms when generating buffer
+                    keys. Typically includes ``"{id}"``. Defaults to ``"node{id}"``.
+   :type form_key: str, optional
+   :param id_start: Starting index for node numbering. Defaults to ``0``.
+   :type id_start: int, optional
+   :param backend: Backend used to convert array data into
+                   buffers. If None, the default backend is used.
+   :type backend: str | object, optional
+   :param byteorder: Byte order for numeric buffers. Defaults to the
+                     system's native byte order.
+   :type byteorder: str, optional
+
+   :returns:
+
+             None
+                 This function writes the safetensors file to ``destination``. If
+             ``container`` is provided, it will be populated with the raw buffer bytes.
+
+   Serialize an Awkward Array to the safetensors format and write it to ``destination``.
+
+   Ref: https://huggingface.co/docs/safetensors/.
+
+   This function converts the provided Awkward Array (or array-like object) into raw
+   buffers via ``ak.to_buffers`` and stores them in the safetensors format. Buffer names
+   are generated from ``buffer_key`` and ``form_key`` templates, allowing downstream
+   compatibility or layout reuse.
+   The resulting safetensors file includes metadata containing the Awkward ``form`` and
+   array ``length``, which are required for ``ak.from_safetensors`` to reconstruct the array.
+
+   .. rubric:: Example
+
+   >>> import awkward as ak
+   >>> arr = ak.Array([[1, 2, 3], [], [4]])
+   >>> ak.to_safetensors(arr, "out.safetensors")
+
+   See also :py:obj:`ak.from_safetensors`.
+

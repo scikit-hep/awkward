@@ -1,0 +1,377 @@
+ak.partition.PartitionedArray
+-----------------------------
+
+Defined in `awkward.partition <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/partition.py>`__ on `line 95 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/partition.py#L95>`__.
+
+.. py:class:: ak.partition.PartitionedArray((self))
+
+ak.partition.PartitionedArray.from_ext
+======================================
+
+.. py:method:: ak.partition.PartitionedArray.from_ext(cls, obj)
+
+ak.partition.PartitionedArray.__repr__
+======================================
+
+.. py:method:: ak.partition.PartitionedArray.__repr__(self)
+
+ak.partition.PartitionedArray.numpartitions
+===========================================
+
+.. py:attribute:: ak.partition.PartitionedArray.numpartitions
+
+ak.partition.PartitionedArray.partitions
+========================================
+
+.. py:attribute:: ak.partition.PartitionedArray.partitions
+
+ak.partition.PartitionedArray.partition
+=======================================
+
+.. py:method:: ak.partition.PartitionedArray.partition(self, partitionid)
+
+ak.partition.PartitionedArray.partitionid_index_at
+==================================================
+
+.. py:method:: ak.partition.PartitionedArray.partitionid_index_at(self, at)
+
+ak.partition.PartitionedArray.repartition
+=========================================
+
+.. py:method:: ak.partition.PartitionedArray.repartition(self)
+
+ak.partition.PartitionedArray.stops
+===================================
+
+.. py:attribute:: ak.partition.PartitionedArray.stops
+
+ak.partition.PartitionedArray.lengths
+=====================================
+
+.. py:attribute:: ak.partition.PartitionedArray.lengths
+
+ak.partition.PartitionedArray.start
+===================================
+
+.. py:method:: ak.partition.PartitionedArray.start(self, partitionid)
+
+ak.partition.PartitionedArray.stop
+==================================
+
+.. py:method:: ak.partition.PartitionedArray.stop(self, partitionid)
+
+ak.partition.PartitionedArray.toContent
+=======================================
+
+.. py:method:: ak.partition.PartitionedArray.toContent(self)
+
+ak.partition.PartitionedArray.__array__
+=======================================
+
+.. py:method:: ak.partition.PartitionedArray.__array__(self)
+
+ak.partition.PartitionedArray.identities
+========================================
+
+.. py:attribute:: ak.partition.PartitionedArray.identities
+
+ak.partition.PartitionedArray.setidentities
+===========================================
+
+.. py:method:: ak.partition.PartitionedArray.setidentities(self, identities=None)
+
+ak.partition.PartitionedArray.parameters
+========================================
+
+.. py:attribute:: ak.partition.PartitionedArray.parameters
+
+ak.partition.PartitionedArray.setparameter
+==========================================
+
+.. py:method:: ak.partition.PartitionedArray.setparameter(self, param, value)
+
+ak.partition.PartitionedArray.withparameter
+===========================================
+
+.. py:method:: ak.partition.PartitionedArray.withparameter(self, param, value)
+
+ak.partition.PartitionedArray.parameter
+=======================================
+
+.. py:method:: ak.partition.PartitionedArray.parameter(self)
+
+ak.partition.PartitionedArray.purelist_parameter
+================================================
+
+.. py:method:: ak.partition.PartitionedArray.purelist_parameter(self)
+
+ak.partition.PartitionedArray.type
+==================================
+
+.. py:method:: ak.partition.PartitionedArray.type(self, typestrs)
+
+ak.partition.PartitionedArray.form
+==================================
+
+.. py:attribute:: ak.partition.PartitionedArray.form
+
+ak.partition.PartitionedArray.__len__
+=====================================
+
+.. py:method:: ak.partition.PartitionedArray.__len__(self)
+
+ak.partition.PartitionedArray.__getitem__
+=========================================
+
+.. py:method:: ak.partition.PartitionedArray.__getitem__(self, where)
+
+ak.partition.PartitionedArray.__iter__
+======================================
+
+.. py:method:: ak.partition.PartitionedArray.__iter__(self)
+
+ak.partition.PartitionedArray.kernels
+=====================================
+
+.. py:attribute:: ak.partition.PartitionedArray.kernels
+
+ak.partition.PartitionedArray.caches
+====================================
+
+.. py:attribute:: ak.partition.PartitionedArray.caches
+
+ak.partition.PartitionedArray.tojson
+====================================
+
+.. py:method:: ak.partition.PartitionedArray.tojson(self)
+
+ak.partition.PartitionedArray.nbytes
+====================================
+
+.. py:attribute:: ak.partition.PartitionedArray.nbytes
+
+ak.partition.PartitionedArray.deep_copy
+=======================================
+
+.. py:method:: ak.partition.PartitionedArray.deep_copy(self)
+
+ak.partition.PartitionedArray.identity
+======================================
+
+.. py:attribute:: ak.partition.PartitionedArray.identity
+
+ak.partition.PartitionedArray.numfields
+=======================================
+
+.. py:attribute:: ak.partition.PartitionedArray.numfields
+
+ak.partition.PartitionedArray.fieldindex
+========================================
+
+.. py:method:: ak.partition.PartitionedArray.fieldindex(self)
+
+ak.partition.PartitionedArray.key
+=================================
+
+.. py:method:: ak.partition.PartitionedArray.key(self)
+
+ak.partition.PartitionedArray.haskey
+====================================
+
+.. py:method:: ak.partition.PartitionedArray.haskey(self)
+
+ak.partition.PartitionedArray.keys
+==================================
+
+.. py:method:: ak.partition.PartitionedArray.keys(self)
+
+ak.partition.PartitionedArray.purelist_isregular
+================================================
+
+.. py:attribute:: ak.partition.PartitionedArray.purelist_isregular
+
+ak.partition.PartitionedArray.purelist_depth
+============================================
+
+.. py:attribute:: ak.partition.PartitionedArray.purelist_depth
+
+ak.partition.PartitionedArray.branch_depth
+==========================================
+
+.. py:attribute:: ak.partition.PartitionedArray.branch_depth
+
+ak.partition.PartitionedArray.minmax_depth
+==========================================
+
+.. py:attribute:: ak.partition.PartitionedArray.minmax_depth
+
+ak.partition.PartitionedArray.getitem_nothing
+=============================================
+
+.. py:method:: ak.partition.PartitionedArray.getitem_nothing(self)
+
+ak.partition.PartitionedArray.getitem_at_nowrap
+===============================================
+
+.. py:method:: ak.partition.PartitionedArray.getitem_at_nowrap(self, where)
+
+ak.partition.PartitionedArray.getitem_range_nowrap
+==================================================
+
+.. py:method:: ak.partition.PartitionedArray.getitem_range_nowrap(self, start, stop)
+
+ak.partition.PartitionedArray._persistent_shared_ptr
+====================================================
+
+.. py:attribute:: ak.partition.PartitionedArray._persistent_shared_ptr
+
+ak.partition.PartitionedArray.validityerror
+===========================================
+
+.. py:method:: ak.partition.PartitionedArray.validityerror(self)
+
+ak.partition.PartitionedArray.fillna
+====================================
+
+.. py:method:: ak.partition.PartitionedArray.fillna(self, what)
+
+ak.partition.PartitionedArray.num
+=================================
+
+.. py:method:: ak.partition.PartitionedArray.num(self, axis)
+
+ak.partition.PartitionedArray.flatten
+=====================================
+
+.. py:method:: ak.partition.PartitionedArray.flatten(self)
+
+ak.partition.PartitionedArray.offsets_and_flatten
+=================================================
+
+.. py:method:: ak.partition.PartitionedArray.offsets_and_flatten(self, axis)
+
+ak.partition.PartitionedArray.rpad
+==================================
+
+.. py:method:: ak.partition.PartitionedArray.rpad(self, length, axis)
+
+ak.partition.PartitionedArray.rpad_and_clip
+===========================================
+
+.. py:method:: ak.partition.PartitionedArray.rpad_and_clip(self, length, axis)
+
+ak.partition.PartitionedArray.mergeable
+=======================================
+
+.. py:method:: ak.partition.PartitionedArray.mergeable(self, other)
+
+ak.partition.PartitionedArray.merge
+===================================
+
+.. py:method:: ak.partition.PartitionedArray.merge(self, other)
+
+ak.partition.PartitionedArray.mergemany
+=======================================
+
+.. py:method:: ak.partition.PartitionedArray.mergemany(self, others)
+
+ak.partition.PartitionedArray.axis_wrap_if_negative
+===================================================
+
+.. py:method:: ak.partition.PartitionedArray.axis_wrap_if_negative(self, axis)
+
+ak.partition.PartitionedArray.reduce
+====================================
+
+.. py:method:: ak.partition.PartitionedArray.reduce(self, name, axis, mask, keepdims, initial=None)
+
+ak.partition.PartitionedArray.count
+===================================
+
+.. py:method:: ak.partition.PartitionedArray.count(self, axis, mask, keepdims)
+
+ak.partition.PartitionedArray.count_nonzero
+===========================================
+
+.. py:method:: ak.partition.PartitionedArray.count_nonzero(self, axis, mask, keepdims)
+
+ak.partition.PartitionedArray.sum
+=================================
+
+.. py:method:: ak.partition.PartitionedArray.sum(self, axis, mask, keepdims)
+
+ak.partition.PartitionedArray.prod
+==================================
+
+.. py:method:: ak.partition.PartitionedArray.prod(self, axis, mask, keepdims)
+
+ak.partition.PartitionedArray.any
+=================================
+
+.. py:method:: ak.partition.PartitionedArray.any(self, axis, mask, keepdims)
+
+ak.partition.PartitionedArray.all
+=================================
+
+.. py:method:: ak.partition.PartitionedArray.all(self, axis, mask, keepdims)
+
+ak.partition.PartitionedArray.min
+=================================
+
+.. py:method:: ak.partition.PartitionedArray.min(self, axis, mask, keepdims, initial)
+
+ak.partition.PartitionedArray.max
+=================================
+
+.. py:method:: ak.partition.PartitionedArray.max(self, axis, mask, keepdims, initial)
+
+ak.partition.PartitionedArray.argmin
+====================================
+
+.. py:method:: ak.partition.PartitionedArray.argmin(self, axis, mask, keepdims)
+
+ak.partition.PartitionedArray.argmax
+====================================
+
+.. py:method:: ak.partition.PartitionedArray.argmax(self, axis, mask, keepdims)
+
+ak.partition.PartitionedArray.localindex
+========================================
+
+.. py:method:: ak.partition.PartitionedArray.localindex(self, axis)
+
+ak.partition.PartitionedArray.combinations
+==========================================
+
+.. py:method:: ak.partition.PartitionedArray.combinations(self, n, replacement, keys, parameters, axis)
+
+ak.partition.PartitionedArray.sort
+==================================
+
+.. py:method:: ak.partition.PartitionedArray.sort(self, axis, ascending, stable)
+
+ak.partition.PartitionedArray.argsort
+=====================================
+
+.. py:method:: ak.partition.PartitionedArray.argsort(self, axis, ascending, stable)
+
+ak.partition.PartitionedArray.numbers_to_type
+=============================================
+
+.. py:method:: ak.partition.PartitionedArray.numbers_to_type(self, dtype_string)
+
+ak.partition.PartitionedArray.is_unique
+=======================================
+
+.. py:method:: ak.partition.PartitionedArray.is_unique(self)
+
+ak.partition.PartitionedArray.copy_to
+=====================================
+
+.. py:method:: ak.partition.PartitionedArray.copy_to(self, ptr_lib)
+
+ak.partition.PartitionedArray.carry
+===================================
+
+.. py:method:: ak.partition.PartitionedArray.carry(self, carry, allow_lazy)
+

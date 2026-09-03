@@ -1,0 +1,57 @@
+ak.numba.layoutbuilder.LayoutBuilder
+------------------------------------
+
+.. py:module: ak.numba.layoutbuilder.LayoutBuilder
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/layoutbuilder.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/layoutbuilder.py#L11>`__.
+
+.. py:class:: ak.numba.layoutbuilder.LayoutBuilder(self)
+
+
+
+.. _ak-numba-layoutbuilder-layoutbuilder-_init:
+
+.. py:method:: ak.numba.layoutbuilder.LayoutBuilder._init(self, parameters)
+
+
+
+.. _ak-numba-layoutbuilder-layoutbuilder-parameters:
+
+.. py:attribute:: ak.numba.layoutbuilder.LayoutBuilder.parameters
+
+
+
+.. _ak-numba-layoutbuilder-layoutbuilder-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.LayoutBuilder.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-layoutbuilder-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.LayoutBuilder.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-layoutbuilder-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.LayoutBuilder.snapshot(self)
+
+
+
+.. _ak-numba-layoutbuilder-layoutbuilder-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.LayoutBuilder.form
+
+
+
+.. _ak-numba-layoutbuilder-layoutbuilder-clear:
+
+.. py:method:: ak.numba.layoutbuilder.LayoutBuilder.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-layoutbuilder-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.LayoutBuilder.is_valid(self, error)
+

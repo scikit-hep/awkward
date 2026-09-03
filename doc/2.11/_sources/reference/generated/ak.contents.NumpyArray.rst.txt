@@ -1,0 +1,280 @@
+ak.contents.NumpyArray
+======================
+
+Defined in `awkward.contents.numpyarray <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/contents/numpyarray.py>`__ on `line 63 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/contents/numpyarray.py#L63>`__.
+
+.. py:class:: ak.contents.NumpyArray(data: awkward._nplikes.array_like.ArrayLike, *, parameters=None, backend=None)
+
+
+
+   A NumpyArray describes 1-dimensional or rectilinear data using a NumPy
+   ``np.ndarray``, a CuPy ``cp.ndarray``, etc., depending on the backend.
+
+   This class is aware of the rectilinear array's ``shape`` and ``strides``, and
+   allows for arbitrary ``strides``, such as Fortran-ordered data. However, many
+   operations require C-contiguous data, so derivatives of Fortran-ordered
+   arrays may not be Fortran-ordered.
+
+   Only a subset of ``dtype`` values are allowed, and only for your system's
+   native endianness:
+
+   * ``bool``: boolean, like NumPy's ``np.bool_`` (considered distinct from integers)
+   * ``int8``: signed 8-bit
+   * ``uint8``: unsigned 8-bit
+   * ``int16``: signed 16-bit
+   * ``uint16``: unsigned 16-bit
+   * ``int32``: signed 32-bit
+   * ``uint32``: unsigned 32-bit
+   * ``int64``: signed 64-bit
+   * ``uint64``: unsigned 64-bit
+   * ``float16``: floating point 16-bit, if your system's NumPy supports it
+   * ``float32``: floating point 32-bit
+   * ``float64``: floating point 64-bit
+   * ``float128``: floating point 128-bit, if your system's NumPy supports it
+   * ``complex64``: floating complex numbers composed of 32-bit real/imag parts
+   * ``complex128``: floating complex numbers composed of 64-bit real/imag parts
+   * ``complex256``: floating complex numbers composed of 128-bit real/imag parts, if your system's NumPy supports it
+   * ``datetime64``: date/time, origin is midnight on January 1, 1970, in any units NumPy supports
+   * ``timedelta64``: time difference, in any units NumPy supports
+
+   If the ``shape`` is one-dimensional, a NumpyArray corresponds to an Apache
+   Arrow `Primitive array <https://arrow.apache.org/docs/format/Columnar.html#fixed-size-primitive-layout>`__.
+
+   To illustrate how the constructor arguments are interpreted, the following is a
+   simplified implementation of ``__init__``, ``__len__``, and ``__getitem__``::
+
+       class NumpyArray(Content):
+           def __init__(self, data):
+               assert isinstance(data, numpy_like_array)
+               assert data.dtype in allowed_dtypes
+               self.data = data
+
+           def __len__(self):
+               return len(self.data)
+
+           def __getitem__(self, where):
+               result = self.data[where]
+               if isinstance(result, numpy_like_array):
+                   return NumpyArray(result)
+               else:
+                   return result
+
+
+   .. py:attribute:: _data
+
+
+   .. py:property:: data
+      :type: awkward._nplikes.array_like.ArrayLike
+
+
+
+   .. py:attribute:: form_cls
+      :type:  awkward._typing.Final
+
+
+   .. py:method:: copy(data=UNSET, *, parameters=UNSET, backend=UNSET)
+
+
+   .. py:method:: __copy__()
+
+
+   .. py:method:: __deepcopy__(memo)
+
+
+   .. py:method:: simplified(data, *, parameters=None, backend=None)
+      :classmethod:
+
+
+
+   .. py:property:: shape
+      :type: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis]
+
+
+
+   .. py:property:: inner_shape
+      :type: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis]
+
+
+
+   .. py:property:: strides
+      :type: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis]
+
+
+
+   .. py:property:: dtype
+      :type: np
+
+
+
+   .. py:method:: _raw(nplike=None)
+
+
+   .. py:method:: _form_with_key(getkey: awkward._typing.Callable[[awkward.contents.content.Content], str | None]) -> awkward.forms.numpyform.NumpyForm
+
+
+   .. py:method:: _form_with_key_path(path: awkward.forms.form.FormKeyPathT) -> awkward.forms.numpyform.NumpyForm
+
+
+   .. py:method:: _to_buffers(form: awkward.forms.form.Form, getkey: awkward._typing.Callable[[awkward.contents.content.Content, awkward.forms.form.Form, str], str], container: collections.abc.MutableMapping[str, awkward._nplikes.array_like.ArrayLike], backend: awkward._backends.backend.Backend, byteorder: str)
+
+
+   .. py:method:: _to_typetracer(forget_length: bool) -> awkward._typing.Self
+
+
+   .. py:method:: _touch_data(recursive: bool)
+
+
+   .. py:method:: _touch_shape(recursive: bool)
+
+
+   .. py:property:: length
+      :type: awkward._nplikes.shape.ShapeItem
+
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _repr(indent, pre, post)
+
+
+   .. py:method:: to_RegularArray()
+
+
+   .. py:method:: maybe_to_NumpyArray() -> awkward._typing.Self
+
+
+   .. py:method:: __iter__()
+
+
+   .. py:method:: _getitem_nothing()
+
+
+   .. py:method:: _is_getitem_at_placeholder() -> bool
+
+
+   .. py:method:: _is_getitem_at_virtual() -> bool
+
+
+   .. py:method:: _getitem_at(where: awkward._nplikes.numpy_like.IndexType)
+
+
+   .. py:method:: _getitem_range(start: awkward._nplikes.numpy_like.IndexType, stop: awkward._nplikes.numpy_like.IndexType) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_field(where: str | awkward._typing.SupportsIndex, only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_fields(where: list[str | awkward._typing.SupportsIndex], only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
+
+
+   .. py:method:: _carry(carry: awkward.index.Index, allow_lazy: bool) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_next_jagged(slicestarts: awkward.index.Index, slicestops: awkward.index.Index, slicecontent: awkward.contents.content.Content, tail) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_next(head: awkward._slicing.SliceItem | tuple, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> awkward.contents.content.Content
+
+
+   .. py:method:: _offsets_and_flattened(axis: int, depth: int) -> tuple[awkward.index.Index, awkward.contents.content.Content]
+
+
+   .. py:method:: _mergeable_next(other: awkward.contents.content.Content, mergebool: bool, mergecastable: awkward._typing.Literal[same_kind, equiv, NumpyArray._mergeable_next.family]) -> bool
+
+
+   .. py:method:: _mergemany(others: collections.abc.Sequence[awkward.contents.content.Content]) -> awkward.contents.content.Content
+
+
+   .. py:method:: _fill_none(value: awkward.contents.content.Content) -> awkward.contents.content.Content
+
+
+   .. py:method:: _local_index(axis, depth)
+
+
+   .. py:method:: to_contiguous() -> awkward._typing.Self
+
+
+   .. py:property:: is_contiguous
+      :type: bool
+
+
+
+   .. py:method:: _subranges_equal(starts, stops, length, sorted=True)
+
+
+   .. py:method:: _as_unique_strings(offsets)
+
+
+   .. py:method:: _numbers_to_type(name, including_unknown)
+
+
+   .. py:method:: _is_unique(negaxis, starts, offsets, outlength)
+
+
+   .. py:method:: _unique(negaxis, starts, offsets, outlength)
+
+
+   .. py:method:: _argsort_next(negaxis, starts, shifts, offsets, outlength, ascending, stable)
+
+
+   .. py:method:: _sort_next(negaxis, starts, offsets, outlength, ascending, stable)
+
+
+   .. py:method:: _combinations(n, replacement, recordlookup, parameters, axis, depth)
+
+
+   .. py:method:: _reduce_next(reducer, negaxis, starts, shifts, offsets, outlength, mask, keepdims, behavior)
+
+
+   .. py:method:: _validity_error(path)
+
+
+   .. py:method:: _pad_none(target, axis, depth, clip)
+
+
+   .. py:method:: _nbytes_part()
+
+
+   .. py:method:: _to_arrow(pyarrow: awkward._typing.Any, mask_node: awkward.contents.content.Content | None, validbytes: awkward.contents.content.Content | None, length: int, options: awkward.contents.content.ToArrowOptions)
+
+
+   .. py:method:: _to_cudf(cudf: awkward._typing.Any, mask: awkward.contents.content.Content | None, length: int)
+
+
+   .. py:method:: _to_backend_array(allow_missing, backend)
+
+
+   .. py:method:: _remove_structure(backend: awkward._backends.backend.Backend, options: awkward.contents.content.RemoveStructureOptions) -> list[awkward.contents.content.Content]
+
+
+   .. py:method:: _recursively_apply(action: awkward.contents.content.ImplementsApplyAction, depth: int, depth_context: collections.abc.Mapping[str, awkward._typing.Any] | None, lateral_context: collections.abc.Mapping[str, awkward._typing.Any] | None, options: awkward.contents.content.ApplyActionOptions) -> awkward.contents.content.Content | None
+
+
+   .. py:method:: _to_packed(recursive: bool = True) -> awkward._typing.Self
+
+
+   .. py:method:: _to_list(behavior, json_conversions)
+
+
+   .. py:method:: _to_backend(backend: awkward._backends.backend.Backend) -> awkward._typing.Self
+
+
+   .. py:method:: _materialize(type_) -> awkward._typing.Self
+
+
+   .. py:property:: _is_all_materialized
+      :type: bool
+
+
+
+   .. py:property:: _is_any_materialized
+      :type: bool
+
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Self, index_dtype: bool, numpyarray: bool, all_parameters: bool) -> bool
+
+
+   .. py:method:: _to_regular_primitive() -> awkward.contents.RegularArray
+

@@ -1,0 +1,105 @@
+ak.forms.BitMaskedForm
+----------------------
+
+.. py:module: ak.forms.BitMaskedForm
+
+Defined in `awkward.forms.bitmaskedform <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/forms/bitmaskedform.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/forms/bitmaskedform.py#L20>`__.
+
+.. py:class:: ak.forms.BitMaskedForm(self, mask, content, valid_when, lsb_order, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-bitmaskedform-mask:
+
+.. py:attribute:: ak.forms.BitMaskedForm.mask
+
+
+
+.. _ak-forms-bitmaskedform-content:
+
+.. py:attribute:: ak.forms.BitMaskedForm.content
+
+
+
+.. _ak-forms-bitmaskedform-valid_when:
+
+.. py:attribute:: ak.forms.BitMaskedForm.valid_when
+
+
+
+.. _ak-forms-bitmaskedform-lsb_order:
+
+.. py:attribute:: ak.forms.BitMaskedForm.lsb_order
+
+
+
+.. _ak-forms-bitmaskedform-copy:
+
+.. py:method:: ak.forms.BitMaskedForm.copy(self, mask=UNSET, content=UNSET, valid_when=UNSET, lsb_order=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-bitmaskedform-simplified:
+
+.. py:method:: ak.forms.BitMaskedForm.simplified(cls, mask, content, valid_when, lsb_order, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-bitmaskedform-__repr__:
+
+.. py:method:: ak.forms.BitMaskedForm.__repr__(self)
+
+
+
+.. _ak-forms-bitmaskedform-_to_dict_part:
+
+.. py:method:: ak.forms.BitMaskedForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-bitmaskedform-type:
+
+.. py:attribute:: ak.forms.BitMaskedForm.type
+
+
+
+.. _ak-forms-bitmaskedform-_columns:
+
+.. py:method:: ak.forms.BitMaskedForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-bitmaskedform-_prune_columns:
+
+.. py:method:: ak.forms.BitMaskedForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-bitmaskedform-_select_columns:
+
+.. py:method:: ak.forms.BitMaskedForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-bitmaskedform-_column_types:
+
+.. py:method:: ak.forms.BitMaskedForm._column_types(self)
+
+
+
+.. _ak-forms-bitmaskedform-__setstate__:
+
+.. py:method:: ak.forms.BitMaskedForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-bitmaskedform-_expected_from_buffers:
+
+.. py:method:: ak.forms.BitMaskedForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-bitmaskedform-_is_equal_to:
+
+.. py:method:: ak.forms.BitMaskedForm._is_equal_to(self, other, all_parameters, form_key)
+

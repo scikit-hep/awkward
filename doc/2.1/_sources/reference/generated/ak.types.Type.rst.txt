@@ -1,0 +1,89 @@
+ak.types.Type
+-------------
+
+.. py:module: ak.types.Type
+
+Defined in `awkward.types.type <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/types/type.py>`__ on `line 14 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/types/type.py#L14>`__.
+
+.. py:class:: ak.types.Type(self)
+
+
+
+.. _ak-types-type-parameters:
+
+.. py:attribute:: ak.types.Type.parameters
+
+
+
+.. _ak-types-type-parameter:
+
+.. py:method:: ak.types.Type.parameter(self, key)
+
+
+
+.. _ak-types-type-typestr:
+
+.. py:attribute:: ak.types.Type.typestr
+
+
+
+.. _ak-types-type-__str__:
+
+.. py:method:: ak.types.Type.__str__(self)
+
+
+
+.. _ak-types-type-show:
+
+.. py:method:: ak.types.Type.show(self, stream=sys.stdout)
+
+
+
+.. _ak-types-type-_str_parameters_exclude:
+
+.. py:attribute:: ak.types.Type._str_parameters_exclude
+    :value: ('__categorical__',)
+
+
+
+.. _ak-types-type-_str_categorical_begin:
+
+.. py:method:: ak.types.Type._str_categorical_begin(self)
+
+
+
+.. _ak-types-type-_str_categorical_end:
+
+.. py:method:: ak.types.Type._str_categorical_end(self)
+
+
+
+.. _ak-types-type-_str_parameters:
+
+.. py:method:: ak.types.Type._str_parameters(self)
+
+
+
+.. _ak-types-type-_repr_args:
+
+.. py:method:: ak.types.Type._repr_args(self)
+
+
+
+.. _ak-types-type-is_equal_to:
+
+.. py:method:: ak.types.Type.is_equal_to(self, other, *, all_parameters=False)
+
+
+
+.. _ak-types-type-__eq__:
+
+.. py:attribute:: ak.types.Type.__eq__
+    :value: is_equal_to
+
+
+
+.. _ak-types-type-_is_equal_to:
+
+.. py:method:: ak.types.Type._is_equal_to(self, other, all_parameters)
+

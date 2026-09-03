@@ -1,0 +1,36 @@
+ak.str.count_substring
+======================
+
+Defined in `awkward.operations.str.akstr_count_substring <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/str/akstr_count_substring.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/str/akstr_count_substring.py#L12>`__.
+
+.. py:function:: ak.str.count_substring(array, pattern, *, ignore_case=False, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param pattern: Substring pattern to count for each string in
+                   ``array``.
+   :type pattern: str or bytes
+   :param ignore_case: If True, perform a case-insensitive match;
+                       otherwise, the match is case-sensitive.
+   :type ignore_case: bool
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Counts the number of occurrences of the given literal ``pattern`` in every
+   string in ``array``. Depending upon the value of ``ignore_case``, the matching
+   function will be case-insensitive.
+
+   Note: this function does not raise an error if the ``array`` does not
+   contain any string or bytestring data.
+
+   Requires the pyarrow library and calls
+   `pyarrow.compute.count_substring <https://arrow.apache.org/docs/python/generated/pyarrow.compute.count_substring.html>`__.
+
+   See also: :py:obj:`ak.str.count_substring_regex`.
+

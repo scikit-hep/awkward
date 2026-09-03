@@ -1,0 +1,14 @@
+ak.from_torch
+=============
+
+Defined in `awkward.operations.ak_from_torch <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_torch.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_torch.py#L11>`__.
+
+.. py:function:: ak.from_torch(array)
+
+   :param array: (PyTorch Tensor):
+                 Tensor to convert into an Awkward Array.
+
+   Converts a PyTorch Tensor into an Awkward Array.
+
+   If ``array`` contains any other data types the function raises an error.
+

@@ -1,0 +1,75 @@
+ak.to_feather
+=============
+
+Defined in `awkward.operations.ak_to_feather <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/operations/ak_to_feather.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/operations/ak_to_feather.py#L16>`__.
+
+.. py:function:: ak.to_feather(array, destination, *, list_to32=False, string_to32=True, bytestring_to32=True, emptyarray_to=None, categorical_as_dictionary=False, extensionarray=True, count_nulls=True, compression='zstd', compression_level=None, chunksize=None, feather_version=2)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param destination: Local destination path, passed to
+                       `pyarrow.feather.write_feather <https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather>`__.
+   :type destination: str
+   :param list_to32: If True, convert Awkward lists into 32-bit Arrow lists
+                     if they're small enough, even if it means an extra conversion. Otherwise,
+                     signed 32-bit :py:obj:`ak.types.ListType` maps to Arrow ``ListType``,
+                     signed 64-bit :py:obj:`ak.types.ListType` maps to Arrow ``LargeListType``,
+                     and unsigned 32-bit :py:obj:`ak.types.ListType` picks whichever Arrow type its
+                     values fit into.
+   :type list_to32: bool
+   :param string_to32: Same as the above for Arrow ``string`` and ``large_string``.
+   :type string_to32: bool
+   :param bytestring_to32: Same as the above for Arrow ``binary`` and ``large_binary``.
+   :type bytestring_to32: bool
+   :param emptyarray_to: If None, :py:obj:`ak.types.UnknownType` maps to Arrow's
+                         null type; otherwise, it is converted a given numeric dtype.
+   :type emptyarray_to: None or dtype
+   :param categorical_as_dictionary: If True, :py:obj:`ak.contents.IndexedArray` and
+                                     :py:obj:`ak.contents.IndexedOptionArray` labeled with ``__array__ = "categorical"``
+                                     are mapped to Arrow ``DictionaryArray``; otherwise, the projection is
+                                     evaluated before conversion (always the case without
+                                     ``__array__ = "categorical"``).
+   :type categorical_as_dictionary: bool
+   :param extensionarray: If True, this function returns extended Arrow arrays
+                          (at all levels of nesting), which preserve metadata so that Awkward →
+                          Arrow → Awkward preserves the array's :py:obj:`ak.types.Type` (though not
+                          the :py:obj:`ak.forms.Form`). If False, this function returns generic Arrow arrays
+                          that might be needed for third-party tools that don't recognize Arrow's
+                          extensions. Even with ``extensionarray=False``, the values produced by
+                          Arrow's ``to_pylist`` method are the same as the values produced by Awkward's
+                          :py:obj:`ak.to_list`.
+   :type extensionarray: bool
+   :param count_nulls: If True, count the number of missing values at each level
+                       and include these in the resulting Arrow array, which makes some downstream
+                       applications faster. If False, skip the up-front cost of counting them.
+   :type count_nulls: bool
+   :param compression: Can be one of {“zstd”, “lz4”, “uncompressed”}. The
+                       default of None uses LZ4 for ``feather_version=2`` files if it is available, otherwise
+                       uncompressed. Passed to `pyarrow.feather.write_feather <https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather>`__.
+   :type compression: None or str
+   :param compression_level: Use a compression level particular to the chosen
+                             compressor. If None use the default compression level. Passed to `pyarrow.feather.write_feather <https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather>`__.
+   :type compression_level: None or int
+   :param chunksize: For ``feather_version=2`` files, this is the internal maximum size of Arrow RecordBatch
+                     chunks when writing the Arrow IPC file format. None means use the
+                     default, which is currently 64K. Passed to `pyarrow.feather.write_feather <https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather>`__.
+   :type chunksize: None or int
+   :param feather_version: Feather file version, passed to `pyarrow.feather.write_feather <https://arrow.apache.org/docs/python/generated/pyarrow.feather.write_feather.html#pyarrow.feather.write_feather>`__.
+                           Version 2 is the current. Version 1 is the more limited legacy format. If not
+                           provided, version 2 is used.
+   :type feather_version: int
+
+   Writes an Awkward Array to a Feather file (through pyarrow).
+
+       >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+       >>> ak.to_feather(array, "filename.feather")
+
+   If the ``array`` does not contain records at top-level, the Arrow table will
+   consist of one field whose name is ``""`` iff. ``extensionarray`` is False.
+
+   If ``extensionarray`` is True``, use a custom Arrow extension to store this array.
+   Otherwise, generic Arrow arrays are used, and if the ``array`` does not
+   contain records at top-level, the Arrow table will consist of one field whose
+   name is ``""``. See :py:obj:`ak.to_arrow_table` for more details.
+
+   See also :py:obj:`ak.from_feather`.
+

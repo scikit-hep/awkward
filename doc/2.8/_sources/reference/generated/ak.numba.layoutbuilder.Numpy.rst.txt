@@ -1,0 +1,75 @@
+ak.numba.layoutbuilder.Numpy
+----------------------------
+
+.. py:module: ak.numba.layoutbuilder.Numpy
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/numba/layoutbuilder.py>`__ on `line 40 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/numba/layoutbuilder.py#L40>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Numpy(self, dtype, *, parameters=None, initial=1024, resize=8.0)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-_from_buffer:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy._from_buffer(cls, data)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-dtype:
+
+.. py:attribute:: ak.numba.layoutbuilder.Numpy.dtype
+
+
+
+.. _ak-numba-layoutbuilder-numpy-append:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy.append(self, x)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-extend:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy.extend(self, data)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.Numpy.form
+
+
+
+.. _ak-numba-layoutbuilder-numpy-clear:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-numpy-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.Numpy.snapshot(self)
+

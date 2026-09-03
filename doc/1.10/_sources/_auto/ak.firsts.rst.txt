@@ -1,0 +1,35 @@
+ak.firsts
+---------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 3055 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L3055>`__.
+
+.. py:function:: ak.firsts(array, axis=1, highlevel=True, behavior=None)
+
+
+    :param array: Data from which to select the first elements from nested lists.
+    :param axis: The dimension at which this operation is applied. The
+             outermost dimension is ``0``, followed by ``1``, etc., and negative
+             values count backward from the innermost: ``-1`` is the innermost
+             dimension, ``-2`` is the next level up, etc.
+    :type axis: int
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Selects the first element of each non-empty list and inserts None for each
+empty list.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]])
+    >>> print(ak.firsts(array))
+    [1.1, 2.2, None, 3.3, None, None, 4.4, 5.5]
+
+See :py:obj:`ak.singletons` to invert this function.
+

@@ -1,0 +1,87 @@
+ak.numba.layoutbuilder.IndexedOption
+------------------------------------
+
+.. py:module: ak.numba.layoutbuilder.IndexedOption
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/numba/layoutbuilder.py>`__ on `line 264 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/numba/layoutbuilder.py#L264>`__.
+
+.. py:class:: ak.numba.layoutbuilder.IndexedOption(self, dtype, content, *, parameters=None, initial=1024, resize=8.0)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-index:
+
+.. py:attribute:: ak.numba.layoutbuilder.IndexedOption.index
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-content:
+
+.. py:attribute:: ak.numba.layoutbuilder.IndexedOption.content
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.IndexedOption.form
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-append_valid:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.append_valid(self)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-extend_valid:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.extend_valid(self, size)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-append_invalid:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.append_invalid(self)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-extend_invalid:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.extend_invalid(self, size)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-clear:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-indexedoption-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.IndexedOption.snapshot(self)
+

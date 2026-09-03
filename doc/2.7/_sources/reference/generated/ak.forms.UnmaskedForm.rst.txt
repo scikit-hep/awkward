@@ -1,0 +1,87 @@
+ak.forms.UnmaskedForm
+---------------------
+
+.. py:module: ak.forms.UnmaskedForm
+
+Defined in `awkward.forms.unmaskedform <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/unmaskedform.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/unmaskedform.py#L23>`__.
+
+.. py:class:: ak.forms.UnmaskedForm(self, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-unmaskedform-content:
+
+.. py:attribute:: ak.forms.UnmaskedForm.content
+
+
+
+.. _ak-forms-unmaskedform-copy:
+
+.. py:method:: ak.forms.UnmaskedForm.copy(self, content=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-unmaskedform-simplified:
+
+.. py:method:: ak.forms.UnmaskedForm.simplified(cls, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-unmaskedform-__repr__:
+
+.. py:method:: ak.forms.UnmaskedForm.__repr__(self)
+
+
+
+.. _ak-forms-unmaskedform-_to_dict_part:
+
+.. py:method:: ak.forms.UnmaskedForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-unmaskedform-type:
+
+.. py:attribute:: ak.forms.UnmaskedForm.type
+
+
+
+.. _ak-forms-unmaskedform-_columns:
+
+.. py:method:: ak.forms.UnmaskedForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-unmaskedform-_prune_columns:
+
+.. py:method:: ak.forms.UnmaskedForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-unmaskedform-_select_columns:
+
+.. py:method:: ak.forms.UnmaskedForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-unmaskedform-_column_types:
+
+.. py:method:: ak.forms.UnmaskedForm._column_types(self)
+
+
+
+.. _ak-forms-unmaskedform-__setstate__:
+
+.. py:method:: ak.forms.UnmaskedForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-unmaskedform-_expected_from_buffers:
+
+.. py:method:: ak.forms.UnmaskedForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-unmaskedform-_is_equal_to:
+
+.. py:method:: ak.forms.UnmaskedForm._is_equal_to(self, other, all_parameters, form_key)
+

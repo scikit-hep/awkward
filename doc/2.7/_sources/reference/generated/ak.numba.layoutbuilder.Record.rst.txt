@@ -1,0 +1,69 @@
+ak.numba.layoutbuilder.Record
+-----------------------------
+
+.. py:module: ak.numba.layoutbuilder.Record
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/numba/layoutbuilder.py>`__ on `line 637 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/numba/layoutbuilder.py#L637>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Record(self, contents, fields, *, parameters=None)
+
+
+
+.. _ak-numba-layoutbuilder-record-contents:
+
+.. py:attribute:: ak.numba.layoutbuilder.Record.contents
+
+
+
+.. _ak-numba-layoutbuilder-record-fields:
+
+.. py:attribute:: ak.numba.layoutbuilder.Record.fields
+
+
+
+.. _ak-numba-layoutbuilder-record-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.Record.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-record-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.Record.form
+
+
+
+.. _ak-numba-layoutbuilder-record-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.Record.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-record-content:
+
+.. py:method:: ak.numba.layoutbuilder.Record.content(self, name)
+
+
+
+.. _ak-numba-layoutbuilder-record-clear:
+
+.. py:method:: ak.numba.layoutbuilder.Record.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-record-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.Record.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-record-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.Record.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-record-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.Record.snapshot(self)
+

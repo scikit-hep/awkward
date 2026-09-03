@@ -1,0 +1,26 @@
+ak.types.UnknownType
+====================
+
+Defined in `awkward.types.unknowntype <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/unknowntype.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/unknowntype.py#L13>`__.
+
+.. py:class:: ak.types.UnknownType(*, parameters: awkward._typing.JSONMapping | None = None)
+
+
+
+   .. py:method:: copy(*, parameters=UNSET) -> UnknownType
+
+
+   .. py:attribute:: _parameters
+      :type:  awkward._typing.JSONMapping | None
+      :value: None
+
+
+
+   .. py:method:: _str(indent: str, compact: bool, behavior: collections.abc.Mapping | None) -> list[str]
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool) -> bool
+

@@ -1,0 +1,22 @@
+ak.without_parameters
+---------------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 1085 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L1085>`__.
+
+.. py:function:: ak.without_parameters(array, highlevel=True, behavior=None)
+
+
+    :param array: Data convertible into an Awkward Array.
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+This function returns a new array without any parameters in its
+:py:obj:`ak.Array.layout`, on nodes of any level of depth.
+
+Note that a "new array" is a lightweight shallow copy, not a duplication
+of large data buffers.
+

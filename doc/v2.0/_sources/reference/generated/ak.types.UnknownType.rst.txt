@@ -1,0 +1,27 @@
+ak.types.UnknownType
+--------------------
+
+.. py:module: ak.types.UnknownType
+
+Defined in `awkward.types.unknowntype <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/types/unknowntype.py>`__ on `line 11 <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/types/unknowntype.py#L11>`__.
+
+.. py:class:: ak.types.UnknownType(self, *, parameters=None, typestr=None)
+
+
+
+.. _ak-types-unknowntype-_str:
+
+.. py:method:: ak.types.UnknownType._str(self, indent, compact)
+
+
+
+.. _ak-types-unknowntype-__repr__:
+
+.. py:method:: ak.types.UnknownType.__repr__(self)
+
+
+
+.. _ak-types-unknowntype-__eq__:
+
+.. py:method:: ak.types.UnknownType.__eq__(self, other)
+

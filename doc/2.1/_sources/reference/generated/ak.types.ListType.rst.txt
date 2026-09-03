@@ -1,0 +1,33 @@
+ak.types.ListType
+-----------------
+
+.. py:module: ak.types.ListType
+
+Defined in `awkward.types.listtype <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/types/listtype.py>`__ on `line 9 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/types/listtype.py#L9>`__.
+
+.. py:class:: ak.types.ListType(self, content, *, parameters=None, typestr=None)
+
+
+
+.. _ak-types-listtype-content:
+
+.. py:attribute:: ak.types.ListType.content
+
+
+
+.. _ak-types-listtype-_str:
+
+.. py:method:: ak.types.ListType._str(self, indent, compact)
+
+
+
+.. _ak-types-listtype-__repr__:
+
+.. py:method:: ak.types.ListType.__repr__(self)
+
+
+
+.. _ak-types-listtype-_is_equal_to:
+
+.. py:method:: ak.types.ListType._is_equal_to(self, other, all_parameters)
+

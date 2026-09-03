@@ -1,0 +1,2006 @@
+
+
+<!DOCTYPE html>
+
+
+<html >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>How to convert to Pandas &#8212; Awkward Array 2.3.3 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Vibur" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyterlite_sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/jupyterlite_sphinx.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-convert-pandas';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.3';
+        </script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-convert-pandas.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Generic buffers" href="how-to-convert-buffers.html" />
+    <link rel="prev" title="How to convert to/from Arrow and Parquet" href="how-to-convert-arrow.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="None"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+      2.3  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="10-minutes-to-awkward-array.html">10 minutes to Awkward Array</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all) [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std) [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Using argmin/argmax [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">On GPUs [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-rename-records.html">Renaming records [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-sort.html">Sorting [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k" [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-arraybuilder.html">Building array output [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Specialized behavior</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-10"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-subclass.html">Subclassing Array/Record [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-override-numpy.html">Overriding NumPy functions [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-in-numba.html">In Numba [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-lorentz.html">For physics: Lorentz vectors [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-convert.html" class="nav-link">Converting arrays</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">How to convert to Pandas</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="how-to-convert-to-pandas">
+<h1>How to convert to Pandas<a class="headerlink" href="#how-to-convert-to-pandas" title="Permalink to this headline">#</a></h1>
+<p><a class="reference external" href="https://pandas.pydata.org/">Pandas</a> is a data analysis library for ordered time-series and relational data. In general, Pandas does not define operations for manipulating nested data structures, but in some cases, <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html">MultiIndex/advanced indexing</a> can do equivalent things.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="from-pandas-to-awkward">
+<h2>From Pandas to Awkward<a class="headerlink" href="#from-pandas-to-awkward" title="Permalink to this headline">#</a></h2>
+<p>At the time of writing, there is no <code class="docutils literal notranslate"><span class="pre">ak.from_dataframe</span></code> function, but such a thing could be useful.</p>
+<p>However, <a class="reference external" href="https://arrow.apache.org/">Apache Arrow</a> can be converted to and from Awkward Arrays, and Arrow can be converted to and from Pandas (sometimes zero-copy). See below for more on conversion through Arrow.</p>
+</section>
+<section id="from-awkward-to-pandas">
+<h2>From Awkward to Pandas<a class="headerlink" href="#from-awkward-to-pandas" title="Permalink to this headline">#</a></h2>
+<p>The function for Awkward → Pandas conversion is <a class="reference internal" href="../reference/generated/ak.to_dataframe.html#ak.to_dataframe" title="ak.to_dataframe"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_dataframe()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;one&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;two&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;three&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">4.4</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;four&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;five&quot;</span><span class="p">},</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1, y: 1, z: &#x27;one&#x27;},
+ {x: 2.2, y: 2, z: &#x27;two&#x27;},
+ {x: 3.3, y: 3, z: &#x27;three&#x27;},
+ {x: 4.4, y: 4, z: &#x27;four&#x27;},
+ {x: 5.5, y: 5, z: &#x27;five&#x27;}]
+----------------------------
+type: 5 * {
+    x: float64,
+    y: int64,
+    z: string
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>x</th>
+      <th>y</th>
+      <th>z</th>
+    </tr>
+    <tr>
+      <th>entry</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1.1</td>
+      <td>1</td>
+      <td>one</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.2</td>
+      <td>2</td>
+      <td>two</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3.3</td>
+      <td>3</td>
+      <td>three</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4.4</td>
+      <td>4</td>
+      <td>four</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5.5</td>
+      <td>5</td>
+      <td>five</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Awkward record field names are converted into Pandas column names, even if nested within lists.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;one&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;two&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;three&quot;</span><span class="p">},</span>
+        <span class="p">],</span>
+        <span class="p">[],</span>
+        <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">4.4</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;four&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;five&quot;</span><span class="p">}],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{x: 1.1, y: 1, z: &#x27;one&#x27;}, {x: 2.2, ...}, {x: 3.3, y: 3, z: &#x27;three&#x27;}],
+ [],
+ [{x: 4.4, y: 4, z: &#x27;four&#x27;}, {x: 5.5, y: 5, z: &#x27;five&#x27;}]]
+-----------------------------------------------------------------------
+type: 3 * var * {
+    x: float64,
+    y: int64,
+    z: string
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>x</th>
+      <th>y</th>
+      <th>z</th>
+    </tr>
+    <tr>
+      <th>entry</th>
+      <th>subentry</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="3" valign="top">0</th>
+      <th>0</th>
+      <td>1.1</td>
+      <td>1</td>
+      <td>one</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.2</td>
+      <td>2</td>
+      <td>two</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3.3</td>
+      <td>3</td>
+      <td>three</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">2</th>
+      <th>0</th>
+      <td>4.4</td>
+      <td>4</td>
+      <td>four</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>5.5</td>
+      <td>5</td>
+      <td>five</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>In this case, we see that the <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;z&quot;</span></code> fields are separate columns, but also that the index is now hierarchical, a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.MultiIndex.html">MultiIndex</a>. Nested lists become MultiIndex rows and nested records become MultiIndex columns.</p>
+<p>Here is an example with three levels of depth:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">3.3</span><span class="p">]],</span>
+        <span class="p">[],</span>
+        <span class="p">[[</span><span class="mf">4.4</span><span class="p">],</span> <span class="p">[</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">]],</span>
+        <span class="p">[[</span><span class="mf">7.7</span><span class="p">]],</span>
+        <span class="p">[[</span><span class="mf">8.8</span><span class="p">]],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[1.1, 2.2], [], [3.3]],
+ [],
+ [[4.4], [5.5, 6.6]],
+ [[7.7]],
+ [[8.8]]]
+-----------------------------
+type: 5 * var * var * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>values</th>
+    </tr>
+    <tr>
+      <th>entry</th>
+      <th>subentry</th>
+      <th>subsubentry</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="3" valign="top">0</th>
+      <th rowspan="2" valign="top">0</th>
+      <th>0</th>
+      <td>1.1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.2</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <th>0</th>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">2</th>
+      <th>0</th>
+      <th>0</th>
+      <td>4.4</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">1</th>
+      <th>0</th>
+      <td>5.5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>6.6</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <th>0</th>
+      <th>0</th>
+      <td>7.7</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <th>0</th>
+      <th>0</th>
+      <td>8.8</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>And here is an example with nested records/hierarchical columns:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;I&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">}},</span> <span class="s2">&quot;II&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">}}}}</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{I: {a: 0, b: {...}}, II: {x: {y: ..., ...}}},
+ {I: {a: 10, b: {...}}, II: {x: {y: ..., ...}}},
+ {I: {a: 20, b: {...}}, II: {x: {y: ..., ...}}},
+ {I: {a: 30, b: {...}}, II: {x: {y: ..., ...}}},
+ {I: {a: 40, b: {...}}, II: {x: {y: ..., ...}}}]
+------------------------------------------------
+type: 5 * {
+    I: {
+        a: int64,
+        b: {
+            i: int64
+        }
+    },
+    II: {
+        x: {
+            y: {
+                z: int64
+            }
+        }
+    }
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+
+    .dataframe thead tr:last-of-type th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="2" halign="left">I</th>
+      <th>II</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>a</th>
+      <th>b</th>
+      <th>x</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>i</th>
+      <th>y</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>z</th>
+    </tr>
+    <tr>
+      <th>entry</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>10</td>
+      <td>10</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>20</td>
+      <td>20</td>
+      <td>20</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>30</td>
+      <td>30</td>
+      <td>30</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>40</td>
+      <td>40</td>
+      <td>40</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Although nested lists and records can be represented using Pandas’s MultiIndex, different-length lists in the same data structure can only be translated without loss into multiple DataFrames. This is because a DataFrame can have only one MultiIndex, but lists of different lengths require different MultiIndexes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">]},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">3.3</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">]},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">]},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">]},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[]},</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: [], y: [4.4, 3.3, 2.2, 1.1]},
+ {x: [1], y: [3.3, 2.2, 1.1]},
+ {x: [1, 2], y: [2.2, 1.1]},
+ {x: [1, 2, 3], y: [1.1]},
+ {x: [1, 2, 3, 4], y: []}]
+----------------------------------
+type: 5 * {
+    x: var * int64,
+    y: var * float64
+}</pre></div></div>
+</div>
+<p>To avoid losing any data, <a class="reference internal" href="../reference/generated/ak.to_dataframe.html#ak.to_dataframe" title="ak.to_dataframe"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_dataframe()</span></code></a> can be used with <code class="docutils literal notranslate"><span class="pre">how=None</span></code> (the default is <code class="docutils literal notranslate"><span class="pre">how=&quot;inner&quot;</span></code>) to return a <em>list</em> of the minimum number of DataFrames needed to encode the data.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">how=None</span></code> mode, <a class="reference internal" href="../reference/generated/ak.to_dataframe.html#ak.to_dataframe" title="ak.to_dataframe"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_dataframe()</span></code></a> always returns a list (sometimes with only one item).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">ak_array</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[                x
+ entry subentry   
+ 1     0         1
+ 2     0         1
+       1         2
+ 3     0         1
+       1         2
+       2         3
+ 4     0         1
+       1         2
+       2         3
+       3         4,
+                   y
+ entry subentry     
+ 0     0         4.4
+       1         3.3
+       2         2.2
+       3         1.1
+ 1     0         3.3
+       1         2.2
+       2         1.1
+ 2     0         2.2
+       1         1.1
+ 3     0         1.1]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The default <code class="docutils literal notranslate"><span class="pre">how=&quot;inner&quot;</span></code> combines the above into a single DataFrame using <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge.html">pd.merge</a>. This operation is lossy.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">ak_array</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>x</th>
+      <th>y</th>
+    </tr>
+    <tr>
+      <th>entry</th>
+      <th>subentry</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <th>0</th>
+      <td>1</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">2</th>
+      <th>0</th>
+      <td>1</td>
+      <td>2.2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>1.1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <th>0</th>
+      <td>1</td>
+      <td>1.1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>The value of <code class="docutils literal notranslate"><span class="pre">how</span></code> is passed to <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge.html">pd.merge</a>, so outer joins are possible as well.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">ak_array</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>x</th>
+      <th>y</th>
+    </tr>
+    <tr>
+      <th>entry</th>
+      <th>subentry</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="4" valign="top">0</th>
+      <th>0</th>
+      <td>NaN</td>
+      <td>4.4</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>NaN</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>NaN</td>
+      <td>2.2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>NaN</td>
+      <td>1.1</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">1</th>
+      <th>0</th>
+      <td>1.0</td>
+      <td>3.3</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>NaN</td>
+      <td>2.2</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>NaN</td>
+      <td>1.1</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">2</th>
+      <th>0</th>
+      <td>1.0</td>
+      <td>2.2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.0</td>
+      <td>1.1</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">3</th>
+      <th>0</th>
+      <td>1.0</td>
+      <td>1.1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th rowspan="4" valign="top">4</th>
+      <th>0</th>
+      <td>1.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4.0</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="conversion-through-apache-arrow">
+<h2>Conversion through Apache Arrow<a class="headerlink" href="#conversion-through-apache-arrow" title="Permalink to this headline">#</a></h2>
+<p>Since <a class="reference external" href="https://arrow.apache.org/">Apache Arrow</a> can be converted to and from Awkward Arrays and Pandas, Arrow can connect Awkward and Pandas in both directions. This is an alternative to <code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_pandas()</span></code> (described above) with different behavior.</p>
+<p>As described in the tutorial on Arrow, the <a class="reference internal" href="../reference/generated/ak.to_arrow.html#ak.to_arrow" title="ak.to_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_arrow()</span></code></a> function returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Arrow</span></code> object. Arrow’s conversion to Pandas requires a <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table" title="(in Apache Arrow v12.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Table</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;one&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;two&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;three&quot;</span><span class="p">},</span>
+        <span class="p">],</span>
+        <span class="p">[],</span>
+        <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">4.4</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;four&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;five&quot;</span><span class="p">}],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{x: 1.1, y: 1, z: &#x27;one&#x27;}, {x: 2.2, ...}, {x: 3.3, y: 3, z: &#x27;three&#x27;}],
+ [],
+ [{x: 4.4, y: 4, z: &#x27;four&#x27;}, {x: 5.5, y: 5, z: &#x27;five&#x27;}]]
+-----------------------------------------------------------------------
+type: 3 * var * {
+    x: float64,
+    y: int64,
+    z: string
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+<span class="n">pa_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;awkward._connect.pyarrow.AwkwardArrowArray object at 0x7f40e2c70160&gt;
+[
+  -- is_valid: all not null
+  -- child 0 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    [
+      1.1,
+      2.2,
+      3.3
+    ]
+  -- child 1 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    [
+      1,
+      2,
+      3
+    ]
+  -- child 2 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    [
+      &quot;one&quot;,
+      &quot;two&quot;,
+      &quot;three&quot;
+    ],
+  -- is_valid: all not null
+  -- child 0 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    []
+  -- child 1 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    []
+  -- child 2 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    [],
+  -- is_valid: all not null
+  -- child 0 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    [
+      4.4,
+      5.5
+    ]
+  -- child 1 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    [
+      4,
+      5
+    ]
+  -- child 2 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+    [
+      &quot;four&quot;,
+      &quot;five&quot;
+    ]
+]
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can build a Table manually, ensuring that we set <code class="docutils literal notranslate"><span class="pre">extensionarray=False</span></code>. The <code class="docutils literal notranslate"><span class="pre">extensionarray</span></code> flag is normally <code class="docutils literal notranslate"><span class="pre">True</span></code>, and enables Awkward to preserve metadata through Arrow transformations. However, tools like Arrow’s Pandas conversion do not recognise Awkward’s special extension type, so we must take care to provide Arrow with native types:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_batches</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">pa</span><span class="o">.</span><span class="n">RecordBatch</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">extensionarray</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">extensionarray</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">extensionarray</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">pa_table</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>pyarrow.Table
+x: large_list&lt;item: double not null&gt;
+  child 0, item: double not null
+y: large_list&lt;item: int64 not null&gt;
+  child 0, item: int64 not null
+z: large_list&lt;item: large_string not null&gt;
+  child 0, item: large_string not null
+----
+x: [[[1.1,2.2,3.3],[],[4.4,5.5]]]
+y: [[[1,2,3],[],[4,5]]]
+z: [[[&quot;one&quot;,&quot;two&quot;,&quot;three&quot;],[],[&quot;four&quot;,&quot;five&quot;]]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_table</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>x</th>
+      <th>y</th>
+      <th>z</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>[1.1, 2.2, 3.3]</td>
+      <td>[1, 2, 3]</td>
+      <td>[one, two, three]</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>[]</td>
+      <td>[]</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>[4.4, 5.5]</td>
+      <td>[4, 5]</td>
+      <td>[four, five]</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Note that this is different from the output of <code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_pandas()</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>x</th>
+      <th>y</th>
+      <th>z</th>
+    </tr>
+    <tr>
+      <th>entry</th>
+      <th>subentry</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="3" valign="top">0</th>
+      <th>0</th>
+      <td>1.1</td>
+      <td>1</td>
+      <td>one</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.2</td>
+      <td>2</td>
+      <td>two</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3.3</td>
+      <td>3</td>
+      <td>three</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">2</th>
+      <th>0</th>
+      <td>4.4</td>
+      <td>4</td>
+      <td>four</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>5.5</td>
+      <td>5</td>
+      <td>five</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>The Awkward → Arrow → Pandas route leaves the lists as nested data within each cell, whereas <a class="reference internal" href="../reference/generated/ak.to_dataframe.html#ak.to_dataframe" title="ak.to_dataframe"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_dataframe()</span></code></a> encodes the nested structure with a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html">MultiIndex/advanced indexing</a> and puts simple values in each cell. Depending on your needs, one or the other may be desirable.</p>
+<p>Finally, the Pandas → Arrow → Awkward is currently the only means of turning Pandas DataFrames into Awkward Arrays.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pokemon</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span>
+    <span class="s2">&quot;https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv&quot;</span>
+<span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">pokemon</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>#</th>
+      <th>Name</th>
+      <th>Type 1</th>
+      <th>Type 2</th>
+      <th>Total</th>
+      <th>HP</th>
+      <th>Attack</th>
+      <th>Defense</th>
+      <th>Sp. Atk</th>
+      <th>Sp. Def</th>
+      <th>Speed</th>
+      <th>Generation</th>
+      <th>Legendary</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>Bulbasaur</td>
+      <td>Grass</td>
+      <td>Poison</td>
+      <td>318</td>
+      <td>45</td>
+      <td>49</td>
+      <td>49</td>
+      <td>65</td>
+      <td>65</td>
+      <td>45</td>
+      <td>1</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>Ivysaur</td>
+      <td>Grass</td>
+      <td>Poison</td>
+      <td>405</td>
+      <td>60</td>
+      <td>62</td>
+      <td>63</td>
+      <td>80</td>
+      <td>80</td>
+      <td>60</td>
+      <td>1</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>Venusaur</td>
+      <td>Grass</td>
+      <td>Poison</td>
+      <td>525</td>
+      <td>80</td>
+      <td>82</td>
+      <td>83</td>
+      <td>100</td>
+      <td>100</td>
+      <td>80</td>
+      <td>1</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3</td>
+      <td>VenusaurMega Venusaur</td>
+      <td>Grass</td>
+      <td>Poison</td>
+      <td>625</td>
+      <td>80</td>
+      <td>100</td>
+      <td>123</td>
+      <td>122</td>
+      <td>120</td>
+      <td>80</td>
+      <td>1</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4</td>
+      <td>Charmander</td>
+      <td>Fire</td>
+      <td>NaN</td>
+      <td>309</td>
+      <td>39</td>
+      <td>52</td>
+      <td>43</td>
+      <td>60</td>
+      <td>50</td>
+      <td>65</td>
+      <td>1</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>795</th>
+      <td>719</td>
+      <td>Diancie</td>
+      <td>Rock</td>
+      <td>Fairy</td>
+      <td>600</td>
+      <td>50</td>
+      <td>100</td>
+      <td>150</td>
+      <td>100</td>
+      <td>150</td>
+      <td>50</td>
+      <td>6</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>796</th>
+      <td>719</td>
+      <td>DiancieMega Diancie</td>
+      <td>Rock</td>
+      <td>Fairy</td>
+      <td>700</td>
+      <td>50</td>
+      <td>160</td>
+      <td>110</td>
+      <td>160</td>
+      <td>110</td>
+      <td>110</td>
+      <td>6</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>797</th>
+      <td>720</td>
+      <td>HoopaHoopa Confined</td>
+      <td>Psychic</td>
+      <td>Ghost</td>
+      <td>600</td>
+      <td>80</td>
+      <td>110</td>
+      <td>60</td>
+      <td>150</td>
+      <td>130</td>
+      <td>70</td>
+      <td>6</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>798</th>
+      <td>720</td>
+      <td>HoopaHoopa Unbound</td>
+      <td>Psychic</td>
+      <td>Dark</td>
+      <td>680</td>
+      <td>80</td>
+      <td>160</td>
+      <td>60</td>
+      <td>170</td>
+      <td>130</td>
+      <td>80</td>
+      <td>6</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>799</th>
+      <td>721</td>
+      <td>Volcanion</td>
+      <td>Fire</td>
+      <td>Water</td>
+      <td>600</td>
+      <td>80</td>
+      <td>110</td>
+      <td>120</td>
+      <td>130</td>
+      <td>90</td>
+      <td>70</td>
+      <td>6</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>800 rows × 13 columns</p>
+</div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{&#x27;#&#x27;: 1, Name: &#x27;Bulbasaur&#x27;, &#x27;Type 1&#x27;: &#x27;Grass&#x27;, &#x27;Type 2&#x27;: &#x27;Poison&#x27;, ...},
+ {&#x27;#&#x27;: 2, Name: &#x27;Ivysaur&#x27;, &#x27;Type 1&#x27;: &#x27;Grass&#x27;, &#x27;Type 2&#x27;: &#x27;Poison&#x27;, ...},
+ {&#x27;#&#x27;: 3, Name: &#x27;Venusaur&#x27;, &#x27;Type 1&#x27;: &#x27;Grass&#x27;, &#x27;Type 2&#x27;: &#x27;Poison&#x27;, ...},
+ {&#x27;#&#x27;: 3, Name: &#x27;VenusaurMega Venusaur&#x27;, &#x27;Type 1&#x27;: &#x27;Grass&#x27;, &#x27;Type 2&#x27;: ..., ...},
+ {&#x27;#&#x27;: 4, Name: &#x27;Charmander&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, &#x27;Type 2&#x27;: None, ...},
+ {&#x27;#&#x27;: 5, Name: &#x27;Charmeleon&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, &#x27;Type 2&#x27;: None, ...},
+ {&#x27;#&#x27;: 6, Name: &#x27;Charizard&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, &#x27;Type 2&#x27;: &#x27;Flying&#x27;, ...},
+ {&#x27;#&#x27;: 6, Name: &#x27;CharizardMega Charizard X&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, ...},
+ {&#x27;#&#x27;: 6, Name: &#x27;CharizardMega Charizard Y&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, ...},
+ {&#x27;#&#x27;: 7, Name: &#x27;Squirtle&#x27;, &#x27;Type 1&#x27;: &#x27;Water&#x27;, &#x27;Type 2&#x27;: None, Total: 314, ...},
+ ...,
+ {&#x27;#&#x27;: 715, Name: &#x27;Noivern&#x27;, &#x27;Type 1&#x27;: &#x27;Flying&#x27;, &#x27;Type 2&#x27;: &#x27;Dragon&#x27;, ...},
+ {&#x27;#&#x27;: 716, Name: &#x27;Xerneas&#x27;, &#x27;Type 1&#x27;: &#x27;Fairy&#x27;, &#x27;Type 2&#x27;: None, ...},
+ {&#x27;#&#x27;: 717, Name: &#x27;Yveltal&#x27;, &#x27;Type 1&#x27;: &#x27;Dark&#x27;, &#x27;Type 2&#x27;: &#x27;Flying&#x27;, ...},
+ {&#x27;#&#x27;: 718, Name: &#x27;Zygarde50% Forme&#x27;, &#x27;Type 1&#x27;: &#x27;Dragon&#x27;, &#x27;Type 2&#x27;: ..., ...},
+ {&#x27;#&#x27;: 719, Name: &#x27;Diancie&#x27;, &#x27;Type 1&#x27;: &#x27;Rock&#x27;, &#x27;Type 2&#x27;: &#x27;Fairy&#x27;, ...},
+ {&#x27;#&#x27;: 719, Name: &#x27;DiancieMega Diancie&#x27;, &#x27;Type 1&#x27;: &#x27;Rock&#x27;, &#x27;Type 2&#x27;: ..., ...},
+ {&#x27;#&#x27;: 720, Name: &#x27;HoopaHoopa Confined&#x27;, &#x27;Type 1&#x27;: &#x27;Psychic&#x27;, ...},
+ {&#x27;#&#x27;: 720, Name: &#x27;HoopaHoopa Unbound&#x27;, &#x27;Type 1&#x27;: &#x27;Psychic&#x27;, ...},
+ {&#x27;#&#x27;: 721, Name: &#x27;Volcanion&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, &#x27;Type 2&#x27;: &#x27;Water&#x27;, ...}]
+--------------------------------------------------------------------------------
+type: 800 * {
+    &quot;#&quot;: ?int64,
+    Name: ?string,
+    &quot;Type 1&quot;: ?string,
+    &quot;Type 2&quot;: ?string,
+    Total: ?int64,
+    HP: ?int64,
+    Attack: ?int64,
+    Defense: ?int64,
+    &quot;Sp. Atk&quot;: ?int64,
+    &quot;Sp. Def&quot;: ?int64,
+    Speed: ?int64,
+    Generation: ?int64,
+    Legendary: ?bool
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(RecordType([OptionType(NumpyType(&#39;int64&#39;)), OptionType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;})), OptionType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;})), OptionType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;})), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;bool&#39;))], [&#39;#&#39;, &#39;Name&#39;, &#39;Type 1&#39;, &#39;Type 2&#39;, &#39;Total&#39;, &#39;HP&#39;, &#39;Attack&#39;, &#39;Defense&#39;, &#39;Sp. Atk&#39;, &#39;Sp. Def&#39;, &#39;Speed&#39;, &#39;Generation&#39;, &#39;Legendary&#39;]), 800, None)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">ak_array</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;#&#39;: 1,
+ &#39;Name&#39;: &#39;Bulbasaur&#39;,
+ &#39;Type 1&#39;: &#39;Grass&#39;,
+ &#39;Type 2&#39;: &#39;Poison&#39;,
+ &#39;Total&#39;: 318,
+ &#39;HP&#39;: 45,
+ &#39;Attack&#39;: 49,
+ &#39;Defense&#39;: 49,
+ &#39;Sp. Atk&#39;: 65,
+ &#39;Sp. Def&#39;: 65,
+ &#39;Speed&#39;: 45,
+ &#39;Generation&#39;: 1,
+ &#39;Legendary&#39;: False}
+</pre></div>
+</div>
+</div>
+</div>
+<p>This array is ready for data analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span><span class="p">[</span><span class="n">ak_array</span><span class="o">.</span><span class="n">Legendary</span><span class="p">]</span><span class="o">.</span><span class="n">Attack</span> <span class="o">-</span> <span class="n">ak_array</span><span class="p">[</span><span class="n">ak_array</span><span class="o">.</span><span class="n">Legendary</span><span class="p">]</span><span class="o">.</span><span class="n">Defense</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[-15,
+ 5,
+ 10,
+ 20,
+ 90,
+ 80,
+ 10,
+ 30,
+ -40,
+ -40,
+ ...,
+ 30,
+ 36,
+ 36,
+ -21,
+ -50,
+ 50,
+ 50,
+ 100,
+ -10]
+-----------------
+type: 65 * ?int64</pre></div></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-convert-arrow.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">How to convert to/from Arrow and Parquet</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-convert-buffers.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Generic buffers</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-pandas-to-awkward">From Pandas to Awkward</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-awkward-to-pandas">From Awkward to Pandas</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-through-apache-arrow">Conversion through Apache Arrow</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-convert-pandas.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/how-to-convert-pandas.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

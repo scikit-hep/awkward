@@ -1,0 +1,41 @@
+ak.str.trim
+===========
+
+Defined in `awkward.operations.str.akstr_trim <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/str/akstr_trim.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/str/akstr_trim.py#L13>`__.
+
+.. py:function:: ak.str.trim(array, characters, *, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param characters: Individual characters to be trimmed from
+                      the string.
+   :type characters: str or bytes
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Removes any leading or trailing characters of ``characters`` from any string
+   or bytestring-valued data.
+
+   If the data are strings, ``characters`` are interpreted as unordered,
+   individual codepoints.
+
+   If the data are bytestrings, ``characters`` are interpreted as unordered,
+   individual bytes.
+
+   Note: this function does not raise an error if the ``array`` does not
+   contain any string or bytestring data.
+
+   Requires the pyarrow library and calls
+   `pyarrow.compute.utf8_trim <https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_trim.html>`__
+   or
+   `pyarrow.compute.ascii_trim <https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_trim.html>`__
+   on strings and bytestrings, respectively.
+
+   See also: :py:obj:`ak.str.trim_whitespace`.
+

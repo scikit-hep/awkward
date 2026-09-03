@@ -1,0 +1,33 @@
+ak.to_layout
+------------
+
+.. py:module: ak.to_layout
+
+Defined in `awkward.operations.ak_to_layout <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/operations/ak_to_layout.py>`__ on `line 21 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/operations/ak_to_layout.py#L21>`__.
+
+.. py:function:: ak.to_layout(array, *, allow_record=True, allow_other=False, regulararray=True)
+
+
+    :param array: Array-like data. May be a high level :py:obj:`ak.Array`, :py:obj:`ak.Record` (if ``allow_record``),
+              :py:obj:`ak.ArrayBuilder`, or low-level :py:obj:`ak.contents.Content`, :py:obj:`ak.record.Record` (if ``allow_record``),
+              or a supported backend array (NumPy ``ndarray``, CuPy ``ndarray``,
+              JAX DeviceArray), data-less TypeTracer, Arrow object, or an arbitrary Python
+              iterable (for :py:obj:`ak.from_iter` to convert).
+    :param allow_record: If True, allow :py:obj:`ak.record.Record` as an output;
+                     otherwise, if the output would be a scalar record, raise an error.
+    :type allow_record: bool
+    :param allow_other: If True, allow non-Awkward outputs; otherwise,
+                    if the output would be another type, raise an error.
+    :type allow_other: bool
+    :param regulararray: Prefer to create :py:obj:`ak.contents.RegularArray` nodes for
+                     regular array objects.
+    :type regulararray: bool
+
+Converts ``array`` (many types supported, including all Awkward Arrays and
+Records) into a :py:obj:`ak.contents.Content` and maybe :py:obj:`ak.record.Record` or
+other types.
+
+This function is usually used to sanitize inputs for other functions; it
+would rarely be used in a data analysis because :py:obj:`ak.contents.Content` and
+:py:obj:`ak.record.Record` are lower-level than :py:obj:`ak.Array`.
+

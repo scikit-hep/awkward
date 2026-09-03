@@ -1,0 +1,15 @@
+ak.typing.SupportsBool
+----------------------
+
+.. py:module: ak.typing.SupportsBool
+
+Defined in `awkward.typing <https://github.com/scikit-hep/awkward-1.0/blob/7fc01d81398dd3ba7bef653768fd6d54d42a38a3/src/awkward/typing.py>`__ on `line 57 <https://github.com/scikit-hep/awkward-1.0/blob/7fc01d81398dd3ba7bef653768fd6d54d42a38a3/src/awkward/typing.py#L57>`__.
+
+.. py:class:: ak.typing.SupportsBool(self)
+
+
+
+.. _ak-typing-supportsbool-__bool__:
+
+.. py:method:: ak.typing.SupportsBool.__bool__(self)
+

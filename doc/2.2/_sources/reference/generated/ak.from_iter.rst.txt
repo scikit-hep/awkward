@@ -1,0 +1,53 @@
+ak.from_iter
+------------
+
+.. py:module: ak.from_iter
+
+Defined in `awkward.operations.ak_from_iter <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_from_iter.py>`__ on `line 15 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_from_iter.py#L15>`__.
+
+.. py:function:: ak.from_iter(iterable, *, allow_record=True, highlevel=True, behavior=None, initial=1024, resize=8)
+
+
+    :param iterable: Data to convert into an Awkward Array.
+    :type iterable: Python iterable
+    :param allow_record: If True, the outermost element may be a record
+                     (returning :py:obj:`ak.Record` or :py:obj:`ak.record.Record` type, depending on
+                     ``highlevel``); if False, the outermost element must be an array.
+    :type allow_record: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param initial: Initial size (in bytes) of buffers used by the ``ak::ArrayBuilder``.
+    :type initial: int
+    :param resize: Resize multiplier for buffers used by the ``ak::ArrayBuilder``;
+               should be strictly greater than 1.
+    :type resize: float
+
+Converts Python data into an Awkward Array.
+
+Any heterogeneous and deeply nested Python data can be converted, but the output
+will never have regular-typed array lengths. Internally, this function uses
+``ak::ArrayBuilder`` (see the high-level :py:obj:`ak.ArrayBuilder` documentation for a
+more complete description).
+
+The following Python types are supported.
+
+* bool, including ``np.bool_``: converted into :py:obj:`ak.contents.NumpyArray`.
+* int, including ``np.integer``: converted into :py:obj:`ak.contents.NumpyArray`.
+* float, including ``np.floating``: converted into :py:obj:`ak.contents.NumpyArray`.
+* bytes: converted into :py:obj:`ak.contents.ListOffsetArray` with parameter
+  ``"__array__"`` equal to ``"bytestring"`` (unencoded bytes).
+* str: converted into :py:obj:`ak.contents.ListOffsetArray` with parameter
+  ``"__array__"`` equal to ``"string"`` (UTF-8 encoded string).
+* tuple: converted into :py:obj:`ak.contents.RecordArray` without field names
+  (i.e. homogeneously typed, uniform sized tuples).
+* dict: converted into :py:obj:`ak.contents.RecordArray` with field names
+  (i.e. homogeneously typed records with the same sets of fields).
+* iterable, including np.ndarray: converted into
+  :py:obj:`ak.contents.ListOffsetArray`.
+
+See also :py:obj:`ak.to_list`.
+

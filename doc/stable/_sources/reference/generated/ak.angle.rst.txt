@@ -1,0 +1,27 @@
+ak.angle
+========
+
+Defined in `awkward.operations.ak_angle <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_angle.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_angle.py#L16>`__.
+
+.. py:function:: ak.angle(val, deg=False, highlevel=True, behavior=None, attrs=None)
+
+   Returns the counterclockwise angle of each complex element in radians or degrees.
+
+   :param val: array_like
+               Input array.
+   :param deg: If True, returns angles in degrees,
+               otherwise in radians.
+   :type deg: bool, default is False
+   :param highlevel: If True, return an :py:obj:`ak.Array`;
+                     otherwise, return a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool, default is True
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   :returns: The counterclockwise angle from the positive real axis on the complex
+             plane in the range ``(-pi, pi]``, with dtype as a float.
+

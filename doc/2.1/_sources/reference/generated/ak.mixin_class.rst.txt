@@ -1,0 +1,24 @@
+ak.mixin_class
+--------------
+
+.. py:module: ak.mixin_class
+
+Defined in `awkward.behaviors.mixins <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/behaviors/mixins.py>`__ on `line 10 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/behaviors/mixins.py#L10>`__.
+
+.. py:function:: ak.mixin_class(registry, name=None)
+
+
+    :param registry: The destination behavior mapping registry. Typically,
+                 this would be the global registry :py:obj:`ak.behavior`, but one may wish
+                 to register methods in an alternative way.
+    :type registry: dict
+    :param name: The name to assign to the behaviour class.
+    :type name: str
+
+This decorator can be used to register a behavior mixin class.
+
+Any inherited behaviors will automatically be made available to the decorated
+class.
+
+See the "Mixin decorators" section of :py:obj:`ak.behavior` for further details.
+

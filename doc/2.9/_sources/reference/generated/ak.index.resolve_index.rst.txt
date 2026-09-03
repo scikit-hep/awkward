@@ -1,0 +1,6 @@
+ak.index.resolve_index
+======================
+
+Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/index.py>`__ on `line 368 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/index.py#L368>`__.
+
+.. py:function:: ak.index.resolve_index(index: Index | LazyIndex, backend) -> Index

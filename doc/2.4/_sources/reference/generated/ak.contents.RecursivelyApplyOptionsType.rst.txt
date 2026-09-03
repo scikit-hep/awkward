@@ -1,0 +1,9 @@
+ak.contents.RecursivelyApplyOptionsType
+---------------------------------------
+
+.. py:module: ak.contents.RecursivelyApplyOptionsType
+
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/contents/content.py>`__ on `line 74 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/contents/content.py#L74>`__.
+
+.. py:class:: ak.contents.RecursivelyApplyOptionsType(self)
+

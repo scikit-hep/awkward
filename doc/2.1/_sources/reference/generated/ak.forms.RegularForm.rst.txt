@@ -1,0 +1,143 @@
+ak.forms.RegularForm
+--------------------
+
+.. py:module: ak.forms.RegularForm
+
+Defined in `awkward.forms.regularform <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/forms/regularform.py>`__ on `line 13 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/forms/regularform.py#L13>`__.
+
+.. py:class:: ak.forms.RegularForm(self, content, size, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-regularform-is_list:
+
+.. py:attribute:: ak.forms.RegularForm.is_list
+    :value: True
+
+
+
+.. _ak-forms-regularform-is_regular:
+
+.. py:attribute:: ak.forms.RegularForm.is_regular
+    :value: True
+
+
+
+.. _ak-forms-regularform-content:
+
+.. py:attribute:: ak.forms.RegularForm.content
+
+
+
+.. _ak-forms-regularform-size:
+
+.. py:attribute:: ak.forms.RegularForm.size
+
+
+
+.. _ak-forms-regularform-copy:
+
+.. py:method:: ak.forms.RegularForm.copy(self, content=unset, size=unset, *, parameters=unset, form_key=unset)
+
+
+
+.. _ak-forms-regularform-simplified:
+
+.. py:method:: ak.forms.RegularForm.simplified(cls, content, size, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-regularform-__repr__:
+
+.. py:method:: ak.forms.RegularForm.__repr__(self)
+
+
+
+.. _ak-forms-regularform-_to_dict_part:
+
+.. py:method:: ak.forms.RegularForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-regularform-_type:
+
+.. py:method:: ak.forms.RegularForm._type(self, typestrs)
+
+
+
+.. _ak-forms-regularform-__eq__:
+
+.. py:method:: ak.forms.RegularForm.__eq__(self, other)
+
+
+
+.. _ak-forms-regularform-purelist_parameter:
+
+.. py:method:: ak.forms.RegularForm.purelist_parameter(self, key)
+
+
+
+.. _ak-forms-regularform-purelist_isregular:
+
+.. py:attribute:: ak.forms.RegularForm.purelist_isregular
+
+
+
+.. _ak-forms-regularform-purelist_depth:
+
+.. py:attribute:: ak.forms.RegularForm.purelist_depth
+
+
+
+.. _ak-forms-regularform-is_identity_like:
+
+.. py:attribute:: ak.forms.RegularForm.is_identity_like
+
+
+
+.. _ak-forms-regularform-minmax_depth:
+
+.. py:attribute:: ak.forms.RegularForm.minmax_depth
+
+
+
+.. _ak-forms-regularform-branch_depth:
+
+.. py:attribute:: ak.forms.RegularForm.branch_depth
+
+
+
+.. _ak-forms-regularform-fields:
+
+.. py:attribute:: ak.forms.RegularForm.fields
+
+
+
+.. _ak-forms-regularform-is_tuple:
+
+.. py:attribute:: ak.forms.RegularForm.is_tuple
+
+
+
+.. _ak-forms-regularform-dimension_optiontype:
+
+.. py:attribute:: ak.forms.RegularForm.dimension_optiontype
+
+
+
+.. _ak-forms-regularform-_columns:
+
+.. py:method:: ak.forms.RegularForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-regularform-_select_columns:
+
+.. py:method:: ak.forms.RegularForm._select_columns(self, index, specifier, matches, output)
+
+
+
+.. _ak-forms-regularform-_column_types:
+
+.. py:method:: ak.forms.RegularForm._column_types(self)
+

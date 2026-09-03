@@ -1,0 +1,25 @@
+ak.ones_like
+------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 1138 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L1138>`__.
+
+.. py:function:: ak.ones_like(array, highlevel=True, behavior=None, dtype=None)
+
+
+    :param array: Array to use as a model for a replacement that contains only ``1``.
+    :param highlevel: If True, return an :py:obj:`ak.Array`;
+                  otherwise, return a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool, default is True
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param dtype: Overrides the data type of the result.
+    :type dtype: None or type
+
+This is the equivalent of NumPy's ``np.ones_like`` for Awkward Arrays.
+
+See :py:obj:`ak.full_like` for details, and see also :py:obj:`ak.zeros_like`.
+
+(There is no equivalent of NumPy's ``np.empty_like`` because Awkward Arrays
+are immutable.)
+

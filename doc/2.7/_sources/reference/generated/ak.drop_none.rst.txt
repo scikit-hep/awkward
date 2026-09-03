@@ -1,0 +1,53 @@
+ak.drop_none
+------------
+
+.. py:module: ak.drop_none
+
+Defined in `awkward.operations.ak_drop_none <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/operations/ak_drop_none.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/operations/ak_drop_none.py#L22>`__.
+
+.. py:function:: ak.drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Data in which to remove Nones.
+    :param axis: If None, the operation drops Nones at all levels of
+             nesting, returning an array of the same dimension, but without Nones.
+             Otherwise, it drops Nones at a specified depth.
+             The outermost dimension is ``0``, followed by ``1``, etc.,
+             and negative values count backward from the innermost: ``-1`` is the
+             innermost dimension, ``-2`` is the next level up, etc.
+    :type axis: None or int
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Removes missing values (None) from a given array.
+
+For example, in the following ``array``,
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[[0]], [[None]], [[1], None], [[2, None]]])
+
+The None value will be removed, resulting in
+
+.. code-block:: python
+
+
+    >>> ak.drop_none(array)
+    <Array [[[0]], [[]], [[1]], [[2]]] type='4 * var * var * int64'>
+
+The default axis is None, however an axis can be specified:
+
+.. code-block:: python
+
+
+    >>> ak.drop_none(array, axis=1)
+    <Array [[[0]], [[None]], [[1]], [[2, None]]] type='4 * var * var * ?int64'>
+

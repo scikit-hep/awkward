@@ -1,0 +1,161 @@
+ak.to_parquet_row_groups
+========================
+
+Defined in `awkward.operations.ak_to_parquet_row_groups <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_to_parquet_row_groups.py>`__ on `line 10 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_to_parquet_row_groups.py#L10>`__.
+
+.. py:function:: ak.to_parquet_row_groups(iterator, destination, *, list_to32=False, string_to32=True, bytestring_to32=True, emptyarray_to=None, categorical_as_dictionary=False, extensionarray=True, count_nulls=True, compression='zstd', compression_level=None, row_group_size=64 * 1024 * 1024, data_page_size=None, parquet_flavor=None, parquet_version='2.4', parquet_page_version='1.0', parquet_metadata_statistics=True, parquet_dictionary_encoding=False, parquet_byte_stream_split=False, parquet_coerce_timestamps=None, parquet_old_int96_timestamps=None, parquet_compliant_nested=False, parquet_extra_options=None, storage_options=None)
+
+   :param iterator: Generator object that iterates over awkward arrays.
+   :param destination: Name of the output file, file path, or
+                       remote URL passed to `fsspec.core.url_to_fs <https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs>`__
+                       for remote writing.
+   :type destination: path-like
+   :param list_to32: If True, convert Awkward lists into 32-bit Arrow lists
+                     if they're small enough, even if it means an extra conversion. Otherwise,
+                     signed 32-bit :py:obj:`ak.types.ListType` maps to Arrow ``ListType``,
+                     signed 64-bit :py:obj:`ak.types.ListType` maps to Arrow ``LargeListType``,
+                     and unsigned 32-bit :py:obj:`ak.types.ListType` picks whichever Arrow type its
+                     values fit into.
+   :type list_to32: bool
+   :param string_to32: Same as the above for Arrow ``string`` and ``large_string``.
+   :type string_to32: bool
+   :param bytestring_to32: Same as the above for Arrow ``binary`` and ``large_binary``.
+   :type bytestring_to32: bool
+   :param emptyarray_to: If None, :py:obj:`ak.types.UnknownType` maps to Arrow's
+                         null type; otherwise, it is converted a given numeric dtype.
+   :type emptyarray_to: None or dtype
+   :param categorical_as_dictionary: If True, :py:obj:`ak.contents.IndexedArray` and
+                                     :py:obj:`ak.contents.IndexedOptionArray` labeled with ``__array__ = "categorical"``
+                                     are mapped to Arrow ``DictionaryArray``; otherwise, the projection is
+                                     evaluated before conversion (always the case without
+                                     ``__array__ = "categorical"``).
+   :type categorical_as_dictionary: bool
+   :param extensionarray: If True, this function returns extended Arrow arrays
+                          (at all levels of nesting), which preserve metadata so that Awkward →
+                          Arrow → Awkward preserves the array's :py:obj:`ak.types.Type` (though not
+                          the :py:obj:`ak.forms.Form`). If False, this function returns generic Arrow arrays
+                          that might be needed for third-party tools that don't recognize Arrow's
+                          extensions. Even with ``extensionarray=False``, the values produced by
+                          Arrow's ``to_pylist`` method are the same as the values produced by Awkward's
+                          :py:obj:`ak.to_list`.
+   :type extensionarray: bool
+   :param count_nulls: If True, count the number of missing values at each level
+                       and include these in the resulting Arrow array, which makes some downstream
+                       applications faster. If False, skip the up-front cost of counting them.
+   :type count_nulls: bool
+   :param compression: Compression algorithm name, passed to
+                       `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                       Parquet supports ``{"NONE", "SNAPPY", "GZIP", "BROTLI", "LZ4", "ZSTD"}``
+                       (where ``"GZIP"`` is also known as "zlib" or "deflate"). If a dict, the keys
+                       are column names (the same column names that :py:obj:`ak.forms.Form.columns` returns
+                       and :py:obj:`ak.forms.Form.select_columns` accepts) and the values are compression
+                       algorithm names, to compress each column differently.
+   :type compression: None, str, or dict
+   :param compression_level: Compression level, passed to
+                             `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                             Compression levels have different meanings for different compression
+                             algorithms: GZIP ranges from 1 to 9, but ZSTD ranges from -7 to 22, for
+                             example. Generally, higher numbers provide slower but smaller compression.
+   :type compression_level: None, int, or dict None
+   :param row_group_size: Maximum number of entries in each row group (except the last),
+                          passed to `pyarrow.parquet.ParquetWriter.write_table <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html#pyarrow.parquet.ParquetWriter.write_table>`__.
+                          If None, the Parquet default of 64 MiB is used.
+   :type row_group_size: int or None
+   :param data_page_size: Number of bytes in each data page, passed to
+                          `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                          If None, the Parquet default of 1 MiB is used.
+   :type data_page_size: None or int
+   :param parquet_flavor: If None, the output Parquet file will follow
+                          Arrow conventions; if ``"spark"``, it will follow Spark conventions. Some
+                          systems, such as Spark and Google BigQuery, might need Spark conventions,
+                          while others might need Arrow conventions. Passed to
+                          `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                          as ``flavor``.
+   :type parquet_flavor: None or ``"spark"``
+   :param parquet_version: Parquet file format version.
+                           Passed to `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                           as ``version``.
+   :type parquet_version: ``"1.0"``, ``"2.4"``, or ``"2.6"``
+   :param parquet_page_version: Parquet page format version.
+                                Passed to `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                                as ``data_page_version``.
+   :type parquet_page_version: ``"1.0"`` or ``"2.0"``
+   :param parquet_metadata_statistics: If True, include summary
+                                       statistics for each data page in the Parquet metadata, which lets some
+                                       applications search for data more quickly (by skipping pages). If a dict
+                                       mapping column names to bool, include summary statistics on only the
+                                       specified columns. Passed to
+                                       `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                                       as ``write_statistics``.
+   :type parquet_metadata_statistics: bool or dict
+   :param parquet_dictionary_encoding: If True, allow Parquet to pre-compress
+                                       with dictionary encoding. If a dict mapping column names to bool, only
+                                       use dictionary encoding on the specified columns. Passed to
+                                       `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                                       as ``use_dictionary``.
+   :type parquet_dictionary_encoding: bool or dict
+   :param parquet_byte_stream_split: If True, pre-compress floating
+                                     point fields (``float32`` or ``float64``) with byte stream splitting, which
+                                     collects all mantissas in one part of the stream and exponents in another.
+                                     Passed to `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                                     as ``use_byte_stream_split``.
+   :type parquet_byte_stream_split: bool or dict
+   :param parquet_coerce_timestamps: If None, any timestamps
+                                     (``datetime64`` data) are coerced to a given resolution depending on
+                                     ``parquet_version``: version ``"1.0"`` and ``"2.4"`` are coerced to microseconds,
+                                     but later versions use the ``datetime64``'s own units. If ``"ms"`` is explicitly
+                                     specified, timestamps are coerced to milliseconds; if ``"us"``, microseconds.
+                                     Passed to `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                                     as ``coerce_timestamps``.
+   :type parquet_coerce_timestamps: None, ``"ms"``, or ``"us"``
+   :param parquet_old_int96_timestamps: If True, use Parquet's INT96 format
+                                        for any timestamps (``datetime64`` data), taking priority over ``parquet_coerce_timestamps``.
+                                        If None, let the ``parquet_flavor`` decide. Passed to
+                                        `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                                        as ``use_deprecated_int96_timestamps``.
+   :type parquet_old_int96_timestamps: None or bool
+   :param parquet_compliant_nested: If True, use the Spark/BigQuery/Parquet
+                                    `convention for nested lists <https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#nested-types>`__,
+                                    in which each list is a one-field record with field name "``element``";
+                                    otherwise, use the Arrow convention, in which the field name is "``item``".
+                                    Passed to `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+                                    as ``use_compliant_nested_type``.
+   :type parquet_compliant_nested: bool
+   :param parquet_extra_options: Any additional options to pass to
+                                 `pyarrow.parquet.ParquetWriter <https://arrow.apache.org/docs/python/generated/pyarrow.parquet.ParquetWriter.html>`__.
+   :type parquet_extra_options: None or dict
+   :param storage_options: Any additional options to pass to
+                           `fsspec.core.url_to_fs <https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs>`__
+                           to open a remote file for writing.
+   :type storage_options: None or dict
+
+   Returns:
+   ``pyarrow._parquet.FileMetaData`` instance
+
+   Writes an iterator over an Awkward Array to a Parquet file in batches (through pyarrow).
+
+       >>> array1 = ak.Array([[1, 2, 3], [], [4, 5], [], [], [6, 7, 8, 9]])
+       >>> ak.to_parquet_row_groups((batch for batch in array1), "array1.parquet")
+       <pyarrow._parquet.FileMetaData object at 0x7f646c38ff40>
+         created_by: parquet-cpp-arrow version 9.0.0
+         num_columns: 1
+         num_rows: 6
+         num_row_groups: 1
+         format_version: 2.6
+         serialized_size: 0
+
+   If the ``array`` does not contain records at top-level, the Arrow table will consist
+   of one field whose name is ``""`` iff. ``extensionarray`` is False.
+
+   If ``extensionarray`` is True``, use a custom Arrow extension to store this array.
+   Otherwise, generic Arrow arrays are used, and if the ``array`` does not
+   contain records at top-level, the Arrow table will consist of one field whose
+   name is ``""``. See :py:obj:`ak.to_arrow_table` for more details.
+
+   Parquet files can maintain the distinction between "option-type but no elements are
+   missing" and "not option-type" at all levels, including the top level. However,
+   there is no distinction between ``?union[X, Y, Z]]`` type and ``union[?X, ?Y, ?Z]`` type.
+   Be aware of these type distinctions when passing data through Arrow or Parquet.
+
+   See also :py:obj:`ak.to_arrow`, which is used as an intermediate step.
+

@@ -1,0 +1,9 @@
+ak.forms.regularize_buffer_key
+------------------------------
+
+.. py:module: ak.forms.regularize_buffer_key
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/form.py>`__ on `line 354 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/form.py#L354>`__.
+
+.. py:function:: ak.forms.regularize_buffer_key(buffer_key)
+

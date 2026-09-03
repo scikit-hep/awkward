@@ -1,0 +1,37 @@
+ak.from_dlpack
+==============
+
+Defined in `awkward.operations.ak_from_dlpack <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_dlpack.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_dlpack.py#L15>`__.
+
+.. py:function:: ak.from_dlpack(array, *, prefer_cpu=True, regulararray=False, highlevel=True, behavior=None, primitive_policy='error', attrs=None)
+
+   :param array: The DLPack-supporting array to convert into an
+                 Awkward Array.
+   :type array: cp.ndarray
+   :param prefer_cpu: If True, and the array device supports both CPU and
+                      GPU backends, prefer the CPU; otherwise, prefer the GPU.
+   :type prefer_cpu: bool
+   :param regulararray: If True and the array is multidimensional,
+                        the dimensions are represented by nested :py:obj:`ak.contents.RegularArray`
+                        nodes; if False and the array is multidimensional, the dimensions
+                        are represented by a multivalued :py:obj:`ak.contents.NumpyArray.shape`.
+                        If the array is one-dimensional, this has no effect.
+   :type regulararray: bool
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Converts a DLPack-aware array into an Awkward Array.
+
+   The resulting layout may involve the following :py:obj:`ak.contents.Content` types
+   (only):
+
+   * :py:obj:`ak.contents.NumpyArray`
+   * :py:obj:`ak.contents.RegularArray` if ``regulararray=True``.
+

@@ -1,0 +1,191 @@
+ak.virtual
+----------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 4043 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L4043>`__.
+
+.. py:function:: ak.virtual(generate, args=(), kwargs=None, form=None, length=None, cache='new', cache_key=None, parameters=None, highlevel=True, behavior=None)
+
+
+    :param generate: Function that makes an array from ``args`` and
+                 ``kwargs``.
+    :type generate: callable
+    :param args: Positional arguments to pass to ``generate``.
+    :type args: tuple
+    :param kwargs: Keyword arguments to pass to ``generate``.
+    :type kwargs: dict
+    :param form: If None, the layout of the generated array
+             is unknown until it is generated, which might require it to be
+             generated earlier than intended; if a Form, use this Form to
+             predict the layout and verify that the generated array complies;
+             if a JSON string, convert the JSON into a Form and use it.
+    :type form: None, Form, or JSON
+    :param length: If None or negative, the length of the generated
+               array is unknown until it is generated, which might require it to
+               be generated earlier than intended; if a non-negative int, use this
+               to predict the length and verify that the generated array complies.
+    :type length: None or int
+    :param cache: If "new", a new dict (keep-forever
+              cache) is created. If None, no cache is used.
+    :type cache: None, "new", or MutableMapping
+    :param cache_key: If None, a unique string is generated for this
+                  virtual array for use with the ``cache`` (unique per Python process);
+                  otherwise, the explicitly provided key is used (which ought to
+                  ensure global uniqueness for the scope in which these arrays are
+                  used).
+    :type cache_key: None or str
+    :param parameters: Parameters for the new
+                   :py:obj:`ak.layout.VirtualArray` node that is created by this operation.
+    :type parameters: None or dict
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Creates a virtual array, an array that is created on demand.
+
+For example, the following array is only created when we try to look at its
+values:
+
+.. code-block:: python
+
+
+    >>> def generate():
+    ...     print("generating")
+    ...     return ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+    ...
+    >>> array = ak.virtual(generate)
+    >>> array
+    generating
+    <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+
+However, just about any kind of query about this ``array`` would cause it to
+be "materialized."
+
+.. code-block:: python
+
+
+    >>> array = ak.virtual(generate)
+    >>> len(array)
+    generating
+    3
+    >>> array = ak.virtual(generate)
+    >>> ak.type(array)
+    generating
+    3 * var * float64
+    >>> array = ak.virtual(generate)
+    >>> array[2]
+    generating
+    <Array [4.4, 5.5] type='2 * float64'>
+
+Since this "materialization" is probably some expensive disk-read, we want
+delay it as much as possible. This can be done by giving the :py:obj:`ak.layout.VirtualArray`
+more information, such as the length. Knowing the length makes it possible to
+slice a virtual array without materializing it.
+
+.. code-block:: python
+
+
+    >>> array = ak.virtual(generate)
+    >>> sliced = array[1:]   # don't know the length; have to materialize
+    generating
+    >>> array = ak.virtual(generate, length=3)
+    >>> sliced = array[1:]   # the length is known; no materialization
+    >>> len(sliced)          # even the length of the sliced array is known
+    2
+
+However, anything that needs more information than just the length will cause
+the virtual array to be materialized.
+
+.. code-block:: python
+
+
+    >>> ak.type(sliced)
+    generating
+    2 * var * float64
+
+To prevent this, we can give it detailed type information, the :py:obj:`ak.forms.Form`.
+
+.. code-block:: python
+
+
+    >>> array = ak.virtual(generate, length=3, form={
+    ...     "class": "ListOffsetArray64",
+    ...     "offsets": "i64",
+    ...     "content": "float64"})
+    >>> sliced = array[1:]
+    >>> ak.type(sliced)
+    2 * var * float64
+
+Of course, _at some point_ the array has to be materialized if we need any
+data values.
+
+.. code-block:: python
+
+
+    >>> selected = sliced[1]
+    generating
+    >>> selected
+    <Array [4.4, 5.5] type='2 * float64'>
+
+Note that you can make arrays of records (:py:obj:`ak.layout.RecordArray`) in which a
+field is virtual.
+
+.. code-block:: python
+
+
+    >>> form = {
+    ...     "class": "ListOffsetArray64",
+    ...     "offsets": "i64",
+    ...     "content": "float64"
+    ... }
+    >>> records = ak.Array({
+    ...     "x": ak.virtual(generate, length=3, form=form),
+    ...     "y": [10, 20, 30]})
+
+You can do simple field slicing without materializing the array.
+
+.. code-block:: python
+
+
+    >>> x = records.x
+    >>> y = records.y
+
+But, of course, any operation that looks at values of that field are going to
+materialize it.
+
+.. code-block:: python
+
+
+    >>> x
+    generating
+    <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+    >>> y
+    <Array [10, 20, 30] type='3 * int64'>
+
+The advantage is that you can make a table of data, most of which resides on
+disk, and only read the values you're interested in. Like all Awkward Arrays,
+the table need not be rectangular.
+
+If you're going to try this trick with :py:obj:`ak.zip`, note that you need to set
+``depth_limit=1`` to avoid materializing the array when it's constructed, since
+:py:obj:`ak.zip` (unlike the dict form of the :py:obj:`ak.Array` constructor) broadcasts its
+arguments together (hence the name "zip").
+
+.. code-block:: python
+
+
+    >>> records = ak.zip({
+    ...     "x": ak.virtual(generate, length=3, form=form),
+    ...     "y": [10, 20, 30]})
+    generating
+    >>> records = ak.zip({
+    ...     "x": ak.virtual(generate, length=3, form=form),
+    ...     "y": [10, 20, 30]}, depth_limit=1)
+
+Functions with a ``lazy`` option, such as :py:obj:`ak.from_parquet` and :py:obj:`ak.from_buffers`,
+construct :py:obj:`ak.layout.RecordArray` of :py:obj:`ak.layout.VirtualArray` in this way.
+
+See also :py:obj:`ak.materialized`.
+

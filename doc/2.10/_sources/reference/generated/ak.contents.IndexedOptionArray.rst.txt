@@ -1,0 +1,267 @@
+ak.contents.IndexedOptionArray
+==============================
+
+Defined in `awkward.contents.indexedoptionarray <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/contents/indexedoptionarray.py>`__ on `line 57 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/contents/indexedoptionarray.py#L57>`__.
+
+.. py:class:: ak.contents.IndexedOptionArray(index, content, *, parameters=None)
+
+
+
+   IndexedOptionArray is an :py:obj:`ak.contents.IndexedArray` for which
+   negative values in the index are interpreted as missing. It represents
+   :py:obj:`ak.types.OptionType` data like :py:obj:`ak.contents.ByteMaskedArray`,
+   :py:obj:`ak.contents.BitMaskedArray`, and :py:obj:`ak.contents.UnmaskedArray`, but
+   the flexibility of the arbitrary ``index`` makes it a common output of
+   many operations.
+
+   IndexedOptionArray doesn't have a direct equivalent in Apache Arrow.
+
+   To illustrate how the constructor arguments are interpreted, the following is a
+   simplified implementation of ``__init__``, ``__len__``, and ``__getitem__``::
+
+       class IndexedOptionArray(Content):
+           def __init__(self, index, content):
+               assert isinstance(index, (Index32, Index64))
+               assert isinstance(content, Content)
+               for x in index:
+                   assert x < len(content)  # index[i] may be negative
+               self.index = index
+               self.content = content
+
+           def __len__(self):
+               return len(self.index)
+
+           def __getitem__(self, where):
+               if isinstance(where, int):
+                   if where < 0:
+                       where += len(self)
+                   assert 0 <= where < len(self)
+                   if self.index[where] < 0:
+                       return None
+                   else:
+                       return self.content[self.index[where]]
+
+               elif isinstance(where, slice) and where.step is None:
+                   return IndexedOptionArray(
+                       self.index[where.start : where.stop], self.content
+                   )
+
+               elif isinstance(where, str):
+                   return IndexedOptionArray(self.index, self.content[where])
+
+               else:
+                   raise AssertionError(where)
+
+
+   .. py:attribute:: _index
+
+
+   .. py:attribute:: _content
+
+
+   .. py:property:: index
+
+
+   .. py:attribute:: form_cls
+      :type:  awkward._typing.Final
+
+
+   .. py:method:: copy(index=UNSET, content=UNSET, *, parameters=UNSET)
+
+
+   .. py:method:: __copy__()
+
+
+   .. py:method:: __deepcopy__(memo)
+
+
+   .. py:method:: simplified(index, content, *, parameters=None)
+      :classmethod:
+
+
+
+   .. py:method:: _form_with_key(getkey: awkward._typing.Callable[[awkward.contents.content.Content], str | None]) -> awkward.forms.indexedoptionform.IndexedOptionForm
+
+
+   .. py:method:: _form_with_key_path(path: awkward.forms.form.FormKeyPathT) -> awkward.forms.indexedoptionform.IndexedOptionForm
+
+
+   .. py:method:: _to_buffers(form: awkward.forms.form.Form, getkey: awkward._typing.Callable[[awkward.contents.content.Content, awkward.forms.form.Form, str], str], container: collections.abc.MutableMapping[str, awkward._nplikes.array_like.ArrayLike], backend: awkward._backends.backend.Backend, byteorder: str)
+
+
+   .. py:method:: _to_typetracer(forget_length: bool) -> awkward._typing.Self
+
+
+   .. py:method:: _touch_data(recursive: bool)
+
+
+   .. py:method:: _touch_shape(recursive: bool)
+
+
+   .. py:property:: length
+      :type: awkward._nplikes.shape.ShapeItem
+
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _repr(indent, pre, post)
+
+
+   .. py:method:: to_IndexedOptionArray64() -> IndexedOptionArray
+
+
+   .. py:method:: to_ByteMaskedArray(valid_when)
+
+
+   .. py:method:: to_BitMaskedArray(valid_when, lsb_order)
+
+
+   .. py:method:: mask_as_bool(valid_when: bool = True) -> awkward._nplikes.array_like.ArrayLike
+
+
+   .. py:method:: _getitem_nothing()
+
+
+   .. py:method:: _is_getitem_at_placeholder() -> bool
+
+
+   .. py:method:: _is_getitem_at_virtual() -> bool
+
+
+   .. py:method:: _getitem_at(where: awkward._nplikes.numpy_like.IndexType)
+
+
+   .. py:method:: _getitem_range(start: awkward._nplikes.numpy_like.IndexType, stop: awkward._nplikes.numpy_like.IndexType) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_field(where: str | awkward._typing.SupportsIndex, only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_fields(where: list[str | awkward._typing.SupportsIndex], only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
+
+
+   .. py:method:: _carry(carry: awkward.index.Index, allow_lazy: bool) -> IndexedOptionArray
+
+
+   .. py:method:: _nextcarry_outindex()
+
+
+   .. py:method:: _getitem_next_jagged_generic(slicestarts, slicestops, slicecontent, tail)
+
+
+   .. py:method:: _getitem_next_jagged(slicestarts: awkward.index.Index, slicestops: awkward.index.Index, slicecontent: awkward.contents.content.Content, tail) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_next(head: awkward._slicing.SliceItem | tuple, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> awkward.contents.content.Content
+
+
+   .. py:method:: project(mask=None)
+
+
+   .. py:method:: _offsets_and_flattened(axis: int, depth: int) -> tuple[awkward.index.Index, awkward.contents.content.Content]
+
+
+   .. py:method:: _mergeable_next(other: awkward.contents.content.Content, mergebool: bool, mergecastable: awkward._typing.Literal[same_kind, equiv, family]) -> bool
+
+
+   .. py:method:: _merging_strategy(others)
+
+
+   .. py:method:: _reverse_merge(other)
+
+
+   .. py:method:: _mergemany(others: collections.abc.Sequence[awkward.contents.content.Content]) -> awkward.contents.content.Content
+
+
+   .. py:method:: _fill_none(value: awkward.contents.content.Content) -> awkward.contents.content.Content
+
+
+   .. py:method:: _local_index(axis, depth)
+
+
+   .. py:method:: _is_subrange_equal(starts, stops, length, sorted=True)
+
+
+   .. py:method:: _numbers_to_type(name, including_unknown)
+
+
+   .. py:method:: _is_unique(negaxis, starts, offsets, outlength)
+
+
+   .. py:method:: _unique(negaxis, starts, offsets, outlength)
+
+
+   .. py:method:: _rearrange_nextshifts(next_length, shifts)
+
+
+   .. py:method:: _rearrange_prepare_next(offsets, outlength)
+
+
+   .. py:method:: _argsort_next(negaxis, starts, shifts, offsets, outlength, ascending, stable)
+
+
+   .. py:method:: _sort_next(negaxis, starts, offsets, outlength, ascending, stable)
+
+
+   .. py:method:: _reduce_next(reducer, negaxis, starts, shifts, offsets, outlength, mask, keepdims, behavior)
+
+
+   .. py:method:: _combinations(n, replacement, recordlookup, parameters, axis, depth)
+
+
+   .. py:method:: _validity_error(path)
+
+
+   .. py:method:: _nbytes_part()
+
+
+   .. py:method:: _pad_none(target, axis, depth, clip)
+
+
+   .. py:method:: _to_arrow(pyarrow: awkward._typing.Any, mask_node: awkward.contents.content.Content | None, validbytes: awkward.contents.content.Content | None, length: int, options: awkward.contents.content.ToArrowOptions)
+
+
+   .. py:method:: _to_cudf(cudf: awkward._typing.Any, mask: awkward.contents.content.Content | None, length: int)
+
+
+   .. py:method:: _to_backend_array(allow_missing, backend)
+
+
+   .. py:method:: _remove_structure(backend: awkward._backends.backend.Backend, options: awkward.contents.content.RemoveStructureOptions) -> list[awkward.contents.content.Content]
+
+
+   .. py:method:: _drop_none() -> awkward.contents.content.Content
+
+
+   .. py:method:: _recursively_apply(action: awkward.contents.content.ImplementsApplyAction, depth: int, depth_context: collections.abc.Mapping[str, awkward._typing.Any] | None, lateral_context: collections.abc.Mapping[str, awkward._typing.Any] | None, options: awkward.contents.content.ApplyActionOptions) -> awkward.contents.content.Content | None
+
+
+   .. py:method:: _to_packed(recursive: bool = True) -> awkward._typing.Self
+
+
+   .. py:method:: _to_list(behavior, json_conversions)
+
+
+   .. py:method:: _to_backend(backend: awkward._backends.backend.Backend) -> awkward._typing.Self
+
+
+   .. py:method:: _materialize(type_) -> awkward._typing.Self
+
+
+   .. py:property:: _is_all_materialized
+      :type: bool
+
+
+
+   .. py:property:: _is_any_materialized
+      :type: bool
+
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Self, index_dtype: bool, numpyarray: bool, all_parameters: bool) -> bool
+
+
+   .. py:method:: _trim() -> awkward._typing.Self
+

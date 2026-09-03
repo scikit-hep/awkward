@@ -1,0 +1,1077 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Min/max/sort one array by another &#8212; Awkward Array 2.8.13 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=cac31c79" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=ec01a7e5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-math-argminmax';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.8';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-math-argminmax.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Awkward Arrays on GPUs" href="how-to-math-gpu.html" />
+    <link rel="prev" title="How to compute statistics on dimensions (mean/var/std)" href="how-to-math-statistics.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.8" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.8.13 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.8.13 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-array-properties.html">Array properties</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-array-properties-named-axis.html">Named axes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std)</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Min/max/sort one array by another</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">Awkward Arrays on GPUs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k"</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-cpp.html">Using arrays in C++</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++ with LayoutBuilder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-cpp-cppyy.html">JIT compiling operations with C++ in cppyy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Special topics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-math.html" class="nav-link">Numerical math</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Min/max/sort one array by another</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="min-max-sort-one-array-by-another">
+<h1>Min/max/sort one array by another<a class="headerlink" href="#min-max-sort-one-array-by-another" title="Link to this heading">#</a></h1>
+<p>A common task in data analysis is to select items from one array that minimizes or maximizes another, or to sort one array by the values of another.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="naive-attempt-goes-wrong">
+<h2>Naive attempt goes wrong<a class="headerlink" href="#naive-attempt-goes-wrong" title="Link to this heading">#</a></h2>
+<p>For instance, in</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">},</span>
+    <span class="p">],</span>
+    <span class="p">[],</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;four&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">4.4</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">},</span>
+    <span class="p">],</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;five&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">},</span>
+    <span class="p">],</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;eight&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">8.8</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;six&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">6.6</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;nine&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">9.9</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;seven&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">7.7</span><span class="p">},</span>
+    <span class="p">],</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>you may want to score each record with a computed value, such as <code class="docutils literal notranslate"><span class="pre">x**2</span> <span class="pre">+</span> <span class="pre">y**2</span></code>, and then select the record with the highest score from each list.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">score</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">score</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[0, 8.84, 2.21],
+ [],
+ [35.4, 19.9],
+ [55.2],
+ [141, 79.6, 179, 108]]
+-----------------------
+backend: cpu
+nbytes: 128 B
+type: 5 * var * float64</pre></div></div>
+</div>
+<p>At first, it would seem that <a class="reference internal" href="../reference/generated/ak.argmax.html#ak.argmax" title="ak.argmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmax()</span></code></a> is what you need to identify the item with the highest score from each list and select it from <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_index</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">best_index</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ None,
+ 0,
+ 0,
+ 2]
+------
+backend: cpu
+nbytes: 45 B
+type: 5 * ?int64</pre></div></div>
+</div>
+<p>However, if you attempt to slice the <code class="docutils literal notranslate"><span class="pre">data</span></code> with this, you’ll either get an indexing error or lists instead of records:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="n">best_index</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ None,
+ [{title: &#x27;zero&#x27;, x: 0, y: 0}, {...}, {title: &#x27;one&#x27;, x: 1, y: 1.1}],
+ [{title: &#x27;zero&#x27;, x: 0, y: 0}, {...}, {title: &#x27;one&#x27;, x: 1, y: 1.1}],
+ [{title: &#x27;four&#x27;, x: 4, y: 4.4}, {title: &#x27;three&#x27;, x: 3, y: 3.3}]]
+--------------------------------------------------------------------
+backend: cpu
+nbytes: 392 B
+type: 5 * option[var * {
+    title: string,
+    x: int64,
+    y: float64
+}]</pre></div></div>
+</div>
+</section>
+<section id="what-happend">
+<h2>What happend?<a class="headerlink" href="#what-happend" title="Link to this heading">#</a></h2>
+<p>Following the logic for <a class="reference internal" href="how-to-math-reducing.html"><span class="doc">reducers</span></a>, the <a class="reference internal" href="../reference/generated/ak.argmin.html#ak.argmin" title="ak.argmin"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmin()</span></code></a> function returns an array with one fewer dimension than the input: the <code class="docutils literal notranslate"><span class="pre">data</span></code> is an array of lists of records, but <code class="docutils literal notranslate"><span class="pre">best_index</span></code> is an array of integers. We want an array of lists of integers.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">keepdims=True</span></code> parameter can ensure that the output has the same number of dimensions as the input:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_index</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">best_index</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1],
+ [None],
+ [0],
+ [0],
+ [2]]
+--------
+backend: cpu
+nbytes: 45 B
+type: 5 * 1 * ?int64</pre></div></div>
+</div>
+<p>Now these integers are at the same level of depth as the records that we want to select:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">best_index</span><span class="p">]</span>
+<span class="n">result</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{title: &#x27;two&#x27;, x: 2, y: 2.2}],
+ [None],
+ [{title: &#x27;four&#x27;, x: 4, y: 4.4}],
+ [{title: &#x27;five&#x27;, x: 5, y: 5.5}],
+ [{title: &#x27;nine&#x27;, x: 9, y: 9.9}]]
+---------------------------------
+backend: cpu
+nbytes: 376 B
+type: 5 * var * ?{
+    title: string,
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<p>In the above, each length-1 list contains the record with the highest <code class="docutils literal notranslate"><span class="pre">score</span></code>. Even the empty list, for which the <a class="reference internal" href="../reference/generated/ak.argmax.html#ak.argmax" title="ak.argmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmax()</span></code></a> is missing (<code class="docutils literal notranslate"><span class="pre">None</span></code>), is now a length-1 list containing <code class="docutils literal notranslate"><span class="pre">None</span></code>. We can remove this length-1 list structure with a slice:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{title: &#x27;two&#x27;, x: 2, y: 2.2},
+ None,
+ {title: &#x27;four&#x27;, x: 4, y: 4.4},
+ {title: &#x27;five&#x27;, x: 5, y: 5.5},
+ {title: &#x27;nine&#x27;, x: 9, y: 9.9}]
+-------------------------------
+backend: cpu
+nbytes: 328 B
+type: 5 * ?{
+    title: string,
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<p>To summarize this as a handy idiom, the way to get the record with maximum <code class="docutils literal notranslate"><span class="pre">data.x**2</span> <span class="pre">+</span> <span class="pre">data.y**2</span></code> from an array of lists of records named <code class="docutils literal notranslate"><span class="pre">data</span></code> is</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="n">ak</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">data</span><span class="o">.</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)][:,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{title: &#x27;two&#x27;, x: 2, y: 2.2},
+ None,
+ {title: &#x27;four&#x27;, x: 4, y: 4.4},
+ {title: &#x27;five&#x27;, x: 5, y: 5.5},
+ {title: &#x27;nine&#x27;, x: 9, y: 9.9}]
+-------------------------------
+backend: cpu
+nbytes: 328 B
+type: 5 * ?{
+    title: string,
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<p>For an array of lists of lists of records, <code class="docutils literal notranslate"><span class="pre">axis=2</span></code> and the final slice would be <code class="docutils literal notranslate"><span class="pre">[:,</span> <span class="pre">:,</span> <span class="pre">0]</span></code>, and so on.</p>
+</section>
+<section id="sorting-by-another-array">
+<h2>Sorting by another array<a class="headerlink" href="#sorting-by-another-array" title="Link to this heading">#</a></h2>
+<p>In addition to selecting items corresponding to the minimum or maximum of some other array, we may want to sort by another array. Just as <a class="reference internal" href="../reference/generated/ak.argmin.html#ak.argmin" title="ak.argmin"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmin()</span></code></a> and <a class="reference internal" href="../reference/generated/ak.argmax.html#ak.argmax" title="ak.argmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmax()</span></code></a> are the functions that would convey indexes from one array to another, <a class="reference internal" href="../reference/generated/ak.argsort.html#ak.argsort" title="ak.argsort"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argsort()</span></code></a> conveys sorted indexes from one array to another array. However, <a class="reference internal" href="../reference/generated/ak.argsort.html#ak.argsort" title="ak.argsort"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argsort()</span></code></a> always maintains the total number of dimensions, so we don’t need to worry about <code class="docutils literal notranslate"><span class="pre">keepdims</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sorted_indexes</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+<span class="n">sorted_indexes</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[0, 2, 1],
+ [],
+ [1, 0],
+ [0],
+ [1, 3, 0, 2]]
+--------------
+backend: cpu
+nbytes: 128 B
+type: 5 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">[</span><span class="n">sorted_indexes</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{title: &#x27;zero&#x27;, x: 0, y: 0}, {...}, {title: &#x27;two&#x27;, x: 2, y: 2.2}],
+ [],
+ [{title: &#x27;three&#x27;, x: 3, y: 3.3}, {title: &#x27;four&#x27;, x: 4, y: 4.4}],
+ [{title: &#x27;five&#x27;, x: 5, y: 5.5}],
+ [{title: &#x27;six&#x27;, x: 6, y: 6.6}, {...}, ..., {title: &#x27;nine&#x27;, x: 9, y: 9.9}]]
+---------------------------------------------------------------------------
+backend: cpu
+nbytes: 416 B
+type: 5 * var * {
+    title: string,
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<p>This sorted data has the same type as <code class="docutils literal notranslate"><span class="pre">data</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>5 * var * {
+    title: string,
+    x: int64,
+    y: float64
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>It’s exactly what we want. <a class="reference internal" href="../reference/generated/ak.argsort.html#ak.argsort" title="ak.argsort"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argsort()</span></code></a> is easier to use than <a class="reference internal" href="../reference/generated/ak.argmin.html#ak.argmin" title="ak.argmin"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmin()</span></code></a> and <a class="reference internal" href="../reference/generated/ak.argmax.html#ak.argmax" title="ak.argmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmax()</span></code></a>.</p>
+</section>
+<section id="getting-the-top-n-items">
+<h2>Getting the top <em>n</em> items<a class="headerlink" href="#getting-the-top-n-items" title="Link to this heading">#</a></h2>
+<p>The <a class="reference internal" href="../reference/generated/ak.min.html#ak.min" title="ak.min"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.min()</span></code></a>, <a class="reference internal" href="../reference/generated/ak.max.html#ak.max" title="ak.max"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.max()</span></code></a>, <a class="reference internal" href="../reference/generated/ak.argmin.html#ak.argmin" title="ak.argmin"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmin()</span></code></a>, and <a class="reference internal" href="../reference/generated/ak.argmax.html#ak.argmax" title="ak.argmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmax()</span></code></a> functions select one extreme value. If you want the top <em>n</em> items (with <em>n ≠ 1</em>), you can use <a class="reference internal" href="../reference/generated/ak.sort.html#ak.sort" title="ak.sort"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.sort()</span></code></a> or <a class="reference internal" href="../reference/generated/ak.argsort.html#ak.argsort" title="ak.argsort"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argsort()</span></code></a>, followed by a slice:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">top2</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">ak</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">score</span><span class="p">)][:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">top2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{title: &#x27;zero&#x27;, x: 0, y: 0}, {title: &#x27;one&#x27;, x: 1, y: 1.1}],
+ [],
+ [{title: &#x27;three&#x27;, x: 3, y: 3.3}, {title: &#x27;four&#x27;, x: 4, y: 4.4}],
+ [{title: &#x27;five&#x27;, x: 5, y: 5.5}],
+ [{title: &#x27;six&#x27;, x: 6, y: 6.6}, {title: &#x27;seven&#x27;, x: 7, y: 7.7}]]
+-----------------------------------------------------------------
+backend: cpu
+nbytes: 392 B
+type: 5 * var * {
+    title: string,
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<p>Notice, though, that not all of these lists have length 2. The lists with 0 or 1 input items have 0 or 1 output items: these lists have <em>up to</em> length 2. That may be fine, but the example with <a class="reference internal" href="../reference/generated/ak.argmax.html#ak.argmax" title="ak.argmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmax()</span></code></a>, above, resulted in <code class="docutils literal notranslate"><span class="pre">None</span></code> for an empty list. We could emulate that with <a class="reference internal" href="../reference/generated/ak.pad_none.html#ak.pad_none" title="ak.pad_none"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.pad_none()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">padded</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">pad_none</span><span class="p">(</span><span class="n">top2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">padded</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{title: &#x27;zero&#x27;, x: 0, y: 0}, {title: &#x27;one&#x27;, x: 1, y: 1.1}],
+ [None, None],
+ [{title: &#x27;three&#x27;, x: 3, y: 3.3}, {title: &#x27;four&#x27;, x: 4, y: 4.4}],
+ [{title: &#x27;five&#x27;, x: 5, y: 5.5}, None],
+ [{title: &#x27;six&#x27;, x: 6, y: 6.6}, {title: &#x27;seven&#x27;, x: 7, y: 7.7}]]
+-----------------------------------------------------------------
+backend: cpu
+nbytes: 416 B
+type: 5 * var * ?{
+    title: string,
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<p>The data type still says “<code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">*</span></code>”, meaning that the lists are allowed to be variable-length, even though they happen to all have length 2. At this point, we might not care because that’s all we need in order to convert these fields into NumPy arrays (e.g. for some machine learning process):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">padded</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>masked_array(
+  data=[[0, 1],
+        [--, --],
+        [3, 4],
+        [5, --],
+        [6, 7]],
+  mask=[[False, False],
+        [ True,  True],
+        [False, False],
+        [False,  True],
+        [False, False]],
+  fill_value=999999)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">padded</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>masked_array(
+  data=[[0.0, 1.1],
+        [--, --],
+        [3.3, 4.4],
+        [5.5, --],
+        [6.6, 7.7]],
+  mask=[[False, False],
+        [ True,  True],
+        [False, False],
+        [False,  True],
+        [False, False]],
+  fill_value=1e+20)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Or we might want to force the data type to ensure that the lists have length 2, using <a class="reference internal" href="../reference/generated/ak.to_regular.html#ak.to_regular" title="ak.to_regular"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_regular()</span></code></a>, <a class="reference internal" href="../reference/generated/ak.enforce_type.html#ak.enforce_type" title="ak.enforce_type"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.enforce_type()</span></code></a>, or just by passing <code class="docutils literal notranslate"><span class="pre">clip=True</span></code> in the original <a class="reference internal" href="../reference/generated/ak.pad_none.html#ak.pad_none" title="ak.pad_none"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.pad_none()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_regular</span><span class="p">(</span><span class="n">padded</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{title: &#x27;zero&#x27;, x: 0, y: 0}, {title: &#x27;one&#x27;, x: 1, y: 1.1}],
+ [None, None],
+ [{title: &#x27;three&#x27;, x: 3, y: 3.3}, {title: &#x27;four&#x27;, x: 4, y: 4.4}],
+ [{title: &#x27;five&#x27;, x: 5, y: 5.5}, None],
+ [{title: &#x27;six&#x27;, x: 6, y: 6.6}, {title: &#x27;seven&#x27;, x: 7, y: 7.7}]]
+-----------------------------------------------------------------
+backend: cpu
+nbytes: 368 B
+type: 5 * 2 * ?{
+    title: string,
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<p>(Now the list lengths are “<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span></code>”, rather than “<code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">*</span></code>”.)</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-math-statistics.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">How to compute statistics on dimensions (mean/var/std)</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-math-gpu.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Awkward Arrays on GPUs</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#naive-attempt-goes-wrong">Naive attempt goes wrong</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-happend">What happend?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sorting-by-another-array">Sorting by another array</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-the-top-n-items">Getting the top <em>n</em> items</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-math-argminmax.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/user-guide/how-to-math-argminmax.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

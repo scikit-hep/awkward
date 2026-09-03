@@ -1,0 +1,389 @@
+ak.contents.RecordArray
+-----------------------
+
+.. py:module: ak.contents.RecordArray
+
+Defined in `awkward.contents.recordarray <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/contents/recordarray.py>`__ on `line 63 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/contents/recordarray.py#L63>`__.
+
+.. py:class:: ak.contents.RecordArray(self, contents, fields, length=None, *, parameters=None, backend=None)
+
+RecordArray represents an array of tuples or records, all with the
+same type. Its ``contents`` is an ordered list of arrays.
+
+* If ``fields`` is None, the data are tuples, indexed only by their order.
+* Otherwise, ``fields`` is an ordered list of names with the same length as
+  the ``contents``, associating a field name to every content.
+
+The length of the RecordArray, if not given, is the length of its shortest
+content; all are aligned element-by-element. If a RecordArray has zero contents,
+it may still represent a non-empty array. In that case, its length is specified
+by a ``length`` parameter.
+
+RecordArrays correspond to Apache Arrow's
+`struct type <https://arrow.apache.org/docs/format/Columnar.html#struct-layout>`__.
+
+To illustrate how the constructor arguments are interpreted, the following is a
+simplified implementation of ``__init__``, ``__len__``, and ``__getitem__``:
+
+.. code-block:: python
+
+
+    class RecordArray(Content):
+        def __init__(self, contents, fields, length):
+            assert isinstance(contents, list)
+            assert isinstance(length, int)
+            for x in contents:
+                assert isinstance(x, Content)
+                assert len(x) >= length
+            assert fields is None or isinstance(fields, list)
+            if isinstance(fields, list):
+                assert len(fields) == len(contents)
+                for x in fields:
+                    assert isinstance(x, str)
+            self.contents = contents
+            self.fields = fields
+            self.length = length
+
+        def __len__(self):
+            return self.length
+
+        def __getitem__(self, where):
+            if isinstance(where, int):
+                if where < 0:
+                    where += len(self)
+                assert 0 <= where < len(self)
+                record = [x[where] for x in self.contents]
+                if self.fields is None:
+                    return tuple(record)
+                else:
+                    return dict(zip(self.fields, record))
+
+            elif isinstance(where, slice) and where.step is None:
+                if len(self.contents) == 0:
+                    start = min(max(where.start, 0), self.length)
+                    stop = min(max(where.stop, 0), self.length)
+                    if stop < start:
+                        stop = start
+                    return RecordArray([], self.fields, stop - start)
+                else:
+                    return RecordArray(
+                        [x[where] for x in self.contents],
+                        self.fields,
+                        where.stop - where.start,
+                    )
+
+            elif isinstance(where, str):
+                if self.fields is None:
+                    try:
+                        i = int(where)
+                    except ValueError:
+                        pass
+                    else:
+                        if i < len(self.contents):
+                            return self.contents[i][0 : len(self)]
+                else:
+                    try:
+                        i = self.fields.index(where)
+                    except ValueError:
+                        pass
+                    else:
+                        return self.contents[i][0 : len(self)]
+                raise ValueError("field " + repr(where) + " not found")
+
+            else:
+                raise AssertionError(where)
+
+
+
+.. _ak-contents-recordarray-copy:
+
+.. py:method:: ak.contents.RecordArray.copy(self, contents=UNSET, fields=UNSET, length=UNSET, *, parameters=UNSET, backend=UNSET)
+
+
+
+.. _ak-contents-recordarray-__copy__:
+
+.. py:method:: ak.contents.RecordArray.__copy__(self)
+
+
+
+.. _ak-contents-recordarray-__deepcopy__:
+
+.. py:method:: ak.contents.RecordArray.__deepcopy__(self, memo)
+
+
+
+.. _ak-contents-recordarray-simplified:
+
+.. py:method:: ak.contents.RecordArray.simplified(cls, contents, fields, length=None, *, parameters=None, backend=None)
+
+
+
+.. _ak-contents-recordarray-to_tuple:
+
+.. py:method:: ak.contents.RecordArray.to_tuple(self)
+
+
+
+.. _ak-contents-recordarray-_form_with_key:
+
+.. py:method:: ak.contents.RecordArray._form_with_key(self, getkey)
+
+
+
+.. _ak-contents-recordarray-_form_with_key_path:
+
+.. py:method:: ak.contents.RecordArray._form_with_key_path(self, path)
+
+
+
+.. _ak-contents-recordarray-_to_buffers:
+
+.. py:method:: ak.contents.RecordArray._to_buffers(self, form, getkey, container, backend, byteorder)
+
+
+
+.. _ak-contents-recordarray-_to_typetracer:
+
+.. py:method:: ak.contents.RecordArray._to_typetracer(self, forget_length)
+
+
+
+.. _ak-contents-recordarray-_touch_data:
+
+.. py:method:: ak.contents.RecordArray._touch_data(self, recursive)
+
+
+
+.. _ak-contents-recordarray-_touch_shape:
+
+.. py:method:: ak.contents.RecordArray._touch_shape(self, recursive)
+
+
+
+.. _ak-contents-recordarray-length:
+
+.. py:attribute:: ak.contents.RecordArray.length
+
+
+
+.. _ak-contents-recordarray-__repr__:
+
+.. py:method:: ak.contents.RecordArray.__repr__(self)
+
+
+
+.. _ak-contents-recordarray-_repr:
+
+.. py:method:: ak.contents.RecordArray._repr(self, indent, pre, post)
+
+
+
+.. _ak-contents-recordarray-content:
+
+.. py:method:: ak.contents.RecordArray.content(self, index_or_field)
+
+
+
+.. _ak-contents-recordarray-maybe_content:
+
+.. py:method:: ak.contents.RecordArray.maybe_content(self, index_or_field)
+
+
+
+.. _ak-contents-recordarray-_getitem_nothing:
+
+.. py:method:: ak.contents.RecordArray._getitem_nothing(self)
+
+
+
+.. _ak-contents-recordarray-_is_getitem_at_placeholder:
+
+.. py:method:: ak.contents.RecordArray._is_getitem_at_placeholder(self)
+
+
+
+.. _ak-contents-recordarray-_getitem_at:
+
+.. py:method:: ak.contents.RecordArray._getitem_at(self, where)
+
+
+
+.. _ak-contents-recordarray-_getitem_range:
+
+.. py:method:: ak.contents.RecordArray._getitem_range(self, start, stop)
+
+
+
+.. _ak-contents-recordarray-_getitem_field:
+
+.. py:method:: ak.contents.RecordArray._getitem_field(self, where, only_fields=())
+
+
+
+.. _ak-contents-recordarray-_getitem_fields:
+
+.. py:method:: ak.contents.RecordArray._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-contents-recordarray-_carry:
+
+.. py:method:: ak.contents.RecordArray._carry(self, carry, allow_lazy)
+
+
+
+.. _ak-contents-recordarray-_getitem_next_jagged:
+
+.. py:method:: ak.contents.RecordArray._getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-recordarray-_getitem_next:
+
+.. py:method:: ak.contents.RecordArray._getitem_next(self, head, tail, advanced)
+
+
+
+.. _ak-contents-recordarray-_offsets_and_flattened:
+
+.. py:method:: ak.contents.RecordArray._offsets_and_flattened(self, axis, depth)
+
+
+
+.. _ak-contents-recordarray-_mergeable_next:
+
+.. py:method:: ak.contents.RecordArray._mergeable_next(self, other, mergebool)
+
+
+
+.. _ak-contents-recordarray-_mergemany:
+
+.. py:method:: ak.contents.RecordArray._mergemany(self, others)
+
+
+
+.. _ak-contents-recordarray-_fill_none:
+
+.. py:method:: ak.contents.RecordArray._fill_none(self, value)
+
+
+
+.. _ak-contents-recordarray-_local_index:
+
+.. py:method:: ak.contents.RecordArray._local_index(self, axis, depth)
+
+
+
+.. _ak-contents-recordarray-_numbers_to_type:
+
+.. py:method:: ak.contents.RecordArray._numbers_to_type(self, name, including_unknown)
+
+
+
+.. _ak-contents-recordarray-_is_unique:
+
+.. py:method:: ak.contents.RecordArray._is_unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-recordarray-_unique:
+
+.. py:method:: ak.contents.RecordArray._unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-recordarray-_argsort_next:
+
+.. py:method:: ak.contents.RecordArray._argsort_next(self, negaxis, starts, shifts, parents, outlength, ascending, stable)
+
+
+
+.. _ak-contents-recordarray-_sort_next:
+
+.. py:method:: ak.contents.RecordArray._sort_next(self, negaxis, starts, parents, outlength, ascending, stable)
+
+
+
+.. _ak-contents-recordarray-_combinations:
+
+.. py:method:: ak.contents.RecordArray._combinations(self, n, replacement, recordlookup, parameters, axis, depth)
+
+
+
+.. _ak-contents-recordarray-_reduce_next:
+
+.. py:method:: ak.contents.RecordArray._reduce_next(self, reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims, behavior)
+
+
+
+.. _ak-contents-recordarray-_validity_error:
+
+.. py:method:: ak.contents.RecordArray._validity_error(self, path)
+
+
+
+.. _ak-contents-recordarray-_nbytes_part:
+
+.. py:method:: ak.contents.RecordArray._nbytes_part(self)
+
+
+
+.. _ak-contents-recordarray-_pad_none:
+
+.. py:method:: ak.contents.RecordArray._pad_none(self, target, axis, depth, clip)
+
+
+
+.. _ak-contents-recordarray-_to_arrow:
+
+.. py:method:: ak.contents.RecordArray._to_arrow(self, pyarrow, mask_node, validbytes, length, options)
+
+
+
+.. _ak-contents-recordarray-_to_cudf:
+
+.. py:method:: ak.contents.RecordArray._to_cudf(self, cudf, mask, length)
+
+
+
+.. _ak-contents-recordarray-_to_backend_array:
+
+.. py:method:: ak.contents.RecordArray._to_backend_array(self, allow_missing, backend)
+
+
+
+.. _ak-contents-recordarray-_remove_structure:
+
+.. py:method:: ak.contents.RecordArray._remove_structure(self, backend, options)
+
+
+
+.. _ak-contents-recordarray-_recursively_apply:
+
+.. py:method:: ak.contents.RecordArray._recursively_apply(self, action, depth, depth_context, lateral_context, options)
+
+
+
+.. _ak-contents-recordarray-to_packed:
+
+.. py:method:: ak.contents.RecordArray.to_packed(self, recursive=True)
+
+
+
+.. _ak-contents-recordarray-_to_list:
+
+.. py:method:: ak.contents.RecordArray._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-recordarray-_to_backend:
+
+.. py:method:: ak.contents.RecordArray._to_backend(self, backend)
+
+
+
+.. _ak-contents-recordarray-_is_equal_to:
+
+.. py:method:: ak.contents.RecordArray._is_equal_to(self, other, index_dtype, numpyarray, all_parameters)
+

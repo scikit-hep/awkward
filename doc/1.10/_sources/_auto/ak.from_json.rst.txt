@@ -1,0 +1,49 @@
+ak.from_json
+------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 1022 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L1022>`__.
+
+.. py:function:: ak.from_json(source, nan_string=None, infinity_string=None, minus_infinity_string=None, complex_record_fields=None, highlevel=True, behavior=None, initial=1024, resize=1.5, buffersize=65536)
+
+
+    :param source: JSON-formatted string or filename to convert into an array.
+    :type source: str
+    :param nan_string: If not None, strings with this value will be
+                   interpreted as floating-point NaN values.
+    :type nan_string: None or str
+    :param infinity_string: If not None, strings with this value will
+                        be interpreted as floating-point positive infinity values.
+    :type infinity_string: None or str
+    :param minus_infinity_string: If not None, strings with this value
+                              will be interpreted as floating-point negative infinity values.
+    :type minus_infinity_string: None or str
+    :param complex_record_fields: If not None, defines a pair of
+                              field names to interpret records as complex numbers.
+    :type complex_record_fields: None or (str, str)
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param initial: Initial size (in bytes) of buffers used by
+                :py:obj:`ak.layout.ArrayBuilder` (see :py:obj:`ak.layout.ArrayBuilderOptions`).
+    :type initial: int
+    :param resize: Resize multiplier for buffers used by
+               :py:obj:`ak.layout.ArrayBuilder` (see :py:obj:`ak.layout.ArrayBuilderOptions`);
+               should be strictly greater than 1.
+    :type resize: float
+    :param buffersize: Size (in bytes) of the buffer used by the JSON
+                   parser.
+    :type buffersize: int
+
+Converts a JSON string into an Awkward Array.
+
+Internally, this function uses :py:obj:`ak.layout.ArrayBuilder` (see the high-level
+:py:obj:`ak.ArrayBuilder` documentation for a more complete description), so it
+has the same flexibility and the same constraints. Any heterogeneous
+and deeply nested JSON can be converted, but the output will never have
+regular-typed array lengths.
+
+See also :py:obj:`ak.to_json`.
+

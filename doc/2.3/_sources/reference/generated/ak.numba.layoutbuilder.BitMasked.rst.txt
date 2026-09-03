@@ -1,0 +1,109 @@
+ak.numba.layoutbuilder.BitMasked
+--------------------------------
+
+.. py:module: ak.numba.layoutbuilder.BitMasked
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/numba/layoutbuilder.py>`__ on `line 427 <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/numba/layoutbuilder.py#L427>`__.
+
+.. py:class:: ak.numba.layoutbuilder.BitMasked(self, dtype, content, valid_when, lsb_order, *, parameters=None, initial=1024, resize=8.0)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-content:
+
+.. py:attribute:: ak.numba.layoutbuilder.BitMasked.content
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-valid_when:
+
+.. py:attribute:: ak.numba.layoutbuilder.BitMasked.valid_when
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-lsb_order:
+
+.. py:attribute:: ak.numba.layoutbuilder.BitMasked.lsb_order
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.BitMasked.form
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-_append_begin:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked._append_begin(self)
+
+Private helper function.
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-_append_end:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked._append_end(self)
+
+Private helper function.
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-append_valid:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.append_valid(self)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-extend_valid:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.extend_valid(self, size)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-append_invalid:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.append_invalid(self)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-extend_invalid:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.extend_invalid(self, size)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-clear:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-bitmasked-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.BitMasked.snapshot(self)
+

@@ -1,0 +1,42 @@
+ak.from_regular
+===============
+
+Defined in `awkward.operations.ak_from_regular <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_from_regular.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_from_regular.py#L18>`__.
+
+.. py:function:: ak.from_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None)
+
+   Converts one or all regular axes into irregular ones.
+
+   See also :py:obj:`ak.to_regular`.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param axis: The dimension at which this operation is applied.
+                The outermost dimension is ``0``, followed by ``1``, etc., and negative
+                values count backward from the innermost: ``-1`` is the innermost
+                dimension, ``-2`` is the next level up, etc. If None, convert all
+                regular dimensions into variable ones.
+   :type axis: int or None
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   :returns: An array with one or all regular axes converted to irregular (var) axes.
+
+   .. rubric:: Examples
+
+   >>> regular = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+   >>> regular.type.show()
+   2 * 3 * 5 * int64
+   >>> ak.from_regular(regular).type.show()
+   2 * var * 5 * int64
+   >>> ak.from_regular(regular, axis=2).type.show()
+   2 * 3 * var * int64
+   >>> ak.from_regular(regular, axis=-1).type.show()
+   2 * 3 * var * int64
+

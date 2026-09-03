@@ -1,0 +1,149 @@
+ak.forms.EmptyForm
+------------------
+
+.. py:module: ak.forms.EmptyForm
+
+Defined in `awkward.forms.emptyform <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/forms/emptyform.py>`__ on `line 15 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/forms/emptyform.py#L15>`__.
+
+.. py:class:: ak.forms.EmptyForm(self, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-emptyform-is_numpy:
+
+.. py:attribute:: ak.forms.EmptyForm.is_numpy
+    :value: True
+
+
+
+.. _ak-forms-emptyform-is_unknown:
+
+.. py:attribute:: ak.forms.EmptyForm.is_unknown
+    :value: True
+
+
+
+.. _ak-forms-emptyform-copy:
+
+.. py:method:: ak.forms.EmptyForm.copy(self, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-emptyform-simplified:
+
+.. py:method:: ak.forms.EmptyForm.simplified(cls, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-emptyform-__repr__:
+
+.. py:method:: ak.forms.EmptyForm.__repr__(self)
+
+
+
+.. _ak-forms-emptyform-_to_dict_part:
+
+.. py:method:: ak.forms.EmptyForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-emptyform-type:
+
+.. py:attribute:: ak.forms.EmptyForm.type
+
+
+
+.. _ak-forms-emptyform-__eq__:
+
+.. py:method:: ak.forms.EmptyForm.__eq__(self, other)
+
+
+
+.. _ak-forms-emptyform-to_numpyform:
+
+.. py:method:: ak.forms.EmptyForm.to_NumpyForm(self, *args)
+
+
+
+.. _ak-forms-emptyform-purelist_parameter:
+
+.. py:method:: ak.forms.EmptyForm.purelist_parameter(self, key)
+
+
+
+.. _ak-forms-emptyform-purelist_isregular:
+
+.. py:attribute:: ak.forms.EmptyForm.purelist_isregular
+
+
+
+.. _ak-forms-emptyform-purelist_depth:
+
+.. py:attribute:: ak.forms.EmptyForm.purelist_depth
+
+
+
+.. _ak-forms-emptyform-is_identity_like:
+
+.. py:attribute:: ak.forms.EmptyForm.is_identity_like
+
+
+
+.. _ak-forms-emptyform-minmax_depth:
+
+.. py:attribute:: ak.forms.EmptyForm.minmax_depth
+
+
+
+.. _ak-forms-emptyform-branch_depth:
+
+.. py:attribute:: ak.forms.EmptyForm.branch_depth
+
+
+
+.. _ak-forms-emptyform-fields:
+
+.. py:attribute:: ak.forms.EmptyForm.fields
+
+
+
+.. _ak-forms-emptyform-is_tuple:
+
+.. py:attribute:: ak.forms.EmptyForm.is_tuple
+
+
+
+.. _ak-forms-emptyform-dimension_optiontype:
+
+.. py:attribute:: ak.forms.EmptyForm.dimension_optiontype
+
+
+
+.. _ak-forms-emptyform-_columns:
+
+.. py:method:: ak.forms.EmptyForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-emptyform-_select_columns:
+
+.. py:method:: ak.forms.EmptyForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-emptyform-_prune_columns:
+
+.. py:method:: ak.forms.EmptyForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-emptyform-_column_types:
+
+.. py:method:: ak.forms.EmptyForm._column_types(self)
+
+
+
+.. _ak-forms-emptyform-_length_one_buffer_lengths:
+
+.. py:method:: ak.forms.EmptyForm._length_one_buffer_lengths(self)
+

@@ -1,0 +1,93 @@
+ak.forms.IndexedOptionForm
+--------------------------
+
+.. py:module: ak.forms.IndexedOptionForm
+
+Defined in `awkward.forms.indexedoptionform <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/forms/indexedoptionform.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/forms/indexedoptionform.py#L23>`__.
+
+.. py:class:: ak.forms.IndexedOptionForm(self, index, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-indexedoptionform-index:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.index
+
+
+
+.. _ak-forms-indexedoptionform-content:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.content
+
+
+
+.. _ak-forms-indexedoptionform-copy:
+
+.. py:method:: ak.forms.IndexedOptionForm.copy(self, index=UNSET, content=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-indexedoptionform-simplified:
+
+.. py:method:: ak.forms.IndexedOptionForm.simplified(cls, index, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-indexedoptionform-__repr__:
+
+.. py:method:: ak.forms.IndexedOptionForm.__repr__(self)
+
+
+
+.. _ak-forms-indexedoptionform-_to_dict_part:
+
+.. py:method:: ak.forms.IndexedOptionForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-indexedoptionform-type:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.type
+
+
+
+.. _ak-forms-indexedoptionform-_columns:
+
+.. py:method:: ak.forms.IndexedOptionForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-indexedoptionform-_prune_columns:
+
+.. py:method:: ak.forms.IndexedOptionForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-indexedoptionform-_select_columns:
+
+.. py:method:: ak.forms.IndexedOptionForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-indexedoptionform-_column_types:
+
+.. py:method:: ak.forms.IndexedOptionForm._column_types(self)
+
+
+
+.. _ak-forms-indexedoptionform-__setstate__:
+
+.. py:method:: ak.forms.IndexedOptionForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-indexedoptionform-_expected_from_buffers:
+
+.. py:method:: ak.forms.IndexedOptionForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-indexedoptionform-_is_equal_to:
+
+.. py:method:: ak.forms.IndexedOptionForm._is_equal_to(self, other, all_parameters, form_key)
+

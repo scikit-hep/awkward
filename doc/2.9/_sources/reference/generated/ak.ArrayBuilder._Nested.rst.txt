@@ -1,0 +1,12 @@
+ak.ArrayBuilder._Nested
+=======================
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/highlevel.py>`__ on `line 3215 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/highlevel.py#L3215>`__.
+
+.. py:class:: ak.ArrayBuilder._Nested(arraybuilder)
+
+   .. py:attribute:: _arraybuilder
+
+
+   .. py:method:: __repr__()
+

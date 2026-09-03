@@ -1,0 +1,6 @@
+ak.str._get_ufunc_action
+========================
+
+Defined in `awkward.operations.str.__init__ <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/str/__init__.py>`__ on `line 184 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/str/__init__.py#L184>`__.
+
+.. py:function:: ak.str._get_ufunc_action(utf8_function, ascii_function, *args, generate_bitmasks=False, bytestring_to_string=False, expect_option_type=False, **kwargs)

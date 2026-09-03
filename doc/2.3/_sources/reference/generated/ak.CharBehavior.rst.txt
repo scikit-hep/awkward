@@ -1,0 +1,16 @@
+ak.CharBehavior
+---------------
+
+.. py:module: ak.CharBehavior
+
+Defined in `awkward.behaviors.string <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/behaviors/string.py>`__ on `line 19 <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/behaviors/string.py#L19>`__.
+
+.. py:class:: ak.CharBehavior(self, *args)
+
+
+
+.. _ak-charbehavior-__name__:
+
+.. py:attribute:: ak.CharBehavior.__name__
+    :value: 'Array'
+

@@ -1,0 +1,33 @@
+ak.with_field
+=============
+
+Defined in `awkward.operations.ak_with_field <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/operations/ak_with_field.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/operations/ak_with_field.py#L20>`__.
+
+.. py:function:: ak.with_field(array, what, where=None, *, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param what: Array-like data (anything :py:obj:`ak.to_layout` recognizes) to add as a new field.
+   :param where: If None, the new field
+                 has no name (can be accessed as an integer slot number in a
+                 string); If str, the name of the new field. If a sequence, it is
+                 interpreted as a path where to add the field in a nested record.
+   :type where: None or str or non-empy sequence of str
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Returns an :py:obj:`ak.Array` or :py:obj:`ak.Record` (or low-level equivalent, if
+   ``highlevel=False``) with a new field attached. This function does not
+   change the array in-place.
+
+   See :py:obj:`ak.Array.__setitem__` and :py:obj:`ak.Record.__setitem__` for a variant that
+   changes the high-level object in-place. (These methods internally use
+   :py:obj:`ak.with_field`, so performance is not a factor in choosing one over the
+   other.)
+

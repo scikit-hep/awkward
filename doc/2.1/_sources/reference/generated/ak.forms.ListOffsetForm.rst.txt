@@ -1,0 +1,136 @@
+ak.forms.ListOffsetForm
+-----------------------
+
+.. py:module: ak.forms.ListOffsetForm
+
+Defined in `awkward.forms.listoffsetform <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/forms/listoffsetform.py>`__ on `line 11 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/forms/listoffsetform.py#L11>`__.
+
+.. py:class:: ak.forms.ListOffsetForm(self, offsets, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-listoffsetform-is_list:
+
+.. py:attribute:: ak.forms.ListOffsetForm.is_list
+    :value: True
+
+
+
+.. _ak-forms-listoffsetform-offsets:
+
+.. py:attribute:: ak.forms.ListOffsetForm.offsets
+
+
+
+.. _ak-forms-listoffsetform-content:
+
+.. py:attribute:: ak.forms.ListOffsetForm.content
+
+
+
+.. _ak-forms-listoffsetform-copy:
+
+.. py:method:: ak.forms.ListOffsetForm.copy(self, offsets=unset, content=unset, *, parameters=unset, form_key=unset)
+
+
+
+.. _ak-forms-listoffsetform-simplified:
+
+.. py:method:: ak.forms.ListOffsetForm.simplified(cls, offsets, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-listoffsetform-__repr__:
+
+.. py:method:: ak.forms.ListOffsetForm.__repr__(self)
+
+
+
+.. _ak-forms-listoffsetform-_to_dict_part:
+
+.. py:method:: ak.forms.ListOffsetForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-listoffsetform-_type:
+
+.. py:method:: ak.forms.ListOffsetForm._type(self, typestrs)
+
+
+
+.. _ak-forms-listoffsetform-__eq__:
+
+.. py:method:: ak.forms.ListOffsetForm.__eq__(self, other)
+
+
+
+.. _ak-forms-listoffsetform-purelist_parameter:
+
+.. py:method:: ak.forms.ListOffsetForm.purelist_parameter(self, key)
+
+
+
+.. _ak-forms-listoffsetform-purelist_isregular:
+
+.. py:attribute:: ak.forms.ListOffsetForm.purelist_isregular
+
+
+
+.. _ak-forms-listoffsetform-purelist_depth:
+
+.. py:attribute:: ak.forms.ListOffsetForm.purelist_depth
+
+
+
+.. _ak-forms-listoffsetform-is_identity_like:
+
+.. py:attribute:: ak.forms.ListOffsetForm.is_identity_like
+
+
+
+.. _ak-forms-listoffsetform-minmax_depth:
+
+.. py:attribute:: ak.forms.ListOffsetForm.minmax_depth
+
+
+
+.. _ak-forms-listoffsetform-branch_depth:
+
+.. py:attribute:: ak.forms.ListOffsetForm.branch_depth
+
+
+
+.. _ak-forms-listoffsetform-fields:
+
+.. py:attribute:: ak.forms.ListOffsetForm.fields
+
+
+
+.. _ak-forms-listoffsetform-is_tuple:
+
+.. py:attribute:: ak.forms.ListOffsetForm.is_tuple
+
+
+
+.. _ak-forms-listoffsetform-dimension_optiontype:
+
+.. py:attribute:: ak.forms.ListOffsetForm.dimension_optiontype
+
+
+
+.. _ak-forms-listoffsetform-_columns:
+
+.. py:method:: ak.forms.ListOffsetForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-listoffsetform-_select_columns:
+
+.. py:method:: ak.forms.ListOffsetForm._select_columns(self, index, specifier, matches, output)
+
+
+
+.. _ak-forms-listoffsetform-_column_types:
+
+.. py:method:: ak.forms.ListOffsetForm._column_types(self)
+

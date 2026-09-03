@@ -1,0 +1,7 @@
+ak.partition.partition_as
+-------------------------
+
+Defined in `awkward.partition <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/partition.py>`__ on `line 36 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/partition.py#L36>`__.
+
+.. py:function:: ak.partition.partition_as(sample, arrays)
+

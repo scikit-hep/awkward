@@ -1,0 +1,85 @@
+ak.from_buffers
+---------------
+
+.. py:module: ak.from_buffers
+
+Defined in `awkward.operations.ak_from_buffers <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_from_buffers.py>`__ on `line 26 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_from_buffers.py#L26>`__.
+
+.. py:function:: ak.from_buffers(form, length, container, buffer_key='{form_key}-{attribute}', *, backend='cpu', byteorder='<', allow_noncanonical_form=False, highlevel=True, behavior=None, attrs=None)
+
+
+    :param form: The form of the Awkward
+             Array to reconstitute from named buffers.
+    :type form: :py:obj:`ak.forms.Form` or str/dict equivalent
+    :param length: Length of the array. (The output of this function is always
+               single-partition.)
+    :type length: int
+    :param container: The str → Python buffers that
+                  represent the decomposed Awkward Array. This ``container`` is only
+                  assumed to have a ``__getitem__`` method that accepts strings as keys.
+    :type container: Mapping, such as dict
+    :param buffer_key: Python format string containing
+                   ``"{form_key}"`` and/or ``"{attribute}"`` or a function that takes these
+                   as keyword arguments and returns a string to use as a key for a buffer
+                   in the ``container``.
+    :type buffer_key: str or callable
+    :param backend: Library to use to generate values that are
+                put into the new array. The default, cpu, makes NumPy
+                arrays, which are in main memory (e.g. not GPU). If all the values in
+                ``container`` have the same ``backend`` as this, they won't be copied.
+    :type backend: str
+    :param byteorder: Endianness of buffers read from ``container``.
+                  If the byteorder does not match the current system byteorder, the
+                  arrays will be copied.
+    :type byteorder: ``"<"``, ``">"``
+    :param allow_noncanonical_form: If True, non-canonical forms will be
+                                simplified to produce arrays with canonical layouts; otherwise,
+                                an exception will be thrown for such forms.
+    :type allow_noncanonical_form: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Reconstitutes an Awkward Array from a Form, length, and a collection of memory
+buffers, so that data can be losslessly read from file formats and storage
+devices that only map names to binary blobs (such as a filesystem directory).
+
+The first three arguments of this function are the return values of
+:py:obj:`ak.to_buffers`, so a full round-trip is
+
+.. code-block:: python
+
+
+    >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
+
+The ``container`` argument lets you specify your own Mapping, which might be
+an interface to some storage format or device (e.g. h5py). It's okay if
+the ``container`` dropped NumPy's ``dtype`` and ``shape`` information, leaving
+raw bytes, since ``dtype`` and ``shape`` can be reconstituted from the
+:py:obj:`ak.forms.NumpyForm`.
+If the values of ``container`` are recognised as arrays by the given backend,
+a view over their existing data will be used, where possible.
+
+The ``buffer_key`` should be the same as the one used in :py:obj:`ak.to_buffers`.
+
+When ``allow_noncanonical_form`` is set to True, this function readily accepts
+non-simplified forms, i.e. forms which will be simplified by Awkward Array
+into "canonical" representations, e.g. ``option[option[...]]`` → ``option[...]``.
+Such forms can be produced by the low-level ArrayBuilder ``snapshot()`` method.
+Given that Awkward Arrays must have canonical layouts, it follows that
+invoking this function with ``allow_noncanonical_form`` may produce arrays
+whose forms differ to the input form.
+
+In order for a non-simplified form to be considered valid, it should be one
+that the :py:obj:`ak.contents.Content` layout classes could produce iff. the
+simplification rules were removed.
+
+
+See :py:obj:`ak.to_buffers` for examples.
+

@@ -1,0 +1,25 @@
+ak.imag
+-------
+
+.. py:module: ak.imag
+
+Defined in `awkward.operations.ak_imag <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_imag.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_imag.py#L17>`__.
+
+.. py:function:: ak.imag(val, highlevel=True, behavior=None, attrs=None)
+
+
+    :param val: array_like
+            Input array.
+    :param highlevel: If True, return an :py:obj:`ak.Array`;
+                  otherwise, return a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool, default is True
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Returns the imaginary components of the given array elements.
+If the arrays have complex elements, the returned arrays are floats.
+

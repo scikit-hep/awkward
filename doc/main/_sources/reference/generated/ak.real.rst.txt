@@ -1,0 +1,25 @@
+ak.real
+=======
+
+Defined in `awkward.operations.ak_real <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_real.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_real.py#L16>`__.
+
+.. py:function:: ak.real(array, highlevel=True, behavior=None, attrs=None)
+
+   Returns the real components of the given array elements.
+
+   If the arrays have complex elements, the returned arrays are floats.
+
+   :param array: array_like
+                 Input array.
+   :param highlevel: If True, return an :py:obj:`ak.Array`;
+                     otherwise, return a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool, default is True
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   :returns: The real components of the given array elements.
+

@@ -1,0 +1,393 @@
+ak.contents.UnionArray
+----------------------
+
+.. py:module: ak.contents.UnionArray
+
+Defined in `awkward.contents.unionarray <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/contents/unionarray.py>`__ on `line 55 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/contents/unionarray.py#L55>`__.
+
+.. py:class:: ak.contents.UnionArray(self, tags, index, contents, *, parameters=None)
+
+UnionArray represents data drawn from an ordered list of ``contents``,
+which can have different types, using
+
+* ``tags``: buffer of integers indicating which content each array element draws from.
+* ``index``: buffer of integers indicating which element from the content to draw from.
+
+UnionArrays correspond to Apache Arrow's
+`dense union type <https://arrow.apache.org/docs/format/Columnar.html#dense-union>`__.
+Awkward Array has no direct equivalent for Apache Arrow's
+`sparse union type <https://arrow.apache.org/docs/format/Columnar.html#sparse-union>`__.
+
+To illustrate how the constructor arguments are interpreted, the following is a
+simplified implementation of ``__init__``, ``__len__``, and ``__getitem__``:
+
+.. code-block:: python
+
+
+    class UnionArray(Content):
+        def __init__(self, tags, index, contents):
+            assert isinstance(tags, Index8)
+            assert isinstance(index, (Index32, IndexU32, Index64))
+            assert isinstance(contents, list)
+            assert len(index) >= len(tags)  # usually equal
+            for x in tags:
+                assert 0 <= x < len(contents)
+            for i, x in enumerate(tags):
+                assert 0 <= index[i] < len(contents[x])
+            self.tags = tags
+            self.index = index
+            self.contents = contents
+
+        def __len__(self):
+            return len(self.tags)
+
+        def __getitem__(self, where):
+            if isinstance(where, int):
+                if where < 0:
+                    where += len(self)
+                assert 0 <= where < len(self)
+                return self.contents[self.tags[where]][self.index[where]]
+
+            elif isinstance(where, slice) and where.step is None:
+                return UnionArray(
+                    self.tags[where], self.index[where], self.contents
+                )
+
+            elif isinstance(where, str):
+                return UnionArray(
+                    self.tags, self.index, [x[where] for x in self.contents]
+                )
+
+            else:
+                raise AssertionError(where)
+
+
+
+.. _ak-contents-unionarray-tags:
+
+.. py:attribute:: ak.contents.UnionArray.tags
+
+
+
+.. _ak-contents-unionarray-index:
+
+.. py:attribute:: ak.contents.UnionArray.index
+
+
+
+.. _ak-contents-unionarray-copy:
+
+.. py:method:: ak.contents.UnionArray.copy(self, tags=UNSET, index=UNSET, contents=UNSET, *, parameters=UNSET)
+
+
+
+.. _ak-contents-unionarray-__copy__:
+
+.. py:method:: ak.contents.UnionArray.__copy__(self)
+
+
+
+.. _ak-contents-unionarray-__deepcopy__:
+
+.. py:method:: ak.contents.UnionArray.__deepcopy__(self, memo)
+
+
+
+.. _ak-contents-unionarray-simplified:
+
+.. py:method:: ak.contents.UnionArray.simplified(cls, tags, index, contents, *, parameters=None, mergebool=False)
+
+
+
+.. _ak-contents-unionarray-_form_with_key:
+
+.. py:method:: ak.contents.UnionArray._form_with_key(self, getkey)
+
+
+
+.. _ak-contents-unionarray-_form_with_key_path:
+
+.. py:method:: ak.contents.UnionArray._form_with_key_path(self, path)
+
+
+
+.. _ak-contents-unionarray-_to_buffers:
+
+.. py:method:: ak.contents.UnionArray._to_buffers(self, form, getkey, container, backend, byteorder)
+
+
+
+.. _ak-contents-unionarray-_to_typetracer:
+
+.. py:method:: ak.contents.UnionArray._to_typetracer(self, forget_length)
+
+
+
+.. _ak-contents-unionarray-_touch_data:
+
+.. py:method:: ak.contents.UnionArray._touch_data(self, recursive)
+
+
+
+.. _ak-contents-unionarray-_touch_shape:
+
+.. py:method:: ak.contents.UnionArray._touch_shape(self, recursive)
+
+
+
+.. _ak-contents-unionarray-length:
+
+.. py:attribute:: ak.contents.UnionArray.length
+
+
+
+.. _ak-contents-unionarray-__repr__:
+
+.. py:method:: ak.contents.UnionArray.__repr__(self)
+
+
+
+.. _ak-contents-unionarray-_repr:
+
+.. py:method:: ak.contents.UnionArray._repr(self, indent, pre, post)
+
+
+
+.. _ak-contents-unionarray-_getitem_nothing:
+
+.. py:method:: ak.contents.UnionArray._getitem_nothing(self)
+
+
+
+.. _ak-contents-unionarray-_is_getitem_at_placeholder:
+
+.. py:method:: ak.contents.UnionArray._is_getitem_at_placeholder(self)
+
+
+
+.. _ak-contents-unionarray-_getitem_at:
+
+.. py:method:: ak.contents.UnionArray._getitem_at(self, where)
+
+
+
+.. _ak-contents-unionarray-_getitem_range:
+
+.. py:method:: ak.contents.UnionArray._getitem_range(self, start, stop)
+
+
+
+.. _ak-contents-unionarray-_getitem_field:
+
+.. py:method:: ak.contents.UnionArray._getitem_field(self, where, only_fields=())
+
+
+
+.. _ak-contents-unionarray-_getitem_fields:
+
+.. py:method:: ak.contents.UnionArray._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-contents-unionarray-_carry:
+
+.. py:method:: ak.contents.UnionArray._carry(self, carry, allow_lazy)
+
+
+
+.. _ak-contents-unionarray-_union_of_optionarrays:
+
+.. py:method:: ak.contents.UnionArray._union_of_optionarrays(self, index, parameters)
+
+
+
+.. _ak-contents-unionarray-project:
+
+.. py:method:: ak.contents.UnionArray.project(self, index)
+
+
+
+.. _ak-contents-unionarray-regular_index:
+
+.. py:method:: ak.contents.UnionArray.regular_index(tags, *, backend, index_cls=Index64)
+
+
+
+.. _ak-contents-unionarray-_regular_index:
+
+.. py:method:: ak.contents.UnionArray._regular_index(self, tags)
+
+
+
+.. _ak-contents-unionarray-nested_tags_index:
+
+.. py:method:: ak.contents.UnionArray.nested_tags_index(offsets, counts, *, backend, tags_cls=Index8, index_cls=Index64)
+
+
+
+.. _ak-contents-unionarray-_getitem_next_jagged_generic:
+
+.. py:method:: ak.contents.UnionArray._getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-unionarray-_getitem_next_jagged:
+
+.. py:method:: ak.contents.UnionArray._getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-unionarray-_getitem_next:
+
+.. py:method:: ak.contents.UnionArray._getitem_next(self, head, tail, advanced)
+
+
+
+.. _ak-contents-unionarray-_offsets_and_flattened:
+
+.. py:method:: ak.contents.UnionArray._offsets_and_flattened(self, axis, depth)
+
+
+
+.. _ak-contents-unionarray-_mergeable_next:
+
+.. py:method:: ak.contents.UnionArray._mergeable_next(self, other, mergebool)
+
+
+
+.. _ak-contents-unionarray-_merging_strategy:
+
+.. py:method:: ak.contents.UnionArray._merging_strategy(self, others)
+
+
+
+.. _ak-contents-unionarray-_reverse_merge:
+
+.. py:method:: ak.contents.UnionArray._reverse_merge(self, other)
+
+
+
+.. _ak-contents-unionarray-_mergemany:
+
+.. py:method:: ak.contents.UnionArray._mergemany(self, others)
+
+
+
+.. _ak-contents-unionarray-_fill_none:
+
+.. py:method:: ak.contents.UnionArray._fill_none(self, value)
+
+
+
+.. _ak-contents-unionarray-_local_index:
+
+.. py:method:: ak.contents.UnionArray._local_index(self, axis, depth)
+
+
+
+.. _ak-contents-unionarray-_combinations:
+
+.. py:method:: ak.contents.UnionArray._combinations(self, n, replacement, recordlookup, parameters, axis, depth)
+
+
+
+.. _ak-contents-unionarray-_numbers_to_type:
+
+.. py:method:: ak.contents.UnionArray._numbers_to_type(self, name, including_unknown)
+
+
+
+.. _ak-contents-unionarray-_is_unique:
+
+.. py:method:: ak.contents.UnionArray._is_unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-unionarray-_unique:
+
+.. py:method:: ak.contents.UnionArray._unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-unionarray-_argsort_next:
+
+.. py:method:: ak.contents.UnionArray._argsort_next(self, negaxis, starts, shifts, parents, outlength, ascending, stable)
+
+
+
+.. _ak-contents-unionarray-_sort_next:
+
+.. py:method:: ak.contents.UnionArray._sort_next(self, negaxis, starts, parents, outlength, ascending, stable)
+
+
+
+.. _ak-contents-unionarray-_reduce_next:
+
+.. py:method:: ak.contents.UnionArray._reduce_next(self, reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims, behavior)
+
+
+
+.. _ak-contents-unionarray-_validity_error:
+
+.. py:method:: ak.contents.UnionArray._validity_error(self, path)
+
+
+
+.. _ak-contents-unionarray-_nbytes_part:
+
+.. py:method:: ak.contents.UnionArray._nbytes_part(self)
+
+
+
+.. _ak-contents-unionarray-_pad_none:
+
+.. py:method:: ak.contents.UnionArray._pad_none(self, target, axis, depth, clip)
+
+
+
+.. _ak-contents-unionarray-_to_arrow:
+
+.. py:method:: ak.contents.UnionArray._to_arrow(self, pyarrow, mask_node, validbytes, length, options)
+
+
+
+.. _ak-contents-unionarray-_to_backend_array:
+
+.. py:method:: ak.contents.UnionArray._to_backend_array(self, allow_missing, backend)
+
+
+
+.. _ak-contents-unionarray-_remove_structure:
+
+.. py:method:: ak.contents.UnionArray._remove_structure(self, backend, options)
+
+
+
+.. _ak-contents-unionarray-_recursively_apply:
+
+.. py:method:: ak.contents.UnionArray._recursively_apply(self, action, depth, depth_context, lateral_context, options)
+
+
+
+.. _ak-contents-unionarray-to_packed:
+
+.. py:method:: ak.contents.UnionArray.to_packed(self, recursive=True)
+
+
+
+.. _ak-contents-unionarray-_to_list:
+
+.. py:method:: ak.contents.UnionArray._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-unionarray-_to_backend:
+
+.. py:method:: ak.contents.UnionArray._to_backend(self, backend)
+
+
+
+.. _ak-contents-unionarray-_is_equal_to:
+
+.. py:method:: ak.contents.UnionArray._is_equal_to(self, other, index_dtype, numpyarray, all_parameters)
+

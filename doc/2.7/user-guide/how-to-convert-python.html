@@ -1,0 +1,2240 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How to convert to/from Python objects &#8212; Awkward Array 2.7.4 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=cac31c79" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=239d9bda"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-convert-python';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.7';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-convert-python.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to convert to/from JSON" href="how-to-convert-json.html" />
+    <link rel="prev" title="How to convert to/from NumPy" href="how-to-convert-numpy.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.7" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.7.4 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.7.4 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-array-properties.html">Array properties</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-array-properties-named-axis.html">Named axes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Min/max/sort one array by another</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">Awkward Arrays on GPUs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k"</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-cpp.html">Using arrays in C++</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++ with LayoutBuilder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-cpp-cppyy.html">JIT compiling operations with C++ in cppyy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Special topics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-convert.html" class="nav-link">Converting arrays</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to convert to/from Python objects</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="how-to-convert-to-from-python-objects">
+<h1>How to convert to/from Python objects<a class="headerlink" href="#how-to-convert-to-from-python-objects" title="Link to this heading">#</a></h1>
+<p>Builtin Python objects like dicts and lists can be converted into Awkward Arrays, and all Awkward Arrays can be converted into Python objects. Awkward type information, such as the distinction between fixed-size and variable-length lists, is lost in the transformation to Python objects.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="from-python-to-awkward">
+<h2>From Python to Awkward<a class="headerlink" href="#from-python-to-awkward" title="Link to this heading">#</a></h2>
+<p>The function for Python → Awkward conversion is <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">py_objects</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]]</span>
+<span class="n">py_objects</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_iter</span><span class="p">(</span><span class="n">py_objects</span><span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+-----------------------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * float64</pre></div></div>
+</div>
+<p>See the sections below for how Python types are mapped to Awkward types.</p>
+<p>Note that this should be considered a slow, memory-intensive function: not only does it need to iterate over Python data, but it needs to discover the type of the data progressively. Internally, this function uses an <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> to accumulate data and discover types simultaneously. Don’t, for instance, convert a large, numerical dataset from NumPy or Arrow into Python objects just to use <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a>. There are specialized functions for that: see their tutorials (left-bar or ≡ button on mobile).</p>
+<p>This is also the fallback operation of the <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a> and <a class="reference internal" href="../reference/generated/ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Record</span></code></a> constructors. Usually, small examples are built by passing Python objects directly to these constructors.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+-----------------------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">]})</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>{x: 1,
+ y: [1.1, 2.2]}
+------------------------------------------
+backend: cpu
+nbytes: 24 B
+type: {
+    x: int64,
+    y: 2 * float64
+}</pre></div></div>
+</div>
+</section>
+<section id="from-awkward-to-python">
+<h2>From Awkward to Python<a class="headerlink" href="#from-awkward-to-python" title="Link to this heading">#</a></h2>
+<p>The function for Awkward → Python conversion is <a class="reference internal" href="../reference/generated/ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_list()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+-----------------------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_record</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">]})</span>
+<span class="n">ak_record</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>{x: 1,
+ y: [1.1, 2.2]}
+------------------------------------------
+backend: cpu
+nbytes: 24 B
+type: {
+    x: int64,
+    y: 2 * float64
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">ak_record</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;x&#39;: 1, &#39;y&#39;: [1.1, 2.2]}
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that this should be considered a slow, memory-intensive function, like <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a>. Don’t, for instance, convert a large, numerical dataset with <a class="reference internal" href="../reference/generated/ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_list()</span></code></a> just to convert those lists into NumPy or Arrow. There are specialized functions for that: see their tutorials (left-bar or ≡ button on mobile).</p>
+<p>Awkward Arrays and Records have a <code class="docutils literal notranslate"><span class="pre">to_list</span></code> method. For small datasets (or a small slice of a dataset), this is a convenient way to get a quick view.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">,</span> <span class="mf">7.7</span><span class="p">,</span> <span class="mf">8.8</span><span class="p">,</span> <span class="mf">9.9</span><span class="p">]),</span> <span class="mi">100</span><span class="p">))</span>
+<span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">})</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 0, y: 0},
+ {x: 1, y: 1.1},
+ {x: 2, y: 2.2},
+ {x: 3, y: 3.3},
+ {x: 4, y: 4.4},
+ {x: 5, y: 5.5},
+ {x: 6, y: 6.6},
+ {x: 7, y: 7.7},
+ {x: 8, y: 8.8},
+ {x: 9, y: 9.9},
+ ...,
+ {x: 991, y: 1.1},
+ {x: 992, y: 2.2},
+ {x: 993, y: 3.3},
+ {x: 994, y: 4.4},
+ {x: 995, y: 5.5},
+ {x: 996, y: 6.6},
+ {x: 997, y: 7.7},
+ {x: 998, y: 8.8},
+ {x: 999, y: 9.9}]
+---------------------------------------------
+backend: cpu
+nbytes: 16.0 kB
+type: 1000 * {
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;x&#39;: 100, &#39;y&#39;: 0.0}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span><span class="p">[</span><span class="mi">100</span><span class="p">:</span><span class="mi">110</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[{&#39;x&#39;: 100, &#39;y&#39;: 0.0},
+ {&#39;x&#39;: 101, &#39;y&#39;: 1.1},
+ {&#39;x&#39;: 102, &#39;y&#39;: 2.2},
+ {&#39;x&#39;: 103, &#39;y&#39;: 3.3},
+ {&#39;x&#39;: 104, &#39;y&#39;: 4.4},
+ {&#39;x&#39;: 105, &#39;y&#39;: 5.5},
+ {&#39;x&#39;: 106, &#39;y&#39;: 6.6},
+ {&#39;x&#39;: 107, &#39;y&#39;: 7.7},
+ {&#39;x&#39;: 108, &#39;y&#39;: 8.8},
+ {&#39;x&#39;: 109, &#39;y&#39;: 9.9}]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="pandas-style-constructor">
+<h2>Pandas-style constructor<a class="headerlink" href="#pandas-style-constructor" title="Link to this heading">#</a></h2>
+<p>As we have seen, the <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a>) constructor interprets an iterable argument as the data that it is meant to represent, as in:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">py_objects1</span> <span class="o">=</span> <span class="p">[[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]]</span>
+<span class="n">py_objects1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">py_objects1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+-----------------------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * float64</pre></div></div>
+</div>
+<p>But sometimes, you have several iterables that you want to use as columns of a table. The <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html">Pandas DataFrame constructor</a> interprets a dict of iterables as columns:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">py_objects2</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">]</span>
+<span class="n">py_objects2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;one&#39;, &#39;two&#39;, &#39;three&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">py_objects1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">py_objects2</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>x</th>
+      <th>y</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>[1.1, 2.2, 3.3]</td>
+      <td>one</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>[]</td>
+      <td>two</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>[4.4, 5.5]</td>
+      <td>three</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>And so does the <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a> constructor:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">py_objects1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">py_objects2</span><span class="p">})</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: [1.1, 2.2, 3.3], y: &#x27;one&#x27;},
+ {x: [], y: &#x27;two&#x27;},
+ {x: [4.4, 5.5], y: &#x27;three&#x27;}]
+-------------------------------------------------
+backend: cpu
+nbytes: 115 B
+type: 3 * {
+    x: var * float64,
+    y: string
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(RecordType([ListType(NumpyType(&#39;float64&#39;)), ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;})], [&#39;x&#39;, &#39;y&#39;]), 3, None)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[{&#39;x&#39;: [1.1, 2.2, 3.3], &#39;y&#39;: &#39;one&#39;},
+ {&#39;x&#39;: [], &#39;y&#39;: &#39;two&#39;},
+ {&#39;x&#39;: [4.4, 5.5], &#39;y&#39;: &#39;three&#39;}]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that this is the transpose of the way the data would be interpreted if it were in a list, rather than a dict. The <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> values are interpreted as being interleaved in each record. There is no potential for conflict between the <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a>-style and Pandas-style constructors because <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a> applied to a dict would always return an <a class="reference internal" href="../reference/generated/ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Record</span></code></a>, rather than an <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_record</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_iter</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">py_objects1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">py_objects2</span><span class="p">})</span>
+<span class="n">ak_record</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>{x: [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
+ y: [&#x27;one&#x27;, &#x27;two&#x27;, &#x27;three&#x27;]}
+---------------------------------------------------------
+backend: cpu
+nbytes: 147 B
+type: {
+    x: var * var * float64,
+    y: var * string
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">ak_record</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ScalarType(RecordType([ListType(ListType(NumpyType(&#39;float64&#39;))), ListType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;}))], [&#39;x&#39;, &#39;y&#39;]), None)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">ak_record</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;x&#39;: [[1.1, 2.2, 3.3], [], [4.4, 5.5]], &#39;y&#39;: [&#39;one&#39;, &#39;two&#39;, &#39;three&#39;]}
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a> function applied to a dict is also equivalent to the <a class="reference internal" href="../reference/generated/ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Record</span></code></a> constructor.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">py_objects1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">py_objects2</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>{x: [[1.1, 2.2, 3.3], [], [4.4, 5.5]],
+ y: [&#x27;one&#x27;, &#x27;two&#x27;, &#x27;three&#x27;]}
+-----------------------------------------------------
+backend: cpu
+nbytes: 115 B
+type: {
+    x: 3 * var * float64,
+    y: 3 * string
+}</pre></div></div>
+</div>
+</section>
+<section id="conversion-of-numbers-and-booleans">
+<h2>Conversion of numbers and booleans<a class="headerlink" href="#conversion-of-numbers-and-booleans" title="Link to this heading">#</a></h2>
+<p>Python <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code>, and <code class="docutils literal notranslate"><span class="pre">bool</span></code> (so-called “primitive” types) are converted to <code class="docutils literal notranslate"><span class="pre">float64</span></code>, <code class="docutils literal notranslate"><span class="pre">int64</span></code>, and <code class="docutils literal notranslate"><span class="pre">bool</span></code> types in Awkward Arrays.</p>
+<p>All floating-point Awkward types are converted to Python’s <code class="docutils literal notranslate"><span class="pre">float</span></code>, all integral Awkward types are converted to Python’s <code class="docutils literal notranslate"><span class="pre">int</span></code>, and Awkward’s boolean type is converted to Python’s <code class="docutils literal notranslate"><span class="pre">bool</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1.1,
+ 2.2,
+ 3.3]
+-----------------
+backend: cpu
+nbytes: 24 B
+type: 3 * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[1.1, 2.2, 3.3]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 2,
+ 3,
+ 4,
+ 5]
+---------------
+backend: cpu
+nbytes: 40 B
+type: 5 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[1, 2, 3, 4, 5]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[True,
+ False,
+ True,
+ False,
+ False]
+--------------
+backend: cpu
+nbytes: 5 B
+type: 5 * bool</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[True, False, True, False, False]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="conversion-of-lists">
+<h2>Conversion of lists<a class="headerlink" href="#conversion-of-lists" title="Link to this heading">#</a></h2>
+<p>Python lists, as well as iterables other than dict, tuple, str, and bytes, are converted to Awkward’s variable-length lists. It is not possible to construct fixed-size lists with <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a>. (One way to do that is by converting a NumPy array with <a class="reference internal" href="../reference/generated/ak.from_numpy.html#ak.from_numpy" title="ak.from_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_numpy()</span></code></a>.)</p>
+<p>Awkward’s variable-length and fixed-size lists are converted into Python lists with <a class="reference internal" href="../reference/generated/ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_list()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+-----------------------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1.1, 2.2, 3.3], [], [4.4, 5.5]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [4, 5, 6]]
+---------------------
+backend: cpu
+nbytes: 72 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1, 2, 3], [4, 5, 6]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Advanced topic: the rest of this section may be skipped if you don’t care about the distinction between fixed-size and variable-length lists.</p>
+</div>
+<p>Note that a NumPy array is an iterable, so <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a> iterates over it, constructing variable-length Awkward lists. By contrast, <a class="reference internal" href="../reference/generated/ak.from_numpy.html#ak.from_numpy" title="ak.from_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_numpy()</span></code></a> casts the data (without iteration) into fixed-size Awkward lists.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="p">[</span><span class="mi">103</span><span class="p">,</span> <span class="mi">203</span><span class="p">]])</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[100, 200],
+       [101, 201],
+       [103, 203]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_iter</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [101, 201],
+ [103, 203]]
+---------------------
+backend: cpu
+nbytes: 80 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [101, 201],
+ [103, 203]]
+-------------------
+backend: cpu
+nbytes: 48 B
+type: 3 * 2 * int64</pre></div></div>
+</div>
+<p>Note that the types differ: <code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">*</span> <span class="pre">int64</span></code> vs <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">int64</span></code>. The <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a> constructor uses <a class="reference internal" href="../reference/generated/ak.from_numpy.html#ak.from_numpy" title="ak.from_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_numpy()</span></code></a> if given a NumPy array (with <code class="docutils literal notranslate"><span class="pre">dtype</span> <span class="pre">!=</span> <span class="pre">&quot;O&quot;</span></code>) and <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a> if given an iterable that it does not recognize.</p>
+<p>This can be particularly subtle when NumPy arrays are nested within iterables.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="p">[</span><span class="mi">103</span><span class="p">,</span> <span class="mi">203</span><span class="p">]])</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[100, 200],
+       [101, 201],
+       [103, 203]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is a NumPy array: constructor uses ak.from_numpy to get an array of fixed-size lists.</span>
+<span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [101, 201],
+ [103, 203]]
+-------------------
+backend: cpu
+nbytes: 48 B
+type: 3 * 2 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">py_objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">103</span><span class="p">,</span> <span class="mi">203</span><span class="p">])]</span>
+<span class="n">py_objects</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[array([100, 200]), array([101, 201]), array([103, 203])]
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is a list that contains NumPy arrays: constructor uses ak.from_iter to get an array of variable-length lists.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">py_objects</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [101, 201],
+ [103, 203]]
+---------------------
+backend: cpu
+nbytes: 80 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array_dtype_O</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="p">[</span><span class="mi">103</span><span class="p">,</span> <span class="mi">203</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>
+<span class="n">np_array_dtype_O</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[100, 200],
+       [101, 201],
+       [103, 203]], dtype=object)
+</pre></div>
+</div>
+</div>
+</div>
+<p>This NumPy array has dtype=”O”, so it cannot be cast without iteration:</p>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np_array_dtype_O</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">42</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np_array_dtype_O</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:326,</span> in <span class="ni">Array.__init__</span><span class="nt">(self, data, behavior, with_name, check_valid, backend, attrs, named_axis)</span>
+<span class="g g-Whitespace">    </span><span class="mi">323</span>     <span class="n">layout</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">highlevel</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">325</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">326</span>     <span class="n">layout</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">to_layout</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">327</span>         <span class="n">data</span><span class="p">,</span> <span class="n">allow_record</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regulararray</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">primitive_policy</span><span class="o">=</span><span class="s2">&quot;error&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">328</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">330</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">Content</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">331</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;could not convert data into an ak.Array&quot;</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:38,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">35</span> <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">36</span> <span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span>     <span class="c1"># NOTE: this decorator assumes that the operation is exposed under `ak.`</span>
+<span class="ne">---&gt; </span><span class="mi">38</span>     <span class="k">with</span> <span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">39</span>         <span class="n">gen_or_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">40</span>         <span class="k">if</span> <span class="n">isgenerator</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:80,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
+<span class="g g-Whitespace">     </span><span class="mi">78</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">79</span>     <span class="c1"># Handle caught exception</span>
+<span class="ne">---&gt; </span><span class="mi">80</span>     <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorate_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
+<span class="g g-Whitespace">     </span><span class="mi">83</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:64,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">62</span> <span class="c1"># Failed to find a custom overload, so resume the original function</span>
+<span class="g g-Whitespace">     </span><span class="mi">63</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">64</span>     <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span> <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">66</span>     <span class="k">return</span> <span class="n">err</span><span class="o">.</span><span class="n">value</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_to_layout.py:80,</span> in <span class="ni">to_layout</span><span class="nt">(array, allow_record, allow_unknown, none_policy, use_from_iter, primitive_policy, string_policy, regulararray)</span>
+<span class="g g-Whitespace">     </span><span class="mi">77</span> <span class="k">yield</span> <span class="p">(</span><span class="n">array</span><span class="p">,)</span>
+<span class="g g-Whitespace">     </span><span class="mi">79</span> <span class="c1"># Implementation</span>
+<span class="ne">---&gt; </span><span class="mi">80</span> <span class="k">return</span> <span class="n">_impl</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span>     <span class="n">array</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="n">allow_record</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">83</span>     <span class="n">allow_unknown</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">84</span>     <span class="n">none_policy</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">85</span>     <span class="n">regulararray</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">86</span>     <span class="n">use_from_iter</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">87</span>     <span class="n">primitive_policy</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">88</span>     <span class="n">string_policy</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">89</span> <span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_to_layout.py:177,</span> in <span class="ni">_impl</span><span class="nt">(obj, allow_record, allow_unknown, none_policy, regulararray, use_from_iter, primitive_policy, string_policy)</span>
+<span class="g g-Whitespace">    </span><span class="mi">175</span>     <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">176</span> <span class="k">elif</span> <span class="n">numpy</span><span class="o">.</span><span class="n">is_own_array</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">177</span>     <span class="n">promoted_layout</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">178</span>         <span class="n">obj</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">179</span>         <span class="n">regulararray</span><span class="o">=</span><span class="n">regulararray</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">180</span>         <span class="n">recordarray</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">181</span>         <span class="n">highlevel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">182</span>         <span class="n">primitive_policy</span><span class="o">=</span><span class="n">primitive_policy</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">183</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">184</span>     <span class="k">return</span> <span class="n">_handle_array_like</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">185</span>         <span class="n">obj</span><span class="p">,</span> <span class="n">promoted_layout</span><span class="p">,</span> <span class="n">primitive_policy</span><span class="o">=</span><span class="n">primitive_policy</span>
+<span class="g g-Whitespace">    </span><span class="mi">186</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">187</span> <span class="k">elif</span> <span class="n">Cupy</span><span class="o">.</span><span class="n">is_own_array</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:39,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">35</span> <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">36</span> <span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span>     <span class="c1"># NOTE: this decorator assumes that the operation is exposed under `ak.`</span>
+<span class="g g-Whitespace">     </span><span class="mi">38</span>     <span class="k">with</span> <span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="ne">---&gt; </span><span class="mi">39</span>         <span class="n">gen_or_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">40</span>         <span class="k">if</span> <span class="n">isgenerator</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">41</span>             <span class="n">array_likes</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_from_numpy.py:56,</span> in <span class="ni">from_numpy</span><span class="nt">(array, regulararray, recordarray, highlevel, behavior, primitive_policy, attrs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="nd">@high_level_function</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="k">def</span><span class="w"> </span><span class="nf">from_numpy</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span>     <span class="n">array</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span>     <span class="n">attrs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">21</span> <span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span><span class="sd">     Args:</span>
+<span class="g g-Whitespace">     </span><span class="mi">24</span><span class="sd">         array (np.ndarray): The NumPy array to convert into an Awkward Array.</span>
+<span class="sd">   (...)</span>
+<span class="g g-Whitespace">     </span><span class="mi">53</span><span class="sd">     See also #ak.to_numpy and #ak.from_cupy.</span>
+<span class="g g-Whitespace">     </span><span class="mi">54</span><span class="sd">     &quot;&quot;&quot;</span>
+<span class="g g-Whitespace">     </span><span class="mi">55</span>     <span class="k">return</span> <span class="n">wrap_layout</span><span class="p">(</span>
+<span class="ne">---&gt; </span><span class="mi">56</span>         <span class="n">from_arraylib</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">57</span>             <span class="n">array</span><span class="p">,</span> <span class="n">regulararray</span><span class="p">,</span> <span class="n">recordarray</span><span class="p">,</span> <span class="n">primitive_policy</span><span class="o">=</span><span class="n">primitive_policy</span>
+<span class="g g-Whitespace">     </span><span class="mi">58</span>         <span class="p">),</span>
+<span class="g g-Whitespace">     </span><span class="mi">59</span>         <span class="n">highlevel</span><span class="o">=</span><span class="n">highlevel</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">60</span>         <span class="n">behavior</span><span class="o">=</span><span class="n">behavior</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">61</span>     <span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_layout.py:367,</span> in <span class="ni">from_arraylib</span><span class="nt">(array, regulararray, recordarray, primitive_policy)</span>
+<span class="g g-Whitespace">    </span><span class="mi">364</span>         <span class="k">return</span> <span class="n">ByteMaskedArray</span><span class="p">(</span><span class="n">Index8</span><span class="p">(</span><span class="n">mask</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="n">valid_when</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">366</span> <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">367</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Awkward Array does not support arrays with object dtypes.&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">369</span> <span class="k">if</span> <span class="n">primitive_policy</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span> <span class="ow">and</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">370</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">371</span>         <span class="sa">f</span><span class="s2">&quot;Encountered a scalar (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">), but scalar conversion/promotion is disabled&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">372</span>     <span class="p">)</span>
+
+<span class="ne">TypeError</span>: Awkward Array does not support arrays with object dtypes.
+
+<span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">calling</span>
+
+    <span class="n">ak</span><span class="o">.</span><span class="n">to_layout</span><span class="p">(</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">([[</span><span class="mi">100</span> <span class="mi">200</span><span class="p">]</span>  <span class="p">[</span><span class="mi">101</span> <span class="mi">201</span><span class="p">]</span>  <span class="p">[</span><span class="mi">103</span> <span class="mi">203</span><span class="p">]])</span>
+        <span class="n">allow_record</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">regulararray</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">primitive_policy</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a> knows that this is a NumPy array, but Awkward does not support object dtypes. Instead, one must use
+<code class="docutils literal notranslate"><span class="pre">from_iter</span></code> to tell Awkward that this iteration is intentional.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_iter</span><span class="p">(</span><span class="n">np_array_dtype_O</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [101, 201],
+ [103, 203]]
+---------------------
+backend: cpu
+nbytes: 80 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<p>The logic behind this policy is that only NumPy arrays with <code class="docutils literal notranslate"><span class="pre">dtype</span> <span class="pre">!=</span> <span class="pre">&quot;O&quot;</span></code> are guaranteed to have fixed-size contents. Other cases must have <code class="docutils literal notranslate"><span class="pre">var</span></code> type lists.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">py_objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">])]</span>
+<span class="n">py_objects</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[array([1.1, 2.2, 3.3]), array([], dtype=float64), array([4.4, 5.5])]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">py_objects</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+-----------------------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array_dtype_O</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>
+<span class="n">np_array_dtype_O</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([list([1.1, 2.2, 3.3]), list([]), list([4.4, 5.5])], dtype=object)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_iter</span><span class="p">(</span><span class="n">np_array_dtype_O</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+-----------------------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * float64</pre></div></div>
+</div>
+</section>
+<section id="conversion-of-strings-and-bytestrings">
+<h2>Conversion of strings and bytestrings<a class="headerlink" href="#conversion-of-strings-and-bytestrings" title="Link to this heading">#</a></h2>
+<p>Python strings (type <code class="docutils literal notranslate"><span class="pre">str</span></code>) are converted to and from Awkward’s UTF-8 encoded strings and Python bytestrings (type <code class="docutils literal notranslate"><span class="pre">bytes</span></code>) are converted to and from Awkward’s unencoded bytestrings.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="s2">&quot;four&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[&#x27;one&#x27;,
+ &#x27;two&#x27;,
+ &#x27;three&#x27;,
+ &#x27;four&#x27;]
+----------------
+backend: cpu
+nbytes: 55 B
+type: 4 * string</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="s2">&quot;four&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;one&#39;, &#39;two&#39;, &#39;three&#39;, &#39;four&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="sa">b</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;four&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[b&#x27;one&#x27;,
+ b&#x27;two&#x27;,
+ b&#x27;three&#x27;,
+ b&#x27;four&#x27;]
+---------------
+backend: cpu
+nbytes: 55 B
+type: 4 * bytes</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="sa">b</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;four&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[b&#39;one&#39;, b&#39;two&#39;, b&#39;three&#39;, b&#39;four&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Advanced topic: the rest of this section may be skipped if you don’t care about internal representations.</p>
+</div>
+<p>Awkward’s strings and bytestrings are <em>specializations</em> of variable-length lists. Whereas a list might be internally represented by a <a class="reference internal" href="../reference/generated/ak.contents.ListArray.html#ak.contents.ListArray" title="ak.contents.ListArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.ListArray</span></code></a> or a <a class="reference internal" href="../reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray" title="ak.contents.ListOffsetArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.ListOffsetArray</span></code></a>,</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span><span class="o">.</span><span class="n">layout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ListOffsetArray len=&#39;3&#39;&gt;
+    &lt;offsets&gt;&lt;Index dtype=&#39;int64&#39; len=&#39;4&#39;&gt;
+        [0 3 3 5]
+    &lt;/Index&gt;&lt;/offsets&gt;
+    &lt;content&gt;&lt;NumpyArray dtype=&#39;float64&#39; len=&#39;5&#39;&gt;[1.1 2.2 3.3 4.4 5.5]&lt;/NumpyArray&gt;&lt;/content&gt;
+&lt;/ListOffsetArray&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Strings and bytestrings are just <a class="reference internal" href="../reference/generated/ak.contents.ListArray.html#ak.contents.ListArray" title="ak.contents.ListArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.ListArray</span></code></a>s and <a class="reference internal" href="../reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray" title="ak.contents.ListOffsetArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.ListOffsetArray</span></code></a>s of one-byte integers with special parameters:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="s2">&quot;four&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">layout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ListOffsetArray len=&#39;4&#39;&gt;
+    &lt;parameter name=&#39;__array__&#39;&gt;&#39;string&#39;&lt;/parameter&gt;
+    &lt;offsets&gt;&lt;Index dtype=&#39;int64&#39; len=&#39;5&#39;&gt;
+        [ 0  3  6 11 15]
+    &lt;/Index&gt;&lt;/offsets&gt;
+    &lt;content&gt;&lt;NumpyArray dtype=&#39;uint8&#39; len=&#39;15&#39;&gt;
+        &lt;parameter name=&#39;__array__&#39;&gt;&#39;char&#39;&lt;/parameter&gt;
+        [111 110 101 116 119 111 116 104 114 101 101 102 111 117 114]
+    &lt;/NumpyArray&gt;&lt;/content&gt;
+&lt;/ListOffsetArray&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>These parameters indicate that the arrays of strings should have special behaviors, such as equality-per-string, rather than equality-per-character.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">3.3</span><span class="p">]])</span> <span class="o">==</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">3.3</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[True, False],
+ [],
+ [True]]
+--------------------
+backend: cpu
+nbytes: 35 B
+type: 3 * var * bool</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="s2">&quot;four&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">&quot;one&quot;</span><span class="p">,</span> <span class="s2">&quot;TWO&quot;</span><span class="p">,</span> <span class="s2">&quot;thirty three&quot;</span><span class="p">,</span> <span class="s2">&quot;four&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[True,
+ False,
+ False,
+ True]
+--------------
+backend: cpu
+nbytes: 4 B
+type: 4 * bool</pre></div></div>
+</div>
+<p>(Without this overloaded behavior, the string comparison would yield <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">True,</span> <span class="pre">True]</span></code> for <code class="docutils literal notranslate"><span class="pre">&quot;one&quot;</span> <span class="pre">==</span> <span class="pre">&quot;one&quot;</span></code> and would fail to broadcast <code class="docutils literal notranslate"><span class="pre">&quot;three&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;thirty</span> <span class="pre">three&quot;</span></code>.)</p>
+<p>The fact that strings are really just variable-length lists is worth keeping in mind, since they might behave in unexpectedly list-like ways. If you notice any behavior that ought to be overloded for strings, recommend it as a <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/issues/new?assignees=&amp;amp;labels=feature&amp;amp;template=feature-request.md&amp;amp;title=">feature request</a>.</p>
+</section>
+<section id="conversion-of-dicts-and-tuples">
+<h2>Conversion of dicts and tuples<a class="headerlink" href="#conversion-of-dicts-and-tuples" title="Link to this heading">#</a></h2>
+<p>Python dicts with string-valued keys are converted to and from Awkward’s record type with named fields. The data associated with different fields can have different types, but you generally want data associated with all instances of the same field to have the same type. Python dicts with non-string valued keys have no equivalent in Awkward Array (records are very different from mappings).</p>
+<p>Python tuples are converted to and from Awkward’s record type with unnamed fields. Note that Awkward views Python’s lists and tuples in very different ways: lists are expected to be variable-length with all elements having the same type, while tuples are expected to be fixed-size with elements having potentially different types, just like a record.</p>
+<p>In the following example, the <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code> field has type <code class="docutils literal notranslate"><span class="pre">int64</span></code> and the <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> field has type <code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">*</span> <span class="pre">int64</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array_rec</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[]}])</span>
+<span class="n">ak_array_rec</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1, y: [1, 2]},
+ {x: 2, y: []}]
+----------------------------------------------
+backend: cpu
+nbytes: 56 B
+type: 2 * {
+    x: int64,
+    y: var * int64
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array_rec</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[{&#39;x&#39;: 1, &#39;y&#39;: [1, 2]}, {&#39;x&#39;: 2, &#39;y&#39;: []}]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Here is the corresponding example with tuples:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array_tup</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[])])</span>
+<span class="n">ak_array_tup</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[(1, [1, 2]),
+ (2, [])]
+----------------------------------------
+backend: cpu
+nbytes: 56 B
+type: 2 * (
+    int64,
+    var * int64
+)</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array_tup</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(1, [1, 2]), (2, [])]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Both of these Awkward types, <code class="docutils literal notranslate"><span class="pre">{&quot;x&quot;:</span> <span class="pre">int64,</span> <span class="pre">&quot;y&quot;:</span> <span class="pre">var</span> <span class="pre">*</span> <span class="pre">int64}</span></code> and <code class="docutils literal notranslate"><span class="pre">(int64,</span> <span class="pre">var</span> <span class="pre">*</span> <span class="pre">int64)</span></code>, have two fields, but the first one has names for those fields.</p>
+<p>Both can be extracted using strings between square brackets, though the strings must be <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code> for the tuple.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array_rec</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2],
+ []]
+---------------------
+backend: cpu
+nbytes: 40 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array_rec</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>---------------
+backend: cpu
+nbytes: 0 B
+type: 0 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array_tup</span><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2],
+ []]
+---------------------
+backend: cpu
+nbytes: 40 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array_tup</span><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>---------------
+backend: cpu
+nbytes: 0 B
+type: 0 * int64</pre></div></div>
+</div>
+<p>Note the difference in meaning between the <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code> and the <code class="docutils literal notranslate"><span class="pre">1</span></code> in the above example. For safety, you may want to use <a class="reference internal" href="../reference/generated/ak.unzip.html#ak.unzip" title="ak.unzip"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.unzip()</span></code></a></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">ak_array_rec</span><span class="p">)</span>
+<span class="n">y</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2],
+ []]
+---------------------
+backend: cpu
+nbytes: 40 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">slot0</span><span class="p">,</span> <span class="n">slot1</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">ak_array_tup</span><span class="p">)</span>
+<span class="n">slot1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2],
+ []]
+---------------------
+backend: cpu
+nbytes: 40 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<p>That way, you can name the variables anything you like.</p>
+<p>If fields are missing from some records, the missing values are filled in with None (option type: more on that below).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1, y: [1, 2]},
+ {x: 2, y: None}]
+------------------------------------------------------
+backend: cpu
+nbytes: 64 B
+type: 2 * {
+    x: int64,
+    y: option[var * int64]
+}</pre></div></div>
+</div>
+<p>If some tuples have different lengths, the resulting Awkward Array is taken to be heterogeneous (union type: more on that below).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[(1, [1, 2]),
+ (2)]
+--------------------------------------------------------------------------------------------
+backend: cpu
+nbytes: 66 B
+type: 2 * union[
+    (
+        int64,
+        var * int64
+    ),
+    (
+        int64
+    )
+]</pre></div></div>
+</div>
+<p>An Awkward Record is a scalar drawn from a record array, so an <a class="reference internal" href="../reference/generated/ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Record</span></code></a> can be built from a single dict with string-valued keys.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>{x: 1,
+ y: [1, 2],
+ z: 3.3}
+--------------------------------------------------------
+backend: cpu
+nbytes: 32 B
+type: {
+    x: int64,
+    y: 2 * int64,
+    z: float64
+}</pre></div></div>
+</div>
+<p>The same is not true for tuples. The <a class="reference internal" href="../reference/generated/ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Record</span></code></a> constructor expects named fields.</p>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mf">3.3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">69</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mf">3.3</span><span class="p">))</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1856,</span> in <span class="ni">Record.__init__</span><span class="nt">(self, data, behavior, with_name, check_valid, backend, attrs, named_axis)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1853</span>     <span class="n">layout</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">Record</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">RecordArray</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">fields</span><span class="p">),</span> <span class="n">at</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1855</span> <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1856</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1857</span>         <span class="s2">&quot;could not convert non-dict into an ak.Record; try ak.Array&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1858</span>     <span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1860</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1861</span>     <span class="n">layout</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="ne">TypeError</span>: could not convert non-dict into an ak.Record; try ak.Array
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="missing-values-python-none">
+<h2>Missing values: Python None<a class="headerlink" href="#missing-values-python-none" title="Link to this heading">#</a></h2>
+<p>Python’s None can appear anywhere in the structure parsed by <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a>. It makes all data at that level of nesting have option type and is represented in <a class="reference internal" href="../reference/generated/ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_list()</span></code></a> as None.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1.1,
+ 2.2,
+ None,
+ 3.3,
+ None,
+ 4.4]
+------------------
+backend: cpu
+nbytes: 80 B
+type: 6 * ?float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[1.1, 2.2, None, 3.3, None, 4.4]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Advanced topic: the rest of this section describes the equivalence of missing record fields and record fields with None values, which is only relevant to datasets with missing fields.</p>
+</div>
+<p>As described above, fields that are absent from some records but not others are filled in with None. As a consequence, conversions from Python to Awkward Array back to Python don’t necessarily result in the original expression:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;two&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;three&quot;</span><span class="p">},</span>
+    <span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[{&#39;x&#39;: 1.1, &#39;y&#39;: [1], &#39;z&#39;: None},
+ {&#39;x&#39;: 2.2, &#39;y&#39;: None, &#39;z&#39;: &#39;two&#39;},
+ {&#39;x&#39;: 3.3, &#39;y&#39;: [1, 2, 3], &#39;z&#39;: &#39;three&#39;}]
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is a deliberate choice. It would have been possible to convert records with missing fields into arrays with union type (more on that below), for which <a class="reference internal" href="../reference/generated/ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.to_list</span></code></a> would result in the original expression,</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]}]),</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;two&quot;</span><span class="p">}]),</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;three&quot;</span><span class="p">}]),</span>
+    <span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[{&#39;x&#39;: 1.1, &#39;y&#39;: [1]},
+ {&#39;x&#39;: 2.2, &#39;z&#39;: &#39;two&#39;},
+ {&#39;x&#39;: 3.3, &#39;y&#39;: [1, 2, 3], &#39;z&#39;: &#39;three&#39;}]
+</pre></div>
+</div>
+</div>
+</div>
+<p>But typical datasets of records with different sets of fields represent missing fields, rather than entirely different types of objects. (Even in particle physics applications that mix “electron objects” with “photon objects,” both types of objects have the same trajectory fields <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;z&quot;</span></code> and differ in fields that exist for one and not the other, such as <code class="docutils literal notranslate"><span class="pre">&quot;charge&quot;</span></code> for electrons but not photons.)</p>
+<p>The memory use of union arrays scales with the number of different types, up to $2^n$ for records with $n$ potentially missing fields. Option types of completely disjoint records with $n_1$ and $n_2$ fields use a memory footprint that scales as $n_1 + n_2$. Assuming that disjoint records are a single record type with missing fields is a recoverable mistake, but assuming that a single record type with missing fields are distinct for every combination of missing fields is potentially disastrous.</p>
+<p>Tuples of different lengths, on the other hand, are assumed to be different types because mistaking slot $i$ for slot $i + 1$ would create unions anyway.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="mf">1.1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="p">(</span><span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;two&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="mf">3.3</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;three&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(1.1, [1]), (2.2, &#39;two&#39;), (3.3, [1, 2, 3], &#39;three&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="union-types-heterogeneous-data">
+<h2>Union types: heterogeneous data<a class="headerlink" href="#union-types-heterogeneous-data" title="Link to this heading">#</a></h2>
+<p>If the data in a Python iterable have different types at the same level of nesting (“heterogeneous”), the Awkward Arrays produced by <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a> have union types.</p>
+<p>Most Awkward operations are defined on union typed Arrays, but they’re not generally not as efficient as the same operations on simply typed Arrays.</p>
+<p>The following example mixes numbers (<code class="docutils literal notranslate"><span class="pre">float64</span></code>) with lists (<code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">*</span> <span class="pre">int64</span></code>).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mf">3.3</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1.1,
+ 2.2,
+ [],
+ [1],
+ [1, 2],
+ 3.3]
+-----------------------------------------------
+backend: cpu
+nbytes: 134 B
+type: 6 * union[
+    float64,
+    var * int64
+]</pre></div></div>
+</div>
+<p>The <a class="reference internal" href="../reference/generated/ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_list()</span></code></a> function converts it back into a heterogeneous Python list.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mf">3.3</span><span class="p">])</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[1.1, 2.2, [], [1], [1, 2], 3.3]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Any types may be mixed: numbers and lists, lists and records, missing data, etc.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="kc">None</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ {x: 1, y: 2},
+ None]
+-------------------------------------------------------------------------------------------
+backend: cpu
+nbytes: 99 B
+type: 3 * union[
+    option[var * int64],
+    ?{
+        x: int64,
+        y: int64
+    }
+]</pre></div></div>
+</div>
+<p>One exception is that numerical data are merged without creating a union type: integers are expanded to floating point numbers.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">,</span> <span class="mf">7.7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 2,
+ 3,
+ 4,
+ 5.5,
+ 6.6,
+ 7.7,
+ 8,
+ 9]
+-----------------
+backend: cpu
+nbytes: 72 B
+type: 9 * float64</pre></div></div>
+</div>
+<p>But booleans are not merged with integers.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 2,
+ 3,
+ True,
+ True,
+ False,
+ 4,
+ 5]
+--------------------------------------
+backend: cpu
+nbytes: 115 B
+type: 8 * union[
+    int64,
+    bool
+]</pre></div></div>
+</div>
+<p>As described above, records with different sets of fields are presumed to be a single record type with missing values.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;two&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;three&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(RecordType([NumpyType(&#39;float64&#39;), OptionType(ListType(NumpyType(&#39;int64&#39;))), OptionType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;}))], [&#39;x&#39;, &#39;y&#39;, &#39;z&#39;]), 3, None)
+</pre></div>
+</div>
+</div>
+</div>
+<p>But tuples with different lengths are presumed to be distinct types.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="mf">1.1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="p">(</span><span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;two&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="mf">3.3</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s2">&quot;three&quot;</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(UnionType([RecordType([NumpyType(&#39;float64&#39;), UnionType([ListType(NumpyType(&#39;int64&#39;)), ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;})])], None), RecordType([NumpyType(&#39;float64&#39;), ListType(NumpyType(&#39;int64&#39;)), ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;})], None)]), 3, None)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="more-control-over-conversions">
+<h2>More control over conversions<a class="headerlink" href="#more-control-over-conversions" title="Link to this heading">#</a></h2>
+<p>The conversions described above are applied by <a class="reference internal" href="../reference/generated/ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_iter()</span></code></a> when it maps data into an <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>. For more control over the conversion process (e.g. to make unions of records), use <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> directly.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-convert-numpy.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">How to convert to/from NumPy</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-convert-json.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">How to convert to/from JSON</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-python-to-awkward">From Python to Awkward</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-awkward-to-python">From Awkward to Python</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pandas-style-constructor">Pandas-style constructor</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-of-numbers-and-booleans">Conversion of numbers and booleans</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-of-lists">Conversion of lists</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-of-strings-and-bytestrings">Conversion of strings and bytestrings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conversion-of-dicts-and-tuples">Conversion of dicts and tuples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#missing-values-python-none">Missing values: Python None</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#union-types-heterogeneous-data">Union types: heterogeneous data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#more-control-over-conversions">More control over conversions</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-convert-python.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/user-guide/how-to-convert-python.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

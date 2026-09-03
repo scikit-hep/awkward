@@ -1,0 +1,25 @@
+ak.numba.layoutbuilder
+======================
+
+.. py:module:: awkward.numba.layoutbuilder
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   awkward.numba.layoutbuilder.LayoutBuilder
+   awkward.numba.layoutbuilder.Numpy
+   awkward.numba.layoutbuilder.Empty
+   awkward.numba.layoutbuilder.ListOffset
+   awkward.numba.layoutbuilder.Regular
+   awkward.numba.layoutbuilder.IndexedOption
+   awkward.numba.layoutbuilder.ByteMasked
+   awkward.numba.layoutbuilder.BitMasked
+   awkward.numba.layoutbuilder.Unmasked
+   awkward.numba.layoutbuilder.Record
+   awkward.numba.layoutbuilder.Tuple
+   awkward.numba.layoutbuilder.Union
+
+

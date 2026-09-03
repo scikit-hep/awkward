@@ -1,0 +1,143 @@
+ak.forms.IndexedOptionForm
+--------------------------
+
+.. py:module: ak.forms.IndexedOptionForm
+
+Defined in `awkward.forms.indexedoptionform <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/forms/indexedoptionform.py>`__ on `line 8 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/forms/indexedoptionform.py#L8>`__.
+
+.. py:class:: ak.forms.IndexedOptionForm(self, index, content)
+
+
+
+.. _ak-forms-indexedoptionform-is_option:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.is_option
+    :value: True
+
+
+
+.. _ak-forms-indexedoptionform-is_indexed:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.is_indexed
+    :value: True
+
+
+
+.. _ak-forms-indexedoptionform-index:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.index
+
+
+
+.. _ak-forms-indexedoptionform-content:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.content
+
+
+
+.. _ak-forms-indexedoptionform-copy:
+
+.. py:method:: ak.forms.IndexedOptionForm.copy(self, index=unset, content=unset)
+
+
+
+.. _ak-forms-indexedoptionform-simplified:
+
+.. py:method:: ak.forms.IndexedOptionForm.simplified(cls, index, content)
+
+
+
+.. _ak-forms-indexedoptionform-__repr__:
+
+.. py:method:: ak.forms.IndexedOptionForm.__repr__(self)
+
+
+
+.. _ak-forms-indexedoptionform-_to_dict_part:
+
+.. py:method:: ak.forms.IndexedOptionForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-indexedoptionform-_type:
+
+.. py:method:: ak.forms.IndexedOptionForm._type(self, typestrs)
+
+
+
+.. _ak-forms-indexedoptionform-__eq__:
+
+.. py:method:: ak.forms.IndexedOptionForm.__eq__(self, other)
+
+
+
+.. _ak-forms-indexedoptionform-purelist_parameter:
+
+.. py:method:: ak.forms.IndexedOptionForm.purelist_parameter(self, key)
+
+
+
+.. _ak-forms-indexedoptionform-purelist_isregular:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.purelist_isregular
+
+
+
+.. _ak-forms-indexedoptionform-purelist_depth:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.purelist_depth
+
+
+
+.. _ak-forms-indexedoptionform-is_identity_like:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.is_identity_like
+
+
+
+.. _ak-forms-indexedoptionform-minmax_depth:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.minmax_depth
+
+
+
+.. _ak-forms-indexedoptionform-branch_depth:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.branch_depth
+
+
+
+.. _ak-forms-indexedoptionform-fields:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.fields
+
+
+
+.. _ak-forms-indexedoptionform-is_tuple:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.is_tuple
+
+
+
+.. _ak-forms-indexedoptionform-dimension_optiontype:
+
+.. py:attribute:: ak.forms.IndexedOptionForm.dimension_optiontype
+
+
+
+.. _ak-forms-indexedoptionform-_columns:
+
+.. py:method:: ak.forms.IndexedOptionForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-indexedoptionform-_select_columns:
+
+.. py:method:: ak.forms.IndexedOptionForm._select_columns(self, index, specifier, matches, output)
+
+
+
+.. _ak-forms-indexedoptionform-_column_types:
+
+.. py:method:: ak.forms.IndexedOptionForm._column_types(self)
+

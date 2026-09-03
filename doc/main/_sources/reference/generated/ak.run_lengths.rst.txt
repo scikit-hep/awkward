@@ -1,0 +1,87 @@
+ak.run_lengths
+==============
+
+Defined in `awkward.operations.ak_run_lengths <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_run_lengths.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_run_lengths.py#L17>`__.
+
+.. py:function:: ak.run_lengths(array, *, highlevel=True, behavior=None, attrs=None)
+
+   Returns the lengths of runs of identical values at the deepest level.
+
+   See also :py:obj:`ak.num`, :py:obj:`ak.argsort`, :py:obj:`ak.unflatten`.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   :returns: The lengths of sequences of identical values at the deepest level
+             of nesting, returning an array with the same structure but with ``int64`` type.
+
+   .. rubric:: Examples
+
+   For example,
+
+   >>> array = ak.Array([1.1, 1.1, 1.1, 2.2, 3.3, 3.3, 4.4, 4.4, 5.5])
+   >>> ak.run_lengths(array)
+   <Array [3, 1, 2, 2, 1] type='5 * int64'>
+
+   There are 3 instances of 1.1, followed by 1 instance of 2.2, 2 instances of 3.3,
+   2 instances of 4.4, and 1 instance of 5.5.
+
+   The order and uniqueness of the input data doesn't matter,
+
+   >>> array = ak.Array([1.1, 1.1, 1.1, 5.5, 4.4, 4.4, 1.1, 1.1, 5.5])
+   >>> ak.run_lengths(array)
+   <Array [3, 1, 2, 2, 1] type='5 * int64'>
+
+   just the difference between each value and its neighbors.
+
+   The data can be nested, but runs don't cross list boundaries.
+
+   >>> array = ak.Array([[1.1, 1.1, 1.1, 2.2, 3.3], [3.3, 4.4], [4.4, 5.5]])
+   >>> ak.run_lengths(array)
+   <Array [[3, 1, 1], [1, 1], [1, 1]] type='3 * var * int64'>
+
+   This function recognizes strings as distinguishable values.
+
+   >>> array = ak.Array([["one", "one"], ["one", "two", "two"], ["three", "two", "two"]])
+   >>> ak.run_lengths(array)
+   <Array [[2], [1, 2], [1, 2]] type='3 * var * int64'>
+
+   Note that this can be combined with :py:obj:`ak.argsort` and :py:obj:`ak.unflatten` to compute
+   a "group by" operation:
+
+   >>> array = ak.Array([{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 1, "y": 1.1},
+   ...                   {"x": 3, "y": 3.3}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}])
+   >>> sorted = array[ak.argsort(array.x)]
+   >>> sorted.x
+   <Array [1, 1, 1, 2, 2, 3] type='6 * int64'>
+   >>> ak.run_lengths(sorted.x)
+   <Array [3, 2, 1] type='3 * int64'>
+   >>> ak.unflatten(sorted, ak.run_lengths(sorted.x)).show()
+   [[{x: 1, y: 1.1}, {x: 1, y: 1.1}, {x: 1, y: 1.1}],
+    [{x: 2, y: 2.2}, {x: 2, y: 2.2}],
+    [{x: 3, y: 3.3}]]
+
+   Unlike a database "group by," this operation can be applied in bulk to many sublists
+   (though the run lengths need to be fully flattened to be used as ``counts`` for
+   :py:obj:`ak.unflatten`, and you need to specify ``axis=-1`` as the depth).
+
+   >>> array = ak.Array([[{"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}, {"x": 1, "y": 1.1}],
+   ...                   [{"x": 3, "y": 3.3}, {"x": 1, "y": 1.1}, {"x": 2, "y": 2.2}]])
+   >>> sorted = array[ak.argsort(array.x)]
+   >>> sorted.x
+   <Array [[1, 1, 2], [1, 2, 3]] type='2 * var * int64'>
+   >>> ak.run_lengths(sorted.x)
+   <Array [[2, 1], [1, 1, 1]] type='2 * var * int64'>
+   >>> counts = ak.flatten(ak.run_lengths(sorted.x), axis=None)
+   >>> ak.unflatten(sorted, counts, axis=-1).show()
+   [[[{x: 1, y: 1.1}, {x: 1, y: 1.1}], [{x: 2, y: 2.2}]],
+    [[{x: 1, y: 1.1}], [{x: 2, y: 2.2}], [{x: 3, y: 3.3}]]]
+

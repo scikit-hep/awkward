@@ -1,0 +1,45 @@
+ak.nanmin
+---------
+
+.. py:module: ak.nanmin
+
+Defined in `awkward.operations.ak_min <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_min.py>`__ on `line 93 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_min.py#L93>`__.
+
+.. py:function:: ak.nanmin(array, axis=None, *, keepdims=False, initial=None, mask_identity=True, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param axis: If None, combine all values from the array into
+             a single scalar result; if an int, group by that axis: ``0`` is the
+             outermost, ``1`` is the first level of nested lists, etc., and
+             negative ``axis`` counts from the innermost: ``-1`` is the innermost,
+             ``-2`` is the next level up, etc.
+    :type axis: None or int
+    :param keepdims: If False, this reducer decreases the number of
+                 dimensions by 1; if True, the reduced values are wrapped in a new
+                 length-1 dimension so that the result of this operation may be
+                 broadcasted with the original array.
+    :type keepdims: bool
+    :param initial: The maximum value of an output element, as
+                an alternative to the numeric type's natural identity (e.g. infinity
+                for floating-point types, a maximum integer for integer types).
+                If you use ``initial``, you might also want ``mask_identity=False``.
+    :type initial: None or number
+    :param mask_identity: If True, reducing over empty lists results in
+                      None (an option type); otherwise, reducing over empty lists
+                      results in the operation's identity.
+    :type mask_identity: bool
+
+Like :py:obj:`ak.min`, but treating NaN ("not a number") values as missing.
+
+Equivalent to
+
+.. code-block:: python
+
+
+    ak.min(ak.nan_to_none(array))
+
+with all other arguments unchanged.
+
+See also :py:obj:`ak.min`.
+

@@ -1,0 +1,53 @@
+ak.types.ArrayType
+==================
+
+Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/types/arraytype.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/types/arraytype.py#L15>`__.
+
+.. py:class:: ak.types.ArrayType(content: awkward.types.type.Type, length: awkward._nplikes.shape.ShapeItem, behavior: collections.abc.Mapping | None = None)
+
+   .. py:attribute:: _content
+      :type:  awkward.types.type.Type
+
+
+   .. py:attribute:: _length
+      :type:  awkward._nplikes.shape.ShapeItem
+
+
+   .. py:attribute:: _behavior
+      :type:  collections.abc.Mapping | None
+      :value: None
+
+
+
+   .. py:property:: content
+      :type: awkward.types.type.Type
+
+
+
+   .. py:property:: length
+      :type: awkward._nplikes.shape.ShapeItem
+
+
+
+   .. py:property:: behavior
+      :type: collections.abc.Mapping | None
+
+
+
+   .. py:method:: __str__() -> str
+
+
+   .. py:method:: show(stream=STDOUT)
+
+
+   .. py:method:: _str(indent: str, compact: bool) -> list[str]
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: is_equal_to(other: awkward._typing.Any, *, all_parameters: bool = False) -> bool
+
+
+   .. py:attribute:: __eq__
+

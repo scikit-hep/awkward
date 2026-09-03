@@ -1,0 +1,45 @@
+ak.types.NumpyType
+------------------
+
+.. py:module: ak.types.NumpyType
+
+Defined in `awkward.types.numpytype <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/types/numpytype.py>`__ on `line 101 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/types/numpytype.py#L101>`__.
+
+.. py:class:: ak.types.NumpyType(self, primitive, *, parameters=None)
+
+
+
+.. _ak-types-numpytype-copy:
+
+.. py:method:: ak.types.NumpyType.copy(self, *, primitive=UNSET, parameters=UNSET)
+
+
+
+.. _ak-types-numpytype-primitive:
+
+.. py:attribute:: ak.types.NumpyType.primitive
+
+
+
+.. _ak-types-numpytype-_get_typestr:
+
+.. py:method:: ak.types.NumpyType._get_typestr(self, behavior)
+
+
+
+.. _ak-types-numpytype-_str:
+
+.. py:method:: ak.types.NumpyType._str(self, indent, compact, behavior)
+
+
+
+.. _ak-types-numpytype-__repr__:
+
+.. py:method:: ak.types.NumpyType.__repr__(self)
+
+
+
+.. _ak-types-numpytype-_is_equal_to:
+
+.. py:method:: ak.types.NumpyType._is_equal_to(self, other, all_parameters)
+

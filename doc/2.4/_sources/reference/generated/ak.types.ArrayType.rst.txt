@@ -1,0 +1,64 @@
+ak.types.ArrayType
+------------------
+
+.. py:module: ak.types.ArrayType
+
+Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/types/arraytype.py>`__ on `line 14 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/types/arraytype.py#L14>`__.
+
+.. py:class:: ak.types.ArrayType(self, content, length, behavior=None)
+
+
+
+.. _ak-types-arraytype-content:
+
+.. py:attribute:: ak.types.ArrayType.content
+
+
+
+.. _ak-types-arraytype-length:
+
+.. py:attribute:: ak.types.ArrayType.length
+
+
+
+.. _ak-types-arraytype-behavior:
+
+.. py:attribute:: ak.types.ArrayType.behavior
+
+
+
+.. _ak-types-arraytype-__str__:
+
+.. py:method:: ak.types.ArrayType.__str__(self)
+
+
+
+.. _ak-types-arraytype-show:
+
+.. py:method:: ak.types.ArrayType.show(self, stream=sys.stdout)
+
+
+
+.. _ak-types-arraytype-_str:
+
+.. py:method:: ak.types.ArrayType._str(self, indent, compact)
+
+
+
+.. _ak-types-arraytype-__repr__:
+
+.. py:method:: ak.types.ArrayType.__repr__(self)
+
+
+
+.. _ak-types-arraytype-is_equal_to:
+
+.. py:method:: ak.types.ArrayType.is_equal_to(self, other, *, all_parameters=False)
+
+
+
+.. _ak-types-arraytype-__eq__:
+
+.. py:attribute:: ak.types.ArrayType.__eq__
+    :value: is_equal_to
+

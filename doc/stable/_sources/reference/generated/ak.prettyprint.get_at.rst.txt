@@ -1,0 +1,6 @@
+ak.prettyprint.get_at
+=====================
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/prettyprint.py>`__ on `line 87 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/prettyprint.py#L87>`__.
+
+.. py:function:: ak.prettyprint.get_at(data: awkward.contents.content.Content, index: int)

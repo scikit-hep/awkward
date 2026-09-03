@@ -1,0 +1,51 @@
+ak.typetracer.TypeTracerReport
+==============================
+
+Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/_nplikes/typetracer.py>`__ on `line 181 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/_nplikes/typetracer.py#L181>`__.
+
+.. py:class:: ak.typetracer.TypeTracerReport
+
+   .. py:attribute:: _shape_touched_set
+
+
+   .. py:attribute:: _data_touched_set
+
+
+   .. py:attribute:: _node_id_to_shape_touched
+      :type:  dict[str, ImmutableBitSet]
+
+
+   .. py:attribute:: _node_id_to_data_touched
+      :type:  dict[str, ImmutableBitSet]
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: set_labels(labels: collections.abc.Collection[str])
+
+
+   .. py:property:: shape_touched
+      :type: list[str]
+
+
+
+   .. py:property:: data_touched
+      :type: list[str]
+
+
+
+   .. py:method:: touch_shape(label: str) -> None
+
+
+   .. py:method:: touch_data(label: str) -> None
+
+
+   .. py:method:: commit(node_id: str) -> None
+
+
+   .. py:method:: shape_touched_in(node_ids: collections.abc.Collection[str]) -> list[str]
+
+
+   .. py:method:: data_touched_in(node_ids: collections.abc.Collection[str]) -> list[str]
+

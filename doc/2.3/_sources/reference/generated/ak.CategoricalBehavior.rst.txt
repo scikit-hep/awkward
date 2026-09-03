@@ -1,0 +1,16 @@
+ak.CategoricalBehavior
+----------------------
+
+.. py:module: ak.CategoricalBehavior
+
+Defined in `awkward.behaviors.categorical <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/behaviors/categorical.py>`__ on `line 6 <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/behaviors/categorical.py#L6>`__.
+
+.. py:class:: ak.CategoricalBehavior(self, *args)
+
+
+
+.. _ak-categoricalbehavior-__name__:
+
+.. py:attribute:: ak.CategoricalBehavior.__name__
+    :value: 'Array'
+

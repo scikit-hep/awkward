@@ -1,0 +1,34 @@
+ak.to_list
+----------
+
+.. py:module: ak.to_list
+
+Defined in `awkward.operations.ak_to_list <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/operations/ak_to_list.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/operations/ak_to_list.py#L20>`__.
+
+.. py:function:: ak.to_list(array)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+
+Converts ``array`` (many types supported, including all Awkward Arrays and
+Records) into Python objects. If ``array`` is not recognized as an array, it
+is passed through as-is.
+
+Awkward Array types have the following Pythonic translations.
+
+* :py:obj:`ak.types.NumpyType`: converted into bool, int, float, datetimes, etc.
+  (Same as NumPy's ``ndarray.tolist``.)
+* :py:obj:`ak.types.OptionType`: missing values are converted into None.
+* :py:obj:`ak.types.ListType`: converted into list.
+* :py:obj:`ak.types.RegularType`: also converted into list. Python (and JSON)
+  forms lose information about the regularity of list lengths.
+* :py:obj:`ak.types.ListType` with parameter ``"__array__"`` equal to
+  ``"__bytestring__"``: converted into bytes.
+* :py:obj:`ak.types.ListType` with parameter ``"__array__"`` equal to
+  ``"__string__"``: converted into str.
+* :py:obj:`ak.types.RecordArray` without field names: converted into tuple.
+* :py:obj:`ak.types.RecordArray` with field names: converted into dict.
+* :py:obj:`ak.types.UnionArray`: Python data are naturally heterogeneous.
+
+See also :py:obj:`ak.from_iter` and :py:obj:`ak.Array.tolist`.
+

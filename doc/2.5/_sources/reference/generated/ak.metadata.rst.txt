@@ -1,0 +1,9 @@
+ak.metadata
+-----------
+
+.. py:module: ak.metadata
+
+Defined in `awkward.operations.ak_from_parquet <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_from_parquet.py>`__ on `line 88 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_from_parquet.py#L88>`__.
+
+.. py:function:: ak.metadata(path, storage_options=None, row_groups=None, columns=None, ignore_metadata=False, scan_files=True)
+

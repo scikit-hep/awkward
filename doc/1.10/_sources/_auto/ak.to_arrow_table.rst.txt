@@ -1,0 +1,35 @@
+ak.to_arrow_table
+-----------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 2525 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L2525>`__.
+
+.. py:function:: ak.to_arrow_table(array, explode_records=False, list_to32=False, string_to32=True, bytestring_to32=True)
+
+
+    :param array: Data to convert to an Apache Arrow table.
+    :param explode_records: If True, lists of records are written as
+                        records of lists, so that nested fields become top-level fields
+                        (which can be zipped when read back).
+    :type explode_records: bool
+    :param list_to32: If True, convert Awkward lists into 32-bit Arrow lists
+                  if they're small enough, even if it means an extra conversion. Otherwise,
+                  signed 32-bit :py:obj:`ak.layout.ListOffsetArray` maps to Arrow ``ListType`` and
+                  all others map to Arrow ``LargeListType``.
+    :type list_to32: bool
+    :param string_to32: Same as the above for Arrow ``string`` and ``large_string``.
+    :type string_to32: bool
+    :param bytestring_to32: Same as the above for Arrow ``binary`` and ``large_binary``.
+    :type bytestring_to32: bool
+
+Converts an Awkward Array into an Apache Arrow table (``pyarrow.Table``).
+
+If the ``array`` does not contain records at top-level, the Arrow table will consist
+of one field whose name is ``""``.
+
+Arrow tables can maintain the distinction between "option-type but no elements are
+missing" and "not option-type" at all levels, including the top level. However,
+there is no distinction between ``?union[X, Y, Z]]`` type and ``union[?X, ?Y, ?Z]`` type.
+Be aware of these type distinctions when passing data through Arrow or Parquet.
+
+See also :py:obj:`ak.to_arrow`, :py:obj:`ak.from_arrow`, :py:obj:`ak.to_parquet`.
+

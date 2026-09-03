@@ -1,0 +1,1422 @@
+ak.Array
+--------
+
+.. py:module: ak.Array
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/highlevel.py>`__ on `line 26 <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/highlevel.py#L26>`__.
+
+.. py:class:: ak.Array(self, data, *, behavior=None, with_name=None, check_valid=False, backend=None)
+
+
+    :param data:
+             Data to wrap or convert into an array.
+                - If a NumPy array, the regularity of its dimensions is preserved
+                  and the data are viewed, not copied.
+                - CuPy arrays are treated the same way as NumPy arrays except that
+                  they default to ``backend="cuda"``, rather than ``backend="cpu"``.
+                - If a pyarrow object, calls :py:obj:`ak.from_arrow`, preserving as much
+                  metadata as possible, usually zero-copy.
+                - If a dict of str → columns, combines the columns into an
+                  array of records (like Pandas's DataFrame constructor).
+                - If a string, the data are assumed to be JSON.
+                - If an iterable, calls :py:obj:`ak.from_iter`, which assumes all dimensions
+                  have irregular lengths.
+    :type data: :py:obj:`ak.contents.Content`, :py:obj:`ak.Array`, ``np.ndarray``, ``cp.ndarray``, ``pyarrow.*``, str, dict, or iterable
+    :param behavior: Custom :py:obj:`ak.behavior` for this Array only.
+    :type behavior: None or dict
+    :param with_name: Gives tuples and records a name that can be
+                  used to override their behavior (see below).
+    :type with_name: None or str
+    :param check_valid: If True, verify that the :py:meth:`layout <ak.Array.layout>` is valid.
+    :type check_valid: bool
+    :param backend: If ``"cpu"``, the Array will be placed in
+                main memory for use with other ``"cpu"`` Arrays and Records; if ``"cuda"``,
+                the Array will be placed in GPU global memory using CUDA; if ``"jax"``, the structure
+                is copied to the CPU for use with JAX. if None, the ``data`` are left untouched.
+    :type backend: None, ``"cpu"``, ``"jax"``, ``"cuda"``
+
+High-level array that can contain data of any type.
+
+For most users, this is the only class in Awkward Array that matters: it
+is the entry point for data analysis with an emphasis on usability. It
+intentionally has a minimum of methods, preferring standalone functions
+like
+
+.. code-block:: python
+
+
+    ak.num(array1)
+    ak.combinations(array1)
+    ak.cartesian([array1, array2])
+    ak.zip({"x": array1, "y": array2, "z": array3})
+
+instead of bound methods like
+
+.. code-block:: python
+
+
+    array1.num()
+    array1.combinations()
+    array1.cartesian([array2, array3])
+    array1.zip(...)   # ?
+
+because its namespace is valuable for domain-specific parameters and
+functionality. For example, if records contain a field named ``"num"``,
+they can be accessed as
+
+.. code-block:: python
+
+
+    array1.num
+
+instead of
+
+.. code-block:: python
+
+
+    array1["num"]
+
+without any confusion or interference from :py:obj:`ak.num`. The same is true
+for domain-specific methods that have been attached to the data. For
+instance, an analysis of mailing addresses might have a function that
+computes zip codes, which can be attached to the data with a method
+like
+
+.. code-block:: python
+
+
+    latlon.zip()
+
+without any confusion or interference from :py:obj:`ak.zip`. Custom methods like
+this can be added with :py:obj:`ak.behavior`, and so the namespace of Array
+attributes must be kept clear for such applications.
+
+See also :py:obj:`ak.Record`.
+
+Interfaces to other libraries
+=============================
+
+NumPy
+*****
+
+When NumPy
+`universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__
+(ufuncs) are applied to an ak.Array, they are passed through the Awkward
+data structure, applied to the numerical data at its leaves, and the output
+maintains the original structure.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[1, 4, 9], [], [16, 25]])
+    >>> np.sqrt(array)
+    <Array [[1, 2, 3], [], [4, 5]] type='3 * var * float64'>
+
+See also :py:obj:`ak.Array.__array_ufunc__`.
+
+Some NumPy functions other than ufuncs are also handled properly in
+NumPy >= 1.17 (see
+`NEP 18 <https://numpy.org/neps/nep-0018-array-function-protocol.html>`__)
+and if an Awkward override exists. That is,
+
+.. code-block:: python
+
+
+    np.concatenate
+
+can be used on an Awkward Array because
+
+.. code-block:: python
+
+
+    ak.concatenate
+
+exists. If your NumPy is older than 1.17, use ``ak.concatenate`` directly.
+
+Pandas
+******
+
+Ragged arrays (list type) can be converted into Pandas
+`MultiIndex <https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html>`__
+rows and nested records can be converted into MultiIndex columns. If the
+Awkward Array has only one "branch" of nested lists (i.e. different record
+fields do not have different-length lists, but a single chain of lists-of-lists
+is okay), then it can be losslessly converted into a single DataFrame.
+Otherwise, multiple DataFrames are needed, though they can be merged (with a
+loss of information).
+
+The :py:obj:`ak.to_dataframe` function performs this conversion; if ``how=None``, it
+returns a list of DataFrames; otherwise, ``how`` is passed to ``pd.merge`` when
+merging the resultant DataFrames.
+
+Numba
+*****
+
+Arrays can be used in `Numba <http://numba.pydata.org/>`__: they can be
+passed as arguments to a Numba-compiled function or returned as return
+values. The only limitation is that Awkward Arrays cannot be *created*
+inside the Numba-compiled function; to make outputs, consider
+:py:obj:`ak.ArrayBuilder`.
+
+Arrow
+*****
+
+Arrays are convertible to and from `Apache Arrow <https://arrow.apache.org/>`__,
+a standard for representing nested data structures in columnar arrays.
+See :py:obj:`ak.to_arrow` and :py:obj:`ak.from_arrow`.
+
+JAX
+********
+
+Derivatives of a calculation on an :py:obj:`ak.Array` (s) can be calculated with
+`JAX <https://github.com/google/jax#readme>`__, but only if the array
+functions in ``ak`` / ``numpy`` are used, not the functions in the ``jax``
+library directly (apart from e.g. ``jax.grad``).
+
+Like NumPy ufuncs, the function and its derivatives are evaluated on the
+numeric leaves of the data structure, maintaining structure in the output.
+
+
+
+.. _ak-array-__init_subclass__:
+
+.. py:method:: ak.Array.__init_subclass__(cls)
+
+
+
+.. _ak-array-_histogram_module_:
+
+.. py:attribute:: ak.Array._histogram_module_
+    :value: awkward._connect.hist
+
+
+
+.. _ak-array-layout:
+
+.. py:attribute:: ak.Array.layout
+
+The composable :py:obj:`ak.contents.Content` elements that determine how this
+Array is structured.
+
+This may be considered a "low-level" view, as it distinguishes between
+arrays that have the same logical meaning (i.e. same JSON output and
+high-level :py:meth:`type <ak.Array.type>`) but different
+
+* node types, such as :py:obj:`ak.contents.ListArray` and
+     :py:obj:`ak.contents.ListOffsetArray`,
+* integer type specialization, such as ``int64`` vs ``int32``
+* or specific values, such as gaps in a :py:obj:`ak.contents.ListArray`.
+
+The :py:obj:`ak.contents.Content` elements are fully composable, whereas an
+Array is not; the high-level Array is a single-layer "shell" around
+its layout.
+
+Layouts are rendered as XML instead of a nested list. For example,
+the following ``array``
+
+.. code-block:: python
+
+
+    ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+is presented as
+
+.. code-block:: python
+
+
+    <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+
+but ``array.layout`` is presented as
+
+.. code-block:: python
+
+
+    <ListOffsetArray len='3'>
+        <offsets><Index dtype='int64' len='4'>
+            [0 3 3 5]
+        </Index></offsets>
+        <content>
+            <NumpyArray dtype='float64' len='5'>[1.1 2.2 3.3 4.4 5.5]</NumpyArray>
+        </content>
+    </ListOffsetArray>
+
+(with truncation for large arrays).
+
+
+
+.. _ak-array-behavior:
+
+.. py:attribute:: ak.Array.behavior
+
+The ``behavior`` parameter passed into this Array's constructor.
+
+* If a dict, this ``behavior`` overrides the global :py:obj:`ak.behavior`.
+     Any keys in the global :py:obj:`ak.behavior` but not this ``behavior`` are
+     still valid, but any keys in both are overridden by this
+     ``behavior``. Keys with a None value are equivalent to missing keys,
+     so this ``behavior`` can effectively remove keys from the
+     global :py:obj:`ak.behavior`.
+
+* If None, the Array defaults to the global :py:obj:`ak.behavior`.
+
+See :py:obj:`ak.behavior` for a list of recognized key patterns and their
+meanings.
+
+
+
+.. _ak-array-mask:
+
+.. py:attribute:: ak.Array.mask
+
+Whereas
+
+.. code-block:: python
+
+
+    array[array_of_booleans]
+
+removes elements from ``array`` in which ``array_of_booleans`` is False,
+
+.. code-block:: python
+
+
+    array.mask[array_of_booleans]
+
+returns data with the same length as the original ``array`` but False
+values in ``array_of_booleans`` are mapped to None. Such an output
+can be used in mathematical expressions with the original ``array``
+because they are still aligned.
+
+See `filtering`_ and :py:obj:`ak.mask`.
+
+
+
+.. _ak-array-tolist:
+
+.. py:method:: ak.Array.tolist(self)
+
+Converts this Array into Python objects; same as :py:obj:`ak.to_list`
+(but without the underscore, like NumPy's
+`tolist <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html>`__).
+
+
+
+.. _ak-array-to_list:
+
+.. py:method:: ak.Array.to_list(self)
+
+Converts this Array into Python objects; same as :py:obj:`ak.to_list`.
+
+
+
+.. _ak-array-to_numpy:
+
+.. py:method:: ak.Array.to_numpy(self, allow_missing=True)
+
+Converts this Array into a NumPy array, if possible; same as :py:obj:`ak.to_numpy`.
+
+
+
+.. _ak-array-nbytes:
+
+.. py:attribute:: ak.Array.nbytes
+
+The total number of bytes in all the :py:obj:`ak.index.Index`,
+and :py:obj:`ak.contents.NumpyArray` buffers in this array tree.
+
+It does not count buffers that must be kept in memory because
+of ownership, but are not directly used in the array. Nor does it count
+the (small) Python objects that reference the (large) array buffers.
+
+
+
+.. _ak-array-ndim:
+
+.. py:attribute:: ak.Array.ndim
+
+Number of dimensions (nested variable-length lists and/or regular arrays)
+before reaching a numeric type or a record.
+
+There may be nested lists within the record, as field values, but this
+number of dimensions does not count those.
+
+(Some fields may have different depths than others, which is why they
+are not counted.)
+
+
+
+.. _ak-array-fields:
+
+.. py:attribute:: ak.Array.fields
+
+List of field names or tuple slot numbers (as strings) of the outermost
+record or tuple in this array.
+
+If the array contains nested records, only the fields of the outermost
+record are shown. If it contains tuples instead of records, its fields
+are string representations of integers, such as ``"0"``, ``"1"``, ``"2"``, etc.
+The records or tuples may be within multiple layers of nested lists.
+
+If the array contains neither tuples nor records, it is an empty list.
+
+See also :py:obj:`ak.fields`.
+
+
+
+.. _ak-array-is_tuple:
+
+.. py:attribute:: ak.Array.is_tuple
+
+If True, the top-most record structure has no named fields, i.e. it's a tuple.
+
+
+
+.. _ak-array-_ipython_key_completions_:
+
+.. py:method:: ak.Array._ipython_key_completions_(self)
+
+
+
+.. _ak-array-type:
+
+.. py:attribute:: ak.Array.type
+
+The high-level type of this Array; same as :py:obj:`ak.type`.
+
+Note that the outermost element of an Array's type is always an
+:py:obj:`ak.types.ArrayType`, which specifies the number of elements in the array.
+
+The type of a :py:obj:`ak.contents.Content` (from :py:obj:`ak.Array.layout`) is not
+wrapped by an :py:obj:`ak.types.ArrayType`.
+
+
+
+.. _ak-array-typestr:
+
+.. py:attribute:: ak.Array.typestr
+
+The high-level type of this Array, presented as a string.
+
+
+
+.. _ak-array-__len__:
+
+.. py:method:: ak.Array.__len__(self)
+
+The length of this Array, only counting the outermost structure.
+
+For example, the length of
+
+.. code-block:: python
+
+
+    ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+is ``3``, not ``5``.
+
+
+
+.. _ak-array-__iter__:
+
+.. py:method:: ak.Array.__iter__(self)
+
+Iterates over this Array in Python.
+
+Note that this is the *slowest* way to access data (even slower than
+native Python objects, like lists and dicts). Usually, you should
+express your problems in array-at-a-time operations.
+
+In other words, do this:
+
+.. code-block:: python
+
+
+    >>> np.sqrt(ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]))
+    <Array [[1.05, 1.48, 1.82], [], [2.1, 2.35]] type='3 * var * float64'>
+
+not this:
+
+.. code-block:: python
+
+
+    >>> for outer in ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]]):
+    ...     for inner in outer:
+    ...         print(np.sqrt(inner))
+    ...
+    1.0488088481701516
+    1.4832396974191326
+    1.816590212458495
+    2.0976176963403033
+    2.345207879911715
+
+Iteration over Arrays exists so that they can be more easily inspected
+as Python objects.
+
+See also :py:obj:`ak.to_list`.
+
+
+
+.. _ak-array-__getitem__:
+
+.. py:method:: ak.Array.__getitem__(self, where)
+
+
+    :param where: Index of positions to
+              select from this Array.
+    :type where: many types supported; see below
+
+Select items from the Array using an extension of NumPy's (already
+quite extensive) rules.
+
+All methods of selecting items described in
+`NumPy indexing <https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html>`__
+are supported with one exception
+(`combining advanced and basic indexing <https://numpy.org/doc/stable/user/basics.indexing.html#combining-advanced-and-basic-indexing>`__
+with basic indexes *between* two advanced indexes: the definition
+NumPy chose for the result does not have a generalization beyond
+rectilinear arrays).
+
+The ``where`` parameter can be any of the following or a tuple of
+the following.
+
+* **An integer** selects one element. Like Python/NumPy, it is
+  zero-indexed: ``0`` is the first item, ``1`` is the second, etc.
+  Negative indexes count from the end of the list: ``-1`` is the
+  last, ``-2`` is the second-to-last, etc.
+  Indexes beyond the size of the array, either because they're too
+  large or because they're too negative, raise errors. In
+  particular, some nested lists might contain a desired element
+  while others don't; this would raise an error.
+* **A slice** (either a Python ``slice`` object or the
+  ``start:stop:step`` syntax) selects a range of elements. The
+  ``start`` and ``stop`` values are zero-indexed; ``start`` is inclusive
+  and ``stop`` is exclusive, like Python/NumPy. Negative ``step``
+  values are allowed, but a ``step`` of ``0`` is an error. Slices
+  beyond the size of the array are not errors but are truncated,
+  like Python/NumPy.
+* **A string** selects a tuple or record field, even if its
+  position in the tuple is to the left of the dimension where the
+  tuple/record is defined. (See `projection`_ below.) This is
+  similar to NumPy's
+  `field access <https://numpy.org/doc/stable/user/basics.indexing.html#field-access>`__,
+  except that strings are allowed in the same tuple with other
+  slice types. While record fields have names, tuple fields are
+  integer strings, such as ``"0"``, ``"1"``, ``"2"`` (always
+  non-negative). Be careful to distinguish these from non-string
+  integers.
+* **An iterable of strings** (not the top-level tuple) selects
+  multiple tuple/record fields.
+* **An ellipsis** (either the Python ``Ellipsis`` object or the
+  ``...`` syntax) skips as many dimensions as needed to put the
+  rest of the slice items to the innermost dimensions.
+* **A np.newaxis** or its equivalent, None, does not select items
+  but introduces a new regular dimension in the output with size
+  ``1``. This is a convenient way to explicitly choose a dimension
+  for broadcasting.
+* **A boolean array** with the same length as the current dimension
+  (or any iterable, other than the top-level tuple) selects elements
+  corresponding to each True value in the array, dropping those
+  that correspond to each False. The behavior is similar to
+  NumPy's
+  `compress <https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html>`__
+  function.
+* **An integer array** (or any iterable, other than the top-level
+  tuple) selects elements like a single integer, but produces a
+  regular dimension of as many as are desired. The array can have
+  any length, any order, and it can have duplicates and incomplete
+  coverage. The behavior is similar to NumPy's
+  `take <https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html>`__
+  function.
+* **An integer Array with missing (None) items** selects multiple
+  values by index, as above, but None values are passed through
+  to the output. This behavior matches pyarrow's
+  `Array.take <https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take>`__
+  which also manages arrays with missing values. See
+  `option indexing`_ below.
+* **An Array of nested lists**, ultimately containing booleans or
+  integers and having the same lengths of lists at each level as
+  the Array to which they're applied, selects by boolean or by
+  integer at the deeply nested level. Missing items at any level
+  above the deepest level must broadcast. See `nested indexing`_ below.
+
+A tuple of the above applies each slice item to a dimension of the
+data, which can be very expressive. More than one flat boolean/integer
+array are "iterated as one" as described in the
+`NumPy documentation <https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing>`__.
+
+Filtering
+*********
+
+A common use of selection by boolean arrays is to filter a dataset by
+some property. For instance, to get the odd values of
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+one can put an array expression with True for each odd value inside
+square brackets:
+
+.. code-block:: python
+
+
+    >>> array[array % 2 == 1]
+    <Array [1, 3, 5, 7, 9] type='5 * int64'>
+
+This technique is so common in NumPy and Pandas data analysis that it
+is often read as a syntax, rather than a consequence of array slicing.
+
+The extension to nested arrays like
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[[0, 1, 2], [], [3, 4], [5]], [[6, 7, 8], [9]]])
+
+allows us to use the same syntax more generally.
+
+.. code-block:: python
+
+
+    >>> array[array % 2 == 1]
+    <Array [[[1], [], [3], [5]], [[7], [9]]] type='2 * var * var * int64'>
+
+In this example, the boolean array is itself nested (see
+`nested indexing`_ below).
+
+.. code-block:: python
+
+
+    >>> array % 2 == 1
+    <Array [[[False, True, False], ..., [True]], ...] type='2 * var * var * bool'>
+
+This also applies to data with record structures.
+
+For nested data, we often need to select the first or first two
+elements from variable-length lists. That can be a problem if some
+lists are empty. A function like :py:obj:`ak.num` can be useful for first
+selecting by the lengths of lists.
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[1.1, 2.2, 3.3],
+    ...                   [],
+    ...                   [4.4, 5.5],
+    ...                   [6.6],
+    ...                   [],
+    ...                   [7.7, 8.8, 9.9]])
+    ...
+    >>> array[ak.num(array) > 0, 0]
+    <Array [1.1, 4.4, 6.6, 7.7] type='4 * float64'>
+    >>> array[ak.num(array) > 1, 1]
+    <Array [2.2, 5.5, 8.8] type='3 * float64'>
+
+It's sometimes also a problem that "cleaning" the dataset by dropping
+empty lists changes its alignment, so that it can no longer be used
+in calculations with "uncleaned" data. For this, :py:obj:`ak.mask` can be
+useful because it inserts None in positions that fail the filter,
+rather than removing them.
+
+.. code-block:: python
+
+
+    >>> ak.mask(array, ak.num(array) > 1)
+    <Array [[1.1, 2.2, 3.3], ..., [7.7, ..., 9.9]] type='6 * option[var * float64]'>
+
+Note, however, that the ``0`` or ``1`` to pick the first or second
+item of each nested list is in the second dimension, so the first
+dimension of the slice must be a ``:``.
+
+.. code-block:: python
+
+
+    >>> ak.mask(array, ak.num(array) > 1)[:, 0]
+    <Array [1.1, None, 4.4, None, None, 7.7] type='6 * ?float64'>
+    >>> ak.mask(array, ak.num(array) > 1)[:, 1]
+    <Array [2.2, None, 5.5, None, None, 8.8] type='6 * ?float64'>
+
+Another syntax for
+
+.. code-block:: python
+
+
+    ak.mask(array, array_of_booleans)
+
+is
+
+.. code-block:: python
+
+
+    array.mask[array_of_booleans]
+
+(which is 5 characters away from simply filtering the ``array``).
+
+Projection
+**********
+
+The following
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+    ...                   [{"x": 3.3, "y": [3, 3, 3]}],
+    ...                   [{"x": 0, "y": []}, {"x": 1.1, "y": [1, 1, 1]}]])
+
+has records inside of nested lists:
+
+.. code-block:: python
+
+
+    >>> array.type.show()
+    3 * var * {
+        x: float64,
+        y: var * int64
+    }
+
+In principle, one should select nested lists before record fields,
+
+.. code-block:: python
+
+
+    >>> array[2, :, "x"]
+    <Array [0, 1.1] type='2 * float64'>
+    >>> array[::2, :, "x"]
+    <Array [[1.1, 2.2], [0, 1.1]] type='2 * var * float64'>
+
+but it's also possible to select record fields first.
+
+.. code-block:: python
+
+
+    >>> array["x"]
+    <Array [[1.1, 2.2], [3.3], [0, 1.1]] type='3 * var * float64'>
+
+The string can "commute" to the left through integers and slices to
+get the same result as it would in its "natural" position.
+
+.. code-block:: python
+
+
+    >>> array[2, :, "x"]
+    <Array [0, 1.1] type='2 * float64'>
+    >>> array[2, "x", :]
+    <Array [0, 1.1] type='2 * float64'>
+    >>> array["x", 2, :]
+    <Array [0, 1.1] type='2 * float64'>
+
+The is analogous to selecting rows (integer indexes) before columns
+(string names) or columns before rows, except that the rows are
+more complex (like a Pandas
+`MultiIndex <https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html>`__).
+This would be an expensive operation in a typical object-oriented
+environment, in which the records with fields ``"x"`` and ``"y"`` are
+akin to C structs, but for columnar Awkward Arrays, projecting
+through all records to produce an array of nested lists of ``"x"``
+values just changes the metadata (no loop over data, and therefore
+fast).
+
+Thus, data analysts should think of records as fluid objects that
+can be easily projected apart and zipped back together with
+:py:obj:`ak.zip`.
+
+Note, however, that while a column string can "commute" with row
+indexes to the left of its position in the tree, it can't commute
+to the right. For example, it's possible to use slices inside
+``"y"`` because ``"y"`` is a list:
+
+.. code-block:: python
+
+
+    >>> array[0, :, "y"]
+    <Array [[1], [2, 2]] type='2 * var * int64'>
+    >>> array[0, :, "y", 0]
+    <Array [1, 2] type='2 * int64'>
+
+but it's not possible to move ``"y"`` to the right
+
+.. code-block:: python
+
+
+    >>> array[0, :, 0, "y"]
+    IndexError: while attempting to slice
+        <Array [[{x: 1.1, y: [1]}, {...}], ...] type='3 * var * {x: float64, y:...'>
+    with
+        (0, :, 0, 'y')
+    at inner NumpyArray of length 2, using sub-slice (0).
+
+because the ``array[0, :, 0, ...]`` slice applies to both ``"x"`` and
+``"y"`` before ``"y"`` is selected, and ``"x"`` is a one-dimensional
+NumpyArray that can't take more than its share of slices.
+
+Finally, note that the dot (``__getattr__``) syntax is equivalent to a single
+string in a slice (``__getitem__``) if the field name is a valid Python
+identifier and doesn't conflict with :py:obj:`ak.Array` methods or properties.
+
+.. code-block:: python
+
+
+    >>> array.x
+    <Array [[1.1, 2.2], [3.3], [0, 1.1]] type='3 * var * float64'>
+    >>> array.y
+    <Array [[[1], [2, 2]], ..., [[], [1, ...]]] type='3 * var * var * int64'>
+
+Nested Projection
+*****************
+
+If records are nested within records, you can use a series of strings in
+the selector to drill down. For instance, with the following
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([
+    ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
+    ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}},
+    ...     {"a": {"x": 1, "y": 2}, "b": {"x": 10, "y": 20}, "c": {"x": 1.1, "y": 2.2}}])
+
+we can go directly to the numerical data by specifying a string for the
+outer field and a string for the inner field.
+
+.. code-block:: python
+
+
+    >>> array["a", "x"]
+    <Array [1, 1, 1] type='3 * int64'>
+    >>> array["a", "y"]
+    <Array [2, 2, 2] type='3 * int64'>
+    >>> array["b", "y"]
+    <Array [20, 20, 20] type='3 * int64'>
+    >>> array["c", "y"]
+    <Array [2.2, 2.2, 2.2] type='3 * float64'>
+
+As with single projections, the dot (``__getattr__``) syntax is equivalent
+to a single string in a slice (``__getitem__``) if the field name is a valid
+Python identifier and doesn't conflict with :py:obj:`ak.Array` methods or properties.
+
+.. code-block:: python
+
+
+    >>> array.a.x
+    <Array [1, 1, 1] type='3 * int64'>
+
+You can even get every field of the same name within an outer record using
+a list of field names for the outer record. The following selects the ``"x"``
+field of ``"a"``, ``"b"``, and ``"c"`` records:
+
+.. code-block:: python
+
+
+    >>> array[["a", "b", "c"], "x"].show()
+    [{a: 1, b: 10, c: 1.1},
+     {a: 1, b: 10, c: 1.1},
+     {a: 1, b: 10, c: 1.1}]
+
+You don't need to get all fields:
+
+.. code-block:: python
+
+
+    >>> array[["a", "b"], "x"].show()
+    [{a: 1, b: 10},
+     {a: 1, b: 10},
+     {a: 1, b: 10}]
+
+And you can select lists of field names at all levels:
+
+.. code-block:: python
+
+
+    >>> array[["a", "b"], ["x", "y"]].show()
+    [{a: {x: 1, y: 2}, b: {x: 10, y: 20}},
+     {a: {x: 1, y: 2}, b: {x: 10, y: 20}},
+     {a: {x: 1, y: 2}, b: {x: 10, y: 20}}]
+
+Option indexing
+***************
+
+NumPy arrays can be sliced by all of the above slice types except
+arrays with missing values and arrays with nested lists, both of
+which are inexpressible in NumPy. Missing values, represented by
+None in Python, are called option types (:py:obj:`ak.types.OptionType`) in
+Awkward Array and can be used as a slice.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+
+can be sliced with a boolean array
+
+.. code-block:: python
+
+
+    >>> array[[False, False, False, False, True, False, True, False, True]]
+    <Array [5.5, 7.7, 9.9] type='3 * float64'>
+
+or a boolean array containing None values:
+
+.. code-block:: python
+
+
+    >>> array[[False, False, False, False, True, None, True, None, True]]
+    <Array [5.5, None, 7.7, None, 9.9] type='5 * ?float64'>
+
+Similarly for arrays of integers and None:
+
+.. code-block:: python
+
+
+    >>> array[[0, 1, None, None, 7, 8]]
+    <Array [1.1, 2.2, None, None, 8.8, 9.9] type='6 * ?float64'>
+
+This is the same behavior as pyarrow's
+`Array.take <https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take>`__,
+which establishes a convention for how to interpret slice arrays
+with option type:
+
+.. code-block:: python
+
+
+    >>> import pyarrow as pa
+    >>> array = pa.array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+    >>> array.take(pa.array([0, 1, None, None, 7, 8]))
+    <pyarrow.lib.DoubleArray object at 0x7efc7f060210>
+    [
+      1.1,
+      2.2,
+      null,
+      null,
+      8.8,
+      9.9
+    ]
+
+Nested indexing
+***************
+
+Awkward Array's nested lists can be used as slices as well, as long
+as the type at the deepest level of nesting is boolean or integer.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[[0.0, 1.1, 2.2], [], [3.3, 4.4]], [], [[5.5]]])
+
+can be sliced at the top level with one-dimensional arrays:
+
+.. code-block:: python
+
+
+    >>> array[[False, True, True]]
+    <Array [[], [[5.5]]] type='2 * var * var * float64'>
+    >>> array[[1, 2]]
+    <Array [[], [[5.5]]] type='2 * var * var * float64'>
+
+with singly nested lists:
+
+.. code-block:: python
+
+
+    >>> array[[[False, True, True], [], [True]]]
+    <Array [[[], [3.3, 4.4]], [], [[5.5]]] type='3 * var * var * float64'>
+    >>> array[[[1, 2], [], [0]]]
+    <Array [[[], [3.3, 4.4]], [], [[5.5]]] type='3 * var * var * float64'>
+
+and with doubly nested lists:
+
+.. code-block:: python
+
+
+    >>> array[[[[False, True, False], [], [True, False]], [], [[False]]]]
+    <Array [[[1.1], [], [3.3]], [], [[]]] type='3 * var * var * float64'>
+    >>> array[[[[1], [], [0]], [], [[]]]]
+    <Array [[[1.1], [], [3.3]], [], [[]]] type='3 * var * var * float64'>
+
+The key thing is that the nested slice has the same number of elements
+as the array it's slicing at every level of nesting that it reproduces.
+This is similar to the requirement that boolean arrays have the same
+length as the array they're filtering.
+
+This kind of slicing is useful because NumPy's
+`universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__
+produce arrays with the same structure as the original array, which
+can then be used as filters.
+
+.. code-block:: python
+
+
+    >>> ((array * 10) % 2 == 1).show()
+    [[[False, True, False], [], [True, False]],
+     [],
+     [[True]]]
+    >>> (array[(array * 10) % 2 == 1]).show()
+    [[[1.1], [], [3.3]],
+     [],
+     [[5.5]]]
+
+Functions whose names start with "arg" return index positions, which
+can be used with the integer form.
+
+.. code-block:: python
+
+
+    >>> np.argmax(array, axis=-1).show()
+    [[2, None, 1],
+     [],
+     [0]]
+    >>> array[np.argmax(array, axis=-1)].show()
+    [[[3.3, 4.4], None, []],
+     [],
+     [[5.5]]]
+
+Here, the ``np.argmax`` returns the integer position of the maximum
+element or None for empty arrays. It's a nice example of
+`option indexing`_ with `nested indexing`_.
+
+When applying a nested index with missing (None) entries at levels
+higher than the last level, the indexer must have the same dimension
+as the array being indexed, and the resulting output will have missing
+entries at the corresponding locations, e.g. for
+
+.. code-block:: python
+
+
+    >>> array[ [[[0, None, 2, None, None], None, [1]], None, [[0]]] ].show()
+    [[[0, None, 2.2, None, None], None, [4.4]],
+     None,
+     [[5.5]]]
+
+the sub-list at entry 0,0 is extended as the masked entries are
+acting at the last level, while the higher levels of the indexer all
+have the same dimension as the array being indexed.
+
+
+
+.. _ak-array-__setitem__:
+
+.. py:method:: ak.Array.__setitem__(self, where, what)
+
+
+    :param where: Field name to add to records in the array.
+    :type where: str or tuple of str
+    :param what: Array to add as the new field.
+    :type what: :py:obj:`ak.Array`
+
+Unlike :py:meth:`__getitem__ <ak.Array.__getitem__>`, which allows a wide variety of slice types,
+only single field-slicing is supported for assignment.
+(:py:obj:`ak.contents.Content` arrays are immutable; field assignment replaces
+the :py:meth:`layout <ak.Array.layout>` with an array that has the new field using :py:obj:`ak.with_field`.)
+
+However, a field can be assigned deeply into a nested record e.g.
+
+.. code-block:: python
+
+
+    >>> nested = ak.zip({"a" : ak.zip({"x" : [1, 2, 3]})})
+    >>> nested["a", "y"] = 2 * nested.a.x
+    >>> nested.show()
+    [{a: {x: 1, y: 2}},
+     {a: {x: 2, y: 4}},
+     {a: {x: 3, y: 6}}]
+
+Note that the following does **not** work:
+
+.. code-block:: python
+
+
+    >>> nested["a"]["y"] = 2 * nested.a.x # does not work, nested["a"] is a copy!
+
+Always assign by passing the whole path to the top level
+
+.. code-block:: python
+
+
+    >>> nested["a", "y"] = 2 * nested.a.x
+
+If necessary, the new field will be broadcasted to fit the array.
+For example, given
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([
+    ...     [{"x": 1.1}, {"x": 2.2}, {"x": 3.3}], [], [{"x": 4.4}, {"x": 5.5}]
+    ... ])
+
+which has three elements with nested data in each, assigning
+
+.. code-block:: python
+
+
+    >>> array["y"] = [100, 200, 300]
+
+will result in
+
+.. code-block:: python
+
+
+    >>> array.show()
+    [[{x: 1.1, y: 100}, {x: 2.2, y: 100}, {x: 3.3, y: 100}],
+     [],
+     [{x: 4.4, y: 300}, {x: 5.5, y: 300}]]
+
+because the ``100`` in ``what[0]`` is broadcasted to all three nested
+elements of ``array[0]``, the ``200`` in ``what[1]`` is broadcasted to the
+empty list ``array[1]``, and the ``300`` in ``what[2]`` is broadcasted to
+both elements of ``array[2]``.
+
+See :py:obj:`ak.with_field` for a variant that does not change the :py:obj:`ak.Array`
+in-place. (Internally, this method uses :py:obj:`ak.with_field`, so performance
+is not a factor in choosing one over the other.)
+
+
+
+.. _ak-array-__delitem__:
+
+.. py:method:: ak.Array.__delitem__(self, where)
+
+
+    :param where: Field name to remove from the array.
+    :type where: str or tuple of str
+
+For example:
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([{"x": 3.3, "y": {"this": 10, "that": 20}}])
+    >>> del array["y", "that"]
+    >>> array.show()
+    [{x: 3.3, y: {this: 10}}]
+
+See :py:obj:`ak.without_field` for a variant that does not change the :py:obj:`ak.Array`
+in-place. (Internally, this method uses :py:obj:`ak.without_field`, so performance
+is not a factor in choosing one over the other.)
+
+
+
+.. _ak-array-__getattr__:
+
+.. py:method:: ak.Array.__getattr__(self, where)
+
+
+    :param where: Attribute name to lookup
+    :type where: str
+
+Whenever possible, fields can be accessed as attributes.
+
+For example, the fields of
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([
+    ...     [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}, {"x": 3.3, "y": [3, 3, 3]}],
+    ...     [],
+    ...     [{"x": 4.4, "y": [4, 4, 4, 4]}, {"x": 5.5, "y": [5, 5, 5, 5, 5]}]
+    ... ])
+
+can be accessed as
+
+.. code-block:: python
+
+
+    >>> array.x
+    <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+    >>> array.y
+    <Array [[[1], [2, 2], [3, 3, 3]], [], [...]] type='3 * var * var * int64'>
+
+which are equivalent to ``array["x"]`` and ``array["y"]``. (See
+`projection`_.)
+
+Fields can't be accessed as attributes when
+
+* :py:obj:`ak.Array` methods or properties take precedence,
+* a domain-specific behavior has methods or properties that take
+     precedence, or
+* the field name is not a valid Python identifier or is a Python
+     keyword.
+
+Note that while fields can be accessed as attributes, they cannot be
+*assigned* as attributes. See :py:obj:`ak.Array.__setitem__` for more.
+
+
+
+.. _ak-array-__setattr__:
+
+.. py:method:: ak.Array.__setattr__(self, name, value)
+
+
+    :param where: Attribute name to set
+    :type where: str
+
+Set an attribute on the array.
+
+Only existing public attributes e.g. :py:obj:`ak.Array.layout`, or private
+attributes (with leading underscores), can be set.
+
+Fields are not assignable to as attributes, i.e. the following doesn't work:
+
+.. code-block:: python
+
+
+    array.z = new_field
+
+Instead, always use :py:obj:`ak.Array.__setitem__`:
+
+.. code-block:: python
+
+
+    array["z"] = new_field
+
+or :py:obj:`ak.with_field`:
+
+.. code-block:: python
+
+
+    array = ak.with_field(array, new_field, "z")
+
+to add or modify a field.
+
+
+
+.. _ak-array-__dir__:
+
+.. py:method:: ak.Array.__dir__(self)
+
+Lists all methods, properties, and field names (see :py:meth:`__getattr__ <ak.Array.__getattr__>`)
+that can be accessed as attributes.
+
+
+
+.. _ak-array-__str__:
+
+.. py:method:: ak.Array.__str__(self)
+
+
+
+.. _ak-array-__repr__:
+
+.. py:method:: ak.Array.__repr__(self)
+
+
+
+.. _ak-array-_repr:
+
+.. py:method:: ak.Array._repr(self, limit_cols)
+
+
+
+.. _ak-array-show:
+
+.. py:method:: ak.Array.show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout)
+
+
+    :param limit_rows: Maximum number of rows (lines) to use in the output.
+    :type limit_rows: int
+    :param limit_cols: Maximum number of columns (characters wide).
+    :type limit_cols: int
+    :param type: If True, print the type as well. (Doesn't count toward number
+             of rows/lines limit.)
+    :type type: bool
+    :param stream: Stream to write the
+               output to. If None, return a string instead of writing to a stream.
+    :type stream: object with a ````write(str)```` method or None
+
+Display the contents of the array within ``limit_rows`` and ``limit_cols``, using
+ellipsis (``...``) for hidden nested data.
+
+
+
+.. _ak-array-_repr_mimebundle_:
+
+.. py:method:: ak.Array._repr_mimebundle_(self, include=None, exclude=None)
+
+
+
+.. _ak-array-__array__:
+
+.. py:method:: ak.Array.__array__(self, *args)
+
+Intercepts attempts to convert this Array into a NumPy array and
+either performs a zero-copy conversion or raises an error.
+
+This function is also called by the
+`np.asarray <https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html>`__
+family of functions, which have ``copy=False`` by default.
+
+.. code-block:: python
+
+
+    >>> np.asarray(ak.Array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
+    array([[1.1, 2.2, 3.3],
+           [4.4, 5.5, 6.6]])
+
+If the data are numerical and regular (nested lists have equal lengths
+in each dimension, as described by the :py:meth:`type <ak.Array.type>`), they can be losslessly
+converted to a NumPy array and this function returns without an error.
+
+Otherwise, the function raises an error. It does not create a NumPy
+array with dtype ``"O"`` for ``np.object_`` (see the
+`note on object_ type <https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in>`__)
+since silent conversions to dtype ``"O"`` arrays would not only be a
+significant performance hit, but would also break functionality, since
+nested lists in a NumPy ``"O"`` array are severed from the array and
+cannot be sliced as dimensions.
+
+
+
+.. _ak-array-__array_ufunc__:
+
+.. py:method:: ak.Array.__array_ufunc__(self, ufunc, method, *inputs)
+
+Intercepts attempts to pass this Array to a NumPy
+`universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__
+(ufuncs) and passes it through the Array's structure.
+
+This method conforms to NumPy's
+`NEP 13 <https://numpy.org/neps/nep-0013-ufunc-overrides.html>`__
+for overriding ufuncs, which has been
+`available since NumPy 1.13 <https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added>`__
+(and thus NumPy 1.13 is the minimum allowed version).
+
+When any ufunc is applied to an Awkward Array, it applies to the
+innermost level of structure and preserves the structure through the
+operation.
+
+For example, with
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
+
+applying ``np.sqrt`` would yield
+
+.. code-block:: python
+
+
+    >>> np.sqrt(array).show()
+    [[1.05, 1.48, 1.82],
+     [],
+     [2.1, 2.35]]
+
+In addition, many unary and binary operators implicitly call ufuncs,
+such as ``np.power`` in
+
+.. code-block:: python
+
+
+    >>> (array**2).show()
+    [[1.21, 4.84, 10.9],
+     [],
+     [19.4, 30.2]]
+
+In the above example, ``array`` is a nested list of records and ``2`` is
+a scalar. Awkward Array applies the same broadcasting rules as NumPy
+plus a few more to deal with nested structures. In addition to
+broadcasting a scalar, as above, it is possible to broadcast
+arrays with less depth into arrays with more depth, such as
+
+.. code-block:: python
+
+
+    >>> (array + ak.Array([10, 20, 30])).show()
+    [[11.1, 12.2, 13.3],
+     [],
+     [34.4, 35.5]]
+
+See :py:obj:`ak.broadcast_arrays` for details about broadcasting and the
+generalized set of broadcasting rules.
+
+Third party libraries can create ufuncs, not just NumPy, so any library
+that "plays well" with the NumPy ecosystem can be used with Awkward
+Arrays:
+
+.. code-block:: python
+
+
+    >>> import numba as nb
+    >>> @nb.vectorize([nb.float64(nb.float64)])
+    ... def sqr(x):
+    ...     return x * x
+    ...
+    >>> sqr(array).show()
+    [[1.21, 4.84, 10.9],
+     [],
+     [19.4, 30.2]]
+
+See also :py:meth:`__array_function__ <ak.Array.__array_function__>`.
+
+
+
+.. _ak-array-__array_function__:
+
+.. py:method:: ak.Array.__array_function__(self, func, types, args, kwargs)
+
+Intercepts attempts to pass this Array to those NumPy functions other
+than universal functions that have an Awkward equivalent.
+
+This method conforms to NumPy's
+`NEP 18 <https://numpy.org/neps/nep-0018-array-function-protocol.html>`__
+for overriding functions, which has been
+`available since NumPy 1.17 <https://numpy.org/devdocs/release/1.17.0-notes.html#numpy-functions-now-always-support-overrides-with-array-function>`__
+(and
+`NumPy 1.16 with an experimental flag set <https://numpy.org/devdocs/release/1.16.0-notes.html#numpy-functions-now-support-overrides-with-array-function>`__).
+This is not crucial for Awkward Array to work correctly, as NumPy
+functions like np.concatenate can be manually replaced with
+:py:obj:`ak.concatenate` for early versions of NumPy.
+
+See also :py:meth:`__array_ufunc__ <ak.Array.__array_ufunc__>`.
+
+
+
+.. _ak-array-numba_type:
+
+.. py:attribute:: ak.Array.numba_type
+
+The type of this Array when it is used in Numba. It contains enough
+information to generate low-level code for accessing any element,
+down to the leaves.
+
+See `Numba documentation <https://numba.pydata.org/numba-doc/dev/reference/types.html>`__
+on types and signatures.
+
+
+
+.. _ak-array-__reduce__:
+
+.. py:method:: ak.Array.__reduce__(self)
+
+
+
+.. _ak-array-__setstate__:
+
+.. py:method:: ak.Array.__setstate__(self, state)
+
+
+
+.. _ak-array-__copy__:
+
+.. py:method:: ak.Array.__copy__(self)
+
+
+
+.. _ak-array-__deepcopy__:
+
+.. py:method:: ak.Array.__deepcopy__(self, memo)
+
+
+
+.. _ak-array-__bool__:
+
+.. py:method:: ak.Array.__bool__(self)
+

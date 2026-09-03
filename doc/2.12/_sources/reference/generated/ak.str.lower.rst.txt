@@ -1,0 +1,32 @@
+ak.str.lower
+============
+
+Defined in `awkward.operations.str.akstr_lower <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/str/akstr_lower.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/str/akstr_lower.py#L13>`__.
+
+.. py:function:: ak.str.lower(array, *, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Replaces any string-valued data with a lowercase version (correctly
+   transforming Unicode characters).
+
+   Replaces any bytestring-valued data with a lowercase version (transforming ASCII characters only).
+
+   Note: this function does not raise an error if the ``array`` does not
+   contain any string or bytestring data.
+
+   Requires the pyarrow library and calls
+   `pyarrow.compute.utf8_lower <https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_lower.html>`__
+   or
+   `pyarrow.compute.ascii_lower <https://arrow.apache.org/docs/python/generated/pyarrow.compute.ascii_lower.html>`__
+   on strings and bytestrings, respectively.
+

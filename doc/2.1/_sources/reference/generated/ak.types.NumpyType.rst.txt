@@ -1,0 +1,40 @@
+ak.types.NumpyType
+------------------
+
+.. py:module: ak.types.NumpyType
+
+Defined in `awkward.types.numpytype <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/types/numpytype.py>`__ on `line 93 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/types/numpytype.py#L93>`__.
+
+.. py:class:: ak.types.NumpyType(self, primitive, *, parameters=None, typestr=None)
+
+
+
+.. _ak-types-numpytype-primitive:
+
+.. py:attribute:: ak.types.NumpyType.primitive
+
+
+
+.. _ak-types-numpytype-_str_parameters_exclude:
+
+.. py:attribute:: ak.types.NumpyType._str_parameters_exclude
+    :value: ('__categorical__', '__unit__')
+
+
+
+.. _ak-types-numpytype-_str:
+
+.. py:method:: ak.types.NumpyType._str(self, indent, compact)
+
+
+
+.. _ak-types-numpytype-__repr__:
+
+.. py:method:: ak.types.NumpyType.__repr__(self)
+
+
+
+.. _ak-types-numpytype-_is_equal_to:
+
+.. py:method:: ak.types.NumpyType._is_equal_to(self, other, all_parameters)
+

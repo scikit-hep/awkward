@@ -1,0 +1,410 @@
+ak.contents.ListOffsetArray
+---------------------------
+
+.. py:module: ak.contents.ListOffsetArray
+
+Defined in `awkward.contents.listoffsetarray <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/contents/listoffsetarray.py>`__ on `line 35 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/contents/listoffsetarray.py#L35>`__.
+
+.. py:class:: ak.contents.ListOffsetArray(self, offsets, content, *, parameters=None)
+
+ListOffsetArray describes unequal-length lists (often called a
+"jagged" or "ragged" array). Like :py:obj:`ak.contents.RegularArray`, the
+underlying data for all lists are in a contiguous ``content``. It is
+subdivided into lists according to an ``offsets`` buffer, which specifies
+the starting and stopping index of each list.
+
+The ``offsets`` must have at least length 1 (corresponding to an empty array),
+but it need not start with ``0`` or include all of the ``content``. Just as
+:py:obj:`ak.contents.RegularArray` can have unreachable ``content`` if it is not
+an integer multiple of ``size``, a ListOffsetArray can have unreachable
+content before the start of the first list and after the end of the last list.
+
+Like :py:obj:`ak.contents.RegularArray` and :py:obj:`ak.contents.ListArray`, a ListOffsetArray can
+represent strings if its ``__array__`` parameter is ``"string"`` (UTF-8 assumed) or
+``"bytestring"`` (no encoding assumed) and it contains an :py:obj:`ak.contents.NumpyArray`
+of ``dtype=np.uint8`` whose ``__array__`` parameter is ``"char"`` (UTF-8 assumed) or
+``"byte"`` (no encoding assumed).
+
+ListOffsetArray corresponds to Apache Arrow
+`List type <https://arrow.apache.org/docs/format/Columnar.html#variable-size-list-layout>`__.
+
+To illustrate how the constructor arguments are interpreted, the following is a
+simplified implementation of ``__init__``, ``__len__``, and ``__getitem__``:
+
+.. code-block:: python
+
+
+    class ListOffsetArray(Content):
+        def __init__(self, offsets, content):
+            assert isinstance(offsets, (Index32, IndexU32, Index64))
+            assert isinstance(content, Content)
+            assert len(offsets) != 0
+            for i in range(len(offsets) - 1):
+                start = offsets[i]
+                stop = offsets[i + 1]
+                if start != stop:
+                    assert start < stop  # i.e. start <= stop
+                    assert start >= 0
+                    assert stop <= len(content)
+            self.offsets = offsets
+            self.content = content
+
+        def __len__(self):
+            return len(self.offsets) - 1
+
+        def __getitem__(self, where):
+            if isinstance(where, int):
+                if where < 0:
+                    where += len(self)
+                assert 0 <= where < len(self)
+                return self.content[self.offsets[where] : self.offsets[where + 1]]
+
+            elif isinstance(where, slice) and where.step is None:
+                offsets = self.offsets[where.start : where.stop + 1]
+                if len(offsets) == 0:
+                    offsets = [0]
+                return ListOffsetArray(offsets, self.content)
+
+            elif isinstance(where, str):
+                return ListOffsetArray(self.offsets, self.content[where])
+
+            else:
+                raise AssertionError(where)
+
+
+
+.. _ak-contents-listoffsetarray-is_list:
+
+.. py:attribute:: ak.contents.ListOffsetArray.is_list
+    :value: True
+
+
+
+.. _ak-contents-listoffsetarray-offsets:
+
+.. py:attribute:: ak.contents.ListOffsetArray.offsets
+
+
+
+.. _ak-contents-listoffsetarray-content:
+
+.. py:attribute:: ak.contents.ListOffsetArray.content
+
+
+
+.. _ak-contents-listoffsetarray-copy:
+
+.. py:method:: ak.contents.ListOffsetArray.copy(self, offsets=UNSET, content=UNSET, *, parameters=UNSET)
+
+
+
+.. _ak-contents-listoffsetarray-__copy__:
+
+.. py:method:: ak.contents.ListOffsetArray.__copy__(self)
+
+
+
+.. _ak-contents-listoffsetarray-__deepcopy__:
+
+.. py:method:: ak.contents.ListOffsetArray.__deepcopy__(self, memo)
+
+
+
+.. _ak-contents-listoffsetarray-simplified:
+
+.. py:method:: ak.contents.ListOffsetArray.simplified(cls, offsets, content, *, parameters=None)
+
+
+
+.. _ak-contents-listoffsetarray-starts:
+
+.. py:attribute:: ak.contents.ListOffsetArray.starts
+
+
+
+.. _ak-contents-listoffsetarray-stops:
+
+.. py:attribute:: ak.contents.ListOffsetArray.stops
+
+
+
+.. _ak-contents-listoffsetarray-_form_with_key:
+
+.. py:method:: ak.contents.ListOffsetArray._form_with_key(self, getkey)
+
+
+
+.. _ak-contents-listoffsetarray-_to_buffers:
+
+.. py:method:: ak.contents.ListOffsetArray._to_buffers(self, form, getkey, container, backend, byteorder)
+
+
+
+.. _ak-contents-listoffsetarray-_to_typetracer:
+
+.. py:method:: ak.contents.ListOffsetArray._to_typetracer(self, forget_length)
+
+
+
+.. _ak-contents-listoffsetarray-_touch_data:
+
+.. py:method:: ak.contents.ListOffsetArray._touch_data(self, recursive)
+
+
+
+.. _ak-contents-listoffsetarray-_touch_shape:
+
+.. py:method:: ak.contents.ListOffsetArray._touch_shape(self, recursive)
+
+
+
+.. _ak-contents-listoffsetarray-length:
+
+.. py:attribute:: ak.contents.ListOffsetArray.length
+
+
+
+.. _ak-contents-listoffsetarray-__repr__:
+
+.. py:method:: ak.contents.ListOffsetArray.__repr__(self)
+
+
+
+.. _ak-contents-listoffsetarray-_repr:
+
+.. py:method:: ak.contents.ListOffsetArray._repr(self, indent, pre, post)
+
+
+
+.. _ak-contents-listoffsetarray-to_listoffsetarray64:
+
+.. py:method:: ak.contents.ListOffsetArray.to_ListOffsetArray64(self, start_at_zero=False)
+
+
+
+.. _ak-contents-listoffsetarray-to_regulararray:
+
+.. py:method:: ak.contents.ListOffsetArray.to_RegularArray(self)
+
+
+
+.. _ak-contents-listoffsetarray-_getitem_nothing:
+
+.. py:method:: ak.contents.ListOffsetArray._getitem_nothing(self)
+
+
+
+.. _ak-contents-listoffsetarray-_getitem_at:
+
+.. py:method:: ak.contents.ListOffsetArray._getitem_at(self, where)
+
+
+
+.. _ak-contents-listoffsetarray-_getitem_range:
+
+.. py:method:: ak.contents.ListOffsetArray._getitem_range(self, start, stop)
+
+
+
+.. _ak-contents-listoffsetarray-_getitem_field:
+
+.. py:method:: ak.contents.ListOffsetArray._getitem_field(self, where, only_fields=())
+
+
+
+.. _ak-contents-listoffsetarray-_getitem_fields:
+
+.. py:method:: ak.contents.ListOffsetArray._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-contents-listoffsetarray-_carry:
+
+.. py:method:: ak.contents.ListOffsetArray._carry(self, carry, allow_lazy)
+
+
+
+.. _ak-contents-listoffsetarray-_compact_offsets64:
+
+.. py:method:: ak.contents.ListOffsetArray._compact_offsets64(self, start_at_zero)
+
+
+
+.. _ak-contents-listoffsetarray-_broadcast_tooffsets64:
+
+.. py:method:: ak.contents.ListOffsetArray._broadcast_tooffsets64(self, offsets)
+
+
+
+.. _ak-contents-listoffsetarray-_getitem_next_jagged:
+
+.. py:method:: ak.contents.ListOffsetArray._getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-listoffsetarray-_getitem_next:
+
+.. py:method:: ak.contents.ListOffsetArray._getitem_next(self, head, tail, advanced)
+
+
+
+.. _ak-contents-listoffsetarray-_offsets_and_flattened:
+
+.. py:method:: ak.contents.ListOffsetArray._offsets_and_flattened(self, axis, depth)
+
+
+
+.. _ak-contents-listoffsetarray-_mergeable_next:
+
+.. py:method:: ak.contents.ListOffsetArray._mergeable_next(self, other, mergebool)
+
+
+
+.. _ak-contents-listoffsetarray-_mergemany:
+
+.. py:method:: ak.contents.ListOffsetArray._mergemany(self, others)
+
+
+
+.. _ak-contents-listoffsetarray-_fill_none:
+
+.. py:method:: ak.contents.ListOffsetArray._fill_none(self, value)
+
+
+
+.. _ak-contents-listoffsetarray-_local_index:
+
+.. py:method:: ak.contents.ListOffsetArray._local_index(self, axis, depth)
+
+
+
+.. _ak-contents-listoffsetarray-_numbers_to_type:
+
+.. py:method:: ak.contents.ListOffsetArray._numbers_to_type(self, name, including_unknown)
+
+
+
+.. _ak-contents-listoffsetarray-_is_unique:
+
+.. py:method:: ak.contents.ListOffsetArray._is_unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-listoffsetarray-_unique:
+
+.. py:method:: ak.contents.ListOffsetArray._unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-listoffsetarray-_argsort_next:
+
+.. py:method:: ak.contents.ListOffsetArray._argsort_next(self, negaxis, starts, shifts, parents, outlength, ascending, stable)
+
+
+
+.. _ak-contents-listoffsetarray-_sort_next:
+
+.. py:method:: ak.contents.ListOffsetArray._sort_next(self, negaxis, starts, parents, outlength, ascending, stable)
+
+
+
+.. _ak-contents-listoffsetarray-_combinations:
+
+.. py:method:: ak.contents.ListOffsetArray._combinations(self, n, replacement, recordlookup, parameters, axis, depth)
+
+
+
+.. _ak-contents-listoffsetarray-_reduce_next:
+
+.. py:method:: ak.contents.ListOffsetArray._reduce_next(self, reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims, behavior)
+
+
+
+.. _ak-contents-listoffsetarray-_rearrange_prepare_next:
+
+.. py:method:: ak.contents.ListOffsetArray._rearrange_prepare_next(self, outlength, parents)
+
+
+
+.. _ak-contents-listoffsetarray-_validity_error:
+
+.. py:method:: ak.contents.ListOffsetArray._validity_error(self, path)
+
+
+
+.. _ak-contents-listoffsetarray-_nbytes_part:
+
+.. py:method:: ak.contents.ListOffsetArray._nbytes_part(self)
+
+
+
+.. _ak-contents-listoffsetarray-_pad_none:
+
+.. py:method:: ak.contents.ListOffsetArray._pad_none(self, target, axis, depth, clip)
+
+
+
+.. _ak-contents-listoffsetarray-_to_arrow:
+
+.. py:method:: ak.contents.ListOffsetArray._to_arrow(self, pyarrow, mask_node, validbytes, length, options)
+
+
+
+.. _ak-contents-listoffsetarray-_to_backend_array:
+
+.. py:method:: ak.contents.ListOffsetArray._to_backend_array(self, allow_missing, backend)
+
+
+
+.. _ak-contents-listoffsetarray-_remove_structure:
+
+.. py:method:: ak.contents.ListOffsetArray._remove_structure(self, backend, options)
+
+
+
+.. _ak-contents-listoffsetarray-_drop_none:
+
+.. py:method:: ak.contents.ListOffsetArray._drop_none(self)
+
+
+
+.. _ak-contents-listoffsetarray-_rebuild_without_nones:
+
+.. py:method:: ak.contents.ListOffsetArray._rebuild_without_nones(self, none_indexes, new_content)
+
+
+
+.. _ak-contents-listoffsetarray-_recursively_apply:
+
+.. py:method:: ak.contents.ListOffsetArray._recursively_apply(self, action, behavior, depth, depth_context, lateral_context, options)
+
+
+
+.. _ak-contents-listoffsetarray-to_packed:
+
+.. py:method:: ak.contents.ListOffsetArray.to_packed(self)
+
+
+
+.. _ak-contents-listoffsetarray-_to_list:
+
+.. py:method:: ak.contents.ListOffsetArray._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-listoffsetarray-_to_backend:
+
+.. py:method:: ak.contents.ListOffsetArray._to_backend(self, backend)
+
+
+
+.. _ak-contents-listoffsetarray-_awkward_strings_to_nonfinite:
+
+.. py:method:: ak.contents.ListOffsetArray._awkward_strings_to_nonfinite(self, nonfinit_dict)
+
+
+
+.. _ak-contents-listoffsetarray-_is_equal_to:
+
+.. py:method:: ak.contents.ListOffsetArray._is_equal_to(self, other, index_dtype, numpyarray)
+

@@ -1,0 +1,51 @@
+ak.types.ArrayType
+------------------
+
+.. py:module: ak.types.ArrayType
+
+Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/types/arraytype.py>`__ on `line 8 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/types/arraytype.py#L8>`__.
+
+.. py:class:: ak.types.ArrayType(self, content, length)
+
+
+
+.. _ak-types-arraytype-content:
+
+.. py:attribute:: ak.types.ArrayType.content
+
+
+
+.. _ak-types-arraytype-length:
+
+.. py:attribute:: ak.types.ArrayType.length
+
+
+
+.. _ak-types-arraytype-__str__:
+
+.. py:method:: ak.types.ArrayType.__str__(self)
+
+
+
+.. _ak-types-arraytype-show:
+
+.. py:method:: ak.types.ArrayType.show(self, stream=sys.stdout)
+
+
+
+.. _ak-types-arraytype-_str:
+
+.. py:method:: ak.types.ArrayType._str(self, indent, compact)
+
+
+
+.. _ak-types-arraytype-__repr__:
+
+.. py:method:: ak.types.ArrayType.__repr__(self)
+
+
+
+.. _ak-types-arraytype-__eq__:
+
+.. py:method:: ak.types.ArrayType.__eq__(self, other)
+

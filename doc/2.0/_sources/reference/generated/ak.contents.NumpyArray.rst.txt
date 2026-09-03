@@ -1,0 +1,365 @@
+ak.contents.NumpyArray
+----------------------
+
+.. py:module: ak.contents.NumpyArray
+
+Defined in `awkward.contents.numpyarray <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/contents/numpyarray.py>`__ on `line 17 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/contents/numpyarray.py#L17>`__.
+
+.. py:class:: ak.contents.NumpyArray(self, data)
+
+
+
+.. _ak-contents-numpyarray-is_numpy:
+
+.. py:attribute:: ak.contents.NumpyArray.is_numpy
+    :value: True
+
+
+
+.. _ak-contents-numpyarray-is_leaf:
+
+.. py:attribute:: ak.contents.NumpyArray.is_leaf
+    :value: True
+
+
+
+.. _ak-contents-numpyarray-data:
+
+.. py:attribute:: ak.contents.NumpyArray.data
+
+
+
+.. _ak-contents-numpyarray-copy:
+
+.. py:method:: ak.contents.NumpyArray.copy(self, data=unset)
+
+
+
+.. _ak-contents-numpyarray-__copy__:
+
+.. py:method:: ak.contents.NumpyArray.__copy__(self)
+
+
+
+.. _ak-contents-numpyarray-__deepcopy__:
+
+.. py:method:: ak.contents.NumpyArray.__deepcopy__(self, memo)
+
+
+
+.. _ak-contents-numpyarray-simplified:
+
+.. py:method:: ak.contents.NumpyArray.simplified(cls, data)
+
+
+
+.. _ak-contents-numpyarray-shape:
+
+.. py:attribute:: ak.contents.NumpyArray.shape
+
+
+
+.. _ak-contents-numpyarray-inner_shape:
+
+.. py:attribute:: ak.contents.NumpyArray.inner_shape
+
+
+
+.. _ak-contents-numpyarray-strides:
+
+.. py:attribute:: ak.contents.NumpyArray.strides
+
+
+
+.. _ak-contents-numpyarray-dtype:
+
+.. py:attribute:: ak.contents.NumpyArray.dtype
+
+
+
+.. _ak-contents-numpyarray-_raw:
+
+.. py:method:: ak.contents.NumpyArray._raw(self, nplike=None)
+
+
+
+.. _ak-contents-numpyarray-_form_with_key:
+
+.. py:method:: ak.contents.NumpyArray._form_with_key(self, getkey)
+
+
+
+.. _ak-contents-numpyarray-_to_buffers:
+
+.. py:method:: ak.contents.NumpyArray._to_buffers(self, form, getkey, container, backend)
+
+
+
+.. _ak-contents-numpyarray-_to_typetracer:
+
+.. py:method:: ak.contents.NumpyArray._to_typetracer(self, forget_length)
+
+
+
+.. _ak-contents-numpyarray-_touch_data:
+
+.. py:method:: ak.contents.NumpyArray._touch_data(self, recursive)
+
+
+
+.. _ak-contents-numpyarray-_touch_shape:
+
+.. py:method:: ak.contents.NumpyArray._touch_shape(self, recursive)
+
+
+
+.. _ak-contents-numpyarray-length:
+
+.. py:attribute:: ak.contents.NumpyArray.length
+
+
+
+.. _ak-contents-numpyarray-__repr__:
+
+.. py:method:: ak.contents.NumpyArray.__repr__(self)
+
+
+
+.. _ak-contents-numpyarray-_repr:
+
+.. py:method:: ak.contents.NumpyArray._repr(self, indent, pre, post)
+
+
+
+.. _ak-contents-numpyarray-to_regulararray:
+
+.. py:method:: ak.contents.NumpyArray.to_RegularArray(self)
+
+
+
+.. _ak-contents-numpyarray-maybe_to_numpyarray:
+
+.. py:method:: ak.contents.NumpyArray.maybe_to_NumpyArray(self)
+
+
+
+.. _ak-contents-numpyarray-__array__:
+
+.. py:method:: ak.contents.NumpyArray.__array__(self)
+
+
+
+.. _ak-contents-numpyarray-__iter__:
+
+.. py:method:: ak.contents.NumpyArray.__iter__(self)
+
+
+
+.. _ak-contents-numpyarray-_getitem_nothing:
+
+.. py:method:: ak.contents.NumpyArray._getitem_nothing(self)
+
+
+
+.. _ak-contents-numpyarray-_getitem_at:
+
+.. py:method:: ak.contents.NumpyArray._getitem_at(self, where)
+
+
+
+.. _ak-contents-numpyarray-_getitem_range:
+
+.. py:method:: ak.contents.NumpyArray._getitem_range(self, where)
+
+
+
+.. _ak-contents-numpyarray-_getitem_field:
+
+.. py:method:: ak.contents.NumpyArray._getitem_field(self, where, only_fields=())
+
+
+
+.. _ak-contents-numpyarray-_getitem_fields:
+
+.. py:method:: ak.contents.NumpyArray._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-contents-numpyarray-_carry:
+
+.. py:method:: ak.contents.NumpyArray._carry(self, carry, allow_lazy)
+
+
+
+.. _ak-contents-numpyarray-_getitem_next_jagged:
+
+.. py:method:: ak.contents.NumpyArray._getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-numpyarray-_getitem_next:
+
+.. py:method:: ak.contents.NumpyArray._getitem_next(self, head, tail, advanced)
+
+
+
+.. _ak-contents-numpyarray-_offsets_and_flattened:
+
+.. py:method:: ak.contents.NumpyArray._offsets_and_flattened(self, axis, depth)
+
+
+
+.. _ak-contents-numpyarray-_mergeable_next:
+
+.. py:method:: ak.contents.NumpyArray._mergeable_next(self, other, mergebool)
+
+
+
+.. _ak-contents-numpyarray-_mergemany:
+
+.. py:method:: ak.contents.NumpyArray._mergemany(self, others)
+
+
+
+.. _ak-contents-numpyarray-_fill_none:
+
+.. py:method:: ak.contents.NumpyArray._fill_none(self, value)
+
+
+
+.. _ak-contents-numpyarray-_local_index:
+
+.. py:method:: ak.contents.NumpyArray._local_index(self, axis, depth)
+
+
+
+.. _ak-contents-numpyarray-to_contiguous:
+
+.. py:method:: ak.contents.NumpyArray.to_contiguous(self)
+
+
+
+.. _ak-contents-numpyarray-is_contiguous:
+
+.. py:attribute:: ak.contents.NumpyArray.is_contiguous
+
+
+
+.. _ak-contents-numpyarray-_subranges_equal:
+
+.. py:method:: ak.contents.NumpyArray._subranges_equal(self, starts, stops, length, sorted=True)
+
+
+
+.. _ak-contents-numpyarray-_as_unique_strings:
+
+.. py:method:: ak.contents.NumpyArray._as_unique_strings(self, offsets)
+
+
+
+.. _ak-contents-numpyarray-_numbers_to_type:
+
+.. py:method:: ak.contents.NumpyArray._numbers_to_type(self, name)
+
+
+
+.. _ak-contents-numpyarray-_is_unique:
+
+.. py:method:: ak.contents.NumpyArray._is_unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-numpyarray-_unique:
+
+.. py:method:: ak.contents.NumpyArray._unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-numpyarray-_argsort_next:
+
+.. py:method:: ak.contents.NumpyArray._argsort_next(self, negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order)
+
+
+
+.. _ak-contents-numpyarray-_sort_next:
+
+.. py:method:: ak.contents.NumpyArray._sort_next(self, negaxis, starts, parents, outlength, ascending, stable, kind, order)
+
+
+
+.. _ak-contents-numpyarray-_combinations:
+
+.. py:method:: ak.contents.NumpyArray._combinations(self, n, replacement, recordlookup, parameters, axis, depth)
+
+
+
+.. _ak-contents-numpyarray-_reduce_next:
+
+.. py:method:: ak.contents.NumpyArray._reduce_next(self, reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims, behavior)
+
+
+
+.. _ak-contents-numpyarray-_validity_error:
+
+.. py:method:: ak.contents.NumpyArray._validity_error(self, path)
+
+
+
+.. _ak-contents-numpyarray-_pad_none:
+
+.. py:method:: ak.contents.NumpyArray._pad_none(self, target, axis, depth, clip)
+
+
+
+.. _ak-contents-numpyarray-_nbytes_part:
+
+.. py:method:: ak.contents.NumpyArray._nbytes_part(self)
+
+
+
+.. _ak-contents-numpyarray-_to_arrow:
+
+.. py:method:: ak.contents.NumpyArray._to_arrow(self, pyarrow, mask_node, validbytes, length, options)
+
+
+
+.. _ak-contents-numpyarray-_to_numpy:
+
+.. py:method:: ak.contents.NumpyArray._to_numpy(self, allow_missing)
+
+
+
+.. _ak-contents-numpyarray-_completely_flatten:
+
+.. py:method:: ak.contents.NumpyArray._completely_flatten(self, backend, options)
+
+
+
+.. _ak-contents-numpyarray-_recursively_apply:
+
+.. py:method:: ak.contents.NumpyArray._recursively_apply(self, action, behavior, depth, depth_context, lateral_context, options)
+
+
+
+.. _ak-contents-numpyarray-to_packed:
+
+.. py:method:: ak.contents.NumpyArray.to_packed(self)
+
+
+
+.. _ak-contents-numpyarray-_to_list:
+
+.. py:method:: ak.contents.NumpyArray._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-numpyarray-to_backend:
+
+.. py:method:: ak.contents.NumpyArray.to_backend(self, backend)
+
+
+
+.. _ak-contents-numpyarray-_is_equal_to:
+
+.. py:method:: ak.contents.NumpyArray._is_equal_to(self, other, index_dtype, numpyarray)
+

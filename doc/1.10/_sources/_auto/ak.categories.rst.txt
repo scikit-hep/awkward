@@ -1,0 +1,19 @@
+ak.categories
+-------------
+
+Defined in `awkward.behaviors.categorical <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/categorical.py>`__ on `line 135 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/categorical.py#L135>`__.
+
+.. py:function:: ak.categories(array, highlevel=True)
+
+
+    :param array: A possibly-categorical Awkward Array.
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+
+If the ``array`` is categorical (contains :py:obj:`ak.layout.IndexedArray` or
+:py:obj:`ak.layout.IndexedOptionArray` labeled with parameter
+``"__array__" = "categorical"``), then this function returns its categories.
+
+See also :py:obj:`ak.is_categorical`, :py:obj:`ak.to_categorical`, :py:obj:`ak.from_categorical`.
+

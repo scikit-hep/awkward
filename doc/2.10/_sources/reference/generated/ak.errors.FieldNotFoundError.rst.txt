@@ -1,0 +1,11 @@
+ak.errors.FieldNotFoundError
+============================
+
+Defined in `awkward.errors <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/errors.py>`__ on `line 10 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/errors.py#L10>`__.
+
+.. py:exception:: ak.errors.FieldNotFoundError
+
+
+
+   Sequence index out of range.
+

@@ -1,0 +1,48 @@
+ak.ravel
+--------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 2220 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L2220>`__.
+
+.. py:function:: ak.ravel(array, highlevel=True, behavior=None)
+
+
+    :param array: Data containing nested lists to flatten
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Returns an array with all level of nesting removed by erasing the
+boundaries between consecutive lists.
+
+This is the equivalent of NumPy's ``np.ravel`` for Awkward Arrays.
+
+Consider the following doubly nested ``array``.
+
+.. code-block:: python
+
+
+    ak.Array([[
+               [1.1, 2.2, 3.3],
+               [],
+               [4.4, 5.5],
+               [6.6]],
+              [],
+              [
+               [7.7],
+               [8.8, 9.9]
+              ]])
+
+Ravelling the array produces a flat array
+
+.. code-block:: python
+
+
+    >>> print(ak.ravel(array))
+    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+
+Missing values are eliminated by flattening: there is no distinction
+between an empty list and a value of None at the level of flattening.
+

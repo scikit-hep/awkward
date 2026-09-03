@@ -1,0 +1,51 @@
+ak.broadcast_fields
+-------------------
+
+.. py:module: ak.broadcast_fields
+
+Defined in `awkward.operations.ak_broadcast_fields <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_broadcast_fields.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_broadcast_fields.py#L19>`__.
+
+.. py:function:: ak.broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None)
+
+
+    :param arrays: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Return a list of arrays whose types contain the same number of fields. Unlike
+:py:obj:`ak.broadcast_arrays`, this function does not require record types to occur at the
+same depths. Where fields are missing from one record, they are inserted at the same
+position with an ``option[unknown]`` type. This type is easily erased by ufunc and
+concatenation operations.
+
+.. code-block:: python
+
+
+    >>> x, y = ak.broadcast_fields(
+    ...     [{"x": {"y": 1, "z": 2, "w": [1]}}],
+    ...     [{"x": [{"y": 1}]}],
+    ... )
+    >>> x.type.show()
+    1 * {
+        x: {
+            y: int64,
+            z: int64,
+            w: var * int64
+        }
+    }
+    >>> y.type.show()
+    1 * {
+        x: var * {
+            y: int64,
+            z: ?unknown,
+            w: ?unknown
+        }
+    }
+

@@ -1,0 +1,24 @@
+ak.size
+-------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 4347 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L4347>`__.
+
+.. py:function:: ak.size(array, axis=None)
+
+
+    :param array: Rectilinear array whose ``shape`` needs to be known.
+    :param axis: The dimension at which this operation is applied. The
+             outermost dimension is ``0``, followed by ``1``, etc., and negative
+             values count backward from the innermost: ``-1`` is the innermost
+             dimension, ``-2`` is the next level up, etc.
+    :type axis: int
+
+Returns an int or a list of ints, one for each regular dimension.
+
+Implements NumPy's
+`size <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ma.size.html>`__
+function in a way that accepts :py:obj:`ak.Array` as the ``array``.
+
+If the ``array`` is not rectilinear (i.e. if #np.to_numpy would raise an
+error), then this function raise an error.
+

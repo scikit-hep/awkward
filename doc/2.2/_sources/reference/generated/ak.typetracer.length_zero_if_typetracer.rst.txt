@@ -1,0 +1,9 @@
+ak.typetracer.length_zero_if_typetracer
+---------------------------------------
+
+.. py:module: ak.typetracer.length_zero_if_typetracer
+
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/typetracer.py>`__ on `line 55 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/typetracer.py#L55>`__.
+
+.. py:function:: ak.typetracer.length_zero_if_typetracer(array)
+

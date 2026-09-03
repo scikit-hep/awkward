@@ -1,0 +1,9 @@
+ak.forms.from_dtype
+-------------------
+
+.. py:module: ak.forms.from_dtype
+
+Defined in `awkward.forms.numpyform <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/numpyform.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/numpyform.py#L23>`__.
+
+.. py:function:: ak.forms.from_dtype(dtype, parameters=None, *, time_units_as_parameter=False)
+

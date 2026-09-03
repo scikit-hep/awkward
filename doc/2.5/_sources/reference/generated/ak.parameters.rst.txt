@@ -1,0 +1,23 @@
+ak.parameters
+-------------
+
+.. py:module: ak.parameters
+
+Defined in `awkward.operations.ak_parameters <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_parameters.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_parameters.py#L20>`__.
+
+.. py:function:: ak.parameters(array)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+
+Extracts parameters from the outermost array node of ``array`` (many types
+supported, including all Awkward Arrays and Records).
+
+Parameters are a dict from str to JSON-like objects, usually strings.
+Every :py:obj:`ak.contents.Content` node has a different set of parameters. Some
+key names are special, such as ``"__record__"`` and ``"__array__"`` that name
+particular records and arrays as capable of supporting special behaviors.
+
+See :py:obj:`ak.Array` and :py:obj:`ak.behavior` for a more complete description of
+behaviors.
+

@@ -1,0 +1,44 @@
+ak.types.ScalarType
+===================
+
+Defined in `awkward.types.scalartype <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/types/scalartype.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/types/scalartype.py#L13>`__.
+
+.. py:class:: ak.types.ScalarType(content: awkward.types.type.Type, behavior: collections.abc.Mapping | None = None)
+
+   .. py:attribute:: _content
+      :type:  awkward.types.type.Type
+
+
+   .. py:attribute:: _behavior
+      :type:  collections.abc.Mapping | None
+      :value: None
+
+
+
+   .. py:property:: content
+      :type: awkward.types.type.Type
+
+
+
+   .. py:property:: behavior
+      :type: collections.abc.Mapping | None
+
+
+
+   .. py:method:: __str__() -> str
+
+
+   .. py:method:: show(stream=STDOUT)
+
+
+   .. py:method:: _str(indent: str, compact: bool) -> list[str]
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: is_equal_to(other: awkward._typing.Any, *, all_parameters: bool = False) -> bool
+
+
+   .. py:attribute:: __eq__
+

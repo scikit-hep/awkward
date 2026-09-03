@@ -1,0 +1,48 @@
+ak.metadata_from_parquet
+========================
+
+Defined in `awkward.operations.ak_metadata_from_parquet <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_metadata_from_parquet.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_metadata_from_parquet.py#L21>`__.
+
+.. py:function:: ak.metadata_from_parquet(path, *, storage_options=None, row_groups=None, ignore_metadata=False, scan_files=True)
+
+   Reads metadata from a Parquet file or dataset without reading the data.
+
+   This function differs from ak.from_parquet._metadata as follows:
+
+   * this function will always use a _metadata file, if present
+   * if there is no _metadata, the schema comes from _common_metadata or
+     the first data file
+   * the total number of rows is always known
+
+   A dict containing
+
+   * ``form``: an Awkward Form representing the low-level type of the data
+     (use ``.type`` to get a high-level type),
+   * ``fs``: the fsspec filesystem object,
+   * ``paths``: a list of matching path names,
+   * ``col_counts``: the number of rows in each row group,
+   * ``columns``: the columns defined by the schema,
+   * ``num_rows``: the length of the array that would be read by :py:obj:`ak.from_parquet`,
+   * ``num_row_groups``: the units that can be filtered (for the :py:obj:`ak.from_parquet` ``row_groups``
+     argument).
+
+   See also :py:obj:`ak.from_parquet`, :py:obj:`ak.to_parquet`.
+
+   :param path: Local filename or remote URL, passed to fsspec for resolution.
+                May contain glob patterns. A list of paths is also allowed, but they
+                must be data files, not directories.
+   :type path: str
+   :param storage_options: Passed to ``fsspec.parquet.open_parquet_file``.
+   :param row_groups: Row groups to read; must be non-negative.
+                      Order is ignored: the output array is presented in the order specified
+                      by Parquet metadata. If None, all row groups/all rows are read.
+   :type row_groups: None or set of int
+   :param ignore_metadata: ignore the dedicated _metadata file if found
+                           and instead derive metadata from the first data file.
+   :type ignore_metadata: bool
+   :param scan_files: TODO
+   :type scan_files: bool
+
+   :returns: A dict of metadata describing the Parquet dataset (its form, filesystem,
+             paths, row counts, and columns), read without reading the array data.
+

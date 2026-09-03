@@ -1,0 +1,14 @@
+ak.str.akstr_reverse
+====================
+
+.. py:module:: awkward.operations.str.akstr_reverse
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_reverse.reverse
+
+

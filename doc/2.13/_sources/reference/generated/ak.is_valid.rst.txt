@@ -1,0 +1,21 @@
+ak.is_valid
+===========
+
+Defined in `awkward.operations.ak_is_valid <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_is_valid.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_is_valid.py#L11>`__.
+
+.. py:function:: ak.is_valid(array, *, exception=False)
+
+   Returns True if the array has no structural errors and False otherwise.
+
+   Checks for errors in the structure of the array, such as indexes that run
+   beyond the length of a node's ``content``, etc. Either an error is raised or
+   the function returns a boolean.
+
+   See also :py:obj:`ak.validity_error`.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param exception: If True, validity errors raise exceptions.
+   :type exception: bool
+
+   :returns: True if ``array`` has no structural errors, False otherwise.
+

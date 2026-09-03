@@ -1,0 +1,6 @@
+ak.prettyprint.valuestr
+=======================
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/prettyprint.py>`__ on `line 360 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/prettyprint.py#L360>`__.
+
+.. py:function:: ak.prettyprint.valuestr(data: awkward._typing.Any, limit_rows: int, limit_cols: int, formatter: Formatter | None = None) -> str

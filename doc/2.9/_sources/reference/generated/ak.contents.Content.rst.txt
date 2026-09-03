@@ -1,0 +1,415 @@
+ak.contents.Content
+===================
+
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/contents/content.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/contents/content.py#L136>`__.
+
+.. py:class:: ak.contents.Content
+
+
+
+   .. py:method:: _init(parameters: dict[str, awkward._typing.Any] | None, backend: awkward._backends.backend.Backend)
+
+
+   .. py:property:: backend
+      :type: awkward._backends.backend.Backend
+
+
+
+   .. py:property:: form
+      :type: awkward.forms.form.Form
+
+
+
+   .. py:method:: form_with_key(form_key: str | None | collections.abc.Callable = 'node{id}', id_start: int = 0) -> awkward.forms.form.Form
+
+
+   .. py:method:: _form_with_key(getkey: collections.abc.Callable[[Content], str | None]) -> awkward.forms.form.Form
+      :abstractmethod:
+
+
+
+   .. py:method:: form_with_key_path(root: awkward.forms.form.FormKeyPathT = ()) -> awkward.forms.form.Form
+
+
+   .. py:method:: _form_with_key_path(path: awkward.forms.form.FormKeyPathT) -> awkward.forms.form.Form
+      :abstractmethod:
+
+
+
+   .. py:property:: form_cls
+      :type: type[awkward.forms.form.Form]
+
+      :abstractmethod:
+
+
+
+   .. py:method:: to_typetracer(forget_length: bool = False) -> awkward._typing.Self
+
+
+   .. py:method:: _to_typetracer(forget_length: bool) -> awkward._typing.Self
+      :abstractmethod:
+
+
+
+   .. py:method:: _touch_data(recursive: bool)
+      :abstractmethod:
+
+
+
+   .. py:method:: _touch_shape(recursive: bool)
+      :abstractmethod:
+
+
+
+   .. py:property:: length
+      :type: awkward._nplikes.shape.ShapeItem
+
+      :abstractmethod:
+
+
+
+   .. py:method:: _to_buffers(form: awkward.forms.form.Form, getkey: collections.abc.Callable[[Content, awkward.forms.form.Form, str], str], container: collections.abc.MutableMapping[str, awkward._typing.Any] | None, backend: awkward._backends.backend.Backend, byteorder: awkward._typing.Literal[<, >]) -> tuple[awkward.forms.form.Form, int, collections.abc.Mapping[str, awkward._typing.Any]]
+      :abstractmethod:
+
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: _repr_extra(indent: str) -> list[str]
+
+
+   .. py:method:: maybe_to_NumpyArray()
+
+
+   .. py:method:: _maybe_index_error(error: awkward._kernels.KernelError | None, slicer)
+
+
+   .. py:method:: __array_ufunc__(ufunc, method, *inputs, **kwargs)
+
+
+   .. py:method:: __array_function__(func, types, args, kwargs)
+
+
+   .. py:method:: __array__(dtype=None, copy=None)
+
+
+   .. py:method:: __iter__()
+
+
+   .. py:method:: _getitem_next_field(head: awkward._slicing.SliceItem | tuple, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None)
+
+
+   .. py:method:: _getitem_next_fields(head: awkward._slicing.SliceItem, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> Content
+
+
+   .. py:method:: _getitem_next_newaxis(tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> awkward.contents.regulararray.RegularArray
+
+
+   .. py:method:: _getitem_next_ellipsis(tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> Content
+
+
+   .. py:method:: _getitem_next_regular_missing(head: awkward.contents.indexedoptionarray.IndexedOptionArray, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None, raw: Content, length: int) -> awkward.contents.regulararray.RegularArray
+
+
+   .. py:method:: _getitem_next_missing_jagged(head: Content, tail, advanced: awkward.index.Index | None, that: Content) -> awkward.contents.regulararray.RegularArray
+
+
+   .. py:method:: _getitem_next_missing(head: awkward.contents.indexedoptionarray.IndexedOptionArray, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> Content
+
+
+   .. py:method:: __getitem__(where)
+
+
+   .. py:method:: _getitem(where, named_axis: awkward._typing.Type[awkward._namedaxis.NamedAxis] = NamedAxis)
+
+
+   .. py:method:: _is_getitem_at_placeholder() -> bool
+      :abstractmethod:
+
+
+
+   .. py:method:: _is_getitem_at_virtual() -> bool
+
+
+   .. py:method:: _getitem_at(where: awkward._nplikes.numpy_like.IndexType)
+      :abstractmethod:
+
+
+
+   .. py:method:: _getitem_range(start: awkward._nplikes.numpy_like.IndexType, stop: awkward._nplikes.numpy_like.IndexType) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _getitem_field(where: str | awkward._typing.SupportsIndex, only_fields: tuple[str, Ellipsis] = ()) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _getitem_fields(where: list[str], only_fields: tuple[str, Ellipsis] = ()) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _getitem_next(head: awkward._slicing.SliceItem | tuple, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _getitem_next_jagged(slicestarts: awkward.index.Index, slicestops: awkward.index.Index, slicecontent: Content, tail: tuple[awkward._slicing.SliceItem, Ellipsis]) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _carry(carry: awkward.index.Index, allow_lazy: bool) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _local_index_axis0() -> awkward.contents.numpyarray.NumpyArray
+
+
+   .. py:method:: _mergeable_next(other: Content, mergebool: bool, mergecastable: awkward._typing.Literal[same_kind, equiv, family]) -> bool
+      :abstractmethod:
+
+
+
+   .. py:method:: _mergemany(others: collections.abc.Sequence[Content]) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _merging_strategy(others: list[Content]) -> tuple[list[Content], list[Content]]
+
+
+   .. py:method:: _local_index(axis: int, depth: int)
+      :abstractmethod:
+
+
+
+   .. py:method:: _reduce_next(reducer: awkward._reducers.Reducer, negaxis: int, starts: awkward.index.Index, shifts: awkward.index.Index | None, parents: awkward.index.Index | awkward.index.ZeroIndex, offsets: awkward.index.Index | awkward.index.EmptyIndex, outlength: int, mask: bool, keepdims: bool, behavior: dict | None)
+      :abstractmethod:
+
+
+
+   .. py:method:: _argsort_next(negaxis: int, starts: awkward.index.Index, shifts: awkward.index.Index | None, parents: awkward.index.Index | awkward.index.ZeroIndex, offsets: awkward.index.Index | awkward.index.EmptyIndex, outlength: int, ascending: bool, stable: bool)
+      :abstractmethod:
+
+
+
+   .. py:method:: _sort_next(negaxis: int, starts: awkward.index.Index, parents: awkward.index.Index | awkward.index.ZeroIndex, offsets: awkward.index.Index | awkward.index.EmptyIndex, outlength: int, ascending: bool, stable: bool)
+      :abstractmethod:
+
+
+
+   .. py:method:: _combinations_axis0(n: int, replacement: bool, recordlookup: list[str] | None, parameters: dict | None)
+
+
+   .. py:method:: _combinations(n: int, replacement: bool, recordlookup: list[str] | None, parameters: dict[str, awkward._typing.Any] | None, axis: int, depth: int)
+      :abstractmethod:
+
+
+
+   .. py:method:: _validity_error(path: str) -> str
+      :abstractmethod:
+
+
+
+   .. py:property:: nbytes
+      :type: int
+
+
+
+   .. py:method:: purelist_parameter(key: str)
+
+      Return the value of the outermost parameter matching ``key`` in a sequence
+      of nested lists, stopping at the first record or tuple layer.
+
+      If a layer has :py:obj:`ak.types.UnionType`, the value is only returned if all
+      possibilities have the same value.
+
+
+
+   .. py:method:: purelist_parameters(*keys: str)
+
+      Return the value of the outermost parameter matching one of ``keys`` in a sequence
+      of nested lists, stopping at the first record or tuple layer.
+
+      If a layer has :py:obj:`ak.types.UnionType`, the value is only returned if all
+      possibilities have the same value.
+
+
+
+   .. py:method:: _is_unique(negaxis: awkward._typing.AxisMaybeNone, starts: awkward.index.Index, parents: awkward.index.Index | awkward.index.ZeroIndex, offsets: awkward.index.Index | awkward.index.EmptyIndex, outlength: int) -> bool
+      :abstractmethod:
+
+
+
+   .. py:method:: _unique(negaxis: awkward._typing.AxisMaybeNone, starts: awkward.index.Index, parents: awkward.index.Index | awkward.index.ZeroIndex, offsets: awkward.index.Index | awkward.index.EmptyIndex, outlength: int)
+      :abstractmethod:
+
+
+
+   .. py:method:: _pad_none_axis0(target: int, clip: bool) -> Content
+
+
+   .. py:method:: _pad_none(target: int, axis: int, depth: int, clip: bool) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: to_arrow(list_to32: bool = False, string_to32: bool = False, bytestring_to32: bool = False, emptyarray_to=None, categorical_as_dictionary: bool = False, extensionarray: bool = True, count_nulls: bool = True, record_is_scalar: bool = False)
+
+
+   .. py:method:: _to_arrow(pyarrow: awkward._typing.Any, mask_node: Content | None, validbytes: Content | None, length: int, options: ToArrowOptions)
+      :abstractmethod:
+
+
+
+   .. py:method:: _to_cudf(cudf: awkward._typing.Any, mask: Content | None, length: int)
+      :abstractmethod:
+
+
+
+   .. py:method:: to_backend_array(allow_missing: bool = True, *, backend: awkward._backends.backend.Backend | str | None = None)
+
+
+   .. py:method:: _to_backend_array(allow_missing: bool, backend: awkward._backends.backend.Backend)
+      :abstractmethod:
+
+
+
+   .. py:method:: drop_none()
+
+
+   .. py:method:: _drop_none() -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _remove_structure(backend: awkward._backends.backend.Backend, options: RemoveStructureOptions) -> list[Content]
+      :abstractmethod:
+
+
+
+   .. py:method:: _recursively_apply(action: ImplementsApplyAction, depth: int, depth_context: collections.abc.Mapping[str, awkward._typing.Any] | None, lateral_context: collections.abc.Mapping[str, awkward._typing.Any] | None, options: ApplyActionOptions) -> Content | None
+      :abstractmethod:
+
+
+
+   .. py:method:: to_json(nan_string: str | None = None, posinf_string: str | None = None, neginf_string: str | None = None, complex_record_fields: tuple[str, str] | None = None, convert_bytes: bool | None = None, behavior: dict | None = None) -> list
+
+
+   .. py:method:: to_packed(recursive: bool = True) -> Content
+
+
+   .. py:method:: _to_packed(recursive: bool = True) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: to_list(behavior: dict | None = None) -> list
+
+
+   .. py:method:: _to_list(behavior: dict | None, json_conversions: dict[str, awkward._typing.Any] | None) -> list
+      :abstractmethod:
+
+
+
+   .. py:method:: _to_list_custom(behavior: dict | None, json_conversions: dict[str, awkward._typing.Any] | None)
+
+
+   .. py:method:: _offsets_and_flattened(axis: int, depth: int) -> tuple[awkward.index.Index, Content]
+      :abstractmethod:
+
+
+
+   .. py:method:: to_backend(backend: awkward._backends.backend.Backend | str | None = None) -> awkward._typing.Self
+
+
+   .. py:method:: _to_backend(backend: awkward._backends.backend.Backend) -> awkward._typing.Self
+      :abstractmethod:
+
+
+
+   .. py:method:: materialize(type_: type = MaterializableArray) -> awkward._typing.Self
+
+
+   .. py:method:: _materialize(type_) -> awkward._typing.Self
+      :abstractmethod:
+
+
+
+   .. py:property:: is_all_materialized
+      :type: bool
+
+
+
+   .. py:property:: _is_all_materialized
+      :type: bool
+
+      :abstractmethod:
+
+
+
+   .. py:property:: is_any_materialized
+      :type: bool
+
+
+
+   .. py:property:: _is_any_materialized
+      :type: bool
+
+      :abstractmethod:
+
+
+
+   .. py:method:: with_parameter(key: str, value: awkward._typing.Any) -> awkward._typing.Self
+
+
+   .. py:method:: __copy__()
+      :abstractmethod:
+
+
+
+   .. py:method:: __deepcopy__(memo)
+      :abstractmethod:
+
+
+
+   .. py:method:: is_equal_to(other: Content, index_dtype: bool = True, numpyarray: bool = True, *, all_parameters: bool = False) -> bool
+
+
+   .. py:method:: _is_equal_to_generic(other: Content, all_parameters: bool) -> bool
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Self, index_dtype: bool, numpyarray: bool, all_parameters: bool) -> bool
+      :abstractmethod:
+
+
+
+   .. py:method:: _repr(indent: str, pre: str, post: str) -> str
+      :abstractmethod:
+
+
+
+   .. py:method:: _numbers_to_type(name: str, including_unknown: bool) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: _fill_none(value: Content) -> Content
+      :abstractmethod:
+
+
+
+   .. py:method:: copy(*, parameters: awkward._typing.JSONMapping | None = UNSET) -> awkward._typing.Self
+      :abstractmethod:
+
+
+
+   .. py:method:: _arrow_needs_option_type()
+      :classmethod:
+
+

@@ -1,0 +1,49 @@
+/* Adapted from SciP: https://github.com/scipy/scipy/blob/66f1201fec94ed920641e0875968406c3d36a1b6/doc/source/_static/scipy.css */
+
+:root {
+    --sd-color-card-border-hover: var(--pst-color-primary)
+}
+
+html[data-theme="dark"] .sd-card {
+    background: var(--pst-color-surface);
+}
+
+.sd-card-header .fas {
+    font-size: 3em;
+}
+
+.intro-grid .sd-card {
+  border-radius: 0;
+  padding: 30px 10px 20px 10px;
+  margin: 10px 0px;
+}
+
+.intro-grid .sd-card-img-top {
+  height: 52px;
+  width: 52px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.intro-grid .sd-card-header {
+  border: none;
+  color: #150458 !important;
+  font-size: var(--pst-font-size-h5);
+  font-weight: bold;
+  padding: 2.5rem 0rem 0.5rem 0rem;
+}
+
+.intro-grid .sd-card-footer {
+  border: none;
+}
+
+.intro-grid .sd-card-footer p.sd-card-text{
+  max-width: 220px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.shield-badge {
+  margin-top: 0.15em;
+  margin-bottom: 0.15em;
+}

@@ -1,0 +1,87 @@
+ak.numba.layoutbuilder.ByteMasked
+---------------------------------
+
+.. py:module: ak.numba.layoutbuilder.ByteMasked
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/numba/layoutbuilder.py>`__ on `line 341 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/numba/layoutbuilder.py#L341>`__.
+
+.. py:class:: ak.numba.layoutbuilder.ByteMasked(self, content, *, valid_when=True, parameters=None, initial=1024, resize=8.0)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-content:
+
+.. py:attribute:: ak.numba.layoutbuilder.ByteMasked.content
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-valid_when:
+
+.. py:attribute:: ak.numba.layoutbuilder.ByteMasked.valid_when
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.ByteMasked.form
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-append_valid:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.append_valid(self)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-extend_valid:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.extend_valid(self, size)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-append_invalid:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.append_invalid(self)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-extend_invalid:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.extend_invalid(self, size)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-clear:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-bytemasked-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.ByteMasked.snapshot(self)
+

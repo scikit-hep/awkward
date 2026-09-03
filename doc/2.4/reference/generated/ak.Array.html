@@ -1,0 +1,2112 @@
+
+
+<!DOCTYPE html>
+
+
+<html >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>ak.Array &#8212; Awkward Array 2.4.10 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Vibur" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyterlite_sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/awkward.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/jupyterlite_sphinx.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'reference/generated/ak.Array';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.4';
+        </script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/reference/generated/ak.Array.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ak.Record" href="ak.Record.html" />
+    <link rel="prev" title="API reference" href="../index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="None"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo-300px.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+      2.4  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user-guide/index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user-guide/index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">High-level data types</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ak.Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.Record.html">ak.Record</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Append-only builder</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.ArrayBuilder.html">ak.ArrayBuilder</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Converting from other formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.from_arrow.html">ak.from_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_arrow_schema.html">ak.from_arrow_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_avro_file.html">ak.from_avro_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_buffers.html">ak.from_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_cupy.html">ak.from_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_feather.html">ak.from_feather</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_iter.html">ak.from_iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_jax.html">ak.from_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_json.html">ak.from_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_numpy.html">ak.from_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_parquet.html">ak.from_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_rdataframe.html">ak.from_rdataframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_avro_file.html">ak.from_avro_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.metadata_from_parquet.html">ak.metadata_from_parquet</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Converting to other formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_arrow.html">ak.to_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_arrow_table.html">ak.to_arrow_table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_buffers.html">ak.to_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_cupy.html">ak.to_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_dataframe.html">ak.to_dataframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_feather.html">ak.to_feather</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_jax.html">ak.to_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_json.html">ak.to_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_list.html">ak.to_list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_numpy.html">ak.to_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_packed.html">ak.to_packed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_parquet.html">ak.to_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_rdataframe.html">ak.to_rdataframe</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Correctness checking</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.is_valid.html">ak.is_valid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.validity_error.html">ak.validity_error</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Lengths of lists</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.num.html">ak.num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.count.html">ak.count</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.count_nonzero.html">ak.count_nonzero</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Making and breaking records (columns)</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.zip.html">ak.zip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.unzip.html">ak.unzip</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Merging arrays (rows)</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.concatenate.html">ak.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.where.html">ak.where</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Flattening lists and missing values</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.flatten.html">ak.flatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.unflatten.html">ak.unflatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ravel.html">ak.ravel</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions that reduce dimension</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.all.html">ak.all</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.any.html">ak.any</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.sum.html">ak.sum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.prod.html">ak.prod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.max.html">ak.max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.min.html">ak.min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argmax.html">ak.argmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argmin.html">ak.argmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nansum.html">ak.nansum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanprod.html">ak.nanprod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanmax.html">ak.nanmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanmin.html">ak.nanmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanargmax.html">ak.nanargmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanargmin.html">ak.nanargmin</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Statistics that reduce dimension</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.moment.html">ak.moment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mean.html">ak.mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.var.html">ak.var</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.std.html">ak.std</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanmean.html">ak.nanmean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanvar.html">ak.nanvar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanstd.html">ak.nanstd</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.covar.html">ak.covar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.corr.html">ak.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.linear_fit.html">ak.linear_fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ptp.html">ak.ptp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.softmax.html">ak.softmax</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Sorting</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.sort.html">ak.sort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argsort.html">ak.argsort</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Missing value handling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.mask.html">ak.mask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.drop_none.html">ak.drop_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_none.html">ak.is_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.pad_none.html">ak.pad_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.fill_none.html">ak.fill_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.firsts.html">ak.firsts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.singletons.html">ak.singletons</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Ragged and regular dimensions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_regular.html">ak.to_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_regular.html">ak.from_regular</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Broadcasting</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.broadcast_arrays.html">ak.broadcast_arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.broadcast_fields.html">ak.broadcast_fields</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Combinatorics ("for loop" replacements)</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.cartesian.html">ak.cartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.combinations.html">ak.combinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argcartesian.html">ak.argcartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argcombinations.html">ak.argcombinations</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String predicates</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_alnum.html">ak.str.is_alnum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_alpha.html">ak.str.is_alpha</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_ascii.html">ak.str.is_ascii</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_decimal.html">ak.str.is_decimal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_digit.html">ak.str.is_digit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_lower.html">ak.str.is_lower</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_numeric.html">ak.str.is_numeric</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_printable.html">ak.str.is_printable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_space.html">ak.str.is_space</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_title.html">ak.str.is_title</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_upper.html">ak.str.is_upper</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String transforms</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.capitalize.html">ak.str.capitalize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.length.html">ak.str.length</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.lower.html">ak.str.lower</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.repeat.html">ak.str.repeat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.replace_slice.html">ak.str.replace_slice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.replace_substring.html">ak.str.replace_substring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.replace_substring_regex.html">ak.str.replace_substring_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.reverse.html">ak.str.reverse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.swapcase.html">ak.str.swapcase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.title.html">ak.str.title</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.upper.html">ak.str.upper</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String padding and trimming</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.center.html">ak.str.center</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.lpad.html">ak.str.lpad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.rpad.html">ak.str.rpad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.ltrim.html">ak.str.ltrim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.ltrim_whitespace.html">ak.str.ltrim_whitespace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.rtrim.html">ak.str.rtrim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.rtrim_whitespace.html">ak.str.rtrim_whitespace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.trim.html">ak.str.trim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.trim_whitespace.html">ak.str.trim_whitespace</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String splitting and joining</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.split_pattern.html">ak.str.split_pattern</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.split_pattern_regex.html">ak.str.split_pattern_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.split_whitespace.html">ak.str.split_whitespace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.join.html">ak.str.join</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.join_element_wise.html">ak.str.join_element_wise</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String slicing and decomposition</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.slice.html">ak.str.slice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.extract_regex.html">ak.str.extract_regex</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String containment tests</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.count_substring.html">ak.str.count_substring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.count_substring_regex.html">ak.str.count_substring_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.ends_with.html">ak.str.ends_with</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.find_substring.html">ak.str.find_substring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.find_substring_regex.html">ak.str.find_substring_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.index_in.html">ak.str.index_in</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_in.html">ak.str.is_in</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.match_like.html">ak.str.match_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.match_substring.html">ak.str.match_substring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.match_substring_regex.html">ak.str.match_substring_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.starts_with.html">ak.str.starts_with</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Value and type conversions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.enforce_type.html">ak.enforce_type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nan_to_none.html">ak.nan_to_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nan_to_num.html">ak.nan_to_num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.values_astype.html">ak.values_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.strings_astype.html">ak.strings_astype</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Arrays of categorical data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_categorical.html">ak.to_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_categorical.html">ak.from_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_categorical.html">ak.is_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.categories.html">ak.categories</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Indexing and grouping</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.local_index.html">ak.local_index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.run_lengths.html">ak.run_lengths</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Restructuring records</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.merge_union_of_records.html">ak.merge_union_of_records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.merge_option_of_records.html">ak.merge_option_of_records</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Copying and packing arrays</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.copy.html">ak.copy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_packed.html">ak.to_packed</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Extracting metadata</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.type.html">ak.type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.parameters.html">ak.parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.fields.html">ak.fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_tuple.html">ak.is_tuple</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Manipulating metadata</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.with_name.html">ak.with_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_field.html">ak.with_field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_parameter.html">ak.with_parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.without_field.html">ak.without_field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.without_parameters.html">ak.without_parameters</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Overriding behavior</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../ak.behavior.html">ak.behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mixin_class.html">ak.mixin_class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mixin_class_method.html">ak.mixin_class_method</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Computational backends</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_backend.html">ak.to_backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.backend.html">ak.backend</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">NumPy compatibility</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.full_like.html">ak.full_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.isclose.html">ak.isclose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ones_like.html">ak.ones_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.zeros_like.html">ak.zeros_like</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Array comparison</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.almost_equal.html">ak.almost_equal</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Third-party integration</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.numba.register_and_check.html">ak.numba.register_and_check</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.jax.assert_registered.html">ak.jax.assert_registered</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.jax.import_jax.html">ak.jax.import_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.jax.register_and_check.html">ak.jax.register_and_check</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.jax.register_behavior_class.html">ak.jax.register_behavior_class</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Array layout transformations</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.transform.html">ak.transform</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Low-level array layouts</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_layout.html">ak.to_layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.Content.html">ak.contents.Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.BitMaskedArray.html">ak.contents.BitMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.ByteMaskedArray.html">ak.contents.ByteMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.EmptyArray.html">ak.contents.EmptyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.IndexedArray.html">ak.contents.IndexedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.IndexedOptionArray.html">ak.contents.IndexedOptionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.ListArray.html">ak.contents.ListArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.ListOffsetArray.html">ak.contents.ListOffsetArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.NumpyArray.html">ak.contents.NumpyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.RecordArray.html">ak.contents.RecordArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.RegularArray.html">ak.contents.RegularArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.UnionArray.html">ak.contents.UnionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.UnmaskedArray.html">ak.contents.UnmaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.record.Record.html">ak.record.Record</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Index for layout nodes</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.index.Index.html">ak.index.Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.Index8.html">ak.index.Index8</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.IndexU8.html">ak.index.IndexU8</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.Index32.html">ak.index.Index32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.IndexU32.html">ak.index.IndexU32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.Index64.html">ak.index.Index64</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">High-level data types</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.types.from_datashape.html">ak.types.from_datashape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.Type.html">ak.types.Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ArrayType.html">ak.types.ArrayType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ScalarType.html">ak.types.ScalarType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ListType.html">ak.types.ListType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.NumpyType.html">ak.types.NumpyType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.OptionType.html">ak.types.OptionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.RecordType.html">ak.types.RecordType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.RegularType.html">ak.types.RegularType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.UnionType.html">ak.types.UnionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.UnknownType.html">ak.types.UnknownType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.is_primitive.html">ak.types.is_primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.dtype_to_primitive.html">ak.types.dtype_to_primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.primitive_to_dtype.html">ak.types.primitive_to_dtype</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Low-level types: "forms"</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.Form.html">ak.forms.Form</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.BitMaskedForm.html">ak.forms.BitMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ByteMaskedForm.html">ak.forms.ByteMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.EmptyForm.html">ak.forms.EmptyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.IndexedForm.html">ak.forms.IndexedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.IndexedOptionForm.html">ak.forms.IndexedOptionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ListForm.html">ak.forms.ListForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ListOffsetForm.html">ak.forms.ListOffsetForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.NumpyForm.html">ak.forms.NumpyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.RecordForm.html">ak.forms.RecordForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.RegularForm.html">ak.forms.RegularForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.UnionForm.html">ak.forms.UnionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.UnmaskedForm.html">ak.forms.UnmaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.from_dict.html">ak.forms.from_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.from_json.html">ak.forms.from_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.from_type.html">ak.forms.from_type</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AwkwardForth for data ingest</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../awkwardforth.html">AwkwardForth virtual machines</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Low-level kernels</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="kernels.html">Kernel interface and specification</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">API reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">ak.Array</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="ak-array">
+<h1>ak.Array<a class="headerlink" href="#ak-array" title="Permalink to this headline">#</a></h1>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/highlevel.py">awkward.highlevel</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/highlevel.py#L119">line 119</a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ak.Array">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">Array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_valid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a>, <a class="reference internal" href="#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>, <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code>, <code class="docutils literal notranslate"><span class="pre">cp.ndarray</span></code>, <code class="docutils literal notranslate"><span class="pre">pyarrow.*</span></code>, str, dict, or iterable) – <dl class="simple">
+<dt>Data to wrap or convert into an array.</dt><dd><ul>
+<li><p>If a NumPy array, the regularity of its dimensions is preserved
+and the data are viewed, not copied.</p></li>
+<li><p>CuPy arrays are treated the same way as NumPy arrays except that
+they default to <code class="docutils literal notranslate"><span class="pre">backend=&quot;cuda&quot;</span></code>, rather than <code class="docutils literal notranslate"><span class="pre">backend=&quot;cpu&quot;</span></code>.</p></li>
+<li><p>If a pyarrow object, calls <a class="reference internal" href="ak.from_arrow.html#ak.from_arrow" title="ak.from_arrow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_arrow</span></code></a>, preserving as much
+metadata as possible, usually zero-copy.</p></li>
+<li><p>If a dict of str → columns, combines the columns into an
+array of records (like Pandas’s DataFrame constructor).</p></li>
+<li><p>If a string, the data are assumed to be JSON.</p></li>
+<li><p>If an iterable, calls <a class="reference internal" href="ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_iter</span></code></a>, which assumes all dimensions
+have irregular lengths.</p></li>
+</ul>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for this Array only.</p></li>
+<li><p><strong>with_name</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Gives tuples and records a name that can be
+used to override their behavior (see below).</p></li>
+<li><p><strong>check_valid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – If True, verify that the <a class="reference internal" href="#ak.Array.layout" title="ak.Array.layout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">layout</span></code></a> is valid.</p></li>
+<li><p><strong>backend</strong> (None, <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;jax&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;cuda&quot;</span></code>) – If <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code>, the Array will be placed in
+main memory for use with other <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code> Arrays and Records; if <code class="docutils literal notranslate"><span class="pre">&quot;cuda&quot;</span></code>,
+the Array will be placed in GPU global memory using CUDA; if <code class="docutils literal notranslate"><span class="pre">&quot;jax&quot;</span></code>, the structure
+is copied to the CPU for use with JAX. if None, the <code class="docutils literal notranslate"><span class="pre">data</span></code> are left untouched.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>High-level array that can contain data of any type.</p>
+<p>For most users, this is the only class in Awkward Array that matters: it
+is the entry point for data analysis with an emphasis on usability. It
+intentionally has a minimum of methods, preferring standalone functions
+like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">array1</span><span class="p">)</span>
+<span class="n">ak</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">array1</span><span class="p">)</span>
+<span class="n">ak</span><span class="o">.</span><span class="n">cartesian</span><span class="p">([</span><span class="n">array1</span><span class="p">,</span> <span class="n">array2</span><span class="p">])</span>
+<span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">array1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">array2</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">array3</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>instead of bound methods like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array1</span><span class="o">.</span><span class="n">num</span><span class="p">()</span>
+<span class="n">array1</span><span class="o">.</span><span class="n">combinations</span><span class="p">()</span>
+<span class="n">array1</span><span class="o">.</span><span class="n">cartesian</span><span class="p">([</span><span class="n">array2</span><span class="p">,</span> <span class="n">array3</span><span class="p">])</span>
+<span class="n">array1</span><span class="o">.</span><span class="n">zip</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="c1"># ?</span>
+</pre></div>
+</div>
+<p>because its namespace is valuable for domain-specific parameters and
+functionality. For example, if records contain a field named <code class="docutils literal notranslate"><span class="pre">&quot;num&quot;</span></code>,
+they can be accessed as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array1</span><span class="o">.</span><span class="n">num</span>
+</pre></div>
+</div>
+<p>instead of</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array1</span><span class="p">[</span><span class="s2">&quot;num&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>without any confusion or interference from <a class="reference internal" href="ak.num.html#ak.num" title="ak.num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.num</span></code></a>. The same is true
+for domain-specific methods that have been attached to the data. For
+instance, an analysis of mailing addresses might have a function that
+computes zip codes, which can be attached to the data with a method
+like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">latlon</span><span class="o">.</span><span class="n">zip</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>without any confusion or interference from <a class="reference internal" href="ak.zip.html#ak.zip" title="ak.zip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.zip</span></code></a>. Custom methods like
+this can be added with <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a>, and so the namespace of Array
+attributes must be kept clear for such applications.</p>
+<p>See also <a class="reference internal" href="ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a>.</p>
+<section id="interfaces-to-other-libraries">
+<h2>Interfaces to other libraries<a class="headerlink" href="#interfaces-to-other-libraries" title="Permalink to this headline">#</a></h2>
+<section id="numpy">
+<h3>NumPy<a class="headerlink" href="#numpy" title="Permalink to this headline">#</a></h3>
+<p>When NumPy
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/ufuncs.html">universal functions</a>
+(ufuncs) are applied to an ak.Array, they are passed through the Awkward
+data structure, applied to the numerical data at its leaves, and the output
+maintains the original structure.</p>
+<p>For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+<span class="go">&lt;Array [[1, 2, 3], [], [4, 5]] type=&#39;3 * var * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>See also <a class="reference internal" href="#ak.Array.__array_ufunc__" title="ak.Array.__array_ufunc__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__array_ufunc__</span></code></a>.</p>
+<p>Some NumPy functions other than ufuncs are also handled properly in
+NumPy &gt;= 1.17 (see
+<a class="reference external" href="https://numpy.org/neps/nep-0018-array-function-protocol.html">NEP 18</a>)
+and if an Awkward override exists. That is,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span>
+</pre></div>
+</div>
+<p>can be used on an Awkward Array because</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span>
+</pre></div>
+</div>
+<p>exists.</p>
+</section>
+<section id="pandas">
+<h3>Pandas<a class="headerlink" href="#pandas" title="Permalink to this headline">#</a></h3>
+<p>Ragged arrays (list type) can be converted into Pandas
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html">MultiIndex</a>
+rows and nested records can be converted into MultiIndex columns. If the
+Awkward Array has only one “branch” of nested lists (i.e. different record
+fields do not have different-length lists, but a single chain of lists-of-lists
+is okay), then it can be losslessly converted into a single DataFrame.
+Otherwise, multiple DataFrames are needed, though they can be merged (with a
+loss of information).</p>
+<p>The <a class="reference internal" href="ak.to_dataframe.html#ak.to_dataframe" title="ak.to_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_dataframe</span></code></a> function performs this conversion; if <code class="docutils literal notranslate"><span class="pre">how=None</span></code>, it
+returns a list of DataFrames; otherwise, <code class="docutils literal notranslate"><span class="pre">how</span></code> is passed to <code class="docutils literal notranslate"><span class="pre">pd.merge</span></code> when
+merging the resultant DataFrames.</p>
+</section>
+<section id="numba">
+<h3>Numba<a class="headerlink" href="#numba" title="Permalink to this headline">#</a></h3>
+<p>Arrays can be used in <a class="reference external" href="http://numba.pydata.org/">Numba</a>: they can be
+passed as arguments to a Numba-compiled function or returned as return
+values. The only limitation is that Awkward Arrays cannot be <em>created</em>
+inside the Numba-compiled function; to make outputs, consider
+<a class="reference internal" href="ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>.</p>
+</section>
+<section id="arrow">
+<h3>Arrow<a class="headerlink" href="#arrow" title="Permalink to this headline">#</a></h3>
+<p>Arrays are convertible to and from <a class="reference external" href="https://arrow.apache.org/">Apache Arrow</a>,
+a standard for representing nested data structures in columnar arrays.
+See <a class="reference internal" href="ak.to_arrow.html#ak.to_arrow" title="ak.to_arrow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_arrow</span></code></a> and <a class="reference internal" href="ak.from_arrow.html#ak.from_arrow" title="ak.from_arrow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_arrow</span></code></a>.</p>
+</section>
+<section id="jax">
+<h3>JAX<a class="headerlink" href="#jax" title="Permalink to this headline">#</a></h3>
+<p>Derivatives of a calculation on an <a class="reference internal" href="#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> (s) can be calculated with
+<a class="reference external" href="https://github.com/google/jax#readme">JAX</a>, but only if the array
+functions in <code class="docutils literal notranslate"><span class="pre">ak</span></code> / <code class="docutils literal notranslate"><span class="pre">numpy</span></code> are used, not the functions in the <code class="docutils literal notranslate"><span class="pre">jax</span></code>
+library directly (apart from e.g. <code class="docutils literal notranslate"><span class="pre">jax.grad</span></code>).</p>
+<p>Like NumPy ufuncs, the function and its derivatives are evaluated on the
+numeric leaves of the data structure, maintaining structure in the output.</p>
+<span class="target" id="ak-array-init-subclass"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__init_subclass__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__init_subclass__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-histogram-module"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array._histogram_module_">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">_histogram_module_</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">awkward._connect.hist</span></em><a class="headerlink" href="#ak.Array._histogram_module_" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-update-class"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array._update_class">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">_update_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array._update_class" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-layout"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.layout">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">layout</span></span><a class="headerlink" href="#ak.Array.layout" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The composable <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> elements that determine how this
+Array is structured.</p>
+<p>This may be considered a “low-level” view, as it distinguishes between
+arrays that have the same logical meaning (i.e. same JSON output and
+high-level <a class="reference internal" href="#ak.Array.type" title="ak.Array.type"><code class="xref py py-meth docutils literal notranslate"><span class="pre">type</span></code></a>) but different</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>node types, such as <a class="reference internal" href="ak.contents.ListArray.html#ak.contents.ListArray" title="ak.contents.ListArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.ListArray</span></code></a> and</dt><dd><p><a class="reference internal" href="ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray" title="ak.contents.ListOffsetArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.ListOffsetArray</span></code></a>,</p>
+</dd>
+</dl>
+</li>
+<li><p>integer type specialization, such as <code class="docutils literal notranslate"><span class="pre">int64</span></code> vs <code class="docutils literal notranslate"><span class="pre">int32</span></code></p></li>
+<li><p>or specific values, such as gaps in a <a class="reference internal" href="ak.contents.ListArray.html#ak.contents.ListArray" title="ak.contents.ListArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.ListArray</span></code></a>.</p></li>
+</ul>
+<p>The <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> elements are fully composable, whereas an
+Array is not; the high-level Array is a single-layer “shell” around
+its layout.</p>
+<p>Layouts are rendered as XML instead of a nested list. For example,
+the following <code class="docutils literal notranslate"><span class="pre">array</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>is presented as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;3 * var * float64&#39;</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>but <code class="docutils literal notranslate"><span class="pre">array.layout</span></code> is presented as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">ListOffsetArray</span> <span class="nb">len</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">offsets</span><span class="o">&gt;&lt;</span><span class="n">Index</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int64&#39;</span> <span class="nb">len</span><span class="o">=</span><span class="s1">&#39;4&#39;</span><span class="o">&gt;</span>
+        <span class="p">[</span><span class="mi">0</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">5</span><span class="p">]</span>
+    <span class="o">&lt;/</span><span class="n">Index</span><span class="o">&gt;&lt;/</span><span class="n">offsets</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">content</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">NumpyArray</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span> <span class="nb">len</span><span class="o">=</span><span class="s1">&#39;5&#39;</span><span class="o">&gt;</span><span class="p">[</span><span class="mf">1.1</span> <span class="mf">2.2</span> <span class="mf">3.3</span> <span class="mf">4.4</span> <span class="mf">5.5</span><span class="p">]</span><span class="o">&lt;/</span><span class="n">NumpyArray</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">content</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">ListOffsetArray</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>(with truncation for large arrays).</p>
+<span class="target" id="ak-array-behavior"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.behavior">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">behavior</span></span><a class="headerlink" href="#ak.Array.behavior" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The <code class="docutils literal notranslate"><span class="pre">behavior</span></code> parameter passed into this Array’s constructor.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>If a dict, this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> overrides the global <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a>.</dt><dd><p>Any keys in the global <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> but not this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> are
+still valid, but any keys in both are overridden by this
+<code class="docutils literal notranslate"><span class="pre">behavior</span></code>. Keys with a None value are equivalent to missing keys,
+so this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> can effectively remove keys from the
+global <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a>.</p>
+</dd>
+</dl>
+</li>
+<li><p>If None, the Array defaults to the global <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a>.</p></li>
+</ul>
+<p>See <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for a list of recognized key patterns and their
+meanings.</p>
+<span class="target" id="ak-array-mask"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.mask">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">mask</span></span><a class="headerlink" href="#ak.Array.mask" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Whereas</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">[</span><span class="n">array_of_booleans</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>removes elements from <code class="docutils literal notranslate"><span class="pre">array</span></code> in which <code class="docutils literal notranslate"><span class="pre">array_of_booleans</span></code> is False,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="o">.</span><span class="n">mask</span><span class="p">[</span><span class="n">array_of_booleans</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>returns data with the same length as the original <code class="docutils literal notranslate"><span class="pre">array</span></code> but False
+values in <code class="docutils literal notranslate"><span class="pre">array_of_booleans</span></code> are mapped to None. Such an output
+can be used in mathematical expressions with the original <code class="docutils literal notranslate"><span class="pre">array</span></code>
+because they are still aligned.</p>
+<p>See <a class="reference internal" href="#filtering">filtering</a> and <a class="reference internal" href="ak.mask.html#ak.mask" title="ak.mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.mask</span></code></a>.</p>
+<span class="target" id="ak-array-tolist"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.tolist">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">tolist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.tolist" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts this Array into Python objects; same as <a class="reference internal" href="ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_list</span></code></a>
+(but without the underscore, like NumPy’s
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html">tolist</a>).</p>
+<span class="target" id="ak-array-to-list"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.to_list">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.to_list" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts this Array into Python objects; same as <a class="reference internal" href="ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_list</span></code></a>.</p>
+<span class="target" id="ak-array-to-numpy"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.to_numpy">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.to_numpy" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts this Array into a NumPy array, if possible; same as <a class="reference internal" href="ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_numpy</span></code></a>.</p>
+<span class="target" id="ak-array-nbytes"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.nbytes">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">nbytes</span></span><a class="headerlink" href="#ak.Array.nbytes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The total number of bytes in all the <a class="reference internal" href="ak.index.Index.html#ak.index.Index" title="ak.index.Index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.index.Index</span></code></a>,
+and <a class="reference internal" href="ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a> buffers in this array tree.</p>
+<p>It does not count buffers that must be kept in memory because
+of ownership, but are not directly used in the array. Nor does it count
+the (small) Python objects that reference the (large) array buffers.</p>
+<span class="target" id="ak-array-ndim"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.ndim">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#ak.Array.ndim" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Number of dimensions (nested variable-length lists and/or regular arrays)
+before reaching a numeric type or a record.</p>
+<p>There may be nested lists within the record, as field values, but this
+number of dimensions does not count those.</p>
+<p>(Some fields may have different depths than others, which is why they
+are not counted.)</p>
+<span class="target" id="ak-array-fields"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.fields">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">fields</span></span><a class="headerlink" href="#ak.Array.fields" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>List of field names or tuple slot numbers (as strings) of the outermost
+record or tuple in this array.</p>
+<p>If the array contains nested records, only the fields of the outermost
+record are shown. If it contains tuples instead of records, its fields
+are string representations of integers, such as <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;2&quot;</span></code>, etc.
+The records or tuples may be within multiple layers of nested lists.</p>
+<p>If the array contains neither tuples nor records, it is an empty list.</p>
+<p>See also <a class="reference internal" href="ak.fields.html#ak.fields" title="ak.fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.fields</span></code></a>.</p>
+<span class="target" id="ak-array-is-tuple"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.is_tuple">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">is_tuple</span></span><a class="headerlink" href="#ak.Array.is_tuple" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>If True, the top-most record structure has no named fields, i.e. it’s a tuple.</p>
+<span class="target" id="ak-array-ipython-key-completions"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array._ipython_key_completions_">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">_ipython_key_completions_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array._ipython_key_completions_" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-type"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.type">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#ak.Array.type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The high-level type of this Array; same as <a class="reference internal" href="ak.type.html#ak.type" title="ak.type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.type</span></code></a>.</p>
+<p>Note that the outermost element of an Array’s type is always an
+<a class="reference internal" href="ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a>, which specifies the number of elements in the array.</p>
+<p>The type of a <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> (from <a class="reference internal" href="#ak.Array.layout" title="ak.Array.layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.layout</span></code></a>) is not
+wrapped by an <a class="reference internal" href="ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a>.</p>
+<span class="target" id="ak-array-typestr"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Array.typestr">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">typestr</span></span><a class="headerlink" href="#ak.Array.typestr" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The high-level type of this Array, presented as a string.</p>
+<span class="target" id="ak-array-len"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__len__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__len__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The length of this Array, only counting the outermost structure.</p>
+<p>For example, the length of</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>is <code class="docutils literal notranslate"><span class="pre">3</span></code>, not <code class="docutils literal notranslate"><span class="pre">5</span></code>.</p>
+<span class="target" id="ak-array-iter"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__iter__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__iter__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Iterates over this Array in Python.</p>
+<p>Note that this is the <em>slowest</em> way to access data (even slower than
+native Python objects, like lists and dicts). Usually, you should
+express your problems in array-at-a-time operations.</p>
+<p>In other words, do this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]]))</span>
+<span class="go">&lt;Array [[1.05, 1.48, 1.82], [], [2.1, 2.35]] type=&#39;3 * var * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>not this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">outer</span> <span class="ow">in</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]]):</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">inner</span> <span class="ow">in</span> <span class="n">outer</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">inner</span><span class="p">))</span>
+<span class="gp">...</span>
+<span class="go">1.0488088481701516</span>
+<span class="go">1.4832396974191326</span>
+<span class="go">1.816590212458495</span>
+<span class="go">2.0976176963403033</span>
+<span class="go">2.345207879911715</span>
+</pre></div>
+</div>
+<p>Iteration over Arrays exists so that they can be more easily inspected
+as Python objects.</p>
+<p>See also <a class="reference internal" href="ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_list</span></code></a>.</p>
+<span class="target" id="ak-array-getitem"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__getitem__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__getitem__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>where</strong> (<em>many types supported; see below</em>) – Index of positions to
+select from this Array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Select items from the Array using an extension of NumPy’s (already
+quite extensive) rules.</p>
+<p>All methods of selecting items described in
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/arrays.indexing.html">NumPy indexing</a>
+are supported with one exception
+(<a class="reference external" href="https://numpy.org/doc/stable/user/basics.indexing.html#combining-advanced-and-basic-indexing">combining advanced and basic indexing</a>
+with basic indexes <em>between</em> two advanced indexes: the definition
+NumPy chose for the result does not have a generalization beyond
+rectilinear arrays).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">where</span></code> parameter can be any of the following or a tuple of
+the following.</p>
+<ul class="simple">
+<li><p><strong>An integer</strong> selects one element. Like Python/NumPy, it is
+zero-indexed: <code class="docutils literal notranslate"><span class="pre">0</span></code> is the first item, <code class="docutils literal notranslate"><span class="pre">1</span></code> is the second, etc.
+Negative indexes count from the end of the list: <code class="docutils literal notranslate"><span class="pre">-1</span></code> is the
+last, <code class="docutils literal notranslate"><span class="pre">-2</span></code> is the second-to-last, etc.
+Indexes beyond the size of the array, either because they’re too
+large or because they’re too negative, raise errors. In
+particular, some nested lists might contain a desired element
+while others don’t; this would raise an error.</p></li>
+<li><p><strong>A slice</strong> (either a Python <code class="docutils literal notranslate"><span class="pre">slice</span></code> object or the
+<code class="docutils literal notranslate"><span class="pre">start:stop:step</span></code> syntax) selects a range of elements. The
+<code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">stop</span></code> values are zero-indexed; <code class="docutils literal notranslate"><span class="pre">start</span></code> is inclusive
+and <code class="docutils literal notranslate"><span class="pre">stop</span></code> is exclusive, like Python/NumPy. Negative <code class="docutils literal notranslate"><span class="pre">step</span></code>
+values are allowed, but a <code class="docutils literal notranslate"><span class="pre">step</span></code> of <code class="docutils literal notranslate"><span class="pre">0</span></code> is an error. Slices
+beyond the size of the array are not errors but are truncated,
+like Python/NumPy.</p></li>
+<li><p><strong>A string</strong> selects a tuple or record field, even if its
+position in the tuple is to the left of the dimension where the
+tuple/record is defined. (See <a class="reference internal" href="#projection">projection</a> below.) This is
+similar to NumPy’s
+<a class="reference external" href="https://numpy.org/doc/stable/user/basics.indexing.html#field-access">field access</a>,
+except that strings are allowed in the same tuple with other
+slice types. While record fields have names, tuple fields are
+integer strings, such as <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;2&quot;</span></code> (always
+non-negative). Be careful to distinguish these from non-string
+integers.</p></li>
+<li><p><strong>An iterable of strings</strong> (not the top-level tuple) selects
+multiple tuple/record fields.</p></li>
+<li><p><strong>An ellipsis</strong> (either the Python <code class="docutils literal notranslate"><span class="pre">Ellipsis</span></code> object or the
+<code class="docutils literal notranslate"><span class="pre">...</span></code> syntax) skips as many dimensions as needed to put the
+rest of the slice items to the innermost dimensions.</p></li>
+<li><p><strong>A np.newaxis</strong> or its equivalent, None, does not select items
+but introduces a new regular dimension in the output with size
+<code class="docutils literal notranslate"><span class="pre">1</span></code>. This is a convenient way to explicitly choose a dimension
+for broadcasting.</p></li>
+<li><p><strong>A boolean array</strong> with the same length as the current dimension
+(or any iterable, other than the top-level tuple) selects elements
+corresponding to each True value in the array, dropping those
+that correspond to each False. The behavior is similar to
+NumPy’s
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html">compress</a>
+function.</p></li>
+<li><p><strong>An integer array</strong> (or any iterable, other than the top-level
+tuple) selects elements like a single integer, but produces a
+regular dimension of as many as are desired. The array can have
+any length, any order, and it can have duplicates and incomplete
+coverage. The behavior is similar to NumPy’s
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html">take</a>
+function.</p></li>
+<li><p><strong>An integer Array with missing (None) items</strong> selects multiple
+values by index, as above, but None values are passed through
+to the output. This behavior matches pyarrow’s
+<a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take">Array.take</a>
+which also manages arrays with missing values. See
+<a class="reference internal" href="#option-indexing">option indexing</a> below.</p></li>
+<li><p><strong>An Array of nested lists</strong>, ultimately containing booleans or
+integers and having the same lengths of lists at each level as
+the Array to which they’re applied, selects by boolean or by
+integer at the deeply nested level. Missing items at any level
+above the deepest level must broadcast. See <a class="reference internal" href="#nested-indexing">nested indexing</a> below.</p></li>
+</ul>
+<p>A tuple of the above applies each slice item to a dimension of the
+data, which can be very expressive. More than one flat boolean/integer
+array are “iterated as one” as described in the
+<a class="reference external" href="https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing">NumPy documentation</a>.</p>
+</section>
+<section id="filtering">
+<h3>Filtering<a class="headerlink" href="#filtering" title="Permalink to this headline">#</a></h3>
+<p>A common use of selection by boolean arrays is to filter a dataset by
+some property. For instance, to get the odd values of</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>one can put an array expression with True for each odd value inside
+square brackets:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="n">array</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">&lt;Array [1, 3, 5, 7, 9] type=&#39;5 * int64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>This technique is so common in NumPy and Pandas data analysis that it
+is often read as a syntax, rather than a consequence of array slicing.</p>
+<p>The extension to nested arrays like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">]]])</span>
+</pre></div>
+</div>
+<p>allows us to use the same syntax more generally.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="n">array</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">&lt;Array [[[1], [], [3], [5]], [[7], [9]]] type=&#39;2 * var * var * int64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>In this example, the boolean array is itself nested (see
+<a class="reference internal" href="#nested-indexing">nested indexing</a> below).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="go">&lt;Array [[[False, True, False], ..., [True]], ...] type=&#39;2 * var * var * bool&#39;&gt;</span>
+</pre></div>
+</div>
+<p>This also applies to data with record structures.</p>
+<p>For nested data, we often need to select the first or first two
+elements from variable-length lists. That can be a problem if some
+lists are empty. A function like <a class="reference internal" href="ak.num.html#ak.num" title="ak.num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.num</span></code></a> can be useful for first
+selecting by the lengths of lists.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="p">[],</span>
+<span class="gp">... </span>                  <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="p">[</span><span class="mf">6.6</span><span class="p">],</span>
+<span class="gp">... </span>                  <span class="p">[],</span>
+<span class="gp">... </span>                  <span class="p">[</span><span class="mf">7.7</span><span class="p">,</span> <span class="mf">8.8</span><span class="p">,</span> <span class="mf">9.9</span><span class="p">]])</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="go">&lt;Array [1.1, 4.4, 6.6, 7.7] type=&#39;4 * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">&lt;Array [2.2, 5.5, 8.8] type=&#39;3 * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>It’s sometimes also a problem that “cleaning” the dataset by dropping
+empty lists changes its alignment, so that it can no longer be used
+in calculations with “uncleaned” data. For this, <a class="reference internal" href="ak.mask.html#ak.mask" title="ak.mask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.mask</span></code></a> can be
+useful because it inserts None in positions that fail the filter,
+rather than removing them.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ak</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">&lt;Array [[1.1, 2.2, 3.3], ..., [7.7, ..., 9.9]] type=&#39;6 * option[var * float64]&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Note, however, that the <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span></code> to pick the first or second
+item of each nested list is in the second dimension, so the first
+dimension of the slice must be a <code class="docutils literal notranslate"><span class="pre">:</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ak</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="go">&lt;Array [1.1, None, 4.4, None, None, 7.7] type=&#39;6 * ?float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ak</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">&lt;Array [2.2, None, 5.5, None, None, 8.8] type=&#39;6 * ?float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Another syntax for</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">array_of_booleans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>is</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="o">.</span><span class="n">mask</span><span class="p">[</span><span class="n">array_of_booleans</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>(which is 5 characters away from simply filtering the <code class="docutils literal notranslate"><span class="pre">array</span></code>).</p>
+</section>
+<section id="projection">
+<h3>Projection<a class="headerlink" href="#projection" title="Permalink to this headline">#</a></h3>
+<p>The following</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]}],</span>
+<span class="gp">... </span>                  <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]}],</span>
+<span class="gp">... </span>                  <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]}]])</span>
+</pre></div>
+</div>
+<p>has records inside of nested lists:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">3 * var * {</span>
+<span class="go">    x: float64,</span>
+<span class="go">    y: var * int64</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+<p>In principle, one should select nested lists before record fields,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [0, 1.1] type=&#39;2 * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[::</span><span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [[1.1, 2.2], [0, 1.1]] type=&#39;2 * var * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>but it’s also possible to select record fields first.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [[1.1, 2.2], [3.3], [0, 1.1]] type=&#39;3 * var * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>The string can “commute” to the left through integers and slices to
+get the same result as it would in its “natural” position.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [0, 1.1] type=&#39;2 * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="p">:]</span>
+<span class="go">&lt;Array [0, 1.1] type=&#39;2 * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+<span class="go">&lt;Array [0, 1.1] type=&#39;2 * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>The is analogous to selecting rows (integer indexes) before columns
+(string names) or columns before rows, except that the rows are
+more complex (like a Pandas
+<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/user_guide/advanced.html">MultiIndex</a>).
+This would be an expensive operation in a typical object-oriented
+environment, in which the records with fields <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> are
+akin to C structs, but for columnar Awkward Arrays, projecting
+through all records to produce an array of nested lists of <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>
+values just changes the metadata (no loop over data, and therefore
+fast).</p>
+<p>Thus, data analysts should think of records as fluid objects that
+can be easily projected apart and zipped back together with
+<a class="reference internal" href="ak.zip.html#ak.zip" title="ak.zip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.zip</span></code></a>.</p>
+<p>Note, however, that while a column string can “commute” with row
+indexes to the left of its position in the tree, it can’t commute
+to the right. For example, it’s possible to use slices inside
+<code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> because <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> is a list:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [[1], [2, 2]] type=&#39;2 * var * int64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="go">&lt;Array [1, 2] type=&#39;2 * int64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>but it’s not possible to move <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> to the right</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="go">IndexError: while attempting to slice</span>
+<span class="go">    &lt;Array [[{x: 1.1, y: [1]}, {...}], ...] type=&#39;3 * var * {x: float64, y:...&#39;&gt;</span>
+<span class="go">with</span>
+<span class="go">    (0, :, 0, &#39;y&#39;)</span>
+<span class="go">at inner NumpyArray of length 2, using sub-slice (0).</span>
+</pre></div>
+</div>
+<p>because the <code class="docutils literal notranslate"><span class="pre">array[0,</span> <span class="pre">:,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> slice applies to both <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code> and
+<code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> before <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code> is selected, and <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code> is a one-dimensional
+NumpyArray that can’t take more than its share of slices.</p>
+<p>Finally, note that the dot (<code class="docutils literal notranslate"><span class="pre">__getattr__</span></code>) syntax is equivalent to a single
+string in a slice (<code class="docutils literal notranslate"><span class="pre">__getitem__</span></code>) if the field name is a valid Python
+identifier and doesn’t conflict with <a class="reference internal" href="#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> methods or properties.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">x</span>
+<span class="go">&lt;Array [[1.1, 2.2], [3.3], [0, 1.1]] type=&#39;3 * var * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">y</span>
+<span class="go">&lt;Array [[[1], [2, 2]], ..., [[], [1, ...]]] type=&#39;3 * var * var * int64&#39;&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="nested-projection">
+<h3>Nested Projection<a class="headerlink" href="#nested-projection" title="Permalink to this headline">#</a></h3>
+<p>If records are nested within records, you can use a series of strings in
+the selector to drill down. For instance, with the following</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">}},</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">}},</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">}}])</span>
+</pre></div>
+</div>
+<p>we can go directly to the numerical data by specifying a string for the
+outer field and a string for the inner field.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [1, 1, 1] type=&#39;3 * int64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [2, 2, 2] type=&#39;3 * int64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [20, 20, 20] type=&#39;3 * int64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [2.2, 2.2, 2.2] type=&#39;3 * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>As with single projections, the dot (<code class="docutils literal notranslate"><span class="pre">__getattr__</span></code>) syntax is equivalent
+to a single string in a slice (<code class="docutils literal notranslate"><span class="pre">__getitem__</span></code>) if the field name is a valid
+Python identifier and doesn’t conflict with <a class="reference internal" href="#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> methods or properties.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">x</span>
+<span class="go">&lt;Array [1, 1, 1] type=&#39;3 * int64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>You can even get every field of the same name within an outer record using
+a list of field names for the outer record. The following selects the <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>
+field of <code class="docutils literal notranslate"><span class="pre">&quot;a&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;b&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;c&quot;</span></code> records:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[{a: 1, b: 10, c: 1.1},</span>
+<span class="go"> {a: 1, b: 10, c: 1.1},</span>
+<span class="go"> {a: 1, b: 10, c: 1.1}]</span>
+</pre></div>
+</div>
+<p>You don’t need to get all fields:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[{a: 1, b: 10},</span>
+<span class="go"> {a: 1, b: 10},</span>
+<span class="go"> {a: 1, b: 10}]</span>
+</pre></div>
+</div>
+<p>And you can select lists of field names at all levels:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[{a: {x: 1, y: 2}, b: {x: 10, y: 20}},</span>
+<span class="go"> {a: {x: 1, y: 2}, b: {x: 10, y: 20}},</span>
+<span class="go"> {a: {x: 1, y: 2}, b: {x: 10, y: 20}}]</span>
+</pre></div>
+</div>
+</section>
+<section id="option-indexing">
+<h3>Option indexing<a class="headerlink" href="#option-indexing" title="Permalink to this headline">#</a></h3>
+<p>NumPy arrays can be sliced by all of the above slice types except
+arrays with missing values and arrays with nested lists, both of
+which are inexpressible in NumPy. Missing values, represented by
+None in Python, are called option types (<a class="reference internal" href="ak.types.OptionType.html#ak.types.OptionType" title="ak.types.OptionType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.OptionType</span></code></a>) in
+Awkward Array and can be used as a slice.</p>
+<p>For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">,</span> <span class="mf">7.7</span><span class="p">,</span> <span class="mf">8.8</span><span class="p">,</span> <span class="mf">9.9</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>can be sliced with a boolean array</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]]</span>
+<span class="go">&lt;Array [5.5, 7.7, 9.9] type=&#39;3 * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>or a boolean array containing None values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">]]</span>
+<span class="go">&lt;Array [5.5, None, 7.7, None, 9.9] type=&#39;5 * ?float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>Similarly for arrays of integers and None:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]]</span>
+<span class="go">&lt;Array [1.1, 2.2, None, None, 8.8, 9.9] type=&#39;6 * ?float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>This is the same behavior as pyarrow’s
+<a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array.take">Array.take</a>,
+which establishes a convention for how to interpret slice arrays
+with option type:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">,</span> <span class="mf">7.7</span><span class="p">,</span> <span class="mf">8.8</span><span class="p">,</span> <span class="mf">9.9</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">pa</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">]))</span>
+<span class="go">&lt;pyarrow.lib.DoubleArray object at 0x7efc7f060210&gt;</span>
+<span class="go">[</span>
+<span class="go">  1.1,</span>
+<span class="go">  2.2,</span>
+<span class="go">  null,</span>
+<span class="go">  null,</span>
+<span class="go">  8.8,</span>
+<span class="go">  9.9</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+</section>
+<section id="nested-indexing">
+<h3>Nested indexing<a class="headerlink" href="#nested-indexing" title="Permalink to this headline">#</a></h3>
+<p>Awkward Array’s nested lists can be used as slices as well, as long
+as the type at the deepest level of nesting is boolean or integer.</p>
+<p>For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">3.3</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">]],</span> <span class="p">[],</span> <span class="p">[[</span><span class="mf">5.5</span><span class="p">]]])</span>
+</pre></div>
+</div>
+<p>can be sliced at the top level with one-dimensional arrays:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">]]</span>
+<span class="go">&lt;Array [[], [[5.5]]] type=&#39;2 * var * var * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+<span class="go">&lt;Array [[], [[5.5]]] type=&#39;2 * var * var * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>with singly nested lists:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="kc">True</span><span class="p">]]]</span>
+<span class="go">&lt;Array [[[], [3.3, 4.4]], [], [[5.5]]] type=&#39;3 * var * var * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]]]</span>
+<span class="go">&lt;Array [[[], [3.3, 4.4]], [], [[5.5]]] type=&#39;3 * var * var * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>and with doubly nested lists:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[[[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]],</span> <span class="p">[],</span> <span class="p">[[</span><span class="kc">False</span><span class="p">]]]]</span>
+<span class="go">&lt;Array [[[1.1], [], [3.3]], [], [[]]] type=&#39;3 * var * var * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[[[[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[],</span> <span class="p">[[]]]]</span>
+<span class="go">&lt;Array [[[1.1], [], [3.3]], [], [[]]] type=&#39;3 * var * var * float64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>The key thing is that the nested slice has the same number of elements
+as the array it’s slicing at every level of nesting that it reproduces.
+This is similar to the requirement that boolean arrays have the same
+length as the array they’re filtering.</p>
+<p>This kind of slicing is useful because NumPy’s
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/ufuncs.html">universal functions</a>
+produce arrays with the same structure as the original array, which
+can then be used as filters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">((</span><span class="n">array</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[[False, True, False], [], [True, False]],</span>
+<span class="go"> [],</span>
+<span class="go"> [[True]]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">array</span><span class="p">[(</span><span class="n">array</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[[1.1], [], [3.3]],</span>
+<span class="go"> [],</span>
+<span class="go"> [[5.5]]]</span>
+</pre></div>
+</div>
+<p>Functions whose names start with “arg” return index positions, which
+can be used with the integer form.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[2, None, 1],</span>
+<span class="go"> [],</span>
+<span class="go"> [0]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[[3.3, 4.4], None, []],</span>
+<span class="go"> [],</span>
+<span class="go"> [[5.5]]]</span>
+</pre></div>
+</div>
+<p>Here, the <code class="docutils literal notranslate"><span class="pre">np.argmax</span></code> returns the integer position of the maximum
+element or None for empty arrays. It’s a nice example of
+<a class="reference internal" href="#option-indexing">option indexing</a> with <a class="reference internal" href="#nested-indexing">nested indexing</a>.</p>
+<p>When applying a nested index with missing (None) entries at levels
+higher than the last level, the indexer must have the same dimension
+as the array being indexed, and the resulting output will have missing
+entries at the corresponding locations, e.g. for</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span> <span class="p">[[[</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]]]</span> <span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[[0, None, 2.2, None, None], None, [4.4]],</span>
+<span class="go"> None,</span>
+<span class="go"> [[5.5]]]</span>
+</pre></div>
+</div>
+<p>the sub-list at entry 0,0 is extended as the masked entries are
+acting at the last level, while the higher levels of the indexer all
+have the same dimension as the array being indexed.</p>
+<span class="target" id="ak-array-bytes"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__bytes__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__bytes__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__bytes__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-setitem"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__setitem__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">what</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__setitem__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>where</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>tuple of str</em>) – Field name to add to records in the array.</p></li>
+<li><p><strong>what</strong> (<a class="reference internal" href="#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>) – Array to add as the new field.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Unlike <a class="reference internal" href="#ak.Array.__getitem__" title="ak.Array.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a>, which allows a wide variety of slice types,
+only single field-slicing is supported for assignment.
+(<a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> arrays are immutable; field assignment replaces
+the <a class="reference internal" href="#ak.Array.layout" title="ak.Array.layout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">layout</span></code></a> with an array that has the new field using <a class="reference internal" href="ak.with_field.html#ak.with_field" title="ak.with_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.with_field</span></code></a>.)</p>
+<p>However, a field can be assigned deeply into a nested record e.g.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nested</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s2">&quot;a&quot;</span> <span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s2">&quot;x&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nested</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nested</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">x</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nested</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[{a: {x: 1, y: 2}},</span>
+<span class="go"> {a: {x: 2, y: 4}},</span>
+<span class="go"> {a: {x: 3, y: 6}}]</span>
+</pre></div>
+</div>
+<p>Note that the following does <strong>not</strong> work:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nested</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">][</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nested</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">x</span> <span class="c1"># does not work, nested[&quot;a&quot;] is a copy!</span>
+</pre></div>
+</div>
+<p>Always assign by passing the whole path to the top level</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nested</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nested</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">x</span>
+</pre></div>
+</div>
+<p>If necessary, the new field will be broadcasted to fit the array.
+For example, given</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">}],</span> <span class="p">[],</span> <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">4.4</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">}]</span>
+<span class="gp">... </span><span class="p">])</span>
+</pre></div>
+</div>
+<p>which has three elements with nested data in each, assigning</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>will result in</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[{x: 1.1, y: 100}, {x: 2.2, y: 100}, {x: 3.3, y: 100}],</span>
+<span class="go"> [],</span>
+<span class="go"> [{x: 4.4, y: 300}, {x: 5.5, y: 300}]]</span>
+</pre></div>
+</div>
+<p>because the <code class="docutils literal notranslate"><span class="pre">100</span></code> in <code class="docutils literal notranslate"><span class="pre">what[0]</span></code> is broadcasted to all three nested
+elements of <code class="docutils literal notranslate"><span class="pre">array[0]</span></code>, the <code class="docutils literal notranslate"><span class="pre">200</span></code> in <code class="docutils literal notranslate"><span class="pre">what[1]</span></code> is broadcasted to the
+empty list <code class="docutils literal notranslate"><span class="pre">array[1]</span></code>, and the <code class="docutils literal notranslate"><span class="pre">300</span></code> in <code class="docutils literal notranslate"><span class="pre">what[2]</span></code> is broadcasted to
+both elements of <code class="docutils literal notranslate"><span class="pre">array[2]</span></code>.</p>
+<p>See <a class="reference internal" href="ak.with_field.html#ak.with_field" title="ak.with_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.with_field</span></code></a> for a variant that does not change the <a class="reference internal" href="#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>
+in-place. (Internally, this method uses <a class="reference internal" href="ak.with_field.html#ak.with_field" title="ak.with_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.with_field</span></code></a>, so performance
+is not a factor in choosing one over the other.)</p>
+<span class="target" id="ak-array-delitem"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__delitem__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__delitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__delitem__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>where</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em> or </em><em>tuple of str</em>) – Field name to remove from the array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;this&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;that&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}}])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">array</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;that&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[{x: 3.3, y: {this: 10}}]</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="ak.without_field.html#ak.without_field" title="ak.without_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.without_field</span></code></a> for a variant that does not change the <a class="reference internal" href="#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>
+in-place. (Internally, this method uses <a class="reference internal" href="ak.without_field.html#ak.without_field" title="ak.without_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.without_field</span></code></a>, so performance
+is not a factor in choosing one over the other.)</p>
+<span class="target" id="ak-array-getattr"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__getattr__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__getattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__getattr__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>where</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Attribute name to lookup</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Whenever possible, fields can be accessed as attributes.</p>
+<p>For example, the fields of</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+<span class="gp">... </span>    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]}],</span>
+<span class="gp">... </span>    <span class="p">[],</span>
+<span class="gp">... </span>    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">4.4</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">5.5</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]}]</span>
+<span class="gp">... </span><span class="p">])</span>
+</pre></div>
+</div>
+<p>can be accessed as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">x</span>
+<span class="go">&lt;Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type=&#39;3 * var * float64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">array</span><span class="o">.</span><span class="n">y</span>
+<span class="go">&lt;Array [[[1], [2, 2], [3, 3, 3]], [], [...]] type=&#39;3 * var * var * int64&#39;&gt;</span>
+</pre></div>
+</div>
+<p>which are equivalent to <code class="docutils literal notranslate"><span class="pre">array[&quot;x&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">array[&quot;y&quot;]</span></code>. (See
+<a class="reference internal" href="#projection">projection</a>.)</p>
+<p>Fields can’t be accessed as attributes when</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> methods or properties take precedence,</p></li>
+<li><dl class="simple">
+<dt>a domain-specific behavior has methods or properties that take</dt><dd><p>precedence, or</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>the field name is not a valid Python identifier or is a Python</dt><dd><p>keyword.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Note that while fields can be accessed as attributes, they cannot be
+<em>assigned</em> as attributes. See <a class="reference internal" href="#ak.Array.__setitem__" title="ak.Array.__setitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__setitem__</span></code></a> for more.</p>
+<span class="target" id="ak-array-setattr"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__setattr__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__setattr__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>where</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Attribute name to set</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Set an attribute on the array.</p>
+<p>Only existing public attributes e.g. <a class="reference internal" href="#ak.Array.layout" title="ak.Array.layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.layout</span></code></a>, or private
+attributes (with leading underscores), can be set.</p>
+<p>Fields are not assignable to as attributes, i.e. the following doesn’t work:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">new_field</span>
+</pre></div>
+</div>
+<p>Instead, always use <a class="reference internal" href="#ak.Array.__setitem__" title="ak.Array.__setitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__setitem__</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_field</span>
+</pre></div>
+</div>
+<p>or <a class="reference internal" href="ak.with_field.html#ak.with_field" title="ak.with_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.with_field</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">with_field</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">new_field</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to add or modify a field.</p>
+<span class="target" id="ak-array-dir"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__dir__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__dir__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__dir__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Lists all methods, properties, and field names (see <a class="reference internal" href="#ak.Array.__getattr__" title="ak.Array.__getattr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattr__</span></code></a>)
+that can be accessed as attributes.</p>
+<span class="target" id="ak-array-str"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__str__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__str__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-repr"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__repr__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__repr__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="id1"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array._repr">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">_repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array._repr" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-show"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.show">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.stdout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.show" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>limit_rows</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Maximum number of rows (lines) to use in the output.</p></li>
+<li><p><strong>limit_cols</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Maximum number of columns (characters wide).</p></li>
+<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – If True, print the type as well. (Doesn’t count toward number
+of rows/lines limit.)</p></li>
+<li><p><strong>stream</strong> (object with a <code class="docutils literal notranslate"><span class="pre">``write(str)``</span></code> method or None) – Stream to write the
+output to. If None, return a string instead of writing to a stream.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Display the contents of the array within <code class="docutils literal notranslate"><span class="pre">limit_rows</span></code> and <code class="docutils literal notranslate"><span class="pre">limit_cols</span></code>, using
+ellipsis (<code class="docutils literal notranslate"><span class="pre">...</span></code>) for hidden nested data.</p>
+<span class="target" id="ak-array-repr-mimebundle"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array._repr_mimebundle_">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">_repr_mimebundle_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array._repr_mimebundle_" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-array"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__array__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__array__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__array__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Intercepts attempts to convert this Array into a NumPy array and
+either performs a zero-copy conversion or raises an error.</p>
+<p>This function is also called by the
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html">np.asarray</a>
+family of functions, which have <code class="docutils literal notranslate"><span class="pre">copy=False</span></code> by default.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">]]))</span>
+<span class="go">array([[1.1, 2.2, 3.3],</span>
+<span class="go">       [4.4, 5.5, 6.6]])</span>
+</pre></div>
+</div>
+<p>If the data are numerical and regular (nested lists have equal lengths
+in each dimension, as described by the <a class="reference internal" href="#ak.Array.type" title="ak.Array.type"><code class="xref py py-meth docutils literal notranslate"><span class="pre">type</span></code></a>), they can be losslessly
+converted to a NumPy array and this function returns without an error.</p>
+<p>Otherwise, the function raises an error. It does not create a NumPy
+array with dtype <code class="docutils literal notranslate"><span class="pre">&quot;O&quot;</span></code> for <code class="docutils literal notranslate"><span class="pre">np.object_</span></code> (see the
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#arrays-scalars-built-in">note on object_ type</a>)
+since silent conversions to dtype <code class="docutils literal notranslate"><span class="pre">&quot;O&quot;</span></code> arrays would not only be a
+significant performance hit, but would also break functionality, since
+nested lists in a NumPy <code class="docutils literal notranslate"><span class="pre">&quot;O&quot;</span></code> array are severed from the array and
+cannot be sliced as dimensions.</p>
+<span class="target" id="ak-array-arrow-array"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__arrow_array__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__arrow_array__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__arrow_array__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-array-ufunc"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__array_ufunc__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__array_ufunc__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ufunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__array_ufunc__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Intercepts attempts to pass this Array to a NumPy
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/ufuncs.html">universal functions</a>
+(ufuncs) and passes it through the Array’s structure.</p>
+<p>This method conforms to NumPy’s
+<a class="reference external" href="https://numpy.org/neps/nep-0013-ufunc-overrides.html">NEP 13</a>
+for overriding ufuncs, which has been
+<a class="reference external" href="https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added">available since NumPy 1.13</a>
+(and thus NumPy 1.13 is the minimum allowed version).</p>
+<p>When any ufunc is applied to an Awkward Array, it applies to the
+innermost level of structure and preserves the structure through the
+operation.</p>
+<p>For example, with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>applying <code class="docutils literal notranslate"><span class="pre">np.sqrt</span></code> would yield</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[1.05, 1.48, 1.82],</span>
+<span class="go"> [],</span>
+<span class="go"> [2.1, 2.35]]</span>
+</pre></div>
+</div>
+<p>In addition, many unary and binary operators implicitly call ufuncs,
+such as <code class="docutils literal notranslate"><span class="pre">np.power</span></code> in</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">array</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[1.21, 4.84, 10.9],</span>
+<span class="go"> [],</span>
+<span class="go"> [19.4, 30.2]]</span>
+</pre></div>
+</div>
+<p>In the above example, <code class="docutils literal notranslate"><span class="pre">array</span></code> is a nested list of records and <code class="docutils literal notranslate"><span class="pre">2</span></code> is
+a scalar. Awkward Array applies the same broadcasting rules as NumPy
+plus a few more to deal with nested structures. In addition to
+broadcasting a scalar, as above, it is possible to broadcast
+arrays with less depth into arrays with more depth, such as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">array</span> <span class="o">+</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[11.1, 12.2, 13.3],</span>
+<span class="go"> [],</span>
+<span class="go"> [34.4, 35.5]]</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="ak.broadcast_arrays.html#ak.broadcast_arrays" title="ak.broadcast_arrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.broadcast_arrays</span></code></a> for details about broadcasting and the
+generalized set of broadcasting rules.</p>
+<p>Third party libraries can create ufuncs, not just NumPy, so any library
+that “plays well” with the NumPy ecosystem can be used with Awkward
+Arrays:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@nb</span><span class="o">.</span><span class="n">vectorize</span><span class="p">([</span><span class="n">nb</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">float64</span><span class="p">)])</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">sqr</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sqr</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[1.21, 4.84, 10.9],</span>
+<span class="go"> [],</span>
+<span class="go"> [19.4, 30.2]]</span>
+</pre></div>
+</div>
+<p>See also <a class="reference internal" href="#ak.Array.__array_function__" title="ak.Array.__array_function__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__array_function__</span></code></a>.</p>
+<span class="target" id="ak-array-array-function"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__array_function__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__array_function__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__array_function__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Intercepts attempts to pass this Array to those NumPy functions other
+than universal functions that have an Awkward equivalent.</p>
+<p>This method conforms to NumPy’s
+<a class="reference external" href="https://numpy.org/neps/nep-0018-array-function-protocol.html">NEP 18</a>
+for overriding functions, which has been
+<a class="reference external" href="https://numpy.org/devdocs/release/1.17.0-notes.html#numpy-functions-now-always-support-overrides-with-array-function">available since NumPy 1.17</a>
+(and
+<a class="reference external" href="https://numpy.org/devdocs/release/1.16.0-notes.html#numpy-functions-now-support-overrides-with-array-function">NumPy 1.16 with an experimental flag set</a>).</p>
+<p>See also <a class="reference internal" href="#ak.Array.__array_ufunc__" title="ak.Array.__array_ufunc__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__array_ufunc__</span></code></a>.</p>
+<span class="target" id="ak-array-numba-type"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.numba_type">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">numba_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.numba_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The type of this Array when it is used in Numba. It contains enough
+information to generate low-level code for accessing any element,
+down to the leaves.</p>
+<p>See <a class="reference external" href="https://numba.pydata.org/numba-doc/dev/reference/types.html">Numba documentation</a>
+on types and signatures.</p>
+<span class="target" id="ak-array-reduce-ex"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__reduce_ex__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__reduce_ex__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__reduce_ex__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-setstate"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__setstate__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__setstate__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-copy"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__copy__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__copy__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__copy__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-deepcopy"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__deepcopy__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__deepcopy__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memo</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__deepcopy__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-bool"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__bool__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__bool__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__bool__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-array-cpp-type"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.cpp_type">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">cpp_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.cpp_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The C++ type of this Array when it is used in cppyy.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>cpp_type (None or str): Generated on demand when the Array needs to be passed
+    to a C++ (possibly templated) function defined by a ``cppyy`` compiler.
+</pre></div>
+</div>
+<p>See <a class="reference external" href="https://cppyy.readthedocs.io/en/latest/index.html">cppyy documentation</a>
+on types and signatures.</p>
+<span class="target" id="ak-array-cast-cpp"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.Array.__cast_cpp__">
+<span class="sig-prename descclassname"><span class="pre">ak.Array.</span></span><span class="sig-name descname"><span class="pre">__cast_cpp__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Array.__cast_cpp__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The <code class="docutils literal notranslate"><span class="pre">__cast_cpp__</span></code> is called by cppyy to determine a C++ type of an <code class="docutils literal notranslate"><span class="pre">ak.Array</span></code>.
+It returns the C++ dataset type that is already registered with cppyy with the
+parameters needed to construct the C++ type of this Array when it is
+used in cppyy.</p>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">API reference</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ak.Record.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ak.Record</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#interfaces-to-other-libraries">Interfaces to other libraries</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy">NumPy</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pandas">Pandas</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numba">Numba</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#arrow">Arrow</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#jax">JAX</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#filtering">Filtering</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#projection">Projection</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nested-projection">Nested Projection</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#option-indexing">Option indexing</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nested-indexing">Nested indexing</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/reference/generated/ak.Array.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/reference/generated/ak.Array.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

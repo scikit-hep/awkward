@@ -1,0 +1,48 @@
+var util_8h =
+[
+    [ "array_deleter< T >", "classawkward_1_1util_1_1array__deleter.html", "classawkward_1_1util_1_1array__deleter" ],
+    [ "dtype", "util_8h.html#acfe99d230e216901bd782cc580e4e815", [
+      [ "NOT_PRIMITIVE", "util_8h.html#acfe99d230e216901bd782cc580e4e815afa22dd540305543488cd837ea17cc615", null ],
+      [ "boolean", "util_8h.html#acfe99d230e216901bd782cc580e4e815a84e2c64f38f78ba3ea5c905ab5a2da27", null ],
+      [ "int8", "util_8h.html#acfe99d230e216901bd782cc580e4e815a27c006cc56b1ba88f960cf8b5144fcac", null ],
+      [ "int16", "util_8h.html#acfe99d230e216901bd782cc580e4e815ace80d5ec65b1d2a2f1049eadc100db23", null ],
+      [ "int32", "util_8h.html#acfe99d230e216901bd782cc580e4e815a0241adbbd83925f051b694d40f02747f", null ],
+      [ "int64", "util_8h.html#acfe99d230e216901bd782cc580e4e815aff9b3f96d37353c528517bc3656a00a8", null ],
+      [ "uint8", "util_8h.html#acfe99d230e216901bd782cc580e4e815a5f423e669d0a8f4ab7c4c3e6da27161a", null ],
+      [ "uint16", "util_8h.html#acfe99d230e216901bd782cc580e4e815aa00ef2ef85ff67b7b39339886f19044f", null ],
+      [ "uint32", "util_8h.html#acfe99d230e216901bd782cc580e4e815a3de84ad0700f2a1571f633d399e1900e", null ],
+      [ "uint64", "util_8h.html#acfe99d230e216901bd782cc580e4e815a2e8d31865e5d4b9d8611e1b991baed07", null ],
+      [ "float16", "util_8h.html#acfe99d230e216901bd782cc580e4e815a098e7844282e240fdee28a9dac11c1c6", null ],
+      [ "float32", "util_8h.html#acfe99d230e216901bd782cc580e4e815ad33ec2b0bbea6d471a4706cea030e1e3", null ],
+      [ "float64", "util_8h.html#acfe99d230e216901bd782cc580e4e815afb7fa22ede616c04c68a7663d0f81e92", null ],
+      [ "float128", "util_8h.html#acfe99d230e216901bd782cc580e4e815a411cb2358f8692ca683b1174c59bc62d", null ],
+      [ "complex64", "util_8h.html#acfe99d230e216901bd782cc580e4e815a8c022579455bcd2c681f007e84f4e2cf", null ],
+      [ "complex128", "util_8h.html#acfe99d230e216901bd782cc580e4e815a6d541ab3e553b4560bb38b3443aa5750", null ],
+      [ "complex256", "util_8h.html#acfe99d230e216901bd782cc580e4e815a49b81d7d24ef974ee47cbb0db1e52fb6", null ],
+      [ "datetime64", "util_8h.html#acfe99d230e216901bd782cc580e4e815aa18e1ba2092c13b465f1f8e7f8e45e2f", null ],
+      [ "timedelta64", "util_8h.html#acfe99d230e216901bd782cc580e4e815ab2826327d33c672e6ae7044ada575c5f", null ],
+      [ "size", "util_8h.html#acfe99d230e216901bd782cc580e4e815af7bd60b75b29d79b660a2859395c1a24", null ]
+    ] ],
+    [ "ForthError", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380", [
+      [ "none", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a334c4a4c42fdb79d7ebc3e73b517e6f8", null ],
+      [ "not_ready", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380ae70f87ee6c385d23a8bb04087aca2025", null ],
+      [ "is_done", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380ac955c854d2e6a1ca1625de7b7911556c", null ],
+      [ "user_halt", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a77517518749b4084bd8ad4293891c3ac", null ],
+      [ "recursion_depth_exceeded", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a9bb941551aa0082ca55c7bd44f118210", null ],
+      [ "stack_underflow", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380ac29317607e7425f9fa62da6bbf064f57", null ],
+      [ "stack_overflow", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380aa7859f4f78fd304b591646b03543f9a6", null ],
+      [ "read_beyond", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a8c62d4a9d4748c45605cb59fb177c718", null ],
+      [ "seek_beyond", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a55571d50f11d34389339b1c3a583030c", null ],
+      [ "skip_beyond", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a0d19db8c71092c651dae5a41db82b99d", null ],
+      [ "rewind_beyond", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a87ddcbd6114b68d6898d7a5f35eafb89", null ],
+      [ "division_by_zero", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380afcf91918b451069903f4298f804668d5", null ],
+      [ "varint_too_big", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a0fa28e743956e7fb854d44c4c2a27716", null ],
+      [ "text_number_missing", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380a2cd7e9002babe54620c9f571dd75b933", null ],
+      [ "quoted_string_missing", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380ad83c7d01f58c2bcaa5e4ec66753eb8e3", null ],
+      [ "enumeration_missing", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380aeb03f61631cb4241aa5674d37282eee5", null ],
+      [ "size", "util_8h.html#a92d73b5f3c1f2ffe79b50ab057087380af7bd60b75b29d79b660a2859395c1a24", null ]
+    ] ],
+    [ "dtype_to_format", "util_8h.html#adaaf4b921ff9016c2e438a4e5569f673", null ],
+    [ "dtype_to_name", "util_8h.html#ac65b2fee747c56c6796cb7bddb1b9eaf", null ],
+    [ "quote", "util_8h.html#a593edd1ae57ade184479a64ed4375686", null ]
+];

@@ -1,0 +1,78 @@
+ak.from_buffers
+---------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 4990 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L4990>`__.
+
+.. py:function:: ak.from_buffers(form, length, container, partition_start=0, key_format='part{partition}-{form_key}-{attribute}', lazy=False, lazy_cache='new', lazy_cache_key=None, highlevel=True, behavior=None)
+
+
+    :param form: The form of the Awkward
+             Array to reconstitute from named buffers.
+    :type form: :py:obj:`ak.forms.Form` or str/dict equivalent
+    :param length: Length of the array to reconstitute as a
+               non-partitioned array or the lengths (plural) of partitions in a
+               partitioned array.
+    :type length: int or iterable of int
+    :param container: The str → Python buffers that
+                  represent the decomposed Awkward Array. This ``container`` is only
+                  assumed to have a ``__getitem__`` method that accepts strings as keys.
+    :type container: Mapping, such as dict
+    :param partition_start: First (or only) partition number to get from the
+                        ``container``.
+    :type partition_start: int
+    :param key_format: Python format string containing
+                   ``"{partition}"``, ``"{form_key}"``, and/or ``"{attribute}"`` or a function
+                   that takes these as keyword arguments and returns a string to use
+                   as keys for buffers in the ``container``. The ``partition`` is a
+                   partition number (non-negative integer, passed as a string), the
+                   ``form_key`` is a string associated with each node in the Form, and the
+                   ``attribute`` is a hard-coded string representing the buffer's function
+                   (e.g. ``"data"``, ``"offsets"``, ``"index"``).
+    :type key_format: str or callable
+    :param lazy: If True, read the array or its partitions on demand (as
+             :py:obj:`ak.layout.VirtualArray`, possibly in :py:obj:`ak.partition.PartitionedArray`
+             if ``num_partitions`` is not None); if False, read all requested data
+             immediately. Any RecordArray child nodes will additionally be
+             read on demand.
+    :type lazy: bool
+    :param lazy_cache: If lazy, pass this
+                   cache to the VirtualArrays. If "new", a new dict (keep-forever cache)
+                   is created. If None, no cache is used.
+    :type lazy_cache: None, "new", or MutableMapping
+    :param lazy_cache_key: If lazy, pass this cache_key to the
+                       VirtualArrays. If None, a process-unique string is constructed.
+    :type lazy_cache_key: None or str
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Reconstitutes an Awkward Array from a Form, length, and a collection of memory
+buffers, so that data can be losslessly read from file formats and storage
+devices that only map names to binary blobs (such as a filesystem directory).
+
+The first three arguments of this function are the return values of
+:py:obj:`ak.to_buffers`, so a full round-trip is
+
+.. code-block:: python
+
+
+    >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
+
+The ``container`` argument lets you specify your own Mapping, which might be
+an interface to some storage format or device (e.g. h5py). It's okay if
+the ``container`` dropped NumPy's ``dtype`` and ``shape`` information, leaving
+raw bytes, since ``dtype`` and ``shape`` can be reconstituted from the
+:py:obj:`ak.forms.NumpyForm`.
+
+The ``key_format`` should be the same as the one used in :py:obj:`ak.to_buffers`.
+
+The arguments that begin with ``lazy_`` are only needed if ``lazy`` is True.
+The ``lazy_cache`` and ``lazy_cache_key`` determine how the array or its
+partitions are cached after being read from the ``container`` (in a no-eviction
+dict attached to the output :py:obj:`ak.Array` as ``cache`` if not specified).
+
+See :py:obj:`ak.to_buffers` for examples.
+

@@ -1,0 +1,22 @@
+ak.StringBehavior
+-----------------
+
+.. py:module: ak.StringBehavior
+
+Defined in `awkward.behaviors.string <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/behaviors/string.py>`__ on `line 102 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/behaviors/string.py#L102>`__.
+
+.. py:class:: ak.StringBehavior(self)
+
+
+
+.. _ak-stringbehavior-__name__:
+
+.. py:attribute:: ak.StringBehavior.__name__
+    :value: 'Array'
+
+
+
+.. _ak-stringbehavior-__iter__:
+
+.. py:method:: ak.StringBehavior.__iter__(self)
+

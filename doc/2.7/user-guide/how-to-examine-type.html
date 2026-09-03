@@ -1,0 +1,1132 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How to examine an array’s type &#8212; Awkward Array 2.7.4 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=cac31c79" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=239d9bda"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-examine-type';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.7';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-examine-type.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to examine a single item in detail" href="how-to-examine-single-item.html" />
+    <link rel="prev" title="Examining arrays" href="how-to-examine.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.7" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.7.4 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.7.4 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-array-properties.html">Array properties</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-array-properties-named-axis.html">Named axes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Min/max/sort one array by another</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">Awkward Arrays on GPUs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k"</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-cpp.html">Using arrays in C++</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++ with LayoutBuilder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-cpp-cppyy.html">JIT compiling operations with C++ in cppyy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Special topics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-examine.html" class="nav-link">Examining arrays</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to examine an array’s type</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="how-to-examine-an-array-s-type">
+<h1>How to examine an array’s type<a class="headerlink" href="#how-to-examine-an-array-s-type" title="Link to this heading">#</a></h1>
+<p>The <em>type</em> of an Awkward Array can be determined using the <a class="reference internal" href="../reference/generated/ak.type.html#ak.type" title="ak.type"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.type()</span></code></a> function, or <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array.type" title="ak.Array.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ak.Array.type</span></code></a> attribute of an array. It describes both the data-types of an array, e.g. <code class="docutils literal notranslate"><span class="pre">float64</span></code>, and the structure of the array (how many dimensions, which dimensions are ragged, which dimensions contain missing values, etc.).</p>
+<section id="array-types">
+<span id="how-to-examine-type-array-types"></span><h2>Array types<a class="headerlink" href="#array-types" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+
+<span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="s2">&quot;Mr.&quot;</span><span class="p">,</span> <span class="s2">&quot;Blue,&quot;</span><span class="p">,</span> <span class="s2">&quot;you&quot;</span><span class="p">,</span> <span class="s2">&quot;did&quot;</span><span class="p">,</span> <span class="s2">&quot;it&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;But&quot;</span><span class="p">,</span> <span class="s2">&quot;soon&quot;</span><span class="p">,</span> <span class="s2">&quot;comes&quot;</span><span class="p">,</span> <span class="s2">&quot;Mr.&quot;</span><span class="p">,</span> <span class="s2">&quot;Night&quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;creepin&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;over&quot;</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">array</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3 * var * string
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">array.type.show()</span></code> displays an extended subset of the <a class="reference external" href="https://datashape.readthedocs.io/en/latest/overview.html">Datashape</a> language, which describes both shape and layout of an array in the form of <em>units</em> and <em>dimensions</em>. <code class="docutils literal notranslate"><span class="pre">array.type</span></code> actually returns an <a class="reference internal" href="../reference/generated/ak.types.Type.html#ak.types.Type" title="ak.types.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.Type</span></code></a> object, which can be inspected</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="o">.</span><span class="n">type</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(ListType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;})), 3, None)
+</pre></div>
+</div>
+</div>
+</div>
+<p><a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array.type" title="ak.Array.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ak.Array.type</span></code></a> always returns an <a class="reference internal" href="../reference/generated/ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a> object describing the outermost length of the array, which is always known.<a class="footnote-reference brackets" href="#tt" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> The <a class="reference internal" href="../reference/generated/ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a> wraps a <a class="reference internal" href="../reference/generated/ak.types.Type.html#ak.types.Type" title="ak.types.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.Type</span></code></a> object, which represents an array of “something”. For example, an array of integers:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">type</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(NumpyType(&#39;int64&#39;), 3, None)
+</pre></div>
+</div>
+</div>
+</div>
+<p>The outermost <a class="reference internal" href="../reference/generated/ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a> object indicates that this array has a known length of 3. Its content</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>NumpyType(&#39;int64&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>describes the array itself, which is an array of <code class="xref py py-data docutils literal notranslate"><span class="pre">np.int64</span></code>.</p>
+<section id="regular-vs-ragged-dimensions">
+<h3>Regular vs ragged dimensions<a class="headerlink" href="#regular-vs-ragged-dimensions" title="Link to this heading">#</a></h3>
+<p>Regular arrays and ragged arrays have different types</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">regular</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">ragged</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_regular</span><span class="p">(</span><span class="n">regular</span><span class="p">)</span>
+
+<span class="n">regular</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">ragged</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2 * 4 * int64
+2 * var * int64
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the Datashape language, ragged dimensions are described as <code class="docutils literal notranslate"><span class="pre">var</span></code>, whilst regular (<code class="docutils literal notranslate"><span class="pre">fixed</span></code>) dimensions are expressed by an integer representing their size. At the type level, the <code class="docutils literal notranslate"><span class="pre">ragged</span></code> type object does not contain any size information, as it is no longer a constant part of the type:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">regular</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ragged</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ragged</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">size</span>
+
+<span class="ne">AttributeError</span>: &#39;ListType&#39; object has no attribute &#39;size&#39;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="records-and-tuples">
+<h3>Records and tuples<a class="headerlink" href="#records-and-tuples" title="Link to this heading">#</a></h3>
+<p>An Awkward Array with records is expressed using curly braces, resembling a JSON object or Python dictionary:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">poet_records</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;first&quot;</span><span class="p">:</span> <span class="s2">&quot;William&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span> <span class="s2">&quot;Shakespeare&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;first&quot;</span><span class="p">:</span> <span class="s2">&quot;Sylvia&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span> <span class="s2">&quot;Plath&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;first&quot;</span><span class="p">:</span> <span class="s2">&quot;Homer&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span> <span class="s2">&quot;Simpson&quot;</span><span class="p">},</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">poet_records</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3 * {
+    first: string,
+    last: string
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>whereas an array with tuples is expressed using parentheses, resembling a Python tuple:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">poet_tuples</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;William&quot;</span><span class="p">,</span> <span class="s2">&quot;Shakespeare&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Sylvia&quot;</span><span class="p">,</span> <span class="s2">&quot;Plath&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;Homer&quot;</span><span class="p">,</span> <span class="s2">&quot;Simpson&quot;</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">poet_tuples</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>3 * (
+    string,
+    string
+)
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <a class="reference internal" href="../reference/generated/ak.types.RecordType.html#ak.types.RecordType" title="ak.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.RecordType</span></code></a> object contains information such as whether the record is a tuple, e.g.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">poet_records</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">is_tuple</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>False
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">poet_tuples</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">is_tuple</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s look at the type of a simpler array:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(RecordType([NumpyType(&#39;int64&#39;), NumpyType(&#39;int64&#39;)], [&#39;x&#39;, &#39;y&#39;]), 2, None)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="missing-items">
+<h3>Missing items<a class="headerlink" href="#missing-items" title="Link to this heading">#</a></h3>
+<p>Missing items are represented by both the <code class="docutils literal notranslate"><span class="pre">option[...]</span></code> and <code class="docutils literal notranslate"><span class="pre">?</span></code> tokens, according to readability:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">missing</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">33.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">15.5</span><span class="p">,</span> <span class="mf">99.1</span><span class="p">])</span>
+<span class="n">missing</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4 * ?float64
+</pre></div>
+</div>
+</div>
+</div>
+<p>Awkward’s <a class="reference internal" href="../reference/generated/ak.types.OptionType.html#ak.types.OptionType" title="ak.types.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.OptionType</span></code></a> object is used to represent this datashape type:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">missing</span><span class="o">.</span><span class="n">type</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(OptionType(NumpyType(&#39;float64&#39;)), 4, None)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="unions">
+<h3>Unions<a class="headerlink" href="#unions" title="Link to this heading">#</a></h3>
+<p>A union is formed whenever multiple types are required for a particular dimension, e.g. if we concatenate two arrays with different records:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mixed</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+    <span class="p">(</span>
+        <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}],</span>
+        <span class="p">[{</span><span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}],</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">mixed</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2 * union[
+    {
+        x: int64
+    },
+    {
+        y: int64
+    }
+]
+</pre></div>
+</div>
+</div>
+</div>
+<p>From the printed type, we can see that the formed union has two possible types. We can inspect these from the <a class="reference internal" href="../reference/generated/ak.types.UnionType.html#ak.types.UnionType" title="ak.types.UnionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.UnionType</span></code></a> object in <code class="docutils literal notranslate"><span class="pre">mixed.type.content</span></code></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mixed</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>UnionType([RecordType([NumpyType(&#39;int64&#39;)], [&#39;x&#39;]), RecordType([NumpyType(&#39;int64&#39;)], [&#39;y&#39;])])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mixed</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{
+    x: int64
+}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mixed</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{
+    y: int64
+}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="strings">
+<h3>Strings<a class="headerlink" href="#strings" title="Link to this heading">#</a></h3>
+<p>Awkward Array implements strings as views over a 1D array of <code class="docutils literal notranslate"><span class="pre">uint8</span></code> characters (<code class="docutils literal notranslate"><span class="pre">char</span></code>):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="s2">&quot;hello world&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), 11, None)
+</pre></div>
+</div>
+</div>
+</div>
+<p>This concept extends to an array of strings:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">&quot;Mr.&quot;</span><span class="p">,</span> <span class="s2">&quot;Blue,&quot;</span><span class="p">,</span> <span class="s2">&quot;you&quot;</span><span class="p">,</span> <span class="s2">&quot;did&quot;</span><span class="p">,</span> <span class="s2">&quot;it&quot;</span><span class="p">,</span> <span class="s2">&quot;right&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">array</span><span class="o">.</span><span class="n">type</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}), parameters={&#39;__array__&#39;: &#39;string&#39;}), 6, None)
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">array</span></code> is a list of strings, which is represented as a list-of-list-of-char. When we evaluate <code class="docutils literal notranslate"><span class="pre">str(array.type)</span></code> (or directly print this value with <code class="docutils literal notranslate"><span class="pre">array.type.show()</span></code>), Awkward returns a readable type-string:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>6 * string
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="scalar-types">
+<h2>Scalar types<a class="headerlink" href="#scalar-types" title="Link to this heading">#</a></h2>
+<p>In <a class="reference internal" href="#how-to-examine-type-array-types"><span class="std std-ref">Array types</span></a> it was discussed that all <code class="xref py py-class docutils literal notranslate"><span class="pre">ak.type.Type</span></code> objects are array-types, e.g. <a class="reference internal" href="../reference/generated/ak.types.NumpyType.html#ak.types.NumpyType" title="ak.types.NumpyType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.NumpyType</span></code></a> is the type of a NumPy (or CuPy, etc.) array of a fixed dtype:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(NumpyType(&#39;int64&#39;), 3, None)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s now consider the following array of records:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">record_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+    <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">}</span>
+<span class="p">])</span>
+<span class="n">record_array</span><span class="o">.</span><span class="n">type</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(RecordType([NumpyType(&#39;int64&#39;), NumpyType(&#39;int64&#39;)], [&#39;x&#39;, &#39;y&#39;]), 1, None)
+</pre></div>
+</div>
+</div>
+</div>
+<p>The resulting type object is an <a class="reference internal" href="../reference/generated/ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a> of <a class="reference internal" href="../reference/generated/ak.types.RecordType.html#ak.types.RecordType" title="ak.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.RecordType</span></code></a>. This record-type represents an array of records, built from two NumPy arrays. From outside-to-inside, we can read the type object as:</p>
+<ul class="simple">
+<li><p>An array of length 1</p></li>
+<li><p>that is an array of records with two fields ‘x’ and ‘y’</p></li>
+<li><p>which are both NumPy arrays of <code class="xref py py-data docutils literal notranslate"><span class="pre">np.int64</span></code> type.</p></li>
+</ul>
+<p>Now, what happens if we pull out a single record and inspect its type?</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">record</span> <span class="o">=</span> <span class="n">record_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">record</span><span class="o">.</span><span class="n">type</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ScalarType(RecordType([NumpyType(&#39;int64&#39;), NumpyType(&#39;int64&#39;)], [&#39;x&#39;, &#39;y&#39;]), None)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Unlike the <a class="reference internal" href="../reference/generated/ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a> objects returned by <a class="reference internal" href="../reference/generated/ak.type.html#ak.type" title="ak.type"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.type()</span></code></a> for arrays, <a class="reference internal" href="../reference/generated/ak.Record.html#ak.Record.type" title="ak.Record.type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ak.Record.type</span></code></a> always returns a <a class="reference internal" href="../reference/generated/ak.types.ScalarType.html#ak.types.ScalarType" title="ak.types.ScalarType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ScalarType</span></code></a> object. Reading the returned type again from outside-to-inside, we have</p>
+<ul class="simple">
+<li><p>A scalar taken from an array</p></li>
+<li><p>that is an array of records with two fields ‘x’ and ‘y’</p></li>
+<li><p>which are both NumPy arrays of <code class="xref py py-data docutils literal notranslate"><span class="pre">np.int64</span></code> type.</p></li>
+</ul>
+<p>Like <a class="reference internal" href="../reference/generated/ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a>, <a class="reference internal" href="../reference/generated/ak.types.ScalarType.html#ak.types.ScalarType" title="ak.types.ScalarType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ScalarType</span></code></a> is an <em>outermost</em> type, but unlike <a class="reference internal" href="../reference/generated/ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a> it does more than add length information; it also <em>removes a dimension</em> from the final type!</p>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="tt" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Except for typetracer arrays, which are used in the <a class="reference external" href="https://github.com/dask-contrib/dask-awkward">dask-awkward</a> integration.</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-examine.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Examining arrays</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-examine-single-item.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">How to examine a single item in detail</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#array-types">Array types</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regular-vs-ragged-dimensions">Regular vs ragged dimensions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#records-and-tuples">Records and tuples</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#missing-items">Missing items</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#unions">Unions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#strings">Strings</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scalar-types">Scalar types</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-examine-type.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/user-guide/how-to-examine-type.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

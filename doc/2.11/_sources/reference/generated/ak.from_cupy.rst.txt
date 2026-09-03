@@ -1,0 +1,35 @@
+ak.from_cupy
+============
+
+Defined in `awkward.operations.ak_from_cupy <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/operations/ak_from_cupy.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/operations/ak_from_cupy.py#L12>`__.
+
+.. py:function:: ak.from_cupy(array, *, regulararray=False, highlevel=True, behavior=None, primitive_policy='error', attrs=None)
+
+   :param array: The CuPy array to convert into an Awkward Array.
+   :type array: cp.ndarray
+   :param regulararray: If True and the array is multidimensional,
+                        the dimensions are represented by nested :py:obj:`ak.contents.RegularArray`
+                        nodes; if False and the array is multidimensional, the dimensions
+                        are represented by a multivalued :py:obj:`ak.contents.NumpyArray.shape`.
+                        If the array is one-dimensional, this has no effect.
+   :type regulararray: bool
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Converts a CuPy array into an Awkward Array.
+
+   The resulting layout may involve the following :py:obj:`ak.contents.Content` types
+   (only):
+
+   * :py:obj:`ak.contents.NumpyArray`
+   * :py:obj:`ak.contents.RegularArray` if ``regulararray=True``.
+
+   See also :py:obj:`ak.to_cupy`, :py:obj:`ak.from_numpy` and :py:obj:`ak.from_jax`.
+

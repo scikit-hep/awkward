@@ -1,0 +1,47 @@
+ak.drop_none
+============
+
+Defined in `awkward.operations.ak_drop_none <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_drop_none.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_drop_none.py#L21>`__.
+
+.. py:function:: ak.drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Data in which to remove Nones.
+   :param axis: If None, the operation drops Nones at all levels
+                of nesting, returning an array of the same dimension, but without Nones.
+                If an int, the depth at which to drop Nones.
+                The outermost dimension is ``0``, followed by ``1``, etc., and negative
+                values count backward from the innermost: ``-1`` is the innermost
+                dimension, ``-2`` is the next level up, etc.
+                If a str, it is interpreted as the name of the axis which maps to
+                an int if named axes are present.
+                Named axes are attached to an array using :py:obj:`ak.with_named_axis` and
+                removed with :py:obj:`ak.without_named_axis`; also see the
+                `Named axes user guide <../../user-guide/how-to-array-properties-named-axis.html>`__.
+   :type axis: None or int or str
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Removes missing values (None) from a given array.
+
+   For example, in the following ``array``,
+
+       >>> array = ak.Array([[[0]], [[None]], [[1], None], [[2, None]]])
+
+   The None value will be removed, resulting in
+
+       >>> ak.drop_none(array)
+       <Array [[[0]], [[]], [[1]], [[2]]] type='4 * var * var * int64'>
+
+   The default axis is None, however an axis can be specified:
+
+       >>> ak.drop_none(array, axis=1)
+       <Array [[[0]], [[None]], [[1]], [[2, None]]] type='4 * var * var * ?int64'>
+
+

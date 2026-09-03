@@ -1,0 +1,21 @@
+ak.from_arrow_schema
+--------------------
+
+.. py:module: ak.from_arrow_schema
+
+Defined in `awkward.operations.ak_from_arrow_schema <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_from_arrow_schema.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_from_arrow_schema.py#L14>`__.
+
+.. py:function:: ak.from_arrow_schema(schema)
+
+
+    :param schema: Apache Arrow schema to convert into an Awkward Form.
+    :type schema: ``pyarrow.Schema``
+
+Converts an Apache Arrow schema into an Awkward Form.
+
+Because awkward uses numpy's dtype system, timestamp types do not have timezones.
+If encountering timestamp types with timezones in the input arrow data, they
+will be silently dropped.
+
+See also :py:obj:`ak.to_arrow`, :py:obj:`ak.to_arrow_table`, :py:obj:`ak.from_arrow`, :py:obj:`ak.to_parquet`, :py:obj:`ak.from_parquet`.
+

@@ -1,0 +1,67 @@
+ak.to_packed
+------------
+
+.. py:module: ak.to_packed
+
+Defined in `awkward.operations.ak_to_packed <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_to_packed.py>`__ on `line 12 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_to_packed.py#L12>`__.
+
+.. py:function:: ak.to_packed(array, *, highlevel=True, behavior=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Returns an array with the same type and values as the input, but with packed inner structures:
+
+- :py:obj:`ak.contents.NumpyArray` becomes C-contiguous (if it isn't already)
+- :py:obj:`ak.contents.RegularArray` trims unreachable content
+- :py:obj:`ak.contents.ListArray` becomes :py:obj:`ak.contents.ListOffsetArray`, making all list data contiguous
+- :py:obj:`ak.contents.ListOffsetArray` starts at ``offsets[0] == 0``, trimming unreachable content
+- :py:obj:`ak.contents.RecordArray` trims unreachable contents
+- :py:obj:`ak.contents.IndexedArray` gets projected
+- :py:obj:`ak.contents.IndexedOptionArray` remains an :py:obj:`ak.contents.IndexedOptionArray` (with simplified ``index``)
+  if it contains records, becomes :py:obj:`ak.contents.ByteMaskedArray` otherwise
+- :py:obj:`ak.contents.ByteMaskedArray` becomes an :py:obj:`ak.contents.IndexedOptionArray` if it contains records,
+  stays a :py:obj:`ak.contents.ByteMaskedArray` otherwise
+- :py:obj:`ak.contents.BitMaskedArray` becomes an :py:obj:`ak.contents.IndexedOptionArray` if it contains records,
+  stays a :py:obj:`ak.contents.BitMaskedArray` otherwise
+- :py:obj:`ak.contents.UnionArray` gets projected contents
+- :py:obj:`ak.record.Record` becomes a record over a single-item :py:obj:`ak.contents.RecordArray`
+
+.. rubric:: Example
+
+>>> a = ak.Array([[1, 2, 3], [], [4, 5], [6], [7, 8, 9, 10]])
+>>> b = a[::-1]
+>>> b.layout
+<ListArray len='5'>
+    <starts><Index dtype='int64' len='5'>
+        [6 5 3 3 0]
+    </Index></starts>
+    <stops><Index dtype='int64' len='5'>
+        [10  6  5  3  3]
+    </Index></stops>
+    <content><NumpyArray dtype='int64' len='10'>
+        [ 1  2  3  4  5  6  7  8  9 10]
+    </NumpyArray></content>
+</ListArray>
+
+>>> c = ak.to_packed(b)
+>>> c.layout
+<ListOffsetArray len='5'>
+    <offsets><Index dtype='int64' len='6'>[ 0  4  5  7  7 10]</Index></offsets>
+    <content><NumpyArray dtype='int64' len='10'>
+        [ 7  8  9 10  6  4  5  1  2  3]
+    </NumpyArray></content>
+</ListOffsetArray>
+
+Performing these operations will minimize the output size of data sent to
+:py:obj:`ak.to_buffers` (though conversions through Arrow, :py:obj:`ak.to_arrow` and
+:py:obj:`ak.to_parquet`, do not need this because packing is part of that conversion).
+
+See also :py:obj:`ak.to_buffers`.
+

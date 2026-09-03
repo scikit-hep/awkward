@@ -1,0 +1,14 @@
+ak.str.akstr_starts_with
+========================
+
+.. py:module:: awkward.operations.str.akstr_starts_with
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_starts_with.starts_with
+
+

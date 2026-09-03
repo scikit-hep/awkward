@@ -1,0 +1,114 @@
+ak.flatten
+----------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 1863 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L1863>`__.
+
+.. py:function:: ak.flatten(array, axis=1, highlevel=True, behavior=None)
+
+
+    :param array: Data containing nested lists to flatten.
+    :param axis: If None, the operation flattens all levels of
+             nesting, returning a 1-dimensional array. Otherwise, it flattens
+             at a specified depth. The outermost dimension is ``0``, followed
+             by ``1``, etc., and negative values count backward from the
+             innermost: ``-1`` is the innermost dimension, ``-2`` is the next
+             level up, etc.
+    :type axis: None or int
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Returns an array with one level of nesting removed by erasing the
+boundaries between consecutive lists. Since this operates on a level of
+nesting, ``axis=0`` is a special case that only removes values at the
+top level that are equal to None.
+
+Consider the following doubly nested ``array``.
+
+.. code-block:: python
+
+
+    ak.Array([[
+               [1.1, 2.2, 3.3],
+               [],
+               [4.4, 5.5],
+               [6.6]],
+              [],
+              [
+               [7.7],
+               [8.8, 9.9]
+              ]])
+
+At ``axis=1``, the outer lists (length 4, length 0, length 2) become a single
+list (of length 6).
+
+.. code-block:: python
+
+
+    >>> print(ak.flatten(array, axis=1))
+    [[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6], [7.7], [8.8, 9.9]]
+
+At ``axis=2``, the inner lists (lengths 3, 0, 2, 1, 1, and 2) become three
+lists (of lengths 6, 0, and 3).
+
+.. code-block:: python
+
+
+    >>> print(ak.flatten(array, axis=2))
+    [[1.1, 2.2, 3.3, 4.4, 5.5, 6.6], [], [7.7, 8.8, 9.9]]
+
+There's also an option to completely flatten the array with ``axis=None``.
+This is useful for passing the data to a function that doesn't care about
+nested structure, such as a plotting routine.
+
+.. code-block:: python
+
+
+    >>> print(ak.flatten(array, axis=None))
+    [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9]
+
+Missing values are eliminated by flattening: there is no distinction
+between an empty list and a value of None at the level of flattening.
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[1.1, 2.2, 3.3], None, [4.4], [], [5.5]])
+    >>> ak.flatten(array, axis=1)
+    <Array [1.1, 2.2, 3.3, 4.4, 5.5] type='5 * float64'>
+
+As a consequence, flattening at ``axis=0`` does only one thing: it removes
+None values from the top level.
+
+.. code-block:: python
+
+
+    >>> ak.flatten(array, axis=0)
+    <Array [[1.1, 2.2, 3.3], [4.4], [], [5.5]] type='4 * var * float64'>
+
+As a technical detail, the flattening operation can be trivial in a common
+case, :py:obj:`ak.layout.ListOffsetArray` in which the first ``offset`` is ``0``.
+In that case, the flattened data is simply the array node's ``content``.
+
+.. code-block:: python
+
+
+    >>> array.layout
+    <ListOffsetArray64>
+        <offsets><Index64 i="[0 4 4 6]" offset="0" length="4"/></offsets>
+        <content><ListOffsetArray64>
+            <offsets><Index64 i="[0 3 3 5 6 7 9]" offset="0" length="7"/></offsets>
+            <content>
+                <NumpyArray format="d" shape="9" data="1.1 2.2 3.3 4.4 5.5 6.6 7.7 8.8 9.9"/>
+            </content>
+        </ListOffsetArray64></content>
+    </ListOffsetArray64>
+    >>> np.asarray(array.layout.content.content)
+    array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+
+However, it is important to keep in mind that this is a special case:
+:py:obj:`ak.flatten` and ``content`` are not interchangeable!
+

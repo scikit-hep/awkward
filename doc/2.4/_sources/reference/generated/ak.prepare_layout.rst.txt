@@ -1,0 +1,9 @@
+ak.prepare_layout
+-----------------
+
+.. py:module: ak.prepare_layout
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/highlevel.py>`__ on `line 106 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/highlevel.py#L106>`__.
+
+.. py:function:: ak.prepare_layout(layout)
+

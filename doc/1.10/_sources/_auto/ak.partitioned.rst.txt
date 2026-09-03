@@ -1,0 +1,28 @@
+ak.partitioned
+--------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 3933 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L3933>`__.
+
+.. py:function:: ak.partitioned(arrays, highlevel=True, behavior=None)
+
+
+    :param arrays: The arrays to logically concatenate into a
+               single partitioned array.
+    :type arrays: list of arrays
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` or :py:obj:`ak.partition.PartitionedArray`
+                  subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Returns the logical concatenation of ``arrays`` as a partitioned array.
+
+Partitioning is an internal aspect of an array: it should behave
+identically to a non-partitioned array, but possibly with different
+performance characteristics.
+
+Arrays can only be partitioned in the first dimension; it is intended
+for performing calculations in memory-sized chunks.
+

@@ -1,0 +1,105 @@
+ak.forms.NumpyForm
+------------------
+
+.. py:module: ak.forms.NumpyForm
+
+Defined in `awkward.forms.numpyform <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/numpyform.py>`__ on `line 48 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/numpyform.py#L48>`__.
+
+.. py:class:: ak.forms.NumpyForm(self, primitive, inner_shape=(), *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-numpyform-primitive:
+
+.. py:attribute:: ak.forms.NumpyForm.primitive
+
+
+
+.. _ak-forms-numpyform-inner_shape:
+
+.. py:attribute:: ak.forms.NumpyForm.inner_shape
+
+
+
+.. _ak-forms-numpyform-copy:
+
+.. py:method:: ak.forms.NumpyForm.copy(self, primitive=UNSET, inner_shape=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-numpyform-simplified:
+
+.. py:method:: ak.forms.NumpyForm.simplified(cls, primitive, inner_shape=(), *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-numpyform-itemsize:
+
+.. py:attribute:: ak.forms.NumpyForm.itemsize
+
+
+
+.. _ak-forms-numpyform-__repr__:
+
+.. py:method:: ak.forms.NumpyForm.__repr__(self)
+
+
+
+.. _ak-forms-numpyform-_to_dict_part:
+
+.. py:method:: ak.forms.NumpyForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-numpyform-type:
+
+.. py:attribute:: ak.forms.NumpyForm.type
+
+
+
+.. _ak-forms-numpyform-to_regularform:
+
+.. py:method:: ak.forms.NumpyForm.to_RegularForm(self)
+
+
+
+.. _ak-forms-numpyform-_columns:
+
+.. py:method:: ak.forms.NumpyForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-numpyform-_select_columns:
+
+.. py:method:: ak.forms.NumpyForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-numpyform-_prune_columns:
+
+.. py:method:: ak.forms.NumpyForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-numpyform-_column_types:
+
+.. py:method:: ak.forms.NumpyForm._column_types(self)
+
+
+
+.. _ak-forms-numpyform-__setstate__:
+
+.. py:method:: ak.forms.NumpyForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-numpyform-_expected_from_buffers:
+
+.. py:method:: ak.forms.NumpyForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-numpyform-_is_equal_to:
+
+.. py:method:: ak.forms.NumpyForm._is_equal_to(self, other, all_parameters, form_key)
+

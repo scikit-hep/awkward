@@ -1,0 +1,9 @@
+ak.register
+-----------
+
+.. py:module: ak.register
+
+Defined in `awkward.behaviors.categorical <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/behaviors/categorical.py>`__ on `line 110 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/behaviors/categorical.py#L110>`__.
+
+.. py:function:: ak.register(behavior)
+

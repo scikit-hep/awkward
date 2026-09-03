@@ -1,0 +1,56 @@
+ak.from_parquet
+===============
+
+Defined in `awkward.operations.ak_from_parquet <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_parquet.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_parquet.py#L19>`__.
+
+.. py:function:: ak.from_parquet(path, *, columns=None, row_groups=None, storage_options=None, max_gap=64000, max_block=256000000, footer_sample_size=1000000, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None)
+
+   Reads data from a local or remote Parquet file or collection of files.
+
+   The data are eagerly (not lazily) read and must fit into memory. Use
+   ``columns`` and/or ``row_groups`` to select and filter manageable subsets of
+   the data, and use :py:obj:`ak.metadata_from_parquet` to find column names and the
+   range of row groups that a dataset has.
+
+   Any attrs that :py:obj:`ak.to_parquet` stored in the file are restored (as are those
+   written by pandas), unless overridden by the ``attrs`` argument.
+
+   See also :py:obj:`ak.to_parquet`, :py:obj:`ak.metadata_from_parquet`.
+
+   :param path: Local filename or remote URL, passed to fsspec for resolution.
+                May contain glob patterns.
+   :type path: str
+   :param columns: Glob pattern(s) including bash-like curly
+                   brackets for matching column names. Nested records are separated by dots.
+                   If a list of patterns, the logical-or is matched. If None, all columns
+                   are read. A list of lists can be provided to select columns with literal dots
+                   in their names -- The inner list provides column names or patterns.
+   :type columns: None, str, or iterable of (str or iterable of str)
+   :param row_groups: Row groups to read; must be non-negative.
+                      Order is ignored: the output array is presented in the order specified by
+                      Parquet metadata. If None, all row groups/all rows are read.
+   :type row_groups: None or set of int
+   :param storage_options: Passed to ``fsspec.parquet.open_parquet_file``.
+   :param max_gap: Passed to ``fsspec.parquet.open_parquet_file``.
+   :type max_gap: int
+   :param max_block: Passed to ``fsspec.parquet.open_parquet_file``.
+   :type max_block: int
+   :param footer_sample_size: Passed to ``fsspec.parquet.open_parquet_file``.
+   :type footer_sample_size: int
+   :param generate_bitmasks: If enabled and Arrow/Parquet does not have Awkward
+                             metadata, ``generate_bitmasks=True`` creates empty bitmasks for nullable
+                             types that don't have bitmasks in the Arrow/Parquet data, so that the
+                             Form (BitMaskedForm vs UnmaskedForm) is predictable.
+   :type generate_bitmasks: bool
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level. These take precedence over any ``attrs`` stored in the file.
+   :type attrs: None or dict
+
+   :returns: An :py:obj:`ak.Array` read from the given local or remote Parquet file(s).
+

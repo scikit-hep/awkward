@@ -1,0 +1,35 @@
+ak.str.is_in
+------------
+
+.. py:module: ak.str.is_in
+
+Defined in `awkward.operations.str.akstr_is_in <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/str/akstr_is_in.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/str/akstr_is_in.py#L16>`__.
+
+.. py:function:: ak.str.is_in(array, value_set, *, skip_nones=False, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param value_set: Array-like data (anything :py:obj:`ak.to_layout` recognizes), set of
+                  values to search for in ``array``.
+    :param skip_nones: If True, None values in ``array`` are not matched
+                   against ``value_set``; otherwise, None is considered a legal value.
+    :type skip_nones: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Returns True for each string in ``array`` if it matches any pattern in
+``value_set``; otherwise, returns False.
+
+Note: this function does not raise an error if the ``array`` does not
+contain any string or bytestring data.
+
+Requires the pyarrow library and calls
+`pyarrow.compute.is_in <https://arrow.apache.org/docs/python/generated/pyarrow.compute.is_in.html>`__.
+

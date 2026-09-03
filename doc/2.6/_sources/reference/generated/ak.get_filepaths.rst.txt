@@ -1,0 +1,9 @@
+ak.get_filepaths
+----------------
+
+.. py:module: ak.get_filepaths
+
+Defined in `awkward.operations.ak_to_parquet_dataset <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_to_parquet_dataset.py>`__ on `line 92 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_to_parquet_dataset.py#L92>`__.
+
+.. py:function:: ak.get_filepaths(filenames, fs, destination)
+

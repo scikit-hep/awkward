@@ -1,0 +1,27 @@
+ak.array_equal
+==============
+
+Defined in `awkward.operations.ak_array_equal <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_array_equal.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_array_equal.py#L12>`__.
+
+.. py:function:: ak.array_equal(a1, a2, equal_nan: bool = False, dtype_exact: bool = True, same_content_types: bool = True, check_parameters: bool = True, check_regular: bool = True, check_named_axis: bool = True)
+
+   Returns True if two arrays have the same shape and elements.
+
+   TypeTracer arrays are not supported, as there is very little information
+   to be compared.
+
+   :param a1: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param a2: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param equal_nan: bool (default=False)
+                     Whether to count NaN values as equal to each other.
+   :param dtype_exact: bool (default=True) whether the dtypes must be exactly the same, or just the
+                       same family.
+   :param same_content_types: bool (default=True)
+                              Whether to require all content classes to match
+   :param check_parameters: bool (default=True) whether to compare parameters.
+   :param check_regular: bool (default=True) whether to consider ragged and regular dimensions as
+                         unequal.
+   :param check_named_axis: bool (default=True) whether to consider named axes as unequal.
+
+   :returns: True if two arrays have the same shape and elements, False otherwise.
+

@@ -1,0 +1,51 @@
+ak.types.RegularType
+--------------------
+
+.. py:module: ak.types.RegularType
+
+Defined in `awkward.types.regulartype <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/types/regulartype.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/types/regulartype.py#L17>`__.
+
+.. py:class:: ak.types.RegularType(self, content, size, *, parameters=None)
+
+
+
+.. _ak-types-regulartype-copy:
+
+.. py:method:: ak.types.RegularType.copy(self, *, content=UNSET, size=UNSET, parameters=UNSET)
+
+
+
+.. _ak-types-regulartype-content:
+
+.. py:attribute:: ak.types.RegularType.content
+
+
+
+.. _ak-types-regulartype-size:
+
+.. py:attribute:: ak.types.RegularType.size
+
+
+
+.. _ak-types-regulartype-_get_typestr:
+
+.. py:method:: ak.types.RegularType._get_typestr(self, behavior)
+
+
+
+.. _ak-types-regulartype-_str:
+
+.. py:method:: ak.types.RegularType._str(self, indent, compact, behavior)
+
+
+
+.. _ak-types-regulartype-__repr__:
+
+.. py:method:: ak.types.RegularType.__repr__(self)
+
+
+
+.. _ak-types-regulartype-_is_equal_to:
+
+.. py:method:: ak.types.RegularType._is_equal_to(self, other, all_parameters)
+

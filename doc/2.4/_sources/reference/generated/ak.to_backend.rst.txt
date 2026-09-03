@@ -1,0 +1,61 @@
+ak.to_backend
+-------------
+
+.. py:module: ak.to_backend
+
+Defined in `awkward.operations.ak_to_backend <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_to_backend.py>`__ on `line 14 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_to_backend.py#L14>`__.
+
+.. py:function:: ak.to_backend(array, backend, *, highlevel=True, behavior=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param backend: If ``"cpu"``, the array structure is
+                recursively copied (if need be) to main memory for use with
+                the default Numpy backend; if ``"cuda"``, the structure is copied
+                to the GPU(s) for use with CuPy. If ``"jax"``, the structure is
+                copied to the CPU for use with JAX.
+    :type backend: ``"cpu"``, ``"cuda"``, or ``"jax"``
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Converts an array from ``"cpu"``, ``"cuda"``, ``"jax"`` kernels to ``"cpu"``,
+``"cuda"``, ``"jax"``, or ``"typetracer"`` .
+
+Any components that are already in the desired backend are viewed,
+rather than copied, so this operation can be an inexpensive way to ensure
+that an array is ready for a particular library.
+
+To use ``"cuda"``, the ``cupy`` package must be installed, either with
+
+.. code-block:: python
+
+
+    pip install cupy
+
+or
+
+.. code-block:: python
+
+
+    conda install -c conda-forge cupy
+
+To use ``"jax"``, the ``jax`` package must be installed, either with
+
+.. code-block:: python
+
+
+    pip install jax
+
+or
+
+.. code-block:: python
+
+
+    conda install -c conda-forge jax
+
+See :py:obj:`ak.kernels`.
+

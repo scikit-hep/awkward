@@ -1,0 +1,9 @@
+ak.contents.ApplyActionOptions
+------------------------------
+
+.. py:module: ak.contents.ApplyActionOptions
+
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/contents/content.py>`__ on `line 104 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/contents/content.py#L104>`__.
+
+.. py:class:: ak.contents.ApplyActionOptions(self)
+

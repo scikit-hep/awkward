@@ -1,0 +1,45 @@
+ak.nanmax
+=========
+
+Defined in `awkward.operations.ak_max <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_max.py>`__ on `line 99 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_max.py#L99>`__.
+
+.. py:function:: ak.nanmax(array, axis=None, *, keepdims=False, initial=None, mask_identity=True, highlevel=True, behavior=None, attrs=None)
+
+   Returns the maximum value, treating NaN values as missing.
+
+   Equivalent to::
+
+       ak.max(ak.nan_to_none(array))
+
+   with all other arguments unchanged.
+
+   See also :py:obj:`ak.max`.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param axis: If None, combine all values from the array into
+                a single scalar result; if an int, group by that axis: ``0`` is the
+                outermost, ``1`` is the first level of nested lists, etc., and
+                negative ``axis`` counts from the innermost: ``-1`` is the innermost,
+                ``-2`` is the next level up, etc; if a str, it is interpreted as the
+                name of the axis which maps to an int if named axes are present.
+                Named axes are attached to an array using :py:obj:`ak.with_named_axis` and
+                removed with :py:obj:`ak.without_named_axis`; also see the
+                `Named axes user guide <../../user-guide/how-to-array-properties-named-axis.html>`__.
+   :type axis: None or int or str
+   :param keepdims: If False, this reducer decreases the number of
+                    dimensions by 1; if True, the reduced values are wrapped in a new
+                    length-1 dimension so that the result of this operation may be
+                    broadcasted with the original array.
+   :type keepdims: bool
+   :param initial: The minimum value of an output element, as
+                   an alternative to the numeric type's natural identity (e.g. negative
+                   infinity for floating-point types, a minimum integer for integer types).
+                   If you use ``initial``, you might also want ``mask_identity=False``.
+   :type initial: None or number
+   :param mask_identity: If True, reducing over empty lists results in
+                         None (an option type); otherwise, reducing over empty lists
+                         results in the operation's identity.
+   :type mask_identity: bool
+
+   :returns: Like :py:obj:`ak.max`, but treating NaN ("not a number") values as missing.
+

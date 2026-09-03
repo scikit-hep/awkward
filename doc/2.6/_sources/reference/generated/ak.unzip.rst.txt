@@ -1,0 +1,41 @@
+ak.unzip
+--------
+
+.. py:module: ak.unzip
+
+Defined in `awkward.operations.ak_unzip <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_unzip.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_unzip.py#L16>`__.
+
+.. py:function:: ak.unzip(array, *, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+If the ``array`` contains tuples or records, this operation splits them
+into a Python tuple of arrays, one for each field.
+
+If the ``array`` does not contain tuples or records, the single ``array``
+is placed in a length 1 Python tuple.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([{"x": 1.1, "y": [1]},
+    ...                   {"x": 2.2, "y": [2, 2]},
+    ...                   {"x": 3.3, "y": [3, 3, 3]}])
+    >>> x, y = ak.unzip(array)
+    >>> x
+    <Array [1.1, 2.2, 3.3] type='3 * float64'>
+    >>> y
+    <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
+

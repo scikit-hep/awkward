@@ -1,0 +1,77 @@
+ak.numba.layoutbuilder.BitMasked
+================================
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/numba/layoutbuilder.py>`__ on `line 428 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/numba/layoutbuilder.py#L428>`__.
+
+.. py:class:: ak.numba.layoutbuilder.BitMasked(dtype, content, valid_when, lsb_order, *, parameters=None, initial=1024, resize=8.0)
+
+
+
+   .. py:attribute:: _mask
+
+
+   .. py:attribute:: _content
+
+
+   .. py:attribute:: _valid_when
+
+
+   .. py:attribute:: _lsb_order
+
+
+   .. py:attribute:: _current_byte_index
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: numbatype()
+
+
+   .. py:property:: content
+
+
+   .. py:property:: valid_when
+
+
+   .. py:property:: lsb_order
+
+
+   .. py:property:: form
+
+
+   .. py:method:: _append_begin()
+
+      Private helper function.
+
+
+
+   .. py:method:: _append_end()
+
+      Private helper function.
+
+
+
+   .. py:method:: append_valid()
+
+
+   .. py:method:: extend_valid(size)
+
+
+   .. py:method:: append_invalid()
+
+
+   .. py:method:: extend_invalid(size)
+
+
+   .. py:method:: clear()
+
+
+   .. py:method:: __len__()
+
+
+   .. py:method:: is_valid(error: str)
+
+
+   .. py:method:: snapshot() -> awkward.contents.Content
+

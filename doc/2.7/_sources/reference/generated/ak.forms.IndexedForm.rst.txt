@@ -1,0 +1,93 @@
+ak.forms.IndexedForm
+--------------------
+
+.. py:module: ak.forms.IndexedForm
+
+Defined in `awkward.forms.indexedform <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/indexedform.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/indexedform.py#L23>`__.
+
+.. py:class:: ak.forms.IndexedForm(self, index, content=None, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-indexedform-index:
+
+.. py:attribute:: ak.forms.IndexedForm.index
+
+
+
+.. _ak-forms-indexedform-content:
+
+.. py:attribute:: ak.forms.IndexedForm.content
+
+
+
+.. _ak-forms-indexedform-copy:
+
+.. py:method:: ak.forms.IndexedForm.copy(self, index=UNSET, content=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-indexedform-simplified:
+
+.. py:method:: ak.forms.IndexedForm.simplified(cls, index, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-indexedform-__repr__:
+
+.. py:method:: ak.forms.IndexedForm.__repr__(self)
+
+
+
+.. _ak-forms-indexedform-_to_dict_part:
+
+.. py:method:: ak.forms.IndexedForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-indexedform-type:
+
+.. py:attribute:: ak.forms.IndexedForm.type
+
+
+
+.. _ak-forms-indexedform-_columns:
+
+.. py:method:: ak.forms.IndexedForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-indexedform-_prune_columns:
+
+.. py:method:: ak.forms.IndexedForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-indexedform-_select_columns:
+
+.. py:method:: ak.forms.IndexedForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-indexedform-_column_types:
+
+.. py:method:: ak.forms.IndexedForm._column_types(self)
+
+
+
+.. _ak-forms-indexedform-__setstate__:
+
+.. py:method:: ak.forms.IndexedForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-indexedform-_expected_from_buffers:
+
+.. py:method:: ak.forms.IndexedForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-indexedform-_is_equal_to:
+
+.. py:method:: ak.forms.IndexedForm._is_equal_to(self, other, all_parameters, form_key)
+

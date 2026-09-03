@@ -1,0 +1,45 @@
+ak.str.slice
+------------
+
+.. py:module: ak.str.slice
+
+Defined in `awkward.operations.str.akstr_slice <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/str/akstr_slice.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/str/akstr_slice.py#L13>`__.
+
+.. py:function:: ak.str.slice(array, start, stop=None, step=1, *, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param start: Index to start slicing at (inclusive).
+    :type start: int
+    :param stop: Index to stop slicing at (exclusive). If not given,
+             slicing will stop at the end.
+    :type stop: None or int
+    :param step: Slice step.
+    :type step: int
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Replaces any string or bytestring-valued data with a slice between ``start``
+and ``stop`` indexes; ``start`` is inclusive and ``stop`` is exclusive and both
+are 0-indexed.
+
+For strings, ``start`` and ``stop`` are measured in Unicode characters; for
+bytestrings, ``start`` and ``stop`` are measured in bytes.
+
+The ``start``, ``stop``, and ``replacement`` are scalars; they cannot be
+different for each string/bytestring in the sample.
+
+Note: this function does not raise an error if the ``array`` does not
+contain any string or bytestring data.
+
+Requires the pyarrow library and calls
+`pyarrow.compute.utf8_slice_codeunits <https://arrow.apache.org/docs/python/generated/pyarrow.compute.utf8_slice_codeunits.html>`__
+or performs a literal slice on strings and bytestrings, respectively.
+

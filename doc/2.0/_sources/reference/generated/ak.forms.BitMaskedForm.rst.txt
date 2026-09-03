@@ -1,0 +1,148 @@
+ak.forms.BitMaskedForm
+----------------------
+
+.. py:module: ak.forms.BitMaskedForm
+
+Defined in `awkward.forms.bitmaskedform <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/forms/bitmaskedform.py>`__ on `line 8 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/forms/bitmaskedform.py#L8>`__.
+
+.. py:class:: ak.forms.BitMaskedForm(self, mask, content, valid_when, lsb_order)
+
+
+
+.. _ak-forms-bitmaskedform-is_option:
+
+.. py:attribute:: ak.forms.BitMaskedForm.is_option
+    :value: True
+
+
+
+.. _ak-forms-bitmaskedform-mask:
+
+.. py:attribute:: ak.forms.BitMaskedForm.mask
+
+
+
+.. _ak-forms-bitmaskedform-content:
+
+.. py:attribute:: ak.forms.BitMaskedForm.content
+
+
+
+.. _ak-forms-bitmaskedform-valid_when:
+
+.. py:attribute:: ak.forms.BitMaskedForm.valid_when
+
+
+
+.. _ak-forms-bitmaskedform-lsb_order:
+
+.. py:attribute:: ak.forms.BitMaskedForm.lsb_order
+
+
+
+.. _ak-forms-bitmaskedform-copy:
+
+.. py:method:: ak.forms.BitMaskedForm.copy(self, mask=unset, content=unset, valid_when=unset, lsb_order=unset)
+
+
+
+.. _ak-forms-bitmaskedform-simplified:
+
+.. py:method:: ak.forms.BitMaskedForm.simplified(cls, mask, content, valid_when, lsb_order)
+
+
+
+.. _ak-forms-bitmaskedform-is_identity_like:
+
+.. py:attribute:: ak.forms.BitMaskedForm.is_identity_like
+
+
+
+.. _ak-forms-bitmaskedform-__repr__:
+
+.. py:method:: ak.forms.BitMaskedForm.__repr__(self)
+
+
+
+.. _ak-forms-bitmaskedform-_to_dict_part:
+
+.. py:method:: ak.forms.BitMaskedForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-bitmaskedform-_type:
+
+.. py:method:: ak.forms.BitMaskedForm._type(self, typestrs)
+
+
+
+.. _ak-forms-bitmaskedform-__eq__:
+
+.. py:method:: ak.forms.BitMaskedForm.__eq__(self, other)
+
+
+
+.. _ak-forms-bitmaskedform-purelist_parameter:
+
+.. py:method:: ak.forms.BitMaskedForm.purelist_parameter(self, key)
+
+
+
+.. _ak-forms-bitmaskedform-purelist_isregular:
+
+.. py:attribute:: ak.forms.BitMaskedForm.purelist_isregular
+
+
+
+.. _ak-forms-bitmaskedform-purelist_depth:
+
+.. py:attribute:: ak.forms.BitMaskedForm.purelist_depth
+
+
+
+.. _ak-forms-bitmaskedform-minmax_depth:
+
+.. py:attribute:: ak.forms.BitMaskedForm.minmax_depth
+
+
+
+.. _ak-forms-bitmaskedform-branch_depth:
+
+.. py:attribute:: ak.forms.BitMaskedForm.branch_depth
+
+
+
+.. _ak-forms-bitmaskedform-fields:
+
+.. py:attribute:: ak.forms.BitMaskedForm.fields
+
+
+
+.. _ak-forms-bitmaskedform-is_tuple:
+
+.. py:attribute:: ak.forms.BitMaskedForm.is_tuple
+
+
+
+.. _ak-forms-bitmaskedform-dimension_optiontype:
+
+.. py:attribute:: ak.forms.BitMaskedForm.dimension_optiontype
+
+
+
+.. _ak-forms-bitmaskedform-_columns:
+
+.. py:method:: ak.forms.BitMaskedForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-bitmaskedform-_select_columns:
+
+.. py:method:: ak.forms.BitMaskedForm._select_columns(self, index, specifier, matches, output)
+
+
+
+.. _ak-forms-bitmaskedform-_column_types:
+
+.. py:method:: ak.forms.BitMaskedForm._column_types(self)
+

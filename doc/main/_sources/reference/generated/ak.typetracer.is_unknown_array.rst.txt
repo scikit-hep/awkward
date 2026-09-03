@@ -1,0 +1,6 @@
+ak.typetracer.is_unknown_array
+==============================
+
+Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/typetracer.py>`__ on `line 63 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/typetracer.py#L63>`__.
+
+.. py:function:: ak.typetracer.is_unknown_array(array: awkward._typing.Any) -> awkward._typing.TypeGuard[TypeTracerArray]

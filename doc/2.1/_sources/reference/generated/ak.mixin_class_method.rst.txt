@@ -1,0 +1,27 @@
+ak.mixin_class_method
+---------------------
+
+.. py:module: ak.mixin_class_method
+
+Defined in `awkward.behaviors.mixins <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/behaviors/mixins.py>`__ on `line 71 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/behaviors/mixins.py#L71>`__.
+
+.. py:function:: ak.mixin_class_method(ufunc, rhs=None, *, transpose=True)
+
+
+    :param ufunc: A universal function (or NEP18 callable) that is
+              hooked in Awkward Array, i.e. it can be the first argument of a behavior.
+    :type ufunc: numpy.ufunc
+    :param rhs: Set of right-hand side argument types, optional
+            if wrapping a unary function. The left-hand side is expected to
+            always be ``self`` of the parent class. The current class is implicitly
+            included in this set.
+    :type rhs: Set[type] or None
+    :param transpose: If true, automatically create a transpose signature
+                  (only makes sense for binary ufuncs).
+    :type transpose: bool
+
+This decorator can be used to register a mixin class method.
+
+Using this decorator ensures that derived classes that are declared with the
+:py:obj:`ak.mixin_class` decorator will also have the behaviors that this class has.
+

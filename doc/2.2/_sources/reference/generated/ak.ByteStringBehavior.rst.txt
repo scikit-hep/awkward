@@ -1,0 +1,22 @@
+ak.ByteStringBehavior
+---------------------
+
+.. py:module: ak.ByteStringBehavior
+
+Defined in `awkward.behaviors.string <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/behaviors/string.py>`__ on `line 94 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/behaviors/string.py#L94>`__.
+
+.. py:class:: ak.ByteStringBehavior(self)
+
+
+
+.. _ak-bytestringbehavior-__name__:
+
+.. py:attribute:: ak.ByteStringBehavior.__name__
+    :value: 'Array'
+
+
+
+.. _ak-bytestringbehavior-__iter__:
+
+.. py:method:: ak.ByteStringBehavior.__iter__(self)
+

@@ -1,0 +1,9 @@
+ak.find_highlevel_backend
+-------------------------
+
+.. py:module: ak.find_highlevel_backend
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/highlevel.py>`__ on `line 3349 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/highlevel.py#L3349>`__.
+
+.. py:function:: ak.find_highlevel_backend(obj)
+

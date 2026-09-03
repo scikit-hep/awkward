@@ -1,0 +1,31 @@
+ak.with_field
+-------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 922 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L922>`__.
+
+.. py:function:: ak.with_field(base, what, where=None, highlevel=True, behavior=None)
+
+
+    :param base: Data containing records or tuples.
+    :param what: Data to add as a new field.
+    :param where: If None, the new field
+              has no name (can be accessed as an integer slot number in a
+              string); If str, the name of the new field. If iterable, it is
+              interpreted as a path where to add the field in a nested record.
+    :type where: None or str or non-empy iterable of str
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Returns an :py:obj:`ak.Array` or :py:obj:`ak.Record` (or low-level equivalent, if
+``highlevel=False``) with a new field attached. This function does not
+change the array in-place.
+
+See :py:obj:`ak.Array.__setitem__` and :py:obj:`ak.Record.__setitem__` for a variant that
+changes the high-level object in-place. (These methods internally use
+:py:obj:`ak.with_field`, so performance is not a factor in choosing one over the
+other.)
+

@@ -1,0 +1,73 @@
+ak.forms.UnmaskedForm
+=====================
+
+Defined in `awkward.forms.unmaskedform <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/forms/unmaskedform.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/forms/unmaskedform.py#L23>`__.
+
+.. py:class:: ak.forms.UnmaskedForm(content, *, parameters=None, form_key=None)
+
+
+
+   Abstract base class for generic types.
+
+   A generic type is typically declared by inheriting from
+   this class parameterized with one or more type variables.
+   For example, a generic mapping type might be defined as::
+
+     class Mapping(Generic[KT, VT]):
+         def __getitem__(self, key: KT) -> VT:
+             ...
+         # Etc.
+
+   This class can then be used as follows::
+
+     def lookup_name(mapping: Mapping[KT, VT], key: KT, default: VT) -> VT:
+         try:
+             return mapping[key]
+         except KeyError:
+             return default
+
+
+   .. py:attribute:: _content
+      :type:  awkward.forms.form.Form
+
+
+   .. py:property:: content
+
+
+   .. py:method:: copy(content=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+   .. py:method:: simplified(content, *, parameters=None, form_key=None)
+      :classmethod:
+
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _to_dict_part(verbose, toplevel)
+
+
+   .. py:property:: type
+
+
+   .. py:method:: _columns(path, output, list_indicator)
+
+
+   .. py:method:: _prune_columns(is_inside_record_or_union: bool) -> awkward._typing.Self | None
+
+
+   .. py:method:: _select_columns(match_specifier: awkward.forms.form._SpecifierMatcher) -> awkward._typing.Self
+
+
+   .. py:method:: _column_types()
+
+
+   .. py:method:: __setstate__(state)
+
+
+   .. py:method:: _expected_from_buffers(getkey: collections.abc.Callable[[awkward.forms.form.Form, str], str], recursive: bool) -> collections.abc.Iterator[tuple[str, awkward._typing.DType]]
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool, form_key: bool) -> bool
+

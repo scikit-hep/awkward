@@ -1,0 +1,70 @@
+ak.full_like
+============
+
+Defined in `awkward.operations.ak_full_like <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_full_like.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_full_like.py#L20>`__.
+
+.. py:function:: ak.full_like(array, fill_value, *, dtype=None, including_unknown=False, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param fill_value: Value to fill the new array with.
+   :param dtype: Overrides the data type of the result.
+   :type dtype: None or NumPy dtype
+   :param including_unknown: If True, the ``unknown`` type is considered
+                             a value type and is converted to a zero-length array of the
+                             specified dtype; if False, ``unknown`` will remain ``unknown``.
+   :type including_unknown: bool
+   :param highlevel: If True, return an :py:obj:`ak.Array`;
+                     otherwise, return a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool, default is True
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   This is the equivalent of NumPy's ``np.full_like`` for Awkward Arrays.
+
+   Although it's possible to produce an array of ``fill_value`` with the
+   structure of an ``array`` using :py:obj:`ak.broadcast_arrays`:
+
+       >>> array = ak.Array([[1, 2, 3], [], [4, 5]])
+       >>> ak.broadcast_arrays(array, 1)
+       [<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>,
+        <Array [[1, 1, 1], [], [1, 1]] type='3 * var * int64'>]
+       >>> ak.broadcast_arrays(array, 1.0)
+       [<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>,
+        <Array [[1, 1, 1], [], [1, 1]] type='3 * var * float64'>]
+
+   Such a technique takes its type from the scalar (``1`` or ``1.0``), rather than
+   the array. This function gets all types from the array, which might not be
+   the same in all parts of the structure.
+
+   Here is an extreme example:
+
+       >>> array = ak.Array([
+       ... [{"x": 0.0, "y": []},
+       ...  {"x": 1.1, "y": [1]},
+       ...  {"x": 2.2, "y": [1, 2]}],
+       ... [],
+       ... [{"x": 3.3, "y": [1, 2, None, 3]},
+       ...  False,
+       ...  False,
+       ...  True,
+       ...  {"x": 4.4, "y": [1, 2, None, 3, 4]}]])
+       >>> ak.full_like(array, 12.3).show()
+       [[{x: 12.3, y: []}, {x: 12.3, y: [12]}, {x: 12.3, y: [12, 12]}],
+        [],
+        [{x: 12.3, y: [12, 12, None, 12]}, True, ..., True, {x: 12.3, y: [12, ...]}]]
+
+   The ``"x"`` values get filled in with ``12.3`` because they retain their type
+   (``float64``) and the ``"y"`` list items get filled in with ``12`` because they
+   retain their type (``int64``). Booleans get filled with True because ``12.3``
+   is not zero. Missing values remain in the same positions as in the original
+   ``array``. (To fill them in, use :py:obj:`ak.fill_none`.)
+
+   See also :py:obj:`ak.zeros_like` and :py:obj:`ak.ones_like`.
+
+   (There is no equivalent of NumPy's ``np.empty_like`` because Awkward Arrays
+   are immutable.)
+

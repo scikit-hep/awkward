@@ -1,0 +1,88 @@
+ak.mean
+=======
+
+Defined in `awkward.operations.ak_mean <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_mean.py>`__ on `line 29 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_mean.py#L29>`__.
+
+.. py:function:: ak.mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
+
+   Computes the mean over one or all levels of nesting.
+
+   Many types are supported, including all Awkward Arrays and Records. The
+   grouping is performed the same way as for reducers, though this operation is
+   not a reducer and has no identity. It is the same as NumPy's
+   `mean <https://docs.scipy.org/doc/numpy/reference/generated/numpy.mean.html>`__
+   if all lists at a given dimension have the same length and no None values,
+   but it generalizes to cases where they do not.
+
+   Passing all arguments to the reducers, the mean is calculated as::
+
+       ak.sum(x*weight) / ak.sum(weight)
+
+   See :py:obj:`ak.sum` for a complete description of handling nested lists and
+   missing values (None) in reducers.
+
+   See also :py:obj:`ak.nanmean`.
+
+   :param x: The data on which to compute the mean (anything :py:obj:`ak.to_layout` recognizes).
+   :param weight: Data that can be broadcasted to ``x`` to give each value a
+                  weight. Weighting values equally is the same as no weights;
+                  weighting some values higher increases the significance of those
+                  values. Weights can be zero or negative.
+   :param axis: If None, combine all values from the array into
+                a single scalar result; if an int, group by that axis: ``0`` is the
+                outermost, ``1`` is the first level of nested lists, etc., and
+                negative ``axis`` counts from the innermost: ``-1`` is the innermost,
+                ``-2`` is the next level up, etc; if a str, it is interpreted as the
+                name of the axis which maps to an int if named axes are present.
+                Named axes are attached to an array using :py:obj:`ak.with_named_axis` and
+                removed with :py:obj:`ak.without_named_axis`; also see the
+                `Named axes user guide <../../user-guide/how-to-array-properties-named-axis.html>`__.
+   :type axis: None or int or str
+   :param keepdims: If False, this function decreases the number of
+                    dimensions by 1; if True, the output values are wrapped in a new
+                    length-1 dimension so that the result of this operation may be
+                    broadcasted with the original array.
+   :type keepdims: bool
+   :param mask_identity: If True, the application of this function on
+                         empty lists results in None (an option type); otherwise, the
+                         calculation is followed through with the reducers' identities,
+                         usually resulting in floating-point ``nan``.
+   :type mask_identity: bool
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   :returns: The mean in each group of elements from ``x``.
+
+   .. rubric:: Examples
+
+   For example, with an ``array`` like
+
+   >>> array = ak.Array([[0, 1, 2, 3],
+                         [          ],
+                         [4, 5      ]])
+
+   The mean of the innermost lists is
+
+   >>> ak.mean(array, axis=-1)
+   <Array [1.5, nan, 4.5] type='3 * float64'>
+
+   because there are three lists, the first has mean ``1.5``, the second is
+   empty, and the third has mean ``4.5``.
+
+   The mean of the outermost lists is
+
+   >>> ak.mean(array, axis=0)
+   <Array [2, 3, 2, 3] type='4 * float64'>
+
+   because the longest list has length 4, the mean of ``0`` and ``4`` is ``2.0``,
+   the mean of ``1`` and ``5`` is ``3.0``, the mean of ``2`` (by itself) is ``2.0``,
+   and the mean of ``3`` (by itself) is ``3.0``. This follows the same grouping
+   behavior as reducers.
+

@@ -1,0 +1,1561 @@
+
+
+<!DOCTYPE html>
+
+
+<html >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>ak.ArrayBuilder &#8212; Awkward Array 2.4.10 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Vibur" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyterlite_sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/awkward.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/jupyterlite_sphinx.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'reference/generated/ak.ArrayBuilder';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.4';
+        </script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/reference/generated/ak.ArrayBuilder.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ak.from_arrow" href="ak.from_arrow.html" />
+    <link rel="prev" title="ak.Record" href="ak.Record.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="None"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo-300px.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+      2.4  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user-guide/index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../../user-guide/index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">High-level data types</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.Array.html">ak.Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.Record.html">ak.Record</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Append-only builder</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ak.ArrayBuilder</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Converting from other formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.from_arrow.html">ak.from_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_arrow_schema.html">ak.from_arrow_schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_avro_file.html">ak.from_avro_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_buffers.html">ak.from_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_cupy.html">ak.from_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_feather.html">ak.from_feather</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_iter.html">ak.from_iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_jax.html">ak.from_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_json.html">ak.from_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_numpy.html">ak.from_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_parquet.html">ak.from_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_rdataframe.html">ak.from_rdataframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_avro_file.html">ak.from_avro_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.metadata_from_parquet.html">ak.metadata_from_parquet</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Converting to other formats</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_arrow.html">ak.to_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_arrow_table.html">ak.to_arrow_table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_buffers.html">ak.to_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_cupy.html">ak.to_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_dataframe.html">ak.to_dataframe</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_feather.html">ak.to_feather</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_jax.html">ak.to_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_json.html">ak.to_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_list.html">ak.to_list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_numpy.html">ak.to_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_packed.html">ak.to_packed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_parquet.html">ak.to_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_rdataframe.html">ak.to_rdataframe</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Correctness checking</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.is_valid.html">ak.is_valid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.validity_error.html">ak.validity_error</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Lengths of lists</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.num.html">ak.num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.count.html">ak.count</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.count_nonzero.html">ak.count_nonzero</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Making and breaking records (columns)</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.zip.html">ak.zip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.unzip.html">ak.unzip</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Merging arrays (rows)</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.concatenate.html">ak.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.where.html">ak.where</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Flattening lists and missing values</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.flatten.html">ak.flatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.unflatten.html">ak.unflatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ravel.html">ak.ravel</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Functions that reduce dimension</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.all.html">ak.all</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.any.html">ak.any</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.sum.html">ak.sum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.prod.html">ak.prod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.max.html">ak.max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.min.html">ak.min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argmax.html">ak.argmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argmin.html">ak.argmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nansum.html">ak.nansum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanprod.html">ak.nanprod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanmax.html">ak.nanmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanmin.html">ak.nanmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanargmax.html">ak.nanargmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanargmin.html">ak.nanargmin</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Statistics that reduce dimension</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.moment.html">ak.moment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mean.html">ak.mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.var.html">ak.var</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.std.html">ak.std</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanmean.html">ak.nanmean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanvar.html">ak.nanvar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nanstd.html">ak.nanstd</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.covar.html">ak.covar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.corr.html">ak.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.linear_fit.html">ak.linear_fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ptp.html">ak.ptp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.softmax.html">ak.softmax</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Sorting</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.sort.html">ak.sort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argsort.html">ak.argsort</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Missing value handling</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.mask.html">ak.mask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.drop_none.html">ak.drop_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_none.html">ak.is_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.pad_none.html">ak.pad_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.fill_none.html">ak.fill_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.firsts.html">ak.firsts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.singletons.html">ak.singletons</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Ragged and regular dimensions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_regular.html">ak.to_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_regular.html">ak.from_regular</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Broadcasting</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.broadcast_arrays.html">ak.broadcast_arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.broadcast_fields.html">ak.broadcast_fields</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Combinatorics ("for loop" replacements)</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.cartesian.html">ak.cartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.combinations.html">ak.combinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argcartesian.html">ak.argcartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argcombinations.html">ak.argcombinations</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String predicates</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_alnum.html">ak.str.is_alnum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_alpha.html">ak.str.is_alpha</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_ascii.html">ak.str.is_ascii</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_decimal.html">ak.str.is_decimal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_digit.html">ak.str.is_digit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_lower.html">ak.str.is_lower</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_numeric.html">ak.str.is_numeric</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_printable.html">ak.str.is_printable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_space.html">ak.str.is_space</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_title.html">ak.str.is_title</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_upper.html">ak.str.is_upper</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String transforms</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.capitalize.html">ak.str.capitalize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.length.html">ak.str.length</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.lower.html">ak.str.lower</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.repeat.html">ak.str.repeat</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.replace_slice.html">ak.str.replace_slice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.replace_substring.html">ak.str.replace_substring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.replace_substring_regex.html">ak.str.replace_substring_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.reverse.html">ak.str.reverse</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.swapcase.html">ak.str.swapcase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.title.html">ak.str.title</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.upper.html">ak.str.upper</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String padding and trimming</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.center.html">ak.str.center</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.lpad.html">ak.str.lpad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.rpad.html">ak.str.rpad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.ltrim.html">ak.str.ltrim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.ltrim_whitespace.html">ak.str.ltrim_whitespace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.rtrim.html">ak.str.rtrim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.rtrim_whitespace.html">ak.str.rtrim_whitespace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.trim.html">ak.str.trim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.trim_whitespace.html">ak.str.trim_whitespace</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String splitting and joining</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.split_pattern.html">ak.str.split_pattern</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.split_pattern_regex.html">ak.str.split_pattern_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.split_whitespace.html">ak.str.split_whitespace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.join.html">ak.str.join</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.join_element_wise.html">ak.str.join_element_wise</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String slicing and decomposition</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.slice.html">ak.str.slice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.extract_regex.html">ak.str.extract_regex</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">String containment tests</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.str.count_substring.html">ak.str.count_substring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.count_substring_regex.html">ak.str.count_substring_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.ends_with.html">ak.str.ends_with</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.find_substring.html">ak.str.find_substring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.find_substring_regex.html">ak.str.find_substring_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.index_in.html">ak.str.index_in</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.is_in.html">ak.str.is_in</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.match_like.html">ak.str.match_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.match_substring.html">ak.str.match_substring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.match_substring_regex.html">ak.str.match_substring_regex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.str.starts_with.html">ak.str.starts_with</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Value and type conversions</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.enforce_type.html">ak.enforce_type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nan_to_none.html">ak.nan_to_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nan_to_num.html">ak.nan_to_num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.values_astype.html">ak.values_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.strings_astype.html">ak.strings_astype</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Arrays of categorical data</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_categorical.html">ak.to_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_categorical.html">ak.from_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_categorical.html">ak.is_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.categories.html">ak.categories</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Indexing and grouping</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.local_index.html">ak.local_index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.run_lengths.html">ak.run_lengths</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Restructuring records</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.merge_union_of_records.html">ak.merge_union_of_records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.merge_option_of_records.html">ak.merge_option_of_records</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Copying and packing arrays</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.copy.html">ak.copy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_packed.html">ak.to_packed</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Extracting metadata</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.type.html">ak.type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.parameters.html">ak.parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.fields.html">ak.fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_tuple.html">ak.is_tuple</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Manipulating metadata</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.with_name.html">ak.with_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_field.html">ak.with_field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_parameter.html">ak.with_parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.without_field.html">ak.without_field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.without_parameters.html">ak.without_parameters</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Overriding behavior</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../ak.behavior.html">ak.behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mixin_class.html">ak.mixin_class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mixin_class_method.html">ak.mixin_class_method</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Computational backends</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_backend.html">ak.to_backend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.backend.html">ak.backend</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">NumPy compatibility</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.full_like.html">ak.full_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.isclose.html">ak.isclose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ones_like.html">ak.ones_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.zeros_like.html">ak.zeros_like</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Array comparison</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.almost_equal.html">ak.almost_equal</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Third-party integration</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.numba.register_and_check.html">ak.numba.register_and_check</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.jax.assert_registered.html">ak.jax.assert_registered</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.jax.import_jax.html">ak.jax.import_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.jax.register_and_check.html">ak.jax.register_and_check</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.jax.register_behavior_class.html">ak.jax.register_behavior_class</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Array layout transformations</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.transform.html">ak.transform</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Low-level array layouts</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.to_layout.html">ak.to_layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.Content.html">ak.contents.Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.BitMaskedArray.html">ak.contents.BitMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.ByteMaskedArray.html">ak.contents.ByteMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.EmptyArray.html">ak.contents.EmptyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.IndexedArray.html">ak.contents.IndexedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.IndexedOptionArray.html">ak.contents.IndexedOptionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.ListArray.html">ak.contents.ListArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.ListOffsetArray.html">ak.contents.ListOffsetArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.NumpyArray.html">ak.contents.NumpyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.RecordArray.html">ak.contents.RecordArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.RegularArray.html">ak.contents.RegularArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.UnionArray.html">ak.contents.UnionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.contents.UnmaskedArray.html">ak.contents.UnmaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.record.Record.html">ak.record.Record</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Index for layout nodes</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.index.Index.html">ak.index.Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.Index8.html">ak.index.Index8</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.IndexU8.html">ak.index.IndexU8</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.Index32.html">ak.index.Index32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.IndexU32.html">ak.index.IndexU32</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.index.Index64.html">ak.index.Index64</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">High-level data types</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.types.from_datashape.html">ak.types.from_datashape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.Type.html">ak.types.Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ArrayType.html">ak.types.ArrayType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ScalarType.html">ak.types.ScalarType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ListType.html">ak.types.ListType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.NumpyType.html">ak.types.NumpyType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.OptionType.html">ak.types.OptionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.RecordType.html">ak.types.RecordType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.RegularType.html">ak.types.RegularType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.UnionType.html">ak.types.UnionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.UnknownType.html">ak.types.UnknownType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.is_primitive.html">ak.types.is_primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.dtype_to_primitive.html">ak.types.dtype_to_primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.primitive_to_dtype.html">ak.types.primitive_to_dtype</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Low-level types: "forms"</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.Form.html">ak.forms.Form</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.BitMaskedForm.html">ak.forms.BitMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ByteMaskedForm.html">ak.forms.ByteMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.EmptyForm.html">ak.forms.EmptyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.IndexedForm.html">ak.forms.IndexedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.IndexedOptionForm.html">ak.forms.IndexedOptionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ListForm.html">ak.forms.ListForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ListOffsetForm.html">ak.forms.ListOffsetForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.NumpyForm.html">ak.forms.NumpyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.RecordForm.html">ak.forms.RecordForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.RegularForm.html">ak.forms.RegularForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.UnionForm.html">ak.forms.UnionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.UnmaskedForm.html">ak.forms.UnmaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.from_dict.html">ak.forms.from_dict</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.from_json.html">ak.forms.from_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.from_type.html">ak.forms.from_type</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">AwkwardForth for data ingest</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../awkwardforth.html">AwkwardForth virtual machines</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Low-level kernels</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="kernels.html">Kernel interface and specification</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">API reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">ak.ArrayBuilder</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="ak-arraybuilder">
+<h1>ak.ArrayBuilder<a class="headerlink" href="#ak-arraybuilder" title="Permalink to this headline">#</a></h1>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/highlevel.py">awkward.highlevel</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/highlevel.py#L2219">line 2219</a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ak.ArrayBuilder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">ArrayBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for arrays built by
+this ArrayBuilder.</p></li>
+<li><p><strong>initial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Initial size (in bytes) of buffers used by the <code class="docutils literal notranslate"><span class="pre">ak::ArrayBuilder</span></code>.</p></li>
+<li><p><strong>resize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Resize multiplier for buffers used by the <code class="docutils literal notranslate"><span class="pre">ak::ArrayBuilder</span></code>;
+should be strictly greater than 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>General tool for building arrays of nested data structures from a sequence
+of commands. Most data types can be constructed by calling commands in the
+right order, similar to printing tokens to construct JSON output.</p>
+<p>To illustrate how this works, consider the following example.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">b</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+
+<span class="c1"># fill commands   # as JSON   # current array type</span>
+<span class="c1">##########################################################################################</span>
+<span class="n">b</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>    <span class="c1"># [         # 0 * var * unknown     (initially, the type is unknown)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>      <span class="c1">#   1,      # 0 * var * int64</span>
+<span class="n">b</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>      <span class="c1">#   2,      # 0 * var * int64</span>
+<span class="n">b</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>         <span class="c1">#   3.0     # 0 * var * float64     (all the integers have become floats)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>      <span class="c1"># ],        # 1 * var * float64     (closed first list; array length is 1)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>    <span class="c1"># [         # 1 * var * float64</span>
+<span class="n">b</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>      <span class="c1"># ],        # 2 * var * float64     (closed empty list; array length is 2)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>    <span class="c1"># [         # 2 * var * float64</span>
+<span class="n">b</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>      <span class="c1">#   4,      # 2 * var * float64</span>
+<span class="n">b</span><span class="o">.</span><span class="n">null</span><span class="p">()</span>          <span class="c1">#   null,   # 2 * var * ?float64    (now the floats are nullable)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>      <span class="c1">#   5       # 2 * var * ?float64</span>
+<span class="n">b</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>      <span class="c1"># ],        # 3 * var * ?float64</span>
+<span class="n">b</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>    <span class="c1"># [         # 3 * var * ?float64</span>
+<span class="n">b</span><span class="o">.</span><span class="n">begin_record</span><span class="p">()</span>  <span class="c1">#   {       # 3 * var * union[?float64, ?{}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>      <span class="c1">#     &quot;x&quot;:  # 3 * var * union[?float64, ?{x: unknown}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>      <span class="c1">#      1,   # 3 * var * union[?float64, ?{x: int64}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>      <span class="c1">#      &quot;y&quot;: # 3 * var * union[?float64, ?{x: int64, y: unknown}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>    <span class="c1">#      [    # 3 * var * union[?float64, ?{x: int64, y: var * unknown}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>      <span class="c1">#        2, # 3 * var * union[?float64, ?{x: int64, y: var * int64}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>      <span class="c1">#        3  # 3 * var * union[?float64, ?{x: int64, y: var * int64}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>      <span class="c1">#      ]    # 3 * var * union[?float64, ?{x: int64, y: var * int64}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">end_record</span><span class="p">()</span>    <span class="c1">#   }       # 3 * var * union[?float64, ?{x: int64, y: var * int64}]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>      <span class="c1"># ]         # 4 * var * union[?float64, ?{x: int64, y: var * int64}]</span>
+</pre></div>
+</div>
+<p>To get an array, we take a <a class="reference internal" href="#ak.ArrayBuilder.snapshot" title="ak.ArrayBuilder.snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">snapshot</span></code></a> of the ArrayBuilder’s current state.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="go">&lt;Array [[1, 2, 3], ..., [{x: 1, y: ..., ...}]] type=&#39;4 * var * union[?float...&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[1, 2, 3],</span>
+<span class="go"> [],</span>
+<span class="go"> [4, None, 5],</span>
+<span class="go"> [{x: 1, y: [2, 3]}]]</span>
+</pre></div>
+</div>
+<p>The full set of filling commands is the following.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.null" title="ak.ArrayBuilder.null"><code class="xref py py-meth docutils literal notranslate"><span class="pre">null</span></code></a>: appends a None value.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.boolean" title="ak.ArrayBuilder.boolean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">boolean</span></code></a>: appends True or False.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.integer" title="ak.ArrayBuilder.integer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integer</span></code></a>: appends an integer.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.real" title="ak.ArrayBuilder.real"><code class="xref py py-meth docutils literal notranslate"><span class="pre">real</span></code></a>: appends a floating-point value.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.complex" title="ak.ArrayBuilder.complex"><code class="xref py py-meth docutils literal notranslate"><span class="pre">complex</span></code></a>: appends a complex value.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.datetime" title="ak.ArrayBuilder.datetime"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datetime</span></code></a>: appends a datetime value.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.timedelta" title="ak.ArrayBuilder.timedelta"><code class="xref py py-meth docutils literal notranslate"><span class="pre">timedelta</span></code></a>: appends a timedelta value.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.bytestring" title="ak.ArrayBuilder.bytestring"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytestring</span></code></a>: appends an unencoded string (raw bytes).</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.string" title="ak.ArrayBuilder.string"><code class="xref py py-meth docutils literal notranslate"><span class="pre">string</span></code></a>: appends a UTF-8 encoded string.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.begin_list" title="ak.ArrayBuilder.begin_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_list</span></code></a>: begins filling a list; must be closed with <a class="reference internal" href="#ak.ArrayBuilder.end_list" title="ak.ArrayBuilder.end_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_list</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.end_list" title="ak.ArrayBuilder.end_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_list</span></code></a>: ends a list.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.begin_tuple" title="ak.ArrayBuilder.begin_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_tuple</span></code></a>: begins filling a tuple; must be closed with <a class="reference internal" href="#ak.ArrayBuilder.end_tuple" title="ak.ArrayBuilder.end_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_tuple</span></code></a>.</p></li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="#ak.ArrayBuilder.index" title="ak.ArrayBuilder.index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">index</span></code></a>: selects a tuple slot to fill; must be followed by a command</dt><dd><p>that actually fills that slot.</p>
+</dd>
+</dl>
+</li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.end_tuple" title="ak.ArrayBuilder.end_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_tuple</span></code></a>: ends a tuple.</p></li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="#ak.ArrayBuilder.begin_record" title="ak.ArrayBuilder.begin_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_record</span></code></a>: begins filling a record; must be closed with</dt><dd><p><a class="reference internal" href="#ak.ArrayBuilder.end_record" title="ak.ArrayBuilder.end_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_record</span></code></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="#ak.ArrayBuilder.field" title="ak.ArrayBuilder.field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">field</span></code></a>: selects a record field to fill; must be followed by a command</dt><dd><p>that actually fills that field.</p>
+</dd>
+</dl>
+</li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.end_record" title="ak.ArrayBuilder.end_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_record</span></code></a>: ends a record.</p></li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="#ak.ArrayBuilder.append" title="ak.ArrayBuilder.append"><code class="xref py py-meth docutils literal notranslate"><span class="pre">append</span></code></a>: generic method for filling <a class="reference internal" href="#ak.ArrayBuilder.null" title="ak.ArrayBuilder.null"><code class="xref py py-meth docutils literal notranslate"><span class="pre">null</span></code></a>, <a class="reference internal" href="#ak.ArrayBuilder.boolean" title="ak.ArrayBuilder.boolean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">boolean</span></code></a>, <a class="reference internal" href="#ak.ArrayBuilder.integer" title="ak.ArrayBuilder.integer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integer</span></code></a>, <a class="reference internal" href="#ak.ArrayBuilder.real" title="ak.ArrayBuilder.real"><code class="xref py py-meth docutils literal notranslate"><span class="pre">real</span></code></a>,</dt><dd><p><a class="reference internal" href="#ak.ArrayBuilder.bytestring" title="ak.ArrayBuilder.bytestring"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytestring</span></code></a>, <a class="reference internal" href="#ak.ArrayBuilder.string" title="ak.ArrayBuilder.string"><code class="xref py py-meth docutils literal notranslate"><span class="pre">string</span></code></a>, <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>, <a class="reference internal" href="ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a>, or arbitrary Python data.</p>
+</dd>
+</dl>
+</li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.extend" title="ak.ArrayBuilder.extend"><code class="xref py py-meth docutils literal notranslate"><span class="pre">extend</span></code></a>: appends all the items from an iterable.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.list" title="ak.ArrayBuilder.list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">list</span></code></a>: context manager for <a class="reference internal" href="#ak.ArrayBuilder.begin_list" title="ak.ArrayBuilder.begin_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_list</span></code></a> and <a class="reference internal" href="#ak.ArrayBuilder.end_list" title="ak.ArrayBuilder.end_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_list</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.tuple" title="ak.ArrayBuilder.tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tuple</span></code></a>: context manager for <a class="reference internal" href="#ak.ArrayBuilder.begin_tuple" title="ak.ArrayBuilder.begin_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_tuple</span></code></a> and <a class="reference internal" href="#ak.ArrayBuilder.end_tuple" title="ak.ArrayBuilder.end_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_tuple</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="#ak.ArrayBuilder.record" title="ak.ArrayBuilder.record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">record</span></code></a>: context manager for <a class="reference internal" href="#ak.ArrayBuilder.begin_record" title="ak.ArrayBuilder.begin_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_record</span></code></a> and <a class="reference internal" href="#ak.ArrayBuilder.end_record" title="ak.ArrayBuilder.end_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_record</span></code></a>.</p></li>
+</ul>
+<p>ArrayBuilders can be used in <a class="reference external" href="http://numba.pydata.org/">Numba</a>: they can
+be passed as arguments to a Numba-compiled function or returned as return
+values. (Since ArrayBuilder works by accumulating side-effects, it’s not
+strictly necessary to return the object.)</p>
+<p>The primary limitation is that ArrayBuilders cannot be <em>created</em> and
+<a class="reference internal" href="#ak.ArrayBuilder.snapshot" title="ak.ArrayBuilder.snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">snapshot</span></code></a> cannot be called inside the Numba-compiled function. Awkward
+Array uses Numba as a transformer: <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> and an empty <a class="reference internal" href="#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>
+go in and a filled <a class="reference internal" href="#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> is the result; <a class="reference internal" href="#ak.ArrayBuilder.snapshot" title="ak.ArrayBuilder.snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">snapshot</span></code></a> can be called
+outside of the compiled function.</p>
+<p>Also, context managers (Python’s <code class="docutils literal notranslate"><span class="pre">with</span></code> statement) are not supported in
+Numba yet, so the <a class="reference internal" href="#ak.ArrayBuilder.list" title="ak.ArrayBuilder.list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference internal" href="#ak.ArrayBuilder.tuple" title="ak.ArrayBuilder.tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tuple</span></code></a>, and <a class="reference internal" href="#ak.ArrayBuilder.record" title="ak.ArrayBuilder.record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">record</span></code></a> methods are not available
+in Numba-compiled functions.</p>
+<p>Here is an example of filling an ArrayBuilder in Numba, which makes a
+tree of dynamic depth.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@nb</span><span class="o">.</span><span class="n">njit</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">deepnesting</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">probability</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">probability</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">())</span>
+<span class="gp">... </span>    <span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="mi">3</span><span class="p">)):</span>
+<span class="gp">... </span>            <span class="n">deepnesting</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">probability</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deepnesting</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="go">&lt;Array [[[-0.523, ..., [[2.16, ...], ...]]]] type=&#39;1 * var * var * union[fl...&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">1 * var * var * union[</span>
+<span class="go">    float64,</span>
+<span class="go">    var * union[</span>
+<span class="go">        var * union[</span>
+<span class="go">            float64,</span>
+<span class="go">            var * unknown</span>
+<span class="go">        ],</span>
+<span class="go">        float64</span>
+<span class="go">    ]</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>Note that this is a <em>general</em> method for building arrays; if the type is
+known in advance, more specialized procedures can be faster. This should
+be considered the “least effort” approach.</p>
+<span class="target" id="ak-arraybuilder-wrap"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder._wrap">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">_wrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder._wrap" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layout</strong> (<code class="docutils literal notranslate"><span class="pre">ak._ext.ArrayBuilder</span></code>) – Low-level builder to wrap.</p></li>
+<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for arrays built by
+this ArrayBuilder.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Wraps a low-level <code class="docutils literal notranslate"><span class="pre">ak._ext.ArrayBuilder</span></code> as a high-level
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBulider</span></code>.</p>
+<p>The <a class="reference internal" href="#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> constructor creates a new <code class="docutils literal notranslate"><span class="pre">ak._ext.ArrayBuilder</span></code>
+with no accumulated data, but Numba needs to wrap existing data
+when returning from a lowered function.</p>
+<span class="target" id="ak-arraybuilder-behavior"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.behavior">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">behavior</span></span><a class="headerlink" href="#ak.ArrayBuilder.behavior" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The <code class="docutils literal notranslate"><span class="pre">behavior</span></code> parameter passed into this ArrayBuilder’s constructor.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>If a dict, this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> overrides the global <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a>.</dt><dd><p>Any keys in the global <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> but not this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> are
+still valid, but any keys in both are overridden by this
+<code class="docutils literal notranslate"><span class="pre">behavior</span></code>. Keys with a None value are equivalent to missing keys,
+so this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> can effectively remove keys from the
+global <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a>.</p>
+</dd>
+</dl>
+</li>
+<li><p>If None, the Array defaults to the global <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a>.</p></li>
+</ul>
+<p>See <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for a list of recognized key patterns and their
+meanings.</p>
+<span class="target" id="ak-arraybuilder-tolist"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.tolist">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">tolist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.tolist" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts this Array into Python objects; same as <a class="reference internal" href="ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_list</span></code></a>
+(but without the underscore, like NumPy’s
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html">tolist</a>).</p>
+<span class="target" id="ak-arraybuilder-to-list"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.to_list">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.to_list" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts this Array into Python objects; same as <a class="reference internal" href="ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_list</span></code></a>.</p>
+<span class="target" id="ak-arraybuilder-to-numpy"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.to_numpy">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.to_numpy" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts this Array into a NumPy array, if possible; same as <a class="reference internal" href="ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_numpy</span></code></a>.</p>
+<span class="target" id="ak-arraybuilder-type"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.type">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#ak.ArrayBuilder.type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The high-level type of the accumulated array; same as <a class="reference internal" href="ak.type.html#ak.type" title="ak.type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.type</span></code></a>.</p>
+<p>Note that the outermost element of an Array’s type is always an
+<a class="reference internal" href="ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a>, which specifies the number of elements in the array.</p>
+<p>The type of a <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> (from <a class="reference internal" href="ak.Array.html#ak.Array.layout" title="ak.Array.layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.layout</span></code></a>) is not
+wrapped by an <a class="reference internal" href="ak.types.ArrayType.html#ak.types.ArrayType" title="ak.types.ArrayType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.ArrayType</span></code></a>.</p>
+<span class="target" id="ak-arraybuilder-typestr"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.typestr">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">typestr</span></span><a class="headerlink" href="#ak.ArrayBuilder.typestr" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The high-level type of this accumulated array, presented as a string.</p>
+<span class="target" id="ak-arraybuilder-len"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.__len__">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.__len__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The current length of the accumulated array.</p>
+<span class="target" id="ak-arraybuilder-str"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.__str__">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.__str__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-arraybuilder-repr"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.__repr__">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.__repr__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="id1"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder._repr">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">_repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_cols</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder._repr" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-arraybuilder-show"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.show">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_rows</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.stdout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.show" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>limit_rows</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Maximum number of rows (lines) to use in the output.</p></li>
+<li><p><strong>limit_cols</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Maximum number of columns (characters wide).</p></li>
+<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – If True, print the type as well. (Doesn’t count toward number
+of rows/lines limit.)</p></li>
+<li><p><strong>stream</strong> (object with a <code class="docutils literal notranslate"><span class="pre">``write(str)``</span></code> method or None) – Stream to write the
+output to. If None, return a string instead of writing to a stream.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Display the contents of the array within <code class="docutils literal notranslate"><span class="pre">limit_rows</span></code> and <code class="docutils literal notranslate"><span class="pre">limit_cols</span></code>, using
+ellipsis (<code class="docutils literal notranslate"><span class="pre">...</span></code>) for hidden nested data.</p>
+<p>This method takes a snapshot of the data and calls show on it, and a snapshot
+copies data.</p>
+<span class="target" id="ak-arraybuilder-array"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.__array__">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">__array__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.__array__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Intercepts attempts to convert a <a class="reference internal" href="#ak.ArrayBuilder.snapshot" title="ak.ArrayBuilder.snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">snapshot</span></code></a> of this array into a
+NumPy array and either performs a zero-copy conversion or raises
+an error.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.__array__" title="ak.Array.__array__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__array__</span></code></a> for a more complete description.</p>
+<span class="target" id="ak-arraybuilder-arrow-array"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.__arrow_array__">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">__arrow_array__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.__arrow_array__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-arraybuilder-numba-type"></span><dl class="py attribute">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.numba_type">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">numba_type</span></span><a class="headerlink" href="#ak.ArrayBuilder.numba_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The type of this Array when it is used in Numba. It contains enough
+information to generate low-level code for accessing any element,
+down to the leaves.</p>
+<p>See <a class="reference external" href="https://numba.pydata.org/numba-doc/dev/reference/types.html">Numba documentation</a>
+on types and signatures.</p>
+<span class="target" id="ak-arraybuilder-bool"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.__bool__">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">__bool__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.__bool__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="ak-arraybuilder-snapshot"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.snapshot">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.snapshot" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts the currently accumulated data into an <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>.</p>
+<p>The currently accumulated data are <em>copied</em> into the new array.</p>
+<span class="target" id="ak-arraybuilder-null"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.null">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">null</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.null" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends a None value at the current position in the accumulated array.</p>
+<span class="target" id="ak-arraybuilder-boolean"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.boolean">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">boolean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.boolean" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends a boolean value <code class="docutils literal notranslate"><span class="pre">x</span></code> at the current position in the accumulated
+array.</p>
+<span class="target" id="ak-arraybuilder-integer"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.integer">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">integer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.integer" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends an integer <code class="docutils literal notranslate"><span class="pre">x</span></code> at the current position in the accumulated
+array.</p>
+<span class="target" id="ak-arraybuilder-real"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.real">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">real</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.real" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends a floating point number <code class="docutils literal notranslate"><span class="pre">x</span></code> at the current position in the
+accumulated array.</p>
+<span class="target" id="ak-arraybuilder-complex"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.complex">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.complex" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends a floating point number <code class="docutils literal notranslate"><span class="pre">x</span></code> at the current position in the
+accumulated array.</p>
+<span class="target" id="ak-arraybuilder-datetime"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.datetime">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.datetime" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends a datetime value <code class="docutils literal notranslate"><span class="pre">x</span></code> at the current position in the
+accumulated array.</p>
+<span class="target" id="ak-arraybuilder-timedelta"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.timedelta">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">timedelta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.timedelta" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends a timedelta value <code class="docutils literal notranslate"><span class="pre">x</span></code> at the current position in the
+accumulated array.</p>
+<span class="target" id="ak-arraybuilder-bytestring"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.bytestring">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">bytestring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.bytestring" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends an unencoded string (raw bytes) <code class="docutils literal notranslate"><span class="pre">x</span></code> at the current position
+in the accumulated array.</p>
+<span class="target" id="ak-arraybuilder-string"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.string">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.string" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Appends a UTF-8 encoded string <code class="docutils literal notranslate"><span class="pre">x</span></code> at the current position in the
+accumulated array.</p>
+<span class="target" id="ak-arraybuilder-begin-list"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.begin_list">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">begin_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.begin_list" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Begins filling a list; must be closed with <a class="reference internal" href="#ak.ArrayBuilder.end_list" title="ak.ArrayBuilder.end_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_list</span></code></a>.</p>
+<p>For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">3.3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">4.4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">5.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>produces</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[1.1, 2.2, 3.3],</span>
+<span class="go"> [],</span>
+<span class="go"> [4.4, 5.5]]</span>
+</pre></div>
+</div>
+<span class="target" id="ak-arraybuilder-end-list"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.end_list">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">end_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.end_list" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Ends a list.</p>
+<span class="target" id="ak-arraybuilder-begin-tuple"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.begin_tuple">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">begin_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numfields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.begin_tuple" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Begins filling a tuple with <code class="docutils literal notranslate"><span class="pre">numfields</span></code> fields; must be closed with
+<a class="reference internal" href="#ak.ArrayBuilder.end_tuple" title="ak.ArrayBuilder.end_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_tuple</span></code></a>.</p>
+<p>For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">begin_tuple</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="s2">&quot;one&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">end_tuple</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">begin_tuple</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="s2">&quot;two&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">end_tuple</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>produces</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[(1, 1.1, &#39;one&#39;),</span>
+<span class="go"> (2, 2.2, &#39;two&#39;)]</span>
+</pre></div>
+</div>
+<span class="target" id="ak-arraybuilder-index"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.index">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.index" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – The tuple slot to fill.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>This method also returns the <a class="reference internal" href="#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>, so that it can be
+chained with the value that fills the slot.</p>
+<p>Prepares to fill a tuple slot; see <a class="reference internal" href="#ak.ArrayBuilder.begin_tuple" title="ak.ArrayBuilder.begin_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_tuple</span></code></a> for an example.</p>
+<span class="target" id="ak-arraybuilder-end-tuple"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.end_tuple">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">end_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.end_tuple" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Ends a tuple.</p>
+<span class="target" id="ak-arraybuilder-begin-record"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.begin_record">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">begin_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.begin_record" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Begins filling a record with an optional <code class="docutils literal notranslate"><span class="pre">name</span></code>; must be closed with
+<a class="reference internal" href="#ak.ArrayBuilder.end_record" title="ak.ArrayBuilder.end_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_record</span></code></a>.</p>
+<p>For example,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">begin_record</span><span class="p">(</span><span class="s2">&quot;points&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">end_record</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">begin_record</span><span class="p">(</span><span class="s2">&quot;points&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">end_record</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>produces</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[{x: 1, y: 1.1},</span>
+<span class="go"> {x: 2, y: 2.2}]</span>
+</pre></div>
+</div>
+<p>with type</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">2 * points[</span>
+<span class="go">    x: float64,</span>
+<span class="go">    y: float64</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>The record type is named <code class="docutils literal notranslate"><span class="pre">&quot;points&quot;</span></code> because its <code class="docutils literal notranslate"><span class="pre">&quot;__record__&quot;</span></code>
+parameter is set to that value:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">parameters</span>
+<span class="go">{&#39;__record__&#39;: &#39;points&#39;}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">&quot;__record__&quot;</span></code> parameter can be used to add behavior to the records
+in the array, as described in <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>, <a class="reference internal" href="ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a>, and <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a>.</p>
+<span class="target" id="ak-arraybuilder-field"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.field">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.field" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The field key to fill.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>This method also returns the <a class="reference internal" href="#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>, so that it can be
+chained with the value that fills the slot.</p>
+<p>Prepares to fill a field; see <a class="reference internal" href="#ak.ArrayBuilder.begin_record" title="ak.ArrayBuilder.begin_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_record</span></code></a> for an example.</p>
+<span class="target" id="ak-arraybuilder-end-record"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.end_record">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">end_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.end_record" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Ends a record.</p>
+<span class="target" id="ak-arraybuilder-append"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.append">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.append" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> – The data to append (None, bool, int, float, bytes, str, or
+anything recognized by <a class="reference internal" href="ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_iter</span></code></a>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Appends any type, which can be a shorthand for <a class="reference internal" href="#ak.ArrayBuilder.null" title="ak.ArrayBuilder.null"><code class="xref py py-meth docutils literal notranslate"><span class="pre">null</span></code></a>,
+<a class="reference internal" href="#ak.ArrayBuilder.boolean" title="ak.ArrayBuilder.boolean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">boolean</span></code></a>, <a class="reference internal" href="#ak.ArrayBuilder.integer" title="ak.ArrayBuilder.integer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">integer</span></code></a>, <a class="reference internal" href="#ak.ArrayBuilder.real" title="ak.ArrayBuilder.real"><code class="xref py py-meth docutils literal notranslate"><span class="pre">real</span></code></a>, <a class="reference internal" href="#ak.ArrayBuilder.bytestring" title="ak.ArrayBuilder.bytestring"><code class="xref py py-meth docutils literal notranslate"><span class="pre">bytestring</span></code></a>, or <a class="reference internal" href="#ak.ArrayBuilder.string" title="ak.ArrayBuilder.string"><code class="xref py py-meth docutils literal notranslate"><span class="pre">string</span></code></a>, but also
+an <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> or <a class="reference internal" href="ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a> to <em>reference</em> values from an existing
+dataset, or any Python object to <em>convert</em> to Awkward Array.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">obj</span></code> is an iterable (including dict), this is equivalent to
+<a class="reference internal" href="ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_iter</span></code></a> except that it fills an existing <a class="reference internal" href="#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>,
+rather than creating a new one.</p>
+<span class="target" id="ak-arraybuilder-extend"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.extend">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.extend" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<em>iterable</em>) – Iterable of data to extend this ArrayBuilder with.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Appends every value from <code class="docutils literal notranslate"><span class="pre">obj</span></code>.</p>
+<span class="target" id="ak-arraybuilder-list"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.list">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.list" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Context manager to prevent unpaired <a class="reference internal" href="#ak.ArrayBuilder.begin_list" title="ak.ArrayBuilder.begin_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_list</span></code></a> and <a class="reference internal" href="#ak.ArrayBuilder.end_list" title="ak.ArrayBuilder.end_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_list</span></code></a>. The
+example in the <a class="reference internal" href="#ak.ArrayBuilder.begin_list" title="ak.ArrayBuilder.begin_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_list</span></code></a> documentation can be rewritten as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">list</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">3.3</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">list</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="k">pass</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">list</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">4.4</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">5.5</span><span class="p">)</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>to produce the same result.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[[1.1, 2.2, 3.3],</span>
+<span class="go"> [],</span>
+<span class="go"> [4.4, 5.5]]</span>
+</pre></div>
+</div>
+<p>Since context managers aren’t yet supported by Numba, this method
+can’t be used in Numba.</p>
+<span class="target" id="ak-arraybuilder-tuple"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.tuple">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numfields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.tuple" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Context manager to prevent unpaired <a class="reference internal" href="#ak.ArrayBuilder.begin_tuple" title="ak.ArrayBuilder.begin_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_tuple</span></code></a> and <a class="reference internal" href="#ak.ArrayBuilder.end_tuple" title="ak.ArrayBuilder.end_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_tuple</span></code></a>. The
+example in the <a class="reference internal" href="#ak.ArrayBuilder.begin_tuple" title="ak.ArrayBuilder.begin_tuple"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_tuple</span></code></a> documentation can be rewritten as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">tuple</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="s2">&quot;one&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">tuple</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="s2">&quot;two&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>to produce the same result.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[(1, 1.1, &#39;one&#39;),</span>
+<span class="go"> (2, 2.2, &#39;two&#39;)]</span>
+</pre></div>
+</div>
+<p>Since context managers aren’t yet supported by Numba, this method
+can’t be used in Numba.</p>
+<span class="target" id="ak-arraybuilder-record"></span><dl class="py method">
+<dt class="sig sig-object py" id="ak.ArrayBuilder.record">
+<span class="sig-prename descclassname"><span class="pre">ak.ArrayBuilder.</span></span><span class="sig-name descname"><span class="pre">record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.record" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Context manager to prevent unpaired <a class="reference internal" href="#ak.ArrayBuilder.begin_record" title="ak.ArrayBuilder.begin_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_record</span></code></a> and <a class="reference internal" href="#ak.ArrayBuilder.end_record" title="ak.ArrayBuilder.end_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_record</span></code></a>. The
+example in the <a class="reference internal" href="#ak.ArrayBuilder.begin_record" title="ak.ArrayBuilder.begin_record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_record</span></code></a> documentation can be rewritten as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;points&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;points&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>to produce the same result.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">builder</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">[{x: 1, y: 1.1},</span>
+<span class="go"> {x: 2, y: 2.2}]</span>
+</pre></div>
+</div>
+<p>Since context managers aren’t yet supported by Numba, this method
+can’t be used in Numba.</p>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ak.Record.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">ak.Record</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ak.from_arrow.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ak.from_arrow</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/reference/generated/ak.ArrayBuilder.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/reference/generated/ak.ArrayBuilder.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

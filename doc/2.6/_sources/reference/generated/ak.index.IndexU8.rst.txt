@@ -1,0 +1,16 @@
+ak.index.IndexU8
+----------------
+
+.. py:module: ak.index.IndexU8
+
+Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/index.py>`__ on `line 291 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/index.py#L291>`__.
+
+.. py:class:: ak.index.IndexU8(self)
+
+
+
+.. _ak-index-indexu8-_expected_dtype:
+
+.. py:attribute:: ak.index.IndexU8._expected_dtype
+    :value: np.dtype(np.uint8)
+

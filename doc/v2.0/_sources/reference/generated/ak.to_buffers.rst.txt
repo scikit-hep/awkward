@@ -1,0 +1,127 @@
+ak.to_buffers
+-------------
+
+.. py:module: ak.to_buffers
+
+Defined in `awkward.operations.ak_to_buffers <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/operations/ak_to_buffers.py>`__ on `line 9 <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/operations/ak_to_buffers.py#L9>`__.
+
+.. py:function:: ak.to_buffers(array, container=None, buffer_key='{form_key}-{attribute}', form_key='node{id}', *, id_start=0, backend=None, byteorder='<')
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param container: The str → NumPy arrays (or
+                  Python buffers) that represent the decomposed Awkward Array. This
+                  ``container`` is only assumed to have a ``__setitem__`` method that
+                  accepts strings as keys.
+    :type container: None or MutableMapping
+    :param buffer_key: Python format string containing
+                   ``"{form_key}"`` and/or ``"{attribute}"`` or a function that takes these
+                   (and/or ``layout``) as keyword arguments and returns a string to use
+                   as a key for a buffer in the ``container``. The ``form_key`` is the result
+                   of applying ``form_key`` (below), and the ``attribute`` is a hard-coded
+                   string representing the buffer's function (e.g. ``"data"``, ``"offsets"``,
+                   ``"index"``).
+    :type buffer_key: str or callable
+    :param form_key: Python format string containing
+                 ``"{id}"`` or a function that takes this (and/or ``layout``) as a keyword
+                 argument and returns a string to use as a key for a Form node.
+                 Together, the ``buffer_key`` and ``form_key`` links attributes of each Form
+                 node to data in the ``container``.
+    :type form_key: str, callable
+    :param id_start: Starting ``id`` to use in ``form_key`` and hence ``buffer_key``.
+                 This integer increases in a depth-first walk over the ``array`` nodes and
+                 can be used to generate unique keys for each Form.
+    :type id_start: int
+    :param backend: Backend to use to
+                generate values that are put into the ``container``. The default,
+                ``"cpu"``, makes NumPy arrays, which are in main memory
+                (e.g. not GPU) and satisfy Python's Buffer protocol. If all the
+                buffers in ``array`` have the same ``backend`` as this, they won't be
+                copied. If the backend is None, then the backend of the layout
+                will be used to generate the buffers.
+    :type backend: ``"cpu"``, ``"cuda"``, ``"jax"``, None
+    :param byteorder: Endianness of buffers written to ``container``.
+                  If the byteorder does not match the current system byteorder, the
+                  arrays will be copied.
+    :type byteorder: ``"<"``, ``">"``
+
+Decomposes an Awkward Array into a Form and a collection of memory buffers,
+so that data can be losslessly written to file formats and storage devices
+that only map names to binary blobs (such as a filesystem directory).
+
+This function returns a 3-tuple:
+
+.. code-block:: python
+
+
+    (form, length, container)
+
+where the ``form`` is a :py:obj:`ak.forms.Form` (whose string representation is JSON),
+the ``length`` is an integer (``len(array)``), and the ``container`` is either
+the MutableMapping you passed in or a new dict containing the buffers (as
+NumPy arrays).
+
+These are also the first three arguments of :py:obj:`ak.from_buffers`, so a full
+round-trip is
+
+.. code-block:: python
+
+
+    >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
+
+The ``container`` argument lets you specify your own MutableMapping, which
+might be an interface to some storage format or device (e.g. h5py). It's
+okay if the ``container`` drops NumPy's ``dtype`` and ``shape`` information,
+leaving raw bytes, since ``dtype`` and ``shape`` can be reconstituted from
+the :py:obj:`ak.forms.NumpyForm`.
+
+The ``buffer_key`` and ``form_key`` arguments let you configure the names of the
+buffers added to the ``container`` and string labels on each Form node, so that
+the two can be uniquely matched later. ``buffer_key`` and ``form_key`` are distinct
+arguments to allow for more indirection (buffer keys can differ from Form keys,
+as long as there's a way to map them to each other) and because some Form nodes,
+such as :py:obj:`ak.forms.ListForm` and :py:obj:`ak.forms.UnionForm`, have more than one attribute
+(``starts`` and ``stops`` for :py:obj:`ak.forms.ListForm` and ``tags`` and ``index`` for
+:py:obj:`ak.forms.UnionForm`).
+
+Awkward 1.x also included partition numbers (``"part0-"``, ``"part1-"``, ...) in
+the buffer keys. In version 2.x onward, partitioning is handled externally by
+Dask, but partition numbers can be emulated by prepending a fixed ``"partN-"``
+string to the ``buffer_key``. The ``array`` represents exactly one partition.
+
+Here is a simple example:
+
+.. code-block:: python
+
+
+    >>> original = ak.Array([[1, 2, 3], [], [4, 5]])
+    >>> form, length, container = ak.to_buffers(original)
+    >>> print(form)
+    {
+        "class": "ListOffsetArray",
+        "offsets": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "primitive": "int64",
+            "form_key": "node1"
+        },
+        "form_key": "node0"
+    }
+    >>> length
+    3
+    >>> container
+    {'node0-offsets': array([0, 3, 3, 5]), 'node1-data': array([1, 2, 3, 4, 5])}
+
+which may be read back with
+
+.. code-block:: python
+
+
+    >>> ak.from_buffers(form, length, container)
+    <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
+
+If you intend to use this function for saving data, you may want to pack it
+first with :py:obj:`ak.to_packed`.
+
+See also :py:obj:`ak.from_buffers` and :py:obj:`ak.to_packed`.
+

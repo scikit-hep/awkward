@@ -1,0 +1,29 @@
+ak.nan_to_num
+-------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 4484 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L4484>`__.
+
+.. py:function:: ak.nan_to_num(array, copy=True, nan=0.0, posinf=None, neginf=None, highlevel=True, behavior=None)
+
+
+    :param array: Array whose ``NaN`` values should be converted to a number.
+    :param copy: Ignored (Awkward Arrays are immutable).
+    :type copy: bool
+    :param nan: Value to be used to fill ``NaN`` values.
+    :type nan: int, float, broadcastable array
+    :param posinf: Value to be used to fill positive infinity
+               values. If None, positive infinities are replaced with a very large number.
+    :type posinf: None, int, float, broadcastable array
+    :param neginf: Value to be used to fill negative infinity
+               values. If None, negative infinities are replaced with a very small number.
+    :type neginf: None, int, float, broadcastable array
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Implements `np.nan_to_num <https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html>`__
+for Awkward Arrays.
+

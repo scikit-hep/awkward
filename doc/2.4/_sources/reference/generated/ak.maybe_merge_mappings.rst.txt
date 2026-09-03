@@ -1,0 +1,9 @@
+ak.maybe_merge_mappings
+-----------------------
+
+.. py:module: ak.maybe_merge_mappings
+
+Defined in `awkward.operations.ak_to_layout <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_to_layout.py>`__ on `line 88 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_to_layout.py#L88>`__.
+
+.. py:function:: ak.maybe_merge_mappings(primary, secondary)
+

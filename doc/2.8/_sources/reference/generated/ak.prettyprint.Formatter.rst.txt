@@ -1,0 +1,33 @@
+ak.prettyprint.Formatter
+------------------------
+
+.. py:module: ak.prettyprint.Formatter
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/prettyprint.py>`__ on `line 283 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/prettyprint.py#L283>`__.
+
+.. py:class:: ak.prettyprint.Formatter(self, formatters=None, precision=3)
+
+
+
+.. _ak-prettyprint-formatter-__call__:
+
+.. py:method:: ak.prettyprint.Formatter.__call__(self, obj)
+
+
+
+.. _ak-prettyprint-formatter-_format_complex:
+
+.. py:method:: ak.prettyprint.Formatter._format_complex(self, data)
+
+
+
+.. _ak-prettyprint-formatter-_format_real:
+
+.. py:method:: ak.prettyprint.Formatter._format_real(self, data)
+
+
+
+.. _ak-prettyprint-formatter-_find_formatter_impl:
+
+.. py:method:: ak.prettyprint.Formatter._find_formatter_impl(self, cls)
+

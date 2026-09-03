@@ -1,0 +1,15 @@
+ak.contents.ImplementsApplyAction
+---------------------------------
+
+.. py:module: ak.contents.ImplementsApplyAction
+
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/e4be9febc76c610eea671ef3f0e3084cb206da49/src/awkward/contents/content.py>`__ on `line 91 <https://github.com/scikit-hep/awkward/blob/e4be9febc76c610eea671ef3f0e3084cb206da49/src/awkward/contents/content.py#L91>`__.
+
+.. py:class:: ak.contents.ImplementsApplyAction(self)
+
+
+
+.. _ak-contents-implementsapplyaction-__call__:
+
+.. py:method:: ak.contents.ImplementsApplyAction.__call__(self, layout, *, depth, depth_context, lateral_context, continuation, behavior, backend, options)
+

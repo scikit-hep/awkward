@@ -1,0 +1,14 @@
+ak.str.akstr_replace_substring
+==============================
+
+.. py:module:: awkward.operations.str.akstr_replace_substring
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_replace_substring.replace_substring
+
+

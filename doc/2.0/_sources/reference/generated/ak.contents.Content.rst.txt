@@ -1,0 +1,612 @@
+ak.contents.Content
+-------------------
+
+.. py:module: ak.contents.Content
+
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/contents/content.py>`__ on `line 32 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/contents/content.py#L32>`__.
+
+.. py:class:: ak.contents.Content(self)
+
+
+
+.. _ak-contents-content-is_numpy:
+
+.. py:attribute:: ak.contents.Content.is_numpy
+    :value: False
+
+
+
+.. _ak-contents-content-is_unknown:
+
+.. py:attribute:: ak.contents.Content.is_unknown
+    :value: False
+
+
+
+.. _ak-contents-content-is_list:
+
+.. py:attribute:: ak.contents.Content.is_list
+    :value: False
+
+
+
+.. _ak-contents-content-is_regular:
+
+.. py:attribute:: ak.contents.Content.is_regular
+    :value: False
+
+
+
+.. _ak-contents-content-is_option:
+
+.. py:attribute:: ak.contents.Content.is_option
+    :value: False
+
+
+
+.. _ak-contents-content-is_indexed:
+
+.. py:attribute:: ak.contents.Content.is_indexed
+    :value: False
+
+
+
+.. _ak-contents-content-is_record:
+
+.. py:attribute:: ak.contents.Content.is_record
+    :value: False
+
+
+
+.. _ak-contents-content-is_union:
+
+.. py:attribute:: ak.contents.Content.is_union
+    :value: False
+
+
+
+.. _ak-contents-content-is_leaf:
+
+.. py:attribute:: ak.contents.Content.is_leaf
+    :value: False
+
+
+
+.. _ak-contents-content-_init:
+
+.. py:method:: ak.contents.Content._init(self, parameters, backend)
+
+
+
+.. _ak-contents-content-parameters:
+
+.. py:attribute:: ak.contents.Content.parameters
+
+
+
+.. _ak-contents-content-parameter:
+
+.. py:method:: ak.contents.Content.parameter(self, key)
+
+
+
+.. _ak-contents-content-backend:
+
+.. py:attribute:: ak.contents.Content.backend
+
+
+
+.. _ak-contents-content-form:
+
+.. py:attribute:: ak.contents.Content.form
+
+
+
+.. _ak-contents-content-form_with_key:
+
+.. py:method:: ak.contents.Content.form_with_key(self, form_key='node{id}', id_start=0)
+
+
+
+.. _ak-contents-content-_form_with_key:
+
+.. py:method:: ak.contents.Content._form_with_key(self, getkey)
+
+
+
+.. _ak-contents-content-form_cls:
+
+.. py:attribute:: ak.contents.Content.form_cls
+
+
+
+.. _ak-contents-content-to_typetracer:
+
+.. py:method:: ak.contents.Content.to_typetracer(self, forget_length=False)
+
+
+
+.. _ak-contents-content-_to_typetracer:
+
+.. py:method:: ak.contents.Content._to_typetracer(self, forget_length)
+
+
+
+.. _ak-contents-content-_touch_data:
+
+.. py:method:: ak.contents.Content._touch_data(self, recursive)
+
+
+
+.. _ak-contents-content-_touch_shape:
+
+.. py:method:: ak.contents.Content._touch_shape(self, recursive)
+
+
+
+.. _ak-contents-content-length:
+
+.. py:attribute:: ak.contents.Content.length
+
+
+
+.. _ak-contents-content-_to_buffers:
+
+.. py:method:: ak.contents.Content._to_buffers(self, form, getkey, container, backend)
+
+
+
+.. _ak-contents-content-__len__:
+
+.. py:method:: ak.contents.Content.__len__(self)
+
+
+
+.. _ak-contents-content-_repr_extra:
+
+.. py:method:: ak.contents.Content._repr_extra(self, indent)
+
+
+
+.. _ak-contents-content-maybe_to_numpyarray:
+
+.. py:method:: ak.contents.Content.maybe_to_NumpyArray(self)
+
+
+
+.. _ak-contents-content-_handle_error:
+
+.. py:method:: ak.contents.Content._handle_error(self, error, slicer=None)
+
+
+
+.. _ak-contents-content-_selfless_handle_error:
+
+.. py:method:: ak.contents.Content._selfless_handle_error(error)
+
+
+
+.. _ak-contents-content-__array_ufunc__:
+
+.. py:method:: ak.contents.Content.__array_ufunc__(self, ufunc, method)
+
+
+
+.. _ak-contents-content-__array_function__:
+
+.. py:method:: ak.contents.Content.__array_function__(self, func, types, args, kwargs)
+
+
+
+.. _ak-contents-content-__array__:
+
+.. py:method:: ak.contents.Content.__array__(self)
+
+
+
+.. _ak-contents-content-__iter__:
+
+.. py:method:: ak.contents.Content.__iter__(self)
+
+
+
+.. _ak-contents-content-_getitem_next_field:
+
+.. py:method:: ak.contents.Content._getitem_next_field(self, head, tail, advanced)
+
+
+
+.. _ak-contents-content-_getitem_next_fields:
+
+.. py:method:: ak.contents.Content._getitem_next_fields(self, head, tail, advanced)
+
+
+
+.. _ak-contents-content-_getitem_next_newaxis:
+
+.. py:method:: ak.contents.Content._getitem_next_newaxis(self, tail, advanced)
+
+
+
+.. _ak-contents-content-_getitem_next_ellipsis:
+
+.. py:method:: ak.contents.Content._getitem_next_ellipsis(self, tail, advanced)
+
+
+
+.. _ak-contents-content-_getitem_next_regular_missing:
+
+.. py:method:: ak.contents.Content._getitem_next_regular_missing(self, head, tail, advanced, raw, length)
+
+
+
+.. _ak-contents-content-_getitem_next_missing_jagged:
+
+.. py:method:: ak.contents.Content._getitem_next_missing_jagged(self, head, tail, advanced, that)
+
+
+
+.. _ak-contents-content-_getitem_next_missing:
+
+.. py:method:: ak.contents.Content._getitem_next_missing(self, head, tail, advanced)
+
+
+
+.. _ak-contents-content-__getitem__:
+
+.. py:method:: ak.contents.Content.__getitem__(self, where)
+
+
+
+.. _ak-contents-content-_getitem:
+
+.. py:method:: ak.contents.Content._getitem(self, where)
+
+
+
+.. _ak-contents-content-_getitem_at:
+
+.. py:method:: ak.contents.Content._getitem_at(self, where)
+
+
+
+.. _ak-contents-content-_getitem_range:
+
+.. py:method:: ak.contents.Content._getitem_range(self, where)
+
+
+
+.. _ak-contents-content-_getitem_field:
+
+.. py:method:: ak.contents.Content._getitem_field(self, where)
+
+
+
+.. _ak-contents-content-_getitem_fields:
+
+.. py:method:: ak.contents.Content._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-contents-content-_getitem_next:
+
+.. py:method:: ak.contents.Content._getitem_next(self, head, tail, advanced)
+
+
+
+.. _ak-contents-content-_carry:
+
+.. py:method:: ak.contents.Content._carry(self, carry, allow_lazy)
+
+
+
+.. _ak-contents-content-_carry_asrange:
+
+.. py:method:: ak.contents.Content._carry_asrange(self, carry)
+
+
+
+.. _ak-contents-content-_local_index_axis0:
+
+.. py:method:: ak.contents.Content._local_index_axis0(self)
+
+
+
+.. _ak-contents-content-_mergeable:
+
+.. py:method:: ak.contents.Content._mergeable(self, other, mergebool=True)
+
+
+
+.. _ak-contents-content-_mergeable_next:
+
+.. py:method:: ak.contents.Content._mergeable_next(self, other, mergebool)
+
+
+
+.. _ak-contents-content-_mergemany:
+
+.. py:method:: ak.contents.Content._mergemany(self, others)
+
+
+
+.. _ak-contents-content-_merging_strategy:
+
+.. py:method:: ak.contents.Content._merging_strategy(self, others)
+
+
+
+.. _ak-contents-content-_local_index:
+
+.. py:method:: ak.contents.Content._local_index(self, axis, depth)
+
+
+
+.. _ak-contents-content-_reduce_next:
+
+.. py:method:: ak.contents.Content._reduce_next(self, reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims, behavior)
+
+
+
+.. _ak-contents-content-_argsort_next:
+
+.. py:method:: ak.contents.Content._argsort_next(self, negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order)
+
+
+
+.. _ak-contents-content-_sort_next:
+
+.. py:method:: ak.contents.Content._sort_next(self, negaxis, starts, parents, outlength, ascending, stable, kind, order)
+
+
+
+.. _ak-contents-content-_combinations_axis0:
+
+.. py:method:: ak.contents.Content._combinations_axis0(self, n, replacement, recordlookup, parameters)
+
+
+
+.. _ak-contents-content-_combinations:
+
+.. py:method:: ak.contents.Content._combinations(self, n, replacement, recordlookup, parameters, axis, depth)
+
+
+
+.. _ak-contents-content-_validity_error_parameters:
+
+.. py:method:: ak.contents.Content._validity_error_parameters(self, path)
+
+
+
+.. _ak-contents-content-_validity_error:
+
+.. py:method:: ak.contents.Content._validity_error(self, path)
+
+
+
+.. _ak-contents-content-nbytes:
+
+.. py:attribute:: ak.contents.Content.nbytes
+
+
+
+.. _ak-contents-content-purelist_parameter:
+
+.. py:method:: ak.contents.Content.purelist_parameter(self, key)
+
+
+
+.. _ak-contents-content-_is_unique:
+
+.. py:method:: ak.contents.Content._is_unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-content-_unique:
+
+.. py:method:: ak.contents.Content._unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-content-is_identity_like:
+
+.. py:attribute:: ak.contents.Content.is_identity_like
+
+
+
+.. _ak-contents-content-purelist_isregular:
+
+.. py:attribute:: ak.contents.Content.purelist_isregular
+
+
+
+.. _ak-contents-content-purelist_depth:
+
+.. py:attribute:: ak.contents.Content.purelist_depth
+
+
+
+.. _ak-contents-content-minmax_depth:
+
+.. py:attribute:: ak.contents.Content.minmax_depth
+
+
+
+.. _ak-contents-content-branch_depth:
+
+.. py:attribute:: ak.contents.Content.branch_depth
+
+
+
+.. _ak-contents-content-fields:
+
+.. py:attribute:: ak.contents.Content.fields
+
+
+
+.. _ak-contents-content-is_tuple:
+
+.. py:attribute:: ak.contents.Content.is_tuple
+
+
+
+.. _ak-contents-content-dimension_optiontype:
+
+.. py:attribute:: ak.contents.Content.dimension_optiontype
+
+
+
+.. _ak-contents-content-_pad_none_axis0:
+
+.. py:method:: ak.contents.Content._pad_none_axis0(self, target, clip)
+
+
+
+.. _ak-contents-content-_pad_none:
+
+.. py:method:: ak.contents.Content._pad_none(self, target, axis, depth, clip)
+
+
+
+.. _ak-contents-content-to_arrow:
+
+.. py:method:: ak.contents.Content.to_arrow(self, list_to32=False, string_to32=False, bytestring_to32=False, emptyarray_to=None, categorical_as_dictionary=False, extensionarray=True, count_nulls=True, record_is_scalar=False)
+
+
+
+.. _ak-contents-content-_to_arrow:
+
+.. py:method:: ak.contents.Content._to_arrow(self, pyarrow, mask_node, validbytes, length, options)
+
+
+
+.. _ak-contents-content-to_numpy:
+
+.. py:method:: ak.contents.Content.to_numpy(self, allow_missing=True)
+
+
+
+.. _ak-contents-content-_to_numpy:
+
+.. py:method:: ak.contents.Content._to_numpy(self, allow_missing)
+
+
+
+.. _ak-contents-content-drop_none:
+
+.. py:method:: ak.contents.Content.drop_none(self)
+
+
+
+.. _ak-contents-content-_drop_none:
+
+.. py:method:: ak.contents.Content._drop_none(self)
+
+
+
+.. _ak-contents-content-_completely_flatten:
+
+.. py:method:: ak.contents.Content._completely_flatten(self, backend, options)
+
+
+
+.. _ak-contents-content-_recursively_apply:
+
+.. py:method:: ak.contents.Content._recursively_apply(self, action, behavior, depth, depth_context, lateral_context, options)
+
+
+
+.. _ak-contents-content-to_json:
+
+.. py:method:: ak.contents.Content.to_json(self, nan_string=None, posinf_string=None, neginf_string=None, complex_record_fields=None, convert_bytes=None, behavior=None)
+
+
+
+.. _ak-contents-content-to_packed:
+
+.. py:method:: ak.contents.Content.to_packed(self)
+
+
+
+.. _ak-contents-content-to_list:
+
+.. py:method:: ak.contents.Content.to_list(self, behavior=None)
+
+
+
+.. _ak-contents-content-_to_list:
+
+.. py:method:: ak.contents.Content._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-content-_to_list_custom:
+
+.. py:method:: ak.contents.Content._to_list_custom(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-content-_offsets_and_flattened:
+
+.. py:method:: ak.contents.Content._offsets_and_flattened(self, axis, depth)
+
+
+
+.. _ak-contents-content-to_backend:
+
+.. py:method:: ak.contents.Content.to_backend(self, backend)
+
+
+
+.. _ak-contents-content-with_parameter:
+
+.. py:method:: ak.contents.Content.with_parameter(self, key, value)
+
+
+
+.. _ak-contents-content-__copy__:
+
+.. py:method:: ak.contents.Content.__copy__(self)
+
+
+
+.. _ak-contents-content-__deepcopy__:
+
+.. py:method:: ak.contents.Content.__deepcopy__(self, memo)
+
+
+
+.. _ak-contents-content-is_equal_to:
+
+.. py:method:: ak.contents.Content.is_equal_to(self, other, index_dtype=True, numpyarray=True)
+
+
+
+.. _ak-contents-content-_is_equal_to:
+
+.. py:method:: ak.contents.Content._is_equal_to(self, other, index_dtype, numpyarray)
+
+
+
+.. _ak-contents-content-_repr:
+
+.. py:method:: ak.contents.Content._repr(self, indent, pre, post)
+
+
+
+.. _ak-contents-content-_numbers_to_type:
+
+.. py:method:: ak.contents.Content._numbers_to_type(self, name)
+
+
+
+.. _ak-contents-content-_fill_none:
+
+.. py:method:: ak.contents.Content._fill_none(self, value)
+
+
+
+.. _ak-contents-content-copy:
+
+.. py:method:: ak.contents.Content.copy(self)
+

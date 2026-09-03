@@ -1,0 +1,17 @@
+ak.from_arrow_schema
+--------------------
+
+.. py:module: ak.from_arrow_schema
+
+Defined in `awkward.operations.ak_from_arrow_schema <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_from_arrow_schema.py>`__ on `line 10 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_from_arrow_schema.py#L10>`__.
+
+.. py:function:: ak.from_arrow_schema(schema)
+
+
+    :param schema: Apache Arrow schema to convert into an Awkward Form.
+    :type schema: ``pyarrow.Schema``
+
+Converts an Apache Arrow schema into an Awkward Form.
+
+See also :py:obj:`ak.to_arrow`, :py:obj:`ak.to_arrow_table`, :py:obj:`ak.from_arrow`, :py:obj:`ak.to_parquet`, :py:obj:`ak.from_parquet`.
+

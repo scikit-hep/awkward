@@ -1,0 +1,31 @@
+ak.singletons
+-------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 2969 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L2969>`__.
+
+.. py:function:: ak.singletons(array, highlevel=True, behavior=None)
+
+
+    :param array: Data to wrap in lists of length 1 if present and length 0
+              if missing (None).
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Returns a singleton list (length 1) wrapping each non-missing value and
+an empty list (length 0) in place of each missing value.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([1.1, 2.2, None, 3.3, None, None, 4.4, 5.5])
+    >>> print(ak.singletons(array))
+    [[1.1], [2.2], [], [3.3], [], [], [4.4], [5.5]]
+
+See :py:obj:`ak.firsts` to invert this function.
+

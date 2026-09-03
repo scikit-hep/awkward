@@ -1,0 +1,46 @@
+ak.types.NumpyType
+==================
+
+Defined in `awkward.types.numpytype <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/types/numpytype.py>`__ on `line 100 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/types/numpytype.py#L100>`__.
+
+.. py:class:: ak.types.NumpyType(primitive: str, *, parameters: awkward._typing.JSONMapping | None = None)
+
+
+
+   .. py:method:: copy(*, primitive: str | awkward._util.Sentinel = UNSET, parameters: awkward._typing.JSONMapping | awkward._util.Sentinel | None = UNSET) -> NumpyType
+
+
+   .. py:attribute:: _primitive
+      :type:  str
+      :value: ''
+
+
+
+   .. py:attribute:: _parameters
+      :type:  awkward._typing.JSONMapping | None
+      :value: None
+
+
+
+   .. py:property:: primitive
+      :type: str
+
+
+
+   .. py:attribute:: _str_parameters_exclude
+      :type:  tuple[str, Ellipsis]
+      :value: ('__categorical__', '__unit__')
+
+
+
+   .. py:method:: _get_typestr(behavior: collections.abc.Mapping | None) -> str | None
+
+
+   .. py:method:: _str(indent: str, compact: bool, behavior: collections.abc.Mapping | None) -> list[str]
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool) -> bool
+

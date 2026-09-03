@@ -1,0 +1,21 @@
+ak.typetracer.MaybeNone
+=======================
+
+Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/_nplikes/typetracer.py>`__ on `line 76 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/_nplikes/typetracer.py#L76>`__.
+
+.. py:class:: ak.typetracer.MaybeNone(content)
+
+   .. py:attribute:: _content
+
+
+   .. py:property:: content
+
+
+   .. py:method:: __eq__(other)
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __str__()
+

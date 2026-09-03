@@ -1,0 +1,44 @@
+ak.to_rdataframe
+----------------
+
+.. py:module: ak.to_rdataframe
+
+Defined in `awkward.operations.ak_to_rdataframe <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_to_rdataframe.py>`__ on `line 13 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/operations/ak_to_rdataframe.py#L13>`__.
+
+.. py:function:: ak.to_rdataframe(arrays, *, flatlist_as_rvec=True)
+
+
+    :param arrays: Each value in this dict can be any array-like data
+               that :py:obj:`ak.to_layout` recognizes, but they must all have the same length.
+    :type arrays: dict of arrays
+    :param flatlist_as_rvec: If True, lists of primitive types (numbers, booleans, etc.)
+                         are presented to C++ as ``ROOT::RVec<primitive>``, but all other types use
+                         Awkward Array's custom C++ classes. If False, even these "flat" lists use
+                         Awkward Array's custom C++ classes.
+    :type flatlist_as_rvec: bool
+
+Converts an Awkward Array into ROOT Data Frame columns:
+
+.. code-block:: python
+
+
+    >>> x = ak.Array([
+    ...     [1.1, 2.2, 3.3],
+    ...     [],
+    ...     [4.4, 5.5],
+    ... ])
+    >>> y = ak.Array([
+    ...     {"a": 1.1, "b": [1]},
+    ...     {"a": 2.2, "b": [2, 1]},
+    ...     {"a": 3.3, "b": [3, 2, 1]},
+    ... ])
+
+    >>> rdf = ak.to_rdataframe({"x": x, "y": y})
+    >>> rdf.Define("z", "ROOT::VecOps::Sum(x) + y.a() + y.b()[0]").AsNumpy(["z"])
+    {'z': ndarray([ 8.7,  4.2, 16.2])}
+
+    >>> ak.sum(x, axis=-1) + y.a + y.b[:, 0]
+    <Array [8.7, 4.2, 16.2] type='3 * float64'>
+
+See also :py:obj:`ak.from_rdataframe`.
+

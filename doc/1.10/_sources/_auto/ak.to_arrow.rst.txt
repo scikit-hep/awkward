@@ -1,0 +1,36 @@
+ak.to_arrow
+-----------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 1999 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L1999>`__.
+
+.. py:function:: ak.to_arrow(array, list_to32=False, string_to32=True, bytestring_to32=True, allow_tensor=True)
+
+
+    :param array: Data to convert to an Apache Arrow array.
+    :param list_to32: If True, convert Awkward lists into 32-bit Arrow lists
+                  if they're small enough, even if it means an extra conversion. Otherwise,
+                  signed 32-bit :py:obj:`ak.layout.ListOffsetArray` maps to Arrow ``ListType`` and
+                  all others map to Arrow ``LargeListType``.
+    :type list_to32: bool
+    :param string_to32: Same as the above for Arrow ``string`` and ``large_string``.
+    :type string_to32: bool
+    :param bytestring_to32: Same as the above for Arrow ``binary`` and ``large_binary``.
+    :type bytestring_to32: bool
+    :param allow_tensor: If True, convert regular-length lists to ``pyarrow.lib.Tensor``;
+                     otherwise, make ``pyarrow.lib.ListArray`` (generating offsets). This is used
+                     by :py:obj:`ak.to_parquet`, since Parquet files can't contain regular-length tensors.
+    :type allow_tensor: bool
+
+Converts an Awkward Array into an Apache Arrow array.
+
+This produces arrays of type ``pyarrow.Array``. You might need to further
+manipulations (using the pyarrow library) to build a ``pyarrow.ChunkedArray``,
+a ``pyarrow.RecordBatch``, or a ``pyarrow.Table``.
+
+Arrow arrays can maintain the distinction between "option-type but no elements are
+missing" and "not option-type" at all levels except the top level. Also, there is
+no distinction between ``?union[X, Y, Z]]`` type and ``union[?X, ?Y, ?Z]`` type. Be
+aware of these type distinctions when passing data through Arrow or Parquet.
+
+See also :py:obj:`ak.from_arrow`, :py:obj:`ak.to_arrow_table`, :py:obj:`ak.to_parquet`.
+

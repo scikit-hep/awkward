@@ -1,0 +1,12 @@
+ak.jax.register_behavior_class
+==============================
+
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/jax.py>`__ on `line 87 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/jax.py#L87>`__.
+
+.. py:function:: ak.jax.register_behavior_class(cls: HighLevelType)
+
+   :param cls: behavior class to register with JAX
+
+   Register the behavior class with JAX, if JAX integration is enabled. Otherwise,
+   queue the type for subsequent registration when/if JAX is registered.
+

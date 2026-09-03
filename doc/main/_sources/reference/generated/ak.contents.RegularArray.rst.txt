@@ -1,0 +1,286 @@
+ak.contents.RegularArray
+========================
+
+Defined in `awkward.contents.regulararray <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/contents/regulararray.py>`__ on `line 74 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/contents/regulararray.py#L74>`__.
+
+.. py:class:: ak.contents.RegularArray(content, size, zeros_length=0, zeros_length_generator=None, *, parameters=None)
+
+
+
+   RegularArray describes lists that all have the same length, the single
+   integer ``size``. Its underlying ``content`` is a flattened view of the data;
+   that is, each list is not stored separately in memory, but is inferred as a
+   subinterval of the underlying data.
+
+   If the ``content`` length is not an integer multiple of ``size``, then the length
+   of the RegularArray is truncated to the largest integer multiple.
+
+   An extra field ``zeros_length`` is ignored unless the ``size`` is zero. This sets the
+   length of the RegularArray in only those cases, so that it is possible for an
+   array to contain a non-zero number of zero-length lists with regular type.
+
+   A multidimensional :py:obj:`ak.contents.NumpyArray` is equivalent to a one-dimensional
+   :py:obj:`ak.layout.NumpyArray` nested within several RegularArrays, one for each
+   dimension. However, RegularArrays can be used to make lists of any other type.
+
+   Like :py:obj:`ak.contents.ListArray` and :py:obj:`ak.contents.ListOffsetArray`, a RegularArray can
+   represent strings if its ``__array__`` parameter is ``"string"`` (UTF-8 assumed) or
+   ``"bytestring"`` (no encoding assumed) and it contains an :py:obj:`ak.contents.NumpyArray`
+   of ``dtype=np.uint8`` whose ``__array__`` parameter is ``"char"`` (UTF-8 assumed) or
+   ``"byte"`` (no encoding assumed).
+
+   RegularArray corresponds to an Apache Arrow
+   `FixedSizeList <https://arrow.apache.org/docs/format/Columnar.html#fixed-size-list-layout>`__.
+
+   To illustrate how the constructor arguments are interpreted, the following is a
+   simplified implementation of ``__init__``, ``__len__``, and ``__getitem__``::
+
+       class RegularArray(Content):
+           def __init__(self, content, size, zeros_length=0):
+               assert isinstance(content, Content)
+               assert isinstance(size, int)
+               assert isinstance(zeros_length, int)
+               assert size >= 0
+               if size != 0:
+                   length = len(content) // size  # floor division
+               else:
+                   assert zeros_length >= 0
+                   length = zeros_length
+               self.content = content
+               self.size = size
+               self.length = length
+
+           def __len__(self):
+               return self.length
+
+           def __getitem__(self, where):
+               if isinstance(where, int):
+                   if where < 0:
+                       where += len(self)
+                   assert 0 <= where < len(self)
+                   return self.content[(where) * self.size : (where + 1) * self.size]
+
+               elif isinstance(where, slice) and where.step is None:
+                   start = where.start * self.size
+                   stop = where.stop * self.size
+                   zeros_length = where.stop - where.start
+                   return RegularArray(
+                       self.content[start:stop], self.size, zeros_length
+                   )
+
+               elif isinstance(where, str):
+                   return RegularArray(self.content[where], self.size, self.length)
+
+               else:
+                   raise AssertionError(where)
+
+
+   .. py:attribute:: _content
+
+
+   .. py:attribute:: _size
+
+
+   .. py:attribute:: _length
+
+
+   .. py:attribute:: _zeros_length_generator
+      :value: None
+
+
+
+   .. py:property:: size
+
+
+   .. py:attribute:: form_cls
+      :type:  awkward._typing.Final
+
+
+   .. py:method:: copy(content=UNSET, size=UNSET, zeros_length=UNSET, zeros_length_generator=UNSET, *, parameters=UNSET)
+
+
+   .. py:method:: __copy__()
+
+
+   .. py:method:: __deepcopy__(memo)
+
+
+   .. py:method:: __getstate__()
+
+
+   .. py:method:: simplified(content, size, zeros_length=0, zeros_length_generator=None, *, parameters=None)
+      :classmethod:
+
+
+
+   .. py:property:: offsets
+      :type: awkward.index.Index
+
+
+
+   .. py:property:: starts
+      :type: awkward.index.Index
+
+
+
+   .. py:property:: stops
+
+
+   .. py:method:: _form_with_key(getkey: awkward._typing.Callable[[awkward.contents.content.Content], str | None]) -> awkward.forms.regularform.RegularForm
+
+
+   .. py:method:: _form_with_key_path(path: awkward.forms.form.FormKeyPathT) -> awkward.forms.regularform.RegularForm
+
+
+   .. py:method:: _to_buffers(form: awkward.forms.form.Form, getkey: awkward._typing.Callable[[awkward.contents.content.Content, awkward.forms.form.Form, str], str], container: collections.abc.MutableMapping[str, awkward._nplikes.array_like.ArrayLike], backend: awkward._backends.backend.Backend, byteorder: str)
+
+
+   .. py:method:: _to_typetracer(forget_length: bool) -> awkward._typing.Self
+
+
+   .. py:method:: _touch_data(recursive: bool)
+
+
+   .. py:method:: _touch_shape(recursive: bool)
+
+
+   .. py:property:: length
+      :type: awkward._nplikes.shape.ShapeItem
+
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _repr(indent, pre, post)
+
+
+   .. py:method:: to_ListOffsetArray64(start_at_zero: bool = False) -> awkward.contents.listoffsetarray.ListOffsetArray
+
+
+   .. py:method:: to_RegularArray()
+
+
+   .. py:method:: maybe_to_NumpyArray() -> awkward.contents.NumpyArray | None
+
+
+   .. py:method:: _getitem_nothing()
+
+
+   .. py:method:: _is_getitem_at_placeholder() -> bool
+
+
+   .. py:method:: _is_getitem_at_virtual() -> bool
+
+
+   .. py:method:: _getitem_at(where: awkward._nplikes.numpy_like.IndexType)
+
+
+   .. py:method:: _getitem_range(start: awkward._nplikes.numpy_like.IndexType, stop: awkward._nplikes.numpy_like.IndexType) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_field(where: str | awkward._typing.SupportsIndex, only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_fields(where: list[str | awkward._typing.SupportsIndex], only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
+
+
+   .. py:method:: _carry(carry: awkward.index.Index, allow_lazy: bool) -> awkward.contents.content.Content
+
+
+   .. py:method:: _compact_offsets64(start_at_zero)
+
+
+   .. py:method:: _broadcast_tooffsets64(offsets: awkward.index.Index) -> awkward.contents.listoffsetarray.ListOffsetArray
+
+
+   .. py:method:: _getitem_next_jagged(slicestarts: awkward.index.Index, slicestops: awkward.index.Index, slicecontent: awkward.contents.content.Content, tail) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_next(head: awkward._slicing.SliceItem | tuple, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> awkward.contents.content.Content
+
+
+   .. py:method:: _offsets_and_flattened(axis: int, depth: int) -> tuple[awkward.index.Index, awkward.contents.content.Content]
+
+
+   .. py:method:: _mergeable_next(other: awkward.contents.content.Content, mergebool: bool, mergecastable: awkward._typing.Literal[same_kind, equiv, family]) -> bool
+
+
+   .. py:method:: _mergemany(others: collections.abc.Sequence[awkward.contents.content.Content]) -> awkward.contents.content.Content
+
+
+   .. py:method:: _fill_none(value: awkward.contents.content.Content) -> awkward.contents.content.Content
+
+
+   .. py:method:: _local_index(axis, depth)
+
+
+   .. py:method:: _numbers_to_type(name, including_unknown)
+
+
+   .. py:method:: _is_unique(negaxis, starts, offsets, outlength)
+
+
+   .. py:method:: _unique(negaxis, starts, offsets, outlength)
+
+
+   .. py:method:: _argsort_next(negaxis, starts, shifts, offsets, outlength, ascending, stable)
+
+
+   .. py:method:: _sort_next(negaxis, starts, offsets, outlength, ascending, stable)
+
+
+   .. py:method:: _combinations(n, replacement, recordlookup, parameters, axis, depth)
+
+
+   .. py:method:: _reduce_next(reducer, negaxis, starts, shifts, offsets, outlength, mask, keepdims, behavior)
+
+
+   .. py:method:: _validity_error(path)
+
+
+   .. py:method:: _nbytes_part()
+
+
+   .. py:method:: _pad_none(target, axis, depth, clip)
+
+
+   .. py:method:: _to_backend_array(allow_missing, backend)
+
+
+   .. py:method:: _to_arrow(pyarrow: awkward._typing.Any, mask_node: awkward.contents.content.Content | None, validbytes: awkward.contents.content.Content | None, length: int, options: awkward.contents.content.ToArrowOptions)
+
+
+   .. py:method:: _remove_structure(backend: awkward._backends.backend.Backend, options: awkward.contents.content.RemoveStructureOptions) -> list[awkward.contents.content.Content]
+
+
+   .. py:method:: _drop_none() -> awkward.contents.content.Content
+
+
+   .. py:method:: _recursively_apply(action: awkward.contents.content.ImplementsApplyAction, depth: int, depth_context: collections.abc.Mapping[str, awkward._typing.Any] | None, lateral_context: collections.abc.Mapping[str, awkward._typing.Any] | None, options: awkward.contents.content.ApplyActionOptions) -> awkward.contents.content.Content | None
+
+
+   .. py:method:: _to_packed(recursive: bool = True) -> awkward._typing.Self
+
+
+   .. py:method:: _to_list(behavior, json_conversions)
+
+
+   .. py:method:: _to_backend(backend: awkward._backends.backend.Backend) -> awkward._typing.Self
+
+
+   .. py:method:: _materialize(type_) -> awkward._typing.Self
+
+
+   .. py:property:: _is_all_materialized
+      :type: bool
+
+
+
+   .. py:property:: _is_any_materialized
+      :type: bool
+
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Self, index_dtype: bool, numpyarray: bool, all_parameters: bool) -> bool
+

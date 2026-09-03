@@ -1,0 +1,14 @@
+ak.str.akstr_split_pattern_regex
+================================
+
+.. py:module:: awkward.operations.str.akstr_split_pattern_regex
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_split_pattern_regex.split_pattern_regex
+
+

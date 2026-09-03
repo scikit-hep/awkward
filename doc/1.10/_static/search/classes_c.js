@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['record_1418',['Record',['../classawkward_1_1LayoutBuilder_1_1Record.html',1,'LayoutBuilder&lt; T, I &gt;::Record&lt; MAP, BUILDERS &gt;'],['../classawkward_1_1Record.html',1,'Record']]],
+  ['recordarray_1419',['RecordArray',['../classawkward_1_1RecordArray.html',1,'awkward']]],
+  ['recordarraybuilder_1420',['RecordArrayBuilder',['../classawkward_1_1RecordArrayBuilder.html',1,'awkward']]],
+  ['recordbuilder_1421',['RecordBuilder',['../classawkward_1_1RecordBuilder.html',1,'awkward']]],
+  ['recordform_1422',['RecordForm',['../classawkward_1_1RecordForm.html',1,'awkward']]],
+  ['recordtype_1423',['RecordType',['../classawkward_1_1RecordType.html',1,'awkward']]],
+  ['reducer_1424',['Reducer',['../classawkward_1_1Reducer.html',1,'awkward']]],
+  ['reducerall_1425',['ReducerAll',['../classawkward_1_1ReducerAll.html',1,'awkward']]],
+  ['reducerany_1426',['ReducerAny',['../classawkward_1_1ReducerAny.html',1,'awkward']]],
+  ['reducerargmax_1427',['ReducerArgmax',['../classawkward_1_1ReducerArgmax.html',1,'awkward']]],
+  ['reducerargmin_1428',['ReducerArgmin',['../classawkward_1_1ReducerArgmin.html',1,'awkward']]],
+  ['reducercount_1429',['ReducerCount',['../classawkward_1_1ReducerCount.html',1,'awkward']]],
+  ['reducercountnonzero_1430',['ReducerCountNonzero',['../classawkward_1_1ReducerCountNonzero.html',1,'awkward']]],
+  ['reducermax_1431',['ReducerMax',['../classawkward_1_1ReducerMax.html',1,'awkward']]],
+  ['reducermin_1432',['ReducerMin',['../classawkward_1_1ReducerMin.html',1,'awkward']]],
+  ['reducerprod_1433',['ReducerProd',['../classawkward_1_1ReducerProd.html',1,'awkward']]],
+  ['reducersum_1434',['ReducerSum',['../classawkward_1_1ReducerSum.html',1,'awkward']]],
+  ['regular_1435',['Regular',['../classawkward_1_1LayoutBuilder_1_1Regular.html',1,'awkward::LayoutBuilder']]],
+  ['regulararray_1436',['RegularArray',['../classawkward_1_1RegularArray.html',1,'awkward']]],
+  ['regulararraybuilder_1437',['RegularArrayBuilder',['../classawkward_1_1RegularArrayBuilder.html',1,'awkward']]],
+  ['regularform_1438',['RegularForm',['../classawkward_1_1RegularForm.html',1,'awkward']]],
+  ['regulartype_1439',['RegularType',['../classawkward_1_1RegularType.html',1,'awkward']]]
+];

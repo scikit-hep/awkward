@@ -1,0 +1,14 @@
+ak.str.akstr_is_digit
+=====================
+
+.. py:module:: awkward.operations.str.akstr_is_digit
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_digit.is_digit
+
+

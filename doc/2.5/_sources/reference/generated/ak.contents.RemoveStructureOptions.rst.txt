@@ -1,0 +1,9 @@
+ak.contents.RemoveStructureOptions
+----------------------------------
+
+.. py:module: ak.contents.RemoveStructureOptions
+
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/contents/content.py>`__ on `line 103 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/contents/content.py#L103>`__.
+
+.. py:class:: ak.contents.RemoveStructureOptions(self)
+

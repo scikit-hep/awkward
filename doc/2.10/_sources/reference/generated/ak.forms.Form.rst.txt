@@ -1,0 +1,123 @@
+ak.forms.Form
+=============
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/forms/form.py>`__ on `line 385 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/forms/form.py#L385>`__.
+
+.. py:class:: ak.forms.Form
+
+
+
+   .. py:method:: _init(*, parameters: awkward._typing.JSONMapping | None, form_key: str | None)
+
+
+   .. py:property:: form_key
+
+
+   .. py:method:: __str__()
+
+
+   .. py:method:: to_dict(verbose=True)
+
+
+   .. py:method:: _to_dict_extra(out, verbose)
+
+
+   .. py:method:: to_json()
+
+
+   .. py:method:: _repr_args()
+
+
+   .. py:property:: type
+      :abstractmethod:
+
+
+
+   .. py:method:: columns(list_indicator=None, column_prefix=())
+
+
+   .. py:method:: select_columns(specifier, expand_braces=True, *, prune_unions_and_records: bool = True)
+
+      select_columns returns a new Form with only columns and sub-columns selected.
+      Returns an empty Form if no columns matched the specifier(s).
+
+      ``specifier`` can be a ``str | Iterable[str | Iterable[str]]``.
+      Strings may include shell-globbing-style wildcards "*" and "?".
+      If ``expand_braces`` is ``True`` (the default), strings may include alternatives in braces.
+      For example, ``["a.{b,c}.d"]`` is equivalent to ``["a.b.d", "a.c.d"]``.
+      Glob-style matching would also suit this single-character instance: ``"a.[bc].d"``.
+      If specifier is a list which contains a list/tuple, that inner list will be interpreted as
+      column and subcolumn specifiers. They *may* contain wildcards, but "." will not be
+      interpreted as a ``<field>.<subfield>`` pattern.
+
+
+
+   .. py:method:: column_types()
+
+
+   .. py:method:: _columns(path, output, list_indicator)
+      :abstractmethod:
+
+
+
+   .. py:method:: _prune_columns(is_inside_record_or_union: bool) -> Form | None
+      :abstractmethod:
+
+
+
+   .. py:method:: _select_columns(match_specifier: _SpecifierMatcher) -> Form | None
+      :abstractmethod:
+
+
+
+   .. py:method:: _column_types()
+      :abstractmethod:
+
+
+
+   .. py:method:: _to_dict_part(verbose, toplevel)
+      :abstractmethod:
+
+
+
+   .. py:method:: length_zero_array(*, backend=numpy_backend, highlevel=False, behavior=None)
+
+
+   .. py:method:: length_one_array(*, backend=numpy_backend, highlevel=False, behavior=None)
+
+
+   .. py:method:: _expected_from_buffers(getkey: collections.abc.Callable[[Form, str], str], recursive: bool) -> awkward._typing.Iterator[tuple[str, awkward._typing.DType]]
+      :abstractmethod:
+
+
+
+   .. py:method:: expected_from_buffers(buffer_key='{form_key}-{attribute}', recursive=True)
+
+      :param buffer_key: Python format string containing
+                         ``"{form_key}"`` and/or ``"{attribute}"`` or a function that takes these
+                         as keyword arguments and returns a string to use as a key for a buffer
+                         in the ``container``.
+      :type buffer_key: str or callable
+      :param recursive: If True, recurse into subforms; otherwise, yield
+                        only the (buffer_key, dtype) pairs for this form object.
+      :type recursive: bool
+
+      Yield (buffer_key, dtype) pairs describing the expected buffer keys,
+      and their corresponding dtypes, that a call to :py:obj:`ak.from_buffers` would
+      be expected to find from the ``container`` object.
+
+
+
+   .. py:method:: is_equal_to(other: awkward._typing.Any, *, all_parameters: bool = False, form_key: bool = False) -> bool
+
+
+   .. py:attribute:: __eq__
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool, form_key: bool) -> bool
+      :abstractmethod:
+
+
+
+   .. py:method:: _is_equal_to_generic(other: awkward._typing.Any, all_parameters: bool, form_key: bool) -> bool
+

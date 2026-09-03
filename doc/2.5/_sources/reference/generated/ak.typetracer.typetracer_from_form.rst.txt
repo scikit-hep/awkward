@@ -1,0 +1,25 @@
+ak.typetracer.typetracer_from_form
+----------------------------------
+
+.. py:module: ak.typetracer.typetracer_from_form
+
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/typetracer.py>`__ on `line 212 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/typetracer.py#L212>`__.
+
+.. py:function:: ak.typetracer.typetracer_from_form(form, *, highlevel=True, behavior=None, attrs=None)
+
+
+    :param form: The form of the Awkward
+             Array to build a typetracer-backed array from.
+    :type form: :py:obj:`ak.forms.Form` or str/dict equivalent
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Returns a typetracer array built from a form.
+

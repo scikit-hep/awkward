@@ -1,0 +1,9 @@
+ak.forms.form_with_unique_keys
+------------------------------
+
+.. py:module: ak.forms.form_with_unique_keys
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/forms/form.py>`__ on `line 754 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/forms/form.py#L754>`__.
+
+.. py:function:: ak.forms.form_with_unique_keys(form, key)
+

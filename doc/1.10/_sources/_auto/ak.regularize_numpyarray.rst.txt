@@ -1,0 +1,26 @@
+ak.regularize_numpyarray
+------------------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 1942 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L1942>`__.
+
+.. py:function:: ak.regularize_numpyarray(array, allow_empty=True, highlevel=True, behavior=None)
+
+
+    :param array: Data to convert into an Awkward Array.
+    :param allow_empty: If True, allow :py:obj:`ak.layout.EmptyArray` in the output;
+                    otherwise, convert empty arrays into :py:obj:`ak.layout.NumpyArray`.
+    :type allow_empty: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Converts any multidimensional :py:obj:`ak.layout.NumpyArray.shape` into nested
+:py:obj:`ak.layout.RegularArray` nodes. The output may have any Awkward data type:
+this only changes the representation of :py:obj:`ak.layout.NumpyArray`.
+
+This function is usually used to sanitize inputs for other functions; it
+would rarely be used in a data analysis.
+

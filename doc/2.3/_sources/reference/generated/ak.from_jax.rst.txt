@@ -1,0 +1,35 @@
+ak.from_jax
+-----------
+
+.. py:module: ak.from_jax
+
+Defined in `awkward.operations.ak_from_jax <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/operations/ak_from_jax.py>`__ on `line 9 <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/operations/ak_from_jax.py#L9>`__.
+
+.. py:function:: ak.from_jax(array, *, regulararray=False, highlevel=True, behavior=None)
+
+
+    :param array: The JAX DeviceArray to convert into an Awkward Array.
+    :type array: jax.numpy.DeviceArray
+    :param regulararray: If True and the array is multidimensional,
+                     the dimensions are represented by nested :py:obj:`ak.contents.RegularArray`
+                     nodes; if False and the array is multidimensional, the dimensions
+                     are represented by a multivalued :py:obj:`ak.contents.NumpyArray.shape`.
+                     If the array is one-dimensional, this has no effect.
+    :type regulararray: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Converts a JAX DeviceArray array into an Awkward Array.
+
+The resulting layout may involve the following :py:obj:`ak.contents.Content` types
+(only):
+
+* :py:obj:`ak.contents.NumpyArray`
+* :py:obj:`ak.contents.RegularArray` if ``regulararray=True``.
+
+See also :py:obj:`ak.to_jax`, :py:obj:`ak.from_numpy` and :py:obj:`ak.from_jax`.
+

@@ -1,0 +1,53 @@
+ak.ByteBehavior
+---------------
+
+Defined in `awkward.behaviors.string <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/string.py>`__ on `line 10 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/string.py#L10>`__.
+
+.. py:class:: ak.ByteBehavior((self))
+
+ak.ByteBehavior.__name__
+========================
+
+.. py:attribute:: ak.ByteBehavior.__name__
+    :value: 'Array'
+
+ak.ByteBehavior.__bytes__
+=========================
+
+.. py:method:: ak.ByteBehavior.__bytes__(self)
+
+ak.ByteBehavior.__str__
+=======================
+
+.. py:method:: ak.ByteBehavior.__str__(self)
+
+ak.ByteBehavior.__repr__
+========================
+
+.. py:method:: ak.ByteBehavior.__repr__(self)
+
+ak.ByteBehavior.__iter__
+========================
+
+.. py:method:: ak.ByteBehavior.__iter__(self)
+
+ak.ByteBehavior.__eq__
+======================
+
+.. py:method:: ak.ByteBehavior.__eq__(self, other)
+
+ak.ByteBehavior.__ne__
+======================
+
+.. py:method:: ak.ByteBehavior.__ne__(self, other)
+
+ak.ByteBehavior.__add__
+=======================
+
+.. py:method:: ak.ByteBehavior.__add__(self, other)
+
+ak.ByteBehavior.__radd__
+========================
+
+.. py:method:: ak.ByteBehavior.__radd__(self, other)
+

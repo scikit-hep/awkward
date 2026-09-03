@@ -1,0 +1,33 @@
+ak.index.LazyIndex
+==================
+
+Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/index.py>`__ on `line 329 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/index.py#L329>`__.
+
+.. py:class:: ak.index.LazyIndex(factory, length: awkward._nplikes.shape.ShapeItem, nplike: awkward._nplikes.numpy_like.NumpyLike, dtype: awkward._typing.DType | None = None)
+
+   .. py:attribute:: __slots__
+      :value: ('_dtype', '_factory', '_index', '_length', '_nplike')
+
+
+
+   .. py:attribute:: _factory
+
+
+   .. py:attribute:: _length
+
+
+   .. py:attribute:: _nplike
+
+
+   .. py:attribute:: _dtype
+      :value: None
+
+
+
+   .. py:attribute:: _index
+      :value: None
+
+
+
+   .. py:method:: _materialize() -> Index
+

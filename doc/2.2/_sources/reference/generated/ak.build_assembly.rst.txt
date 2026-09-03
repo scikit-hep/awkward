@@ -1,0 +1,9 @@
+ak.build_assembly
+-----------------
+
+.. py:module: ak.build_assembly
+
+Defined in `awkward.operations.ak_from_json <https://github.com/scikit-hep/awkward-1.0/blob/53dc6aed93d8843db55cae4d2d829285a2f785d7/src/awkward/operations/ak_from_json.py>`__ on `line 583 <https://github.com/scikit-hep/awkward-1.0/blob/53dc6aed93d8843db55cae4d2d829285a2f785d7/src/awkward/operations/ak_from_json.py#L583>`__.
+
+.. py:function:: ak.build_assembly(schema, container, instructions)
+

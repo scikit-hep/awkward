@@ -1,0 +1,34 @@
+ak.str.join_element_wise
+------------------------
+
+.. py:module: ak.str.join_element_wise
+
+Defined in `awkward.operations.str.akstr_join_element_wise <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/str/akstr_join_element_wise.py>`__ on `line 18 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/str/akstr_join_element_wise.py#L18>`__.
+
+.. py:function:: ak.str.join_element_wise(*arrays, highlevel=True, behavior=None)
+
+
+    :param arrays: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Broadcasts and concatenates all but the last array of strings in ``arrays``;
+the last is used as a separator.
+
+Note: this function does not raise an error if the ``array`` does not
+contain any string or bytestring data.
+
+Requires the pyarrow library and calls
+`pyarrow.compute.binary_join_element_wise <https://arrow.apache.org/docs/python/generated/pyarrow.compute.binary_join_element_wise.html>`__.
+
+Unlike Arrow's ``binary_join_element_wise``, this function has no ``null_handling``
+and ``null_replacement`` arguments. This function's behavior is like
+``null_handling="emit_null"`` (Arrow's default). The other cases can be implemented
+with Awkward slices, :py:obj:`ak.drop_none`, and :py:obj:`ak.fill_none`.
+
+See also: :py:obj:`ak.str.join`.
+

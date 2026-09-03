@@ -1,0 +1,25 @@
+ak.atleast_1d
+-------------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 4460 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L4460>`__.
+
+.. py:function:: ak.atleast_1d()
+
+
+    :param arrays: Rectilinear arrays to be converted to NumPy arrays of at
+               least 1 dimension.
+    :param axis: The dimension at which this operation is applied. The
+             outermost dimension is ``0``, followed by ``1``, etc., and negative
+             values count backward from the innermost: ``-1`` is the innermost
+             dimension, ``-2`` is the next level up, etc.
+    :type axis: int
+
+Implements NumPy's
+`atleast_1d <https://docs.scipy.org/doc/numpy/reference/generated/numpy.atleast_1d.html>`__
+function in a way that accepts :py:obj:`ak.Array` objects as the ``arrays``.
+
+If the ``arrays`` are not all rectilinear (i.e. if #np.to_numpy would raise an
+error), then this function raise an error.
+
+Note: this function returns a NumPy array, not an Awkward Array.
+

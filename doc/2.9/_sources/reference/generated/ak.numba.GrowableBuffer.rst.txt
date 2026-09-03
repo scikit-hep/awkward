@@ -1,0 +1,61 @@
+ak.numba.GrowableBuffer
+=======================
+
+Defined in `awkward.numba.__init__ <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/numba/__init__.py>`__ on `line 44 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/numba/__init__.py#L44>`__.
+
+.. py:class:: ak.numba.GrowableBuffer(dtype, *, initial=1024, resize=8.0)
+
+   .. py:attribute:: _panels
+
+
+   .. py:attribute:: _length_pos
+
+
+   .. py:attribute:: _resize
+      :value: 8.0
+
+
+
+   .. py:method:: _from_data(panels, length_pos, resize)
+      :classmethod:
+
+
+
+   .. py:property:: dtype
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:property:: _length
+
+
+   .. py:method:: _length_inc(value)
+
+
+   .. py:property:: _pos
+
+
+   .. py:method:: _pos_inc(value)
+
+
+   .. py:method:: __len__()
+
+
+   .. py:method:: last()
+
+
+   .. py:method:: append(datum)
+
+
+   .. py:method:: extend(data)
+
+
+   .. py:method:: _add_panel()
+
+
+   .. py:method:: snapshot()
+
+
+   .. py:method:: clear()
+

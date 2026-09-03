@@ -1,0 +1,183 @@
+ak.typetracer.PlaceholderArray
+==============================
+
+Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/placeholder.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/placeholder.py#L16>`__.
+
+.. py:class:: ak.typetracer.PlaceholderArray(nplike: awkward._nplikes.numpy_like.NumpyLike, shape: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis], dtype: awkward._typing.DType, buffer_key: str | None = None)
+
+
+
+   Base class for protocol classes.
+
+   Protocol classes are defined as::
+
+       class Proto(Protocol):
+           def meth(self) -> int:
+               ...
+
+   Such classes are primarily used with static type checkers that recognize
+   structural subtyping (static duck-typing), for example::
+
+       class C:
+           def meth(self) -> int:
+               return 0
+
+       def func(x: Proto) -> int:
+           return x.meth()
+
+       func(C())  # Passes static type check
+
+   See PEP 544 for details. Protocol classes decorated with
+   @typing.runtime_checkable act as simple-minded runtime protocols that check
+   only the presence of given attributes, ignoring their type signatures.
+   Protocol classes can be generic, they are defined as::
+
+       class GenProto(Protocol[T]):
+           def meth(self) -> T:
+               ...
+
+
+   .. py:attribute:: _nplike
+
+
+   .. py:attribute:: _shape
+
+
+   .. py:attribute:: _dtype
+
+
+   .. py:attribute:: _buffer_key
+      :value: None
+
+
+
+   .. py:property:: buffer_key
+      :type: str | None
+
+
+
+   .. py:property:: dtype
+      :type: awkward._typing.DType
+
+
+
+   .. py:property:: shape
+      :type: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis]
+
+
+
+   .. py:property:: ndim
+      :type: int
+
+
+
+   .. py:property:: size
+      :type: awkward._nplikes.shape.ShapeItem
+
+
+
+   .. py:property:: nbytes
+      :type: int
+
+
+
+   .. py:method:: materialize()
+
+
+   .. py:property:: strides
+      :type: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis]
+
+
+
+   .. py:property:: T
+
+
+   .. py:method:: view(dtype: numpy.typing.DTypeLike) -> awkward._typing.Self
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: __getitem__(index)
+
+
+   .. py:method:: tolist()
+
+
+   .. py:method:: __setitem__(key, value)
+
+
+   .. py:method:: __bool__()
+
+
+   .. py:method:: __int__()
+
+
+   .. py:method:: __index__()
+
+
+   .. py:method:: __len__() -> int
+
+
+   .. py:method:: __add__(other)
+
+
+   .. py:method:: __and__(other)
+
+
+   .. py:method:: __eq__(other)
+
+
+   .. py:method:: __floordiv__(other)
+
+
+   .. py:method:: __ge__(other)
+
+
+   .. py:method:: __gt__(other)
+
+
+   .. py:method:: __invert__()
+
+
+   .. py:method:: __le__(other)
+
+
+   .. py:method:: __lt__(other)
+
+
+   .. py:method:: __mul__(other)
+
+
+   .. py:method:: __or__(other)
+
+
+   .. py:method:: __sub__(other)
+
+
+   .. py:method:: __truediv__(other)
+
+
+   .. py:method:: __iter__()
+
+
+   .. py:method:: __array__(dtype=None, copy=None)
+
+
+   .. py:method:: __cupy_get_ndarray__()
+
+
+   .. py:method:: __jax_array__()
+
+
+   .. py:property:: __array_interface__
+
+
+   .. py:property:: __cuda_array_interface__
+
+
+   .. py:method:: __dlpack_device__()
+
+
+   .. py:method:: __dlpack__(stream: awkward._typing.Any = None)
+

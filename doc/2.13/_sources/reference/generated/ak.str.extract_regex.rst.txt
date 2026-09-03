@@ -1,0 +1,52 @@
+ak.str.extract_regex
+====================
+
+Defined in `awkward.operations.str.akstr_extract_regex <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/str/akstr_extract_regex.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/str/akstr_extract_regex.py#L12>`__.
+
+.. py:function:: ak.str.extract_regex(array, pattern, *, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param pattern: Regular expression with named capture fields.
+   :type pattern: str or bytes
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Returns None for every string in ``array`` if it does not match ``pattern``;
+   otherwise, a record whose fields are named capture groups and whose
+   contents are the substrings they've captured.
+
+   Uses `Google RE2 <https://github.com/google/re2/wiki/Syntax>`__, and ``pattern`` must
+   contain named groups. The syntax for a named group is ``(?P<...>...)`` in which
+   the first ``...`` is a name and the last ``...`` is a regular expression.
+
+   For example,
+
+       >>> array = ak.Array([["one1", "two2", "three3"], [], ["four4", "five5"]])
+       >>> result = ak.str.extract_regex(array, "(?P<vowel>[aeiou])(?P<number>[0-9]+)")
+       >>> result.show(type=True)
+       type: 3 * var * ?{
+           vowel: ?string,
+           number: ?string
+       }
+       [[{vowel: 'e', number: '1'}, {vowel: 'o', number: '2'}, {vowel: 'e', number: '3'}],
+        [],
+        [None, {vowel: 'e', number: '5'}]]
+
+   (The string ``"four4"`` does not match because the vowel is not immediately before
+   the number.)
+
+   Regular expressions with unnamed groups or features not implemented by RE2 raise an error.
+
+   Note: this function does not raise an error if the ``array`` does not
+   contain any string or bytestring data.
+
+   Requires the pyarrow library and calls
+   `pyarrow.compute.extract_regex <https://arrow.apache.org/docs/python/generated/pyarrow.compute.extract_regex.html>`__.
+

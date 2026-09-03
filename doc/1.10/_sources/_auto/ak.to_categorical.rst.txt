@@ -1,0 +1,78 @@
+ak.to_categorical
+-----------------
+
+Defined in `awkward.behaviors.categorical <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/categorical.py>`__ on `line 172 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/categorical.py#L172>`__.
+
+.. py:function:: ak.to_categorical(array, highlevel=True)
+
+
+    :param array: Data convertible to an Awkward Array
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+
+Creates a categorical dataset, which has the following properties:
+
+   * only distinct values (categories) are stored in their entirety,
+   * pointers to those distinct values are represented by integers
+     (an :py:obj:`ak.layout.IndexedArray` or :py:obj:`ak.layout.IndexedOptionArray`
+     labeled with parameter ``"__array__" = "categorical"``.
+
+This is equivalent to R's "factor", Pandas's "categorical", and
+Arrow/Parquet's "dictionary encoding." It differs from generic uses of
+:py:obj:`ak.layout.IndexedArray` and :py:obj:`ak.layout.IndexedOptionArray` in Awkward
+Arrays by the guarantee of no duplicate categories and the ``"categorical"``
+parameter.
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([["one", "two", "three"], [], ["three", "two"]])
+    >>> categorical = ak.to_categorical(array)
+    >>> categorical
+    <Array [['one', 'two', ... 'three', 'two']] type='3 * var * categorical[type=str...'>
+    >>> ak.type(categorical)
+    3 * var * categorical[type=string]
+    >>> ak.to_list(categorical) == ak.to_list(array)
+    True
+    >>> ak.categories(categorical)
+    <Array ['one', 'two', 'three'] type='3 * string'>
+    >>> ak.is_categorical(categorical)
+    True
+    >>> ak.from_categorical(categorical)
+    <Array [['one', 'two', ... 'three', 'two']] type='3 * var * string'>
+
+This function descends through nested lists, but not into the fields of
+records, so records can be categories. To make categorical record
+fields, split up the record, apply this function to each desired field,
+and :py:obj:`ak.zip` the results together.
+
+.. code-block:: python
+
+
+    >>> records = ak.Array([
+    ...     {"x": 1.1, "y": "one"},
+    ...     {"x": 2.2, "y": "two"},
+    ...     {"x": 3.3, "y": "three"},
+    ...     {"x": 2.2, "y": "two"},
+    ...     {"x": 1.1, "y": "one"}
+    ... ])
+    >>> records
+    <Array [{x: 1.1, y: 'one'}, ... y: 'one'}] type='5 * {"x": float64, "y": string}'>
+    >>> categorical_records = ak.zip({
+    ...     "x": ak.to_categorical(records["x"]),
+    ...     "y": ak.to_categorical(records["y"]),
+    ... })
+    >>> categorical_records
+    <Array [{x: 1.1, y: 'one'}, ... y: 'one'}] type='5 * {"x": categorical[type=floa...'>
+    >>> ak.type(categorical_records)
+    5 * {"x": categorical[type=float64], "y": categorical[type=string]}
+    >>> ak.to_list(categorical_records) == ak.to_list(records)
+    True
+
+The check for uniqueness is currently implemented in a Python loop, so
+conversion to categorical should be regarded as expensive. (This can
+change, but it would always be an _n log(n)_ operation.)
+
+See also :py:obj:`ak.is_categorical`, :py:obj:`ak.categories`, :py:obj:`ak.from_categorical`.
+

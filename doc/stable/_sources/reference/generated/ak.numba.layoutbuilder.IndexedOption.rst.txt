@@ -1,0 +1,58 @@
+ak.numba.layoutbuilder.IndexedOption
+====================================
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/numba/layoutbuilder.py>`__ on `line 263 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/numba/layoutbuilder.py#L263>`__.
+
+.. py:class:: ak.numba.layoutbuilder.IndexedOption(dtype, content, *, parameters=None, initial=1024, resize=8.0)
+
+
+
+   .. py:attribute:: _last_valid
+      :value: -1
+
+
+
+   .. py:attribute:: _index
+
+
+   .. py:attribute:: _content
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: numbatype()
+
+
+   .. py:property:: index
+
+
+   .. py:property:: content
+
+
+   .. py:property:: form
+
+
+   .. py:method:: append_valid()
+
+
+   .. py:method:: extend_valid(size)
+
+
+   .. py:method:: append_invalid()
+
+
+   .. py:method:: extend_invalid(size)
+
+
+   .. py:method:: clear()
+
+
+   .. py:method:: __len__()
+
+
+   .. py:method:: is_valid(error: str)
+
+
+   .. py:method:: snapshot() -> awkward.contents.Content
+

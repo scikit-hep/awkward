@@ -1,0 +1,213 @@
+ak.record.Record
+----------------
+
+.. py:module: ak.record.Record
+
+Defined in `awkward.record <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/record.py>`__ on `line 25 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/record.py#L25>`__.
+
+.. py:class:: ak.record.Record(self, array, at)
+
+Represents a single value from a :py:obj:`ak.contents.RecordArray`.
+
+As this is a columnar representation, the Record contains a
+:py:obj:`ak.layout.RecordArray`, rather than the other way around.
+Its two fields are
+
+* ``array``: the :py:obj:`ak.layout.RecordArray` and
+* ``at``: the index posiion where this Record is found.
+
+The Record shares a reference with its :py:obj:`ak.layout.RecordArray`;
+it is not a copy.
+
+
+
+.. _ak-record-record-array:
+
+.. py:attribute:: ak.record.Record.array
+
+
+
+.. _ak-record-record-backend:
+
+.. py:attribute:: ak.record.Record.backend
+
+
+
+.. _ak-record-record-at:
+
+.. py:attribute:: ak.record.Record.at
+
+
+
+.. _ak-record-record-fields:
+
+.. py:attribute:: ak.record.Record.fields
+
+
+
+.. _ak-record-record-is_tuple:
+
+.. py:attribute:: ak.record.Record.is_tuple
+
+
+
+.. _ak-record-record-to_tuple:
+
+.. py:method:: ak.record.Record.to_tuple(self)
+
+
+
+.. _ak-record-record-contents:
+
+.. py:attribute:: ak.record.Record.contents
+
+
+
+.. _ak-record-record-content:
+
+.. py:method:: ak.record.Record.content(self, index_or_field)
+
+
+
+.. _ak-record-record-__repr__:
+
+.. py:method:: ak.record.Record.__repr__(self)
+
+
+
+.. _ak-record-record-_repr:
+
+.. py:method:: ak.record.Record._repr(self, indent, pre, post)
+
+
+
+.. _ak-record-record-validity_error:
+
+.. py:method:: ak.record.Record.validity_error(self, path='layout.array')
+
+
+
+.. _ak-record-record-parameters:
+
+.. py:attribute:: ak.record.Record.parameters
+
+
+
+.. _ak-record-record-parameter:
+
+.. py:method:: ak.record.Record.parameter(self, key)
+
+
+
+.. _ak-record-record-purelist_parameter:
+
+.. py:method:: ak.record.Record.purelist_parameter(self, key)
+
+
+
+.. _ak-record-record-purelist_parameters:
+
+.. py:method:: ak.record.Record.purelist_parameters(self, *keys)
+
+
+
+.. _ak-record-record-purelist_isregular:
+
+.. py:attribute:: ak.record.Record.purelist_isregular
+
+
+
+.. _ak-record-record-purelist_depth:
+
+.. py:attribute:: ak.record.Record.purelist_depth
+
+
+
+.. _ak-record-record-minmax_depth:
+
+.. py:attribute:: ak.record.Record.minmax_depth
+
+
+
+.. _ak-record-record-branch_depth:
+
+.. py:attribute:: ak.record.Record.branch_depth
+
+
+
+.. _ak-record-record-_touch_data:
+
+.. py:method:: ak.record.Record._touch_data(self, recursive)
+
+
+
+.. _ak-record-record-_touch_shape:
+
+.. py:method:: ak.record.Record._touch_shape(self, recursive)
+
+
+
+.. _ak-record-record-__getitem__:
+
+.. py:method:: ak.record.Record.__getitem__(self, where)
+
+
+
+.. _ak-record-record-_getitem:
+
+.. py:method:: ak.record.Record._getitem(self, where)
+
+
+
+.. _ak-record-record-_getitem_field:
+
+.. py:method:: ak.record.Record._getitem_field(self, where, only_fields=())
+
+
+
+.. _ak-record-record-_getitem_fields:
+
+.. py:method:: ak.record.Record._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-record-record-to_packed:
+
+.. py:method:: ak.record.Record.to_packed(self)
+
+
+
+.. _ak-record-record-to_list:
+
+.. py:method:: ak.record.Record.to_list(self, behavior=None)
+
+
+
+.. _ak-record-record-_to_list:
+
+.. py:method:: ak.record.Record._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-record-record-to_backend:
+
+.. py:method:: ak.record.Record.to_backend(self, backend=None)
+
+
+
+.. _ak-record-record-__copy__:
+
+.. py:method:: ak.record.Record.__copy__(self)
+
+
+
+.. _ak-record-record-__deepcopy__:
+
+.. py:method:: ak.record.Record.__deepcopy__(self, memo)
+
+
+
+.. _ak-record-record-copy:
+
+.. py:method:: ak.record.Record.copy(self, array=UNSET, at=UNSET)
+

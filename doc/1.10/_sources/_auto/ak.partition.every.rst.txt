@@ -1,0 +1,7 @@
+ak.partition.every
+------------------
+
+Defined in `awkward.partition <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/partition.py>`__ on `line 29 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/partition.py#L29>`__.
+
+.. py:function:: ak.partition.every(obj)
+

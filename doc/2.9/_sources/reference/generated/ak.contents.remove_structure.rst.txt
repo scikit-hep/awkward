@@ -1,0 +1,9 @@
+ak.contents.remove_structure
+----------------------------
+
+.. py:module: ak.contents.remove_structure
+
+Defined in `awkward.contents.remove_structure <https://github.com/scikit-hep/awkward/blob/e4be9febc76c610eea671ef3f0e3084cb206da49/src/awkward/contents/remove_structure.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/e4be9febc76c610eea671ef3f0e3084cb206da49/src/awkward/contents/remove_structure.py#L11>`__.
+
+.. py:function:: ak.contents.remove_structure(layout, backend=None, flatten_records=True, function_name=None, drop_nones=True, keepdims=False, allow_records=False, list_to_regular=False)
+

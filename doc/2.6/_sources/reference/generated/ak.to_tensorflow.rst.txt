@@ -1,0 +1,19 @@
+ak.to_tensorflow
+----------------
+
+.. py:module: ak.to_tensorflow
+
+Defined in `awkward.operations.ak_to_tensorflow <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_to_tensorflow.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_to_tensorflow.py#L15>`__.
+
+.. py:function:: ak.to_tensorflow(array)
+
+
+    :param array: Array-like data. May be a high level :py:obj:`ak.Array`,
+              or low-level :py:obj:`ak.contents.ListOffsetArray`, :py:obj:`ak.contents.ListArray`,
+              :py:obj:`ak.contents.RegularArray`, :py:obj:`ak.contents.NumpyArray`
+
+Converts ``array`` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
+into a TensorFlow Tensor, if possible.
+
+If ``array`` contains any other data types (RecordArray for example) the function raises a TypeError.
+

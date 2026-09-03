@@ -1,0 +1,33 @@
+ak.from_arrow
+-------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 2593 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L2593>`__.
+
+.. py:function:: ak.from_arrow(array, highlevel=True, behavior=None)
+
+
+    :param array (``pyarrow.Array``: or ``pyarrow.Table``): Apache Arrow array to convert into an
+                                 Awkward Array.
+    :param ``pyarrow.ChunkedArray``: or ``pyarrow.Table``): Apache Arrow array to convert into an
+                                 Awkward Array.
+    :param ``pyarrow.RecordBatch``: or ``pyarrow.Table``): Apache Arrow array to convert into an
+                                Awkward Array.
+    :param : or ``pyarrow.Table``): Apache Arrow array to convert into an
+         Awkward Array.
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Converts an Apache Arrow array into an Awkward Array.
+
+Arrow arrays can maintain the distinction between "option-type but no elements are
+missing" and "not option-type" at all levels except the top level. Arrow tables
+can maintain the distinction at all levels. However, note that there is no distinction
+between ``?union[X, Y, Z]]`` type and ``union[?X, ?Y, ?Z]`` type. Be aware of these
+type distinctions when passing data through Arrow or Parquet.
+
+See also :py:obj:`ak.to_arrow`, :py:obj:`ak.to_arrow_table`.
+

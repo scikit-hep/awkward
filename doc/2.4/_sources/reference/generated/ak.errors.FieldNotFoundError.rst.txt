@@ -1,0 +1,9 @@
+ak.errors.FieldNotFoundError
+----------------------------
+
+.. py:module: ak.errors.FieldNotFoundError
+
+Defined in `awkward.errors <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/errors.py>`__ on `line 9 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/errors.py#L9>`__.
+
+.. py:class:: ak.errors.FieldNotFoundError(self)
+

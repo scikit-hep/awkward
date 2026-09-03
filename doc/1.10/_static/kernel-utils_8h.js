@@ -1,0 +1,28 @@
+var kernel_utils_8h =
+[
+    [ "awkward_free", "kernel-utils_8h.html#a78d2ae30b0138ab3b55ecf7401abe7f1", null ],
+    [ "awkward_Index32_getitem_at_nowrap", "kernel-utils_8h.html#a70d6be4350cf4a2183239062c1a029c6", null ],
+    [ "awkward_Index32_setitem_at_nowrap", "kernel-utils_8h.html#afc6904d98317abcb547adf00024c6de7", null ],
+    [ "awkward_Index64_getitem_at_nowrap", "kernel-utils_8h.html#a2248fed5615313d65cc03edbe652c9e1", null ],
+    [ "awkward_Index64_setitem_at_nowrap", "kernel-utils_8h.html#a3ba0e91f80dd299889803a91a740eb6c", null ],
+    [ "awkward_Index8_getitem_at_nowrap", "kernel-utils_8h.html#ad1745991006dde02cc889e020eb4c93f", null ],
+    [ "awkward_Index8_setitem_at_nowrap", "kernel-utils_8h.html#a1d1fd677680f3e0a700c5b06cf7fa10b", null ],
+    [ "awkward_IndexU32_getitem_at_nowrap", "kernel-utils_8h.html#ab246fc91c7bfc542937e982ed6bfa778", null ],
+    [ "awkward_IndexU32_setitem_at_nowrap", "kernel-utils_8h.html#aa4dc7aeb98ad64cfc0dbc9abee9d120c", null ],
+    [ "awkward_IndexU8_getitem_at_nowrap", "kernel-utils_8h.html#a5eaabe3530d8075927fe817713bdcef5", null ],
+    [ "awkward_IndexU8_setitem_at_nowrap", "kernel-utils_8h.html#a32bf6651dee44c6e0495c3e16c59e2e0", null ],
+    [ "awkward_ListArray_combinations_step_64", "kernel-utils_8h.html#a98a2b3b4cd31d0a4ed1c21ae5b2d822c", null ],
+    [ "awkward_malloc", "kernel-utils_8h.html#a8a6bdf26e840f6b3c557e5b6aa84a115", null ],
+    [ "awkward_NumpyArray16_getitem_at0", "kernel-utils_8h.html#ae590a693c1a1e8f0c9dfca5a28d8d8f5", null ],
+    [ "awkward_NumpyArray32_getitem_at0", "kernel-utils_8h.html#a814a8bd5f771f18c3b5af2fb2417602b", null ],
+    [ "awkward_NumpyArray64_getitem_at0", "kernel-utils_8h.html#abd0822262d1a42f70cff24eed1f141ec", null ],
+    [ "awkward_NumpyArray8_getitem_at0", "kernel-utils_8h.html#ab059d59aaa36d9a53df04e092d308dcc", null ],
+    [ "awkward_NumpyArraybool_getitem_at0", "kernel-utils_8h.html#ace7c741746637aa7018f061df488dcd0", null ],
+    [ "awkward_NumpyArrayfloat32_getitem_at0", "kernel-utils_8h.html#ab74d0afae21ec1d6dbbff9623146ed09", null ],
+    [ "awkward_NumpyArrayfloat64_getitem_at0", "kernel-utils_8h.html#abea808371db641b548635f273574e333", null ],
+    [ "awkward_NumpyArrayU16_getitem_at0", "kernel-utils_8h.html#a074ac1781a6cc27e45e8e2541017c175", null ],
+    [ "awkward_NumpyArrayU32_getitem_at0", "kernel-utils_8h.html#acd31f8fd0b3012aea5a2ce56d018c472", null ],
+    [ "awkward_NumpyArrayU64_getitem_at0", "kernel-utils_8h.html#abcce303bed0765d80a461f637b35f7bc", null ],
+    [ "awkward_NumpyArrayU8_getitem_at0", "kernel-utils_8h.html#a0ae53eb61555f8c5b2960813c6892743", null ],
+    [ "awkward_regularize_rangeslice", "kernel-utils_8h.html#aad275de53294a9f15b31faa666bd594d", null ]
+];

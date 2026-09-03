@@ -1,0 +1,154 @@
+ak.forms.UnionForm
+------------------
+
+.. py:module: ak.forms.UnionForm
+
+Defined in `awkward.forms.unionform <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/forms/unionform.py>`__ on `line 13 <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/forms/unionform.py#L13>`__.
+
+.. py:class:: ak.forms.UnionForm(self, tags, index, contents, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-unionform-is_union:
+
+.. py:attribute:: ak.forms.UnionForm.is_union
+    :value: True
+
+
+
+.. _ak-forms-unionform-tags:
+
+.. py:attribute:: ak.forms.UnionForm.tags
+
+
+
+.. _ak-forms-unionform-index:
+
+.. py:attribute:: ak.forms.UnionForm.index
+
+
+
+.. _ak-forms-unionform-contents:
+
+.. py:attribute:: ak.forms.UnionForm.contents
+
+
+
+.. _ak-forms-unionform-copy:
+
+.. py:method:: ak.forms.UnionForm.copy(self, tags=unset, index=unset, contents=unset, *, parameters=unset, form_key=unset)
+
+
+
+.. _ak-forms-unionform-simplified:
+
+.. py:method:: ak.forms.UnionForm.simplified(cls, tags, index, contents, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-unionform-_union_of_optionarrays:
+
+.. py:method:: ak.forms.UnionForm._union_of_optionarrays(self, index, parameters)
+
+
+
+.. _ak-forms-unionform-content:
+
+.. py:method:: ak.forms.UnionForm.content(self, index)
+
+
+
+.. _ak-forms-unionform-__repr__:
+
+.. py:method:: ak.forms.UnionForm.__repr__(self)
+
+
+
+.. _ak-forms-unionform-_to_dict_part:
+
+.. py:method:: ak.forms.UnionForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-unionform-_type:
+
+.. py:method:: ak.forms.UnionForm._type(self, typestrs)
+
+
+
+.. _ak-forms-unionform-__eq__:
+
+.. py:method:: ak.forms.UnionForm.__eq__(self, other)
+
+
+
+.. _ak-forms-unionform-purelist_parameter:
+
+.. py:method:: ak.forms.UnionForm.purelist_parameter(self, key)
+
+
+
+.. _ak-forms-unionform-purelist_isregular:
+
+.. py:attribute:: ak.forms.UnionForm.purelist_isregular
+
+
+
+.. _ak-forms-unionform-purelist_depth:
+
+.. py:attribute:: ak.forms.UnionForm.purelist_depth
+
+
+
+.. _ak-forms-unionform-is_identity_like:
+
+.. py:attribute:: ak.forms.UnionForm.is_identity_like
+
+
+
+.. _ak-forms-unionform-minmax_depth:
+
+.. py:attribute:: ak.forms.UnionForm.minmax_depth
+
+
+
+.. _ak-forms-unionform-branch_depth:
+
+.. py:attribute:: ak.forms.UnionForm.branch_depth
+
+
+
+.. _ak-forms-unionform-fields:
+
+.. py:attribute:: ak.forms.UnionForm.fields
+
+
+
+.. _ak-forms-unionform-is_tuple:
+
+.. py:attribute:: ak.forms.UnionForm.is_tuple
+
+
+
+.. _ak-forms-unionform-dimension_optiontype:
+
+.. py:attribute:: ak.forms.UnionForm.dimension_optiontype
+
+
+
+.. _ak-forms-unionform-_columns:
+
+.. py:method:: ak.forms.UnionForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-unionform-_select_columns:
+
+.. py:method:: ak.forms.UnionForm._select_columns(self, index, specifier, matches, output)
+
+
+
+.. _ak-forms-unionform-_column_types:
+
+.. py:method:: ak.forms.UnionForm._column_types(self)
+

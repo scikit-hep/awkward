@@ -1,0 +1,180 @@
+ak.forms.Form
+-------------
+
+.. py:module: ak.forms.Form
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/forms/form.py>`__ on `line 380 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/forms/form.py#L380>`__.
+
+.. py:class:: ak.forms.Form(self)
+
+
+
+.. _ak-forms-form-_init:
+
+.. py:method:: ak.forms.Form._init(self, *, parameters, form_key)
+
+
+
+.. _ak-forms-form-form_key:
+
+.. py:attribute:: ak.forms.Form.form_key
+
+
+
+.. _ak-forms-form-__str__:
+
+.. py:method:: ak.forms.Form.__str__(self)
+
+
+
+.. _ak-forms-form-to_dict:
+
+.. py:method:: ak.forms.Form.to_dict(self, verbose=True)
+
+
+
+.. _ak-forms-form-_to_dict_extra:
+
+.. py:method:: ak.forms.Form._to_dict_extra(self, out, verbose)
+
+
+
+.. _ak-forms-form-to_json:
+
+.. py:method:: ak.forms.Form.to_json(self)
+
+
+
+.. _ak-forms-form-_repr_args:
+
+.. py:method:: ak.forms.Form._repr_args(self)
+
+
+
+.. _ak-forms-form-type:
+
+.. py:attribute:: ak.forms.Form.type
+
+
+
+.. _ak-forms-form-columns:
+
+.. py:method:: ak.forms.Form.columns(self, list_indicator=None, column_prefix=())
+
+
+
+.. _ak-forms-form-select_columns:
+
+.. py:method:: ak.forms.Form.select_columns(self, specifier, expand_braces=True, *, prune_unions_and_records=True)
+
+select_columns returns a new Form with only columns and sub-columns selected.
+Returns an empty Form if no columns matched the specifier(s).
+
+``specifier`` can be a ``str | Iterable[str | Iterable[str]]``.
+Strings may include shell-globbing-style wildcards "*" and "?".
+If ``expand_braces`` is ``True`` (the default), strings may include alternatives in braces.
+For example, ``["a.{b,c}.d"]`` is equivalent to ``["a.b.d", "a.c.d"]``.
+Glob-style matching would also suit this single-character instance: ``"a.[bc].d"``.
+If specifier is a list which contains a list/tuple, that inner list will be interpreted as
+column and subcolumn specifiers. They *may* contain wildcards, but "." will not be
+interpreted as a ``<field>.<subfield>`` pattern.
+
+
+
+.. _ak-forms-form-column_types:
+
+.. py:method:: ak.forms.Form.column_types(self)
+
+
+
+.. _ak-forms-form-_columns:
+
+.. py:method:: ak.forms.Form._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-form-_prune_columns:
+
+.. py:method:: ak.forms.Form._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-form-_select_columns:
+
+.. py:method:: ak.forms.Form._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-form-_column_types:
+
+.. py:method:: ak.forms.Form._column_types(self)
+
+
+
+.. _ak-forms-form-_to_dict_part:
+
+.. py:method:: ak.forms.Form._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-form-length_zero_array:
+
+.. py:method:: ak.forms.Form.length_zero_array(self, *, backend=numpy_backend, highlevel=False, behavior=None)
+
+
+
+.. _ak-forms-form-length_one_array:
+
+.. py:method:: ak.forms.Form.length_one_array(self, *, backend=numpy_backend, highlevel=False, behavior=None)
+
+
+
+.. _ak-forms-form-_expected_from_buffers:
+
+.. py:method:: ak.forms.Form._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-form-expected_from_buffers:
+
+.. py:method:: ak.forms.Form.expected_from_buffers(self, buffer_key='{form_key}-{attribute}', recursive=True)
+
+
+    :param buffer_key: Python format string containing
+                   ``"{form_key}"`` and/or ``"{attribute}"`` or a function that takes these
+                   as keyword arguments and returns a string to use as a key for a buffer
+                   in the ``container``.
+    :type buffer_key: str or callable
+    :param recursive: If True, recurse into subforms; otherwise, yield
+                  only the (buffer_key, dtype) pairs for this form object.
+    :type recursive: bool
+
+Yield (buffer_key, dtype) pairs describing the expected buffer keys,
+and their corresponding dtypes, that a call to :py:obj:`ak.from_buffers` would
+be expected to find from the ``container`` object.
+
+
+
+.. _ak-forms-form-is_equal_to:
+
+.. py:method:: ak.forms.Form.is_equal_to(self, other, *, all_parameters=False, form_key=False)
+
+
+
+.. _ak-forms-form-__eq__:
+
+.. py:attribute:: ak.forms.Form.__eq__
+    :value: is_equal_to
+
+
+
+.. _ak-forms-form-_is_equal_to:
+
+.. py:method:: ak.forms.Form._is_equal_to(self, other, all_parameters, form_key)
+
+
+
+.. _ak-forms-form-_is_equal_to_generic:
+
+.. py:method:: ak.forms.Form._is_equal_to_generic(self, other, all_parameters, form_key)
+

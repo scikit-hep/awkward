@@ -1,0 +1,16 @@
+ak.ByteBehavior
+---------------
+
+.. py:module: ak.ByteBehavior
+
+Defined in `awkward.behaviors.string <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/behaviors/string.py>`__ on `line 6 <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/behaviors/string.py#L6>`__.
+
+.. py:class:: ak.ByteBehavior(self, *args)
+
+
+
+.. _ak-bytebehavior-__name__:
+
+.. py:attribute:: ak.ByteBehavior.__name__
+    :value: 'Array'
+

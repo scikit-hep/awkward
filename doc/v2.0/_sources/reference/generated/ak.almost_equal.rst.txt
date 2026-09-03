@@ -1,0 +1,30 @@
+ak.almost_equal
+---------------
+
+.. py:module: ak.almost_equal
+
+Defined in `awkward.operations.ak_almost_equal <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/operations/ak_almost_equal.py>`__ on `line 15 <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/operations/ak_almost_equal.py#L15>`__.
+
+.. py:function:: ak.almost_equal(left, right, *, rtol=1e-05, atol=1e-08, dtype_exact=True, check_parameters=True, check_regular=True)
+
+
+    :param left: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param right: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param rtol: the relative tolerance parameter (see below).
+    :param atol: the absolute tolerance parameter (see below).
+    :param dtype_exact: whether the dtypes must be exactly the same, or just the
+                    same family.
+    :param check_parameters: whether to compare parameters.
+    :param check_regular: whether to consider ragged and regular dimensions as
+                      unequal.
+
+Return True if the two array-like arguments are considered equal for the
+given options. Otherwise, return False.
+
+The relative difference (``rtol * abs(b)``) and the absolute difference ``atol``
+are added together to compare against the absolute difference between ``left``
+and ``right``.
+
+TypeTracer arrays are not supported, as there is very little information to
+be compared.
+

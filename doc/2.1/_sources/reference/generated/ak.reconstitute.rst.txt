@@ -1,0 +1,9 @@
+ak.reconstitute
+---------------
+
+.. py:module: ak.reconstitute
+
+Defined in `awkward.operations.ak_from_buffers <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/operations/ak_from_buffers.py>`__ on `line 178 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/operations/ak_from_buffers.py#L178>`__.
+
+.. py:function:: ak.reconstitute(form, length, container, getkey, backend, byteorder, simplify)
+

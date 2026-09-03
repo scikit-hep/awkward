@@ -1,0 +1,14 @@
+ak.str.akstr_is_numeric
+=======================
+
+.. py:module:: awkward.operations.str.akstr_is_numeric
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_numeric.is_numeric
+
+

@@ -1,0 +1,65 @@
+ak.from_safetensors
+===================
+
+Defined in `awkward.operations.ak_from_safetensors <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/operations/ak_from_safetensors.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/operations/ak_from_safetensors.py#L14>`__.
+
+.. py:function:: ak.from_safetensors(source, *, storage_options=None, virtual=False, buffer_key='{form_key}-{attribute}', backend='cpu', byteorder='<', allow_noncanonical_form=False, highlevel=True, behavior=None, attrs=None)
+
+   :param source: Name of the input file, file path, or
+                  remote URL passed to `fsspec.core.url_to_fs <https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs>`__
+                  for remote reading.
+   :type source: path-like
+   :param storage_options: Any additional options to pass to
+                           `fsspec.core.url_to_fs <https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs>`__
+                           to open a remote file for reading.
+   :type storage_options: None or dict
+   :param virtual: If True, create a virtual (lazy) Awkward Array
+                   that references buffers without materializing them. Defaults to False.
+   :type virtual: bool, optional
+   :param buffer_key: Template for buffer names, with placeholders
+                      ``{form_key}`` and ``{attribute}``. Defaults to "{form_key}-{attribute}".
+   :type buffer_key: str, optional
+   :param backend: Backend identifier (e.g., "cpu"). Defaults to "cpu".
+   :type backend: str, optional
+   :param byteorder: Byte order, "<" (little-endian, default) or ">".
+   :type byteorder: str, optional
+   :param allow_noncanonical_form:
+                                   If True, normalize
+                                      safetensors forms that do not directly match Awkward. Defaults to False.
+                                   highlevel (bool, optional): If True, return a high-level ak.Array. If False,
+                                       return the low-level layout. Defaults to True.
+                                   behavior (Mapping | None, optional): Optional Awkward behavior mapping.
+                                   attrs (Mapping | None, optional): Optional metadata to attach to the array.
+   :type allow_noncanonical_form: bool, optional
+
+   :returns: An Awkward Array (or layout) reconstructed
+             from the safetensors buffers.
+   :rtype: ak.Array or ak.layout.Content
+
+   Load a safetensors file as an Awkward Array.
+
+   Ref: https://huggingface.co/docs/safetensors/.
+
+   This function reads data serialized in the safetensors format and reconstructs
+   an Awkward Array (or low-level layout) from it. Buffers in the safetensors file
+   are mapped to Awkward buffers according to the ``buffer_key`` template, and
+   optional behavior or attributes can be attached to the returned array.
+
+   The safetensors file **must contain** ``form`` and ``length`` entries in its
+   metadata, which define the structure and length of the reconstructed array.
+
+   .. rubric:: Example
+
+   >>> import awkward as ak
+   >>> arr = ak.from_safetensors("out.safetensors")
+   >>> arr  # doctest: +SKIP
+   <Array [[1, 2, 3], [], [4]] type='3 * var * int64'>
+
+   Create a virtual (lazy) array that references buffers without materializing them:
+
+   >>> virtual_arr = ak.from_safetensors("out.safetensors", virtual=True)
+   >>> virtual_arr  # doctest: +SKIP
+   <Array [??, ??, ??] type='3 * var * int64'>
+
+   See also :py:obj:`ak.to_safetensors`.
+

@@ -1,0 +1,17 @@
+ak.is_categorical
+-----------------
+
+Defined in `awkward.behaviors.categorical <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/categorical.py>`__ on `line 116 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/categorical.py#L116>`__.
+
+.. py:function:: ak.is_categorical(array)
+
+
+    :param array: A possibly-categorical Awkward Array.
+
+If the ``array`` is categorical (contains :py:obj:`ak.layout.IndexedArray` or
+:py:obj:`ak.layout.IndexedOptionArray` labeled with parameter
+``"__array__" = "categorical"``), then this function returns True;
+otherwise, it returns False.
+
+See also :py:obj:`ak.categories`, :py:obj:`ak.to_categorical`, :py:obj:`ak.from_categorical`.
+

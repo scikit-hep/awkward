@@ -1,0 +1,1334 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How to reduce dimensions (sum/min/any/all) &#8212; Awkward Array 2.13.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=b9a6aa19" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=f5edd4dd"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-math-reducing';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'main';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-math-reducing.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to compute statistics on dimensions (mean/var/std)" href="how-to-math-statistics.html" />
+    <link rel="prev" title="How Awkward broadcasting works" href="how-to-math-broadcasting.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.13" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.13.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.13.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-array-properties.html">Array properties</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-array-properties-named-axis.html">Named axes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Reducing (sum/min/any/all)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Min/max/sort one array by another</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">Awkward Arrays on GPUs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k"</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-cpp.html">Using arrays in C++</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++ with LayoutBuilder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-cpp-cppyy.html">JIT compiling operations with C++ in cppyy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Special topics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-math.html" class="nav-link">Numerical math</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to reduce dimensions (sum/min/any/all)</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="how-to-reduce-dimensions-sum-min-any-all">
+<h1>How to reduce dimensions (sum/min/any/all)<a class="headerlink" href="#how-to-reduce-dimensions-sum-min-any-all" title="Link to this heading">#</a></h1>
+<p>After elementwise functions, dimension-reducer functions are the most commonly used. These functions replace a list of numbers with a single, scalar number by adding, multiplying, minimizing, maximizing, or performing logical-or (“any”) or logical-and (“all”).</p>
+<p>These are also called aggregation functions; in relational databases, SQL, and data-frames, aggregations are applied after a “group by” operation. Awkward Array doesn’t have “group by” operations; lists are already grouped.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="first-reducer-ak-sum">
+<h2>First reducer: <code class="docutils literal notranslate"><span class="pre">ak.sum</span></code><a class="headerlink" href="#first-reducer-ak-sum" title="Link to this heading">#</a></h2>
+<p>To illustrate all of these functions, let’s consider addition. Given an array:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">6</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><a class="reference internal" href="../reference/generated/ak.sum.html#ak.sum" title="ak.sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.sum()</span></code></a> with no arguments adds all of the values in the nested lists, just like <code class="docutils literal notranslate"><span class="pre">np.sum</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.int64(21)
+</pre></div>
+</div>
+</div>
+</div>
+<p>With Awkward Arrays, it’s usually more useful to supply an <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument to reduce one dimension, rather than all dimensions.</p>
+<p>For reasons that will be explained below, <code class="docutils literal notranslate"><span class="pre">axis=-1</span></code> is the most frequently useful.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[6,
+ 9,
+ 0,
+ 6]
+---
+backend: cpu
+nbytes: 32 B
+type: 4 * int64</pre></div></div>
+</div>
+<section id="the-axis-argument">
+<h3>The <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument<a class="headerlink" href="#the-axis-argument" title="Link to this heading">#</a></h3>
+<p>Before getting deeper into the <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument, let’s consider a NumPy array with more dimensions.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+    <span class="p">[</span>
+        <span class="p">[</span>    <span class="mi">1</span><span class="p">,</span>     <span class="mi">2</span><span class="p">,</span>     <span class="mi">3</span><span class="p">,</span>     <span class="mi">4</span><span class="p">,</span>     <span class="mi">5</span><span class="p">],</span>
+        <span class="p">[</span>   <span class="mi">10</span><span class="p">,</span>    <span class="mi">20</span><span class="p">,</span>    <span class="mi">30</span><span class="p">,</span>    <span class="mi">40</span><span class="p">,</span>    <span class="mi">50</span><span class="p">],</span>
+        <span class="p">[</span>  <span class="mi">100</span><span class="p">,</span>   <span class="mi">200</span><span class="p">,</span>   <span class="mi">300</span><span class="p">,</span>   <span class="mi">400</span><span class="p">,</span>   <span class="mi">500</span><span class="p">],</span>
+    <span class="p">],</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mf">0.1</span>  <span class="p">,</span> <span class="mf">0.2</span>  <span class="p">,</span> <span class="mf">0.3</span>  <span class="p">,</span> <span class="mf">0.4</span>  <span class="p">,</span> <span class="mf">0.5</span>  <span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.01</span> <span class="p">,</span> <span class="mf">0.02</span> <span class="p">,</span> <span class="mf">0.03</span> <span class="p">,</span> <span class="mf">0.04</span> <span class="p">,</span> <span class="mf">0.05</span> <span class="p">],</span>
+        <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">,</span> <span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.004</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">],</span>
+    <span class="p">],</span>
+<span class="p">])</span>
+
+<span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">printoptions</span><span class="p">(</span><span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">array3d</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[[  1.      2.      3.      4.      5.   ]
+  [ 10.     20.     30.     40.     50.   ]
+  [100.    200.    300.    400.    500.   ]]
+
+ [[  0.1     0.2     0.3     0.4     0.5  ]
+  [  0.01    0.02    0.03    0.04    0.05 ]
+  [  0.001   0.002   0.003   0.004   0.005]]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>This array has 3 dimensions, so in addition to <code class="docutils literal notranslate"><span class="pre">axis=None</span></code> (reduce everything to a scalar), there are 3 possible axis values.</p>
+<p>The first case, <code class="docutils literal notranslate"><span class="pre">axis=0</span></code>, adds the first 3×5 block to the second 3×5 block, i.e. summing over the first (length-2) dimension. Thus, the <code class="docutils literal notranslate"><span class="pre">1</span></code> is added to <code class="docutils literal notranslate"><span class="pre">0.1</span></code>, the <code class="docutils literal notranslate"><span class="pre">2</span></code> is added to <code class="docutils literal notranslate"><span class="pre">0.2</span></code>, and so on until the <code class="docutils literal notranslate"><span class="pre">500</span></code> is added to <code class="docutils literal notranslate"><span class="pre">0.005</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">printoptions</span><span class="p">(</span><span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array3d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[  1.1     2.2     3.3     4.4     5.5  ]
+ [ 10.01   20.02   30.03   40.04   50.05 ]
+ [100.001 200.002 300.003 400.004 500.005]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The second case, <code class="docutils literal notranslate"><span class="pre">axis=1</span></code>, adds vertically within each 3×5 block, i.e. summing over the second (length-3) dimension. What’s left are two lists of length 5.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">printoptions</span><span class="p">(</span><span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array3d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[111.    222.    333.    444.    555.   ]
+ [  0.111   0.222   0.333   0.444   0.555]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The third case, <code class="docutils literal notranslate"><span class="pre">axis=2</span></code>, adds horizontally within each 3×5 block, i.e. summing over the third (length-5) dimension. What’s left are two lists of length 3.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">printoptions</span><span class="p">(</span><span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array3d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[  15.     150.    1500.   ]
+ [   1.5      0.15     0.015]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Since negative <code class="docutils literal notranslate"><span class="pre">axis</span></code> counts from the other end of the scale,</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">axis=0</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">axis=-3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axis=1</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">axis=-2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axis=2</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">axis=-1</span></code>.</p></li>
+</ul>
+</section>
+<section id="the-axis-argument-with-ragged-lists">
+<h3>The <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument with ragged lists<a class="headerlink" href="#the-axis-argument-with-ragged-lists" title="Link to this heading">#</a></h3>
+<p>Awkward Arrays allow the lengths of lists in an array to differ, so we can have</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array_ragged</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+    <span class="p">[</span>  <span class="mi">1</span><span class="p">,</span>   <span class="mi">2</span><span class="p">,</span>   <span class="mi">3</span>     <span class="p">],</span>
+    <span class="p">[</span> <span class="mi">10</span><span class="p">,</span>  <span class="mi">20</span>          <span class="p">],</span>
+    <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">400</span><span class="p">],</span>
+<span class="p">])</span>
+<span class="n">array_ragged</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [10, 20],
+ [100, 200, 300, 400]]
+----------------------
+backend: cpu
+nbytes: 104 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<p>As before, <code class="docutils literal notranslate"><span class="pre">axis=-1</span></code> sums over the innermost lists, replacing each of the 3 horizontal rows with a sum.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array_ragged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[6,
+ 30,
+ 1000]
+------
+backend: cpu
+nbytes: 24 B
+type: 3 * int64</pre></div></div>
+</div>
+<p>And <code class="docutils literal notranslate"><span class="pre">axis=-2</span></code> sums vertically, replacing each of the 4 vertical columns with a sum. Since the list lengths differ, some of the places we might expect to see a value is an empty gap—it contributes nothing to the result.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array_ragged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[111,
+ 222,
+ 303,
+ 400]
+-----
+backend: cpu
+nbytes: 32 B
+type: 4 * int64</pre></div></div>
+</div>
+<p>We also have to choose a convention: should the values be left-aligned or right-aligned within their lists? Awkward Array choses left-aligned.</p>
+<p>In ragged data from real datasets, summing over whole lists usually has more meaning than summing over parts of different lists, so <code class="docutils literal notranslate"><span class="pre">axis=-1</span></code> is usually the most meaningful choice of <code class="docutils literal notranslate"><span class="pre">axis</span></code>.</p>
+</section>
+<section id="the-axis-argument-with-missing-data">
+<h3>The <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument with missing data<a class="headerlink" href="#the-axis-argument-with-missing-data" title="Link to this heading">#</a></h3>
+<p>Just as empty gaps contribute nothing to the sum, missing values (<code class="docutils literal notranslate"><span class="pre">None</span></code>) don’t contribute anything, either.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array_ragged</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+    <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>    <span class="mi">3</span><span class="p">,</span>    <span class="mi">4</span><span class="p">],</span>
+    <span class="p">[</span>  <span class="mi">10</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span>   <span class="mi">30</span>      <span class="p">],</span>
+    <span class="p">[</span> <span class="mi">100</span><span class="p">,</span>  <span class="mi">200</span><span class="p">,</span>  <span class="mi">300</span><span class="p">,</span>  <span class="mi">400</span><span class="p">],</span>
+<span class="p">])</span>
+<span class="n">array_ragged</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[None, None, 3, 4],
+ [10, None, 30],
+ [100, 200, 300, 400]]
+----------------------
+backend: cpu
+nbytes: 184 B
+type: 3 * var * ?int64</pre></div></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">axis=-1</span></code> sums over each inner list, horizontally, replacing it with a scalar.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array_ragged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[7,
+ 40,
+ 1000]
+------
+backend: cpu
+nbytes: 24 B
+type: 3 * int64</pre></div></div>
+</div>
+<p>And <code class="docutils literal notranslate"><span class="pre">axis=-2</span></code> sums over the outer dimension, vertically.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array_ragged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[110,
+ 200,
+ 333,
+ 404]
+-----
+backend: cpu
+nbytes: 32 B
+type: 4 * int64</pre></div></div>
+</div>
+<p>For <a class="reference internal" href="../reference/generated/ak.sum.html#ak.sum" title="ak.sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.sum()</span></code></a>, each <code class="docutils literal notranslate"><span class="pre">None</span></code> has the same effect as a <code class="docutils literal notranslate"><span class="pre">0</span></code> value, for <a class="reference internal" href="../reference/generated/ak.prod.html#ak.prod" title="ak.prod"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.prod()</span></code></a> (multiplication), each <code class="docutils literal notranslate"><span class="pre">None</span></code> has the same effect as a <code class="docutils literal notranslate"><span class="pre">1</span></code> value, etc.</p>
+</section>
+</section>
+<section id="the-keepdims-argument">
+<h2>The <code class="docutils literal notranslate"><span class="pre">keepdims</span></code> argument<a class="headerlink" href="#the-keepdims-argument" title="Link to this heading">#</a></h2>
+<p>Sometimes, you want to replace lists with a length-1 list, rather than a scalar. <code class="docutils literal notranslate"><span class="pre">keepdims=True</span></code> does that.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array_ragged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[7],
+ [40],
+ [1000]]
+--------
+backend: cpu
+nbytes: 24 B
+type: 3 * 1 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">array_ragged</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[110, 200, 333, 404]]
+----------------------
+backend: cpu
+nbytes: 48 B
+type: 1 * var * int64</pre></div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">keepdims</span></code> argument is particularly useful for <a class="reference internal" href="../reference/generated/ak.argmin.html#ak.argmin" title="ak.argmin"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmin()</span></code></a> and <a class="reference internal" href="../reference/generated/ak.argmax.html#ak.argmax" title="ak.argmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmax()</span></code></a>, which return positions in a list where the value is minimized or maximized. Those positions can only be used as slice indexes if they’re at the right nesting level, which <code class="docutils literal notranslate"><span class="pre">keepdims=True</span></code> maintains.</p>
+</section>
+<section id="other-reducers">
+<h2>Other reducers<a class="headerlink" href="#other-reducers" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>The <a class="reference internal" href="../reference/generated/ak.prod.html#ak.prod" title="ak.prod"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.prod()</span></code></a> reducer multiplies, rather than adding.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/ak.min.html#ak.min" title="ak.min"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.min()</span></code></a> and <a class="reference internal" href="../reference/generated/ak.max.html#ak.max" title="ak.max"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.max()</span></code></a> minimize and maximize, returning <code class="docutils literal notranslate"><span class="pre">None</span></code> for empty lists.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/ak.argmin.html#ak.argmin" title="ak.argmin"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmin()</span></code></a> and <a class="reference internal" href="../reference/generated/ak.argmax.html#ak.argmax" title="ak.argmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.argmax()</span></code></a> return the index positions of the minimum or maximum value, with <code class="docutils literal notranslate"><span class="pre">None</span></code> for empty lists.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/ak.nansum.html#ak.nansum" title="ak.nansum"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.nansum()</span></code></a>, <a class="reference internal" href="../reference/generated/ak.nanprod.html#ak.nanprod" title="ak.nanprod"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.nanprod()</span></code></a>, <a class="reference internal" href="../reference/generated/ak.nanmin.html#ak.nanmin" title="ak.nanmin"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.nanmin()</span></code></a>, <a class="reference internal" href="../reference/generated/ak.nanmax.html#ak.nanmax" title="ak.nanmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.nanmax()</span></code></a>, <a class="reference internal" href="../reference/generated/ak.nanargmin.html#ak.nanargmin" title="ak.nanargmin"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.nanargmin()</span></code></a>, and <a class="reference internal" href="../reference/generated/ak.nanargmax.html#ak.nanargmax" title="ak.nanargmax"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.nanargmax()</span></code></a> ignore floating-point <code class="docutils literal notranslate"><span class="pre">nan</span></code> values before operating, the way that all reducers ignore <code class="docutils literal notranslate"><span class="pre">None</span></code> values before operating.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/ak.count_nonzero.html#ak.count_nonzero" title="ak.count_nonzero"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.count_nonzero()</span></code></a> counts non-zero values.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/ak.count.html#ak.count" title="ak.count"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.count()</span></code></a> simply counts values. In NumPy, there’s no need for such a function because it would return constants (drawn from the NumPy array’s <code class="docutils literal notranslate"><span class="pre">shape</span></code>), but for ragged arrays, it counts the number of values that enter into a reduction. <a class="reference internal" href="../reference/generated/ak.num.html#ak.num" title="ak.num"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.num()</span></code></a> also returns lengths of lists, but in a way that’s more useful for slicing; <a class="reference internal" href="../reference/generated/ak.count.html#ak.count" title="ak.count"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.count()</span></code></a> is useful as the denominator of expressions in which another reducer (with the same <code class="docutils literal notranslate"><span class="pre">axis</span></code> and <code class="docutils literal notranslate"><span class="pre">keepdims</span></code> choices) is in the numerator.</p></li>
+<li><p><a class="reference internal" href="../reference/generated/ak.any.html#ak.any" title="ak.any"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.any()</span></code></a> and <a class="reference internal" href="../reference/generated/ak.all.html#ak.all" title="ak.all"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.all()</span></code></a> reduce like logical-or and logical-and, which makes them particularly useful in slices (below).</p></li>
+</ul>
+</section>
+<section id="reducing-over-any-and-all">
+<h2>Reducing over “any” and “all”<a class="headerlink" href="#reducing-over-any-and-all" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="../reference/generated/ak.any.html#ak.any" title="ak.any"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.any()</span></code></a> and <a class="reference internal" href="../reference/generated/ak.all.html#ak.all" title="ak.all"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.all()</span></code></a> reduce boolean arrays, asking if a predicate is satisfied by “any” item or “all” items, respectively.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array_bool</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span>
+    <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">],</span>
+    <span class="p">[</span><span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">],</span>
+    <span class="p">[</span><span class="kc">False</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">],</span>
+<span class="p">])</span>
+<span class="n">array_bool</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[False, False, True, True],
+ [False, True, False, True],
+ [False, True, True, True]]
+----------------------------
+backend: cpu
+nbytes: 44 B
+type: 3 * var * bool</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">array_bool</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[True,
+ True,
+ True]
+------
+backend: cpu
+nbytes: 3 B
+type: 3 * bool</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">array_bool</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[False,
+ True,
+ True,
+ True]
+-------
+backend: cpu
+nbytes: 4 B
+type: 4 * bool</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">array_bool</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[False,
+ False,
+ False]
+-------
+backend: cpu
+nbytes: 3 B
+type: 3 * bool</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">array_bool</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[False,
+ False,
+ False,
+ True]
+-------
+backend: cpu
+nbytes: 4 B
+type: 4 * bool</pre></div></div>
+</div>
+<p>Since logical-or is like addition of booleans and logical-and is like multiplication, these reducers could have been replaced with <a class="reference internal" href="../reference/generated/ak.sum.html#ak.sum" title="ak.sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.sum()</span></code></a> and <a class="reference internal" href="../reference/generated/ak.prod.html#ak.prod" title="ak.prod"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.prod()</span></code></a>, but they’re very useful to have because they make some boolean-array slices easier to read.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">9</span><span class="p">]])</span>
+<span class="n">array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[0, 1, 2],
+ [],
+ [-3, 4],
+ [-5],
+ [-6, -7, -8, -9]]
+------------------
+backend: cpu
+nbytes: 128 B
+type: 5 * var * int64</pre></div></div>
+</div>
+<p>Select <em>whole lists</em> if <em>any</em> of their values are negative:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">[</span><span class="n">ak</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">array</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[-3, 4],
+ [-5],
+ [-6, -7, -8, -9]]
+------------------
+backend: cpu
+nbytes: 128 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<p>Select <em>whole lists</em> if <em>all</em> of their values are negative:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">[</span><span class="n">ak</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">array</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [-5],
+ [-6, -7, -8, -9]]
+------------------
+backend: cpu
+nbytes: 128 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<p>(If a list is empty, all of its elements satisfy a constraint.)</p>
+<p>In both cases above, the selection can be read like an English sentence, “select lists if <em>any</em>…” or “select lists if <em>all</em>…”.</p>
+</section>
+<section id="heterogeneous-data-and-records-cannot-be-reduced">
+<h2>Heterogeneous data and records cannot be reduced<a class="headerlink" href="#heterogeneous-data-and-records-cannot-be-reduced" title="Link to this heading">#</a></h2>
+<p>These two kinds of data types are not reducible. Heterogeneous data allows an array to have multiple numbers of dimensions, so the problem is ill-posed:</p>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">25</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]))</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:40,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span> <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">38</span> <span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">39</span>     <span class="c1"># NOTE: this decorator assumes that the operation is exposed under `ak.`</span>
+<span class="ne">---&gt; </span><span class="mi">40</span>     <span class="k">with</span> <span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">41</span>         <span class="n">gen_or_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">42</span>         <span class="k">if</span> <span class="n">isgenerator</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:79,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
+<span class="g g-Whitespace">     </span><span class="mi">77</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">78</span>     <span class="c1"># Handle caught exception</span>
+<span class="ne">---&gt; </span><span class="mi">79</span>     <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorate_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">80</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:66,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">64</span> <span class="c1"># Failed to find a custom overload, so resume the original function</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">66</span>     <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">67</span> <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">68</span>     <span class="k">return</span> <span class="n">err</span><span class="o">.</span><span class="n">value</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_sum.py:224,</span> in <span class="ni">sum</span><span class="nt">(array, axis, keepdims, mask_identity, highlevel, behavior, attrs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">221</span> <span class="k">yield</span> <span class="p">(</span><span class="n">array</span><span class="p">,)</span>
+<span class="g g-Whitespace">    </span><span class="mi">223</span> <span class="c1"># Implementation</span>
+<span class="ne">--&gt; </span><span class="mi">224</span> <span class="k">return</span> <span class="n">_impl</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="p">,</span> <span class="n">mask_identity</span><span class="p">,</span> <span class="n">highlevel</span><span class="p">,</span> <span class="n">behavior</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_sum.py:317,</span> in <span class="ni">_impl</span><span class="nt">(array, axis, keepdims, mask_identity, highlevel, behavior, attrs, dtype)</span>
+<span class="g g-Whitespace">    </span><span class="mi">313</span> <span class="n">axis</span> <span class="o">=</span> <span class="n">regularize_axis</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">none_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">315</span> <span class="n">reducer</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_reducers</span><span class="o">.</span><span class="n">Sum</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">317</span> <span class="n">out</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_do</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">318</span>     <span class="n">layout</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">319</span>     <span class="n">reducer</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">320</span>     <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">321</span>     <span class="n">mask</span><span class="o">=</span><span class="n">mask_identity</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">322</span>     <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">323</span>     <span class="n">behavior</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">behavior</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">324</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">326</span> <span class="n">wrapped_out</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">327</span>     <span class="n">out</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">328</span>     <span class="n">highlevel</span><span class="o">=</span><span class="n">highlevel</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">329</span>     <span class="n">allow_other</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">330</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">332</span> <span class="c1"># propagate named axis to output</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_do.py:252,</span> in <span class="ni">reduce</span><span class="nt">(layout, reducer, axis, mask, keepdims, behavior)</span>
+<span class="g g-Whitespace">    </span><span class="mi">240</span> <span class="n">parts</span> <span class="o">=</span> <span class="n">remove_structure</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">241</span>     <span class="n">layout</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">242</span>     <span class="n">flatten_records</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>    <span class="mi">246</span>     <span class="n">list_to_regular</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">247</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">249</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">250</span>     <span class="c1"># We know that `flatten_records` must fail, so the only other type</span>
+<span class="g g-Whitespace">    </span><span class="mi">251</span>     <span class="c1"># that can return multiple parts here is the union array</span>
+<span class="ne">--&gt; </span><span class="mi">252</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">253</span>         <span class="s2">&quot;cannot use axis=None on an array containing irreducible unions&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">254</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">255</span> <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">256</span>     <span class="n">layout</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">EmptyArray</span><span class="p">()</span>
+
+<span class="ne">ValueError</span>: cannot use axis=None on an array containing irreducible unions
+
+<span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">calling</span>
+
+    <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+        <span class="o">&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;4 * union[var * float6...&#39;</span><span class="o">&gt;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>And records are sometimes used to represent data with coordinates; applying <a class="reference internal" href="../reference/generated/ak.sum.html#ak.sum" title="ak.sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.sum()</span></code></a> to non-Cartesian coordinates would be a subtle error.</p>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]}]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">26</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]}]),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:40,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span> <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">38</span> <span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">39</span>     <span class="c1"># NOTE: this decorator assumes that the operation is exposed under `ak.`</span>
+<span class="ne">---&gt; </span><span class="mi">40</span>     <span class="k">with</span> <span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">41</span>         <span class="n">gen_or_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">42</span>         <span class="k">if</span> <span class="n">isgenerator</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:79,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
+<span class="g g-Whitespace">     </span><span class="mi">77</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">78</span>     <span class="c1"># Handle caught exception</span>
+<span class="ne">---&gt; </span><span class="mi">79</span>     <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorate_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">80</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:66,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">64</span> <span class="c1"># Failed to find a custom overload, so resume the original function</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">66</span>     <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">67</span> <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">68</span>     <span class="k">return</span> <span class="n">err</span><span class="o">.</span><span class="n">value</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_sum.py:224,</span> in <span class="ni">sum</span><span class="nt">(array, axis, keepdims, mask_identity, highlevel, behavior, attrs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">221</span> <span class="k">yield</span> <span class="p">(</span><span class="n">array</span><span class="p">,)</span>
+<span class="g g-Whitespace">    </span><span class="mi">223</span> <span class="c1"># Implementation</span>
+<span class="ne">--&gt; </span><span class="mi">224</span> <span class="k">return</span> <span class="n">_impl</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="p">,</span> <span class="n">mask_identity</span><span class="p">,</span> <span class="n">highlevel</span><span class="p">,</span> <span class="n">behavior</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_sum.py:317,</span> in <span class="ni">_impl</span><span class="nt">(array, axis, keepdims, mask_identity, highlevel, behavior, attrs, dtype)</span>
+<span class="g g-Whitespace">    </span><span class="mi">313</span> <span class="n">axis</span> <span class="o">=</span> <span class="n">regularize_axis</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">none_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">315</span> <span class="n">reducer</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_reducers</span><span class="o">.</span><span class="n">Sum</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">317</span> <span class="n">out</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_do</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">318</span>     <span class="n">layout</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">319</span>     <span class="n">reducer</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">320</span>     <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">321</span>     <span class="n">mask</span><span class="o">=</span><span class="n">mask_identity</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">322</span>     <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">323</span>     <span class="n">behavior</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">behavior</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">324</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">326</span> <span class="n">wrapped_out</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">327</span>     <span class="n">out</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">328</span>     <span class="n">highlevel</span><span class="o">=</span><span class="n">highlevel</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">329</span>     <span class="n">allow_other</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">330</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">332</span> <span class="c1"># propagate named axis to output</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_do.py:328,</span> in <span class="ni">reduce</span><span class="nt">(layout, reducer, axis, mask, keepdims, behavior)</span>
+<span class="g g-Whitespace">    </span><span class="mi">325</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">Index64</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">layout</span><span class="o">.</span><span class="n">length</span><span class="p">],</span> <span class="n">nplike</span><span class="o">=</span><span class="n">layout</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">nplike</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">327</span> <span class="n">shifts</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="ne">--&gt; </span><span class="mi">328</span> <span class="nb">next</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">_reduce_next</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">329</span>     <span class="n">reducer</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">330</span>     <span class="n">negaxis</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">331</span>     <span class="n">starts</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">332</span>     <span class="n">shifts</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">333</span>     <span class="n">offsets</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">334</span>     <span class="mi">1</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">335</span>     <span class="n">mask</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">336</span>     <span class="n">keepdims</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">337</span>     <span class="n">behavior</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">338</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">340</span> <span class="k">return</span> <span class="nb">next</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/recordarray.py:960,</span> in <span class="ni">RecordArray._reduce_next</span><span class="nt">(self, reducer, negaxis, starts, shifts, offsets, outlength, mask, keepdims, behavior)</span>
+<span class="g g-Whitespace">    </span><span class="mi">958</span> <span class="n">reducer_recordclass</span> <span class="o">=</span> <span class="n">find_record_reducer</span><span class="p">(</span><span class="n">reducer</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">behavior</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">959</span> <span class="k">if</span> <span class="n">reducer_recordclass</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">960</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">961</span>         <span class="s2">&quot;no ak.</span><span class="si">{}</span><span class="s2"> overloads for custom types: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">962</span>             <span class="n">reducer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">963</span>         <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">964</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">965</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">966</span>     <span class="c1"># Positional reducers ultimately need to do more work when rebuilding the result</span>
+<span class="g g-Whitespace">    </span><span class="mi">967</span>     <span class="c1"># so asking for a mask doesn&#39;t help us!</span>
+<span class="g g-Whitespace">    </span><span class="mi">968</span>     <span class="n">reducer_should_mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reducer</span><span class="o">.</span><span class="n">needs_position</span>
+
+<span class="ne">TypeError</span>: no ak.sum overloads for custom types: x, y
+
+<span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">calling</span>
+
+    <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+        <span class="o">&lt;</span><span class="n">Array</span> <span class="p">[{</span><span class="n">x</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="o">...</span><span class="p">}]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;2 * {x: float64, y: var * in...&#39;</span><span class="o">&gt;</span>
+        <span class="n">axis</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-math-broadcasting.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">How Awkward broadcasting works</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-math-statistics.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">How to compute statistics on dimensions (mean/var/std)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#first-reducer-ak-sum">First reducer: <code class="docutils literal notranslate"><span class="pre">ak.sum</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-axis-argument">The <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-axis-argument-with-ragged-lists">The <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument with ragged lists</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-axis-argument-with-missing-data">The <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument with missing data</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-keepdims-argument">The <code class="docutils literal notranslate"><span class="pre">keepdims</span></code> argument</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#other-reducers">Other reducers</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reducing-over-any-and-all">Reducing over “any” and “all”</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#heterogeneous-data-and-records-cannot-be-reduced">Heterogeneous data and records cannot be reduced</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-math-reducing.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/how-to-math-reducing.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

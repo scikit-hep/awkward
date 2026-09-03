@@ -1,0 +1,16 @@
+ak.index.Index64
+----------------
+
+.. py:module: ak.index.Index64
+
+Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/index.py>`__ on `line 303 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/index.py#L303>`__.
+
+.. py:class:: ak.index.Index64(self)
+
+
+
+.. _ak-index-index64-_expected_dtype:
+
+.. py:attribute:: ak.index.Index64._expected_dtype
+    :value: np.dtype(np.int64)
+

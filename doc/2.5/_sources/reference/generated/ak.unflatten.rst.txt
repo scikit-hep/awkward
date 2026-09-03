@@ -1,0 +1,86 @@
+ak.unflatten
+------------
+
+.. py:module: ak.unflatten
+
+Defined in `awkward.operations.ak_unflatten <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_unflatten.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_unflatten.py#L21>`__.
+
+.. py:function:: ak.unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param counts: Number of elements the new level should have.
+               If an integer, the new level will be regularly sized; otherwise,
+               it will consist of variable-length lists with the given lengths.
+    :type counts: int or array
+    :param axis: The dimension at which this operation is applied. The
+             outermost dimension is ``0``, followed by ``1``, etc., and negative
+             values count backward from the innermost: ``-1`` is the innermost
+             dimension, ``-2`` is the next level up, etc.
+    :type axis: int
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Returns an array with an additional level of nesting. This is roughly the
+inverse of :py:obj:`ak.flatten`, where ``counts`` were obtained by :py:obj:`ak.num` (both with
+``axis=1``).
+
+For example,
+
+.. code-block:: python
+
+
+    >>> original = ak.Array([[0, 1, 2], [], [3, 4], [5], [6, 7, 8, 9]])
+    >>> counts = ak.num(original)
+    >>> array = ak.flatten(original)
+    >>> counts
+    <Array [3, 0, 2, 1, 4] type='5 * int64'>
+    >>> array
+    <Array [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] type='10 * int64'>
+    >>> ak.unflatten(array, counts)
+    <Array [[0, 1, 2], [], [3, ...], [5], [6, 7, 8, 9]] type='5 * var * int64'>
+
+An inner dimension can be unflattened by setting the ``axis`` parameter, but
+operations like this constrain the ``counts`` more tightly.
+
+For example, we can subdivide an already divided list:
+
+.. code-block:: python
+
+
+    >>> original = ak.Array([[1, 2, 3, 4], [], [5, 6, 7], [8, 9]])
+    >>> ak.unflatten(original, [2, 2, 1, 2, 1, 1], axis=1).show()
+    [[[1, 2], [3, 4]],
+     [],
+     [[5], [6, 7]],
+     [[8], [9]]]
+
+But the counts have to add up to the lengths of those lists. We can't mix
+values from the first ``[1, 2, 3, 4]`` with values from the next ``[5, 6, 7]``.
+
+.. code-block:: python
+
+
+    >>> ak.unflatten(original, [2, 1, 2, 2, 1, 1], axis=1).show()
+    ValueError: while calling
+        ak.unflatten(
+            array = <Array [[1, 2, 3, 4], [], ..., [8, 9]] type='4 * var * int64'>
+            counts = [2, 1, 2, 2, 1, 1]
+            axis = 1
+            highlevel = True
+            behavior = None
+        )
+    Error details: structure imposed by 'counts' does not fit in the array or partition at axis=1
+
+Also note that new lists created by this function cannot cross partitions
+(which is only possible at ``axis=0``, anyway).
+
+See also :py:obj:`ak.num` and :py:obj:`ak.flatten`.
+

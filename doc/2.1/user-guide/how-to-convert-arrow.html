@@ -1,0 +1,1386 @@
+
+
+<!DOCTYPE html>
+
+
+<html >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>How to convert to/from Arrow and Parquet &#8212; Awkward Array 2.1.4 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Vibur" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyterlite_sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/jupyterlite_sphinx.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-convert-arrow';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.1';
+        </script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-convert-arrow.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to convert to Pandas" href="how-to-convert-pandas.html" />
+    <link rel="prev" title="How to convert to/from JSON" href="how-to-convert-json.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="None"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+      2.1  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="10-minutes-to-awkward-array.html">10 minutes to Awkward Array</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-4"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all) [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std) [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Using argmin/argmax [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">On GPUs [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-5"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-6"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-rename-records.html">Renaming records [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-sort.html">Sorting [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-7"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k" [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections [todo]</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-8"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-arraybuilder.html">Building array output [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Specialized behavior</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-9"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-subclass.html">Subclassing Array/Record [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-override-numpy.html">Overriding NumPy functions [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-in-numba.html">In Numba [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-lorentz.html">For physics: Lorentz vectors [todo]</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-convert.html" class="nav-link">Converting arrays</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">How to convert to/from Arrow and Parquet</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="how-to-convert-to-from-arrow-and-parquet">
+<h1>How to convert to/from Arrow and Parquet<a class="headerlink" href="#how-to-convert-to-from-arrow-and-parquet" title="Permalink to this headline">#</a></h1>
+<p>The <a class="reference external" href="https://arrow.apache.org/">Apache Arrow</a> data format is very similar to Awkward Array’s, but they’re not exactly the same. As such, arrays can <em>usually</em> be shared without copying, but not always.</p>
+<p>The <a class="reference external" href="https://parquet.apache.org/">Apache Parquet</a> file format has strong connections to Arrow with a large overlap in available tools, and while it’s also a columnar format like Awkward and Arrow, it is implemented in a different way, which emphasizes compact storage over random access.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+<span class="kn">import</span> <span class="nn">pyarrow</span> <span class="k">as</span> <span class="nn">pa</span>
+<span class="kn">import</span> <span class="nn">pyarrow.csv</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="from-arrow-to-awkward">
+<h2>From Arrow to Awkward<a class="headerlink" href="#from-arrow-to-awkward" title="Permalink to this headline">#</a></h2>
+<p>The function for Arrow → Awkward conversion is <a class="reference internal" href="../reference/generated/ak.from_arrow.html#ak.from_arrow" title="ak.from_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_arrow()</span></code></a>.</p>
+<p>The argument to this function can be any of the following types from the pyarrow library:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Array</span></code></a></p></li>
+<li><p><a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.ChunkedArray.html#pyarrow.ChunkedArray" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.ChunkedArray</span></code></a></p></li>
+<li><p><a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.RecordBatch.html#pyarrow.RecordBatch" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.RecordBatch</span></code></a></p></li>
+<li><p><a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Table</span></code></a></p></li>
+</ul>
+<p>and they are converted into non-partitioned, non-virtual Awkward Arrays. (Any disjoint chunks in the Arrow array are concatenated.)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_array</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]])</span>
+<span class="n">pa_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;pyarrow.lib.ListArray object at 0x7f06e47cc700&gt;
+[
+  [
+    1.1,
+    2.2,
+    3.3
+  ],
+  [],
+  [
+    4.4,
+    5.5
+  ]
+]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">pa_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+------------------------
+type: 3 * var * ?float64</pre></div></div>
+</div>
+<p>Here is an example of an Arrow Table, derived from CSV. (Printing a table shows its field types.)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pokemon</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span>
+    <span class="s2">&quot;https://gist.githubusercontent.com/armgilles/194bcff35001e7eb53a2a8b441e8b2c6/raw/92200bc0a673d5ce2110aaad4544ed6c4010f687/pokemon.csv&quot;</span>
+<span class="p">)</span>
+<span class="n">table</span> <span class="o">=</span> <span class="n">pyarrow</span><span class="o">.</span><span class="n">csv</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">pokemon</span><span class="p">)</span>
+<span class="n">table</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>pyarrow.Table
+#: int64
+Name: string
+Type 1: string
+Type 2: string
+Total: int64
+HP: int64
+Attack: int64
+Defense: int64
+Sp. Atk: int64
+Sp. Def: int64
+Speed: int64
+Generation: int64
+Legendary: bool
+----
+#: [[1,2,3,3,4,...,719,719,720,720,721]]
+Name: [[&quot;Bulbasaur&quot;,&quot;Ivysaur&quot;,&quot;Venusaur&quot;,&quot;VenusaurMega Venusaur&quot;,&quot;Charmander&quot;,...,&quot;Diancie&quot;,&quot;DiancieMega Diancie&quot;,&quot;HoopaHoopa Confined&quot;,&quot;HoopaHoopa Unbound&quot;,&quot;Volcanion&quot;]]
+Type 1: [[&quot;Grass&quot;,&quot;Grass&quot;,&quot;Grass&quot;,&quot;Grass&quot;,&quot;Fire&quot;,...,&quot;Rock&quot;,&quot;Rock&quot;,&quot;Psychic&quot;,&quot;Psychic&quot;,&quot;Fire&quot;]]
+Type 2: [[&quot;Poison&quot;,&quot;Poison&quot;,&quot;Poison&quot;,&quot;Poison&quot;,&quot;&quot;,...,&quot;Fairy&quot;,&quot;Fairy&quot;,&quot;Ghost&quot;,&quot;Dark&quot;,&quot;Water&quot;]]
+Total: [[318,405,525,625,309,...,600,700,600,680,600]]
+HP: [[45,60,80,80,39,...,50,50,80,80,80]]
+Attack: [[49,62,82,100,52,...,100,160,110,160,110]]
+Defense: [[49,63,83,123,43,...,150,110,60,60,120]]
+Sp. Atk: [[65,80,100,122,60,...,100,160,150,170,130]]
+Sp. Def: [[65,80,100,120,50,...,150,110,130,130,90]]
+...
+</pre></div>
+</div>
+</div>
+</div>
+<p>Awkward Array doesn’t make a deep distinction between “arrays” and “tables” the way Arrow does: the Awkward equivalent of an Arrow table is just an Awkward Array of record type.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<span class="n">array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{&#x27;#&#x27;: 1, Name: &#x27;Bulbasaur&#x27;, &#x27;Type 1&#x27;: &#x27;Grass&#x27;, &#x27;Type 2&#x27;: &#x27;Poison&#x27;, ...},
+ {&#x27;#&#x27;: 2, Name: &#x27;Ivysaur&#x27;, &#x27;Type 1&#x27;: &#x27;Grass&#x27;, &#x27;Type 2&#x27;: &#x27;Poison&#x27;, ...},
+ {&#x27;#&#x27;: 3, Name: &#x27;Venusaur&#x27;, &#x27;Type 1&#x27;: &#x27;Grass&#x27;, &#x27;Type 2&#x27;: &#x27;Poison&#x27;, ...},
+ {&#x27;#&#x27;: 3, Name: &#x27;VenusaurMega Venusaur&#x27;, &#x27;Type 1&#x27;: &#x27;Grass&#x27;, &#x27;Type 2&#x27;: ..., ...},
+ {&#x27;#&#x27;: 4, Name: &#x27;Charmander&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, &#x27;Type 2&#x27;: &#x27;&#x27;, Total: 309, ...},
+ {&#x27;#&#x27;: 5, Name: &#x27;Charmeleon&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, &#x27;Type 2&#x27;: &#x27;&#x27;, Total: 405, ...},
+ {&#x27;#&#x27;: 6, Name: &#x27;Charizard&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, &#x27;Type 2&#x27;: &#x27;Flying&#x27;, ...},
+ {&#x27;#&#x27;: 6, Name: &#x27;CharizardMega Charizard X&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, ...},
+ {&#x27;#&#x27;: 6, Name: &#x27;CharizardMega Charizard Y&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, ...},
+ {&#x27;#&#x27;: 7, Name: &#x27;Squirtle&#x27;, &#x27;Type 1&#x27;: &#x27;Water&#x27;, &#x27;Type 2&#x27;: &#x27;&#x27;, Total: 314, ...},
+ ...,
+ {&#x27;#&#x27;: 715, Name: &#x27;Noivern&#x27;, &#x27;Type 1&#x27;: &#x27;Flying&#x27;, &#x27;Type 2&#x27;: &#x27;Dragon&#x27;, ...},
+ {&#x27;#&#x27;: 716, Name: &#x27;Xerneas&#x27;, &#x27;Type 1&#x27;: &#x27;Fairy&#x27;, &#x27;Type 2&#x27;: &#x27;&#x27;, Total: 680, ...},
+ {&#x27;#&#x27;: 717, Name: &#x27;Yveltal&#x27;, &#x27;Type 1&#x27;: &#x27;Dark&#x27;, &#x27;Type 2&#x27;: &#x27;Flying&#x27;, ...},
+ {&#x27;#&#x27;: 718, Name: &#x27;Zygarde50% Forme&#x27;, &#x27;Type 1&#x27;: &#x27;Dragon&#x27;, &#x27;Type 2&#x27;: ..., ...},
+ {&#x27;#&#x27;: 719, Name: &#x27;Diancie&#x27;, &#x27;Type 1&#x27;: &#x27;Rock&#x27;, &#x27;Type 2&#x27;: &#x27;Fairy&#x27;, ...},
+ {&#x27;#&#x27;: 719, Name: &#x27;DiancieMega Diancie&#x27;, &#x27;Type 1&#x27;: &#x27;Rock&#x27;, &#x27;Type 2&#x27;: ..., ...},
+ {&#x27;#&#x27;: 720, Name: &#x27;HoopaHoopa Confined&#x27;, &#x27;Type 1&#x27;: &#x27;Psychic&#x27;, ...},
+ {&#x27;#&#x27;: 720, Name: &#x27;HoopaHoopa Unbound&#x27;, &#x27;Type 1&#x27;: &#x27;Psychic&#x27;, ...},
+ {&#x27;#&#x27;: 721, Name: &#x27;Volcanion&#x27;, &#x27;Type 1&#x27;: &#x27;Fire&#x27;, &#x27;Type 2&#x27;: &#x27;Water&#x27;, ...}]
+--------------------------------------------------------------------------------
+type: 800 * {
+    &quot;#&quot;: ?int64,
+    Name: ?string,
+    &quot;Type 1&quot;: ?string,
+    &quot;Type 2&quot;: ?string,
+    Total: ?int64,
+    HP: ?int64,
+    Attack: ?int64,
+    Defense: ?int64,
+    &quot;Sp. Atk&quot;: ?int64,
+    &quot;Sp. Def&quot;: ?int64,
+    Speed: ?int64,
+    Generation: ?int64,
+    Legendary: ?bool
+}</pre></div></div>
+</div>
+<p>The Awkward equivalent of Arrow’s schemas is <a class="reference internal" href="../reference/generated/ak.type.html#ak.type" title="ak.type"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.type()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(RecordType([OptionType(NumpyType(&#39;int64&#39;)), OptionType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}, typestr=&#39;char&#39;), parameters={&#39;__array__&#39;: &#39;string&#39;}, typestr=&#39;string&#39;)), OptionType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}, typestr=&#39;char&#39;), parameters={&#39;__array__&#39;: &#39;string&#39;}, typestr=&#39;string&#39;)), OptionType(ListType(NumpyType(&#39;uint8&#39;, parameters={&#39;__array__&#39;: &#39;char&#39;}, typestr=&#39;char&#39;), parameters={&#39;__array__&#39;: &#39;string&#39;}, typestr=&#39;string&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;int64&#39;)), OptionType(NumpyType(&#39;bool&#39;))], [&#39;#&#39;, &#39;Name&#39;, &#39;Type 1&#39;, &#39;Type 2&#39;, &#39;Total&#39;, &#39;HP&#39;, &#39;Attack&#39;, &#39;Defense&#39;, &#39;Sp. Atk&#39;, &#39;Sp. Def&#39;, &#39;Speed&#39;, &#39;Generation&#39;, &#39;Legendary&#39;]), 800)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;#&#39;: 1,
+ &#39;Name&#39;: &#39;Bulbasaur&#39;,
+ &#39;Type 1&#39;: &#39;Grass&#39;,
+ &#39;Type 2&#39;: &#39;Poison&#39;,
+ &#39;Total&#39;: 318,
+ &#39;HP&#39;: 45,
+ &#39;Attack&#39;: 49,
+ &#39;Defense&#39;: 49,
+ &#39;Sp. Atk&#39;: 65,
+ &#39;Sp. Def&#39;: 65,
+ &#39;Speed&#39;: 45,
+ &#39;Generation&#39;: 1,
+ &#39;Legendary&#39;: False}
+</pre></div>
+</div>
+</div>
+</div>
+<p>This array is ready for data analysis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">[</span><span class="n">array</span><span class="o">.</span><span class="n">Legendary</span><span class="p">]</span><span class="o">.</span><span class="n">Attack</span> <span class="o">-</span> <span class="n">array</span><span class="p">[</span><span class="n">array</span><span class="o">.</span><span class="n">Legendary</span><span class="p">]</span><span class="o">.</span><span class="n">Defense</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[-15,
+ 5,
+ 10,
+ 20,
+ 90,
+ 80,
+ 10,
+ 30,
+ -40,
+ -40,
+ ...,
+ 30,
+ 36,
+ 36,
+ -21,
+ -50,
+ 50,
+ 50,
+ 100,
+ -10]
+-----------------
+type: 65 * ?int64</pre></div></div>
+</div>
+</section>
+<section id="from-awkward-to-arrow">
+<h2>From Awkward to Arrow<a class="headerlink" href="#from-awkward-to-arrow" title="Permalink to this headline">#</a></h2>
+<p>The function for Awkward → Arrow conversion is <a class="reference internal" href="../reference/generated/ak.to_arrow.html#ak.to_arrow" title="ak.to_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_arrow()</span></code></a>. This function always returns</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Array</span></code></a></p></li>
+</ul>
+<p>type.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]}]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1, y: [1]},
+ {x: 2.2, y: [1, 2]},
+ {x: 3.3, y: [1, 2, 3]}]
+------------------------
+type: 3 * {
+    x: float64,
+    y: var * int64
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+<span class="n">pa_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;awkward._connect.pyarrow.AwkwardArrowArray object at 0x7f06e47ceaa0&gt;
+-- is_valid: all not null
+-- child 0 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+  [
+    1.1,
+    2.2,
+    3.3
+  ]
+-- child 1 type: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+  [
+    [
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      2,
+      3
+    ]
+  ]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">pa_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>awkward._connect.pyarrow.AwkwardArrowArray
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">isinstance</span><span class="p">(</span><span class="n">pa_array</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you need <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.RecordBatch.html#pyarrow.RecordBatch" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.RecordBatch</span></code></a>, you can build this using pyarrow:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_batch</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">RecordBatch</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">y</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">pa_batch</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>pyarrow.RecordBatch
+x: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+y: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you need <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Table</span></code></a>, you can build this using pyarrow:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_batches</span><span class="p">([</span><span class="n">pa_batch</span><span class="p">])</span>
+<span class="n">pa_table</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>pyarrow.Table
+x: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+y: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+----
+x: [[1.1,2.2,3.3]]
+y: [[[1],[1,2],[1,2,3]]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The columns of this Table are <code class="xref py py-class docutils literal notranslate"><span class="pre">pa.lib.ChunkedArray</span></code> instances:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_table</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;pyarrow.lib.ChunkedArray object at 0x7f06e462b740&gt;
+[
+  [
+    1.1,
+    2.2,
+    3.3
+  ]
+]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_table</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;pyarrow.lib.ChunkedArray object at 0x7f06e46543b0&gt;
+[
+  [
+    [
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      2,
+      3
+    ]
+  ]
+]
+</pre></div>
+</div>
+</div>
+</div>
+<p>shares memory as much as is possible, which <a class="reference external" href="https://ursalabs.org/blog/fast-pandas-loading/">can be faster than constructing Pandas directly</a>.</p>
+</section>
+<section id="reading-writing-data-streams-and-random-access-files">
+<h2>Reading/writing data streams and random access files<a class="headerlink" href="#reading-writing-data-streams-and-random-access-files" title="Permalink to this headline">#</a></h2>
+<p>Arrow has several methods for interfacing to data streams and disk-bound files, <a class="reference external" href="https://arrow.apache.org/docs/python/ipc.html">see the official documentation</a> for instructions.</p>
+<p>When following those instructions, remember that <a class="reference internal" href="../reference/generated/ak.from_arrow.html#ak.from_arrow" title="ak.from_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_arrow()</span></code></a> can accept <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Array</span></code></a>, <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.ChunkedArray.html#pyarrow.ChunkedArray" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.ChunkedArray</span></code></a>, <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.RecordBatch.html#pyarrow.RecordBatch" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.RecordBatch</span></code></a>, and <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Table</span></code></a>, but <a class="reference internal" href="../reference/generated/ak.to_arrow.html#ak.to_arrow" title="ak.to_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_arrow()</span></code></a> <em>only returns <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Array</span></code></a></em>.</p>
+<p>For instance, when writing to an IPC stream, Arrow requires <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.RecordBatch.html#pyarrow.RecordBatch" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.RecordBatch</span></code></a>, so you need to build them:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]}]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1, y: [1]},
+ {x: 2.2, y: [1, 2]},
+ {x: 3.3, y: [1, 2, 3]}]
+------------------------
+type: 3 * {
+    x: float64,
+    y: var * int64
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_batch</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">RecordBatch</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">y</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">first_batch</span><span class="o">.</span><span class="n">schema</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>x: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+y: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sink</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">BufferOutputStream</span><span class="p">()</span>
+<span class="n">writer</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">ipc</span><span class="o">.</span><span class="n">new_stream</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="n">first_batch</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+
+<span class="n">writer</span><span class="o">.</span><span class="n">write_batch</span><span class="p">(</span><span class="n">first_batch</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">next_batch</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">RecordBatch</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+            <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">y</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">writer</span><span class="o">.</span><span class="n">write_batch</span><span class="p">(</span><span class="n">next_batch</span><span class="p">)</span>
+
+<span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">bytes</span><span class="p">(</span><span class="n">sink</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>b&#39;\xff\xff\xff\xff\x18\x04\x00\x00\x10\x00\x00\x00\x00\x00\n\x00\x0c\x00\x06\x00\x05\x00\x08\x00\n\x00\x00\x00\x00\x01\x04\x00\x0c\x00\x00\x00\x08\x00\x08\x00\x00\x00\x04\x00\x08\x00\x00\x00\x04\x00\x00\x00\x02\x00\x00\x00\xa8\x02\x00\x00\x04\x00\x00\x00r\xfd\xff\xff\x00\x00\x01\x15\x18\x00\x00\x00(\x01\x00\x00\x08\x00\x00\x00\x14\x00\x00\x00\x01\x00\x00\x000\x01\x00\x00\x01\x00\x00\x00y\x00\x00\x00\x02\x00\x00\x00&lt;\x00\x00\x00\x04\x00\x00\x000\xfd\xff\xff\x08\x00\x00\x00 \x00\x00\x00\x14\x00\x00\x00ARROW:extension:name\x00\x00\x00\x00\x07\x00\x00\x00awkward\x00d\xfd\xff\xff\x08\x00\x00\x00$\x00\x00\x00\x18\x00\x00\x00ARROW:extension:metadata\x00\x00\x00\x00\x97\x00\x00\x00{&quot;mask_type&quot;: null, &quot;node_type&quot;: &quot;ListOffsetArray&quot;, &quot;mask_parameters&quot;: null, &quot;node_parameters&quot;: {}, &quot;record_is_tuple&quot;: null, &quot;record_is_scalar&quot;: false}\x00\x04\x00\x06\x00\x04\x00\x00\x00\x00\x00\x12\x00\x18\x00\x08\x00\x00\x00\x07\x00\x0c\x00\x00\x00\x10\x00\x14\x00\x12\x00\x00\x00\x00\x00\x00\x02\x14\x00\x00\x00(\x01\x00\x00\x08\x00\x00\x00\x14\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00item\x00\x00\x00\x00\x02\x00\x00\x00&lt;\x00\x00\x00\x04\x00\x00\x00|\xfe\xff\xff\x08\x00\x00\x00 \x00\x00\x00\x14\x00\x00\x00ARROW:extension:name\x00\x00\x00\x00\x07\x00\x00\x00awkward\x00\xb0\xfe\xff\xff\x08\x00\x00\x00$\x00\x00\x00\x18\x00\x00\x00ARROW:extension:metadata\x00\x00\x00\x00\x92\x00\x00\x00{&quot;mask_type&quot;: null, &quot;node_type&quot;: &quot;NumpyArray&quot;, &quot;mask_parameters&quot;: null, &quot;node_parameters&quot;: {}, &quot;record_is_tuple&quot;: null, &quot;record_is_scalar&quot;: false}\x00\x00\x08\x00\x0e\x00\x08\x00\x07\x00\x08\x00\x00\x00\x00\x00\x00\x01@\x00\x00\x00\x00\x00\x12\x00\x18\x00\x08\x00\x06\x00\x07\x00\x0c\x00\x00\x00\x10\x00\x14\x00\x12\x00\x00\x00\x00\x00\x01\x03\x14\x00\x00\x00,\x01\x00\x00\x08\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00x\x00\x00\x00\x02\x00\x00\x00D\x00\x00\x00\x04\x00\x00\x00\xcc\xff\xff\xff\x08\x00\x00\x00 \x00\x00\x00\x14\x00\x00\x00ARROW:extension:name\x00\x00\x00\x00\x07\x00\x00\x00awkward\x00\x08\x00\x0c\x00\x04\x00\x08\x00\x08\x00\x00\x00\x08\x00\x00\x00$\x00\x00\x00\x18\x00\x00\x00ARROW:extension:metadata\x00\x00\x00\x00\x92\x00\x00\x00{&quot;mask_type&quot;: null, &quot;node_type&quot;: &quot;NumpyArray&quot;, &quot;mask_parameters&quot;: null, &quot;node_parameters&quot;: {}, &quot;record_is_tuple&quot;: null, &quot;record_is_scalar&quot;: false}\x00\x00\x00\x00\x06\x00\x08\x00\x06\x00\x06\x00\x00\x00\x00\x00\x02\x00\xff\xff\xff\xff\xe8\x00\x00\x00\x14\x00\x00\x00\x00\x00\x00\x00\x0c\x00\x16\x00\x06\x00\x05\x00\x08\x00\x0c\x00\x0c\x00\x00\x00\x00\x03\x04\x00\x18\x00\x00\x00h\x00\x00\x00\x00\x00\x00\x00\x00\x00\n\x00\x18\x00\x0c\x00\x04\x00\x08\x00\n\x00\x00\x00|\x00\x00\x00\x10\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00 \x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9a\x99\x99\x99\x99\x99\xf1?\x9a\x99\x99\x99\x99\x99\x01@ffffff\n@\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xe8\x00\x00\x00\x14\x00\x00\x00\x00\x00\x00\x00\x0c\x00\x16\x00\x06\x00\x05\x00\x08\x00\x0c\x00\x0c\x00\x00\x00\x00\x03\x04\x00\x18\x00\x00\x00h\x00\x00\x00\x00\x00\x00\x00\x00\x00\n\x00\x18\x00\x0c\x00\x04\x00\x08\x00\n\x00\x00\x00|\x00\x00\x00\x10\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00 \x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9a\x99\x99\x99\x99\x99\xf1?\x9a\x99\x99\x99\x99\x99\x01@ffffff\n@\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xe8\x00\x00\x00\x14\x00\x00\x00\x00\x00\x00\x00\x0c\x00\x16\x00\x06\x00\x05\x00\x08\x00\x0c\x00\x0c\x00\x00\x00\x00\x03\x04\x00\x18\x00\x00\x00h\x00\x00\x00\x00\x00\x00\x00\x00\x00\n\x00\x18\x00\x0c\x00\x04\x00\x08\x00\n\x00\x00\x00|\x00\x00\x00\x10\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00 \x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9a\x99\x99\x99\x99\x99\xf1?\x9a\x99\x99\x99\x99\x99\x01@ffffff\n@\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xe8\x00\x00\x00\x14\x00\x00\x00\x00\x00\x00\x00\x0c\x00\x16\x00\x06\x00\x05\x00\x08\x00\x0c\x00\x0c\x00\x00\x00\x00\x03\x04\x00\x18\x00\x00\x00h\x00\x00\x00\x00\x00\x00\x00\x00\x00\n\x00\x18\x00\x0c\x00\x04\x00\x08\x00\n\x00\x00\x00|\x00\x00\x00\x10\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00 \x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9a\x99\x99\x99\x99\x99\xf1?\x9a\x99\x99\x99\x99\x99\x01@ffffff\n@\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xe8\x00\x00\x00\x14\x00\x00\x00\x00\x00\x00\x00\x0c\x00\x16\x00\x06\x00\x05\x00\x08\x00\x0c\x00\x0c\x00\x00\x00\x00\x03\x04\x00\x18\x00\x00\x00h\x00\x00\x00\x00\x00\x00\x00\x00\x00\n\x00\x18\x00\x0c\x00\x04\x00\x08\x00\n\x00\x00\x00|\x00\x00\x00\x10\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00 \x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9a\x99\x99\x99\x99\x99\xf1?\x9a\x99\x99\x99\x99\x99\x01@ffffff\n@\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\xe8\x00\x00\x00\x14\x00\x00\x00\x00\x00\x00\x00\x0c\x00\x16\x00\x06\x00\x05\x00\x08\x00\x0c\x00\x0c\x00\x00\x00\x00\x03\x04\x00\x18\x00\x00\x00h\x00\x00\x00\x00\x00\x00\x00\x00\x00\n\x00\x18\x00\x0c\x00\x04\x00\x08\x00\n\x00\x00\x00|\x00\x00\x00\x10\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x00\x00\x00\x00\x00 \x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x008\x00\x00\x00\x00\x00\x00\x000\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9a\x99\x99\x99\x99\x99\xf1?\x9a\x99\x99\x99\x99\x99\x01@ffffff\n@\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x03\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>But when reading them back, we can just pass the record batches (yielded by the <code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.RecordBatchStreamReader</span></code> <code class="docutils literal notranslate"><span class="pre">reader</span></code>) to <a class="reference internal" href="../reference/generated/ak.from_arrow.html#ak.from_arrow" title="ak.from_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_arrow()</span></code></a>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">ipc</span><span class="o">.</span><span class="n">open_stream</span><span class="p">(</span><span class="n">sink</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">schema</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>x: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+y: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">batch</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type=&#39;3 * {x: ?float64, y: op...&#39;&gt;
+&lt;Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type=&#39;3 * {x: ?float64, y: op...&#39;&gt;
+&lt;Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type=&#39;3 * {x: ?float64, y: op...&#39;&gt;
+&lt;Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type=&#39;3 * {x: ?float64, y: op...&#39;&gt;
+&lt;Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type=&#39;3 * {x: ?float64, y: op...&#39;&gt;
+&lt;Array [{x: 1.1, y: [1]}, ..., {x: 3.3, ...}] type=&#39;3 * {x: ?float64, y: op...&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-writing-the-feather-file-format">
+<h2>Reading/writing the Feather file format<a class="headerlink" href="#reading-writing-the-feather-file-format" title="Permalink to this headline">#</a></h2>
+<p>Feather is a lightweight file format that puts Arrow Tables in disk-bound files, <a class="reference external" href="https://arrow.apache.org/docs/python/feather.html">see the official documentation</a> for instructions.</p>
+<p>When following those instructions, remember that <a class="reference internal" href="../reference/generated/ak.from_arrow.html#ak.from_arrow" title="ak.from_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_arrow()</span></code></a> can accept <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Table</span></code></a>, but <a class="reference internal" href="../reference/generated/ak.to_arrow.html#ak.to_arrow" title="ak.to_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_arrow()</span></code></a> <em>only returns <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Array.html#pyarrow.Array" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Array</span></code></a></em>.</p>
+<p>For instance, when writing to a Feather file, Arrow requires <a class="reference external" href="https://arrow.apache.org/docs/python/generated/pyarrow.Table.html#pyarrow.Table" title="(in Apache Arrow v11.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyarrow.lib.Table</span></code></a>, so you need to build them:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]}]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1, y: [1]},
+ {x: 2.2, y: [1, 2]},
+ {x: 3.3, y: [1, 2, 3]}]
+------------------------
+type: 3 * {
+    x: float64,
+    y: var * int64
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pa_batch</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">RecordBatch</span><span class="o">.</span><span class="n">from_arrays</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+        <span class="n">ak</span><span class="o">.</span><span class="n">to_arrow</span><span class="p">(</span><span class="n">ak_array</span><span class="o">.</span><span class="n">y</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">pa_table</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">from_batches</span><span class="p">([</span><span class="n">pa_batch</span><span class="p">])</span>
+<span class="n">pa_table</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>pyarrow.Table
+x: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+y: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+----
+x: [[1.1,2.2,3.3]]
+y: [[[1],[1,2],[1,2,3]]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyarrow.feather</span>
+
+<span class="n">pyarrow</span><span class="o">.</span><span class="n">feather</span><span class="o">.</span><span class="n">write_feather</span><span class="p">(</span><span class="n">pa_table</span><span class="p">,</span> <span class="s2">&quot;/tmp/example.feather&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>But when reading them back, we can just pass the Arrow Table to <a class="reference internal" href="../reference/generated/ak.from_arrow.html#ak.from_arrow" title="ak.from_arrow"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_arrow()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">from_feather</span> <span class="o">=</span> <span class="n">pyarrow</span><span class="o">.</span><span class="n">feather</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="s2">&quot;/tmp/example.feather&quot;</span><span class="p">)</span>
+<span class="n">from_feather</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>pyarrow.Table
+x: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+y: extension&lt;awkward&lt;AwkwardArrowType&gt;&gt;
+----
+x: [[1.1,2.2,3.3]]
+y: [[[1],[1,2],[1,2,3]]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="n">from_feather</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>pyarrow.lib.Table
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">from_feather</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1, y: [1]},
+ {x: 2.2, y: [1, 2]},
+ {x: 3.3, y: [1, 2, 3]}]
+--------------------------
+type: 3 * {
+    x: ?float64,
+    y: option[var * int64]
+}</pre></div></div>
+</div>
+</section>
+<section id="reading-writing-the-parquet-file-format">
+<h2>Reading/writing the Parquet file format<a class="headerlink" href="#reading-writing-the-parquet-file-format" title="Permalink to this headline">#</a></h2>
+<p>With data converted to and from Arrow, it can then be saved and loaded from Parquet files. <a class="reference external" href="https://arrow.apache.org/docs/python/parquet.html">Arrow’s official Parquet documentation</a> provides instructions for converting Arrow to and from Parquet, but Parquet is a sufficiently important file format that Awkward has specialized functions for it.</p>
+<p>The <a class="reference internal" href="../reference/generated/ak.to_parquet.html#ak.to_parquet" title="ak.to_parquet"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_parquet()</span></code></a> function writes Awkward Arrays as Parquet files. It has relatively few options.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span>
+    <span class="p">[{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]},</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]}]</span>
+<span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1, y: [1]},
+ {x: 2.2, y: [1, 2]},
+ {x: 3.3, y: [1, 2, 3]}]
+------------------------
+type: 3 * {
+    x: float64,
+    y: var * int64
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">ak_array</span><span class="p">,</span> <span class="s2">&quot;/tmp/example.parquet&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;pyarrow._parquet.FileMetaData object at 0x7f06e44236a0&gt;
+  created_by: parquet-cpp-arrow version 11.0.0
+  num_columns: 2
+  num_rows: 3
+  num_row_groups: 1
+  format_version: 2.6
+  serialized_size: 0
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <a class="reference internal" href="../reference/generated/ak.from_parquet.html#ak.from_parquet" title="ak.from_parquet"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_parquet()</span></code></a> function reads Parquet files as Awkward Arrays, with quite a few more options. Basic usage just gives you the Awkward Array back.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_parquet</span><span class="p">(</span><span class="s2">&quot;/tmp/example.parquet&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1, y: [1]},
+ {x: 2.2, y: [1, 2]},
+ {x: 3.3, y: [1, 2, 3]}]
+------------------------
+type: 3 * {
+    x: float64,
+    y: var * int64
+}</pre></div></div>
+</div>
+<p>Since the data in a Parquet file may be huge, there are <code class="docutils literal notranslate"><span class="pre">columns</span></code> and <code class="docutils literal notranslate"><span class="pre">row_groups</span></code> options to read back only <em>part</em> of the file.</p>
+<ul class="simple">
+<li><p>Parquet’s “columns” correspond to Awkward’s record “fields,” though Parquet columns cannot be nested.</p></li>
+<li><p>Parquet’s “row groups” are ranges of contiguous elements, such as “<code class="docutils literal notranslate"><span class="pre">1000-2000</span></code>”. They correspond to Awkward’s “partitioning.” Neither Parquet row groups nor Awkward partitions can be nested.</p></li>
+</ul>
+<p>For instance, the expression</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_parquet</span><span class="p">(</span><span class="s2">&quot;/tmp/example.parquet&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1},
+ {x: 2.2},
+ {x: 3.3}]
+--------------
+type: 3 * {
+    x: float64
+}</pre></div></div>
+</div>
+<p>Doesn’t read column <code class="docutils literal notranslate"><span class="pre">&quot;y&quot;</span></code>.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-convert-json.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">How to convert to/from JSON</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-convert-pandas.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">How to convert to Pandas</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-arrow-to-awkward">From Arrow to Awkward</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-awkward-to-arrow">From Awkward to Arrow</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-writing-data-streams-and-random-access-files">Reading/writing data streams and random access files</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-writing-the-feather-file-format">Reading/writing the Feather file format</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-writing-the-parquet-file-format">Reading/writing the Parquet file format</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-convert-arrow.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/how-to-convert-arrow.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

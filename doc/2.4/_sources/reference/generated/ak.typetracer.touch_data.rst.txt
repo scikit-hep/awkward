@@ -1,0 +1,20 @@
+ak.typetracer.touch_data
+------------------------
+
+.. py:module: ak.typetracer.touch_data
+
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/typetracer.py>`__ on `line 86 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/typetracer.py#L86>`__.
+
+.. py:function:: ak.typetracer.touch_data(array, *, highlevel=True, behavior=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Recursively touches the data and returns a shall copy of the given array.
+

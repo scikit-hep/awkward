@@ -1,0 +1,168 @@
+ak.to_buffers
+-------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 4002 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L4002>`__.
+
+.. py:function:: ak.to_buffers(array, container=None, partition_start=0, form_key='node{id}', key_format='part{partition}-{form_key}-{attribute}', virtual='materialize')
+
+
+    :param array: Data to decompose into named buffers.
+    :param container: The str → NumPy arrays (or
+                  Python buffers) that represent the decomposed Awkward Array. This
+                  ``container`` is only assumed to have a ``__setitem__`` method that
+                  accepts strings as keys.
+    :type container: None or MutableMapping
+    :param partition_start: If ``array`` is not partitioned, this is
+                        the partition number that will be used as part of the container
+                        key. If ``array`` is partitioned, this is the first partition number.
+    :type partition_start: non-negative int
+    :param form_key: Python format string containing
+                 ``"{id}"`` or a function that takes non-negative integer as a string
+                 and the current ``layout`` as keyword arguments and returns a string,
+                 for use as a ``form_key`` on each Form node and in ``key_format`` (below).
+    :type form_key: str, callable
+    :param key_format: Python format string containing
+                   ``"{partition}"``, ``"{form_key}"``, and/or ``"{attribute}"`` or a function
+                   that takes these as keyword arguments and returns a string to use
+                   as keys for buffers in the ``container``. The ``partition`` is a
+                   partition number (non-negative integer, passed as a string), the
+                   ``form_key`` is the result of applying ``form_key`` (above), and the
+                   ``attribute`` is a hard-coded string representing the buffer's function
+                   (e.g. ``"data"``, ``"offsets"``, ``"index"``).
+    :type key_format: str or callable
+    :param virtual: If ``"materialize"``, any virtual arrays will be materialized
+                and the materialized data will be included in the container. If ``"pass"``,
+                a virtual array's Form is passed through as a :py:obj:`ak.forms.VirtualForm`,
+                assuming that it contains ``form_keys`` that can be found in the
+                container (e.g. by a previous pass through this function). No other
+                values are allowed for this function argument.
+    :type virtual: str
+
+Decomposes an Awkward Array into a Form and a collection of memory buffers,
+so that data can be losslessly written to file formats and storage devices
+that only map names to binary blobs (such as a filesystem directory).
+
+This function returns a 3-tuple:
+
+.. code-block:: python
+
+
+    (form, length, container)
+
+where the ``form`` is a :py:obj:`ak.forms.Form` (which can be converted to JSON
+with ``tojson``), the ``length`` is either an integer (``len(array)``) or a list
+of the lengths of each partition in ``array``, and the ``container`` is either
+the MutableMapping you passed in or a new dict containing the buffers (as
+NumPy arrays).
+
+These are also the first three arguments of :py:obj:`ak.from_buffers`, so a full
+round-trip is
+
+.. code-block:: python
+
+
+    >>> reconstituted = ak.from_buffers(*ak.to_buffers(original))
+
+The ``container`` argument lets you specify your own MutableMapping, which
+might be an interface to some storage format or device (e.g. h5py). It's
+okay if the ``container`` drops NumPy's ``dtype`` and ``shape`` information,
+leaving raw bytes, since ``dtype`` and ``shape`` can be reconstituted from
+the :py:obj:`ak.forms.NumpyForm`.
+
+The ``partition_start`` argument lets you fill the ``container`` gradually or
+in parallel. If the ``array`` is not partitioned, the ``partition_start``
+argument sets its partition number (for the container keys, through
+``key_format``). If the ``array`` is partitioned, the first partition is numbered
+``partition_start`` and as many are filled as ar in ``array``. See :py:obj:`ak.partitions`
+to get the number of partitions in ``array``.
+
+Here is a simple example:
+
+.. code-block:: python
+
+
+    >>> original = ak.Array([[1, 2, 3], [], [4, 5]])
+    >>> form, length, container = ak.to_buffers(original)
+    >>> form
+    {
+        "class": "ListOffsetArray64",
+        "offsets": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "itemsize": 8,
+            "format": "l",
+            "primitive": "int64",
+            "form_key": "node1"
+        },
+        "form_key": "node0"
+    }
+    >>> length
+    3
+    >>> container
+    {'part0-node0-offsets': array([0, 3, 3, 5], dtype=int64),
+     'part0-node1-data': array([1, 2, 3, 4, 5])}
+
+which may be read back with
+
+.. code-block:: python
+
+
+    >>> ak.from_buffers(form, length, container)
+    <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
+
+Here is an example that builds up a partitioned array:
+
+.. code-block:: python
+
+
+    >>> container = {}
+    >>> lengths = []
+    >>> form, length, _ = ak.to_buffers(ak.Array([[1, 2, 3], [], [4, 5]]), container, 0)
+    >>> lengths.append(length)
+    >>> form, length, _ = ak.to_buffers(ak.Array([[6, 7, 8, 9]]), container, 1)
+    >>> lengths.append(length)
+    >>> form, length, _ = ak.to_buffers(ak.Array([[], [], []]), container, 2)
+    >>> lengths.append(length)
+    >>> form, length, _ = ak.to_buffers(ak.Array([[10]]), container, 3)
+    >>> lengths.append(length)
+    >>> form
+    {
+        "class": "ListOffsetArray64",
+        "offsets": "i64",
+        "content": {
+            "class": "NumpyArray",
+            "itemsize": 8,
+            "format": "l",
+            "primitive": "int64",
+            "form_key": "node1"
+        },
+        "form_key": "node0"
+    }
+    >>> lengths
+    [3, 1, 3, 1]
+    >>> container
+    {'part0-node0-offsets': array([0, 3, 3, 5], dtype=int64),
+     'part0-node1-data': array([1, 2, 3, 4, 5]),
+     'part1-node0-offsets': array([0, 4], dtype=int64),
+     'part1-node1-data': array([6, 7, 8, 9]),
+     'part2-node0-offsets': array([0, 0, 0, 0], dtype=int64),
+     'part2-node1-data': array([], dtype=float64),
+     'part3-node0-offsets': array([0, 1], dtype=int64),
+     'part3-node1-data': array([10])}
+
+The object returned by :py:obj:`ak.from_buffers` is now a partitioned array:
+
+.. code-block:: python
+
+
+    >>> reconstituted = ak.from_buffers(form, lengths, container)
+    >>> reconstituted
+    <Array [[1, 2, 3], [], [4, ... [], [], [10]] type='8 * var * int64'>
+    >>> ak.partitions(reconstituted)
+    [3, 1, 3, 1]
+
+If you intend to use this function for saving data, you may want to pack it
+first with :py:obj:`ak.packed`.
+
+See also :py:obj:`ak.from_buffers` and :py:obj:`ak.packed`.
+

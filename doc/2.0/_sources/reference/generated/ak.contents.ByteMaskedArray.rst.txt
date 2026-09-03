@@ -1,0 +1,352 @@
+ak.contents.ByteMaskedArray
+---------------------------
+
+.. py:module: ak.contents.ByteMaskedArray
+
+Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/contents/bytemaskedarray.py>`__ on `line 19 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/contents/bytemaskedarray.py#L19>`__.
+
+.. py:class:: ak.contents.ByteMaskedArray(self, mask, content, valid_when)
+
+
+
+.. _ak-contents-bytemaskedarray-is_option:
+
+.. py:attribute:: ak.contents.ByteMaskedArray.is_option
+    :value: True
+
+
+
+.. _ak-contents-bytemaskedarray-mask:
+
+.. py:attribute:: ak.contents.ByteMaskedArray.mask
+
+
+
+.. _ak-contents-bytemaskedarray-content:
+
+.. py:attribute:: ak.contents.ByteMaskedArray.content
+
+
+
+.. _ak-contents-bytemaskedarray-valid_when:
+
+.. py:attribute:: ak.contents.ByteMaskedArray.valid_when
+
+
+
+.. _ak-contents-bytemaskedarray-copy:
+
+.. py:method:: ak.contents.ByteMaskedArray.copy(self, mask=unset, content=unset, valid_when=unset)
+
+
+
+.. _ak-contents-bytemaskedarray-__copy__:
+
+.. py:method:: ak.contents.ByteMaskedArray.__copy__(self)
+
+
+
+.. _ak-contents-bytemaskedarray-__deepcopy__:
+
+.. py:method:: ak.contents.ByteMaskedArray.__deepcopy__(self, memo)
+
+
+
+.. _ak-contents-bytemaskedarray-simplified:
+
+.. py:method:: ak.contents.ByteMaskedArray.simplified(cls, mask, content, valid_when)
+
+
+
+.. _ak-contents-bytemaskedarray-_form_with_key:
+
+.. py:method:: ak.contents.ByteMaskedArray._form_with_key(self, getkey)
+
+
+
+.. _ak-contents-bytemaskedarray-_to_buffers:
+
+.. py:method:: ak.contents.ByteMaskedArray._to_buffers(self, form, getkey, container, backend)
+
+
+
+.. _ak-contents-bytemaskedarray-_to_typetracer:
+
+.. py:method:: ak.contents.ByteMaskedArray._to_typetracer(self, forget_length)
+
+
+
+.. _ak-contents-bytemaskedarray-_touch_data:
+
+.. py:method:: ak.contents.ByteMaskedArray._touch_data(self, recursive)
+
+
+
+.. _ak-contents-bytemaskedarray-_touch_shape:
+
+.. py:method:: ak.contents.ByteMaskedArray._touch_shape(self, recursive)
+
+
+
+.. _ak-contents-bytemaskedarray-length:
+
+.. py:attribute:: ak.contents.ByteMaskedArray.length
+
+
+
+.. _ak-contents-bytemaskedarray-_forget_length:
+
+.. py:method:: ak.contents.ByteMaskedArray._forget_length(self)
+
+
+
+.. _ak-contents-bytemaskedarray-__repr__:
+
+.. py:method:: ak.contents.ByteMaskedArray.__repr__(self)
+
+
+
+.. _ak-contents-bytemaskedarray-_repr:
+
+.. py:method:: ak.contents.ByteMaskedArray._repr(self, indent, pre, post)
+
+
+
+.. _ak-contents-bytemaskedarray-to_indexedoptionarray64:
+
+.. py:method:: ak.contents.ByteMaskedArray.to_IndexedOptionArray64(self)
+
+
+
+.. _ak-contents-bytemaskedarray-to_bytemaskedarray:
+
+.. py:method:: ak.contents.ByteMaskedArray.to_ByteMaskedArray(self, valid_when)
+
+
+
+.. _ak-contents-bytemaskedarray-to_bitmaskedarray:
+
+.. py:method:: ak.contents.ByteMaskedArray.to_BitMaskedArray(self, valid_when, lsb_order)
+
+
+
+.. _ak-contents-bytemaskedarray-mask_as_bool:
+
+.. py:method:: ak.contents.ByteMaskedArray.mask_as_bool(self, valid_when=None)
+
+
+
+.. _ak-contents-bytemaskedarray-_getitem_nothing:
+
+.. py:method:: ak.contents.ByteMaskedArray._getitem_nothing(self)
+
+
+
+.. _ak-contents-bytemaskedarray-_getitem_at:
+
+.. py:method:: ak.contents.ByteMaskedArray._getitem_at(self, where)
+
+
+
+.. _ak-contents-bytemaskedarray-_getitem_range:
+
+.. py:method:: ak.contents.ByteMaskedArray._getitem_range(self, where)
+
+
+
+.. _ak-contents-bytemaskedarray-_getitem_field:
+
+.. py:method:: ak.contents.ByteMaskedArray._getitem_field(self, where, only_fields=())
+
+
+
+.. _ak-contents-bytemaskedarray-_getitem_fields:
+
+.. py:method:: ak.contents.ByteMaskedArray._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-contents-bytemaskedarray-_carry:
+
+.. py:method:: ak.contents.ByteMaskedArray._carry(self, carry, allow_lazy)
+
+
+
+.. _ak-contents-bytemaskedarray-_nextcarry_outindex:
+
+.. py:method:: ak.contents.ByteMaskedArray._nextcarry_outindex(self, backend)
+
+
+
+.. _ak-contents-bytemaskedarray-_getitem_next_jagged_generic:
+
+.. py:method:: ak.contents.ByteMaskedArray._getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-bytemaskedarray-_getitem_next_jagged:
+
+.. py:method:: ak.contents.ByteMaskedArray._getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-bytemaskedarray-_getitem_next:
+
+.. py:method:: ak.contents.ByteMaskedArray._getitem_next(self, head, tail, advanced)
+
+
+
+.. _ak-contents-bytemaskedarray-project:
+
+.. py:method:: ak.contents.ByteMaskedArray.project(self, mask=None)
+
+
+
+.. _ak-contents-bytemaskedarray-_offsets_and_flattened:
+
+.. py:method:: ak.contents.ByteMaskedArray._offsets_and_flattened(self, axis, depth)
+
+
+
+.. _ak-contents-bytemaskedarray-_mergeable_next:
+
+.. py:method:: ak.contents.ByteMaskedArray._mergeable_next(self, other, mergebool)
+
+
+
+.. _ak-contents-bytemaskedarray-_reverse_merge:
+
+.. py:method:: ak.contents.ByteMaskedArray._reverse_merge(self, other)
+
+
+
+.. _ak-contents-bytemaskedarray-_mergemany:
+
+.. py:method:: ak.contents.ByteMaskedArray._mergemany(self, others)
+
+
+
+.. _ak-contents-bytemaskedarray-_fill_none:
+
+.. py:method:: ak.contents.ByteMaskedArray._fill_none(self, value)
+
+
+
+.. _ak-contents-bytemaskedarray-_local_index:
+
+.. py:method:: ak.contents.ByteMaskedArray._local_index(self, axis, depth)
+
+
+
+.. _ak-contents-bytemaskedarray-_numbers_to_type:
+
+.. py:method:: ak.contents.ByteMaskedArray._numbers_to_type(self, name)
+
+
+
+.. _ak-contents-bytemaskedarray-_is_unique:
+
+.. py:method:: ak.contents.ByteMaskedArray._is_unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-bytemaskedarray-_unique:
+
+.. py:method:: ak.contents.ByteMaskedArray._unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-bytemaskedarray-_argsort_next:
+
+.. py:method:: ak.contents.ByteMaskedArray._argsort_next(self, negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order)
+
+
+
+.. _ak-contents-bytemaskedarray-_sort_next:
+
+.. py:method:: ak.contents.ByteMaskedArray._sort_next(self, negaxis, starts, parents, outlength, ascending, stable, kind, order)
+
+
+
+.. _ak-contents-bytemaskedarray-_combinations:
+
+.. py:method:: ak.contents.ByteMaskedArray._combinations(self, n, replacement, recordlookup, parameters, axis, depth)
+
+
+
+.. _ak-contents-bytemaskedarray-_reduce_next:
+
+.. py:method:: ak.contents.ByteMaskedArray._reduce_next(self, reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims, behavior)
+
+
+
+.. _ak-contents-bytemaskedarray-_validity_error:
+
+.. py:method:: ak.contents.ByteMaskedArray._validity_error(self, path)
+
+
+
+.. _ak-contents-bytemaskedarray-_nbytes_part:
+
+.. py:method:: ak.contents.ByteMaskedArray._nbytes_part(self)
+
+
+
+.. _ak-contents-bytemaskedarray-_pad_none:
+
+.. py:method:: ak.contents.ByteMaskedArray._pad_none(self, target, axis, depth, clip)
+
+
+
+.. _ak-contents-bytemaskedarray-_to_arrow:
+
+.. py:method:: ak.contents.ByteMaskedArray._to_arrow(self, pyarrow, mask_node, validbytes, length, options)
+
+
+
+.. _ak-contents-bytemaskedarray-_to_numpy:
+
+.. py:method:: ak.contents.ByteMaskedArray._to_numpy(self, allow_missing)
+
+
+
+.. _ak-contents-bytemaskedarray-_completely_flatten:
+
+.. py:method:: ak.contents.ByteMaskedArray._completely_flatten(self, backend, options)
+
+
+
+.. _ak-contents-bytemaskedarray-_drop_none:
+
+.. py:method:: ak.contents.ByteMaskedArray._drop_none(self)
+
+
+
+.. _ak-contents-bytemaskedarray-_recursively_apply:
+
+.. py:method:: ak.contents.ByteMaskedArray._recursively_apply(self, action, behavior, depth, depth_context, lateral_context, options)
+
+
+
+.. _ak-contents-bytemaskedarray-to_packed:
+
+.. py:method:: ak.contents.ByteMaskedArray.to_packed(self)
+
+
+
+.. _ak-contents-bytemaskedarray-_to_list:
+
+.. py:method:: ak.contents.ByteMaskedArray._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-bytemaskedarray-to_backend:
+
+.. py:method:: ak.contents.ByteMaskedArray.to_backend(self, backend)
+
+
+
+.. _ak-contents-bytemaskedarray-_is_equal_to:
+
+.. py:method:: ak.contents.ByteMaskedArray._is_equal_to(self, other, index_dtype, numpyarray)
+

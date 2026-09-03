@@ -1,0 +1,66 @@
+ak.fill_none
+------------
+
+.. py:module: ak.fill_none
+
+Defined in `awkward.operations.ak_fill_none <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_fill_none.py>`__ on `line 19 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_fill_none.py#L19>`__.
+
+.. py:function:: ak.fill_none(array, value, axis=-1, *, highlevel=True, behavior=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param value: Data with which to replace None.
+    :param axis: If None, replace all None values in the array
+             with the given value; if an int, The dimension at which this
+             operation is applied. The outermost dimension is ``0``, followed
+             by ``1``, etc., and negative values count backward from the
+             innermost: ``-1`` is the innermost  dimension, ``-2`` is the next
+             level up, etc.
+    :type axis: None or int
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Replaces missing values (None) with a given ``value``.
+
+For example, in the following
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
+
+The None values could be replaced with ``0`` by
+
+.. code-block:: python
+
+
+    >>> ak.fill_none(array, 0)
+    <Array [[1.1, 0, 2.2], [], [0, 3.3, 4.4]] type='3 * var * float64'>
+
+The replacement value doesn't strictly need the same type as the
+surrounding data. For example, the None values could also be replaced
+by a string.
+
+.. code-block:: python
+
+
+    >>> ak.fill_none(array, "hi")
+    <Array [[1.1, 'hi', 2.2], [], ['hi', ...]] type='3 * var * union[float64, s...'>
+
+The list content now has a union type:
+
+.. code-block:: python
+
+
+    >>> ak.fill_none(array, "hi").type.show()
+    3 * var * union[
+        float64,
+        string
+    ]
+
+The values could be floating-point numbers or strings.
+

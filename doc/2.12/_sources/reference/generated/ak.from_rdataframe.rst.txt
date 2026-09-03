@@ -1,0 +1,43 @@
+ak.from_rdataframe
+==================
+
+Defined in `awkward.operations.ak_from_rdataframe <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_from_rdataframe.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_from_rdataframe.py#L15>`__.
+
+.. py:function:: ak.from_rdataframe(rdf, columns, *, keep_order=False, offsets_type='int64', with_name=None, highlevel=True, behavior=None, attrs=None)
+
+   :param rdf: ROOT RDataFrame to convert into an
+               Awkward Array.
+   :type rdf: ``ROOT.RDataFrame``
+   :param columns: A column or multiple columns to be
+                   converted to Awkward Array.
+   :type columns: str or iterable of str
+   :param keep_order: If set to ``True`` the columns with Awkward type will
+                      keep order after filtering.
+   :type keep_order: bool
+   :param offsets_type: A ``NumpyType.primitive`` type of the ListOffsetArray
+                        offsets: ``"int32"``, ``"uint32"`` or ``"int64"``.
+   :type offsets_type: str
+   :param with_name: Gives tuples and records a name that can be
+                     used to override their behavior (see :py:obj:`ak.Array`).
+   :type with_name: None or str
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Converts ROOT RDataFrame columns into an Awkward Array.
+
+   If ``columns`` is a string, the return value represents a single RDataFrame column.
+
+   If ``columns`` is any other iterable, the return value is a record array, in which
+   each field corresponds to an RDataFrame column. In particular, if the ``columns``
+   iterable contains only one string, it is still a record array, which has only
+   one field.
+
+   See also :py:obj:`ak.to_rdataframe`.
+

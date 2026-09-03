@@ -1,0 +1,93 @@
+ak.forms.ListOffsetForm
+-----------------------
+
+.. py:module: ak.forms.ListOffsetForm
+
+Defined in `awkward.forms.listoffsetform <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/forms/listoffsetform.py>`__ on `line 27 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/forms/listoffsetform.py#L27>`__.
+
+.. py:class:: ak.forms.ListOffsetForm(self, offsets, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-listoffsetform-offsets:
+
+.. py:attribute:: ak.forms.ListOffsetForm.offsets
+
+
+
+.. _ak-forms-listoffsetform-content:
+
+.. py:attribute:: ak.forms.ListOffsetForm.content
+
+
+
+.. _ak-forms-listoffsetform-copy:
+
+.. py:method:: ak.forms.ListOffsetForm.copy(self, offsets=UNSET, content=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-listoffsetform-simplified:
+
+.. py:method:: ak.forms.ListOffsetForm.simplified(cls, offsets, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-listoffsetform-__repr__:
+
+.. py:method:: ak.forms.ListOffsetForm.__repr__(self)
+
+
+
+.. _ak-forms-listoffsetform-_to_dict_part:
+
+.. py:method:: ak.forms.ListOffsetForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-listoffsetform-type:
+
+.. py:attribute:: ak.forms.ListOffsetForm.type
+
+
+
+.. _ak-forms-listoffsetform-_columns:
+
+.. py:method:: ak.forms.ListOffsetForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-listoffsetform-_prune_columns:
+
+.. py:method:: ak.forms.ListOffsetForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-listoffsetform-_select_columns:
+
+.. py:method:: ak.forms.ListOffsetForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-listoffsetform-_column_types:
+
+.. py:method:: ak.forms.ListOffsetForm._column_types(self)
+
+
+
+.. _ak-forms-listoffsetform-__setstate__:
+
+.. py:method:: ak.forms.ListOffsetForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-listoffsetform-_expected_from_buffers:
+
+.. py:method:: ak.forms.ListOffsetForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-listoffsetform-_is_equal_to:
+
+.. py:method:: ak.forms.ListOffsetForm._is_equal_to(self, other, all_parameters, form_key)
+

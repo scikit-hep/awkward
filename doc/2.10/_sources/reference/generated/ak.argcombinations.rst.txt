@@ -1,0 +1,56 @@
+ak.argcombinations
+==================
+
+Defined in `awkward.operations.ak_argcombinations <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_argcombinations.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/ak_argcombinations.py#L18>`__.
+
+.. py:function:: ak.argcombinations(array, n, *, replacement=False, axis=1, fields=None, parameters=None, with_name=None, highlevel=True, behavior=None, attrs=None)
+
+   Computes combinations of ``n`` items from an array, returning integer indexes.
+
+   The motivation and uses of this function are similar to those of
+   :py:obj:`ak.argcartesian`. See :py:obj:`ak.combinations` and :py:obj:`ak.argcartesian` for a more
+   complete description.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param n: The number of items to choose from each list: ``2`` chooses
+             unique pairs, ``3`` chooses unique triples, etc.
+   :type n: int
+   :param replacement: If True, combinations that include the same
+                       item more than once are allowed; otherwise each item in a
+                       combinations is strictly unique.
+   :type replacement: bool
+   :param axis: The dimension at which this operation is applied. The
+                outermost dimension is ``0``, followed by ``1``, etc., and negative
+                values count backward from the innermost: ``-1`` is the innermost
+                dimension, ``-2`` is the next level up, etc.
+                If a str, it is interpreted as the name of the axis which maps
+                to an int if named axes are present. Named axes are attached
+                to an array using :py:obj:`ak.with_named_axis` and removed with
+                :py:obj:`ak.without_named_axis`; also see the
+                `Named axes user guide <../../user-guide/how-to-array-properties-named-axis.html>`__.
+   :type axis: int or str
+   :param fields: If None, the pairs/triples/etc. are
+                  tuples with unnamed fields; otherwise, these ``fields`` name the
+                  fields. The number of ``fields`` must be equal to ``n``.
+   :type fields: None or list of str
+   :param parameters: Parameters for the new
+                      :py:obj:`ak.contents.RecordArray` node that is created by this operation.
+   :type parameters: None or dict
+   :param with_name: Assigns a ``"__record__"`` name to the new
+                     :py:obj:`ak.contents.RecordArray` node that is created by this operation
+                     (overriding ``parameters``, if necessary).
+   :type with_name: None or str
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   :returns: An array of integer indexes into the combinations of ``array`` with
+             itself (sampled without replacement), like :py:obj:`ak.combinations` but for use
+             with :py:obj:`ak.Array.__getitem__`.
+

@@ -1,0 +1,160 @@
+ak.forms.ByteMaskedForm
+-----------------------
+
+.. py:module: ak.forms.ByteMaskedForm
+
+Defined in `awkward.forms.bytemaskedform <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/forms/bytemaskedform.py>`__ on `line 18 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/forms/bytemaskedform.py#L18>`__.
+
+.. py:class:: ak.forms.ByteMaskedForm(self, mask, content, valid_when, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-bytemaskedform-is_option:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.is_option
+    :value: True
+
+
+
+.. _ak-forms-bytemaskedform-mask:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.mask
+
+
+
+.. _ak-forms-bytemaskedform-content:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.content
+
+
+
+.. _ak-forms-bytemaskedform-valid_when:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.valid_when
+
+
+
+.. _ak-forms-bytemaskedform-copy:
+
+.. py:method:: ak.forms.ByteMaskedForm.copy(self, mask=UNSET, content=UNSET, valid_when=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-bytemaskedform-simplified:
+
+.. py:method:: ak.forms.ByteMaskedForm.simplified(cls, mask, content, valid_when, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-bytemaskedform-is_identity_like:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.is_identity_like
+
+
+
+.. _ak-forms-bytemaskedform-__repr__:
+
+.. py:method:: ak.forms.ByteMaskedForm.__repr__(self)
+
+
+
+.. _ak-forms-bytemaskedform-_to_dict_part:
+
+.. py:method:: ak.forms.ByteMaskedForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-bytemaskedform-type:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.type
+
+
+
+.. _ak-forms-bytemaskedform-__eq__:
+
+.. py:method:: ak.forms.ByteMaskedForm.__eq__(self, other)
+
+
+
+.. _ak-forms-bytemaskedform-purelist_parameters:
+
+.. py:method:: ak.forms.ByteMaskedForm.purelist_parameters(self, *keys)
+
+
+
+.. _ak-forms-bytemaskedform-purelist_isregular:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.purelist_isregular
+
+
+
+.. _ak-forms-bytemaskedform-purelist_depth:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.purelist_depth
+
+
+
+.. _ak-forms-bytemaskedform-minmax_depth:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.minmax_depth
+
+
+
+.. _ak-forms-bytemaskedform-branch_depth:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.branch_depth
+
+
+
+.. _ak-forms-bytemaskedform-fields:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.fields
+
+
+
+.. _ak-forms-bytemaskedform-is_tuple:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.is_tuple
+
+
+
+.. _ak-forms-bytemaskedform-dimension_optiontype:
+
+.. py:attribute:: ak.forms.ByteMaskedForm.dimension_optiontype
+
+
+
+.. _ak-forms-bytemaskedform-_columns:
+
+.. py:method:: ak.forms.ByteMaskedForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-bytemaskedform-_prune_columns:
+
+.. py:method:: ak.forms.ByteMaskedForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-bytemaskedform-_select_columns:
+
+.. py:method:: ak.forms.ByteMaskedForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-bytemaskedform-_column_types:
+
+.. py:method:: ak.forms.ByteMaskedForm._column_types(self)
+
+
+
+.. _ak-forms-bytemaskedform-__setstate__:
+
+.. py:method:: ak.forms.ByteMaskedForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-bytemaskedform-_expected_from_buffers:
+
+.. py:method:: ak.forms.ByteMaskedForm._expected_from_buffers(self, getkey, recursive)
+

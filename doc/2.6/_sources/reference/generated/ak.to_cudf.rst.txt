@@ -1,0 +1,14 @@
+ak.to_cudf
+----------
+
+.. py:module: ak.to_cudf
+
+Defined in `awkward.operations.ak_to_cudf <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_to_cudf.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/operations/ak_to_cudf.py#L11>`__.
+
+.. py:function:: ak.to_cudf(array)
+
+Create a cuDF.Series out of the given ak array
+
+Buffers that are not already in GPU memory will be transferred, and some
+structural reformatting may happen to account for differences in architecture.
+

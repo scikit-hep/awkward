@@ -1,0 +1,75 @@
+ak.types.RecordType
+-------------------
+
+.. py:module: ak.types.RecordType
+
+Defined in `awkward.types.recordtype <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/types/recordtype.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/types/recordtype.py#L20>`__.
+
+.. py:class:: ak.types.RecordType(self, contents, fields, *, parameters=None)
+
+
+
+.. _ak-types-recordtype-copy:
+
+.. py:method:: ak.types.RecordType.copy(self, *, contents=UNSET, fields=UNSET, parameters=UNSET)
+
+
+
+.. _ak-types-recordtype-contents:
+
+.. py:attribute:: ak.types.RecordType.contents
+
+
+
+.. _ak-types-recordtype-fields:
+
+.. py:attribute:: ak.types.RecordType.fields
+
+
+
+.. _ak-types-recordtype-is_tuple:
+
+.. py:attribute:: ak.types.RecordType.is_tuple
+
+
+
+.. _ak-types-recordtype-_str:
+
+.. py:method:: ak.types.RecordType._str(self, indent, compact, behavior)
+
+
+
+.. _ak-types-recordtype-__repr__:
+
+.. py:method:: ak.types.RecordType.__repr__(self)
+
+
+
+.. _ak-types-recordtype-_is_equal_to:
+
+.. py:method:: ak.types.RecordType._is_equal_to(self, other, all_parameters)
+
+
+
+.. _ak-types-recordtype-index_to_field:
+
+.. py:method:: ak.types.RecordType.index_to_field(self, index)
+
+
+
+.. _ak-types-recordtype-field_to_index:
+
+.. py:method:: ak.types.RecordType.field_to_index(self, field)
+
+
+
+.. _ak-types-recordtype-has_field:
+
+.. py:method:: ak.types.RecordType.has_field(self, field)
+
+
+
+.. _ak-types-recordtype-content:
+
+.. py:method:: ak.types.RecordType.content(self, index_or_field)
+

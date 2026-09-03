@@ -1,0 +1,6 @@
+ak.str._drop_option_preserving_form
+===================================
+
+Defined in `awkward.operations.str.__init__ <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/str/__init__.py>`__ on `line 93 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/operations/str/__init__.py#L93>`__.
+
+.. py:function:: ak.str._drop_option_preserving_form(layout, ensure_empty_mask: bool = False)

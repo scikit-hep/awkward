@@ -1,0 +1,9 @@
+ak.contents.ToArrowOptions
+--------------------------
+
+.. py:module: ak.contents.ToArrowOptions
+
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/e4be9febc76c610eea671ef3f0e3084cb206da49/src/awkward/contents/content.py>`__ on `line 125 <https://github.com/scikit-hep/awkward/blob/e4be9febc76c610eea671ef3f0e3084cb206da49/src/awkward/contents/content.py#L125>`__.
+
+.. py:class:: ak.contents.ToArrowOptions(self)
+

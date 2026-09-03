@@ -1,0 +1,15 @@
+ak.contents.create_missing_data
+-------------------------------
+
+.. py:module: ak.contents.create_missing_data
+
+Defined in `awkward.contents.indexedoptionarray <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/contents/indexedoptionarray.py>`__ on `line 1805 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/contents/indexedoptionarray.py#L1805>`__.
+
+.. py:function:: ak.contents.create_missing_data(dtype, backend)
+
+Create missing data based on the input dtype
+
+Missing data are represented differently based on the Numpy array
+dtype, this function returns the proper missing data representation
+given the input dtype
+

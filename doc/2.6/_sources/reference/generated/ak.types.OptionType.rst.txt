@@ -1,0 +1,45 @@
+ak.types.OptionType
+-------------------
+
+.. py:module: ak.types.OptionType
+
+Defined in `awkward.types.optiontype <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/types/optiontype.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/types/optiontype.py#L22>`__.
+
+.. py:class:: ak.types.OptionType(self, content, *, parameters=None)
+
+
+
+.. _ak-types-optiontype-copy:
+
+.. py:method:: ak.types.OptionType.copy(self, *, content=UNSET, parameters=UNSET)
+
+
+
+.. _ak-types-optiontype-content:
+
+.. py:attribute:: ak.types.OptionType.content
+
+
+
+.. _ak-types-optiontype-_str:
+
+.. py:method:: ak.types.OptionType._str(self, indent, compact, behavior)
+
+
+
+.. _ak-types-optiontype-__repr__:
+
+.. py:method:: ak.types.OptionType.__repr__(self)
+
+
+
+.. _ak-types-optiontype-simplify_option_union:
+
+.. py:method:: ak.types.OptionType.simplify_option_union(self)
+
+
+
+.. _ak-types-optiontype-_is_equal_to:
+
+.. py:method:: ak.types.OptionType._is_equal_to(self, other, all_parameters)
+

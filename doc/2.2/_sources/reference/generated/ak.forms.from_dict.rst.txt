@@ -1,0 +1,9 @@
+ak.forms.from_dict
+------------------
+
+.. py:module: ak.forms.from_dict
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/forms/form.py>`__ on `line 36 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/forms/form.py#L36>`__.
+
+.. py:function:: ak.forms.from_dict(input)
+

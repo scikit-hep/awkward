@@ -1,0 +1,9 @@
+ak.prettyprint.valuestr_horiz
+-----------------------------
+
+.. py:module: ak.prettyprint.valuestr_horiz
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/prettyprint.py>`__ on `line 138 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/prettyprint.py#L138>`__.
+
+.. py:function:: ak.prettyprint.valuestr_horiz(data, limit_cols, formatter)
+

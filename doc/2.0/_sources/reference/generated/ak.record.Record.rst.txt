@@ -1,0 +1,177 @@
+ak.record.Record
+----------------
+
+.. py:module: ak.record.Record
+
+Defined in `awkward.record <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/record.py>`__ on `line 15 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/record.py#L15>`__.
+
+.. py:class:: ak.record.Record(self, array, at)
+
+
+
+.. _ak-record-record-array:
+
+.. py:attribute:: ak.record.Record.array
+
+
+
+.. _ak-record-record-backend:
+
+.. py:attribute:: ak.record.Record.backend
+
+
+
+.. _ak-record-record-at:
+
+.. py:attribute:: ak.record.Record.at
+
+
+
+.. _ak-record-record-fields:
+
+.. py:attribute:: ak.record.Record.fields
+
+
+
+.. _ak-record-record-is_tuple:
+
+.. py:attribute:: ak.record.Record.is_tuple
+
+
+
+.. _ak-record-record-to_tuple:
+
+.. py:method:: ak.record.Record.to_tuple(self)
+
+
+
+.. _ak-record-record-contents:
+
+.. py:attribute:: ak.record.Record.contents
+
+
+
+.. _ak-record-record-content:
+
+.. py:method:: ak.record.Record.content(self, index_or_field)
+
+
+
+.. _ak-record-record-__repr__:
+
+.. py:method:: ak.record.Record.__repr__(self)
+
+
+
+.. _ak-record-record-_repr:
+
+.. py:method:: ak.record.Record._repr(self, indent, pre, post)
+
+
+
+.. _ak-record-record-validity_error:
+
+.. py:method:: ak.record.Record.validity_error(self, path='layout.array')
+
+
+
+.. _ak-record-record-parameters:
+
+.. py:attribute:: ak.record.Record.parameters
+
+
+
+.. _ak-record-record-parameter:
+
+.. py:method:: ak.record.Record.parameter(self, key)
+
+
+
+.. _ak-record-record-purelist_parameter:
+
+.. py:method:: ak.record.Record.purelist_parameter(self, key)
+
+
+
+.. _ak-record-record-purelist_isregular:
+
+.. py:attribute:: ak.record.Record.purelist_isregular
+
+
+
+.. _ak-record-record-purelist_depth:
+
+.. py:attribute:: ak.record.Record.purelist_depth
+
+
+
+.. _ak-record-record-minmax_depth:
+
+.. py:attribute:: ak.record.Record.minmax_depth
+
+
+
+.. _ak-record-record-branch_depth:
+
+.. py:attribute:: ak.record.Record.branch_depth
+
+
+
+.. _ak-record-record-__getitem__:
+
+.. py:method:: ak.record.Record.__getitem__(self, where)
+
+
+
+.. _ak-record-record-_getitem:
+
+.. py:method:: ak.record.Record._getitem(self, where)
+
+
+
+.. _ak-record-record-_getitem_field:
+
+.. py:method:: ak.record.Record._getitem_field(self, where)
+
+
+
+.. _ak-record-record-_getitem_fields:
+
+.. py:method:: ak.record.Record._getitem_fields(self, where)
+
+
+
+.. _ak-record-record-to_packed:
+
+.. py:method:: ak.record.Record.to_packed(self)
+
+
+
+.. _ak-record-record-to_list:
+
+.. py:method:: ak.record.Record.to_list(self, behavior=None)
+
+
+
+.. _ak-record-record-_to_list:
+
+.. py:method:: ak.record.Record._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-record-record-__copy__:
+
+.. py:method:: ak.record.Record.__copy__(self)
+
+
+
+.. _ak-record-record-__deepcopy__:
+
+.. py:method:: ak.record.Record.__deepcopy__(self, memo)
+
+
+
+.. _ak-record-record-copy:
+
+.. py:method:: ak.record.Record.copy(self, array=unset, at=unset)
+

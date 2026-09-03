@@ -1,0 +1,49 @@
+ak.to_layout
+------------
+
+.. py:module: ak.to_layout
+
+Defined in `awkward.operations.ak_to_layout <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_to_layout.py>`__ on `line 31 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_to_layout.py#L31>`__.
+
+.. py:function:: ak.to_layout(array, *, allow_record=True, allow_unknown=False, none_policy='error', use_from_iter=True, primitive_policy='promote', string_policy='as-characters', regulararray=True)
+
+
+    :param array: Array-like data. May be a high level :py:obj:`ak.Array`, :py:obj:`ak.Record` (if ``allow_record``),
+              :py:obj:`ak.ArrayBuilder`, or low-level :py:obj:`ak.contents.Content`, :py:obj:`ak.record.Record` (if ``allow_record``),
+              or a supported backend array (NumPy ``ndarray``, CuPy ``ndarray``,
+              JAX DeviceArray), data-less TypeTracer, Arrow object, or an arbitrary Python
+              iterable (for :py:obj:`ak.from_iter` to convert).
+    :param allow_record: If True, allow :py:obj:`ak.record.Record` as an output;
+                     otherwise, if the output would be a scalar record, raise an error.
+    :type allow_record: bool
+    :param allow_unknown: If True, allow non-Awkward outputs; otherwise,
+                      raise an error.
+    :type allow_unknown: bool
+    :param use_from_iter: If True, allow conversion of iterable inputs to
+                      arrays using :py:obj:`ak.from_iter`; otherwise, throw an Exception.
+    :type use_from_iter: bool
+    :param none_policy: ("error", "pass-through", "promote"): If "error", throw an Exception
+                    for None inputs; if "pass-through", return None; otherwise,
+                    for "promote" return a length-one array containing the None with unknown type.
+    :type none_policy: bool
+    :param primitive_policy: If "error", throw an Exception
+                         for scalar inputs; if "pass-through", return the scalar input; otherwise,
+                         for "promote" return a length-one array containing the scalar.
+    :type primitive_policy: "error", "pass-through", "promote"
+    :param string_policy: If "error", throw an Exception
+                      for scalar inputs; if "pass-through", return the scalar input;
+                      ir "as-characters", return an array of characters; otherwise,
+                      for "promote" return a length-one array containing the string.
+    :type string_policy: "error", "pass-through", "as-characters", "promote"
+    :param regulararray: Prefer to create :py:obj:`ak.contents.RegularArray` nodes for
+                     regular array objects.
+    :type regulararray: bool
+
+Converts ``array`` (many types supported, including all Awkward Arrays and
+Records) into a :py:obj:`ak.contents.Content` and maybe :py:obj:`ak.record.Record` or
+other types.
+
+This function is usually used to sanitize inputs for other functions; it
+would rarely be used in a data analysis because :py:obj:`ak.contents.Content` and
+:py:obj:`ak.record.Record` are lower-level than :py:obj:`ak.Array`.
+

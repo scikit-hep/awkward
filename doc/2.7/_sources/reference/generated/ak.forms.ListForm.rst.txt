@@ -1,0 +1,99 @@
+ak.forms.ListForm
+-----------------
+
+.. py:module: ak.forms.ListForm
+
+Defined in `awkward.forms.listform <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/listform.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/forms/listform.py#L20>`__.
+
+.. py:class:: ak.forms.ListForm(self, starts, stops, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-listform-starts:
+
+.. py:attribute:: ak.forms.ListForm.starts
+
+
+
+.. _ak-forms-listform-stops:
+
+.. py:attribute:: ak.forms.ListForm.stops
+
+
+
+.. _ak-forms-listform-content:
+
+.. py:attribute:: ak.forms.ListForm.content
+
+
+
+.. _ak-forms-listform-copy:
+
+.. py:method:: ak.forms.ListForm.copy(self, starts=UNSET, stops=UNSET, content=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-listform-simplified:
+
+.. py:method:: ak.forms.ListForm.simplified(cls, starts, stops, content, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-listform-__repr__:
+
+.. py:method:: ak.forms.ListForm.__repr__(self)
+
+
+
+.. _ak-forms-listform-_to_dict_part:
+
+.. py:method:: ak.forms.ListForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-listform-type:
+
+.. py:attribute:: ak.forms.ListForm.type
+
+
+
+.. _ak-forms-listform-_columns:
+
+.. py:method:: ak.forms.ListForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-listform-_prune_columns:
+
+.. py:method:: ak.forms.ListForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-listform-_select_columns:
+
+.. py:method:: ak.forms.ListForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-listform-_column_types:
+
+.. py:method:: ak.forms.ListForm._column_types(self)
+
+
+
+.. _ak-forms-listform-__setstate__:
+
+.. py:method:: ak.forms.ListForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-listform-_expected_from_buffers:
+
+.. py:method:: ak.forms.ListForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-listform-_is_equal_to:
+
+.. py:method:: ak.forms.ListForm._is_equal_to(self, other, all_parameters, form_key)
+

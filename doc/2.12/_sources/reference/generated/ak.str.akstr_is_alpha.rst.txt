@@ -1,0 +1,14 @@
+ak.str.akstr_is_alpha
+=====================
+
+.. py:module:: awkward.operations.str.akstr_is_alpha
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_alpha.is_alpha
+
+

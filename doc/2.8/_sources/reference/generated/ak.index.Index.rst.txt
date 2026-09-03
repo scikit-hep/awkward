@@ -1,0 +1,195 @@
+ak.index.Index
+--------------
+
+.. py:module: ak.index.Index
+
+Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/index.py>`__ on `line 44 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/index.py#L44>`__.
+
+.. py:class:: ak.index.Index(self, data, *, metadata=None, nplike=None)
+
+
+
+.. _ak-index-index-zeros:
+
+.. py:method:: ak.index.Index.zeros(cls, length, nplike, dtype=None)
+
+
+
+.. _ak-index-index-empty:
+
+.. py:method:: ak.index.Index.empty(cls, length, nplike, dtype=None)
+
+
+
+.. _ak-index-index-data:
+
+.. py:attribute:: ak.index.Index.data
+
+
+
+.. _ak-index-index-nplike:
+
+.. py:attribute:: ak.index.Index.nplike
+
+
+
+.. _ak-index-index-dtype:
+
+.. py:attribute:: ak.index.Index.dtype
+
+
+
+.. _ak-index-index-metadata:
+
+.. py:attribute:: ak.index.Index.metadata
+
+
+
+.. _ak-index-index-ptr:
+
+.. py:attribute:: ak.index.Index.ptr
+
+
+
+.. _ak-index-index-length:
+
+.. py:attribute:: ak.index.Index.length
+
+
+
+.. _ak-index-index-forget_length:
+
+.. py:method:: ak.index.Index.forget_length(self)
+
+
+
+.. _ak-index-index-raw:
+
+.. py:method:: ak.index.Index.raw(self, nplike)
+
+
+
+.. _ak-index-index-materialize:
+
+.. py:method:: ak.index.Index.materialize(self, type_)
+
+
+
+.. _ak-index-index-is_all_materialized:
+
+.. py:attribute:: ak.index.Index.is_all_materialized
+
+
+
+.. _ak-index-index-is_any_materialized:
+
+.. py:attribute:: ak.index.Index.is_any_materialized
+
+
+
+.. _ak-index-index-__len__:
+
+.. py:method:: ak.index.Index.__len__(self)
+
+
+
+.. _ak-index-index-__cuda_array_interface__:
+
+.. py:attribute:: ak.index.Index.__cuda_array_interface__
+
+
+
+.. _ak-index-index-__array_interface__:
+
+.. py:attribute:: ak.index.Index.__array_interface__
+
+
+
+.. _ak-index-index-__dlpack_device__:
+
+.. py:method:: ak.index.Index.__dlpack_device__(self)
+
+
+
+.. _ak-index-index-__dlpack__:
+
+.. py:method:: ak.index.Index.__dlpack__(self, stream=None)
+
+
+
+.. _ak-index-index-__repr__:
+
+.. py:method:: ak.index.Index.__repr__(self)
+
+
+
+.. _ak-index-index-_repr:
+
+.. py:method:: ak.index.Index._repr(self, indent, pre, post)
+
+
+
+.. _ak-index-index-form:
+
+.. py:attribute:: ak.index.Index.form
+
+
+
+.. _ak-index-index-__getitem__:
+
+.. py:method:: ak.index.Index.__getitem__(self, where)
+
+
+
+.. _ak-index-index-__setitem__:
+
+.. py:method:: ak.index.Index.__setitem__(self, where, what)
+
+
+
+.. _ak-index-index-to64:
+
+.. py:method:: ak.index.Index.to64(self)
+
+
+
+.. _ak-index-index-__copy__:
+
+.. py:method:: ak.index.Index.__copy__(self)
+
+
+
+.. _ak-index-index-__deepcopy__:
+
+.. py:method:: ak.index.Index.__deepcopy__(self, memo)
+
+
+
+.. _ak-index-index-_nbytes_part:
+
+.. py:method:: ak.index.Index._nbytes_part(self)
+
+
+
+.. _ak-index-index-to_nplike:
+
+.. py:method:: ak.index.Index.to_nplike(self, nplike)
+
+
+
+.. _ak-index-index-is_equal_to:
+
+.. py:method:: ak.index.Index.is_equal_to(self, other, index_dtype=True, numpyarray=True)
+
+
+
+.. _ak-index-index-_touch_data:
+
+.. py:method:: ak.index.Index._touch_data(self)
+
+
+
+.. _ak-index-index-_touch_shape:
+
+.. py:method:: ak.index.Index._touch_shape(self)
+

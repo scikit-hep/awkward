@@ -1,0 +1,31 @@
+ak.with_parameter
+=================
+
+Defined in `awkward.operations.ak_with_parameter <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/operations/ak_with_parameter.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/operations/ak_with_parameter.py#L15>`__.
+
+.. py:function:: ak.with_parameter(array, parameter, value, *, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param parameter: Name of the parameter to set on that array.
+   :type parameter: str
+   :param value: Value of the parameter to set on that array.
+   :type value: JSON
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   This function returns a new array with a parameter set on the outermost
+   node of its :py:obj:`ak.Array.layout`.
+
+   Note that a "new array" is a lightweight shallow copy, not a duplication
+   of large data buffers.
+
+   You can also remove a single parameter with this function, since setting
+   a parameter to None is equivalent to removing it.
+

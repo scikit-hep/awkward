@@ -1,0 +1,847 @@
+
+
+<!DOCTYPE html>
+
+
+<html >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Read strings from a binary stream &#8212; Awkward Array 2.5.2 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Vibur" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyterlite_sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/jupyterlite_sphinx.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-strings-read-binary';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.5';
+        </script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-strings-read-binary.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="None"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  <div class="navbar-header-items__start">
+    
+      <div class="navbar-item">
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button type="button" class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle" data-bs-toggle="dropdown">
+      2.5  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div class="version-switcher__menu dropdown-menu list-group-flush py-0">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+    
+  </div>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item"><nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting-started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../reference/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-gitter"></i></span>
+            <label class="sr-only">Gitter</label></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumbs">
+  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Read strings from a binary stream</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="read-strings-from-a-binary-stream">
+<h1>Read strings from a binary stream<a class="headerlink" href="#read-strings-from-a-binary-stream" title="Permalink to this headline">#</a></h1>
+<p>Awkward Array implements support for ragged strings as ragged lists of <a class="reference external" href="https://en.wikipedia.org/wiki/UTF-8">code-units</a>. As such, successive strings are closely packed in memory, leading to high-performance operations.</p>
+<p>Let’s imagine that we want to read some logging output that is stored in a text file. For example, <a class="reference external" href="https://zenodo.org/record/8196385">a subset of logs from the Android Application framework</a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+
+<span class="c1"># Preview logs</span>
+<span class="n">log_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;samples&quot;</span><span class="p">,</span> <span class="s2">&quot;Android.head.log.gz&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>12-17 19:31:36.263  1795  1825 I PowerManager_screenOn: DisplayPowerStatesetColorFadeLevel: level=1.0
+12-17 19:31:36.263  5224  5283 I SendBroadcastPermission: action:android.com.huawei.bone.NOTIFY_SPORT_DATA, mPermissionType:0
+12-17 19:31:36.264  1795  1825 D DisplayPowerController: Animating brightness: target=21, rate=40
+12-17 19:31:36.264  1795  1825 I PowerManager_screenOn: DisplayPowerController updatePowerState mPendingRequestLocked=policy=BRIGHT, useProximitySensor=true, useProximitySensorbyPhone=true, screenBrightness=33, screenAutoBrightnessAdjustment=0.0, brightnessSetByUser=true, useAutoBrightness=true, blockScreenOn=false, lowPowerMode=false, boostScreenBrightness=false, dozeScreenBrightness=-1, dozeScreenState=UNKNOWN, useTwilight=false, useSmartBacklight=true, brightnessWaitMode=false, brightnessWaitRet=true, screenAutoBrightness=-1, userId=0
+12-17 19:31:36.264  1795  2750 I PowerManager_screenOn: DisplayPowerState Updating screen state: state=ON, backlight=823
+12-17 19:31:36.264  1795  2750 I HwLightsService: back light level before map = 823
+12-17 19:31:36.264  1795  1825 D DisplayPowerController: Animating brightness: target=21, rate=40
+12-17 19:31:36.264  1795  1825 V KeyguardServiceDelegate: onScreenTurnedOn()
+</pre></div>
+</div>
+</div>
+</div>
+<p>To begin with, we can read the decompressed log-files as an array of <code class="xref py py-data docutils literal notranslate"><span class="pre">np.uint8</span></code> dtype using NumPy, and convert the resulting array to an Awkward Array</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="c1"># `gzip.open` doesn&#39;t return a true file descriptor that NumPy can ingest</span>
+    <span class="c1"># So, instead we read into memory.</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+<span class="n">raw_bytes</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+<span class="n">raw_bytes</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1150841 * uint8
+</pre></div>
+</div>
+</div>
+</div>
+<p>Awkward Array doesn’t support scalar values, so we can’t treat these characters as a single-string. Instead we need at least one dimension. Let’s unflatten our array of characters, to form a length-1 array of characters.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array_of_chars</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_bytes</span><span class="p">))</span>
+<span class="n">array_of_chars</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[49, 50, 45, 49, 55, 32, 49, 57, 58, ..., 99, 114, 105, 109, 40, 41, 13, 10]]
+------------------------------------------------------------------------------
+type: 1 * 1150841 * uint8</pre></div></div>
+</div>
+<p>We can then ask Awkward Array to treat this array of lists of characters as an array of strings, using <a class="reference internal" href="../reference/generated/ak.enforce_type.html#ak.enforce_type" title="ak.enforce_type"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.enforce_type()</span></code></a></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">string</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">enforce_type</span><span class="p">(</span><span class="n">array_of_chars</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span><span class="p">)</span>
+<span class="n">string</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1 * string
+</pre></div>
+</div>
+</div>
+</div>
+<p>The underlying mechanism for implementing strings as lists of code-units can be seen if we inspect the low-level layout that builds the array</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">string</span><span class="o">.</span><span class="n">layout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ListOffsetArray len=&#39;1&#39;&gt;
+    &lt;parameter name=&#39;__array__&#39;&gt;&#39;string&#39;&lt;/parameter&gt;
+    &lt;offsets&gt;&lt;Index dtype=&#39;int64&#39; len=&#39;2&#39;&gt;[      0 1150841]&lt;/Index&gt;&lt;/offsets&gt;
+    &lt;content&gt;&lt;NumpyArray dtype=&#39;uint8&#39; len=&#39;1150841&#39;&gt;
+        &lt;parameter name=&#39;__array__&#39;&gt;&#39;char&#39;&lt;/parameter&gt;
+        [49 50 45 ... 41 13 10]
+    &lt;/NumpyArray&gt;&lt;/content&gt;
+&lt;/ListOffsetArray&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">__array__</span></code> parameter is special. It is reserved by Awkward Array, and signals that the layout is a special pre-undertood built-in type. In this case, that type of the outer <a class="reference internal" href="../reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray" title="ak.contents.ListOffsetArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.ListOffsetArray</span></code></a> is “string”. It can also be seen that the inner <a class="reference internal" href="../reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a> also has an <code class="docutils literal notranslate"><span class="pre">__array__</span></code> parameter, this time with a value of <code class="docutils literal notranslate"><span class="pre">char</span></code>. In Awkward Array, an array of strings <em>must</em> look like this layout; a list with the <code class="docutils literal notranslate"><span class="pre">__array__=&quot;string&quot;</span></code> parameter wrapping a <a class="reference internal" href="../reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a> with the <code class="docutils literal notranslate"><span class="pre">__array__=&quot;char&quot;</span></code> parameter.</p>
+<p>A single (very long) string isn’t much use. Let’s split this string at the line boundaries</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">split_at_newlines</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split_pattern</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">split_at_newlines</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[...]]
+----------------------
+type: 1 * var * string</pre></div></div>
+</div>
+<p>Now we can remove the temporary length-1 outer dimension that was required to treat the data as a string</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lines</span> <span class="o">=</span> <span class="n">split_at_newlines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">lines</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[&#x27;12-17 19:31:36.263  1795  1825 I PowerManager_screenOn: DisplayPowerStatesetColorFadeLevel: level=1.0\r&#x27;,
+ &#x27;12-17 19:31:36.263  5224  5283 I SendBroadcastPermission: action:android.com.huawei.bone.NOTIFY_SPORT_DATA, mPermissionType:0\r&#x27;,
+ &#x27;12-17 19:31:36.264  1795  1825 D DisplayPowerController: Animating brightness: target=21, rate=40\r&#x27;,
+ &#x27;12-17 19:31:36.264  1795  1825 I PowerManager_screenOn: DisplayPowerController updatePowerState mPendingRequestLocked=policy=BRIGHT, useProximitySensor=true, useProximitySensorbyPhone=true, screenBrightness=33, screenAutoBrightnessAdjustment=0.0, brightnessSetByUser=true, useAutoBrightness=true, blockScreenOn=false, lowPowerMode=false, boostScreenBrightness=false, dozeScreenBrightness=-1, dozeScreenState=UNKNOWN, useTwilight=false, useSmartBacklight=true, brightnessWaitMode=false, brightnessWaitRet=true, screenAutoBrightness=-1, userId=0\r&#x27;,
+ &#x27;12-17 19:31:36.264  1795  2750 I PowerManager_screenOn: DisplayPowerState Updating screen state: state=ON, backlight=823\r&#x27;,
+ &#x27;12-17 19:31:36.264  1795  2750 I HwLightsService: back light level before map = 823\r&#x27;,
+ &#x27;12-17 19:31:36.264  1795  1825 D DisplayPowerController: Animating brightness: target=21, rate=40\r&#x27;,
+ &#x27;12-17 19:31:36.264  1795  1825 V KeyguardServiceDelegate: onScreenTurnedOn()\r&#x27;,
+ &#x27;12-17 19:31:36.264  1795  1825 I WindowManger_keyguard: onScreenTurnedOn()\r&#x27;,
+ &#x27;12-17 19:31:36.264  1795  1825 D DisplayPowerController: Display ready!\r&#x27;,
+ ...,
+ &#x27;12-17 19:31:56.801  2852  2866 D KeyguardService: KGSvcCall onScreenTurningOn.\r&#x27;,
+ &#x27;12-17 19:31:56.801  2852  2866 D KeyguardViewMediator: notifyScreenOn\r&#x27;,
+ &#x27;12-17 19:31:56.801  2852  2852 D KeyguardViewMediator: handleNotifyScreenTurningOn\r&#x27;,
+ &#x27;12-17 19:31:56.801  2852  2852 I PhoneStatusBar: onScreenTurningOn\r&#x27;,
+ &#x27;12-17 19:31:56.801  2852  2852 D KeyguardViewMediator: handleNotifyScreenTurnedOn End with : 110\r&#x27;,
+ &#x27;12-17 19:31:56.801  1795 15987 I WindowManger_keyguard: **** SHOWN CALLED ****\r&#x27;,
+ &#x27;12-17 19:31:56.801  1795 15987 D WindowManager: mKeyguardDelegate.ShowListener.onDrawn.\r&#x27;,
+ &#x27;12-17 19:31:56.801  1795 15987 I WindowManger_keyguard: hideScrim()\r&#x27;,
+ &#x27;&#x27;]
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+type: 10001 * string</pre></div></div>
+</div>
+<p>In the low-level layout, we can see that these lines are still just variable-length lists</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lines</span><span class="o">.</span><span class="n">layout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ListOffsetArray len=&#39;10001&#39;&gt;
+    &lt;parameter name=&#39;__array__&#39;&gt;&#39;string&#39;&lt;/parameter&gt;
+    &lt;offsets&gt;&lt;Index dtype=&#39;int64&#39; len=&#39;10002&#39;&gt;
+        [      0     102     228 ... 1140773 1140841 1140841]
+    &lt;/Index&gt;&lt;/offsets&gt;
+    &lt;content&gt;&lt;NumpyArray dtype=&#39;uint8&#39; len=&#39;1140841&#39;&gt;
+        &lt;parameter name=&#39;__array__&#39;&gt;&#39;char&#39;&lt;/parameter&gt;
+        [49 50 45 ... 40 41 13]
+    &lt;/NumpyArray&gt;&lt;/content&gt;
+&lt;/ListOffsetArray&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<section id="bytestrings-vs-strings">
+<h2>Bytestrings vs strings<a class="headerlink" href="#bytestrings-vs-strings" title="Permalink to this headline">#</a></h2>
+<p>In general, whilst strings can fundamentally be described as lists of bytes (code-units), many string operations do not operate at the byte-level. The <code class="xref py py-mod docutils literal notranslate"><span class="pre">ak.str</span></code> submodule provides a suite of vectorised operations that operate at the code-point (<em>not</em> code-unit) level, such as computing the string length. Consider the following simple string</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">large_code_point</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="s2">&quot;Å&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In Awkward Array, strings are UTF-8 encoded, meaning that a single code-point may comprise up to four code-units (bytes). Although it looks like this is a single character, if we look at the layout it’s clear that the number of code-units is in-fact two</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">large_code_point</span><span class="o">.</span><span class="n">layout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ListOffsetArray len=&#39;1&#39;&gt;
+    &lt;parameter name=&#39;__array__&#39;&gt;&#39;string&#39;&lt;/parameter&gt;
+    &lt;offsets&gt;&lt;Index dtype=&#39;int64&#39; len=&#39;2&#39;&gt;
+        [0 2]
+    &lt;/Index&gt;&lt;/offsets&gt;
+    &lt;content&gt;&lt;NumpyArray dtype=&#39;uint8&#39; len=&#39;2&#39;&gt;
+        &lt;parameter name=&#39;__array__&#39;&gt;&#39;char&#39;&lt;/parameter&gt;
+        [195 133]
+    &lt;/NumpyArray&gt;&lt;/content&gt;
+&lt;/ListOffsetArray&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is reflected in the <a class="reference internal" href="../reference/generated/ak.num.html#ak.num" title="ak.num"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.num()</span></code></a> function</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">large_code_point</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[2]
+---------------
+type: 1 * int64</pre></div></div>
+</div>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">ak.str</span></code> module provides a function for computing the length of a string</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="n">large_code_point</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1]
+---------------
+type: 1 * int64</pre></div></div>
+</div>
+<p>Clearly <em>this</em> function is code-point aware.</p>
+<p>If one wants to drop the UTF-8 string abstraction, and instead deal with strings as raw byte arrays, there is the <code class="docutils literal notranslate"><span class="pre">bytes</span></code> type</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">large_code_point_bytes</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">enforce_type</span><span class="p">(</span><span class="n">large_code_point</span><span class="p">,</span> <span class="s2">&quot;bytes&quot;</span><span class="p">)</span>
+<span class="n">large_code_point_bytes</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[b&#x27;\xc3\x85&#x27;]
+---------------
+type: 1 * bytes</pre></div></div>
+</div>
+<p>The layout of this array has different <code class="docutils literal notranslate"><span class="pre">&quot;bytestring&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;byte&quot;</span></code> parameters</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">large_code_point_bytes</span><span class="o">.</span><span class="n">layout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ListOffsetArray len=&#39;1&#39;&gt;
+    &lt;parameter name=&#39;__array__&#39;&gt;&#39;bytestring&#39;&lt;/parameter&gt;
+    &lt;offsets&gt;&lt;Index dtype=&#39;int64&#39; len=&#39;2&#39;&gt;
+        [0 2]
+    &lt;/Index&gt;&lt;/offsets&gt;
+    &lt;content&gt;&lt;NumpyArray dtype=&#39;uint8&#39; len=&#39;2&#39;&gt;
+        &lt;parameter name=&#39;__array__&#39;&gt;&#39;byte&#39;&lt;/parameter&gt;
+        [195 133]
+    &lt;/NumpyArray&gt;&lt;/content&gt;
+&lt;/ListOffsetArray&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Many of the functions in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">ak.str</span></code> module treat bytestrings and strings differently; in the latter case, strings are often manipulated in terms of code-points instead of code-units. Consider <a class="reference internal" href="../reference/generated/ak.str.length.html#ak.str.length" title="ak.str.length"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.str.length()</span></code></a> for this array</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">length</span><span class="p">(</span><span class="n">large_code_point_bytes</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[2]
+---------------
+type: 1 * int64</pre></div></div>
+</div>
+<p>This is clearly counting the bytes (code-units), not code-points.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#bytestrings-vs-strings">Bytestrings vs strings</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-strings-read-binary.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/how-to-strings-read-binary.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

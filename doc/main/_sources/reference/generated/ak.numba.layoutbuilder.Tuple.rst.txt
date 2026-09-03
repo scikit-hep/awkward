@@ -1,0 +1,38 @@
+ak.numba.layoutbuilder.Tuple
+============================
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/numba/layoutbuilder.py>`__ on `line 713 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/numba/layoutbuilder.py#L713>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Tuple(contents, *, parameters=None)
+
+
+
+   .. py:attribute:: _contents
+
+
+   .. py:property:: contents
+
+
+   .. py:property:: form
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: numbatype()
+
+
+   .. py:method:: index(at)
+
+
+   .. py:method:: clear()
+
+
+   .. py:method:: __len__()
+
+
+   .. py:method:: is_valid(error: str)
+
+
+   .. py:method:: snapshot() -> awkward.contents.Content
+

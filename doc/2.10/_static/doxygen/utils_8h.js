@@ -1,0 +1,25 @@
+var utils_8h =
+[
+    [ "is_specialization< Test, Ref >", "structawkward_1_1is__specialization.html", null ],
+    [ "is_specialization< Ref< Args... >, Ref >", "structawkward_1_1is__specialization_3_01Ref_3_01Args_8_8_8_01_4_00_01Ref_01_4.html", null ],
+    [ "visit_impl< INDEX >", "structawkward_1_1visit__impl.html", null ],
+    [ "visit_impl< 0 >", "structawkward_1_1visit__impl_3_010_01_4.html", null ],
+    [ "buffer_name_helper", "namespaceawkward.html#afa040db50e514ff67055993abecc1dae", null ],
+    [ "buffer_size_helper", "namespaceawkward.html#a4cb2f62f116bddc01e3acfbe394dbc96", null ],
+    [ "is_awkward_type", "namespaceawkward.html#a2c6c07c272084910fe71a0d11c313016", null ],
+    [ "num_buffers_helper", "namespaceawkward.html#a51e079aee37365f38c0a67e4fd483f46", null ],
+    [ "type_to_form", "namespaceawkward.html#a424377e79627af8aff2a430314f4ef74", null ],
+    [ "type_to_name", "namespaceawkward.html#a97a0f1079126a8de52d1382a2444f713", null ],
+    [ "type_to_name< bool >", "namespaceawkward.html#af94141d3617882ce3a8d64a292b655f9", null ],
+    [ "type_to_name< char >", "namespaceawkward.html#a0e6d2d8bab985c8316785a29b54e147e", null ],
+    [ "type_to_numpy_like", "namespaceawkward.html#a1a80abacca21d8558a4f11921031bb61", null ],
+    [ "type_to_numpy_like< int32_t >", "namespaceawkward.html#ae52ac6465ec85b868b7d47755082e78d", null ],
+    [ "type_to_numpy_like< int64_t >", "namespaceawkward.html#a254223096d18700ed2ef0d7b8d1fe758", null ],
+    [ "type_to_numpy_like< int8_t >", "namespaceawkward.html#a116f2a98a586d32deb37130858395aed", null ],
+    [ "type_to_numpy_like< uint32_t >", "namespaceawkward.html#a95e7907f350a4153aef73e26d3046147", null ],
+    [ "type_to_numpy_like< uint8_t >", "namespaceawkward.html#a02e4767dd22bd21be73a86b8471b26c2", null ],
+    [ "visit_at", "namespaceawkward.html#aa3b630b8151236029564f8acad10cc9d", null ],
+    [ "visit_at", "namespaceawkward.html#a346db31c542029e4df14646dc7a01094", null ],
+    [ "is_iterable", "namespaceawkward.html#a362f6a798f49c1416202aef3f908a064", null ],
+    [ "is_iterable< T, std::void_t< decltype(std::declval< T >().begin()), decltype(std::declval< T >().end())> >", "namespaceawkward.html#aadeba00412a13bf8e0377a587eb20ef0", null ]
+];

@@ -1,0 +1,6 @@
+ak.forms.form_with_unique_keys
+==============================
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/form.py>`__ on `line 753 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/form.py#L753>`__.
+
+.. py:function:: ak.forms.form_with_unique_keys(form: Form, key: tuple) -> Form

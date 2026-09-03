@@ -1,0 +1,38 @@
+ak.merge_option_of_records
+--------------------------
+
+.. py:module: ak.merge_option_of_records
+
+Defined in `awkward.operations.ak_merge_option_of_records <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/operations/ak_merge_option_of_records.py>`__ on `line 11 <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/operations/ak_merge_option_of_records.py#L11>`__.
+
+.. py:function:: ak.merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param axis: The dimension at which this operation is applied.
+             The outermost dimension is ``0``, followed by ``1``, etc., and negative
+             values count backward from the  innermost: ``-1`` is the innermost
+             dimension, ``-2`` is the next level up, etc.
+    :type axis: int
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Simplifies options of records, e.g.
+
+.. code-block:: python
+
+
+    >>> array = ak.Array([None, {"a": 1}, {"a": 2}])
+
+into records of options, i.e.
+
+.. code-block:: python
+
+
+    >>> ak.merge_option_of_records(array)
+    <Array [{a: None}, {a: 1}, {a: 2}] type='3 * {a: ?int64}'>
+

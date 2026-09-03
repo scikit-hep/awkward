@@ -1,0 +1,1052 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How to use the header-only LayoutBuilder in C++ &#8212; Awkward Array 2.8.13 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=cac31c79" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=ec01a7e5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-use-header-only-layoutbuilder';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.8';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-use-header-only-layoutbuilder.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to use Awkward Arrays in C++ with cppyy" href="how-to-use-in-cpp-cppyy.html" />
+    <link rel="prev" title="Using arrays in C++" href="how-to-use-in-cpp.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.8" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.8.13 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.8.13 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-array-properties.html">Array properties</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-array-properties-named-axis.html">Named axes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Min/max/sort one array by another</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">Awkward Arrays on GPUs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k"</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-use-in-cpp.html">Using arrays in C++</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Building Awkward Arrays in C++ with LayoutBuilder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-cpp-cppyy.html">JIT compiling operations with C++ in cppyy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Special topics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-use-in-cpp.html" class="nav-link">Using arrays in C++</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to use the header-only LayoutBuilder in C++</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="how-to-use-the-header-only-layoutbuilder-in-c">
+<h1>How to use the header-only LayoutBuilder in C++<a class="headerlink" href="#how-to-use-the-header-only-layoutbuilder-in-c" title="Link to this heading">#</a></h1>
+<div class="cell tag_hide-cell docutils container">
+<details class="admonition hide above-input">
+<summary aria-label="Toggle hidden content">
+<p class="collapsed admonition-title">Show code cell content</p>
+<p class="expanded admonition-title">Hide code cell content</p>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Make Awkward headers available in this notebook, because we know these headers are available from the Python sources</span>
+<span class="c1">// Don&#39;t refer to the Git repo location, because they do not exist in sdist</span>
+<span class="cp">#pragma cling add_include_path(&quot;../../src/awkward/_connect/header-only&quot;)</span>
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<section id="what-is-header-only-layout-builder">
+<h2>What is header-only Layout Builder?<a class="headerlink" href="#what-is-header-only-layout-builder" title="Link to this heading">#</a></h2>
+<p>The header-only Layout Builder consists of a set of compile-time, templated, static C++ classes, implemented entirely in header file which can be dropped into any external project, and easily separable from the rest of the Awkward C++ codebase.</p>
+<p>The Layout Builder namespace consists of <a class="reference download internal" download="" href="../_downloads/e70b7d40f7e4f136c711cbe915f93fe3/LayoutBuilder_8h.html"><span class="xref download myst">14 types of Layout Builders</span></a>.</p>
+<p>All Builders except <code class="docutils literal notranslate"><span class="pre">Numpy</span></code> and <code class="docutils literal notranslate"><span class="pre">Empty</span></code> can take any other Builder as template parameters.
+These Builders are sufficient to build every type of Awkward Array.</p>
+</section>
+<section id="why-header-only-layout-builder">
+<h2>Why header-only Layout Builder?<a class="headerlink" href="#why-header-only-layout-builder" title="Link to this heading">#</a></h2>
+<p>The users can directly include <code class="docutils literal notranslate"><span class="pre">LayoutBuilder.h</span></code> in their compilation, rather than linking against platform-specific libraries or worrying about native dependencies. This makes the integration of Awkward Arrays into other projects easier and more portable.</p>
+<p>The code is minimal; it does not include all of the code needed to use Awkward Arrays in Python, nor does it have helper methods to pass the data through pybind11, so that different projects can use different binding generators. The C++ users can use it to make arrays and then copy them to Python without any specialised data types - only raw buffers, strings, and integers.</p>
+</section>
+<section id="how-to-use-layout-builders">
+<h2>How to use Layout Builders?<a class="headerlink" href="#how-to-use-layout-builders" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A set of example projects that use the header-only layout-builder can be found <a class="reference external" href="https://github.com/scikit-hep/awkward/tree/main/header-only/examples">in Awkward Array’s repository</a>.</p>
+</div>
+<p>If you are using the CMake project generator, then the <code class="docutils literal notranslate"><span class="pre">awkward-headers</span></code> library can be installed using <code class="docutils literal notranslate"><span class="pre">FetchContent</span></code> for a particular version:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">include</span><span class="p">(</span><span class="s">FetchContent</span><span class="p">)</span>
+
+<span class="nb">set</span><span class="p">(</span><span class="s">AWKWARD_VERSION</span><span class="w"> </span><span class="s2">&quot;v2.1.0&quot;</span><span class="p">)</span>
+
+<span class="nb">FetchContent_Declare</span><span class="p">(</span>
+<span class="w">  </span><span class="s">awkward-headers</span>
+<span class="w">  </span><span class="s">URL</span><span class="w">      </span><span class="s">https://github.com/scikit-hep/awkward/releases/download/</span><span class="o">${</span><span class="nv">AWKWARD_VERSION</span><span class="o">}</span><span class="s">/header-only.zip</span>
+<span class="p">)</span>
+<span class="c"># Instead of using `FetchContent_MakeAvailable(awkward-headers)`, we manually load the target so</span>
+<span class="c"># that we can EXCLUDE_FROM_ALL</span>
+<span class="nb">FetchContent_GetProperties</span><span class="p">(</span><span class="s">awkward-headers</span><span class="p">)</span>
+<span class="nb">if</span><span class="p">(</span><span class="s">NOT</span><span class="w"> </span><span class="s">awkward-headers_POPULATED</span><span class="p">)</span>
+<span class="w">  </span><span class="nb">FetchContent_Populate</span><span class="p">(</span><span class="s">awkward-headers</span><span class="p">)</span>
+<span class="w">  </span><span class="nb">add_subdirectory</span><span class="p">(</span><span class="o">${</span><span class="nv">awkward-headers_SOURCE_DIR</span><span class="o">}</span><span class="w"> </span><span class="o">${</span><span class="nv">awkward-headers_BINARY_DIR</span><span class="o">}</span><span class="w"> </span><span class="s">EXCLUDE_FROM_ALL</span><span class="p">)</span>
+<span class="nb">endif</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The loaded targets can then be linked against, e.g. to link <code class="docutils literal notranslate"><span class="pre">my_application</span></code> against the <code class="docutils literal notranslate"><span class="pre">layout-builder</span></code> target:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">my_application</span><span class="w"> </span><span class="s">awkward::layout-builder</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you are using a different generator, it is recommended to download these headers from the <a class="reference external" href="https://github.com/scikit-hep/awkward/releases">release artifacts on GitHub</a>. Each of the targets enumerated in <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> should be added to the include path that is passed to the compiler.</p>
+</section>
+<section id="three-phases-of-using-layout-builder">
+<h2>Three phases of using Layout Builder<a class="headerlink" href="#three-phases-of-using-layout-builder" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><em>Constructing a Layout Builder:</em> from variadic templates. (It is implicit template instantiation).</p></li>
+<li><p><em>Filling the Layout Builder:</em> while repeatedly walking over the raw pointers within the LayoutBuilder.</p></li>
+<li><p><em>Taking the data out to user allocated buffers:</em> Then user can pass them to Python if they want.</p></li>
+</ol>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">#</a></h2>
+<p>Below is an example for creating RecordArray with NumpyArray and ListOffsetArray as fields.</p>
+<p>First, include the LayoutBuilder header file. Note that only <code class="docutils literal notranslate"><span class="pre">LayoutBuilder.h</span></code> needs to be included in the example since the other header-only files required are already included in its implementation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;awkward/LayoutBuilder.h&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The Record Builder content is a heterogeneous type container (std::tuple) which can take other Builders as template parameters. The field names are non-type template parameters defined by a user. Note, it is not possible to template on <code class="docutils literal notranslate"><span class="pre">std::string</span></code> because this feature comes only from <code class="docutils literal notranslate"><span class="pre">C++20</span></code>. That is why, a user-defined <code class="docutils literal notranslate"><span class="pre">field_map</span></code> with enumerated type field ID as keys and field names as value has to provided for passing the field names as template parameters to the <code class="docutils literal notranslate"><span class="pre">Record</span></code> Builder. If multiple <code class="docutils literal notranslate"><span class="pre">Record</span></code> Builders are used in a Builder, then a user-defined map has to be provided for each of the <code class="docutils literal notranslate"><span class="pre">Record</span></code> Builders used.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">enum</span><span class="w"> </span><span class="nc">Field</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="p">{</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="n">two</span><span class="p">};</span>
+
+<span class="k">using</span><span class="w"> </span><span class="n">UserDefinedMap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="n">UserDefinedMap</span><span class="w"> </span><span class="n">fields_map</span><span class="p">({</span>
+<span class="w">    </span><span class="p">{</span><span class="n">Field</span><span class="o">::</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;one&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="n">Field</span><span class="o">::</span><span class="n">two</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;two&quot;</span><span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="p">...</span><span class="w"> </span><span class="n">BUILDERS</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RecordBuilder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">awkward</span><span class="o">::</span><span class="n">LayoutBuilder</span><span class="o">::</span><span class="n">Record</span><span class="o">&lt;</span><span class="n">UserDefinedMap</span><span class="p">,</span><span class="w"> </span><span class="n">BUILDERS</span><span class="p">...</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">field_name</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">BUILDER</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">RecordField</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">awkward</span><span class="o">::</span><span class="n">LayoutBuilder</span><span class="o">::</span><span class="n">Field</span><span class="o">&lt;</span><span class="n">field_name</span><span class="p">,</span><span class="w"> </span><span class="n">BUILDER</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the ListOffset Builder, there is an option to use 64-bit signed integers <code class="docutils literal notranslate"><span class="pre">int64</span></code>, 32-bit signed integers <code class="docutils literal notranslate"><span class="pre">int32</span></code> or 32-bit unsigned integers <code class="docutils literal notranslate"><span class="pre">uint32</span></code> as the type for list offsets.</p>
+<p>Type alias can be used for each builder class.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">PRIMITIVE</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">BUILDER</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">ListOffsetBuilder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">awkward</span><span class="o">::</span><span class="n">LayoutBuilder</span><span class="o">::</span><span class="n">ListOffset</span><span class="o">&lt;</span><span class="n">PRIMITIVE</span><span class="p">,</span><span class="w"> </span><span class="n">BUILDER</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">PRIMITIVE</span><span class="o">&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="n">NumpyBuilder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">awkward</span><span class="o">::</span><span class="n">LayoutBuilder</span><span class="o">::</span><span class="n">Numpy</span><span class="o">&lt;</span><span class="n">PRIMITIVE</span><span class="o">&gt;</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The builder is defined as demonstrated below. To set the field names, there are two methods:</p>
+<p>First Method: The user-defined <code class="docutils literal notranslate"><span class="pre">fields_map</span></code> can be passed as a parameter in the object of the builder.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RecordBuilder</span><span class="o">&lt;</span>
+<span class="w">  </span><span class="n">RecordField</span><span class="o">&lt;</span><span class="n">Field</span><span class="o">::</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="n">NumpyBuilder</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="w">  </span><span class="n">RecordField</span><span class="o">&lt;</span><span class="n">Field</span><span class="o">::</span><span class="n">two</span><span class="p">,</span><span class="w"> </span><span class="n">ListOffsetBuilder</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="p">,</span>
+<span class="w">      </span><span class="n">NumpyBuilder</span><span class="o">&lt;</span><span class="kt">int32_t</span><span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">(</span><span class="n">fields_map</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Second Method: The user-defined <code class="docutils literal notranslate"><span class="pre">fields_map</span></code> can be passed a parameter in <code class="docutils literal notranslate"><span class="pre">set_fields()</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="p">.</span><span class="n">set_fields</span><span class="p">(</span><span class="n">fields_map</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">fields()</span></code> method can be used to check if field names are set correctly in the Record Builder or not.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;one&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;two&quot;</span><span class="p">};</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">fields</span><span class="p">();</span>
+<span class="n">names</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(std::vector&lt;std::string&gt; &amp;) { &quot;one&quot;, &quot;two&quot; }
+</pre></div>
+</div>
+</div>
+</div>
+<p>Assign each field content to a <code class="docutils literal notranslate"><span class="pre">fieldname_builder</span></code> builder which will be used to fill the Builder buffers.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">one_builder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">content</span><span class="o">&lt;</span><span class="n">Field</span><span class="o">::</span><span class="n">one</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">two_builder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">content</span><span class="o">&lt;</span><span class="n">Field</span><span class="o">::</span><span class="n">two</span><span class="o">&gt;</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Append the data in the fields using <code class="docutils literal notranslate"><span class="pre">append()</span></code>. In case of ListOffsetArray, append the data between <code class="docutils literal notranslate"><span class="pre">begin_list()</span></code> and <code class="docutils literal notranslate"><span class="pre">end_list()</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">one_builder</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.1</span><span class="p">);</span>
+<span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">two_subbuilder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">two_builder</span><span class="p">.</span><span class="n">begin_list</span><span class="p">();</span>
+<span class="n">two_subbuilder</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">two_builder</span><span class="p">.</span><span class="n">end_list</span><span class="p">();</span>
+
+<span class="n">one_builder</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.2</span><span class="p">);</span>
+<span class="n">two_builder</span><span class="p">.</span><span class="n">begin_list</span><span class="p">();</span>
+<span class="n">two_subbuilder</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">two_subbuilder</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">two_builder</span><span class="p">.</span><span class="n">end_list</span><span class="p">();</span>
+
+<span class="n">one_builder</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="mf">3.3</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Check the validity of the buffer by <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> to make sure there are no errors.</p>
+<p>In this example, since the Record <code class="docutils literal notranslate"><span class="pre">node0</span></code> has field <code class="docutils literal notranslate"><span class="pre">two</span></code> length = 2 while the first field has length = 3, an error is generated.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">error</span><span class="p">;</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(bool) false
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can inspect the error message:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">error</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(std::string &amp;) &quot;Record node0 has field &quot;two&quot; length 2 that differs from the first length 3
+&quot;
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you need to append an entire array in one go, <code class="docutils literal notranslate"><span class="pre">extend()</span></code> can be used which takes pointer to the array and the size of array as paramaters. Note that it is just an interface and not actually faster than calling append many times.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">size_t</span><span class="w"> </span><span class="n">data_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="kt">int32_t</span><span class="w"> </span><span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+
+<span class="n">two_builder</span><span class="p">.</span><span class="n">begin_list</span><span class="p">();</span>
+<span class="n">two_subbuilder</span><span class="p">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">data_size</span><span class="p">);</span>
+<span class="n">two_builder</span><span class="p">.</span><span class="n">end_list</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>input_line_66:3:1: warning: &#39;data&#39; shadows a declaration with the same name in the &#39;std&#39; namespace; use &#39;::data&#39; to reference this declaration
+int32_t data[3] = {1, 2, 3};
+^
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, the length of all fields in Record <code class="docutils literal notranslate"><span class="pre">node0</span></code> are equal, no error is generated.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> method can be called on every entry if you want to trade safety for speed.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="p">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(bool) true
+</pre></div>
+</div>
+</div>
+</div>
+<p>Retrieve the information needed to allocate the empty buffers as a map of their names (the form node keys as defined by the LayoutBuilder) to their sizes (in bytes).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">names_nbytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
+<span class="n">builder</span><span class="p">.</span><span class="n">buffer_nbytes</span><span class="p">(</span><span class="n">names_nbytes</span><span class="p">);</span>
+<span class="n">names_nbytes</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(std::map&lt;std::string, size_t&gt; &amp;) { &quot;node1-data&quot; =&gt; 24, &quot;node2-offsets&quot; =&gt; 32, &quot;node3-data&quot; =&gt; 24 }
+</pre></div>
+</div>
+</div>
+</div>
+<p>Next, allocate the memory for these buffers using the user-given pointers and the same names/sizes as above. Then, let the LayoutBuilder fill these buffers with <code class="docutils literal notranslate"><span class="pre">to_buffers()</span></code> method.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*&gt;</span><span class="w"> </span><span class="n">buffers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
+<span class="k">for</span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">names_nbytes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">uint8_t</span><span class="p">[</span><span class="n">it</span><span class="p">.</span><span class="n">second</span><span class="p">];</span>
+<span class="w">    </span><span class="n">buffers</span><span class="p">[</span><span class="n">it</span><span class="p">.</span><span class="n">first</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">ptr</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="n">builder</span><span class="p">.</span><span class="n">to_buffers</span><span class="p">(</span><span class="n">buffers</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, let’s look at the <em>form</em> of the builder. A Form is a unique description of an Awkward Array and returns a JSON-like <code class="docutils literal notranslate"><span class="pre">std::string</span></code> and its form keys. The is the Awkward Form generated for this example.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">form</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{ &quot;class&quot;: &quot;RecordArray&quot;, &quot;contents&quot;: { &quot;one&quot;: { &quot;class&quot;: &quot;NumpyArray&quot;, &quot;primitive&quot;: &quot;float64&quot;, &quot;form_key&quot;: &quot;node1&quot; }, &quot;two&quot;: { &quot;class&quot;: &quot;ListOffsetArray&quot;, &quot;offsets&quot;: &quot;i64&quot;, &quot;content&quot;: { &quot;class&quot;: &quot;NumpyArray&quot;, &quot;primitive&quot;: &quot;int32&quot;, &quot;form_key&quot;: &quot;node3&quot; }, &quot;form_key&quot;: &quot;node2&quot; } }, &quot;form_key&quot;: &quot;node0&quot; }
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="passing-from-c-to-python">
+<h2>Passing from C++ to Python<a class="headerlink" href="#passing-from-c-to-python" title="Link to this heading">#</a></h2>
+<p>We want NumPy to own the array buffers, so that they get deleted when the Awkward Array goes out of Python scope, not when the LayoutBuilder goes out of C++ scope. For the hand-off, one can allocate memory for those buffers in Python, presumably with <code class="docutils literal notranslate"><span class="pre">np.empty(nbytes,</span> <span class="pre">dtype=np.uint8)</span></code> and get <code class="docutils literal notranslate"><span class="pre">void*</span></code> pointers to these buffers by casting the output of <code class="docutils literal notranslate"><span class="pre">numpy_array.ctypes.data</span></code> (pointer as integer). Then we can pass everything over the border from C++ to Python using e.g. <code class="docutils literal notranslate"><span class="pre">pybind11</span></code>’s <code class="docutils literal notranslate"><span class="pre">py::buffer_protocol</span></code> for the buffers.</p>
+<p>Alternatively, the Python <em>capsule</em> system can be used to tie the lifetime of the allocated buffers to the calling Python scope. <code class="docutils literal notranslate"><span class="pre">pybind11</span></code> makes this fairly trivial, and also permits us to invoke Python code <em>from</em> C++. We can use this approach to call <code class="docutils literal notranslate"><span class="pre">ak.from_buffers</span></code> in order to build an <code class="docutils literal notranslate"><span class="pre">ak.Array</span></code>:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="n">py</span><span class="o">::</span><span class="n">object</span><span class="w"> </span><span class="n">snapshot_builder</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">T</span><span class="o">&amp;</span><span class="w"> </span><span class="n">builder</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// How much memory to allocate?</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">names_nbytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
+<span class="w">    </span><span class="n">builder</span><span class="p">.</span><span class="n">buffer_nbytes</span><span class="p">(</span><span class="n">names_nbytes</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Allocate memory</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="o">*&gt;</span><span class="w"> </span><span class="n">buffers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">names_nbytes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="kt">uint8_t</span><span class="p">[</span><span class="n">it</span><span class="p">.</span><span class="n">second</span><span class="p">];</span>
+<span class="w">        </span><span class="n">buffers</span><span class="p">[</span><span class="n">it</span><span class="p">.</span><span class="n">first</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">ptr</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Write non-contiguous contents to memory</span>
+<span class="w">    </span><span class="n">builder</span><span class="p">.</span><span class="n">to_buffers</span><span class="p">(</span><span class="n">buffers</span><span class="p">);</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">from_buffers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">py</span><span class="o">::</span><span class="k">module</span><span class="o">::</span><span class="k">import</span><span class="p">(</span><span class="s">&quot;awkward&quot;</span><span class="p">).</span><span class="n">attr</span><span class="p">(</span><span class="s">&quot;from_buffers&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Build Python dictionary containing arrays</span>
+<span class="w">    </span><span class="c1">// dtypes not important here as long as they match the underlying buffer</span>
+<span class="w">    </span><span class="c1">// as Awkward Array calls `frombuffer` to convert to the correct type</span>
+<span class="w">    </span><span class="n">py</span><span class="o">::</span><span class="n">dict</span><span class="w"> </span><span class="n">container</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">it</span><span class="o">:</span><span class="w"> </span><span class="n">buffers</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">        </span><span class="c1">// Create capsule that frees the allocated data when out of scope</span>
+<span class="w">        </span><span class="n">py</span><span class="o">::</span><span class="n">capsule</span><span class="w"> </span><span class="nf">free_when_done</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="n">second</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">dataPtr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">            </span><span class="k">delete</span><span class="p">[]</span><span class="w"> </span><span class="n">dataPtr</span><span class="p">;</span>
+<span class="w">        </span><span class="p">});</span>
+
+<span class="w">        </span><span class="c1">// Adopt the memory filled by `to_buffers` as a NumPy array</span>
+<span class="w">        </span><span class="c1">// We only need to return a &quot;buffer&quot; here, but py::array_t let&#39;s</span>
+<span class="w">        </span><span class="c1">// us associate a capsule for destruction, which means that</span>
+<span class="w">        </span><span class="c1">// Python can own this memory. Therefore, we use py::array_t</span>
+<span class="w">        </span><span class="kt">uint8_t</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="n">second</span><span class="p">);</span>
+<span class="w">        </span><span class="n">container</span><span class="p">[</span><span class="n">py</span><span class="o">::</span><span class="n">str</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="n">first</span><span class="p">)]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">py</span><span class="o">::</span><span class="n">array_t</span><span class="o">&lt;</span><span class="kt">uint8_t</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">            </span><span class="p">{</span><span class="n">names_nbytes</span><span class="p">[</span><span class="n">it</span><span class="p">.</span><span class="n">first</span><span class="p">]},</span>
+<span class="w">            </span><span class="p">{</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">uint8_t</span><span class="p">)},</span>
+<span class="w">            </span><span class="n">data</span><span class="p">,</span>
+<span class="w">            </span><span class="n">free_when_done</span>
+<span class="w">        </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">from_buffers</span><span class="p">(</span><span class="n">builder</span><span class="p">.</span><span class="n">form</span><span class="p">(),</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span><span class="w"> </span><span class="n">container</span><span class="p">);</span>
+
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="more-examples">
+<h2>More Examples<a class="headerlink" href="#more-examples" title="Link to this heading">#</a></h2>
+<p>Examples for other LayoutBuilders can be found <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/main/header-only/tests/test_1494-layout-builder.cpp">here</a>.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-use-in-cpp.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Using arrays in C++</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-use-in-cpp-cppyy.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">How to use Awkward Arrays in C++ with cppyy</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-header-only-layout-builder">What is header-only Layout Builder?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-header-only-layout-builder">Why header-only Layout Builder?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-use-layout-builders">How to use Layout Builders?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#three-phases-of-using-layout-builder">Three phases of using Layout Builder</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#passing-from-c-to-python">Passing from C++ to Python</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#more-examples">More Examples</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-use-header-only-layoutbuilder.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/user-guide/how-to-use-header-only-layoutbuilder.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

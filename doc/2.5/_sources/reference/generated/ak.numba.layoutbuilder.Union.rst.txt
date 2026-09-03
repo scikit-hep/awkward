@@ -1,0 +1,75 @@
+ak.numba.layoutbuilder.Union
+----------------------------
+
+.. py:module: ak.numba.layoutbuilder.Union
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/layoutbuilder.py>`__ on `line 782 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/layoutbuilder.py#L782>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Union(self, tags_dtype, index_dtype, contents, *, parameters=None, initial=1024, resize=8.0)
+
+
+
+.. _ak-numba-layoutbuilder-union-tags:
+
+.. py:attribute:: ak.numba.layoutbuilder.Union.tags
+
+
+
+.. _ak-numba-layoutbuilder-union-index:
+
+.. py:attribute:: ak.numba.layoutbuilder.Union.index
+
+
+
+.. _ak-numba-layoutbuilder-union-contents:
+
+.. py:attribute:: ak.numba.layoutbuilder.Union.contents
+
+
+
+.. _ak-numba-layoutbuilder-union-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.Union.form
+
+
+
+.. _ak-numba-layoutbuilder-union-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.Union.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-union-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.Union.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-union-append_content:
+
+.. py:method:: ak.numba.layoutbuilder.Union.append_content(self, tag)
+
+
+
+.. _ak-numba-layoutbuilder-union-clear:
+
+.. py:method:: ak.numba.layoutbuilder.Union.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-union-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.Union.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-union-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.Union.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-union-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.Union.snapshot(self)
+

@@ -1,0 +1,22 @@
+ak.backend
+----------
+
+.. py:module: ak.backend
+
+Defined in `awkward.operations.ak_backend <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/operations/ak_backend.py>`__ on `line 6 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/operations/ak_backend.py#L6>`__.
+
+.. py:function:: ak.backend()
+
+
+    :param arrays: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+
+Returns the names of the backend used by ``arrays``. This name may be
+
+* ``"cpu"`` for arrays backed by NumPy;
+* ``"cuda"`` for arrays backed by CuPy;
+* ``"jax"`` for arrays backed by JAX;
+* None if the objects are not Awkward, NumPy, JAX, or CuPy arrays (e.g.
+  Python numbers, booleans, strings).
+
+See :py:obj:`ak.to_backend`.
+

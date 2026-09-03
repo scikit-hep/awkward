@@ -1,0 +1,2058 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How to convert to/from NumPy &#8212; Awkward Array 2.12.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=b9a6aa19" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=84389e84"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-convert-numpy';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.12';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-convert-numpy.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to convert to/from Python objects" href="how-to-convert-python.html" />
+    <link rel="prev" title="Converting arrays" href="how-to-convert.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.12" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.12.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.12.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-array-properties.html">Array properties</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-array-properties-named-axis.html">Named axes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Min/max/sort one array by another</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">Awkward Arrays on GPUs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k"</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-cpp.html">Using arrays in C++</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++ with LayoutBuilder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-cpp-cppyy.html">JIT compiling operations with C++ in cppyy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Special topics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-convert.html" class="nav-link">Converting arrays</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to convert to/from NumPy</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="how-to-convert-to-from-numpy">
+<h1>How to convert to/from NumPy<a class="headerlink" href="#how-to-convert-to-from-numpy" title="Link to this heading">#</a></h1>
+<p>As a generalization of NumPy, any NumPy array can be converted to an Awkward Array, but not vice-versa.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="from-numpy-to-awkward">
+<h2>From NumPy to Awkward<a class="headerlink" href="#from-numpy-to-awkward" title="Link to this heading">#</a></h2>
+<p>The function for NumPy → Awkward conversion is <a class="reference internal" href="../reference/generated/ak.from_numpy.html#ak.from_numpy" title="ak.from_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_numpy()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">,</span> <span class="mf">7.7</span><span class="p">,</span> <span class="mf">8.8</span><span class="p">,</span> <span class="mf">9.9</span><span class="p">])</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1.1,
+ 2.2,
+ 3.3,
+ 4.4,
+ 5.5,
+ 6.6,
+ 7.7,
+ 8.8,
+ 9.9]
+-----
+backend: cpu
+nbytes: 72 B
+type: 9 * float64</pre></div></div>
+</div>
+<p>However, NumPy arrays are also recognized by the <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a> constructor, so you can use that unless your goal is to explicitly draw the reader’s attention to the fact that the input is a NumPy array.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1.1,
+ 2.2,
+ 3.3,
+ 4.4,
+ 5.5,
+ 6.6,
+ 7.7,
+ 8.8,
+ 9.9]
+-----
+backend: cpu
+nbytes: 72 B
+type: 9 * float64</pre></div></div>
+</div>
+</section>
+<section id="fixed-size-vs-variable-length-dimensions">
+<h2>Fixed-size vs variable-length dimensions<a class="headerlink" href="#fixed-size-vs-variable-length-dimensions" title="Link to this heading">#</a></h2>
+<p>If the NumPy array is multidimensional, the Awkward Array will be as well.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="p">[</span><span class="mi">103</span><span class="p">,</span> <span class="mi">203</span><span class="p">]])</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[100, 200],
+       [101, 201],
+       [103, 203]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [101, 201],
+ [103, 203]]
+------------
+backend: cpu
+nbytes: 48 B
+type: 3 * 2 * int64</pre></div></div>
+</div>
+<p>It’s important to notice that the type is <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">int64</span></code>, not <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">var</span> <span class="pre">*</span> <span class="pre">int64</span></code>. The second dimension has a fixed size—it is guaranteed to have exactly two items—just like a NumPy array. This differs from an Awkward Array constructed from Python lists:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="mi">101</span><span class="p">,</span> <span class="mi">201</span><span class="p">],</span> <span class="p">[</span><span class="mi">103</span><span class="p">,</span> <span class="mi">203</span><span class="p">]])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [101, 201],
+ [103, 203]]
+------------
+backend: cpu
+nbytes: 80 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<p>or JSON:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="s2">&quot;[[100, 200], [101, 201], [103, 203]]&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [101, 201],
+ [103, 203]]
+------------
+backend: cpu
+nbytes: 80 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<p>because Python and JSON lists have arbitrary lengths, at least in principle, if not in a particular instance. Some behaviors depend on this fact (such as broadcasting rules).</p>
+</section>
+<section id="from-awkward-to-numpy">
+<h2>From Awkward to NumPy<a class="headerlink" href="#from-awkward-to-numpy" title="Link to this heading">#</a></h2>
+<p>The function for Awkward → NumPy conversion is <a class="reference internal" href="../reference/generated/ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_numpy()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">6.6</span><span class="p">,</span> <span class="mf">7.7</span><span class="p">,</span> <span class="mf">8.8</span><span class="p">,</span> <span class="mf">9.9</span><span class="p">])</span>
+<span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1.1,
+ 2.2,
+ 3.3,
+ 4.4,
+ 5.5,
+ 6.6,
+ 7.7,
+ 8.8,
+ 9.9]
+-----
+backend: cpu
+nbytes: 72 B
+type: 9 * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Awkward Arrays that happen to have regular structure can be converted to NumPy, even if their type is formally “variable length lists” (<code class="docutils literal notranslate"><span class="pre">var</span></code>):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [4, 5, 6]]
+-----------
+backend: cpu
+nbytes: 72 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[1, 2, 3],
+       [4, 5, 6]])
+</pre></div>
+</div>
+</div>
+</div>
+<p>But if the lengths of nested lists do vary, attempts to convert to NumPy fail:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [],
+ [4, 5]]
+-----------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">14</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:41,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">38</span> <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">39</span> <span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">40</span>     <span class="c1"># NOTE: this decorator assumes that the operation is exposed under `ak.`</span>
+<span class="ne">---&gt; </span><span class="mi">41</span>     <span class="k">with</span> <span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">42</span>         <span class="n">gen_or_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">43</span>         <span class="k">if</span> <span class="n">isgenerator</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:80,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
+<span class="g g-Whitespace">     </span><span class="mi">78</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">79</span>     <span class="c1"># Handle caught exception</span>
+<span class="ne">---&gt; </span><span class="mi">80</span>     <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorate_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
+<span class="g g-Whitespace">     </span><span class="mi">83</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:67,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span> <span class="c1"># Failed to find a custom overload, so resume the original function</span>
+<span class="g g-Whitespace">     </span><span class="mi">66</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">67</span>     <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">68</span> <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">69</span>     <span class="k">return</span> <span class="n">err</span><span class="o">.</span><span class="n">value</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_to_numpy.py:48,</span> in <span class="ni">to_numpy</span><span class="nt">(array, allow_missing)</span>
+<span class="g g-Whitespace">     </span><span class="mi">45</span> <span class="k">yield</span> <span class="p">(</span><span class="n">array</span><span class="p">,)</span>
+<span class="g g-Whitespace">     </span><span class="mi">47</span> <span class="c1"># Implementation</span>
+<span class="ne">---&gt; </span><span class="mi">48</span> <span class="k">return</span> <span class="n">_impl</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">allow_missing</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_to_numpy.py:60,</span> in <span class="ni">_impl</span><span class="nt">(array, allow_missing)</span>
+<span class="g g-Whitespace">     </span><span class="mi">57</span> <span class="n">backend</span> <span class="o">=</span> <span class="n">NumpyBackend</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">58</span> <span class="n">numpy_layout</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">to_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">60</span> <span class="k">return</span> <span class="n">numpy_layout</span><span class="o">.</span><span class="n">to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="o">=</span><span class="n">allow_missing</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:1131,</span> in <span class="ni">Content.to_backend_array</span><span class="nt">(self, allow_missing, backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1129</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1130</span>     <span class="n">backend</span> <span class="o">=</span> <span class="n">regularize_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">1131</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/listoffsetarray.py:1902,</span> in <span class="ni">ListOffsetArray._to_backend_array</span><span class="nt">(self, allow_missing, backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1900</span>     <span class="k">return</span> <span class="n">buffer</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">((</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">max_count</span><span class="p">)))</span>
+<span class="g g-Whitespace">   </span><span class="mi">1901</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1902</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_RegularArray</span><span class="p">()</span><span class="o">.</span><span class="n">_to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/listoffsetarray.py:296,</span> in <span class="ni">ListOffsetArray.to_RegularArray</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">291</span> <span class="n">_size</span> <span class="o">=</span> <span class="n">Index64</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">nplike</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">292</span> <span class="k">assert</span> <span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">293</span>     <span class="n">_size</span><span class="o">.</span><span class="n">nplike</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">nplike</span>
+<span class="g g-Whitespace">    </span><span class="mi">294</span>     <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">nplike</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">nplike</span>
+<span class="g g-Whitespace">    </span><span class="mi">295</span> <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">296</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">maybe_kernel_error</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">297</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="p">[</span>
+<span class="g g-Whitespace">    </span><span class="mi">298</span>         <span class="s2">&quot;awkward_ListOffsetArray_toRegularArray&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">299</span>         <span class="n">_size</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">300</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">301</span>     <span class="p">](</span>
+<span class="g g-Whitespace">    </span><span class="mi">302</span>         <span class="n">_size</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">303</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">304</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">305</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">306</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">307</span> <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">nplike</span><span class="o">.</span><span class="n">index_as_shape_item</span><span class="p">(</span><span class="n">_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="g g-Whitespace">    </span><span class="mi">308</span> <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_backends/backend.py:62,</span> in <span class="ni">Backend.maybe_kernel_error</span><span class="nt">(self, error)</span>
+<span class="g g-Whitespace">     </span><span class="mi">60</span>     <span class="k">return</span>
+<span class="g g-Whitespace">     </span><span class="mi">61</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">62</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format_kernel_error</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+
+<span class="ne">ValueError</span>: cannot convert to RegularArray because subarray lengths are not regular (in compiled code: https://github.com/scikit-hep/awkward/blob/awkward-cpp-55/awkward-cpp/src/cpu-kernels/awkward_ListOffsetArray_toRegularArray.cpp#L22)
+
+<span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">calling</span>
+
+    <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span>
+        <span class="o">&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;3 * var * int64&#39;</span><span class="o">&gt;</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>One might argue that such arrays should become NumPy arrays with <code class="docutils literal notranslate"><span class="pre">dtype=&quot;O&quot;</span></code>. However, this is usually undesirable because these “NumPy object arrays” are just arrays of pointers to Python objects, and all the performance issues of dealing with Python objects apply.</p>
+<p>If you do want this, use <a class="reference internal" href="../reference/generated/ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_list()</span></code></a> with the <code class="xref py py-class docutils literal notranslate"><span class="pre">np.ndarray</span></code> constructor.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">to_list</span><span class="p">(</span><span class="n">ak_array</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;O&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([list([1, 2, 3]), list([]), list([4, 5])], dtype=object)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="implicit-awkward-to-numpy-conversion">
+<h2>Implicit Awkward to NumPy conversion<a class="headerlink" href="#implicit-awkward-to-numpy-conversion" title="Link to this heading">#</a></h2>
+<p>Awkward Arrays satisfy NumPy’s <code class="docutils literal notranslate"><span class="pre">__array__</span></code> protocol, so simply passing an Awkward Array to the <code class="xref py py-class docutils literal notranslate"><span class="pre">np.ndarray</span></code> constructor calls <a class="reference internal" href="../reference/generated/ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_numpy()</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [4, 5, 6]]
+-----------
+backend: cpu
+nbytes: 72 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[1, 2, 3],
+       [4, 5, 6]])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Libraries that expect NumPy arrays as input, such as Matplotlib, use this.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ak_array</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/8f2a7c9db7971cd60409d65da7b6027980df58f04eef39c7e580cb571967af93.png" src="../_images/8f2a7c9db7971cd60409d65da7b6027980df58f04eef39c7e580cb571967af93.png" />
+</div>
+</div>
+<p>Implicit conversion to NumPy inherits the same restrictions as <a class="reference internal" href="../reference/generated/ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_numpy()</span></code></a>, namely that variable-length lists cannot be converted to NumPy.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]])</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [],
+ [4, 5]]
+-----------
+backend: cpu
+nbytes: 72 B
+type: 3 * var * int64</pre></div></div>
+</div>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">20</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1564,</span> in <span class="ni">Array.__array__</span><span class="nt">(self, dtype, copy)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1535</span> <span class="k">def</span><span class="w"> </span><span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">1536</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1537</span><span class="sd">     Intercepts attempts to convert this Array into a NumPy array and</span>
+<span class="g g-Whitespace">   </span><span class="mi">1538</span><span class="sd">     either performs a conversion if possible or raises an error.</span>
+<span class="sd">   (...)   1562     cannot be sliced as dimensions.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1563</span><span class="sd">     &quot;&quot;&quot;</span>
+<span class="ne">-&gt; </span><span class="mi">1564</span>     <span class="k">with</span> <span class="n">ak</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">OperationErrorContext</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1565</span>         <span class="s2">&quot;numpy.asarray&quot;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="p">,),</span> <span class="p">{</span><span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot;copy&quot;</span><span class="p">:</span> <span class="n">copy</span><span class="p">}</span>
+<span class="g g-Whitespace">   </span><span class="mi">1566</span>     <span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">1567</span>         <span class="kn">from</span><span class="w"> </span><span class="nn">awkward._connect.numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_array</span>
+<span class="g g-Whitespace">   </span><span class="mi">1569</span>         <span class="k">return</span> <span class="n">convert_to_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:80,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
+<span class="g g-Whitespace">     </span><span class="mi">78</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">79</span>     <span class="c1"># Handle caught exception</span>
+<span class="ne">---&gt; </span><span class="mi">80</span>     <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorate_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
+<span class="g g-Whitespace">     </span><span class="mi">83</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1569,</span> in <span class="ni">Array.__array__</span><span class="nt">(self, dtype, copy)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1564</span> <span class="k">with</span> <span class="n">ak</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">OperationErrorContext</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1565</span>     <span class="s2">&quot;numpy.asarray&quot;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="p">,),</span> <span class="p">{</span><span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">dtype</span><span class="p">,</span> <span class="s2">&quot;copy&quot;</span><span class="p">:</span> <span class="n">copy</span><span class="p">}</span>
+<span class="g g-Whitespace">   </span><span class="mi">1566</span> <span class="p">):</span>
+<span class="g g-Whitespace">   </span><span class="mi">1567</span>     <span class="kn">from</span><span class="w"> </span><span class="nn">awkward._connect.numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_array</span>
+<span class="ne">-&gt; </span><span class="mi">1569</span>     <span class="k">return</span> <span class="n">convert_to_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_connect/numpy.py:527,</span> in <span class="ni">convert_to_array</span><span class="nt">(layout, dtype, copy)</span>
+<span class="g g-Whitespace">    </span><span class="mi">526</span> <span class="k">def</span><span class="w"> </span><span class="nf">convert_to_array</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">527</span>     <span class="n">out</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">528</span>     <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">529</span>         <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:67,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span> <span class="c1"># Failed to find a custom overload, so resume the original function</span>
+<span class="g g-Whitespace">     </span><span class="mi">66</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">67</span>     <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">68</span> <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">69</span>     <span class="k">return</span> <span class="n">err</span><span class="o">.</span><span class="n">value</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_to_numpy.py:48,</span> in <span class="ni">to_numpy</span><span class="nt">(array, allow_missing)</span>
+<span class="g g-Whitespace">     </span><span class="mi">45</span> <span class="k">yield</span> <span class="p">(</span><span class="n">array</span><span class="p">,)</span>
+<span class="g g-Whitespace">     </span><span class="mi">47</span> <span class="c1"># Implementation</span>
+<span class="ne">---&gt; </span><span class="mi">48</span> <span class="k">return</span> <span class="n">_impl</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">allow_missing</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_to_numpy.py:60,</span> in <span class="ni">_impl</span><span class="nt">(array, allow_missing)</span>
+<span class="g g-Whitespace">     </span><span class="mi">57</span> <span class="n">backend</span> <span class="o">=</span> <span class="n">NumpyBackend</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">58</span> <span class="n">numpy_layout</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">to_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">60</span> <span class="k">return</span> <span class="n">numpy_layout</span><span class="o">.</span><span class="n">to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="o">=</span><span class="n">allow_missing</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:1131,</span> in <span class="ni">Content.to_backend_array</span><span class="nt">(self, allow_missing, backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1129</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1130</span>     <span class="n">backend</span> <span class="o">=</span> <span class="n">regularize_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">1131</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/listoffsetarray.py:1902,</span> in <span class="ni">ListOffsetArray._to_backend_array</span><span class="nt">(self, allow_missing, backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1900</span>     <span class="k">return</span> <span class="n">buffer</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">((</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">max_count</span><span class="p">)))</span>
+<span class="g g-Whitespace">   </span><span class="mi">1901</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1902</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_RegularArray</span><span class="p">()</span><span class="o">.</span><span class="n">_to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/listoffsetarray.py:296,</span> in <span class="ni">ListOffsetArray.to_RegularArray</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">291</span> <span class="n">_size</span> <span class="o">=</span> <span class="n">Index64</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">nplike</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">292</span> <span class="k">assert</span> <span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">293</span>     <span class="n">_size</span><span class="o">.</span><span class="n">nplike</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">nplike</span>
+<span class="g g-Whitespace">    </span><span class="mi">294</span>     <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">nplike</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">nplike</span>
+<span class="g g-Whitespace">    </span><span class="mi">295</span> <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">296</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">maybe_kernel_error</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">297</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="p">[</span>
+<span class="g g-Whitespace">    </span><span class="mi">298</span>         <span class="s2">&quot;awkward_ListOffsetArray_toRegularArray&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">299</span>         <span class="n">_size</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">300</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">301</span>     <span class="p">](</span>
+<span class="g g-Whitespace">    </span><span class="mi">302</span>         <span class="n">_size</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">303</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">304</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">305</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">306</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">307</span> <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">nplike</span><span class="o">.</span><span class="n">index_as_shape_item</span><span class="p">(</span><span class="n">_size</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="g g-Whitespace">    </span><span class="mi">308</span> <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_backends/backend.py:62,</span> in <span class="ni">Backend.maybe_kernel_error</span><span class="nt">(self, error)</span>
+<span class="g g-Whitespace">     </span><span class="mi">60</span>     <span class="k">return</span>
+<span class="g g-Whitespace">     </span><span class="mi">61</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">62</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format_kernel_error</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+
+<span class="ne">ValueError</span>: cannot convert to RegularArray because subarray lengths are not regular (in compiled code: https://github.com/scikit-hep/awkward/blob/awkward-cpp-55/awkward-cpp/src/cpu-kernels/awkward_ListOffsetArray_toRegularArray.cpp#L22)
+
+<span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">calling</span>
+
+    <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
+        <span class="o">&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;3 * var * int64&#39;</span><span class="o">&gt;</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">copy</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="numpy-s-structured-arrays">
+<h2>NumPy’s structured arrays<a class="headerlink" href="#numpy-s-structured-arrays" title="Link to this heading">#</a></h2>
+<p><a class="reference external" href="https://numpy.org/doc/stable/user/basics.rec.html">NumPy’s structured arrays</a> correspond to Awkward’s “record type.”</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="nb">float</span><span class="p">)]</span>
+<span class="p">)</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([(1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4), (5, 5.5)],
+      dtype=[(&#39;x&#39;, &#39;&lt;i8&#39;), (&#39;y&#39;, &#39;&lt;f8&#39;)])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1, y: 1.1},
+ {x: 2, y: 2.2},
+ {x: 3, y: 3.3},
+ {x: 4, y: 4.4},
+ {x: 5, y: 5.5}]
+----------------
+backend: cpu
+nbytes: 80 B
+type: 5 * {
+    x: int64,
+    y: float64
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([(1, 1.1), (2, 2.2), (3, 3.3), (4, 4.4), (5, 5.5)],
+      dtype=[(&#39;x&#39;, &#39;&lt;i8&#39;), (&#39;y&#39;, &#39;&lt;f8&#39;)])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Awkward Arrays with record type can be sliced by field name like NumPy structured arrays:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 2,
+ 3,
+ 4,
+ 5]
+---
+backend: cpu
+nbytes: 40 B
+type: 5 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([1, 2, 3, 4, 5])
+</pre></div>
+</div>
+</div>
+</div>
+<p>But Awkward Arrays can be sliced by field name <em>and</em> index within the same square brackets, whereas NumPy requires two sets of square brackets.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.int64(3)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">IndexError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">27</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">np_array</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+<span class="ne">IndexError</span>: only integers, slices (`:`), ellipsis (`...`), numpy.newaxis (`None`) and integer or boolean arrays are valid indices
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.int64(3)
+</pre></div>
+</div>
+</div>
+</div>
+<p>They have the same commutivity, however. In this example, slicing <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code> and then <code class="docutils literal notranslate"><span class="pre">2</span></code> returns the same result as <code class="docutils literal notranslate"><span class="pre">2</span></code> and then <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.int64(3)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.int64(3)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="numpy-s-masked-arrays">
+<h2>NumPy’s masked arrays<a class="headerlink" href="#numpy-s-masked-arrays" title="Link to this heading">#</a></h2>
+<p><a class="reference external" href="https://numpy.org/doc/stable/reference/maskedarray.generic.html">NumPy’s masked arrays</a> correspond to Awkward’s “option type.”</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">(</span>
+    <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span> <span class="n">mask</span><span class="o">=</span><span class="p">[[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]]</span>
+<span class="p">)</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>masked_array(
+  data=[[1, --, 3],
+        [--, --, 6]],
+  mask=[[False,  True, False],
+        [ True,  True, False]],
+  fill_value=999999)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1, None, 3], [None, None, 6]]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, None, 3],
+ [None, None, 6]]
+-----------------
+backend: cpu
+nbytes: 54 B
+type: 2 * 3 * ?int64</pre></div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">?</span></code> before <code class="docutils literal notranslate"><span class="pre">int64</span></code> (expands to <code class="docutils literal notranslate"><span class="pre">option[...]</span></code> for more complex contents) refers to “option type,” meaning that the values can be missing (“None” in Python).</p>
+<p>It is possible for a dataset to have no missing data, yet still have option type, just as it’s possible to have a NumPy masked array with no mask.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span> <span class="n">mask</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [4, 5, 6]]
+-----------
+backend: cpu
+nbytes: 54 B
+type: 2 * 3 * ?int64</pre></div></div>
+</div>
+<p>Awkward Arrays with option type are converted to NumPy masked arrays.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>masked_array(
+  data=[[1, --, 3],
+        [--, --, 6]],
+  mask=[[False,  True, False],
+        [ True,  True, False]],
+  fill_value=999999)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1, None, 3], [None, None, 6]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note, however, that the structure of an Awkward Array’s option type is not always preserved when converting to NumPy masked arrays. Masked arrays can only have missing numbers, not missing lists, so missing lists are expanded into lists of missing numbers.</p>
+<p>For example, an array of type <code class="docutils literal notranslate"><span class="pre">var</span> <span class="pre">*</span> <span class="pre">?int64</span></code> can be converted into an identical NumPy structure:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array1</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">ak_array1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, None, 3],
+ [None, None, 6]]
+-----------------
+backend: cpu
+nbytes: 96 B
+type: 2 * var * ?int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array1</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1, None, 3], [None, None, 6]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>But an array of type <code class="docutils literal notranslate"><span class="pre">option[var</span> <span class="pre">*</span> <span class="pre">int64]</span></code> must have its missing lists expanded into lists of missing numbers.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array2</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">ak_array2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ None,
+ [4, 5, 6]]
+-----------
+backend: cpu
+nbytes: 96 B
+type: 3 * option[var * int64]</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[1, 2, 3], [None, None, None], [4, 5, 6]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finally, it is possible to prevent the <a class="reference internal" href="../reference/generated/ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_numpy()</span></code></a> function from creating NumPy masked arrays by passing <code class="docutils literal notranslate"><span class="pre">allow_missing=False</span></code>.</p>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">,</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">41</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">,</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:41,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">38</span> <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">39</span> <span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">40</span>     <span class="c1"># NOTE: this decorator assumes that the operation is exposed under `ak.`</span>
+<span class="ne">---&gt; </span><span class="mi">41</span>     <span class="k">with</span> <span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">42</span>         <span class="n">gen_or_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">43</span>         <span class="k">if</span> <span class="n">isgenerator</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:80,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
+<span class="g g-Whitespace">     </span><span class="mi">78</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">79</span>     <span class="c1"># Handle caught exception</span>
+<span class="ne">---&gt; </span><span class="mi">80</span>     <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorate_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
+<span class="g g-Whitespace">     </span><span class="mi">83</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:67,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span> <span class="c1"># Failed to find a custom overload, so resume the original function</span>
+<span class="g g-Whitespace">     </span><span class="mi">66</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">67</span>     <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">68</span> <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">69</span>     <span class="k">return</span> <span class="n">err</span><span class="o">.</span><span class="n">value</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_to_numpy.py:48,</span> in <span class="ni">to_numpy</span><span class="nt">(array, allow_missing)</span>
+<span class="g g-Whitespace">     </span><span class="mi">45</span> <span class="k">yield</span> <span class="p">(</span><span class="n">array</span><span class="p">,)</span>
+<span class="g g-Whitespace">     </span><span class="mi">47</span> <span class="c1"># Implementation</span>
+<span class="ne">---&gt; </span><span class="mi">48</span> <span class="k">return</span> <span class="n">_impl</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">allow_missing</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_to_numpy.py:60,</span> in <span class="ni">_impl</span><span class="nt">(array, allow_missing)</span>
+<span class="g g-Whitespace">     </span><span class="mi">57</span> <span class="n">backend</span> <span class="o">=</span> <span class="n">NumpyBackend</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">58</span> <span class="n">numpy_layout</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">to_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">60</span> <span class="k">return</span> <span class="n">numpy_layout</span><span class="o">.</span><span class="n">to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="o">=</span><span class="n">allow_missing</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:1131,</span> in <span class="ni">Content.to_backend_array</span><span class="nt">(self, allow_missing, backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1129</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1130</span>     <span class="n">backend</span> <span class="o">=</span> <span class="n">regularize_backend</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+<span class="ne">-&gt; </span><span class="mi">1131</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/regulararray.py:1268,</span> in <span class="ni">RegularArray._to_backend_array</span><span class="nt">(self, allow_missing, backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1266</span>         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">((</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">)))</span>
+<span class="g g-Whitespace">   </span><span class="mi">1267</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1268</span>     <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="o">.</span><span class="n">_to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1269</span>     <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">,</span> <span class="o">*</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+<span class="g g-Whitespace">   </span><span class="mi">1271</span>     <span class="c1"># ShapeItem is a defined type, but some nplikes don&#39;t map onto the entire space; e.g.</span>
+<span class="g g-Whitespace">   </span><span class="mi">1272</span>     <span class="c1"># NumPy never has `None` shape items. We require that if a shape-item is used between nplikes</span>
+<span class="g g-Whitespace">   </span><span class="mi">1273</span>     <span class="c1"># they both be the same &quot;known-shape-ness&quot;.</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/bytemaskedarray.py:1088,</span> in <span class="ni">ByteMaskedArray._to_backend_array</span><span class="nt">(self, allow_missing, backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1087</span> <span class="k">def</span><span class="w"> </span><span class="nf">_to_backend_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_missing</span><span class="p">,</span> <span class="n">backend</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1088</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_IndexedOptionArray64</span><span class="p">()</span><span class="o">.</span><span class="n">_to_backend_array</span><span class="p">(</span><span class="n">allow_missing</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/indexedoptionarray.py:1617,</span> in <span class="ni">IndexedOptionArray._to_backend_array</span><span class="nt">(self, allow_missing, backend)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1615</span>         <span class="k">return</span> <span class="n">nplike</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1616</span>     <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1617</span>         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1618</span>             <span class="s2">&quot;Content.to_nplike cannot convert &#39;None&#39; values to &quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1619</span>             <span class="s2">&quot;np.ma.MaskedArray unless the &quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1620</span>             <span class="s2">&quot;&#39;allow_missing&#39; parameter is set to True&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1621</span>         <span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1622</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1623</span>     <span class="k">if</span> <span class="n">allow_missing</span><span class="p">:</span>
+
+<span class="ne">ValueError</span>: Content.to_nplike cannot convert &#39;None&#39; values to np.ma.MaskedArray unless the &#39;allow_missing&#39; parameter is set to True
+
+<span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">calling</span>
+
+    <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span>
+        <span class="o">&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">6</span><span class="p">]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;2 * 3 * ?int64&#39;</span><span class="o">&gt;</span>
+        <span class="n">allow_missing</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>You might want to do this to be sure that the output of <a class="reference internal" href="../reference/generated/ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.to_numpy()</span></code></a> has type <code class="xref py py-class docutils literal notranslate"><span class="pre">np.ndarray</span></code> (or die trying).</p>
+</section>
+<section id="numpyarray-shapes-vs-regulararrays">
+<h2>NumpyArray shapes vs RegularArrays<a class="headerlink" href="#numpyarray-shapes-vs-regulararrays" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Advanced topic: it is not necessary to understand the internal representation in order to use Awkward Arrays in data analysis.</p>
+</div>
+<p>One reason you might want to use <a class="reference internal" href="../reference/generated/ak.from_numpy.html#ak.from_numpy" title="ak.from_numpy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_numpy()</span></code></a> directly is to control how it is internally represented.</p>
+<p>Inside of an <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a>, data structures are represented by “layout nodes” such as <a class="reference internal" href="../reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a> and <a class="reference internal" href="../reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">]]],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;i1&quot;</span><span class="p">)</span>
+<span class="n">ak_array1</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array1</span><span class="o">.</span><span class="n">layout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;NumpyArray dtype=&#39;int8&#39; shape=&#39;(2, 3, 2)&#39;&gt;
+    [[[ 1  2]
+      [ 3  4]
+     ...
+      [ 9 10]
+      [11 12]]]
+&lt;/NumpyArray&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the above, the shape is represented as part of the <a class="reference internal" href="../reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a> node, but it could also have been represented in <a class="reference internal" href="../reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a> nodes.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array2</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">,</span> <span class="n">regulararray</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ak_array2</span><span class="o">.</span><span class="n">layout</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;RegularArray size=&#39;3&#39; len=&#39;2&#39;&gt;
+    &lt;content&gt;&lt;RegularArray size=&#39;2&#39; len=&#39;6&#39;&gt;
+        &lt;content&gt;&lt;NumpyArray dtype=&#39;int8&#39; len=&#39;12&#39;&gt;
+            [ 1  2  3  4  5  6  7  8  9 10 11 12]
+        &lt;/NumpyArray&gt;&lt;/content&gt;
+    &lt;/RegularArray&gt;&lt;/content&gt;
+&lt;/RegularArray&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the above, the internal <a class="reference internal" href="../reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a> is one-dimensional and the shape is described by nesting it within two <a class="reference internal" href="../reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a> nodes.</p>
+<p>This distinction is technical: <code class="docutils literal notranslate"><span class="pre">ak_array1</span></code> and <code class="docutils literal notranslate"><span class="pre">ak_array2</span></code> have the same <a class="reference internal" href="../reference/generated/ak.type.html#ak.type" title="ak.type"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.type()</span></code></a> and behave identically (including broadcasting rules).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">ak_array1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(RegularType(RegularType(NumpyType(&#39;int8&#39;), 2), 3), 2, None)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">ak_array2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>ArrayType(RegularType(RegularType(NumpyType(&#39;int8&#39;), 2), 3), 2, None)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array1</span> <span class="o">==</span> <span class="n">ak_array2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[[True, True], [True, True], [True, True]],
+ [[True, True], [True, True], [True, True]]]
+--------------------------------------------
+backend: cpu
+nbytes: 12 B
+type: 2 * 3 * 2 * bool</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">ak_array1</span> <span class="o">==</span> <span class="n">ak_array2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.True_
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="mutability-of-awkward-arrays-from-numpy">
+<h2>Mutability of Awkward Arrays from NumPy<a class="headerlink" href="#mutability-of-awkward-arrays-from-numpy" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Advanced topic: unless you’re willing to investigate subtleties of when a NumPy array is viewed and when it is copied, do not modify the NumPy arrays that Awkward Arrays are built from (or build Awkward Arrays from deliberate copies of the NumPy arrays).</p>
+</div>
+<p>Awkward Arrays are not supposed to be changed in place (“mutated”), and all of the functions in the Awkward Array library return new values, rather than changing the old. However, it is possible to create an Awkward Array from a NumPy array and modify the NumPy array in place, thus modifying the Awkward Array. Wherever possible, Awkward Arrays are <em>views</em> of the NumPy data, not <em>copies</em>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[1, 2, 3],
+       [4, 5, 6]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [4, 5, 6]]
+-----------
+backend: cpu
+nbytes: 48 B
+type: 2 * 3 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Change the NumPy array in place.</span>
+<span class="n">np_array</span> <span class="o">*=</span> <span class="mi">100</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[100, 200, 300],
+       [400, 500, 600]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The Awkward Array changes as well.</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200, 300],
+ [400, 500, 600]]
+-----------------
+backend: cpu
+nbytes: 48 B
+type: 2 * 3 * int64</pre></div></div>
+</div>
+<p>You might want to do this in some performance-critical applications. However, note that NumPy arrays sometimes have to be copied to make an Awkward Array.</p>
+<p>For example, if a NumPy array is not C-contiguous and is internally represented as a <a class="reference internal" href="../reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a> (see previous section), it must be copied.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Slicing the inner dimension of this NumPy array makes it not C-contiguous.</span>
+<span class="n">np_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">np_array</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">&quot;C_CONTIGUOUS&quot;</span><span class="p">],</span> <span class="n">np_array</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s2">&quot;C_CONTIGUOUS&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(True, False)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Case 1: C-contiguous and not RegularArray (should view).</span>
+<span class="n">ak_array1</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+<span class="n">ak_array1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [4, 5, 6]]
+-----------
+backend: cpu
+nbytes: 48 B
+type: 2 * 3 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Case 2: C-contiguous and RegularArray (should view).</span>
+<span class="n">ak_array2</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">,</span> <span class="n">regulararray</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ak_array2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [4, 5, 6]]
+-----------
+backend: cpu
+nbytes: 48 B
+type: 2 * 3 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Case 3: not C-contiguous and not RegularArray (should view).</span>
+<span class="n">ak_array3</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">ak_array3</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2],
+ [4, 5]]
+--------
+backend: cpu
+nbytes: 32 B
+type: 2 * 2 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Case 4: not C-contiguous and RegularArray (has to copy).</span>
+<span class="n">ak_array4</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np_array</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">regulararray</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ak_array4</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2],
+ [4, 5]]
+--------
+backend: cpu
+nbytes: 32 B
+type: 2 * 2 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Change the NumPy array in place.</span>
+<span class="n">np_array</span> <span class="o">*=</span> <span class="mi">100</span>
+<span class="n">np_array</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[100, 200],
+       [400, 500]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Case 1 changes as well because it is a view.</span>
+<span class="n">ak_array1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200, 300],
+ [400, 500, 600]]
+-----------------
+backend: cpu
+nbytes: 48 B
+type: 2 * 3 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Case 2 changes as well because it is a view.</span>
+<span class="n">ak_array2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200, 300],
+ [400, 500, 600]]
+-----------------
+backend: cpu
+nbytes: 48 B
+type: 2 * 3 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Case 3 changes as well because it is a view.</span>
+<span class="n">ak_array3</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200],
+ [400, 500]]
+------------
+backend: cpu
+nbytes: 32 B
+type: 2 * 2 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Case 4 does not change because it is a copy.</span>
+<span class="n">ak_array4</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2],
+ [4, 5]]
+--------
+backend: cpu
+nbytes: 32 B
+type: 2 * 2 * int64</pre></div></div>
+</div>
+<p>In general, it can be hard to determine if an Awkward Array is a view or a copy because some operations need to construct a <a class="reference internal" href="../reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a>. Furthermore, the view-vs-copy behavior can change from one version of Awkward Array to the next. It is only safe to rely on view-vs-copy behavior of Awkward Arrays that were directly created from NumPy arrays, as in the four cases above, not in any derived arrays (i.e. arrays produced from slices of Awkward Arrays or computed using functions from the Awkward Array library).</p>
+</section>
+<section id="mutability-of-awkward-arrays-converted-to-numpy">
+<h2>Mutability of Awkward Arrays converted to NumPy<a class="headerlink" href="#mutability-of-awkward-arrays-converted-to-numpy" title="Link to this heading">#</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Advanced topic: unless you’re willing to investigate subtleties of when an Awkward array is viewed and when it is copied, do not modify the NumPy arrays that Awkward Arrays are converted into (or make deliberate copies of the resulting NumPy arrays).</p>
+</div>
+<p>The considerations described above also apply to NumPy arrays created from Awkward Arrays. If possible, they are <em>views</em>, rather than <em>copies</em>, but these semantics are not guaranteed.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, 2, 3],
+ [4, 5, 6]]
+-----------
+backend: cpu
+nbytes: 72 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array</span><span class="p">)</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[1, 2, 3],
+       [4, 5, 6]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Change the NumPy array in place.</span>
+<span class="n">np_array</span> <span class="o">*=</span> <span class="mi">100</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[100, 200, 300],
+       [400, 500, 600]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The Awkward Array that it came from is changed as well.</span>
+<span class="n">ak_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[100, 200, 300],
+ [400, 500, 600]]
+-----------------
+backend: cpu
+nbytes: 72 B
+type: 2 * var * int64</pre></div></div>
+</div>
+<p>As a counter-example, a NumPy array constructed from an Awkward Array with missing data <em>might not</em> be a view. (It depends on the internal representation; the most common case of an <a class="reference internal" href="../reference/generated/ak.contents.IndexedOptionArray.html#ak.contents.IndexedOptionArray" title="ak.contents.IndexedOptionArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.contents.IndexedOptionArray</span></code></a> is not.)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak_array1</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">ak_array1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, None, 3],
+ [None, None, 6]]
+-----------------
+backend: cpu
+nbytes: 96 B
+type: 2 * var * ?int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np_array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">ak_array1</span><span class="p">)</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>masked_array(
+  data=[[1, --, 3],
+        [--, --, 6]],
+  mask=[[False,  True, False],
+        [ True,  True, False]],
+  fill_value=999999)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Change the NumPy array in place.</span>
+<span class="n">np_array</span> <span class="o">*=</span> <span class="mi">100</span>
+<span class="n">np_array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>masked_array(
+  data=[[100, --, 300],
+        [--, --, 600]],
+  mask=[[False,  True, False],
+        [ True,  True, False]],
+  fill_value=999999)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The Awkward Array that it came from is not changed in this case.</span>
+<span class="n">ak_array1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1, None, 3],
+ [None, None, 6]]
+-----------------
+backend: cpu
+nbytes: 96 B
+type: 2 * var * ?int64</pre></div></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-convert.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Converting arrays</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-convert-python.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">How to convert to/from Python objects</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-numpy-to-awkward">From NumPy to Awkward</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fixed-size-vs-variable-length-dimensions">Fixed-size vs variable-length dimensions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-awkward-to-numpy">From Awkward to NumPy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implicit-awkward-to-numpy-conversion">Implicit Awkward to NumPy conversion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-s-structured-arrays">NumPy’s structured arrays</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-s-masked-arrays">NumPy’s masked arrays</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpyarray-shapes-vs-regulararrays">NumpyArray shapes vs RegularArrays</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mutability-of-awkward-arrays-from-numpy">Mutability of Awkward Arrays from NumPy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mutability-of-awkward-arrays-converted-to-numpy">Mutability of Awkward Arrays converted to NumPy</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-convert-numpy.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/how-to-convert-numpy.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+ak.where
+--------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 1752 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L1752>`__.
+
+.. py:function:: ak.where(condition)
+
+
+    :param condition: In the
+                  three-argument form of this function (``condition``, ``x``, ``y``),
+                  True values in ``condition`` select values from ``x`` and False
+                  values in ``condition`` select values from ``y``.
+    :type condition: np.ndarray or rectilinear :py:obj:`ak.Array` of booleans
+    :param x: Data with the same length as ``condition``.
+    :param y: Data with the same length as ``condition``.
+    :param mergebool: If True, boolean and numeric data
+                  can be combined into the same buffer, losing information about
+                  False vs ``0`` and True vs ``1``; otherwise, they are kept in separate
+                  buffers with distinct types (using an :py:obj:`ak.layout.UnionArray8_64`).
+    :type mergebool: bool, default is True
+    :param highlevel: If True, return an :py:obj:`ak.Array`;
+                  otherwise, return a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool, default is True
+
+This function has a one-argument form, ``condition`` without ``x`` or ``y``, and
+a three-argument form, ``condition``, ``x``, and ``y``. In the one-argument form,
+it is completely equivalent to NumPy's
+`nonzero <https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html>`__
+function.
+
+In the three-argument form, it acts as a vectorized ternary operator:
+``condition``, ``x``, and ``y`` must all have the same length and
+
+.. code-block:: python
+
+
+    output[i] = x[i] if condition[i] else y[i]
+
+for all ``i``. The structure of ``x`` and ``y`` do not need to be the same; if
+they are incompatible types, the output will have :py:obj:`ak.type.UnionType`.
+

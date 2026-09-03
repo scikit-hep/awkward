@@ -1,0 +1,75 @@
+ak.numba.layoutbuilder.Regular
+------------------------------
+
+.. py:module: ak.numba.layoutbuilder.Regular
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/numba/layoutbuilder.py>`__ on `line 198 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/numba/layoutbuilder.py#L198>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Regular(self, content, size, *, parameters=None)
+
+
+
+.. _ak-numba-layoutbuilder-regular-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.Regular.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-regular-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.Regular.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-regular-content:
+
+.. py:attribute:: ak.numba.layoutbuilder.Regular.content
+
+
+
+.. _ak-numba-layoutbuilder-regular-size:
+
+.. py:attribute:: ak.numba.layoutbuilder.Regular.size
+
+
+
+.. _ak-numba-layoutbuilder-regular-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.Regular.form
+
+
+
+.. _ak-numba-layoutbuilder-regular-begin_list:
+
+.. py:method:: ak.numba.layoutbuilder.Regular.begin_list(self)
+
+
+
+.. _ak-numba-layoutbuilder-regular-end_list:
+
+.. py:method:: ak.numba.layoutbuilder.Regular.end_list(self)
+
+
+
+.. _ak-numba-layoutbuilder-regular-clear:
+
+.. py:method:: ak.numba.layoutbuilder.Regular.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-regular-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.Regular.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-regular-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.Regular.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-regular-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.Regular.snapshot(self)
+

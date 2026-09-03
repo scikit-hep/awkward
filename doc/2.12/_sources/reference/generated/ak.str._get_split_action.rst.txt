@@ -1,0 +1,6 @@
+ak.str._get_split_action
+========================
+
+Defined in `awkward.operations.str.__init__ <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/str/__init__.py>`__ on `line 237 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/str/__init__.py#L237>`__.
+
+.. py:function:: ak.str._get_split_action(utf8_function, ascii_function, *args, generate_bitmasks=False, bytestring_to_string=False, **kwargs)

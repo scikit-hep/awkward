@@ -1,0 +1,58 @@
+var annotated_dup =
+[
+    [ "awkward", "namespaceawkward.html", [
+      [ "LayoutBuilder", "namespaceawkward_1_1LayoutBuilder.html", [
+        [ "Field", "classawkward_1_1LayoutBuilder_1_1Field.html", "classawkward_1_1LayoutBuilder_1_1Field" ],
+        [ "Numpy", "classawkward_1_1LayoutBuilder_1_1Numpy.html", "classawkward_1_1LayoutBuilder_1_1Numpy" ],
+        [ "ListOffset", "classawkward_1_1LayoutBuilder_1_1ListOffset.html", "classawkward_1_1LayoutBuilder_1_1ListOffset" ],
+        [ "List", "classawkward_1_1LayoutBuilder_1_1List.html", "classawkward_1_1LayoutBuilder_1_1List" ],
+        [ "Empty", "classawkward_1_1LayoutBuilder_1_1Empty.html", "classawkward_1_1LayoutBuilder_1_1Empty" ],
+        [ "EmptyRecord", "classawkward_1_1LayoutBuilder_1_1EmptyRecord.html", "classawkward_1_1LayoutBuilder_1_1EmptyRecord" ],
+        [ "Record", "classawkward_1_1LayoutBuilder_1_1Record.html", "classawkward_1_1LayoutBuilder_1_1Record" ],
+        [ "Tuple", "classawkward_1_1LayoutBuilder_1_1Tuple.html", "classawkward_1_1LayoutBuilder_1_1Tuple" ],
+        [ "Regular", "classawkward_1_1LayoutBuilder_1_1Regular.html", "classawkward_1_1LayoutBuilder_1_1Regular" ],
+        [ "Indexed", "classawkward_1_1LayoutBuilder_1_1Indexed.html", "classawkward_1_1LayoutBuilder_1_1Indexed" ],
+        [ "IndexedOption", "classawkward_1_1LayoutBuilder_1_1IndexedOption.html", "classawkward_1_1LayoutBuilder_1_1IndexedOption" ],
+        [ "Unmasked", "classawkward_1_1LayoutBuilder_1_1Unmasked.html", "classawkward_1_1LayoutBuilder_1_1Unmasked" ],
+        [ "ByteMasked", "classawkward_1_1LayoutBuilder_1_1ByteMasked.html", "classawkward_1_1LayoutBuilder_1_1ByteMasked" ],
+        [ "BitMasked", "classawkward_1_1LayoutBuilder_1_1BitMasked.html", "classawkward_1_1LayoutBuilder_1_1BitMasked" ],
+        [ "Union", "classawkward_1_1LayoutBuilder_1_1Union.html", "classawkward_1_1LayoutBuilder_1_1Union" ]
+      ] ],
+      [ "util", "namespaceawkward_1_1util.html", [
+        [ "NameValuePair", "structawkward_1_1util_1_1NameValuePair.html", "structawkward_1_1util_1_1NameValuePair" ],
+        [ "array_deleter", "classawkward_1_1util_1_1array__deleter.html", "classawkward_1_1util_1_1array__deleter" ]
+      ] ],
+      [ "ArrayBuilder", "classawkward_1_1ArrayBuilder.html", "classawkward_1_1ArrayBuilder" ],
+      [ "BoolBuilder", "classawkward_1_1BoolBuilder.html", "classawkward_1_1BoolBuilder" ],
+      [ "BuffersContainer", "classawkward_1_1BuffersContainer.html", "classawkward_1_1BuffersContainer" ],
+      [ "Builder", "classawkward_1_1Builder.html", "classawkward_1_1Builder" ],
+      [ "Complex128Builder", "classawkward_1_1Complex128Builder.html", "classawkward_1_1Complex128Builder" ],
+      [ "DatetimeBuilder", "classawkward_1_1DatetimeBuilder.html", "classawkward_1_1DatetimeBuilder" ],
+      [ "Float64Builder", "classawkward_1_1Float64Builder.html", "classawkward_1_1Float64Builder" ],
+      [ "Int64Builder", "classawkward_1_1Int64Builder.html", "classawkward_1_1Int64Builder" ],
+      [ "ListBuilder", "classawkward_1_1ListBuilder.html", "classawkward_1_1ListBuilder" ],
+      [ "OptionBuilder", "classawkward_1_1OptionBuilder.html", "classawkward_1_1OptionBuilder" ],
+      [ "RecordBuilder", "classawkward_1_1RecordBuilder.html", "classawkward_1_1RecordBuilder" ],
+      [ "StringBuilder", "classawkward_1_1StringBuilder.html", "classawkward_1_1StringBuilder" ],
+      [ "TupleBuilder", "classawkward_1_1TupleBuilder.html", "classawkward_1_1TupleBuilder" ],
+      [ "UnionBuilder", "classawkward_1_1UnionBuilder.html", "classawkward_1_1UnionBuilder" ],
+      [ "UnknownBuilder", "classawkward_1_1UnknownBuilder.html", "classawkward_1_1UnknownBuilder" ],
+      [ "ForthInputBuffer", "classawkward_1_1ForthInputBuffer.html", "classawkward_1_1ForthInputBuffer" ],
+      [ "ForthMachineOf", "classawkward_1_1ForthMachineOf.html", "classawkward_1_1ForthMachineOf" ],
+      [ "ForthOutputBuffer", "classawkward_1_1ForthOutputBuffer.html", "classawkward_1_1ForthOutputBuffer" ],
+      [ "ForthOutputBufferOf", "classawkward_1_1ForthOutputBufferOf.html", "classawkward_1_1ForthOutputBufferOf" ],
+      [ "FileLikeObject", "classawkward_1_1FileLikeObject.html", "classawkward_1_1FileLikeObject" ],
+      [ "FromJsonObjectSchema", "classawkward_1_1FromJsonObjectSchema.html", "classawkward_1_1FromJsonObjectSchema" ],
+      [ "Options", "structawkward_1_1Options.html", "structawkward_1_1Options" ],
+      [ "Panel", "classawkward_1_1Panel.html", "classawkward_1_1Panel" ],
+      [ "GrowableBuffer", "classawkward_1_1GrowableBuffer.html", "classawkward_1_1GrowableBuffer" ],
+      [ "voider", "structawkward_1_1voider.html", "structawkward_1_1voider" ],
+      [ "is_specialization", "structawkward_1_1is__specialization.html", null ],
+      [ "is_specialization< Ref< Args... >, Ref >", "structawkward_1_1is__specialization_3_01Ref_3_01Args_8_8_8_01_4_00_01Ref_01_4.html", null ],
+      [ "visit_impl", "structawkward_1_1visit__impl.html", null ],
+      [ "visit_impl< 0 >", "structawkward_1_1visit__impl_3_010_01_4.html", null ]
+    ] ],
+    [ "Error", "structError.html", "structError" ],
+    [ "ForthMachine", "classForthMachine.html", null ],
+    [ "pyobject_deleter", "classpyobject__deleter.html", "classpyobject__deleter" ]
+];

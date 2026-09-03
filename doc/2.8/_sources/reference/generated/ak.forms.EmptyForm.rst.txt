@@ -1,0 +1,93 @@
+ak.forms.EmptyForm
+------------------
+
+.. py:module: ak.forms.EmptyForm
+
+Defined in `awkward.forms.emptyform <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/forms/emptyform.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/forms/emptyform.py#L21>`__.
+
+.. py:class:: ak.forms.EmptyForm(self, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-emptyform-copy:
+
+.. py:method:: ak.forms.EmptyForm.copy(self, *, parameters=UNSET, form_key=UNSET)
+
+
+
+.. _ak-forms-emptyform-simplified:
+
+.. py:method:: ak.forms.EmptyForm.simplified(cls, *, parameters=None, form_key=None)
+
+
+
+.. _ak-forms-emptyform-__repr__:
+
+.. py:method:: ak.forms.EmptyForm.__repr__(self)
+
+
+
+.. _ak-forms-emptyform-_to_dict_part:
+
+.. py:method:: ak.forms.EmptyForm._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-emptyform-type:
+
+.. py:attribute:: ak.forms.EmptyForm.type
+
+
+
+.. _ak-forms-emptyform-to_numpyform:
+
+.. py:method:: ak.forms.EmptyForm.to_NumpyForm(self, primitive)
+
+
+
+.. _ak-forms-emptyform-_columns:
+
+.. py:method:: ak.forms.EmptyForm._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-emptyform-_select_columns:
+
+.. py:method:: ak.forms.EmptyForm._select_columns(self, match_specifier)
+
+
+
+.. _ak-forms-emptyform-_prune_columns:
+
+.. py:method:: ak.forms.EmptyForm._prune_columns(self, is_inside_record_or_union)
+
+
+
+.. _ak-forms-emptyform-_column_types:
+
+.. py:method:: ak.forms.EmptyForm._column_types(self)
+
+
+
+.. _ak-forms-emptyform-_length_one_buffer_lengths:
+
+.. py:method:: ak.forms.EmptyForm._length_one_buffer_lengths(self)
+
+
+
+.. _ak-forms-emptyform-__setstate__:
+
+.. py:method:: ak.forms.EmptyForm.__setstate__(self, state)
+
+
+
+.. _ak-forms-emptyform-_expected_from_buffers:
+
+.. py:method:: ak.forms.EmptyForm._expected_from_buffers(self, getkey, recursive)
+
+
+
+.. _ak-forms-emptyform-_is_equal_to:
+
+.. py:method:: ak.forms.EmptyForm._is_equal_to(self, other, all_parameters, form_key)
+

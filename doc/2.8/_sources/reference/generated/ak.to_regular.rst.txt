@@ -1,0 +1,60 @@
+ak.to_regular
+-------------
+
+.. py:module: ak.to_regular
+
+Defined in `awkward.operations.ak_to_regular <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_to_regular.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_to_regular.py#L18>`__.
+
+.. py:function:: ak.to_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param axis: The dimension at which this operation is applied.
+             The outermost dimension is ``0``, followed by ``1``, etc., and negative
+             values count backward from the innermost: ``-1`` is the innermost
+             dimension, ``-2`` is the next level up, etc. If None, convert all
+             variable dimensions into regular ones or raise a ValueError if that
+             is not possible.
+    :type axis: int or None
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Converts a variable-length axis into a regular one, if possible.
+
+.. code-block:: python
+
+
+    >>> irregular = ak.from_iter(np.arange(2*3*5).reshape(2, 3, 5))
+    >>> irregular.type.show()
+    2 * var * var * int64
+    >>> ak.to_regular(irregular).type.show()
+    2 * 3 * var * int64
+    >>> ak.to_regular(irregular, axis=2).type.show()
+    2 * var * 5 * int64
+    >>> ak.to_regular(irregular, axis=-1).type.show()
+    2 * var * 5 * int64
+
+But truly irregular data cannot be converted.
+
+.. code-block:: python
+
+
+    >>> ak.to_regular(ak.Array([[1, 2, 3], [], [4, 5]]))
+    ValueError: while calling
+        ak.to_regular(
+            array = <Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>
+            axis = 1
+            highlevel = True
+            behavior = None
+        )
+    Error details: cannot convert to RegularArray because subarray lengths are not regular
+
+See also :py:obj:`ak.from_regular`.
+

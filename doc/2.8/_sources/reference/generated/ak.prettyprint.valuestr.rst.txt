@@ -1,0 +1,9 @@
+ak.prettyprint.valuestr
+-----------------------
+
+.. py:module: ak.prettyprint.valuestr
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/prettyprint.py>`__ on `line 358 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/prettyprint.py#L358>`__.
+
+.. py:function:: ak.prettyprint.valuestr(data, limit_rows, limit_cols, formatter=None)
+

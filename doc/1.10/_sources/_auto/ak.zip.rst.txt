@@ -1,0 +1,146 @@
+ak.zip
+------
+
+Defined in `awkward.operations.structure <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py>`__ on `line 470 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/structure.py#L470>`__.
+
+.. py:function:: ak.zip(arrays, depth_limit=None, parameters=None, with_name=None, highlevel=True, behavior=None, right_broadcast=False, optiontype_outside_record=False)
+
+
+    :param arrays: Arrays to combine into a
+               record-containing structure (if a dict) or a tuple-containing
+               structure (if any other kind of iterable).
+    :type arrays: dict or iterable of arrays
+    :param depth_limit: If None, attempt to fully broadcast the
+                    ``array`` to all levels. If an int, limit the number of dimensions
+                    that get broadcasted. The minimum value is ``1``, for no
+                    broadcasting.
+    :type depth_limit: None or int
+    :param parameters: Parameters for the new
+                   :py:obj:`ak.layout.RecordArray` node that is created by this operation.
+    :type parameters: None or dict
+    :param with_name: Assigns a ``"__record__"`` name to the new
+                  :py:obj:`ak.layout.RecordArray` node that is created by this operation
+                  (overriding ``parameters``, if necessary).
+    :type with_name: None or str
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.layout.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param right_broadcast: If True, follow rules for implicit
+                        right-broadcasting, as described in :py:obj:`ak.broadcast_arrays`.
+    :type right_broadcast: bool
+    :param optiontype_outside_record: If True, continue broadcasting past
+                                  any option types before creating the new :py:obj:`ak.layout.RecordArray` node.
+    :type optiontype_outside_record: bool
+
+Combines ``arrays`` into a single structure as the fields of a collection
+of records or the slots of a collection of tuples. If the ``arrays`` have
+nested structure, they are broadcasted with one another to form the
+records or tuples as deeply as possible, though this can be limited by
+``depth_limit``.
+
+This operation may be thought of as the opposite of projection in
+:py:obj:`ak.Array.__getitem__`, which extracts fields one at a time, or
+:py:obj:`ak.unzip`, which extracts them all in one call.
+
+Consider the following arrays, ``one`` and ``two``.
+
+.. code-block:: python
+
+
+    >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
+    >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
+
+Zipping them together using a dict creates a collection of records with
+the same nesting structure as ``one`` and ``two``.
+
+.. code-block:: python
+
+
+    >>> ak.to_list(ak.zip({"x": one, "y": two}))
+    [
+     [{'x': 1.1, 'y': 'a'}, {'x': 2.2, 'y': 'b'}, {'x': 3.3, 'y': 'c'}],
+     [],
+     [{'x': 4.4, 'y': 'd'}, {'x': 5.5, 'y': 'e'}],
+     [{'x': 6.6, 'y': 'f'}]
+    ]
+
+Doing so with a list creates tuples, whose fields are not named.
+
+.. code-block:: python
+
+
+    >>> ak.to_list(ak.zip([one, two]))
+    [
+     [(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
+     [],
+     [(4.4, 'd'), (5.5, 'e')],
+     [(6.6, 'f')]
+    ]
+
+Adding a third array with the same length as ``one`` and ``two`` but less
+internal structure is okay: it gets broadcasted to match the others.
+(See :py:obj:`ak.broadcast_arrays` for broadcasting rules.)
+
+.. code-block:: python
+
+
+    >>> three = ak.Array([100, 200, 300, 400])
+    >>> ak.to_list(ak.zip([one, two, three]))
+    [
+     [[(1.1, 97, 100)], [(2.2, 98, 100)], [(3.3, 99, 100)]],
+     [],
+     [[(4.4, 100, 300)], [(5.5, 101, 300)]],
+     [[(6.6, 102, 400)]]
+    ]
+
+However, if arrays have the same depth but different lengths of nested
+lists, attempting to zip them together is a broadcasting error.
+
+.. code-block:: python
+
+
+    >>> one = ak.Array([[[1, 2, 3], [], [4, 5], [6]], [], [[7, 8]]])
+    >>> two = ak.Array([[[1.1, 2.2], [3.3], [4.4], [5.5]], [], [[6.6]]])
+    >>> ak.zip([one, two])
+    ValueError: in ListArray64, cannot broadcast nested list
+
+For this, one can set the ``depth_limit`` to prevent the operation from
+attempting to broadcast what can't be broadcasted.
+
+.. code-block:: python
+
+
+    >>> ak.to_list(ak.zip([one, two], depth_limit=1))
+    [([[1, 2, 3], [], [4, 5], [6]], [[1.1, 2.2], [3.3], [4.4], [5.5]]),
+     ([], []),
+     ([[7, 8]], [[6.6]])]
+
+As an extreme, ``depth_limit=1`` is a handy way to make a record structure
+at the outermost level, regardless of whether the fields have matching
+structure or not.
+
+When zipping together arrays with optional values, it can be useful to create
+the :py:obj:`ak.layout.RecordArray` node after the option types. By default, :py:obj:`ak.zip`
+does not do this:
+
+.. code-block:: python
+
+
+    >>> one = ak.Array([1, 2, None])
+    >>> two = ak.Array([None, 5, 6])
+    >>> ak.zip([one, two])
+    <Array [(1, None), (2, 5), (None, 6)] type='3 * (?int64, ?int64)'>
+
+If the ``optiontype_outside_record`` option is set to ``True``, Awkward will continue to
+broadcast the arrays together at the depth_limit until it reaches non-option
+types. This effectively takes the union of the option mask:
+
+.. code-block:: python
+
+
+    >>> ak.zip([one, two], optiontype_outside_record=True)
+    <Array [None, (2, 5), None] type='3 * ?(int64, int64)'>
+

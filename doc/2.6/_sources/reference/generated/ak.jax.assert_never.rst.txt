@@ -1,0 +1,9 @@
+ak.jax.assert_never
+-------------------
+
+.. py:module: ak.jax.assert_never
+
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/jax.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/b620e696e1147d6a6cf2d1070439db7d7bc77771/src/awkward/jax.py#L17>`__.
+
+.. py:function:: ak.jax.assert_never(arg)
+

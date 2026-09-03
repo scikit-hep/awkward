@@ -1,0 +1,6 @@
+ak.forms.from_dict
+==================
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/form.py>`__ on `line 54 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/form.py#L54>`__.
+
+.. py:function:: ak.forms.from_dict(input: collections.abc.Mapping) -> Form

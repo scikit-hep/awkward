@@ -1,0 +1,25 @@
+ak.types.from_datashape
+-----------------------
+
+.. py:module: ak.types.from_datashape
+
+Defined in `awkward.types.type <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/types/type.py>`__ on `line 307 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/types/type.py#L307>`__.
+
+.. py:function:: ak.types.from_datashape(datashape, highlevel=True)
+
+Parses ``datashape`` (str) and returns a :py:obj:`ak.types.Type` object, the inverse of
+calling ``str`` on a :py:obj:`ak.types.Type`.
+
+If ``highlevel=True``, and the type string starts with a number (e.g. '1000 * ...'),
+the return type is :py:obj:`ak.types.ArrayType`, representing an :py:obj:`ak.highlevel.Array`.
+
+If ``highlevel=True`` and the type string starts with a record indicator (e.g. ``{``),
+the return type is :py:obj:`ak.types.ScalarType` with an :py:obj:`ak.types.RecordType` content,
+representing a scalar :py:obj:`ak.highlevel.Record` rather than an array of them.
+
+Other strings (e.g. starting with ``var *``, ``?``, ``option``, etc.) are not compatible
+with ``highlevel=True``; an exception would be raised.
+
+If ``highlevel=False``, the type is assumed to represent a layout (e.g. a number
+indicates a :py:obj:`ak.types.RegularType`, rather than a :py:obj:`ak.types.ArrayType`).
+

@@ -1,0 +1,28 @@
+ak.behaviors.string
+===================
+
+.. py:module:: awkward.behaviors.string
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   awkward.behaviors.string.ByteBehavior
+   awkward.behaviors.string.CharBehavior
+   awkward.behaviors.string.ByteStringBehavior
+   awkward.behaviors.string.StringBehavior
+
+
+Module Contents
+---------------
+
+.. py:data:: ByteBehavior
+
+.. py:data:: CharBehavior
+
+.. py:data:: ByteStringBehavior
+
+.. py:data:: StringBehavior
+

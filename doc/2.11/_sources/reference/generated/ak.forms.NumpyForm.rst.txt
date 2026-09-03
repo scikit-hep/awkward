@@ -1,0 +1,68 @@
+ak.forms.NumpyForm
+==================
+
+Defined in `awkward.forms.numpyform <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/forms/numpyform.py>`__ on `line 48 <https://github.com/scikit-hep/awkward/blob/a95344181dc847c0593b9e4a66523d13fbac0432/src/awkward/forms/numpyform.py#L48>`__.
+
+.. py:class:: ak.forms.NumpyForm(primitive, inner_shape=(), *, parameters=None, form_key=None)
+
+
+
+   .. py:attribute:: _primitive
+      :value: ''
+
+
+
+   .. py:attribute:: _inner_shape
+      :value: ()
+
+
+
+   .. py:property:: primitive
+
+
+   .. py:property:: inner_shape
+
+
+   .. py:method:: copy(primitive=UNSET, inner_shape=UNSET, *, parameters=UNSET, form_key=UNSET)
+
+
+   .. py:method:: simplified(primitive, inner_shape=(), *, parameters=None, form_key=None)
+      :classmethod:
+
+
+
+   .. py:property:: itemsize
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _to_dict_part(verbose, toplevel)
+
+
+   .. py:property:: type
+
+
+   .. py:method:: to_RegularForm() -> awkward.forms.regularform.RegularForm | NumpyForm
+
+
+   .. py:method:: _columns(path, output, list_indicator)
+
+
+   .. py:method:: _select_columns(match_specifier: awkward.forms.form._SpecifierMatcher) -> awkward._typing.Self
+
+
+   .. py:method:: _prune_columns(is_inside_record_or_union: bool) -> awkward._typing.Self
+
+
+   .. py:method:: _column_types()
+
+
+   .. py:method:: __setstate__(state)
+
+
+   .. py:method:: _expected_from_buffers(getkey: collections.abc.Callable[[awkward.forms.form.Form, str], str], recursive: bool) -> collections.abc.Iterator[tuple[str, awkward._typing.DType]]
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool, form_key: bool) -> bool
+

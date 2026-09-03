@@ -1,0 +1,27 @@
+ak.to_layout
+------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 1859 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L1859>`__.
+
+.. py:function:: ak.to_layout(array, allow_record=True, allow_other=False, numpytype=(np.number, np.bool_, np.str_, np.bytes_, np.datetime64, np.timedelta64))
+
+
+    :param array: Data to convert into an :py:obj:`ak.layout.Content` and maybe
+              :py:obj:`ak.layout.Record` and other types.
+    :param allow_record: If True, allow :py:obj:`ak.layout.Record` as an output;
+                     otherwise, if the output would be a scalar record, raise an error.
+    :type allow_record: bool
+    :param allow_other: If True, allow non-Awkward outputs; otherwise,
+                    if the output would be another type, raise an error.
+    :type allow_other: bool
+    :param numpytype: Allowed NumPy types in
+                  :py:obj:`ak.layout.NumpyArray` outputs.
+    :type numpytype: tuple of NumPy types
+
+Converts ``array`` (many types supported, including all Awkward Arrays and
+Records) into a :py:obj:`ak.layout.Content` and maybe :py:obj:`ak.layout.Record` and other
+types.
+
+This function is usually used to sanitize inputs for other functions; it
+would rarely be used in a data analysis.
+

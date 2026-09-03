@@ -1,0 +1,774 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="API Reference" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="api-reference.html" />
+<meta property="og:site_name" content="Awkward Array" />
+<meta property="og:description" content="High-level data types: ak.Array for an array of items (records, numbers, strings, etc.) and ak.Record for a single record. Arrays and records are read-only structures, but functions that manipulate..." />
+<meta property="og:image" content="/None" />
+<meta property="og:image:alt" content="High-level data types: ak.Array for an array of items (records, numbers, strings, etc.) and ak.Record for a single record. Arrays and records are read-only s..." />
+<meta name="description" content="High-level data types: ak.Array for an array of items (records, numbers, strings, etc.) and ak.Record for a single record. Arrays and records are read-only structures, but functions that manipulate..." />
+<meta name="robots" content="noindex,nofollow">
+
+    <title>API Reference &#8212; Awkward Array 1.10.2 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api-reference';</script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/api-reference.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Release history" href="_auto/changelog.html" />
+    <link rel="prev" title="Documentation" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="_static/logo-300px.png" class="logo__image only-light" alt="Logo image">
+    <img src="_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fab fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fab fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_auto/changelog.html">Release history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.Array.html">ak.Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.Record.html">ak.Record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ArrayBuilder.html">ak.ArrayBuilder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.behavior.html">ak.behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.is_valid.html">ak.is_valid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.validity_error.html">ak.validity_error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.type.html">ak.type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.parameters.html">ak.parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.fields.html">ak.fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.is_tuple.html">ak.is_tuple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_numpy.html">ak.from_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_numpy.html">ak.to_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_cupy.html">ak.from_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_cupy.html">ak.to_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_jax.html">ak.from_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_jax.html">ak.to_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.kernels.html">ak.kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_kernels.html">ak.to_kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_iter.html">ak.from_iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_list.html">ak.to_list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_json.html">ak.from_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_json.html">ak.to_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_awkward0.html">ak.from_awkward0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_awkward0.html">ak.to_awkward0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_layout.html">ak.to_layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.regularize_numpyarray.html">ak.regularize_numpyarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_arrow.html">ak.to_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_arrow_table.html">ak.to_arrow_table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_arrow.html">ak.from_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_parquet.html">ak.to_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_parquet.html">ak.from_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_buffers.html">ak.to_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_buffers.html">ak.from_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_pandas.html">ak.to_pandas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.copy.html">ak.copy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.mask.html">ak.mask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.num.html">ak.num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.run_lengths.html">ak.run_lengths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.zip.html">ak.zip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.unzip.html">ak.unzip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_regular.html">ak.to_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_regular.html">ak.from_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.with_name.html">ak.with_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.with_field.html">ak.with_field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.with_parameter.html">ak.with_parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.without_parameters.html">ak.without_parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.zeros_like.html">ak.zeros_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ones_like.html">ak.ones_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.full_like.html">ak.full_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.broadcast_arrays.html">ak.broadcast_arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.concatenate.html">ak.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.where.html">ak.where</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.flatten.html">ak.flatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.unflatten.html">ak.unflatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ravel.html">ak.ravel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.packed.html">ak.packed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.local_index.html">ak.local_index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.sort.html">ak.sort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argsort.html">ak.argsort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.pad_none.html">ak.pad_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.fill_none.html">ak.fill_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.is_none.html">ak.is_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.singletons.html">ak.singletons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.firsts.html">ak.firsts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.cartesian.html">ak.cartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argcartesian.html">ak.argcartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.combinations.html">ak.combinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argcombinations.html">ak.argcombinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partitions.html">ak.partitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partitioned.html">ak.partitioned</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.repartition.html">ak.repartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.virtual.html">ak.virtual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.materialized.html">ak.materialized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.with_cache.html">ak.with_cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.size.html">ak.size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.atleast_1d.html">ak.atleast_1d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.nan_to_num.html">ak.nan_to_num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.isclose.html">ak.isclose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.values_astype.html">ak.values_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.strings_astype.html">ak.strings_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.count.html">ak.count</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.count_nonzero.html">ak.count_nonzero</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.sum.html">ak.sum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.prod.html">ak.prod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.any.html">ak.any</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.all.html">ak.all</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.min.html">ak.min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.max.html">ak.max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ptp.html">ak.ptp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argmin.html">ak.argmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argmax.html">ak.argmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.moment.html">ak.moment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.mean.html">ak.mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.var.html">ak.var</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.std.html">ak.std</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.covar.html">ak.covar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.corr.html">ak.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.linear_fit.html">ak.linear_fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.softmax.html">ak.softmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.CategoricalBehavior.html">ak.CategoricalBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.is_categorical.html">ak.is_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.categories.html">ak.categories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_categorical.html">ak.to_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_categorical.html">ak.from_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.mixin_class.html">ak.mixin_class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.mixin_class_method.html">ak.mixin_class_method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ByteBehavior.html">ak.ByteBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.CharBehavior.html">ak.CharBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ByteStringBehavior.html">ak.ByteStringBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.StringBehavior.html">ak.StringBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.numba.register.html">ak.numba.register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.single.html">ak.partition.single</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.first.html">ak.partition.first</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.every.html">ak.partition.every</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.partition_as.html">ak.partition.partition_as</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.iterate.html">ak.partition.iterate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.apply.html">ak.partition.apply</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.PartitionedArray.html">ak.partition.PartitionedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.IrregularlyPartitionedArray.html">ak.partition.IrregularlyPartitionedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.numba.register.html">ak.numba.register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.numexpr.evaluate.html">ak.numexpr.evaluate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.numexpr.re_evaluate.html">ak.numexpr.re_evaluate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.autograd.elementwise_grad.html">ak.autograd.elementwise_grad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Content.html">ak.layout.Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.EmptyArray.html">ak.layout.EmptyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.NumpyArray.html">ak.layout.NumpyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.RegularArray.html">ak.layout.RegularArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ListArray.html">ak.layout.ListArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ListOffsetArray.html">ak.layout.ListOffsetArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.RecordArray.html">ak.layout.RecordArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Record.html">ak.layout.Record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.IndexedArray.html">ak.layout.IndexedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.IndexedOptionArray.html">ak.layout.IndexedOptionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ByteMaskedArray.html">ak.layout.ByteMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.BitMaskedArray.html">ak.layout.BitMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.UnmaskedArray.html">ak.layout.UnmaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.UnionArray.html">ak.layout.UnionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.VirtualArray.html">ak.layout.VirtualArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ArrayGenerator.html">ak.layout.ArrayGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.SliceGenerator.html">ak.layout.SliceGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ArrayCache.html">ak.layout.ArrayCache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Iterator.html">ak.layout.Iterator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ArrayBuilder.html">ak.layout.ArrayBuilder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Index.html">ak.layout.Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Identities.html">ak.layout.Identities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.Type.html">ak.types.Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ArrayType.html">ak.types.ArrayType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.UnknownType.html">ak.types.UnknownType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.PrimitiveType.html">ak.types.PrimitiveType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.RegularType.html">ak.types.RegularType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ListType.html">ak.types.ListType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.RecordType.html">ak.types.RecordType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.OptionType.html">ak.types.OptionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.UnionType.html">ak.types.UnionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.Form.html">ak.forms.Form</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.EmptyForm.html">ak.forms.EmptyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.NumpyForm.html">ak.forms.NumpyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.RegularForm.html">ak.forms.RegularForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ListForm.html">ak.forms.ListForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ListOffsetForm.html">ak.forms.ListOffsetForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.RecordForm.html">ak.forms.RecordForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.IndexedForm.html">ak.forms.IndexedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.IndexedOptionForm.html">ak.forms.IndexedOptionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ByteMaskedForm.html">ak.forms.ByteMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.BitMaskedForm.html">ak.forms.BitMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.UnmaskedForm.html">ak.forms.UnmaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.UnionForm.html">ak.forms.UnionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.VirtualForm.html">ak.forms.VirtualForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="awkwardforth.html">AwkwardForth virtual machines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/kernels.html">Kernel interface and specification</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">#</a></h1>
+<p><strong>High-level data types:</strong> <a class="reference internal" href="_auto/ak.Array.html"><span class="doc">ak.Array</span></a> for an array of items (records, numbers, strings, etc.) and <a class="reference internal" href="_auto/ak.Record.html"><span class="doc">ak.Record</span></a> for a single record. Arrays and records are read-only structures, but functions that manipulate them efficiently share data between the input and output.</p>
+<p><strong>Append-only data type:</strong> <a class="reference internal" href="_auto/ak.ArrayBuilder.html"><span class="doc">ak.ArrayBuilder</span></a> discovers its type from the sequence of append operations called on it.</p>
+<p><strong>Adding methods, overloading operators:</strong> <a class="reference internal" href="ak.behavior.html"><span class="doc">ak.behavior</span></a> for a global registry; see also for overloading individual arrays.</p>
+<p><strong>Describing an array:</strong> <a class="reference internal" href="_auto/ak.is_valid.html"><span class="doc">ak.is_valid</span></a>, <a class="reference internal" href="_auto/ak.validity_error.html"><span class="doc">ak.validity_error</span></a>, <a class="reference internal" href="_auto/ak.type.html"><span class="doc">ak.type</span></a>, <a class="reference internal" href="_auto/ak.parameters.html"><span class="doc">ak.parameters</span></a>, <span class="xref std std-doc">_auto/ak.keys</span>.</p>
+<p><strong>Converting from other formats:</strong> <a class="reference internal" href="_auto/ak.from_numpy.html"><span class="doc">ak.from_numpy</span></a>, <a class="reference internal" href="_auto/ak.from_iter.html"><span class="doc">ak.from_iter</span></a>, <a class="reference internal" href="_auto/ak.from_json.html"><span class="doc">ak.from_json</span></a>, <a class="reference internal" href="_auto/ak.from_awkward0.html"><span class="doc">ak.from_awkward0</span></a>. Note that the <a class="reference internal" href="_auto/ak.Array.html"><span class="doc">ak.Array</span></a> and <a class="reference internal" href="_auto/ak.Record.html"><span class="doc">ak.Record</span></a> constructors use these functions.</p>
+<p><strong>Converting to other formats:</strong> <a class="reference internal" href="_auto/ak.to_numpy.html"><span class="doc">ak.to_numpy</span></a>, <a class="reference internal" href="_auto/ak.to_list.html"><span class="doc">ak.to_list</span></a>, <a class="reference internal" href="_auto/ak.to_json.html"><span class="doc">ak.to_json</span></a>, <a class="reference internal" href="_auto/ak.to_awkward0.html"><span class="doc">ak.to_awkward0</span></a>.</p>
+<p><strong>Conversion functions used internally:</strong> <a class="reference internal" href="_auto/ak.to_layout.html"><span class="doc">ak.to_layout</span></a>, <a class="reference internal" href="_auto/ak.regularize_numpyarray.html"><span class="doc">ak.regularize_numpyarray</span></a>.</p>
+<p><strong>Alternative to filtering:</strong> <a class="reference internal" href="_auto/ak.mask.html"><span class="doc">ak.mask</span></a>, which is the same as <code class="docutils literal notranslate"><span class="pre">array.mask[filter]</span></code>. Creates an array with missing values instead of removing values.</p>
+<p><strong>Number of elements in each list:</strong> <a class="reference internal" href="_auto/ak.num.html"><span class="doc">ak.num</span></a> (not to be confused with the reducer <a class="reference internal" href="_auto/ak.count.html"><span class="doc">ak.count</span></a>).</p>
+<p><strong>Making and breaking arrays of records:</strong> <a class="reference internal" href="_auto/ak.zip.html"><span class="doc">ak.zip</span></a> and <a class="reference internal" href="_auto/ak.unzip.html"><span class="doc">ak.unzip</span></a>.</p>
+<p><strong>Manipulating records:</strong> <a class="reference internal" href="_auto/ak.with_name.html"><span class="doc">ak.with_name</span></a>, <a class="reference internal" href="_auto/ak.with_field.html"><span class="doc">ak.with_field</span></a>.</p>
+<p><strong>Manipulating parameters:</strong> <a class="reference internal" href="_auto/ak.with_parameter.html"><span class="doc">ak.with_parameter</span></a>, <a class="reference internal" href="_auto/ak.without_parameters.html"><span class="doc">ak.without_parameters</span></a>.</p>
+<p><strong>Broadcasting:</strong> <a class="reference internal" href="_auto/ak.broadcast_arrays.html"><span class="doc">ak.broadcast_arrays</span></a> forms an explicit broadcast of a set of arrays, which usually isn’t necessary. This page also describes the general broadcasting rules, though.</p>
+<p><strong>Merging arrays:</strong> <a class="reference internal" href="_auto/ak.concatenate.html"><span class="doc">ak.concatenate</span></a>, <a class="reference internal" href="_auto/ak.where.html"><span class="doc">ak.where</span></a>.</p>
+<p><strong>Flattening lists and missing values:</strong> <a class="reference internal" href="_auto/ak.flatten.html"><span class="doc">ak.flatten</span></a> removes a level of list structure. Empty lists and None at that level disappear. Also useful for eliminating None in the first dimension.</p>
+<p><strong>Inserting, replacing, and checking for missing values:</strong> <a class="reference internal" href="_auto/ak.pad_none.html"><span class="doc">ak.pad_none</span></a>, <a class="reference internal" href="_auto/ak.fill_none.html"><span class="doc">ak.fill_none</span></a>, <a class="reference internal" href="_auto/ak.is_none.html"><span class="doc">ak.is_none</span></a>.</p>
+<p><strong>Converting missing values to and from empty lists:</strong> <a class="reference internal" href="_auto/ak.singletons.html"><span class="doc">ak.singletons</span></a> turns <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">None,</span> <span class="pre">3]</span></code> into <code class="docutils literal notranslate"><span class="pre">[[1],</span> <span class="pre">[],</span> <span class="pre">[3]]</span></code> and <a class="reference internal" href="_auto/ak.firsts.html"><span class="doc">ak.firsts</span></a> turns <code class="docutils literal notranslate"><span class="pre">[[1],</span> <span class="pre">[],</span> <span class="pre">[3]]</span></code> into <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">None,</span> <span class="pre">3]</span></code>. This can be useful with <a class="reference internal" href="_auto/ak.argmin.html"><span class="doc">ak.argmin</span></a> and <a class="reference internal" href="_auto/ak.argmax.html"><span class="doc">ak.argmax</span></a>.</p>
+<p><strong>Combinatorics:</strong> <a class="reference internal" href="_auto/ak.cartesian.html"><span class="doc">ak.cartesian</span></a> produces tuples of <em>n</em> items from <em>n</em> arrays, usually per-sublist, and <a class="reference internal" href="_auto/ak.combinations.html"><span class="doc">ak.combinations</span></a> produces unique tuples of <em>n</em> items from the same array. To get integer arrays for selecting these tuples, use <a class="reference internal" href="_auto/ak.argcartesian.html"><span class="doc">ak.argcartesian</span></a> and <a class="reference internal" href="_auto/ak.argcombinations.html"><span class="doc">ak.argcombinations</span></a>.</p>
+<p><strong>Partitioned arrays:</strong> <a class="reference internal" href="_auto/ak.partitions.html"><span class="doc">ak.partitions</span></a> reveals how an array is internally partitioned (if at all) and <a class="reference internal" href="_auto/ak.partitioned.html"><span class="doc">ak.partitioned</span></a>, <a class="reference internal" href="_auto/ak.repartition.html"><span class="doc">ak.repartition</span></a> create or change the partitioning.</p>
+<p><strong>Virtual arrays:</strong> <a class="reference internal" href="_auto/ak.virtual.html"><span class="doc">ak.virtual</span></a> creates an array that will be generated on demand and <a class="reference internal" href="_auto/ak.with_cache.html"><span class="doc">ak.with_cache</span></a> assigns a new cache to all virtual arrays in a structure.</p>
+<p><strong>NumPy compatibility:</strong> <a class="reference internal" href="_auto/ak.size.html"><span class="doc">ak.size</span></a>, <a class="reference internal" href="_auto/ak.atleast_1d.html"><span class="doc">ak.atleast_1d</span></a>.</p>
+<p><strong>Reducers:</strong> eliminate a dimension by replacing it with a count, sum, logical and/or, etc. over its members. These functions summarize the innermost lists with <code class="docutils literal notranslate"><span class="pre">axis=-1</span></code> and cross lists with other values of <code class="docutils literal notranslate"><span class="pre">axis</span></code>. They never apply to data structures, only numbers at the innermost fields of a structure.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="_auto/ak.count.html"><span class="doc">ak.count</span></a>: the number of elements (not to be confused with <a class="reference internal" href="_auto/ak.num.html"><span class="doc">ak.num</span></a>, which interprets <code class="docutils literal notranslate"><span class="pre">axis</span></code> differently from a reducer).</p></li>
+<li><p><a class="reference internal" href="_auto/ak.count_nonzero.html"><span class="doc">ak.count_nonzero</span></a>: the number of elements that are not equal to zero or False.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.sum.html"><span class="doc">ak.sum</span></a>: adds values with identity 0.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.prod.html"><span class="doc">ak.prod</span></a>: multiplies values with identity 1.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.any.html"><span class="doc">ak.any</span></a>: reduces with logical or, “true if <em>any</em> members are non-zero.”</p></li>
+<li><p><a class="reference internal" href="_auto/ak.all.html"><span class="doc">ak.all</span></a>: reduces with logical and, “true if <em>all</em> members are non-zero.”</p></li>
+<li><p><a class="reference internal" href="_auto/ak.min.html"><span class="doc">ak.min</span></a>: minimum value; empty lists result in None.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.max.html"><span class="doc">ak.max</span></a>: maximum value; empty lists result in None.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.argmin.html"><span class="doc">ak.argmin</span></a>: integer position of the minimum value; empty lists result in None.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.argmax.html"><span class="doc">ak.argmax</span></a>: integer position of the maximum value; empty lists result in None.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>Non-reducers:</strong> not technically reducers because they don’t obey an associative law (e.g. the mean of means is not the overall mean); these functions nevertheless have the same interface as reducers.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="_auto/ak.moment.html"><span class="doc">ak.moment</span></a>: the “nth” moment of the distribution; <code class="docutils literal notranslate"><span class="pre">0</span></code> for sum, <code class="docutils literal notranslate"><span class="pre">1</span></code> for mean, <code class="docutils literal notranslate"><span class="pre">2</span></code> for variance without subtracting the mean, etc.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.mean.html"><span class="doc">ak.mean</span></a>: also known as the average.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.var.html"><span class="doc">ak.var</span></a>: variance about the mean.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.std.html"><span class="doc">ak.std</span></a>: standard deviation about the mean.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.covar.html"><span class="doc">ak.covar</span></a>: covariance of two datasets.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.corr.html"><span class="doc">ak.corr</span></a>: correlation of two datasets (covariance normalized to variance).</p></li>
+<li><p><a class="reference internal" href="_auto/ak.linear_fit.html"><span class="doc">ak.linear_fit</span></a>: linear fits, possibly very many of them.</p></li>
+<li><p><a class="reference internal" href="_auto/ak.softmax.html"><span class="doc">ak.softmax</span></a>: the softmax function of machine learning.</p></li>
+</ul>
+</div></blockquote>
+<p><strong>String behaviors:</strong> defined in the <code class="docutils literal notranslate"><span class="pre">ak.behaviors.string</span></code> submodule; rarely needed for analysis (strings are a built-in behavior).</p>
+<p><strong>Partition functions:</strong> defined in the <code class="docutils literal notranslate"><span class="pre">ak.partition</span></code> submodule; rarely needed for analysis: use <a class="reference internal" href="_auto/ak.partitions.html"><span class="doc">ak.partitions</span></a>, <a class="reference internal" href="_auto/ak.partitioned.html"><span class="doc">ak.partitioned</span></a>, <a class="reference internal" href="_auto/ak.repartition.html"><span class="doc">ak.repartition</span></a>.</p>
+<p><strong>Numba compatibility:</strong> <a class="reference internal" href="ak.numba.register.html"><span class="doc">ak.numba.register</span></a> informs Numba about Awkward Array types; rarely needed because this should happen automatically.</p>
+<p><strong>Pandas compatibility:</strong> <span class="xref std std-doc">ak.to_pandas</span> turns an Awkward Array into a list of DataFrames or joins them with <a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html">pd.merge</a> if necessary.</p>
+<p><strong>NumExpr compatibility:</strong> <a class="reference internal" href="ak.numexpr.evaluate.html"><span class="doc">ak.numexpr.evaluate</span></a> and <a class="reference internal" href="ak.numexpr.re_evaluate.html"><span class="doc">ak.numexpr.re_evaluate</span></a> are like the NumExpr functions, but with Awkward Array support.</p>
+<p><strong>Autograd compatibility:</strong> <a class="reference internal" href="ak.autograd.elementwise_grad.html"><span class="doc">ak.autograd.elementwise_grad</span></a> is like the Autograd function, but with Awkward Array support.</p>
+<p><strong>Layout nodes:</strong> the high-level <a class="reference internal" href="_auto/ak.Array.html"><span class="doc">ak.Array</span></a> and <a class="reference internal" href="_auto/ak.Record.html"><span class="doc">ak.Record</span></a> types hide the tree-structure that build the array, but they can be accessed with <a class="reference external" href="_auto/ak.Array.html#ak-array-layout">ak.Array.layout</a>. This layout structure is the core of the library, but usually doesn’t have to be accessed by data analysts.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="ak.layout.Content.html"><span class="doc">ak.layout.Content</span></a>: the abstract base class.</p></li>
+<li><p><a class="reference internal" href="ak.layout.EmptyArray.html"><span class="doc">ak.layout.EmptyArray</span></a>: an array of unknown type with no elements (usually produced by <a class="reference internal" href="_auto/ak.ArrayBuilder.html"><span class="doc">ak.ArrayBuilder</span></a>, which can’t determine type at a given level without samples).</p></li>
+<li><p><a class="reference internal" href="ak.layout.NumpyArray.html"><span class="doc">ak.layout.NumpyArray</span></a>: any NumPy array (e.g. multidimensional shape, arbitrary dtype), though usually only one-dimensional arrays of numbers.</p></li>
+<li><p><a class="reference internal" href="ak.layout.RegularArray.html"><span class="doc">ak.layout.RegularArray</span></a>: splits its nested content into equal-length lists.</p></li>
+<li><p><a class="reference internal" href="ak.layout.ListArray.html"><span class="doc">ak.layout.ListArray</span></a>: splits its nested content into variable-length lists with full generality (may use its content non-contiguously, overlapping, or out-of-order).</p></li>
+<li><p><a class="reference internal" href="ak.layout.ListOffsetArray.html"><span class="doc">ak.layout.ListOffsetArray</span></a>: splits its nested content into variable-length lists, assuming contiguous, non-overlapping, in-order content.</p></li>
+<li><p><a class="reference internal" href="ak.layout.RecordArray.html"><span class="doc">ak.layout.RecordArray</span></a>: represents a logical array of records with a “struct of arrays” layout in memory.</p></li>
+<li><p><a class="reference internal" href="ak.layout.Record.html"><span class="doc">ak.layout.Record</span></a>: represents a single record (not a subclass of <a class="reference internal" href="ak.layout.Content.html"><span class="doc">ak.layout.Content</span></a> in Python).</p></li>
+<li><p><a class="reference internal" href="ak.layout.IndexedArray.html"><span class="doc">ak.layout.IndexedArray</span></a>: rearranges and/or duplicates its content by lazily applying an integer index.</p></li>
+<li><p><a class="reference internal" href="ak.layout.IndexedOptionArray.html"><span class="doc">ak.layout.IndexedOptionArray</span></a>: same as <a class="reference internal" href="ak.layout.IndexedArray.html"><span class="doc">ak.layout.IndexedArray</span></a> with missing values as negative indexes.</p></li>
+<li><p><a class="reference internal" href="ak.layout.ByteMaskedArray.html"><span class="doc">ak.layout.ByteMaskedArray</span></a>: represents its content with missing values with an 8-bit boolean mask.</p></li>
+<li><p><a class="reference internal" href="ak.layout.BitMaskedArray.html"><span class="doc">ak.layout.BitMaskedArray</span></a>: represents its content with missing values with a 1-bit boolean mask.</p></li>
+<li><p><a class="reference internal" href="ak.layout.UnmaskedArray.html"><span class="doc">ak.layout.UnmaskedArray</span></a>: specifies that its content can contain missing values in principle, but no mask is supplied because all elements are non-missing.</p></li>
+<li><p><a class="reference internal" href="ak.layout.UnionArray.html"><span class="doc">ak.layout.UnionArray</span></a>: interleaves a set of arrays as a tagged union, can represent heterogeneous data.</p></li>
+<li><p><a class="reference internal" href="ak.layout.VirtualArray.html"><span class="doc">ak.layout.VirtualArray</span></a>: generates an array on demand from an <a class="reference internal" href="ak.layout.ArrayGenerator.html"><span class="doc">ak.layout.ArrayGenerator</span></a> or a <a class="reference internal" href="ak.layout.SliceGenerator.html"><span class="doc">ak.layout.SliceGenerator</span></a> and optionally caches the generated array in an <a class="reference internal" href="ak.layout.ArrayCache.html"><span class="doc">ak.layout.ArrayCache</span></a>.</p></li>
+</ul>
+</div></blockquote>
+<p>Most layout nodes contain another content node (<a class="reference internal" href="ak.layout.RecordArray.html"><span class="doc">ak.layout.RecordArray</span></a> and <a class="reference internal" href="ak.layout.UnionArray.html"><span class="doc">ak.layout.UnionArray</span></a> can contain more than one), thus forming a tree. Only <a class="reference internal" href="ak.layout.EmptyArray.html"><span class="doc">ak.layout.EmptyArray</span></a> and <a class="reference internal" href="ak.layout.NumpyArray.html"><span class="doc">ak.layout.NumpyArray</span></a> cannot contain a content, and hence these are leaves of the tree.</p>
+<p>Note that <a class="reference internal" href="_auto/ak.partition.PartitionedArray.html"><span class="doc">ak.partition.PartitionedArray</span></a> and its concrete class,  <a class="reference internal" href="_auto/ak.partition.IrregularlyPartitionedArray.html"><span class="doc">ak.partition.IrregularlyPartitionedArray</span></a>, are not <a class="reference internal" href="ak.layout.Content.html"><span class="doc">ak.layout.Content</span></a> because they cannot be nested within a tree. Partitioning is only allowed at the root of the tree.</p>
+<p><strong>Iterator for layout nodes:</strong> <a class="reference internal" href="ak.layout.Iterator.html"><span class="doc">ak.layout.Iterator</span></a> (used internally).</p>
+<p><strong>Layout-level ArrayBuilder:</strong> <a class="reference internal" href="ak.layout.ArrayBuilder.html"><span class="doc">ak.layout.ArrayBuilder</span></a> (used internally).</p>
+<p><strong>Index for layout nodes:</strong> integer and boolean arrays that define the shape of the data structure, such as boolean masks in <a class="reference internal" href="ak.layout.ByteMaskedArray.html"><span class="doc">ak.layout.ByteMaskedArray</span></a>, are not <a class="reference internal" href="ak.layout.NumpyArray.html"><span class="doc">ak.layout.NumpyArray</span></a> but a more constrained type called <a class="reference internal" href="ak.layout.Index.html"><span class="doc">ak.layout.Index</span></a>.</p>
+<p><strong>Identities for layout nodes:</strong> <a class="reference internal" href="ak.layout.Identities.html"><span class="doc">ak.layout.Identities</span></a> are an optional surrogate key for certain join operations. (Not yet used.)</p>
+<p><strong>High-level data types:</strong></p>
+<p>This is the type of data in a high-level <a class="reference internal" href="_auto/ak.Array.html"><span class="doc">ak.Array</span></a> or <a class="reference internal" href="_auto/ak.Record.html"><span class="doc">ak.Record</span></a> as reported by <a class="reference internal" href="_auto/ak.type.html"><span class="doc">ak.type</span></a>. It represents as much information as a data analyst needs to know (e.g. the distinction between variable and fixed-length lists, but not the distinction between <a class="reference internal" href="ak.layout.ListArray.html"><span class="doc">ak.layout.ListArray</span></a> and <a class="reference internal" href="ak.layout.ListOffsetArray.html"><span class="doc">ak.layout.ListOffsetArray</span></a>).</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="ak.types.Type.html"><span class="doc">ak.types.Type</span></a>: the abstract base class.</p></li>
+<li><p><a class="reference internal" href="ak.types.ArrayType.html"><span class="doc">ak.types.ArrayType</span></a>: type of a non-composable, high-level <a class="reference internal" href="_auto/ak.Array.html"><span class="doc">ak.Array</span></a>, which includes the length of the array.</p></li>
+<li><p><a class="reference internal" href="ak.types.UnknownType.html"><span class="doc">ak.types.UnknownType</span></a>: a type that is not known because it is represented by an <a class="reference internal" href="ak.layout.EmptyArray.html"><span class="doc">ak.layout.EmptyArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.types.PrimitiveType.html"><span class="doc">ak.types.PrimitiveType</span></a>: a numeric or boolean type.</p></li>
+<li><p><a class="reference internal" href="ak.types.RegularType.html"><span class="doc">ak.types.RegularType</span></a>: lists of a fixed length; this <code class="docutils literal notranslate"><span class="pre">size</span></code> is part of the type description.</p></li>
+<li><p><a class="reference internal" href="ak.types.ListType.html"><span class="doc">ak.types.ListType</span></a>: lists of unspecified or variable length.</p></li>
+<li><p><a class="reference internal" href="ak.types.RecordType.html"><span class="doc">ak.types.RecordType</span></a>: records with named fields or tuples with a fixed number of unnamed slots. The fields/slots and their types are part of the type description.</p></li>
+<li><p><a class="reference internal" href="ak.types.OptionType.html"><span class="doc">ak.types.OptionType</span></a>: data that may be missing.</p></li>
+<li><p><a class="reference internal" href="ak.types.UnionType.html"><span class="doc">ak.types.UnionType</span></a>: heterogeneous data selected from a short list of possibilities.</p></li>
+</ul>
+</div></blockquote>
+<p>All concrete <a class="reference internal" href="ak.types.Type.html"><span class="doc">ak.types.Type</span></a> subclasses are composable except <a class="reference internal" href="ak.types.ArrayType.html"><span class="doc">ak.types.ArrayType</span></a>.</p>
+<p><strong>Low-level array forms:</strong></p>
+<p>This is the type of a <a class="reference internal" href="ak.layout.Content.html"><span class="doc">ak.layout.Content</span></a> array expressed with low-level granularity (e.g. including the distinction between <a class="reference internal" href="ak.layout.ListArray.html"><span class="doc">ak.layout.ListArray</span></a> and <a class="reference internal" href="ak.layout.ListOffsetArray.html"><span class="doc">ak.layout.ListOffsetArray</span></a>). There is a one-to-one relationship between <a class="reference internal" href="ak.layout.Content.html"><span class="doc">ak.layout.Content</span></a> subclasses and <a class="reference internal" href="ak.forms.Form.html"><span class="doc">ak.forms.Form</span></a> subclasses, and each <a class="reference internal" href="ak.forms.Form.html"><span class="doc">ak.forms.Form</span></a> maps to only one <a class="reference internal" href="ak.types.Type.html"><span class="doc">ak.types.Type</span></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="ak.forms.Form.html"><span class="doc">ak.forms.Form</span></a>: the abstract base class.</p></li>
+<li><p><a class="reference internal" href="ak.forms.EmptyForm.html"><span class="doc">ak.forms.EmptyForm</span></a> for <a class="reference internal" href="ak.layout.EmptyArray.html"><span class="doc">ak.layout.EmptyArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.NumpyForm.html"><span class="doc">ak.forms.NumpyForm</span></a> for <a class="reference internal" href="ak.layout.NumpyArray.html"><span class="doc">ak.layout.NumpyArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.RegularForm.html"><span class="doc">ak.forms.RegularForm</span></a> for <a class="reference internal" href="ak.layout.RegularArray.html"><span class="doc">ak.layout.RegularArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.ListForm.html"><span class="doc">ak.forms.ListForm</span></a> for <a class="reference internal" href="ak.layout.ListArray.html"><span class="doc">ak.layout.ListArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.ListOffsetForm.html"><span class="doc">ak.forms.ListOffsetForm</span></a> for <a class="reference internal" href="ak.layout.ListOffsetArray.html"><span class="doc">ak.layout.ListOffsetArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.RecordForm.html"><span class="doc">ak.forms.RecordForm</span></a> for <a class="reference internal" href="ak.layout.RecordArray.html"><span class="doc">ak.layout.RecordArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.IndexedForm.html"><span class="doc">ak.forms.IndexedForm</span></a> for <a class="reference internal" href="ak.layout.IndexedArray.html"><span class="doc">ak.layout.IndexedArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.IndexedOptionForm.html"><span class="doc">ak.forms.IndexedOptionForm</span></a> for <a class="reference internal" href="ak.layout.IndexedOptionArray.html"><span class="doc">ak.layout.IndexedOptionArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.ByteMaskedForm.html"><span class="doc">ak.forms.ByteMaskedForm</span></a> for <a class="reference internal" href="ak.layout.ByteMaskedArray.html"><span class="doc">ak.layout.ByteMaskedArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.BitMaskedForm.html"><span class="doc">ak.forms.BitMaskedForm</span></a> for <a class="reference internal" href="ak.layout.BitMaskedArray.html"><span class="doc">ak.layout.BitMaskedArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.UnmaskedForm.html"><span class="doc">ak.forms.UnmaskedForm</span></a> for <a class="reference internal" href="ak.layout.UnmaskedArray.html"><span class="doc">ak.layout.UnmaskedArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.UnionForm.html"><span class="doc">ak.forms.UnionForm</span></a> for <a class="reference internal" href="ak.layout.UnionArray.html"><span class="doc">ak.layout.UnionArray</span></a>.</p></li>
+<li><p><a class="reference internal" href="ak.forms.VirtualForm.html"><span class="doc">ak.forms.VirtualForm</span></a> for <a class="reference internal" href="ak.layout.VirtualArray.html"><span class="doc">ak.layout.VirtualArray</span></a>.</p></li>
+</ul>
+</div></blockquote>
+<section id="internal-implementation">
+<h2>Internal implementation<a class="headerlink" href="#internal-implementation" title="Permalink to this headline">#</a></h2>
+<p>The rest of the classes and functions described here are not part of the public interface. Either the objects or the submodules begin with an underscore, indicating that they can freely change from one version to the next.</p>
+</section>
+<section id="more-documentation">
+<h2>More documentation<a class="headerlink" href="#more-documentation" title="Permalink to this headline">#</a></h2>
+<p>The Awkward Array project is divided into 3 layers with 5 main components.</p>
+<img src="_static/awkward-1-0-layers.svg" style="max-width: 500px; margin-left: auto; margin-right: auto;"><p>The C++ classes, cpu-kernels, and gpu-kernels are described in the <a class="reference external" href="_static/index.html">C++ API reference</a>.</p>
+<p>The kernels (cpu-kernels and cuda-kernels) are documented on the <a class="reference internal" href="_auto/kernels.html"><span class="doc">Kernel interface and specification</span></a> page, with interfaces and normative Python implementations.</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="index.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Documentation</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="_auto/changelog.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Release history</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#internal-implementation">
+   Internal implementation
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#more-documentation">
+   More documentation
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main-v1/docs-sphinx/api-reference.rst">
+        <i class="fa-solid fa-pencil"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="_sources/api-reference.rst.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2023, Awkward Array development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

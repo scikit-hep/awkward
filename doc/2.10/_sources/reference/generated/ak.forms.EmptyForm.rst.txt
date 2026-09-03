@@ -1,0 +1,52 @@
+ak.forms.EmptyForm
+==================
+
+Defined in `awkward.forms.emptyform <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/forms/emptyform.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/forms/emptyform.py#L21>`__.
+
+.. py:class:: ak.forms.EmptyForm(*, parameters: awkward.forms.form.JSONMapping | None = None, form_key: str | None = None)
+
+
+
+   .. py:method:: copy(*, parameters: awkward.forms.form.JSONMapping | awkward._util.Sentinel | None = UNSET, form_key: str | awkward._util.Sentinel | None = UNSET) -> EmptyForm
+
+
+   .. py:method:: simplified(*, parameters: awkward.forms.form.JSONMapping | None = None, form_key: str | None = None) -> awkward.forms.form.Form
+      :classmethod:
+
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _to_dict_part(verbose, toplevel)
+
+
+   .. py:property:: type
+
+
+   .. py:method:: to_NumpyForm(primitive)
+
+
+   .. py:method:: _columns(path, output, list_indicator)
+
+
+   .. py:method:: _select_columns(match_specifier: awkward.forms.form._SpecifierMatcher) -> awkward._typing.Self
+
+
+   .. py:method:: _prune_columns(is_inside_record_or_union: bool) -> awkward._typing.Self
+
+
+   .. py:method:: _column_types() -> tuple[str, Ellipsis]
+
+
+   .. py:method:: _length_one_buffer_lengths() -> awkward._typing.Iterator[awkward._nplikes.shape.ShapeItem]
+
+
+   .. py:method:: __setstate__(state)
+
+
+   .. py:method:: _expected_from_buffers(getkey: collections.abc.Callable[[awkward.forms.form.Form, str], str], recursive: bool) -> awkward._typing.Iterator[tuple[str, awkward._typing.DType]]
+
+
+   .. py:method:: _is_equal_to(other: awkward.forms.form.Any, all_parameters: bool, form_key: bool) -> bool
+

@@ -1,0 +1,63 @@
+ak.numba.layoutbuilder.Tuple
+----------------------------
+
+.. py:module: ak.numba.layoutbuilder.Tuple
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/layoutbuilder.py>`__ on `line 714 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/layoutbuilder.py#L714>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Tuple(self, contents, *, parameters=None)
+
+
+
+.. _ak-numba-layoutbuilder-tuple-contents:
+
+.. py:attribute:: ak.numba.layoutbuilder.Tuple.contents
+
+
+
+.. _ak-numba-layoutbuilder-tuple-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.Tuple.form
+
+
+
+.. _ak-numba-layoutbuilder-tuple-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.Tuple.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-tuple-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.Tuple.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-tuple-index:
+
+.. py:method:: ak.numba.layoutbuilder.Tuple.index(self, at)
+
+
+
+.. _ak-numba-layoutbuilder-tuple-clear:
+
+.. py:method:: ak.numba.layoutbuilder.Tuple.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-tuple-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.Tuple.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-tuple-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.Tuple.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-tuple-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.Tuple.snapshot(self)
+

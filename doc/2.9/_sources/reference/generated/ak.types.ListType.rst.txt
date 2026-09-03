@@ -1,0 +1,38 @@
+ak.types.ListType
+=================
+
+Defined in `awkward.types.listtype <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/types/listtype.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/types/listtype.py#L15>`__.
+
+.. py:class:: ak.types.ListType(content: awkward.types.type.Type, *, parameters: awkward._typing.JSONMapping | None = None)
+
+
+
+   .. py:method:: copy(*, content: awkward.types.type.Type | awkward._util.Sentinel = UNSET, parameters: awkward._typing.JSONMapping | awkward._util.Sentinel | None = UNSET) -> awkward._typing.Self
+
+
+   .. py:attribute:: _content
+      :type:  awkward.types.type.Type
+
+
+   .. py:attribute:: _parameters
+      :type:  awkward._typing.JSONMapping | None
+      :value: None
+
+
+
+   .. py:property:: content
+      :type: awkward.types.type.Type
+
+
+
+   .. py:method:: _get_typestr(behavior: collections.abc.Mapping | None) -> str | None
+
+
+   .. py:method:: _str(indent: str, compact: bool, behavior: collections.abc.Mapping | None) -> list[str]
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool) -> bool
+

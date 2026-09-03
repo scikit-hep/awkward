@@ -1,0 +1,47 @@
+ak.from_feather
+---------------
+
+.. py:module: ak.from_feather
+
+Defined in `awkward.operations.ak_from_feather <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/operations/ak_from_feather.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/operations/ak_from_feather.py#L12>`__.
+
+.. py:function:: ak.from_feather(path, *, columns=None, use_threads=True, memory_map=False, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None)
+
+
+    :param path: Feather file to read as an Awkward Array,
+             passed directly to `pyarrow.feather.read_table <https://arrow.apache.org/docs/python/generated/pyarrow.feather.read_table.html>`__.
+    :type path: str or file-like object
+    :param columns: Only read a specific set of columns. If not provided,
+                all columns are read.
+    :type columns: sequence
+    :param use_threads: If True, parallelize reading using multiple threads.
+    :type use_threads: bool
+    :param memory_map: If True, use memory mapping when opening file on disk,
+                   when source is a string.
+    :type memory_map: bool
+    :param generate_bitmasks: If enabled and Arrow/Parquet does not have Awkward
+                          metadata, ``generate_bitmasks=True`` creates empty bitmasks for nullable
+                          types that don't have bitmasks in the Arrow/Parquet data, so that the
+                          Form (BitMaskedForm vs UnmaskedForm) is predictable.
+    :type generate_bitmasks: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Reads an Feather file as an Awkward Array (through pyarrow).
+
+.. code-block:: python
+
+
+    >>> ak.from_feather("file_name.feather")
+    <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
+
+
+See also :py:obj:`ak.to_feather`.
+

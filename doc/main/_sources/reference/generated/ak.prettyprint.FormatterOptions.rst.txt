@@ -1,0 +1,87 @@
+ak.prettyprint.FormatterOptions
+===============================
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/prettyprint.py>`__ on `line 24 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/prettyprint.py#L24>`__.
+
+.. py:class:: ak.prettyprint.FormatterOptions
+
+
+
+   dict() -> new empty dictionary
+   dict(mapping) -> new dictionary initialized from a mapping object's
+       (key, value) pairs
+   dict(iterable) -> new dictionary initialized as if via:
+       d = {}
+       for k, v in iterable:
+           d[k] = v
+   dict(**kwargs) -> new dictionary initialized with the name=value pairs
+       in the keyword argument list.  For example:  dict(one=1, two=2)
+
+
+   .. py:attribute:: bool
+      :type:  FormatterType
+
+
+   .. py:attribute:: int
+      :type:  FormatterType
+
+
+   .. py:attribute:: timedelta
+      :type:  FormatterType
+
+
+   .. py:attribute:: datetime
+      :type:  FormatterType
+
+
+   .. py:attribute:: float
+      :type:  FormatterType
+
+
+   .. py:attribute:: longfloat
+      :type:  FormatterType
+
+
+   .. py:attribute:: complexfloat
+      :type:  FormatterType
+
+
+   .. py:attribute:: longcomplexfloat
+      :type:  FormatterType
+
+
+   .. py:attribute:: numpystr
+      :type:  FormatterType
+
+
+   .. py:attribute:: object
+      :type:  FormatterType
+
+
+   .. py:attribute:: all
+      :type:  FormatterType
+
+
+   .. py:attribute:: int_kind
+      :type:  FormatterType
+
+
+   .. py:attribute:: float_kind
+      :type:  FormatterType
+
+
+   .. py:attribute:: complex_kind
+      :type:  FormatterType
+
+
+   .. py:attribute:: str_kind
+      :type:  FormatterType
+
+
+   .. py:attribute:: str
+      :type:  FormatterType
+
+
+   .. py:attribute:: bytes
+      :type:  FormatterType
+

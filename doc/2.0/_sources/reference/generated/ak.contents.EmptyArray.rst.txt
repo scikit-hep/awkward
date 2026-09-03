@@ -1,0 +1,299 @@
+ak.contents.EmptyArray
+----------------------
+
+.. py:module: ak.contents.EmptyArray
+
+Defined in `awkward.contents.emptyarray <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/contents/emptyarray.py>`__ on `line 16 <https://github.com/scikit-hep/awkward-1.0/blob/21f485b45e31dcd53968a279e47e4df4596a194b/src/awkward/contents/emptyarray.py#L16>`__.
+
+.. py:class:: ak.contents.EmptyArray(self)
+
+
+
+.. _ak-contents-emptyarray-is_unknown:
+
+.. py:attribute:: ak.contents.EmptyArray.is_unknown
+    :value: True
+
+
+
+.. _ak-contents-emptyarray-is_leaf:
+
+.. py:attribute:: ak.contents.EmptyArray.is_leaf
+    :value: True
+
+
+
+.. _ak-contents-emptyarray-copy:
+
+.. py:method:: ak.contents.EmptyArray.copy(self)
+
+
+
+.. _ak-contents-emptyarray-__copy__:
+
+.. py:method:: ak.contents.EmptyArray.__copy__(self)
+
+
+
+.. _ak-contents-emptyarray-__deepcopy__:
+
+.. py:method:: ak.contents.EmptyArray.__deepcopy__(self, memo)
+
+
+
+.. _ak-contents-emptyarray-simplified:
+
+.. py:method:: ak.contents.EmptyArray.simplified(cls)
+
+
+
+.. _ak-contents-emptyarray-_form_with_key:
+
+.. py:method:: ak.contents.EmptyArray._form_with_key(self, getkey)
+
+
+
+.. _ak-contents-emptyarray-_to_buffers:
+
+.. py:method:: ak.contents.EmptyArray._to_buffers(self, form, getkey, container, backend)
+
+
+
+.. _ak-contents-emptyarray-_to_typetracer:
+
+.. py:method:: ak.contents.EmptyArray._to_typetracer(self, forget_length)
+
+
+
+.. _ak-contents-emptyarray-_touch_data:
+
+.. py:method:: ak.contents.EmptyArray._touch_data(self, recursive)
+
+
+
+.. _ak-contents-emptyarray-_touch_shape:
+
+.. py:method:: ak.contents.EmptyArray._touch_shape(self, recursive)
+
+
+
+.. _ak-contents-emptyarray-length:
+
+.. py:attribute:: ak.contents.EmptyArray.length
+
+
+
+.. _ak-contents-emptyarray-__repr__:
+
+.. py:method:: ak.contents.EmptyArray.__repr__(self)
+
+
+
+.. _ak-contents-emptyarray-_repr:
+
+.. py:method:: ak.contents.EmptyArray._repr(self, indent, pre, post)
+
+
+
+.. _ak-contents-emptyarray-to_numpyarray:
+
+.. py:method:: ak.contents.EmptyArray.to_NumpyArray(self, dtype, backend=None)
+
+
+
+.. _ak-contents-emptyarray-__array__:
+
+.. py:method:: ak.contents.EmptyArray.__array__(self)
+
+
+
+.. _ak-contents-emptyarray-__iter__:
+
+.. py:method:: ak.contents.EmptyArray.__iter__(self)
+
+
+
+.. _ak-contents-emptyarray-_getitem_nothing:
+
+.. py:method:: ak.contents.EmptyArray._getitem_nothing(self)
+
+
+
+.. _ak-contents-emptyarray-_getitem_at:
+
+.. py:method:: ak.contents.EmptyArray._getitem_at(self, where)
+
+
+
+.. _ak-contents-emptyarray-_getitem_range:
+
+.. py:method:: ak.contents.EmptyArray._getitem_range(self, where)
+
+
+
+.. _ak-contents-emptyarray-_getitem_field:
+
+.. py:method:: ak.contents.EmptyArray._getitem_field(self, where, only_fields=())
+
+
+
+.. _ak-contents-emptyarray-_getitem_fields:
+
+.. py:method:: ak.contents.EmptyArray._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-contents-emptyarray-_carry:
+
+.. py:method:: ak.contents.EmptyArray._carry(self, carry, allow_lazy)
+
+
+
+.. _ak-contents-emptyarray-_getitem_next_jagged:
+
+.. py:method:: ak.contents.EmptyArray._getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-emptyarray-_getitem_next:
+
+.. py:method:: ak.contents.EmptyArray._getitem_next(self, head, tail, advanced)
+
+
+
+.. _ak-contents-emptyarray-_offsets_and_flattened:
+
+.. py:method:: ak.contents.EmptyArray._offsets_and_flattened(self, axis, depth)
+
+
+
+.. _ak-contents-emptyarray-_mergeable_next:
+
+.. py:method:: ak.contents.EmptyArray._mergeable_next(self, other, mergebool)
+
+
+
+.. _ak-contents-emptyarray-_mergemany:
+
+.. py:method:: ak.contents.EmptyArray._mergemany(self, others)
+
+
+
+.. _ak-contents-emptyarray-_fill_none:
+
+.. py:method:: ak.contents.EmptyArray._fill_none(self, value)
+
+
+
+.. _ak-contents-emptyarray-_local_index:
+
+.. py:method:: ak.contents.EmptyArray._local_index(self, axis, depth)
+
+
+
+.. _ak-contents-emptyarray-_numbers_to_type:
+
+.. py:method:: ak.contents.EmptyArray._numbers_to_type(self, name)
+
+
+
+.. _ak-contents-emptyarray-_is_unique:
+
+.. py:method:: ak.contents.EmptyArray._is_unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-emptyarray-_unique:
+
+.. py:method:: ak.contents.EmptyArray._unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-emptyarray-_argsort_next:
+
+.. py:method:: ak.contents.EmptyArray._argsort_next(self, negaxis, starts, shifts, parents, outlength, ascending, stable, kind, order)
+
+
+
+.. _ak-contents-emptyarray-_sort_next:
+
+.. py:method:: ak.contents.EmptyArray._sort_next(self, negaxis, starts, parents, outlength, ascending, stable, kind, order)
+
+
+
+.. _ak-contents-emptyarray-_combinations:
+
+.. py:method:: ak.contents.EmptyArray._combinations(self, n, replacement, recordlookup, parameters, axis, depth)
+
+
+
+.. _ak-contents-emptyarray-_reduce_next:
+
+.. py:method:: ak.contents.EmptyArray._reduce_next(self, reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims, behavior)
+
+
+
+.. _ak-contents-emptyarray-_validity_error:
+
+.. py:method:: ak.contents.EmptyArray._validity_error(self, path)
+
+
+
+.. _ak-contents-emptyarray-_nbytes_part:
+
+.. py:method:: ak.contents.EmptyArray._nbytes_part(self)
+
+
+
+.. _ak-contents-emptyarray-_pad_none:
+
+.. py:method:: ak.contents.EmptyArray._pad_none(self, target, axis, depth, clip)
+
+
+
+.. _ak-contents-emptyarray-_to_arrow:
+
+.. py:method:: ak.contents.EmptyArray._to_arrow(self, pyarrow, mask_node, validbytes, length, options)
+
+
+
+.. _ak-contents-emptyarray-_to_numpy:
+
+.. py:method:: ak.contents.EmptyArray._to_numpy(self, allow_missing)
+
+
+
+.. _ak-contents-emptyarray-_completely_flatten:
+
+.. py:method:: ak.contents.EmptyArray._completely_flatten(self, backend, options)
+
+
+
+.. _ak-contents-emptyarray-_recursively_apply:
+
+.. py:method:: ak.contents.EmptyArray._recursively_apply(self, action, behavior, depth, depth_context, lateral_context, options)
+
+
+
+.. _ak-contents-emptyarray-to_packed:
+
+.. py:method:: ak.contents.EmptyArray.to_packed(self)
+
+
+
+.. _ak-contents-emptyarray-_to_list:
+
+.. py:method:: ak.contents.EmptyArray._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-emptyarray-to_backend:
+
+.. py:method:: ak.contents.EmptyArray.to_backend(self, backend)
+
+
+
+.. _ak-contents-emptyarray-_is_equal_to:
+
+.. py:method:: ak.contents.EmptyArray._is_equal_to(self, other, index_dtype, numpyarray)
+

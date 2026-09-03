@@ -1,0 +1,49 @@
+ak.to_backend
+=============
+
+Defined in `awkward.operations.ak_to_backend <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_to_backend.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_to_backend.py#L16>`__.
+
+.. py:function:: ak.to_backend(array, backend, *, highlevel=True, behavior=None, attrs=None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param backend: If ``"cpu"``, the array structure is
+                   recursively copied (if need be) to main memory for use with
+                   the default Numpy backend; if ``"cuda"``, the structure is copied
+                   to the GPU(s) for use with CuPy. If ``"jax"``, the structure is
+                   copied to the CPU for use with JAX.
+   :type backend: ``"cpu"``, ``"cuda"``, ``"jax"``, or ``"typetracer"``
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Converts an array from ``"cpu"``, ``"cuda"``, ``"jax"`` kernels to ``"cpu"``,
+   ``"cuda"``, ``"jax"``, or ``"typetracer"`` .
+
+   Any components that are already in the desired backend are viewed,
+   rather than copied, so this operation can be an inexpensive way to ensure
+   that an array is ready for a particular library.
+
+   To use ``"cuda"``, the ``cupy`` package must be installed, either with::
+
+       pip install cupy
+
+   or::
+
+       conda install -c conda-forge cupy
+
+   To use ``"jax"``, the ``jax`` package must be installed, either with::
+
+       pip install jax
+
+   or::
+
+       conda install -c conda-forge jax
+
+   See :py:obj:`ak.kernels`.
+

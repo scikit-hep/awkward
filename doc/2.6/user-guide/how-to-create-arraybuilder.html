@@ -1,0 +1,1485 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How to create arrays with ArrayBuilder (easy and general) &#8212; Awkward Array 2.6.10 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=cac31c79" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=235c4503"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-create-arraybuilder';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.6';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-create-arraybuilder.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Direct constructors (fastest)" href="how-to-create-constructors.html" />
+    <link rel="prev" title="How to create arrays by “unflattening” or “grouping”" href="how-to-create-unflatten-group.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.6.10 documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo-300px-white.png" class="logo__image only-dark" alt="Awkward Array 2.6.10 documentation - Home"/>`);</script>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-unflatten-group.html">Unflattening and grouping</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-array-properties.html">Array properties</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-array-properties-named-axis.html">Named axes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Min/max/sort one array by another</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">Awkward Arrays on GPUs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k"</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-cpp.html">Using arrays in C++</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++ with LayoutBuilder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-cpp-cppyy.html">JIT compiling operations with C++ in cppyy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Special topics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-create.html" class="nav-link">Creating arrays</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">How to...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="how-to-create-arrays-with-arraybuilder-easy-and-general">
+<h1>How to create arrays with ArrayBuilder (easy and general)<a class="headerlink" href="#how-to-create-arrays-with-arraybuilder-easy-and-general" title="Link to this heading">#</a></h1>
+<p>If you’re not getting data from a file or conversion from another format, you may need to create it from scratch. <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> is a general, high-level way to do that, though it has performance limitations.</p>
+<p>The biggest difference between an <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> and an <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a> is that you can append data to a builder, but an array is immutable (<a class="reference internal" href="#how-to-convert-numpy.html#mutability-of-awkward-arrays-from-numpy"><span class="xref myst">see qualifications on mutability</span></a>). It’s a bit like a Python list, which has an <code class="docutils literal notranslate"><span class="pre">append</span></code> method, but <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> has many methods for appending different types of structures.</p>
+<section id="appending">
+<h2>Appending<a class="headerlink" href="#appending" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">awkward</span> <span class="k">as</span> <span class="nn">ak</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>When a builder is first created, it has zero length and unknown type.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;0 * unknown&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Calling its <code class="docutils literal notranslate"><span class="pre">append</span></code> method adds data and also determines its type.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;1 * int64&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;2 * float64&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;3 * complex128&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that this can include missing data by promoting to an <a class="reference internal" href="../reference/generated/ak.types.OptionType.html#ak.types.OptionType" title="ak.types.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">option-type</span></code></a>,</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;4 * ?complex128&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>and mix types by promoting to a <a class="reference internal" href="../reference/generated/ak.types.UnionType.html#ak.types.UnionType" title="ak.types.UnionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">union-type</span></code></a>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;five&quot;</span><span class="p">)</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;5 * union[?complex128, ?string]&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>5 * union[
+    ?complex128,
+    ?string
+]
+</pre></div>
+</div>
+</div>
+</div>
+<p>We’ve been using “<code class="docutils literal notranslate"><span class="pre">append</span></code>” because it is generic (it recognizes the types of its arguments and builds that), but there are also methods for building structure explicitly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">boolean</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">complex</span><span class="p">(</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">null</span><span class="p">()</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">string</span><span class="p">(</span><span class="s2">&quot;five&quot;</span><span class="p">)</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;6 * union[?bool, ?complex128, ?string]&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>6 * union[
+    ?bool,
+    ?complex128,
+    ?string
+]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="snapshot">
+<h2>Snapshot<a class="headerlink" href="#snapshot" title="Link to this heading">#</a></h2>
+<p>To turn an <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> into an <a class="reference internal" href="../reference/generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a>, call <code class="docutils literal notranslate"><span class="pre">snapshot</span></code>. This is an inexpensive operation (may be done multiple times; the builder is unaffected).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="n">array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[False,
+ 1+0j,
+ 2.2+0j,
+ 3+1j,
+ None,
+ &#x27;five&#x27;]
+----------------
+type: 6 * union[
+    ?bool,
+    ?complex128,
+    ?string
+]</pre></div></div>
+</div>
+<p>Builders don’t have all the high-level methods that arrays do, so if you want to use the array for normal analysis, remember to take a snapshot.</p>
+</section>
+<section id="nested-lists">
+<h2>Nested lists<a class="headerlink" href="#nested-lists" title="Link to this heading">#</a></h2>
+<p>The most useful of these create nested data structures:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">begin_list</span></code>/<code class="docutils literal notranslate"><span class="pre">end_list</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">begin_record</span></code>/<code class="docutils literal notranslate"><span class="pre">end_record</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">begin_tuple</span></code>/<code class="docutils literal notranslate"><span class="pre">end_tuple</span></code></p></li>
+</ul>
+<p>which switch into a mode that starts filling inside of a list, record, or tuple. For records and tuples, you additionally have to specify the <code class="docutils literal notranslate"><span class="pre">field</span></code> or <code class="docutils literal notranslate"><span class="pre">index</span></code> of the record or tuple (respectively).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+
+<span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">3.3</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+
+<span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+
+<span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">4.4</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">5.5</span><span class="p">)</span>
+<span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;3 * var * float64&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Appending after the <code class="docutils literal notranslate"><span class="pre">begin_list</span></code> puts data inside the list, rather than outside:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">9.9</span><span class="p">)</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;4 * union[var * float64, float64]&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>This <code class="docutils literal notranslate"><span class="pre">9.9</span></code> is outside of the lists, and hence the type is now “lists of numbers <em>or</em> numbers.”</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4 * union[
+    var * float64,
+    float64
+]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Since <code class="docutils literal notranslate"><span class="pre">begin_list</span></code> and <code class="docutils literal notranslate"><span class="pre">end_list</span></code> are imperative, the nesting structure of an array can be determined by program flow:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">arbitrary_nesting</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+        <span class="n">arbitrary_nesting</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+
+
+<span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+<span class="n">arbitrary_nesting</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;1 * var * var * var * var * var * int64&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Often, you’ll know the exact depth of nesting you want. The Python <code class="docutils literal notranslate"><span class="pre">with</span></code> statement can be used to restrict the generality (nd free you from having to remember to <code class="docutils literal notranslate"><span class="pre">end</span></code> what you <code class="docutils literal notranslate"><span class="pre">begin</span></code>).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">list</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">list</span><span class="p">():</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;1 * var * var * int64&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>(Note that the Python <code class="docutils literal notranslate"><span class="pre">with</span></code> statement, a.k.a. “context manager,” is not available in Numba jit-compiled functions, in case you’re using <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> in Numba.)</p>
+</section>
+<section id="nested-records">
+<h2>Nested records<a class="headerlink" href="#nested-records" title="Link to this heading">#</a></h2>
+<p>When using <code class="docutils literal notranslate"><span class="pre">begin_record</span></code>/<code class="docutils literal notranslate"><span class="pre">end_record</span></code> (or the equivalent <code class="docutils literal notranslate"><span class="pre">record</span></code> in the <code class="docutils literal notranslate"><span class="pre">with</span></code> statement), you have to specify which field each “<code class="docutils literal notranslate"><span class="pre">append</span></code>” is associated with.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">field(&quot;fieldname&quot;)</span></code>: switches to fill a field with a given name (and returns the builder, for convenience).</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">record</span><span class="p">():</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;three&quot;</span><span class="p">)</span>
+
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;1 * {x: int64, y: float64, z: string}&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>The record type can also be given a name.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;Point&quot;</span><span class="p">):</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="mf">3.3</span><span class="p">)</span>
+
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;1 * Point[x: float64, y: float64, z: float64]&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>This gives the resulting records a type named “<code class="docutils literal notranslate"><span class="pre">Point</span></code>”, which might have specialized behaviors.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="n">array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1.1, y: 2.2, z: 3.3}]
+--------------------------
+type: 1 * Point[
+    x: float64,
+    y: float64,
+    z: float64
+]</pre></div></div>
+</div>
+</section>
+<section id="nested-tuples">
+<h2>Nested tuples<a class="headerlink" href="#nested-tuples" title="Link to this heading">#</a></h2>
+<p>The same is true for tuples, but the next field to fill is selected by “<code class="docutils literal notranslate"><span class="pre">index</span></code>” (integer), rather than “<code class="docutils literal notranslate"><span class="pre">field</span></code>” (string), and the tuple size has to be given up-front.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">builder</span><span class="o">.</span><span class="n">tuple</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;three&quot;</span><span class="p">)</span>
+
+<span class="n">builder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;ArrayBuilder type=&#39;1 * (int64, float64, string)&#39;&gt;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="records-and-unions">
+<h2>Records and unions<a class="headerlink" href="#records-and-unions" title="Link to this heading">#</a></h2>
+<p>If the set of fields changes while collecting records, the builder algorithm could handle it one of two possible ways:</p>
+<ol class="arabic simple">
+<li><p>Assume that the new field or fields have simply been missing up to this point, and that any now-unspecified fields are also missing.</p></li>
+<li><p>Assume that a different set of fields means a different type and make a union.</p></li>
+</ol>
+<p>By default, <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> follows policy (1), but it can be made to follow policy (2) if the names of the records are different.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">policy1</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">policy1</span><span class="o">.</span><span class="n">record</span><span class="p">():</span>
+    <span class="n">policy1</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">policy1</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">policy1</span><span class="o">.</span><span class="n">record</span><span class="p">():</span>
+    <span class="n">policy1</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+    <span class="n">policy1</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;three&quot;</span><span class="p">)</span>
+
+<span class="n">policy1</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2 * {
+    x: ?int64,
+    y: float64,
+    z: ?string
+}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">policy2</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">policy2</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;First&quot;</span><span class="p">):</span>
+    <span class="n">policy2</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">policy2</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">policy2</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">&quot;Second&quot;</span><span class="p">):</span>
+    <span class="n">policy2</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+    <span class="n">policy2</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;three&quot;</span><span class="p">)</span>
+
+<span class="n">policy2</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2 * union[
+    First[
+        x: int64,
+        y: float64
+    ],
+    Second[
+        y: float64,
+        z: string
+    ]
+]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="comments-on-union-type">
+<h2>Comments on union-type<a class="headerlink" href="#comments-on-union-type" title="Link to this heading">#</a></h2>
+<p>Although it’s easy to make <a class="reference internal" href="../reference/generated/ak.types.UnionType.html#ak.types.UnionType" title="ak.types.UnionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">union-type</span></code></a> data with <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>, the applications of union-type data are more limited. For instance, we can select a field that belongs to <em>all</em> types of the union, but not any fields that don’t share that field.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array2</span> <span class="o">=</span> <span class="n">policy2</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="n">array2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1, y: 1.1},
+ {y: 2.2, z: &#x27;three&#x27;}]
+----------------------
+type: 2 * union[
+    First[
+        x: int64,
+        y: float64
+    ],
+    Second[
+        y: float64,
+        z: string
+    ]
+]</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array2</span><span class="o">.</span><span class="n">y</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1.1,
+ 2.2]
+-----------------
+type: 2 * float64</pre></div></div>
+</div>
+<div class="cell tag_raises-exception docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array2</span><span class="o">.</span><span class="n">x</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">25</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">array2</span><span class="o">.</span><span class="n">x</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1289,</span> in <span class="ni">Array.__getattr__</span><span class="nt">(self, where)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1284</span>         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1285</span>             <span class="sa">f</span><span class="s2">&quot;while trying to get field </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">, an exception &quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1286</span>             <span class="sa">f</span><span class="s2">&quot;occurred:</span><span class="se">\n</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">err</span><span class="si">!s}</span><span class="s2">&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1287</span>         <span class="p">)</span> <span class="kn">from</span> <span class="nn">err</span>
+<span class="g g-Whitespace">   </span><span class="mi">1288</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1289</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no field named </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="ne">AttributeError</span>: no field named &#39;x&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<p>The above would be no problem for records collected using policy 1 (see previous section).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array1</span> <span class="o">=</span> <span class="n">policy1</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="n">array1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{x: 1, y: 1.1, z: None},
+ {x: None, y: 2.2, z: &#x27;three&#x27;}]
+-------------------------------
+type: 2 * {
+    x: ?int64,
+    y: float64,
+    z: ?string
+}</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array1</span><span class="o">.</span><span class="n">y</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1.1,
+ 2.2]
+-----------------
+type: 2 * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array1</span><span class="o">.</span><span class="n">x</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ None]
+----------------
+type: 2 * ?int64</pre></div></div>
+</div>
+<p>At the time of writing, <a class="reference internal" href="../reference/generated/ak.types.UnionType.html#ak.types.UnionType" title="ak.types.UnionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">union-type</span></code></a> are not supported in Numba (<a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/issues/174">issue 174</a>).</p>
+</section>
+<section id="use-in-numba">
+<h2>Use in Numba<a class="headerlink" href="#use-in-numba" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> can be used in Numba-compiled functions, and that can often be the most convenient way to build up an array, relatively quickly (see below).</p>
+<p>There are a few limitations, though:</p>
+<ul class="simple">
+<li><p>At the time of writing, <a class="reference external" href="https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#language">Numba doesn’t support Python’s <code class="docutils literal notranslate"><span class="pre">with</span></code> statement</a> (context manager), so <code class="docutils literal notranslate"><span class="pre">begin_list</span></code>/<code class="docutils literal notranslate"><span class="pre">end_list</span></code> will have to be used instead.</p></li>
+<li><p>Builders cannot be constructed inside of the compiled function; they have to be passed in.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">snapshot</span></code> method cannot be called inside of the compiled function; it has to be applied to the output.</p></li>
+</ul>
+<p>Therefore, a common pattern is:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+
+
+<span class="nd">@nb</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">builder</span><span class="p">):</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.1</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.2</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">3.3</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">begin_list</span><span class="p">()</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">4.4</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">5.5</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">end_list</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">builder</span>
+
+
+<span class="n">array</span> <span class="o">=</span> <span class="n">build</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">())</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+<span class="n">array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[1.1, 2.2, 3.3],
+ [],
+ [4.4, 5.5]]
+-----------------------
+type: 3 * var * float64</pre></div></div>
+</div>
+</section>
+<section id="setting-the-type-of-empty-lists">
+<h2>Setting the type of empty lists<a class="headerlink" href="#setting-the-type-of-empty-lists" title="Link to this heading">#</a></h2>
+<p>In addition to supporting type-discovery at execution time, <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> also makes it convenient to work with complex, ragged arrays when the type is known ahead of time. Although it is not the most performant means of constructing an array whose type is already known, it provides a readable abstraction in the event that building the array is not a limiting factor for performance. However, due to this “on-line” type-discovery, it is possible that for certain data the result of <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder.snapshot" title="ak.ArrayBuilder.snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ak.ArrayBuilder.snapshot()</span></code></a> will have different types. Consider this function that builds an array from the contents of some iterable:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">builder</span><span class="o">.</span><span class="n">null</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">builder</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If we pass in only positive integers, the result is an array of integers:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">process_data</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">(),</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 2,
+ 3,
+ 4]
+---------------
+type: 4 * int64</pre></div></div>
+</div>
+<p>If we pass in only negative integers, the result is an array of <code class="docutils literal notranslate"><span class="pre">None</span></code>s with an unknown type:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">process_data</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">(),</span>
+    <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[None,
+ None,
+ None,
+ None]
+------------------
+type: 4 * ?unknown</pre></div></div>
+</div>
+<p>It is only if we pass in a mix of these values that we see the “full” array type:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">process_data</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">(),</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 2,
+ 3,
+ 4,
+ None,
+ None,
+ None,
+ None]
+----------------
+type: 8 * ?int64</pre></div></div>
+</div>
+<p>A simple way to solve this problem is to explore all code branches explicitly, and remove the generated entry(ies) from the final array:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">process_data</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">builder</span><span class="o">.</span><span class="n">null</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">builder</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="c1"># Ensure we have the proper type</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">null</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">snapshot</span><span class="p">()[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The previous examples now have the same type:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">process_data</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">(),</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 2,
+ 3,
+ 4]
+----------------
+type: 4 * ?int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">process_data</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">(),</span>
+    <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[None,
+ None,
+ None,
+ None]
+----------------
+type: 4 * ?int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">process_data</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">ArrayBuilder</span><span class="p">(),</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 2,
+ 3,
+ 4,
+ None,
+ None,
+ None,
+ None]
+----------------
+type: 8 * ?int64</pre></div></div>
+</div>
+</section>
+<section id="comments-on-performance">
+<h2>Comments on performance<a class="headerlink" href="#comments-on-performance" title="Link to this heading">#</a></h2>
+<p>Although <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> is implemented in C++, it is dynamically typed by design. The advantage of compiled code over interpreted code often comes in the knowledge of data types at compile-time, enabling fewer runtime checks and more compiler optimizations.</p>
+<p>If you’re using a builder in Python, there’s also the overhead of calling from Python.</p>
+<p>If you’re using a builder in Numba, the builder calls are external function calls and LLVM can’t inline them for optimizations.</p>
+<p>Whenever you have a choice between</p>
+<ol class="arabic simple">
+<li><p>using the <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>,</p></li>
+<li><p>constructing an array manually from layouts (next chapter), or</p></li>
+<li><p>filling a NumPy array and using it as an index,</p></li>
+</ol>
+<p>the alternatives are often faster. The point of <a class="reference internal" href="../reference/generated/ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a> is that it is <em>easy</em>.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-create-unflatten-group.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">How to create arrays by “unflattening” or “grouping”</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-create-constructors.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Direct constructors (fastest)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#appending">Appending</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#snapshot">Snapshot</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nested-lists">Nested lists</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nested-records">Nested records</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nested-tuples">Nested tuples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#records-and-unions">Records and unions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comments-on-union-type">Comments on union-type</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#use-in-numba">Use in Numba</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-the-type-of-empty-lists">Setting the type of empty lists</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comments-on-performance">Comments on performance</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-create-arraybuilder.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/how-to-create-arraybuilder.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

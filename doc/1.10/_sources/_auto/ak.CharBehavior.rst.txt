@@ -1,0 +1,53 @@
+ak.CharBehavior
+---------------
+
+Defined in `awkward.behaviors.string <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/string.py>`__ on `line 51 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/behaviors/string.py#L51>`__.
+
+.. py:class:: ak.CharBehavior((self))
+
+ak.CharBehavior.__name__
+========================
+
+.. py:attribute:: ak.CharBehavior.__name__
+    :value: 'Array'
+
+ak.CharBehavior.__bytes__
+=========================
+
+.. py:method:: ak.CharBehavior.__bytes__(self)
+
+ak.CharBehavior.__str__
+=======================
+
+.. py:method:: ak.CharBehavior.__str__(self)
+
+ak.CharBehavior.__repr__
+========================
+
+.. py:method:: ak.CharBehavior.__repr__(self)
+
+ak.CharBehavior.__iter__
+========================
+
+.. py:method:: ak.CharBehavior.__iter__(self)
+
+ak.CharBehavior.__eq__
+======================
+
+.. py:method:: ak.CharBehavior.__eq__(self, other)
+
+ak.CharBehavior.__ne__
+======================
+
+.. py:method:: ak.CharBehavior.__ne__(self, other)
+
+ak.CharBehavior.__add__
+=======================
+
+.. py:method:: ak.CharBehavior.__add__(self, other)
+
+ak.CharBehavior.__radd__
+========================
+
+.. py:method:: ak.CharBehavior.__radd__(self, other)
+

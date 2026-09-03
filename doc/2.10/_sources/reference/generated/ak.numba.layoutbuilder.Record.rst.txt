@@ -1,0 +1,44 @@
+ak.numba.layoutbuilder.Record
+=============================
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/numba/layoutbuilder.py>`__ on `line 637 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/numba/layoutbuilder.py#L637>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Record(contents, fields, *, parameters=None)
+
+
+
+   .. py:attribute:: _contents
+
+
+   .. py:attribute:: _fields
+
+
+   .. py:property:: contents
+
+
+   .. py:property:: fields
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:property:: form
+
+
+   .. py:method:: numbatype()
+
+
+   .. py:method:: content(name)
+
+
+   .. py:method:: clear()
+
+
+   .. py:method:: __len__()
+
+
+   .. py:method:: is_valid(error: str)
+
+
+   .. py:method:: snapshot() -> awkward.contents.Content
+

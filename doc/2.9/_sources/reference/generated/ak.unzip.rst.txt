@@ -1,0 +1,54 @@
+ak.unzip
+========
+
+Defined in `awkward.operations.ak_unzip <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/operations/ak_unzip.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/operations/ak_unzip.py#L16>`__.
+
+.. py:function:: ak.unzip(array, *, how=tuple, highlevel=True, behavior=None, attrs=None)
+
+   Splits records or tuples into a tuple or dict of arrays, one per field.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param how: The type of the returned output. This can be ``tuple`` or ``dict``.
+   :type how: type
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   :returns: If the ``array`` contains tuples or records, this operation splits them
+             into a Python tuple (or dict) of arrays, one for each field.
+
+             If the ``array`` does not contain tuples or records, the single ``array``
+             is placed in a length 1 Python tuple (or dict).
+
+   .. rubric:: Examples
+
+   For example,
+
+   >>> array = ak.Array([{"x": 1.1, "y": [1]},
+   ...                   {"x": 2.2, "y": [2, 2]},
+   ...                   {"x": 3.3, "y": [3, 3, 3]}])
+   >>> x, y = ak.unzip(array)
+   >>> x
+   <Array [1.1, 2.2, 3.3] type='3 * float64'>
+   >>> y
+   <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>
+
+   The ``how`` argument determines the structure of the output. Using ``how=dict``
+   returns a dictionary of arrays instead of a tuple, and let's you round-trip
+   through ``ak.zip``:
+
+   >>> array = ak.Array([{"x": 1.1, "y": [1]},
+   ...                   {"x": 2.2, "y": [2, 2]},
+   ...                   {"x": 3.3, "y": [3, 3, 3]}])
+   >>> x = ak.unzip(array, how=dict)
+   >>> x
+   {'x': <Array [1.1, 2.2, 3.3] type='3 * float64'>,
+    'y': <Array [[1], [2, 2], [3, 3, 3]] type='3 * var * int64'>}
+   >>> assert ak.zip(ak.unzip(array, how=dict), depth_limit=1).to_list() == array.to_list()  # True
+

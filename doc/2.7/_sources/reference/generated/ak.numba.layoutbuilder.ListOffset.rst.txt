@@ -1,0 +1,75 @@
+ak.numba.layoutbuilder.ListOffset
+---------------------------------
+
+.. py:module: ak.numba.layoutbuilder.ListOffset
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/numba/layoutbuilder.py>`__ on `line 129 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/numba/layoutbuilder.py#L129>`__.
+
+.. py:class:: ak.numba.layoutbuilder.ListOffset(self, dtype, content, *, parameters=None, initial=1024, resize=8.0)
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.ListOffset.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.ListOffset.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-offsets:
+
+.. py:attribute:: ak.numba.layoutbuilder.ListOffset.offsets
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-content:
+
+.. py:attribute:: ak.numba.layoutbuilder.ListOffset.content
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.ListOffset.form
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-begin_list:
+
+.. py:method:: ak.numba.layoutbuilder.ListOffset.begin_list(self)
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-end_list:
+
+.. py:method:: ak.numba.layoutbuilder.ListOffset.end_list(self)
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-clear:
+
+.. py:method:: ak.numba.layoutbuilder.ListOffset.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.ListOffset.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.ListOffset.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-listoffset-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.ListOffset.snapshot(self)
+

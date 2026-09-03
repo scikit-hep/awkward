@@ -1,0 +1,9 @@
+ak.contents.find_content_backend
+--------------------------------
+
+.. py:module: ak.contents.find_content_backend
+
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/contents/content.py>`__ on `line 1309 <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/contents/content.py#L1309>`__.
+
+.. py:function:: ak.contents.find_content_backend(obj)
+

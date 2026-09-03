@@ -1,0 +1,35 @@
+ak.from_arrow
+-------------
+
+.. py:module: ak.from_arrow
+
+Defined in `awkward.operations.ak_from_arrow <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_from_arrow.py>`__ on `line 12 <https://github.com/scikit-hep/awkward-1.0/blob/bc11dd632e68aac9d4b5ace9dfb8c2ae81e1c29a/src/awkward/operations/ak_from_arrow.py#L12>`__.
+
+.. py:function:: ak.from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None)
+
+
+    :param array: Apache Arrow array to convert into an  Awkward Array.
+    :type array: ``pyarrow.Array``, ``pyarrow.ChunkedArray``, ``pyarrow.RecordBatch``, or ``pyarrow.Table``
+    :param generate_bitmasks: If enabled and Arrow/Parquet does not have Awkward
+                          metadata, ``generate_bitmasks=True`` creates empty bitmasks for nullable
+                          types that don't have bitmasks in the Arrow/Parquet data, so that the
+                          Form (BitMaskedForm vs UnmaskedForm) is predictable.
+    :type generate_bitmasks: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+
+Converts an Apache Arrow array into an Awkward Array.
+
+This function always preserves the values of a dataset; i.e. the Python objects
+returned by :py:obj:`ak.to_list` are identical to the Python objects returned by Arrow's
+``to_pylist`` method. If :py:obj:`ak.to_arrow` was invoked with ``extensionarray=True``, this
+function also preserves the data type (high-level :py:obj:`ak.types.Type`, though not the
+low-level :py:obj:`ak.forms.Form`), even through Parquet, making Parquet a good way to save
+Awkward Arrays for later use.
+
+See also :py:obj:`ak.to_arrow`, :py:obj:`ak.to_arrow_table`, :py:obj:`ak.from_parquet`, :py:obj:`ak.from_arrow_schema`.
+

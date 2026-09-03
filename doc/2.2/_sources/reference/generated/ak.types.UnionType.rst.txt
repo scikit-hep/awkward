@@ -1,0 +1,39 @@
+ak.types.UnionType
+------------------
+
+.. py:module: ak.types.UnionType
+
+Defined in `awkward.types.uniontype <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/types/uniontype.py>`__ on `line 16 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/types/uniontype.py#L16>`__.
+
+.. py:class:: ak.types.UnionType(self, contents, *, parameters=None, typestr=None)
+
+
+
+.. _ak-types-uniontype-copy:
+
+.. py:method:: ak.types.UnionType.copy(self, *, contents=UNSET, parameters=UNSET, typestr=UNSET)
+
+
+
+.. _ak-types-uniontype-contents:
+
+.. py:attribute:: ak.types.UnionType.contents
+
+
+
+.. _ak-types-uniontype-_str:
+
+.. py:method:: ak.types.UnionType._str(self, indent, compact, behavior)
+
+
+
+.. _ak-types-uniontype-__repr__:
+
+.. py:method:: ak.types.UnionType.__repr__(self)
+
+
+
+.. _ak-types-uniontype-_is_equal_to:
+
+.. py:method:: ak.types.UnionType._is_equal_to(self, other, all_parameters)
+

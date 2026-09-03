@@ -1,0 +1,1343 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="ak.Record" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="_auto/ak.Record.html" />
+<meta property="og:site_name" content="Awkward Array" />
+<meta property="og:description" content="Defined in awkward.highlevel on line 1501. High-level record that can contain fields of any type. Most users won’t be creating Records manually. This class primarily exists to be overridden in the ..." />
+<meta property="og:image" content="/None" />
+<meta property="og:image:alt" content="Defined in awkward.highlevel on line 1501. High-level record that can contain fields of any type. Most users won’t be creating Records manually. This class p..." />
+<meta name="description" content="Defined in awkward.highlevel on line 1501. High-level record that can contain fields of any type. Most users won’t be creating Records manually. This class primarily exists to be overridden in the ..." />
+<meta name="robots" content="noindex,nofollow">
+
+    <title>ak.Record &#8212; Awkward Array 1.10.2 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_auto/ak.Record';</script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/_auto/ak.Record.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ak.ArrayBuilder" href="ak.ArrayBuilder.html" />
+    <link rel="prev" title="ak.Array" href="ak.Array.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../api-reference.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fab fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="../api-reference.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fab fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Release history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.Array.html">ak.Array</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ak.Record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ArrayBuilder.html">ak.ArrayBuilder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.behavior.html">ak.behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_valid.html">ak.is_valid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.validity_error.html">ak.validity_error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.type.html">ak.type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.parameters.html">ak.parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.fields.html">ak.fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_tuple.html">ak.is_tuple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_numpy.html">ak.from_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_numpy.html">ak.to_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_cupy.html">ak.from_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_cupy.html">ak.to_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_jax.html">ak.from_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_jax.html">ak.to_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.kernels.html">ak.kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_kernels.html">ak.to_kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_iter.html">ak.from_iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_list.html">ak.to_list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_json.html">ak.from_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_json.html">ak.to_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_awkward0.html">ak.from_awkward0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_awkward0.html">ak.to_awkward0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_layout.html">ak.to_layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.regularize_numpyarray.html">ak.regularize_numpyarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_arrow.html">ak.to_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_arrow_table.html">ak.to_arrow_table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_arrow.html">ak.from_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_parquet.html">ak.to_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_parquet.html">ak.from_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_buffers.html">ak.to_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_buffers.html">ak.from_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_pandas.html">ak.to_pandas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.copy.html">ak.copy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mask.html">ak.mask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.num.html">ak.num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.run_lengths.html">ak.run_lengths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.zip.html">ak.zip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.unzip.html">ak.unzip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_regular.html">ak.to_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_regular.html">ak.from_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_name.html">ak.with_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_field.html">ak.with_field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_parameter.html">ak.with_parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.without_parameters.html">ak.without_parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.zeros_like.html">ak.zeros_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ones_like.html">ak.ones_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.full_like.html">ak.full_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.broadcast_arrays.html">ak.broadcast_arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.concatenate.html">ak.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.where.html">ak.where</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.flatten.html">ak.flatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.unflatten.html">ak.unflatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ravel.html">ak.ravel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.packed.html">ak.packed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.local_index.html">ak.local_index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.sort.html">ak.sort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argsort.html">ak.argsort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.pad_none.html">ak.pad_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.fill_none.html">ak.fill_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_none.html">ak.is_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.singletons.html">ak.singletons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.firsts.html">ak.firsts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.cartesian.html">ak.cartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argcartesian.html">ak.argcartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.combinations.html">ak.combinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argcombinations.html">ak.argcombinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partitions.html">ak.partitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partitioned.html">ak.partitioned</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.repartition.html">ak.repartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.virtual.html">ak.virtual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.materialized.html">ak.materialized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.with_cache.html">ak.with_cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.size.html">ak.size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.atleast_1d.html">ak.atleast_1d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.nan_to_num.html">ak.nan_to_num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.isclose.html">ak.isclose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.values_astype.html">ak.values_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.strings_astype.html">ak.strings_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.count.html">ak.count</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.count_nonzero.html">ak.count_nonzero</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.sum.html">ak.sum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.prod.html">ak.prod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.any.html">ak.any</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.all.html">ak.all</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.min.html">ak.min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.max.html">ak.max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ptp.html">ak.ptp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argmin.html">ak.argmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.argmax.html">ak.argmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.moment.html">ak.moment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mean.html">ak.mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.var.html">ak.var</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.std.html">ak.std</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.covar.html">ak.covar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.corr.html">ak.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.linear_fit.html">ak.linear_fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.softmax.html">ak.softmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.CategoricalBehavior.html">ak.CategoricalBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.is_categorical.html">ak.is_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.categories.html">ak.categories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.to_categorical.html">ak.to_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.from_categorical.html">ak.from_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mixin_class.html">ak.mixin_class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.mixin_class_method.html">ak.mixin_class_method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ByteBehavior.html">ak.ByteBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.CharBehavior.html">ak.CharBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.ByteStringBehavior.html">ak.ByteStringBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.StringBehavior.html">ak.StringBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.numba.register.html">ak.numba.register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.single.html">ak.partition.single</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.first.html">ak.partition.first</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.every.html">ak.partition.every</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.partition_as.html">ak.partition.partition_as</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.iterate.html">ak.partition.iterate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.apply.html">ak.partition.apply</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.PartitionedArray.html">ak.partition.PartitionedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.partition.IrregularlyPartitionedArray.html">ak.partition.IrregularlyPartitionedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.numba.register.html">ak.numba.register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.numexpr.evaluate.html">ak.numexpr.evaluate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.numexpr.re_evaluate.html">ak.numexpr.re_evaluate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.autograd.elementwise_grad.html">ak.autograd.elementwise_grad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Content.html">ak.layout.Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.EmptyArray.html">ak.layout.EmptyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.NumpyArray.html">ak.layout.NumpyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.RegularArray.html">ak.layout.RegularArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ListArray.html">ak.layout.ListArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ListOffsetArray.html">ak.layout.ListOffsetArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.RecordArray.html">ak.layout.RecordArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Record.html">ak.layout.Record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.IndexedArray.html">ak.layout.IndexedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.IndexedOptionArray.html">ak.layout.IndexedOptionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ByteMaskedArray.html">ak.layout.ByteMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.BitMaskedArray.html">ak.layout.BitMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.UnmaskedArray.html">ak.layout.UnmaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.UnionArray.html">ak.layout.UnionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.VirtualArray.html">ak.layout.VirtualArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ArrayGenerator.html">ak.layout.ArrayGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.SliceGenerator.html">ak.layout.SliceGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ArrayCache.html">ak.layout.ArrayCache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Iterator.html">ak.layout.Iterator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.ArrayBuilder.html">ak.layout.ArrayBuilder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Index.html">ak.layout.Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.layout.Identities.html">ak.layout.Identities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.Type.html">ak.types.Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.ArrayType.html">ak.types.ArrayType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.UnknownType.html">ak.types.UnknownType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.PrimitiveType.html">ak.types.PrimitiveType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.RegularType.html">ak.types.RegularType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.ListType.html">ak.types.ListType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.RecordType.html">ak.types.RecordType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.OptionType.html">ak.types.OptionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.types.UnionType.html">ak.types.UnionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.Form.html">ak.forms.Form</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.EmptyForm.html">ak.forms.EmptyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.NumpyForm.html">ak.forms.NumpyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.RegularForm.html">ak.forms.RegularForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.ListForm.html">ak.forms.ListForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.ListOffsetForm.html">ak.forms.ListOffsetForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.RecordForm.html">ak.forms.RecordForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.IndexedForm.html">ak.forms.IndexedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.IndexedOptionForm.html">ak.forms.IndexedOptionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.ByteMaskedForm.html">ak.forms.ByteMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.BitMaskedForm.html">ak.forms.BitMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.UnmaskedForm.html">ak.forms.UnmaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.UnionForm.html">ak.forms.UnionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ak.forms.VirtualForm.html">ak.forms.VirtualForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../awkwardforth.html">AwkwardForth virtual machines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kernels.html">Kernel interface and specification</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="ak-record">
+<h1>ak.Record<a class="headerlink" href="#ak-record" title="Permalink to this headline">#</a></h1>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/highlevel.py">awkward.highlevel</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/highlevel.py#L1501">line 1501</a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ak.Record">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">Record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_valid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Record</span></code>, <a class="reference internal" href="#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a>, str, or dict) – Data to wrap or convert into a record.
+If a string, the data are assumed to be JSON.
+If a dict, calls <a class="reference internal" href="ak.from_iter.html#ak.from_iter" title="ak.from_iter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_iter</span></code></a>, which assumes all inner
+dimensions have irregular lengths.</p></li>
+<li><p><strong>behavior</strong> (<em>None</em><em> or </em><em>dict</em>) – Custom <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code> for this Record only.</p></li>
+<li><p><strong>with_name</strong> (<em>None</em><em> or </em><em>str</em>) – Gives the record type a name that can be
+used to override its behavior (see below).</p></li>
+<li><p><strong>check_valid</strong> (<em>bool</em>) – If True, verify that the <a class="reference internal" href="#ak.Record.layout" title="ak.Record.layout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">layout</span></code></a> is valid.</p></li>
+<li><p><strong>kernels</strong> (None, <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;cuda&quot;</span></code>) – If <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code>, the Record will be placed in
+main memory for use with other <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code> Arrays and Records; if <code class="docutils literal notranslate"><span class="pre">&quot;cuda&quot;</span></code>,
+the Record will be placed in GPU global memory using CUDA; if None,
+the <code class="docutils literal notranslate"><span class="pre">data</span></code> are left untouched. For <code class="docutils literal notranslate"><span class="pre">&quot;cuda&quot;</span></code>,
+<a class="reference external" href="https://pypi.org/project/awkward-cuda-kernels">awkward-cuda-kernels</a>
+must be installed, which can be invoked with
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">awkward[cuda]</span> <span class="pre">--upgrade</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>High-level record that can contain fields of any type.</p>
+<p>Most users won’t be creating Records manually. This class primarily exists
+to be overridden in the same way as <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>.</p>
+<p>Records can be used in <a class="reference external" href="http://numba.pydata.org/">Numba</a>: they can be
+passed as arguments to a Numba-compiled function or returned as return
+values. The only limitation is that they cannot be <em>created</em>
+inside the Numba-compiled function; to make outputs, consider
+<a class="reference internal" href="ak.ArrayBuilder.html#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>.</p>
+<p>See also <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code>.</p>
+<section id="ak-record-layout">
+<h2>ak.Record.layout<a class="headerlink" href="#ak-record-layout" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.layout">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">layout</span></span><a class="headerlink" href="#ak.Record.layout" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Record</span></code> that contains composable <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Content</span></code>
+elements to determine how the array is structured.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.layout" title="ak.Array.layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.layout</span></code></a> for a more complete description.</p>
+<p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Record</span></code> is not a subclass of <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Content</span></code> in
+Python (note: <a class="reference external" href="../_static/classawkward_1_1Record.html">Record</a> <em>is</em> a
+subclass of <a class="reference external" href="../_static/classawkward_1_1Content.html">Content</a> in
+C++!) and it is not composable with them: <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Record</span></code> contains
+one <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.RecordArray</span></code> (which is a <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Content</span></code>), but
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Content</span></code> nodes cannot contain a <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Record</span></code>.</p>
+<p>A <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Record</span></code> is not an independent entity from its
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.RecordArray</span></code>; it’s really just a marker indicating which
+element to select. The XML representation reflects that:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vectors</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="mf">30.0</span><span class="p">},</span>
+<span class="gp">... </span>                    <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="mf">20.0</span><span class="p">},</span>
+<span class="gp">... </span>                    <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">}])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vectors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">layout</span>
+<span class="go">&lt;Record at=&quot;1&quot;&gt;</span>
+<span class="go">    &lt;RecordArray&gt;</span>
+<span class="go">        &lt;field index=&quot;0&quot; key=&quot;x&quot;&gt;</span>
+<span class="go">            &lt;NumpyArray format=&quot;d&quot; shape=&quot;3&quot; data=&quot;0.1 0.2 0.3&quot; at=&quot;0x555660dfe7d0&quot;/&gt;</span>
+<span class="go">        &lt;/field&gt;</span>
+<span class="go">        &lt;field index=&quot;1&quot; key=&quot;y&quot;&gt;</span>
+<span class="go">            &lt;NumpyArray format=&quot;d&quot; shape=&quot;3&quot; data=&quot;1 2 3&quot; at=&quot;0x555660df4180&quot;/&gt;</span>
+<span class="go">        &lt;/field&gt;</span>
+<span class="go">        &lt;field index=&quot;2&quot; key=&quot;z&quot;&gt;</span>
+<span class="go">            &lt;NumpyArray format=&quot;d&quot; shape=&quot;3&quot; data=&quot;30 20 10&quot; at=&quot;0x555660df6190&quot;/&gt;</span>
+<span class="go">        &lt;/field&gt;</span>
+<span class="go">    &lt;/RecordArray&gt;</span>
+<span class="go">&lt;/Record&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="ak-record-behavior">
+<h2>ak.Record.behavior<a class="headerlink" href="#ak-record-behavior" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.behavior">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">behavior</span></span><a class="headerlink" href="#ak.Record.behavior" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The <code class="docutils literal notranslate"><span class="pre">behavior</span></code> parameter passed into this Record’s constructor.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>If a dict, this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> overrides the global <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code>.
+Any keys in the global <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code> but not this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> are
+still valid, but any keys in both are overridden by this
+<code class="docutils literal notranslate"><span class="pre">behavior</span></code>. Keys with a None value are equivalent to missing keys,
+so this <code class="docutils literal notranslate"><span class="pre">behavior</span></code> can effectively remove keys from the
+global <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code>.</p></li>
+<li><p>If None, the Record defaults to the global <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code>.</p></li>
+</ul>
+</div></blockquote>
+<p>See <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code> for a list of recognized key patterns and their
+meanings.</p>
+</section>
+<section id="ak-record-caches">
+<h2>ak.Record.caches<a class="headerlink" href="#ak-record-caches" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.caches">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">caches</span></span><a class="headerlink" href="#ak.Record.caches" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-tolist">
+<h2>ak.Record.tolist<a class="headerlink" href="#ak-record-tolist" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.tolist">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">tolist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.tolist" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts this Record into Python objects; same as <a class="reference internal" href="ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_list</span></code></a>
+(but without the underscore, like NumPy’s
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html">tolist</a>).</p>
+</section>
+<section id="ak-record-to-list">
+<h2>ak.Record.to_list<a class="headerlink" href="#ak-record-to-list" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.to_list">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.to_list" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Converts this Record into Python objects; same as <a class="reference internal" href="ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_list</span></code></a>.</p>
+</section>
+<section id="ak-record-nbytes">
+<h2>ak.Record.nbytes<a class="headerlink" href="#ak-record-nbytes" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.nbytes">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">nbytes</span></span><a class="headerlink" href="#ak.Record.nbytes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The total number of bytes in all the <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Index</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.Identities</span></code>, and <code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.layout.NumpyArray</span></code> buffers in this
+array tree.</p>
+<p>Note: this calculation takes overlapping buffers into account, to the
+extent that overlaps are not double-counted, but overlaps are currently
+assumed to be complete subsets of one another, and so it is
+theoretically possible (though unlikely) that this number is an
+underestimate of the true usage.</p>
+<p>It also does not count buffers that must be kept in memory because
+of ownership, but are not directly used in the array. Nor does it count
+the (small) C++ nodes or Python objects that reference the (large)
+array buffers.</p>
+</section>
+<section id="ak-record-fields">
+<h2>ak.Record.fields<a class="headerlink" href="#ak-record-fields" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.fields">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">fields</span></span><a class="headerlink" href="#ak.Record.fields" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>List of field names or tuple slot numbers (as strings) of this record.</p>
+<p>If this is actually a tuple its fields are string representations of
+integers, such as <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;2&quot;</span></code>, etc.</p>
+<p>See also <a class="reference internal" href="ak.fields.html#ak.fields" title="ak.fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.fields</span></code></a>.</p>
+</section>
+<section id="ak-record-ipython-key-completions">
+<h2>ak.Record._ipython_key_completions_<a class="headerlink" href="#ak-record-ipython-key-completions" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record._ipython_key_completions_">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">_ipython_key_completions_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record._ipython_key_completions_" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-iter">
+<h2>ak.Record.__iter__<a class="headerlink" href="#ak-record-iter" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__iter__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__iter__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-type">
+<h2>ak.Record.type<a class="headerlink" href="#ak-record-type" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.type">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">type</span></span><a class="headerlink" href="#ak.Record.type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The high-level type of this Record; same as <a class="reference internal" href="ak.type.html#ak.type" title="ak.type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.type</span></code></a>.</p>
+<p>Note that the outermost element of a Record’s type is always a
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.RecordType</span></code>.</p>
+</section>
+<section id="ak-record-getitem">
+<h2>ak.Record.__getitem__<a class="headerlink" href="#ak-record-getitem" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__getitem__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__getitem__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>where</strong> (<em>many types supported; see below</em>) – Index of positions to
+select from this Record.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Select items from the Record using an extension of NumPy’s (already
+quite extensive) rules.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.__getitem__" title="ak.Array.__getitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__getitem__</span></code></a> for a more complete description. Since
+this is a record, the first item in the slice tuple must be a
+string, selecting a field.</p>
+<p>For example, with a <code class="docutils literal notranslate"><span class="pre">record</span></code> like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
+</pre></div>
+</div>
+<p>we can select</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+<span class="go">3.3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="go">&lt;Array [1, 2, 3] type=&#39;3 * int64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+</section>
+<section id="ak-record-setitem">
+<h2>ak.Record.__setitem__<a class="headerlink" href="#ak-record-setitem" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__setitem__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">what</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__setitem__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>where</strong> (<em>str</em>) – Field name to add data to the record.</p></li>
+<li><p><strong>what</strong> – Data to add as the new field.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">record</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">3.3</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;another&quot;</span><span class="p">:</span> <span class="s2">&quot;record&quot;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+<span class="go">{x: 3.3, y: 4, z: {another: &#39;record&#39;}}</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="ak.with_field.html#ak.with_field" title="ak.with_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.with_field</span></code></a> for a variant that does not change the <a class="reference internal" href="#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a>
+in-place. (Internally, this method uses <a class="reference internal" href="ak.with_field.html#ak.with_field" title="ak.with_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.with_field</span></code></a>, so performance
+is not a factor in choosing one over the other.)</p>
+</section>
+<section id="ak-record-getattr">
+<h2>ak.Record.__getattr__<a class="headerlink" href="#ak-record-getattr" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__getattr__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__getattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__getattr__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Whenever possible, fields can be accessed as attributes.</p>
+<p>For example, the fields of an <code class="docutils literal notranslate"><span class="pre">record</span></code> like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="s2">&quot;three&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>can be accessed as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">record</span><span class="o">.</span><span class="n">x</span>
+<span class="go">1.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">record</span><span class="o">.</span><span class="n">y</span>
+<span class="go">&lt;Array [2, 2] type=&#39;2 * int64&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">record</span><span class="o">.</span><span class="n">z</span>
+<span class="go">&#39;three&#39;</span>
+</pre></div>
+</div>
+<p>which are equivalent to <code class="docutils literal notranslate"><span class="pre">record[&quot;x&quot;]</span></code>, <code class="docutils literal notranslate"><span class="pre">record[&quot;y&quot;]</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">record[&quot;z&quot;]</span></code>.</p>
+<p>Fields can’t be accessed as attributes when</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a> methods or properties take precedence,</p></li>
+<li><p>a domain-specific behavior has methods or properties that take
+precedence, or</p></li>
+<li><p>the field name is not a valid Python identifier or is a Python
+keyword.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="ak-record-dir">
+<h2>ak.Record.__dir__<a class="headerlink" href="#ak-record-dir" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__dir__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__dir__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__dir__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Lists all methods, properties, and field names (see <a class="reference internal" href="#ak.Record.__getattr__" title="ak.Record.__getattr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getattr__</span></code></a>)
+that can be accessed as attributes.</p>
+</section>
+<section id="ak-record-slot0">
+<h2>ak.Record.slot0<a class="headerlink" href="#ak-record-slot0" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot0">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot0</span></span><a class="headerlink" href="#ak.Record.slot0" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">0</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot1">
+<h2>ak.Record.slot1<a class="headerlink" href="#ak-record-slot1" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot1">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot1</span></span><a class="headerlink" href="#ak.Record.slot1" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">1</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot2">
+<h2>ak.Record.slot2<a class="headerlink" href="#ak-record-slot2" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot2">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot2</span></span><a class="headerlink" href="#ak.Record.slot2" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;2&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">2</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot3">
+<h2>ak.Record.slot3<a class="headerlink" href="#ak-record-slot3" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot3">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot3</span></span><a class="headerlink" href="#ak.Record.slot3" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;3&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">3</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot4">
+<h2>ak.Record.slot4<a class="headerlink" href="#ak-record-slot4" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot4">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot4</span></span><a class="headerlink" href="#ak.Record.slot4" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;4&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">4</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot5">
+<h2>ak.Record.slot5<a class="headerlink" href="#ak-record-slot5" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot5">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot5</span></span><a class="headerlink" href="#ak.Record.slot5" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;5&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">5</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot6">
+<h2>ak.Record.slot6<a class="headerlink" href="#ak-record-slot6" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot6">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot6</span></span><a class="headerlink" href="#ak.Record.slot6" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;6&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">6</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot7">
+<h2>ak.Record.slot7<a class="headerlink" href="#ak-record-slot7" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot7">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot7</span></span><a class="headerlink" href="#ak.Record.slot7" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;7&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">7</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot8">
+<h2>ak.Record.slot8<a class="headerlink" href="#ak-record-slot8" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot8">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot8</span></span><a class="headerlink" href="#ak.Record.slot8" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;8&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">8</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-slot9">
+<h2>ak.Record.slot9<a class="headerlink" href="#ak-record-slot9" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.slot9">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">slot9</span></span><a class="headerlink" href="#ak.Record.slot9" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Equivalent to <a class="reference internal" href="#ak.Record.__getitem__" title="ak.Record.__getitem__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__getitem__</span></code></a> with <code class="docutils literal notranslate"><span class="pre">&quot;9&quot;</span></code>, which selects slot <code class="docutils literal notranslate"><span class="pre">9</span></code> from
+the Record as a tuple.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.slot0" title="ak.Array.slot0"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.slot0</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-str">
+<h2>ak.Record.__str__<a class="headerlink" href="#ak-record-str" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__str__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__str__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>limit_value</strong> (<em>int</em>) – Maximum number of characters to use when
+presenting the Record as a string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Presents this Record as a string without type or <code class="docutils literal notranslate"><span class="pre">&quot;&lt;Record</span> <span class="pre">...&gt;&quot;</span></code>.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.__str__" title="ak.Array.__str__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__str__</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-repr">
+<h2>ak.Record.__repr__<a class="headerlink" href="#ak-record-repr" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__repr__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__repr__" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>limit_value</strong> (<em>int</em>) – Maximum number of characters to use when
+presenting the data of the Record.</p></li>
+<li><p><strong>limit_total</strong> (<em>int</em>) – Maximum number of characters to use for
+the whole string (should be larger than <code class="docutils literal notranslate"><span class="pre">limit_value</span></code>).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Presents this Record as a string with its type and <code class="docutils literal notranslate"><span class="pre">&quot;&lt;Record</span> <span class="pre">...&gt;&quot;</span></code>.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.__repr__" title="ak.Array.__repr__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__repr__</span></code></a> for a more complete description.</p>
+</section>
+<section id="id1">
+<h2>ak.Record._str<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record._str">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">85</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record._str" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="id2">
+<h2>ak.Record._repr<a class="headerlink" href="#id2" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record._repr">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">_repr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit_total</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">85</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record._repr" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-array-ufunc">
+<h2>ak.Record.__array_ufunc__<a class="headerlink" href="#ak-record-array-ufunc" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__array_ufunc__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__array_ufunc__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ufunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__array_ufunc__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Intercepts attempts to pass this Record to a NumPy
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/ufuncs.html">universal functions</a>
+(ufuncs) and passes it through the Record’s structure.</p>
+<p>This method conforms to NumPy’s
+<a class="reference external" href="https://numpy.org/neps/nep-0013-ufunc-overrides.html">NEP 13</a>
+for overriding ufuncs, which has been
+<a class="reference external" href="https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added">available since NumPy 1.13</a>
+(and thus NumPy 1.13 is the minimum allowed version).</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.__array_ufunc__" title="ak.Array.__array_ufunc__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__array_ufunc__</span></code></a> for a more complete description.</p>
+</section>
+<section id="ak-record-numba-type">
+<h2>ak.Record.numba_type<a class="headerlink" href="#ak-record-numba-type" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.Record.numba_type">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">numba_type</span></span><a class="headerlink" href="#ak.Record.numba_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>The type of this Record when it is used in Numba. It contains enough
+information to generate low-level code for accessing any element,
+down to the leaves.</p>
+<p>See <a class="reference external" href="https://numba.pydata.org/numba-doc/dev/reference/types.html">Numba documentation</a>
+on types and signatures.</p>
+</section>
+<section id="ak-record-getstate">
+<h2>ak.Record.__getstate__<a class="headerlink" href="#ak-record-getstate" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__getstate__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__getstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__getstate__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-setstate">
+<h2>ak.Record.__setstate__<a class="headerlink" href="#ak-record-setstate" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__setstate__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__setstate__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__setstate__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-copy">
+<h2>ak.Record.__copy__<a class="headerlink" href="#ak-record-copy" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__copy__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__copy__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__copy__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-deepcopy">
+<h2>ak.Record.__deepcopy__<a class="headerlink" href="#ak-record-deepcopy" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__deepcopy__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__deepcopy__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memo</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__deepcopy__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-bool">
+<h2>ak.Record.__bool__<a class="headerlink" href="#ak-record-bool" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__bool__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__bool__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__bool__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-record-contains">
+<h2>ak.Record.__contains__<a class="headerlink" href="#ak-record-contains" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.Record.__contains__">
+<span class="sig-prename descclassname"><span class="pre">ak.Record.</span></span><span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.Record.__contains__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="ak.Array.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">ak.Array</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="ak.ArrayBuilder.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">ak.ArrayBuilder</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-layout">
+   ak.Record.layout
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-behavior">
+   ak.Record.behavior
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-caches">
+   ak.Record.caches
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-tolist">
+   ak.Record.tolist
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-to-list">
+   ak.Record.to_list
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-nbytes">
+   ak.Record.nbytes
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-fields">
+   ak.Record.fields
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-ipython-key-completions">
+   ak.Record._ipython_key_completions_
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-iter">
+   ak.Record.__iter__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-type">
+   ak.Record.type
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-getitem">
+   ak.Record.__getitem__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-setitem">
+   ak.Record.__setitem__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-getattr">
+   ak.Record.__getattr__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-dir">
+   ak.Record.__dir__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot0">
+   ak.Record.slot0
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot1">
+   ak.Record.slot1
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot2">
+   ak.Record.slot2
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot3">
+   ak.Record.slot3
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot4">
+   ak.Record.slot4
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot5">
+   ak.Record.slot5
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot6">
+   ak.Record.slot6
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot7">
+   ak.Record.slot7
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot8">
+   ak.Record.slot8
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-slot9">
+   ak.Record.slot9
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-str">
+   ak.Record.__str__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-repr">
+   ak.Record.__repr__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#id1">
+   ak.Record._str
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#id2">
+   ak.Record._repr
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-array-ufunc">
+   ak.Record.__array_ufunc__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-numba-type">
+   ak.Record.numba_type
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-getstate">
+   ak.Record.__getstate__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-setstate">
+   ak.Record.__setstate__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-copy">
+   ak.Record.__copy__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-deepcopy">
+   ak.Record.__deepcopy__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-bool">
+   ak.Record.__bool__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-record-contains">
+   ak.Record.__contains__
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main-v1/docs-sphinx/_auto/ak.Record.rst">
+        <i class="fa-solid fa-pencil"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/_auto/ak.Record.rst.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2023, Awkward Array development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

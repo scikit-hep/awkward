@@ -1,0 +1,69 @@
+ak.type
+=======
+
+Defined in `awkward.operations.ak_type <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_type.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_type.py#L20>`__.
+
+.. py:function:: ak.type(array, *, behavior=None)
+
+   Returns the high-level type of an array as a Type object.
+
+   The high-level type ignores layout differences like :py:obj:`ak.contents.ListArray`
+   versus :py:obj:`ak.contents.ListOffsetArray`, but not differences like
+   "regular-sized lists" (i.e. :py:obj:`ak.contents.RegularArray`) versus
+   "variable-sized lists" (i.e. :py:obj:`ak.contents.ListArray` and similar).
+
+   Types are rendered as `Datashape <https://datashape.readthedocs.io/>`__
+   strings, which makes the same distinctions.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param behavior: Custom :py:obj:`ak.behavior` for the output type, if
+                    high-level.
+   :type behavior: None or dict
+
+   :returns: The high-level type of an ``array`` (many types supported, including all
+             Awkward Arrays and Records) as :py:obj:`ak.types.Type` objects.
+
+   .. rubric:: Examples
+
+   For example,
+
+   >>> array = ak.Array([[{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [2, 2]}],
+   ...                   [],
+   ...                   [{"x": 3.3, "y": [3, 3, 3]}]])
+
+   has type
+
+   >>> ak.type(array).show()
+   3 * var * {
+       x: float64,
+       y: var * int64
+   }
+
+   but
+
+   >>> array = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
+
+   has type
+
+   >>> ak.type(array).show()
+   2 * 3 * 5 * int64
+
+   Some cases, like heterogeneous data, require [extensions beyond the
+   Datashape specification](https://github.com/blaze/datashape/issues/237).
+   For example,
+
+   >>> array = ak.Array([1, "two", [3, 3, 3]])
+
+   has type
+
+   >>> ak.type(array).show()
+   3 * union[
+       int64,
+       string,
+       var * int64
+   ]
+
+   but "union" is not a Datashape type-constructor. (Its syntax is
+   similar to existing type-constructors, so it's a plausible addition
+   to the language.)
+

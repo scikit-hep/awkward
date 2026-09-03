@@ -1,0 +1,829 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="ak.layout.ByteMaskedArray" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="ak.layout.ByteMaskedArray.html" />
+<meta property="og:site_name" content="Awkward Array" />
+<meta property="og:description" content="The ByteMaskedArray implements an ak.types.OptionType with two aligned arrays, a boolean mask and content. At any element i where mask[i] == valid_when, the value can be found at content[i]. If mas..." />
+<meta property="og:image" content="/None" />
+<meta property="og:image:alt" content="The ByteMaskedArray implements an ak.types.OptionType with two aligned arrays, a boolean mask and content. At any element i where mask[i] == valid_when, the..." />
+<meta name="description" content="The ByteMaskedArray implements an ak.types.OptionType with two aligned arrays, a boolean mask and content. At any element i where mask[i] == valid_when, the value can be found at content[i]. If mas..." />
+<meta name="robots" content="noindex,nofollow">
+
+    <title>ak.layout.ByteMaskedArray &#8212; Awkward Array 1.10.2 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'ak.layout.ByteMaskedArray';</script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/ak.layout.ByteMaskedArray.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ak.layout.BitMaskedArray" href="ak.layout.BitMaskedArray.html" />
+    <link rel="prev" title="ak.layout.IndexedOptionArray" href="ak.layout.IndexedOptionArray.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fa-solid fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <img src="_static/logo-300px.png" class="logo__image only-light" alt="Logo image">
+    <img src="_static/logo-300px-white.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="api-reference.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+        </div>
+      
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fab fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
+  <i class="fa-solid fa-magnifying-glass"></i>
+</button>
+    </div>
+  
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fa-solid fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="api-reference.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+                    Contributor guide
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+                    Release history
+                  </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fa-brands fa-square-github"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-toggle="tooltip"><span><i class="fab fa-python"></i></span>
+            <label class="sr-only">PyPI</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+  <div class="sidebar-start-items sidebar-primary__section">
+    <div class="sidebar-start-items__item"><nav class="bd-links" id="bd-docs-nav" aria-label="Section navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">
+    Section Navigation
+  </p>
+  <div class="bd-toc-item navbar-nav">
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_auto/changelog.html">Release history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.Array.html">ak.Array</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.Record.html">ak.Record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ArrayBuilder.html">ak.ArrayBuilder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.behavior.html">ak.behavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.is_valid.html">ak.is_valid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.validity_error.html">ak.validity_error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.type.html">ak.type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.parameters.html">ak.parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.fields.html">ak.fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.is_tuple.html">ak.is_tuple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_numpy.html">ak.from_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_numpy.html">ak.to_numpy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_cupy.html">ak.from_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_cupy.html">ak.to_cupy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_jax.html">ak.from_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_jax.html">ak.to_jax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.kernels.html">ak.kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_kernels.html">ak.to_kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_iter.html">ak.from_iter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_list.html">ak.to_list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_json.html">ak.from_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_json.html">ak.to_json</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_awkward0.html">ak.from_awkward0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_awkward0.html">ak.to_awkward0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_layout.html">ak.to_layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.regularize_numpyarray.html">ak.regularize_numpyarray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_arrow.html">ak.to_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_arrow_table.html">ak.to_arrow_table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_arrow.html">ak.from_arrow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_parquet.html">ak.to_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_parquet.html">ak.from_parquet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_buffers.html">ak.to_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_buffers.html">ak.from_buffers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_pandas.html">ak.to_pandas</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.copy.html">ak.copy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.mask.html">ak.mask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.num.html">ak.num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.run_lengths.html">ak.run_lengths</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.zip.html">ak.zip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.unzip.html">ak.unzip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_regular.html">ak.to_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_regular.html">ak.from_regular</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.with_name.html">ak.with_name</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.with_field.html">ak.with_field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.with_parameter.html">ak.with_parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.without_parameters.html">ak.without_parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.zeros_like.html">ak.zeros_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ones_like.html">ak.ones_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.full_like.html">ak.full_like</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.broadcast_arrays.html">ak.broadcast_arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.concatenate.html">ak.concatenate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.where.html">ak.where</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.flatten.html">ak.flatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.unflatten.html">ak.unflatten</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ravel.html">ak.ravel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.packed.html">ak.packed</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.local_index.html">ak.local_index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.sort.html">ak.sort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argsort.html">ak.argsort</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.pad_none.html">ak.pad_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.fill_none.html">ak.fill_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.is_none.html">ak.is_none</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.singletons.html">ak.singletons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.firsts.html">ak.firsts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.cartesian.html">ak.cartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argcartesian.html">ak.argcartesian</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.combinations.html">ak.combinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argcombinations.html">ak.argcombinations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partitions.html">ak.partitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partitioned.html">ak.partitioned</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.repartition.html">ak.repartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.virtual.html">ak.virtual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.materialized.html">ak.materialized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.with_cache.html">ak.with_cache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.size.html">ak.size</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.atleast_1d.html">ak.atleast_1d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.nan_to_num.html">ak.nan_to_num</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.isclose.html">ak.isclose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.values_astype.html">ak.values_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.strings_astype.html">ak.strings_astype</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.count.html">ak.count</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.count_nonzero.html">ak.count_nonzero</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.sum.html">ak.sum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.prod.html">ak.prod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.any.html">ak.any</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.all.html">ak.all</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.min.html">ak.min</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.max.html">ak.max</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ptp.html">ak.ptp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argmin.html">ak.argmin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.argmax.html">ak.argmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.moment.html">ak.moment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.mean.html">ak.mean</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.var.html">ak.var</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.std.html">ak.std</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.covar.html">ak.covar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.corr.html">ak.corr</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.linear_fit.html">ak.linear_fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.softmax.html">ak.softmax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.CategoricalBehavior.html">ak.CategoricalBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.is_categorical.html">ak.is_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.categories.html">ak.categories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.to_categorical.html">ak.to_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.from_categorical.html">ak.from_categorical</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.mixin_class.html">ak.mixin_class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.mixin_class_method.html">ak.mixin_class_method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ByteBehavior.html">ak.ByteBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.CharBehavior.html">ak.CharBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.ByteStringBehavior.html">ak.ByteStringBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.StringBehavior.html">ak.StringBehavior</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.numba.register.html">ak.numba.register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.single.html">ak.partition.single</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.first.html">ak.partition.first</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.every.html">ak.partition.every</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.partition_as.html">ak.partition.partition_as</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.iterate.html">ak.partition.iterate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.apply.html">ak.partition.apply</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.PartitionedArray.html">ak.partition.PartitionedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/ak.partition.IrregularlyPartitionedArray.html">ak.partition.IrregularlyPartitionedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.numba.register.html">ak.numba.register</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.numexpr.evaluate.html">ak.numexpr.evaluate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.numexpr.re_evaluate.html">ak.numexpr.re_evaluate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.autograd.elementwise_grad.html">ak.autograd.elementwise_grad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Content.html">ak.layout.Content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.EmptyArray.html">ak.layout.EmptyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.NumpyArray.html">ak.layout.NumpyArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.RegularArray.html">ak.layout.RegularArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ListArray.html">ak.layout.ListArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ListOffsetArray.html">ak.layout.ListOffsetArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.RecordArray.html">ak.layout.RecordArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Record.html">ak.layout.Record</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.IndexedArray.html">ak.layout.IndexedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.IndexedOptionArray.html">ak.layout.IndexedOptionArray</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ak.layout.ByteMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.BitMaskedArray.html">ak.layout.BitMaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.UnmaskedArray.html">ak.layout.UnmaskedArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.UnionArray.html">ak.layout.UnionArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.VirtualArray.html">ak.layout.VirtualArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ArrayGenerator.html">ak.layout.ArrayGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.SliceGenerator.html">ak.layout.SliceGenerator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ArrayCache.html">ak.layout.ArrayCache</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Iterator.html">ak.layout.Iterator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.ArrayBuilder.html">ak.layout.ArrayBuilder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Index.html">ak.layout.Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.layout.Identities.html">ak.layout.Identities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.Type.html">ak.types.Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ArrayType.html">ak.types.ArrayType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.UnknownType.html">ak.types.UnknownType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.PrimitiveType.html">ak.types.PrimitiveType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.RegularType.html">ak.types.RegularType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.ListType.html">ak.types.ListType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.RecordType.html">ak.types.RecordType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.OptionType.html">ak.types.OptionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.types.UnionType.html">ak.types.UnionType</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.Form.html">ak.forms.Form</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.EmptyForm.html">ak.forms.EmptyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.NumpyForm.html">ak.forms.NumpyForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.RegularForm.html">ak.forms.RegularForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ListForm.html">ak.forms.ListForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ListOffsetForm.html">ak.forms.ListOffsetForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.RecordForm.html">ak.forms.RecordForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.IndexedForm.html">ak.forms.IndexedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.IndexedOptionForm.html">ak.forms.IndexedOptionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.ByteMaskedForm.html">ak.forms.ByteMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.BitMaskedForm.html">ak.forms.BitMaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.UnmaskedForm.html">ak.forms.UnmaskedForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.UnionForm.html">ak.forms.UnionForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ak.forms.VirtualForm.html">ak.forms.VirtualForm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="awkwardforth.html">AwkwardForth virtual machines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_auto/kernels.html">Kernel interface and specification</a></li>
+</ul>
+
+  </div>
+</nav>
+    </div>
+  </div>
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+  
+  <div id="rtd-footer-container"></div>
+
+      </div>
+      <main id="main-content" class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="ak-layout-bytemaskedarray">
+<h1>ak.layout.ByteMaskedArray<a class="headerlink" href="#ak-layout-bytemaskedarray" title="Permalink to this headline">#</a></h1>
+<p>The ByteMaskedArray implements an <a class="reference internal" href="ak.types.OptionType.html"><span class="doc">ak.types.OptionType</span></a> with two aligned
+arrays, a boolean <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">content</span></code>. At any element <code class="docutils literal notranslate"><span class="pre">i</span></code> where
+<code class="docutils literal notranslate"><span class="pre">mask[i]</span> <span class="pre">==</span> <span class="pre">valid_when</span></code>, the value can be found at <code class="docutils literal notranslate"><span class="pre">content[i]</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">mask[i]</span> <span class="pre">!=</span> <span class="pre">valid_when</span></code>, the value is missing (None).</p>
+<p>This is equivalent to NumPy’s
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/maskedarray.html">masked arrays</a>
+if <code class="docutils literal notranslate"><span class="pre">valid_when=False</span></code>.</p>
+<p>There is no Apache Arrow equivalent because Arrow
+<a class="reference external" href="https://arrow.apache.org/docs/format/Columnar.html#validity-bitmaps">uses bitmaps</a>
+to mask all node types.</p>
+<p>Below is a simplified implementation of a ByteMaskedArray class in pure Python
+that exhaustively checks validity in its constructor (see
+<a class="reference internal" href="_auto/ak.is_valid.html"><span class="doc">ak.is_valid</span></a>) and can generate random valid arrays. The
+<code class="docutils literal notranslate"><span class="pre">random_number()</span></code> function returns a random float and the
+<code class="docutils literal notranslate"><span class="pre">random_length(minlen)</span></code> function returns a random int that is at least
+<code class="docutils literal notranslate"><span class="pre">minlen</span></code>. The <code class="docutils literal notranslate"><span class="pre">RawArray</span></code> class represents simple, one-dimensional data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ByteMaskedArray</span><span class="p">(</span><span class="n">Content</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">valid_when</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">valid_when</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">mask</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_when</span> <span class="o">=</span> <span class="n">valid_when</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="n">minlen</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">random_length</span><span class="p">(</span><span class="n">minlen</span><span class="p">)):</span>
+            <span class="n">mask</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">),</span> <span class="n">choices</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ByteMaskedArray</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">where</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">[</span><span class="n">where</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_when</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="n">where</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="nb">slice</span><span class="p">)</span> <span class="ow">and</span> <span class="n">where</span><span class="o">.</span><span class="n">step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ByteMaskedArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">[</span><span class="n">where</span><span class="o">.</span><span class="n">start</span><span class="p">:</span><span class="n">where</span><span class="o">.</span><span class="n">stop</span><span class="p">],</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="n">where</span><span class="o">.</span><span class="n">start</span><span class="p">:</span><span class="n">where</span><span class="o">.</span><span class="n">stop</span><span class="p">],</span>
+                                   <span class="n">valid_when</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">valid_when</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ByteMaskedArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="n">where</span><span class="p">],</span> <span class="n">valid_when</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">valid_when</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="n">where</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;ByteMaskedArray(&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valid_when</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">xml</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">indent</span> <span class="o">+</span> <span class="n">pre</span> <span class="o">+</span> <span class="s2">&quot;&lt;ByteMaskedArray&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="n">indent</span> <span class="o">+</span> <span class="s2">&quot;    &lt;valid_when&gt;&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valid_when</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&lt;valid_when&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="n">indent</span> <span class="o">+</span> <span class="s2">&quot;    &lt;mask&gt;&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&lt;/mask&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">xml</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="s2">&quot;    &quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;content&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/content&gt;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="n">indent</span> <span class="o">+</span> <span class="s2">&quot;&lt;/ByteMaskedArray&gt;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+<p>Here is an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ByteMaskedArray</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span>
+                <span class="n">RawArray</span><span class="p">([</span><span class="mf">5.7</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">,</span> <span class="mf">8.3</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">5.1</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">9.5</span><span class="p">,</span> <span class="mf">7.1</span><span class="p">,</span> <span class="mf">7.7</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span>
+                          <span class="mf">4.8</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">2.9</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">,</span> <span class="mf">7.3</span><span class="p">,</span> <span class="mf">4.9</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">11.2</span><span class="p">,</span> <span class="mf">6.1</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span>
+                          <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.9</span><span class="p">,</span> <span class="mf">7.6</span><span class="p">,</span> <span class="mf">6.3</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">,</span> <span class="mf">11.0</span><span class="p">,</span> <span class="mf">9.2</span><span class="p">,</span> <span class="mf">5.3</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">,</span> <span class="mf">6.4</span><span class="p">,</span> <span class="mf">2.8</span><span class="p">,</span>
+                          <span class="mf">1.4</span><span class="p">,</span> <span class="mf">5.8</span><span class="p">]),</span>
+                <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;ByteMaskedArray&gt;</span>
+<span class="w">    </span><span class="nt">&lt;valid_when&gt;</span>False<span class="nt">&lt;/valid_when&gt;</span>
+<span class="w">    </span><span class="nt">&lt;mask&gt;</span>True<span class="w"> </span>True<span class="w"> </span>False<span class="w"> </span>False<span class="w"> </span>True<span class="w"> </span>False<span class="w"> </span>False<span class="w"> </span>True<span class="w"> </span>True<span class="w"> </span>True<span class="w"> </span>True<span class="w"> </span>True<span class="nt">&lt;/mask&gt;</span>
+<span class="w">    </span><span class="nt">&lt;content&gt;&lt;RawArray&gt;</span>
+<span class="w">        </span><span class="nt">&lt;ptr&gt;</span>5.7<span class="w"> </span>4.5<span class="w"> </span>8.3<span class="w"> </span>4.1<span class="w"> </span>5.1<span class="w"> </span>4.1<span class="w"> </span>0.3<span class="w"> </span>6.4<span class="w"> </span>5.5<span class="w"> </span>9.5<span class="w"> </span>7.1<span class="w"> </span>7.7<span class="w"> </span>4.0<span class="w"> </span>4.8<span class="w"> </span>4.4<span class="w"> </span>2.9<span class="w"> </span>1.4<span class="w"> </span>4.8<span class="w"> </span>7.3<span class="w"> </span>4.9
+<span class="w">             </span>6.0<span class="w"> </span>0.6<span class="w"> </span>11.2<span class="w"> </span>6.1<span class="w"> </span>4.7<span class="w"> </span>4.1<span class="w"> </span>4.4<span class="w"> </span>5.9<span class="w"> </span>7.6<span class="w"> </span>6.3<span class="w"> </span>5.5<span class="w"> </span>11.0<span class="w"> </span>9.2<span class="w"> </span>5.3<span class="w"> </span>0.1<span class="w"> </span>1.2<span class="w"> </span>4.5<span class="w"> </span>6.4<span class="w"> </span>2.8
+<span class="w">             </span>1.4<span class="w"> </span>5.8<span class="nt">&lt;/ptr&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/RawArray&gt;&lt;/content&gt;</span>
+<span class="nt">&lt;/ByteMaskedArray&gt;</span>
+</pre></div>
+</div>
+<p>which represents the following logical data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">8.3</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>In addition to the properties and methods described in <a class="reference internal" href="ak.layout.Content.html"><span class="doc">ak.layout.Content</span></a>,
+a ByteMaskedArray has the following.</p>
+<section id="ak-layout-bytemaskedarray-init">
+<h2>ak.layout.ByteMaskedArray.__init__<a class="headerlink" href="#ak-layout-bytemaskedarray-init" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.layout.ByteMaskedArray.__init__">
+<span class="sig-prename descclassname"><span class="pre">ak.layout.ByteMaskedArray.</span></span><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_when</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.layout.ByteMaskedArray.__init__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-layout-bytemaskedarray-mask">
+<h2>ak.layout.ByteMaskedArray.mask<a class="headerlink" href="#ak-layout-bytemaskedarray-mask" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.layout.ByteMaskedArray.mask">
+<span class="sig-prename descclassname"><span class="pre">ak.layout.ByteMaskedArray.</span></span><span class="sig-name descname"><span class="pre">mask</span></span><a class="headerlink" href="#ak.layout.ByteMaskedArray.mask" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-layout-bytemaskedarray-content">
+<h2>ak.layout.ByteMaskedArray.content<a class="headerlink" href="#ak-layout-bytemaskedarray-content" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.layout.ByteMaskedArray.content">
+<span class="sig-prename descclassname"><span class="pre">ak.layout.ByteMaskedArray.</span></span><span class="sig-name descname"><span class="pre">content</span></span><a class="headerlink" href="#ak.layout.ByteMaskedArray.content" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-layout-bytemaskedarray-valid-when">
+<h2>ak.layout.ByteMaskedArray.valid_when<a class="headerlink" href="#ak-layout-bytemaskedarray-valid-when" title="Permalink to this headline">#</a></h2>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ak.layout.ByteMaskedArray.valid_when">
+<span class="sig-prename descclassname"><span class="pre">ak.layout.ByteMaskedArray.</span></span><span class="sig-name descname"><span class="pre">valid_when</span></span><a class="headerlink" href="#ak.layout.ByteMaskedArray.valid_when" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="ak-layout-bytemaskedarray-project">
+<h2>ak.layout.ByteMaskedArray.project<a class="headerlink" href="#ak-layout-bytemaskedarray-project" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.layout.ByteMaskedArray.project">
+<span class="sig-prename descclassname"><span class="pre">ak.layout.ByteMaskedArray.</span></span><span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.layout.ByteMaskedArray.project" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Returns a non-<a class="reference internal" href="ak.types.OptionType.html"><span class="doc">ak.types.OptionType</span></a> array containing only the valid elements.
+If <code class="docutils literal notranslate"><span class="pre">mask</span></code> is a signed 8-bit <a class="reference internal" href="ak.layout.Index.html"><span class="doc">ak.layout.Index</span></a> in which <code class="docutils literal notranslate"><span class="pre">0</span></code> means valid
+and <code class="docutils literal notranslate"><span class="pre">1</span></code> means missing, this <code class="docutils literal notranslate"><span class="pre">mask</span></code> is unioned with the ByteMaskedArray’s
+mask (after converting to <code class="docutils literal notranslate"><span class="pre">valid_when=False</span></code> to match this <code class="docutils literal notranslate"><span class="pre">mask</span></code>).</p>
+</section>
+<section id="ak-layout-bytemaskedarray-bytemask">
+<h2>ak.layout.ByteMaskedArray.bytemask<a class="headerlink" href="#ak-layout-bytemaskedarray-bytemask" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.layout.ByteMaskedArray.bytemask">
+<span class="sig-prename descclassname"><span class="pre">ak.layout.ByteMaskedArray.</span></span><span class="sig-name descname"><span class="pre">bytemask</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ak.layout.ByteMaskedArray.bytemask" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Returns an array of 8-bit values in which <code class="docutils literal notranslate"><span class="pre">0</span></code> means valid and <code class="docutils literal notranslate"><span class="pre">1</span></code> means missing.</p>
+</section>
+<section id="ak-layout-bytemaskedarray-simplify">
+<h2>ak.layout.ByteMaskedArray.simplify<a class="headerlink" href="#ak-layout-bytemaskedarray-simplify" title="Permalink to this headline">#</a></h2>
+<dl class="py method">
+<dt class="sig sig-object py" id="ak.layout.ByteMaskedArray.simplify">
+<span class="sig-prename descclassname"><span class="pre">ak.layout.ByteMaskedArray.</span></span><span class="sig-name descname"><span class="pre">simplify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ak.layout.ByteMaskedArray.simplify" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p>Combines this node with its <code class="docutils literal notranslate"><span class="pre">content</span></code> if the <code class="docutils literal notranslate"><span class="pre">content</span></code> also has
+<a class="reference internal" href="ak.types.OptionType.html"><span class="doc">ak.types.OptionType</span></a>; otherwise, this is a pass-through.
+In all cases, the output has the same logical meaning as the input.</p>
+<p>This method only operates one level deep.</p>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="ak.layout.IndexedOptionArray.html" title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">ak.layout.IndexedOptionArray</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="ak.layout.BitMaskedArray.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">ak.layout.BitMaskedArray</p>
+  </div>
+  <i class="fa-solid fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-layout-bytemaskedarray-init">
+   ak.layout.ByteMaskedArray.__init__
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-layout-bytemaskedarray-mask">
+   ak.layout.ByteMaskedArray.mask
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-layout-bytemaskedarray-content">
+   ak.layout.ByteMaskedArray.content
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-layout-bytemaskedarray-valid-when">
+   ak.layout.ByteMaskedArray.valid_when
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-layout-bytemaskedarray-project">
+   ak.layout.ByteMaskedArray.project
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-layout-bytemaskedarray-bytemask">
+   ak.layout.ByteMaskedArray.bytemask
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#ak-layout-bytemaskedarray-simplify">
+   ak.layout.ByteMaskedArray.simplify
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+<div id="searchbox"></div>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main-v1/docs-sphinx/ak.layout.ByteMaskedArray.rst">
+        <i class="fa-solid fa-pencil"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="_sources/ak.layout.ByteMaskedArray.rst.txt">
+        <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2023, Awkward Array development team.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

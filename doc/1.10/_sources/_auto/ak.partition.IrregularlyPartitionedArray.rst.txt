@@ -1,0 +1,27 @@
+ak.partition.IrregularlyPartitionedArray
+----------------------------------------
+
+Defined in `awkward.partition <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/partition.py>`__ on `line 637 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/partition.py#L637>`__.
+
+.. py:class:: ak.partition.IrregularlyPartitionedArray(self, partitions, stops=None)
+
+ak.partition.IrregularlyPartitionedArray.toPartitioned
+======================================================
+
+.. py:method:: ak.partition.IrregularlyPartitionedArray.toPartitioned(cls, layout, stops)
+
+ak.partition.IrregularlyPartitionedArray.stops
+==============================================
+
+.. py:attribute:: ak.partition.IrregularlyPartitionedArray.stops
+
+ak.partition.IrregularlyPartitionedArray.validityerror
+======================================================
+
+.. py:method:: ak.partition.IrregularlyPartitionedArray.validityerror(self)
+
+ak.partition.IrregularlyPartitionedArray.replace_partitions
+===========================================================
+
+.. py:method:: ak.partition.IrregularlyPartitionedArray.replace_partitions(self, partitions)
+

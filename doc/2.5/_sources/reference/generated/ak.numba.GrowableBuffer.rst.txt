@@ -1,0 +1,93 @@
+ak.numba.GrowableBuffer
+-----------------------
+
+.. py:module: ak.numba.GrowableBuffer
+
+Defined in `awkward.numba <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/__init__.py>`__ on `line 44 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/__init__.py#L44>`__.
+
+.. py:class:: ak.numba.GrowableBuffer(self, dtype, *, initial=1024, resize=8.0)
+
+
+
+.. _ak-numba-growablebuffer-_from_data:
+
+.. py:method:: ak.numba.GrowableBuffer._from_data(cls, panels, length_pos, resize)
+
+
+
+.. _ak-numba-growablebuffer-dtype:
+
+.. py:attribute:: ak.numba.GrowableBuffer.dtype
+
+
+
+.. _ak-numba-growablebuffer-__repr__:
+
+.. py:method:: ak.numba.GrowableBuffer.__repr__(self)
+
+
+
+.. _ak-numba-growablebuffer-_length:
+
+.. py:attribute:: ak.numba.GrowableBuffer._length
+
+
+
+.. _ak-numba-growablebuffer-_length_inc:
+
+.. py:method:: ak.numba.GrowableBuffer._length_inc(self, value)
+
+
+
+.. _ak-numba-growablebuffer-_pos:
+
+.. py:attribute:: ak.numba.GrowableBuffer._pos
+
+
+
+.. _ak-numba-growablebuffer-_pos_inc:
+
+.. py:method:: ak.numba.GrowableBuffer._pos_inc(self, value)
+
+
+
+.. _ak-numba-growablebuffer-__len__:
+
+.. py:method:: ak.numba.GrowableBuffer.__len__(self)
+
+
+
+.. _ak-numba-growablebuffer-last:
+
+.. py:method:: ak.numba.GrowableBuffer.last(self)
+
+
+
+.. _ak-numba-growablebuffer-append:
+
+.. py:method:: ak.numba.GrowableBuffer.append(self, datum)
+
+
+
+.. _ak-numba-growablebuffer-extend:
+
+.. py:method:: ak.numba.GrowableBuffer.extend(self, data)
+
+
+
+.. _ak-numba-growablebuffer-_add_panel:
+
+.. py:method:: ak.numba.GrowableBuffer._add_panel(self)
+
+
+
+.. _ak-numba-growablebuffer-snapshot:
+
+.. py:method:: ak.numba.GrowableBuffer.snapshot(self)
+
+
+
+.. _ak-numba-growablebuffer-clear:
+
+.. py:method:: ak.numba.GrowableBuffer.clear(self)
+

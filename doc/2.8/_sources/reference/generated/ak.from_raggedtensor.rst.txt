@@ -1,0 +1,17 @@
+ak.from_raggedtensor
+--------------------
+
+.. py:module: ak.from_raggedtensor
+
+Defined in `awkward.operations.ak_from_raggedtensor <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_from_raggedtensor.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/operations/ak_from_raggedtensor.py#L14>`__.
+
+.. py:function:: ak.from_raggedtensor(array)
+
+
+    :param array: (``tensorflow.RaggedTensor``):
+              RaggedTensor to convert into an  Awkward Array.
+
+Converts a TensorFlow RaggedTensor into an Awkward Array.
+
+If ``array`` contains any other data types the function raises an error.
+

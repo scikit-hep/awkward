@@ -1,0 +1,48 @@
+ak.any
+------
+
+.. py:module: ak.any
+
+Defined in `awkward.operations.ak_any <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_any.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/ak_any.py#L18>`__.
+
+.. py:function:: ak.any(array, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param axis: If None, combine all values from the array into
+             a single scalar result; if an int, group by that axis: ``0`` is the
+             outermost, ``1`` is the first level of nested lists, etc., and
+             negative ``axis`` counts from the innermost: ``-1`` is the innermost,
+             ``-2`` is the next level up, etc.
+    :type axis: None or int
+    :param keepdims: If False, this reducer decreases the number of
+                 dimensions by 1; if True, the reduced values are wrapped in a new
+                 length-1 dimension so that the result of this operation may be
+                 broadcasted with the original array.
+    :type keepdims: bool
+    :param mask_identity: If True, reducing over empty lists results in
+                      None (an option type); otherwise, reducing over empty lists
+                      results in the operation's identity.
+    :type mask_identity: bool
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Returns True in each group of elements from ``array`` (many types supported,
+including all Awkward Arrays and Records) if any values are True; False
+otherwise. Thus, it represents reduction over the "logical or" operation,
+whose identity is False (i.e. asking if there are any True values in an
+empty list results in False). This operation is the same as NumPy's
+`any <https://docs.scipy.org/doc/numpy/reference/generated/numpy.any.html>`__
+if all lists at a given dimension have the same length and no None values,
+but it generalizes to cases where they do not.
+
+See :py:obj:`ak.sum` for a more complete description of nested list and missing
+value (None) handling in reducers.
+

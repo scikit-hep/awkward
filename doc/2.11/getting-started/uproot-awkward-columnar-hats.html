@@ -1,0 +1,1747 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Uproot Awkward Columnar HATS &#8212; Awkward Array 2.11.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=b9a6aa19" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=1647406f"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'getting-started/uproot-awkward-columnar-hats';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.11';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/getting-started/uproot-awkward-columnar-hats.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Jagged, Ragged, Awkward Arrays!" href="jagged-ragged-awkward-arrays.html" />
+    <link rel="prev" title="10 minutes to Awkward Array" href="10-minutes-to-awkward-array.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.11" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.11.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.11.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user-guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../user-guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="what-is-an-awkward-array.html">What is an “Awkward” Array?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10-minutes-to-awkward-array.html">10 minutes to Awkward Array</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Uproot Awkward Columnar HATS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jagged-ragged-awkward-arrays.html">Jagged, Ragged, Awkward Arrays!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thinking-in-arrays.html">Thinking in arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="papers-and-talks.html">Papers and talks, citations</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Getting started</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Uproot Awkward Columnar HATS</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="uproot-awkward-columnar-hats">
+<h1>Uproot Awkward Columnar HATS<a class="headerlink" href="#uproot-awkward-columnar-hats" title="Link to this heading">#</a></h1>
+<p><em>Originally presented as <a class="reference external" href="https://github.com/jpivarski-talks/2021-06-14-uproot-awkward-columnar-hats/blob/main/3-awkward-array.ipynb">part</a> of <a class="reference external" href="https://indico.cern.ch/event/1042866/">CMS HATS training on June 14, 2021</a>.</em></p>
+<p><br><br><br><br><br></p>
+<section id="what-about-an-array-of-lists">
+<h2>What about an array of lists?<a class="headerlink" href="#what-about-an-array-of-lists" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skhep_testdata</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uproot</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">skhep_testdata</span><span class="o">.</span><span class="n">data_path</span><span class="p">(</span><span class="s2">&quot;uproot-HZZ.root&quot;</span><span class="p">))[</span><span class="s2">&quot;events&quot;</span><span class="p">]</span>
+<span class="n">events</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>name                 | typename                 | interpretation                
+---------------------+--------------------------+-------------------------------
+NJet                 | int32_t                  | AsDtype(&#39;&gt;i4&#39;)
+Jet_Px               | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Jet_Py               | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Jet_Pz               | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Jet_E                | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Jet_btag             | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Jet_ID               | bool[]                   | AsJagged(AsDtype(&#39;bool&#39;))
+NMuon                | int32_t                  | AsDtype(&#39;&gt;i4&#39;)
+Muon_Px              | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Muon_Py              | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Muon_Pz              | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Muon_E               | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Muon_Charge          | int32_t[]                | AsJagged(AsDtype(&#39;&gt;i4&#39;))
+Muon_Iso             | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+NElectron            | int32_t                  | AsDtype(&#39;&gt;i4&#39;)
+Electron_Px          | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Electron_Py          | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Electron_Pz          | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Electron_E           | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Electron_Charge      | int32_t[]                | AsJagged(AsDtype(&#39;&gt;i4&#39;))
+Electron_Iso         | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+NPhoton              | int32_t                  | AsDtype(&#39;&gt;i4&#39;)
+Photon_Px            | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Photon_Py            | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Photon_Pz            | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Photon_E             | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+Photon_Iso           | float[]                  | AsJagged(AsDtype(&#39;&gt;f4&#39;))
+MET_px               | float                    | AsDtype(&#39;&gt;f4&#39;)
+MET_py               | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicBottom_px  | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicBottom_py  | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicBottom_pz  | float                    | AsDtype(&#39;&gt;f4&#39;)
+MCleptonicBottom_px  | float                    | AsDtype(&#39;&gt;f4&#39;)
+MCleptonicBottom_py  | float                    | AsDtype(&#39;&gt;f4&#39;)
+MCleptonicBottom_pz  | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicWDecayQ... | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicWDecayQ... | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicWDecayQ... | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicWDecayQ... | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicWDecayQ... | float                    | AsDtype(&#39;&gt;f4&#39;)
+MChadronicWDecayQ... | float                    | AsDtype(&#39;&gt;f4&#39;)
+MClepton_px          | float                    | AsDtype(&#39;&gt;f4&#39;)
+MClepton_py          | float                    | AsDtype(&#39;&gt;f4&#39;)
+MClepton_pz          | float                    | AsDtype(&#39;&gt;f4&#39;)
+MCleptonPDGid        | int32_t                  | AsDtype(&#39;&gt;i4&#39;)
+MCneutrino_px        | float                    | AsDtype(&#39;&gt;f4&#39;)
+MCneutrino_py        | float                    | AsDtype(&#39;&gt;f4&#39;)
+MCneutrino_pz        | float                    | AsDtype(&#39;&gt;f4&#39;)
+NPrimaryVertices     | int32_t                  | AsDtype(&#39;&gt;i4&#39;)
+triggerIsoMu24       | bool                     | AsDtype(&#39;bool&#39;)
+EventWeight          | float                    | AsDtype(&#39;&gt;f4&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="p">[</span><span class="s2">&quot;Muon_Px&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[-52.9, 37.7],
+ [-0.816],
+ [49, 0.828],
+ [22.1, 76.7],
+ [45.2, 39.8],
+ [9.23, -5.79],
+ [12.5, 29.5],
+ [34.9],
+ [-53.2, 11.5],
+ [-67, -18.1],
+ ...,
+ [14.9],
+ [-24.2],
+ [-9.2],
+ [34.5, -31.6],
+ [-39.3],
+ [35.1],
+ [-29.8],
+ [1.14],
+ [23.9]]
+---------------
+backend: cpu
+nbytes: 34.7 kB
+type: 2421 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">events</span><span class="p">[</span><span class="s2">&quot;Muon_Px&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">entry_stop</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[[-52.89945602416992, 37.7377815246582],
+ [-0.8164593577384949],
+ [48.987831115722656, 0.8275666832923889],
+ [22.08833122253418, 76.6919174194336],
+ [45.171321868896484, 39.75095748901367],
+ [9.228110313415527, -5.793715000152588],
+ [12.538717269897461, 29.541839599609375],
+ [34.883758544921875],
+ [-53.16697311401367, 11.491869926452637],
+ [-67.01485443115234, -18.118755340576172],
+ [15.983028411865234, 34.68440628051758],
+ [-70.51190948486328, -38.028743743896484],
+ [58.94381332397461],
+ [-15.587870597839355],
+ [-122.33011627197266, -1.0597527027130127],
+ [-46.70415496826172, 39.020023345947266],
+ [51.29465866088867, 17.45092010498047],
+ [43.28120040893555],
+ [-45.92393493652344, 22.549766540527344],
+ [43.29360580444336, -33.28158187866211, -4.376191139221191]]
+</pre></div>
+</div>
+</div>
+</div>
+<p>This is what Awkward Array was made for. NumPy’s equivalent is cumbersome and inefficient.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">jagged_numpy</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="s2">&quot;Muon_Px&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">entry_stop</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;np&quot;</span><span class="p">)</span>
+<span class="n">jagged_numpy</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([array([-52.899456,  37.73778 ], dtype=float32),
+       array([-0.81645936], dtype=float32),
+       array([48.98783  ,  0.8275667], dtype=float32),
+       array([22.088331, 76.69192 ], dtype=float32),
+       array([45.17132 , 39.750957], dtype=float32),
+       array([ 9.22811 , -5.793715], dtype=float32),
+       array([12.538717, 29.54184 ], dtype=float32),
+       array([34.88376], dtype=float32),
+       array([-53.166973,  11.49187 ], dtype=float32),
+       array([-67.014854, -18.118755], dtype=float32),
+       array([15.983028, 34.684406], dtype=float32),
+       array([-70.51191 , -38.028744], dtype=float32),
+       array([58.943813], dtype=float32),
+       array([-15.587871], dtype=float32),
+       array([-122.33012  ,   -1.0597527], dtype=float32),
+       array([-46.704155,  39.020023], dtype=float32),
+       array([51.29466, 17.45092], dtype=float32),
+       array([43.2812], dtype=float32),
+       array([-45.923935,  22.549767], dtype=float32),
+       array([ 43.293606, -33.28158 ,  -4.376191], dtype=float32)],
+      dtype=object)
+</pre></div>
+</div>
+</div>
+</div>
+<p>What if I want the first item in each list as an array?</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">jagged_numpy</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ -52.899456  ,   -0.81645936,   48.98783   ,   22.088331  ,
+         45.17132   ,    9.22811   ,   12.538717  ,   34.88376   ,
+        -53.166973  ,  -67.014854  ,   15.983028  ,  -70.51191   ,
+         58.943813  ,  -15.587871  , -122.33012   ,  -46.704155  ,
+         51.29466   ,   43.2812    ,  -45.923935  ,   43.293606  ],
+      dtype=float32)
+</pre></div>
+</div>
+</div>
+</div>
+<p>This violates the rule from <a class="reference external" href="https://github.com/jpivarski-talks/2021-06-14-uproot-awkward-columnar-hats/blob/main/1-python-performance.ipynb">1-python-performance.ipynb</a>: don’t iterate in Python.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">jagged_awkward</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="s2">&quot;Muon_Px&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">entry_stop</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s2">&quot;ak&quot;</span><span class="p">)</span>
+<span class="n">jagged_awkward</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[-52.9, 37.7],
+ [-0.816],
+ [49, 0.828],
+ [22.1, 76.7],
+ [45.2, 39.8],
+ [9.23, -5.79],
+ [12.5, 29.5],
+ [34.9],
+ [-53.2, 11.5],
+ [-67, -18.1],
+ [16, 34.7],
+ [-70.5, -38],
+ [58.9],
+ [-15.6],
+ [-122, -1.06],
+ [-46.7, 39],
+ [51.3, 17.5],
+ [43.3],
+ [-45.9, 22.5],
+ [43.3, -33.3, -4.38]]
+----------------------
+backend: cpu
+nbytes: 312 B
+type: 20 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">jagged_awkward</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[-52.9,
+ -0.816,
+ 49,
+ 22.1,
+ 45.2,
+ 9.23,
+ 12.5,
+ 34.9,
+ -53.2,
+ -67,
+ 16,
+ -70.5,
+ 58.9,
+ -15.6,
+ -122,
+ -46.7,
+ 51.3,
+ 43.3,
+ -45.9,
+ 43.3]
+--------
+backend: cpu
+nbytes: 80 B
+type: 20 * float32</pre></div></div>
+</div>
+<p><br><br><br><br><br></p>
+</section>
+<section id="awkward-array-is-a-general-purpose-library-numpy-like-idioms-on-json-like-data">
+<h2>Awkward Array is a general-purpose library: NumPy-like idioms on JSON-like data<a class="headerlink" href="#awkward-array-is-a-general-purpose-library-numpy-like-idioms-on-json-like-data" title="Link to this heading">#</a></h2>
+<p><img alt="" src="../_images/pivarski-one-slide-summary.svg" /></p>
+<p><br><br><br><br><br></p>
+</section>
+<section id="main-idea-slicing-through-structure-is-computationally-inexpensive">
+<h2>Main idea: slicing through structure is computationally inexpensive<a class="headerlink" href="#main-idea-slicing-through-structure-is-computationally-inexpensive" title="Link to this heading">#</a></h2>
+<p>Slicing by field name doesn’t modify any large buffers and <a class="reference external" href="https://awkward-array.readthedocs.io/en/latest/_auto/ak.zip.html">ak.zip</a> only scans them to ensure they’re compatible (not even that if <code class="docutils literal notranslate"><span class="pre">depth_limit=1</span></code>).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">arrays</span><span class="p">()</span>
+<span class="n">array</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{NJet: 0, Jet_Px: [], Jet_Py: [], Jet_Pz: [], Jet_E: [], Jet_btag: [], ...},
+ {NJet: 1, Jet_Px: [-38.9], Jet_Py: [19.9], Jet_Pz: [-0.895], Jet_E: ..., ...},
+ {NJet: 0, Jet_Px: [], Jet_Py: [], Jet_Pz: [], Jet_E: [], Jet_btag: [], ...},
+ {NJet: 3, Jet_Px: [-71.7, 36.6, -28.9], Jet_Py: [93.6, ...], Jet_Pz: ..., ...},
+ {NJet: 2, Jet_Px: [3.88, 4.98], Jet_Py: [-75.2, ...], Jet_Pz: [...], ...},
+ {NJet: 2, Jet_Px: [-46.3, 27.7], Jet_Py: [27.3, ...], Jet_Pz: [...], ...},
+ {NJet: 1, Jet_Px: [-82.1], Jet_Py: [47.7], Jet_Pz: [-262], Jet_E: [279], ...},
+ {NJet: 1, Jet_Px: [27.9], Jet_Py: [-32.9], Jet_Pz: [231], Jet_E: [235], ...},
+ {NJet: 0, Jet_Px: [], Jet_Py: [], Jet_Pz: [], Jet_E: [], Jet_btag: [], ...},
+ {NJet: 1, Jet_Px: [37.9], Jet_Py: [-8.89], Jet_Pz: [-69.2], Jet_E: ..., ...},
+ ...,
+ {NJet: 1, Jet_Px: [-25.6], Jet_Py: [-20.6], Jet_Pz: [-113], Jet_E: [118], ...},
+ {NJet: 2, Jet_Px: [3.43, 38.3], Jet_Py: [45.6, ...], Jet_Pz: [...], ...},
+ {NJet: 1, Jet_Px: [34], Jet_Py: [58.9], Jet_Pz: [-17], Jet_E: [70.5], ...},
+ {NJet: 0, Jet_Px: [], Jet_Py: [], Jet_Pz: [], Jet_E: [], Jet_btag: [], ...},
+ {NJet: 1, Jet_Px: [37.1], Jet_Py: [20.1], Jet_Pz: [226], Jet_E: [230], ...},
+ {NJet: 2, Jet_Px: [-33.2, -26.1], Jet_Py: [-59.7, ...], Jet_Pz: [...], ...},
+ {NJet: 1, Jet_Px: [-3.71], Jet_Py: [-37.2], Jet_Pz: [41], Jet_E: [56], ...},
+ {NJet: 2, Jet_Px: [-36.4, -15.3], Jet_Py: [10.2, ...], Jet_Pz: [...], ...},
+ {NJet: 0, Jet_Px: [], Jet_Py: [], Jet_Pz: [], Jet_E: [], Jet_btag: [], ...}]
+--------------------------------------------------------------------------------
+backend: cpu
+nbytes: 868.1 kB
+type: 2421 * {
+    NJet: int32,
+    Jet_Px: var * float32,
+    Jet_Py: var * ...</pre></div></div>
+</div>
+<p>Think of this as zero-cost:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="o">.</span><span class="n">Muon_Px</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Py</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Pz</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [[-52.9, 37.7], [-0.816], ..., [23.9]] type=&#39;2421 * var * float32&#39;&gt;,
+ &lt;Array [[-11.7, 0.693], [-24.4], ..., [-35.7]] type=&#39;2421 * var * float32&#39;&gt;,
+ &lt;Array [[-8.16, -11.3], [20.2], ..., [162], [54.7]] type=&#39;2421 * var * float32&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>Think of this as zero-cost:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s2">&quot;px&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Px</span><span class="p">,</span> <span class="s2">&quot;py&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Py</span><span class="p">,</span> <span class="s2">&quot;pz&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Pz</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{px: -52.9, py: -11.7, pz: -8.16}, {px: 37.7, py: 0.693, pz: ..., ...}],
+ [{px: -0.816, py: -24.4, pz: 20.2}],
+ [{px: 49, py: -21.7, pz: 11.2}, {px: 0.828, py: 29.8, pz: 37}],
+ [{px: 22.1, py: -85.8, pz: 404}, {px: 76.7, py: -14, pz: 335}],
+ [{px: 45.2, py: 67.2, pz: -89.7}, {px: 39.8, py: 25.4, pz: 20.1}],
+ [{px: 9.23, py: 40.6, pz: -14.6}, {px: -5.79, py: -30.3, pz: 43}],
+ [{px: 12.5, py: -42.5, pz: -124}, {px: 29.5, py: -4.45, pz: -26.4}],
+ [{px: 34.9, py: -16, pz: 156}],
+ [{px: -53.2, py: 92, pz: 35.6}, {px: 11.5, py: -4.42, pz: -17.5}],
+ [{px: -67, py: 53.2, pz: 54.4}, {px: -18.1, py: -35.1, pz: 58}],
+ ...,
+ [{px: 14.9, py: 32, pz: -156}],
+ [{px: -24.2, py: -35, pz: -19.2}],
+ [{px: -9.2, py: -42.2, pz: -64.3}],
+ [{px: 34.5, py: 28.8, pz: -151}, {px: -31.6, py: -10.4, pz: -111}],
+ [{px: -39.3, py: -14.6, pz: 61.7}],
+ [{px: 35.1, py: -14.2, pz: 161}],
+ [{px: -29.8, py: -15.3, pz: -52.7}],
+ [{px: 1.14, py: 63.6, pz: 162}],
+ [{px: 23.9, py: -35.7, pz: 54.7}]]
+--------------------------------------------------------------------------
+backend: cpu
+nbytes: 65.3 kB
+type: 2421 * var * {
+    px: float32,
+    py: float32,
+    pz: float32
+}</pre></div></div>
+</div>
+<p>(The above is a manual version of <code class="docutils literal notranslate"><span class="pre">how=&quot;zip&quot;</span></code>.)</p>
+<p><br><br><br></p>
+<p>NumPy ufuncs work on these arrays (if they’re “<a class="reference external" href="https://awkward-array.readthedocs.io/en/latest/_auto/ak.broadcast_arrays.html">broadcastable</a>”).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">Muon_Px</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Py</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[54.2, 37.7],
+ [24.4],
+ [53.6, 29.8],
+ [88.6, 78],
+ [81, 47.2],
+ [41.6, 30.8],
+ [44.4, 29.9],
+ [38.4],
+ [106, 12.3],
+ [85.5, 39.5],
+ ...,
+ [35.3],
+ [42.6],
+ [43.2],
+ [45, 33.2],
+ [41.9],
+ [37.8],
+ [33.5],
+ [63.6],
+ [42.9]]
+--------------
+backend: cpu
+nbytes: 34.7 kB
+type: 2421 * var * float32</pre></div></div>
+</div>
+<p><br><br><br></p>
+<p>And there are specialized operations that only make sense in a variable-length context.</p>
+<p><a class="reference internal" href="../reference/generated/ak.cartesian.html#ak.cartesian" title="ak.cartesian"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.cartesian()</span></code></a></p>
+<p><img alt="" src="../_images/cartoon-cartesian.png" /></p>
+<p><a class="reference internal" href="../reference/generated/ak.combinations.html#ak.combinations" title="ak.combinations"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.combinations()</span></code></a></p>
+<p><img alt="" src="../_images/cartoon-combinations.png" /></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">cartesian</span><span class="p">((</span><span class="n">array</span><span class="o">.</span><span class="n">Muon_Px</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">Jet_Px</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [(-0.816, -38.9)],
+ [],
+ [(22.1, -71.7), (22.1, 36.6), (22.1, ...), ..., (76.7, 36.6), (76.7, -28.9)],
+ [(45.2, 3.88), (45.2, 4.98), (39.8, 3.88), (39.8, 4.98)],
+ [(9.23, -46.3), (9.23, 27.7), (-5.79, -46.3), (-5.79, 27.7)],
+ [(12.5, -82.1), (29.5, -82.1)],
+ [(34.9, 27.9)],
+ [],
+ [(-67, 37.9), (-18.1, 37.9)],
+ ...,
+ [(14.9, -25.6)],
+ [(-24.2, 3.43), (-24.2, 38.3)],
+ [(-9.2, 34)],
+ [],
+ [(-39.3, 37.1)],
+ [(35.1, -33.2), (35.1, -26.1)],
+ [(-29.8, -3.71)],
+ [(1.14, -36.4), (1.14, -15.3)],
+ []]
+------------------------------------------------------------------------------
+backend: cpu
+nbytes: 51.9 kB
+type: 2421 * var * (
+    float32,
+    float32
+)</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">Muon_Px</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[(-52.9, 37.7)],
+ [],
+ [(49, 0.828)],
+ [(22.1, 76.7)],
+ [(45.2, 39.8)],
+ [(9.23, -5.79)],
+ [(12.5, 29.5)],
+ [],
+ [(-53.2, 11.5)],
+ [(-67, -18.1)],
+ ...,
+ [],
+ [],
+ [],
+ [(34.5, -31.6)],
+ [],
+ [],
+ [],
+ [],
+ []]
+-----------------
+backend: cpu
+nbytes: 31.5 kB
+type: 2421 * var * (
+    float32,
+    float32
+)</pre></div></div>
+</div>
+<p><br><br><br><br><br></p>
+</section>
+<section id="arrays-can-have-custom-behavior">
+<h2>Arrays can have custom <a class="reference external" href="https://awkward-array.readthedocs.io/en/latest/ak.behavior.html">behavior</a><a class="headerlink" href="#arrays-can-have-custom-behavior" title="Link to this heading">#</a></h2>
+<p>The following come from the new <a class="reference external" href="https://github.com/scikit-hep/vector#readme">Vector</a> library.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">vector</span>
+<span class="n">vector</span><span class="o">.</span><span class="n">register_awkward</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">muons</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s2">&quot;px&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Px</span><span class="p">,</span> <span class="s2">&quot;py&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Py</span><span class="p">,</span> <span class="s2">&quot;pz&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_Pz</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Muon_E</span><span class="p">},</span> <span class="n">with_name</span><span class="o">=</span><span class="s2">&quot;Momentum4D&quot;</span><span class="p">)</span>
+<span class="n">muons</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{px: -52.9, py: -11.7, pz: -8.16, E: 54.8}, {px: 37.7, py: 0.693, ...}],
+ [{px: -0.816, py: -24.4, pz: 20.2, E: 31.7}],
+ [{px: 49, py: -21.7, pz: 11.2, E: 54.7}, {px: 0.828, py: 29.8, ...}],
+ [{px: 22.1, py: -85.8, pz: 404, E: 413}, {px: 76.7, py: -14, ...}],
+ [{px: 45.2, py: 67.2, pz: -89.7, E: 121}, {px: 39.8, py: 25.4, ...}],
+ [{px: 9.23, py: 40.6, pz: -14.6, E: 44.1}, {px: -5.79, py: -30.3, ...}],
+ [{px: 12.5, py: -42.5, pz: -124, E: 132}, {px: 29.5, py: -4.45, ...}],
+ [{px: 34.9, py: -16, pz: 156, E: 160}],
+ [{px: -53.2, py: 92, pz: 35.6, E: 112}, {px: 11.5, py: -4.42, ...}],
+ [{px: -67, py: 53.2, pz: 54.4, E: 101}, {px: -18.1, py: -35.1, ...}],
+ ...,
+ [{px: 14.9, py: 32, pz: -156, E: 160}],
+ [{px: -24.2, py: -35, pz: -19.2, E: 46.7}],
+ [{px: -9.2, py: -42.2, pz: -64.3, E: 77.4}],
+ [{px: 34.5, py: 28.8, pz: -151, E: 157}, {px: -31.6, py: -10.4, ...}],
+ [{px: -39.3, py: -14.6, pz: 61.7, E: 74.6}],
+ [{px: 35.1, py: -14.2, pz: 161, E: 165}],
+ [{px: -29.8, py: -15.3, pz: -52.7, E: 62.4}],
+ [{px: 1.14, py: 63.6, pz: 162, E: 174}],
+ [{px: 23.9, py: -35.7, pz: 54.7, E: 69.6}]]
+--------------------------------------------------------------------------
+backend: cpu
+nbytes: 80.6 kB
+type: 2421 * var * Momentum4D[
+    px: float32,
+    py: float32,
+    pz: floa...</pre></div></div>
+</div>
+<p>This is an array of lists of vectors, and methods like <code class="docutils literal notranslate"><span class="pre">pt</span></code>, <code class="docutils literal notranslate"><span class="pre">eta</span></code>, <code class="docutils literal notranslate"><span class="pre">phi</span></code> apply through the whole array.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">muons</span><span class="o">.</span><span class="n">pt</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[54.2, 37.7],
+ [24.4],
+ [53.6, 29.8],
+ [88.6, 78],
+ [81, 47.2],
+ [41.6, 30.8],
+ [44.4, 29.9],
+ [38.4],
+ [106, 12.3],
+ [85.5, 39.5],
+ ...,
+ [35.3],
+ [42.6],
+ [43.2],
+ [45, 33.2],
+ [41.9],
+ [37.8],
+ [33.5],
+ [63.6],
+ [42.9]]
+--------------
+backend: cpu
+nbytes: 34.7 kB
+type: 2421 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">muons</span><span class="o">.</span><span class="n">eta</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[-0.15, -0.295],
+ [0.754],
+ [0.207, 1.04],
+ [2.22, 2.16],
+ [-0.955, 0.414],
+ [-0.345, 1.13],
+ [-1.76, -0.796],
+ [2.11],
+ [0.329, -1.15],
+ [0.6, 1.18],
+ ...,
+ [-2.19],
+ [-0.437],
+ [-1.19],
+ [-1.92, -1.92],
+ [1.18],
+ [2.15],
+ [-1.24],
+ [1.67],
+ [1.06]]
+-----------------
+backend: cpu
+nbytes: 34.7 kB
+type: 2421 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">muons</span><span class="o">.</span><span class="n">phi</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[-2.92, 0.0184],
+ [-1.6],
+ [-0.417, 1.54],
+ [-1.32, -0.18],
+ [0.979, 0.569],
+ [1.35, -1.76],
+ [-1.28, -0.149],
+ [-0.43],
+ [2.09, -0.367],
+ [2.47, -2.05],
+ ...,
+ [1.13],
+ [-2.17],
+ [-1.79],
+ [0.696, -2.82],
+ [-2.79],
+ [-0.384],
+ [-2.67],
+ [1.55],
+ [-0.98]]
+-----------------
+backend: cpu
+nbytes: 34.7 kB
+type: 2421 * var * float32</pre></div></div>
+</div>
+<p><br><br><br></p>
+<p>Let’s try an example: ΔR(muons, jets)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">jets</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s2">&quot;px&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Jet_Px</span><span class="p">,</span> <span class="s2">&quot;py&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Jet_Py</span><span class="p">,</span> <span class="s2">&quot;pz&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Jet_Pz</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span> <span class="n">array</span><span class="o">.</span><span class="n">Jet_E</span><span class="p">},</span> <span class="n">with_name</span><span class="o">=</span><span class="s2">&quot;Momentum4D&quot;</span><span class="p">)</span>
+<span class="n">jets</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [{px: -38.9, py: 19.9, pz: -0.895, E: 44.1}],
+ [],
+ [{px: -71.7, py: 93.6, pz: 196, E: 230}, ..., {px: -28.9, py: 9.32, ...}],
+ [{px: 3.88, py: -75.2, pz: -360, E: 368}, {px: 4.98, py: -39.2, ...}],
+ [{px: -46.3, py: 27.3, pz: 51.4, E: 74.4}, {px: 27.7, py: -14.5, ...}],
+ [{px: -82.1, py: 47.7, pz: -262, E: 279}],
+ [{px: 27.9, py: -32.9, pz: 231, E: 235}],
+ [],
+ [{px: 37.9, py: -8.89, pz: -69.2, E: 79.9}],
+ ...,
+ [{px: -25.6, py: -20.6, pz: -113, E: 118}],
+ [{px: 3.43, py: 45.6, pz: -130, E: 138}, {px: 38.3, py: -3.39, ...}],
+ [{px: 34, py: 58.9, pz: -17, E: 70.5}],
+ [],
+ [{px: 37.1, py: 20.1, pz: 226, E: 230}],
+ [{px: -33.2, py: -59.7, pz: -29, E: 74.9}, {px: -26.1, py: -19.1, ...}],
+ [{px: -3.71, py: -37.2, pz: 41, E: 56}],
+ [{px: -36.4, py: 10.2, pz: 226, E: 230}, {px: -15.3, py: -27.2, ...}],
+ []]
+---------------------------------------------------------------------------
+backend: cpu
+nbytes: 63.7 kB
+type: 2421 * var * Momentum4D[
+    px: float32,
+    py: float32,
+    pz: floa...</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">muons</span><span class="p">),</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">jets</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [2, 1, 2, 2, 2, 2, 2, 1, ..., 1, 2, 1, 1, 1, 1, 1] type=&#39;2421 * int64&#39;&gt;,
+ &lt;Array [0, 1, 0, 3, 2, 2, 1, 1, ..., 1, 0, 1, 2, 1, 2, 0] type=&#39;2421 * int64&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ms</span><span class="p">,</span> <span class="n">js</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">cartesian</span><span class="p">((</span><span class="n">muons</span><span class="p">,</span> <span class="n">jets</span><span class="p">)))</span>
+<span class="n">ms</span><span class="p">,</span> <span class="n">js</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;MomentumArray4D [[], [{px: -0.816, ...}], ..., []] type=&#39;2421 * var * Mome...&#39;&gt;,
+ &lt;MomentumArray4D [[], [{px: -38.9, ...}], ..., [...], []] type=&#39;2421 * var ...&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">ms</span><span class="p">),</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">js</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [0, 1, 0, 6, 4, 4, 2, 1, ..., 1, 0, 1, 2, 1, 2, 0] type=&#39;2421 * int64&#39;&gt;,
+ &lt;Array [0, 1, 0, 6, 4, 4, 2, 1, ..., 1, 0, 1, 2, 1, 2, 0] type=&#39;2421 * int64&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ms</span><span class="o">.</span><span class="n">deltaR</span><span class="p">(</span><span class="n">js</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[],
+ [2.15],
+ [],
+ [2.9, 1.99, 2.33, 2.56, 0.972, 3.13],
+ [2.82, 3.32, 3.4, 2.21],
+ [1.74, 1.9, 1.93, 1.6],
+ [2.38, 2.92],
+ [0.515],
+ [],
+ [3.33, 3.1],
+ ...,
+ [2.7],
+ [2.93, 2.38],
+ [2.99],
+ [],
+ [3.23],
+ [3.08, 2.55],
+ [2.4],
+ [1.55, 2.94],
+ []]
+--------------------------------------
+backend: cpu
+nbytes: 35.6 kB
+type: 2421 * var * float32</pre></div></div>
+</div>
+<p><br><br><br></p>
+<p>And another: muon pairs (all combinations, not just the first two per event).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">muons</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[2,
+ 1,
+ 2,
+ 2,
+ 2,
+ 2,
+ 2,
+ 1,
+ 2,
+ 2,
+ ...,
+ 1,
+ 1,
+ 1,
+ 2,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1]
+-----
+backend: cpu
+nbytes: 19.4 kB
+type: 2421 * int64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span><span class="p">,</span> <span class="n">m2</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">muons</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">m1</span><span class="p">,</span> <span class="n">m2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;MomentumArray4D [[{px: -52.9, py: -11.7, ...}], ..., []] type=&#39;2421 * var ...&#39;&gt;,
+ &lt;MomentumArray4D [[{px: 37.7, py: 0.693, ...}], ..., []] type=&#39;2421 * var *...&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">m1</span><span class="p">),</span> <span class="n">ak</span><span class="o">.</span><span class="n">num</span><span class="p">(</span><span class="n">m2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(&lt;Array [1, 0, 1, 1, 1, 1, 1, 0, ..., 0, 1, 0, 0, 0, 0, 0] type=&#39;2421 * int64&#39;&gt;,
+ &lt;Array [1, 0, 1, 1, 1, 1, 1, 0, ..., 0, 1, 0, 0, 0, 0, 0] type=&#39;2421 * int64&#39;&gt;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{x: -15.2, y: -11, z: -19.5, t: 94.2}],
+ [],
+ [{x: 49.8, y: 8.08, z: 48.1, t: 102}],
+ [{x: 98.8, y: -99.8, z: 739, t: 758}],
+ [{x: 84.9, y: 92.7, z: -69.6, t: 172}],
+ [{x: 3.43, y: 10.3, z: 28.3, t: 97}],
+ [{x: 42.1, y: -47, z: -151, t: 172}],
+ [],
+ [{x: -41.7, y: 87.6, z: 18.2, t: 133}],
+ [{x: -85.1, y: 18.1, z: 112, t: 172}],
+ ...,
+ [],
+ [],
+ [],
+ [{x: 2.94, y: 18.4, z: -262, t: 273}],
+ [],
+ [],
+ [],
+ [],
+ []]
+-----------------------------------------
+backend: cpu
+nbytes: 43.7 kB
+type: 2421 * var * Momentum4D[
+    x: float32,
+    y: float32,
+    z: float32...</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span><span class="p">)</span><span class="o">.</span><span class="n">mass</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[90.2],
+ [],
+ [74.7],
+ [89.8],
+ [94.9],
+ [92.1],
+ [53.4],
+ [],
+ [89.8],
+ [96],
+ ...,
+ [],
+ [],
+ [],
+ [76],
+ [],
+ [],
+ [],
+ [],
+ []]
+--------
+backend: cpu
+nbytes: 25.5 kB
+type: 2421 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hist</span>
+
+<span class="n">hist</span><span class="o">.</span><span class="n">Hist</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">Reg</span><span class="p">(</span><span class="mi">120</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mass&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">Double</span><span class="p">()</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">flatten</span><span class="p">((</span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span><span class="p">)</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="kc">None</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/b8592055e22d5b3c80d0f2465100354786614b424f9e4df87ea7309ccad07715.png" src="../_images/b8592055e22d5b3c80d0f2465100354786614b424f9e4df87ea7309ccad07715.png" />
+</div>
+</div>
+<p><br><br><br></p>
+<section id="it-doesn-t-matter-which-coordinates-were-used-to-construct-it">
+<h3>It doesn’t matter which coordinates were used to construct it<a class="headerlink" href="#it-doesn-t-matter-which-coordinates-were-used-to-construct-it" title="Link to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">array2</span> <span class="o">=</span> <span class="n">uproot</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+    <span class="s2">&quot;https://github.com/jpivarski-talks/2023-12-18-hsf-india-tutorial-bhubaneswar/raw/main/data/SMHiggsToZZTo4L.root:Events&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">arrays</span><span class="p">([</span><span class="s2">&quot;Muon_pt&quot;</span><span class="p">,</span> <span class="s2">&quot;Muon_eta&quot;</span><span class="p">,</span> <span class="s2">&quot;Muon_phi&quot;</span><span class="p">,</span> <span class="s2">&quot;Muon_charge&quot;</span><span class="p">],</span> <span class="n">entry_stop</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">particle</span>
+
+<span class="n">muons2</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">zip</span><span class="p">({</span><span class="s2">&quot;pt&quot;</span><span class="p">:</span> <span class="n">array2</span><span class="o">.</span><span class="n">Muon_pt</span><span class="p">,</span> <span class="s2">&quot;eta&quot;</span><span class="p">:</span> <span class="n">array2</span><span class="o">.</span><span class="n">Muon_eta</span><span class="p">,</span> <span class="s2">&quot;phi&quot;</span><span class="p">:</span> <span class="n">array2</span><span class="o">.</span><span class="n">Muon_phi</span><span class="p">,</span> <span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="n">array2</span><span class="o">.</span><span class="n">Muon_charge</span><span class="p">},</span> <span class="n">with_name</span><span class="o">=</span><span class="s2">&quot;Momentum4D&quot;</span><span class="p">)</span>
+<span class="n">muons2</span><span class="p">[</span><span class="s2">&quot;mass&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">particle</span><span class="o">.</span><span class="n">Particle</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;mu-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mass</span> <span class="o">/</span> <span class="mf">1000.0</span>
+<span class="n">muons2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{pt: 63, eta: -0.719, phi: 2.97, q: 1, mass: 0.106}, ..., {pt: 4.05, ...}],
+ [],
+ [],
+ [{pt: 54.3, eta: -1.06, phi: -0.362, q: 1, mass: 0.106}, ..., {pt: 3.49, ...}],
+ [],
+ [{pt: 38.5, eta: 0.315, phi: 2.05, q: -1, mass: 0.106}, {pt: 47, ...}],
+ [{pt: 4.45, eta: -0.986, phi: 1.12, q: 1, mass: 0.106}],
+ [],
+ [],
+ [],
+ ...,
+ [],
+ [{pt: 6.47, eta: -1.08, phi: -2.1, q: -1, mass: 0.106}, {pt: 16.2, ...}],
+ [],
+ [{pt: 33.8, eta: 1.15, phi: -2.67, q: 1, mass: 0.106}, {pt: 16.4, ...}],
+ [{pt: 6.39, eta: -1.47, phi: 0.895, q: 1, mass: 0.106}, ..., {pt: 8.33, ...}],
+ [],
+ [{pt: 35.9, eta: 1.4, phi: -2.86, q: 1, mass: 0.106}],
+ [{pt: 15.1, eta: -0.84, phi: 0.0732, q: 1, mass: 0.106}],
+ []]
+--------------------------------------------------------------------------------
+backend: cpu
+nbytes: 4.3 MB
+type: 100000 * var * Momentum4D[
+    pt: float32,
+    eta: float32,
+    phi: ...</pre></div></div>
+</div>
+<p>As long as you use properties (dots, not strings in brackets), you don’t need to care what coordinates it’s based on.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">muons2</span><span class="o">.</span><span class="n">px</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[-62.1, 19.5, 2.05],
+ [],
+ [],
+ [50.8, 22.4, 13, -1.88, 3.76, 6.11, -1.54],
+ [],
+ [-17.7, 19.1],
+ [1.93],
+ [],
+ [],
+ [],
+ ...,
+ [],
+ [-3.29, -15.6],
+ [],
+ [-30, -16.2],
+ [4, 18.7, -12.8, -8.32],
+ [],
+ [-34.5],
+ [15],
+ []]
+--------------------------------------------
+backend: cpu
+nbytes: 1.4 MB
+type: 100000 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">muons2</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[10.9, -32.7, 3.49],
+ [],
+ [],
+ [-19.3, -7.1, 51.2, 3.9, -3.8, -5.76, 3.13],
+ [],
+ [34.2, -42.9],
+ [4.01],
+ [],
+ [],
+ [],
+ ...,
+ [],
+ [-5.57, 4.39],
+ [],
+ [-15.5, -2.18],
+ [4.99, -2.66, 15.1, -0.266],
+ [],
+ [-10.1],
+ [1.1],
+ []]
+---------------------------------------------
+backend: cpu
+nbytes: 1.4 MB
+type: 100000 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">muons2</span><span class="o">.</span><span class="n">pz</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[-49.3, -38, -1.32],
+ [],
+ [],
+ [-68.8, -5.88, -1.4, 3.65, -6.45, -8.88, 2.96],
+ [],
+ [12.3, -5.59],
+ [-5.14],
+ [],
+ [],
+ [],
+ ...,
+ [],
+ [-8.39, -8.74],
+ [],
+ [48, 3.9],
+ [-13.1, -42.2, 5.85, 40.8],
+ [],
+ [68.1],
+ [-14.2],
+ []]
+------------------------------------------------
+backend: cpu
+nbytes: 1.4 MB
+type: 100000 * var * float32</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">muons2</span><span class="o">.</span><span class="n">E</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[80, 53.8, 4.26],
+ [],
+ [],
+ [87.7, 24.2, 52.9, 5.67, 8.38, 12.2, 4.58],
+ [],
+ [40.4, 47.3],
+ [6.8],
+ [],
+ [],
+ [],
+ ...,
+ [],
+ [10.6, 18.4],
+ [],
+ [58.7, 16.8],
+ [14.6, 46.2, 20.7, 41.7],
+ [],
+ [76.9],
+ [20.7],
+ []]
+--------------------------------------------
+backend: cpu
+nbytes: 2.0 MB
+type: 100000 * var * float64</pre></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m1</span><span class="p">,</span> <span class="n">m2</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unzip</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">muons2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">hist</span><span class="o">.</span><span class="n">Hist</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">Log</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;mass&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">Double</span><span class="p">()</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+    <span class="n">ak</span><span class="o">.</span><span class="n">flatten</span><span class="p">((</span><span class="n">m1</span> <span class="o">+</span> <span class="n">m2</span><span class="p">)</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="kc">None</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/a439583e6d3dacfc799d45970d45faf581880ce25dd308de3cd34672e2f48f73.png" src="../_images/a439583e6d3dacfc799d45970d45faf581880ce25dd308de3cd34672e2f48f73.png" />
+</div>
+</div>
+<p><br><br><br></p>
+</section>
+</section>
+<section id="awkward-arrays-and-vector-in-numba">
+<h2>Awkward Arrays and Vector in Numba<a class="headerlink" href="#awkward-arrays-and-vector-in-numba" title="Link to this heading">#</a></h2>
+<p>Remember Numba, the JIT-compiler from <a class="reference external" href="https://github.com/jpivarski-talks/2021-06-14-uproot-awkward-columnar-hats/blob/main/1-python-performance.ipynb">1-python-performance.ipynb</a>? Awkward Array and Vector have been implemented in Numba’s compiler.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nb</span>
+
+<span class="nd">@nb</span><span class="o">.</span><span class="n">njit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">first_big_dimuon</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">event</span><span class="p">)):</span>
+            <span class="n">mu1</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">event</span><span class="p">)):</span>
+                <span class="n">mu2</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">dimuon</span> <span class="o">=</span> <span class="n">mu1</span> <span class="o">+</span> <span class="n">mu2</span>
+                <span class="k">if</span> <span class="n">dimuon</span><span class="o">.</span><span class="n">mass</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">dimuon</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">first_big_dimuon</span><span class="p">(</span><span class="n">muons2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>MomentumObject4D(pt=47.82986068725586, phi=-2.6673949400531214, eta=-1.3629037141799927, mass=89.49191465603693)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="10-minutes-to-awkward-array.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">10 minutes to Awkward Array</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="jagged-ragged-awkward-arrays.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Jagged, Ragged, Awkward Arrays!</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-about-an-array-of-lists">What about an array of lists?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#awkward-array-is-a-general-purpose-library-numpy-like-idioms-on-json-like-data">Awkward Array is a general-purpose library: NumPy-like idioms on JSON-like data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main-idea-slicing-through-structure-is-computationally-inexpensive">Main idea: slicing through structure is computationally inexpensive</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#arrays-can-have-custom-behavior">Arrays can have custom behavior</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#it-doesn-t-matter-which-coordinates-were-used-to-construct-it">It doesn’t matter which coordinates were used to construct it</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#awkward-arrays-and-vector-in-numba">Awkward Arrays and Vector in Numba</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/getting-started/uproot-awkward-columnar-hats.ipynb">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/getting-started/uproot-awkward-columnar-hats.ipynb.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

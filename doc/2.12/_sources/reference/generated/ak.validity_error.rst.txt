@@ -1,0 +1,22 @@
+ak.validity_error
+=================
+
+Defined in `awkward.operations.ak_validity_error <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_validity_error.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_validity_error.py#L12>`__.
+
+.. py:function:: ak.validity_error(array, *, exception=False)
+
+   Returns an error message if the array has a structural error, or empty if valid.
+
+   Checks for errors in the structure of the array, such as indexes that run
+   beyond the length of a node's ``content``, etc. Either an error is raised or
+   a string describing the error is returned.
+
+   See also :py:obj:`ak.is_valid`.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param exception: If True, validity errors raise exceptions.
+   :type exception: bool
+
+   :returns: An empty string if ``array`` is valid, or a string describing the structural
+             error otherwise.
+

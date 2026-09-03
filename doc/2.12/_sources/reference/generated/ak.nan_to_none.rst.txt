@@ -1,0 +1,22 @@
+ak.nan_to_none
+==============
+
+Defined in `awkward.operations.ak_nan_to_none <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_nan_to_none.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/e8ade13f5a98a83c87023d381a827eb9b92c9a56/src/awkward/operations/ak_nan_to_none.py#L17>`__.
+
+.. py:function:: ak.nan_to_none(array, *, highlevel: bool = True, behavior: awkward._typing.Mapping | None = None, attrs: awkward._typing.Mapping | None = None)
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Converts NaN ("not a number") into None, i.e. missing values with option-type.
+
+   See also :py:obj:`ak.nan_to_num` to convert NaN or infinity to specified values.
+

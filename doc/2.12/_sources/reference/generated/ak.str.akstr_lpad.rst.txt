@@ -1,0 +1,14 @@
+ak.str.akstr_lpad
+=================
+
+.. py:module:: awkward.operations.str.akstr_lpad
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_lpad.lpad
+
+

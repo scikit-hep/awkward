@@ -1,0 +1,99 @@
+ak.to_json
+----------
+
+.. py:module: ak.to_json
+
+Defined in `awkward.operations.ak_to_json <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/operations/ak_to_json.py>`__ on `line 21 <https://github.com/scikit-hep/awkward-1.0/blob/3d0cdec1725886aef91d418587f5ae3955ebf6ca/src/awkward/operations/ak_to_json.py#L21>`__.
+
+.. py:function:: ak.to_json(array, file=None, *, line_delimited=False, num_indent_spaces=None, num_readability_spaces=0, nan_string=None, posinf_string=None, neginf_string=None, complex_record_fields=None, convert_bytes=None, convert_other=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param file: If None, this function returns
+             JSON-encoded bytes. Otherwise, this function has no return value.
+             If a string/pathlib.Path, this function opens a file with that name, writes JSON
+             data, and closes the file. If that path has a URI protocol (like
+             "https://" or "s3://"), this function attempts to open the file with
+             the fsspec library. If a file-like object with a ``write`` method,
+             this function writes to the object, but does not close it.
+    :type file: None, path-like, or file-like object
+    :param line_delimited: If False, a single JSON document is written,
+                       representing the entire array or record. If True, each element of the
+                       array (or just the one record) is written on a separate line of text,
+                       separated by ``"\n"``. If a string, such as ``"\r\n"``, it is taken as a
+                       custom line delimiter. (Use ``os.linesep`` for a platform-dependent
+                       line delimiter.)
+    :type line_delimited: bool or str
+    :param num_indent_spaces: Number of spaces to indent nested
+                          elements, for pretty-printed JSON. If None, the JSON output is written
+                          on one line of text. Ignored if ``line_delimited`` is True or a string.
+    :type num_indent_spaces: None or nonnegative int
+    :param num_readability_spaces: Number of spaces to include after
+                               commas (``,``) and colons (``:``), for pretty-printed JSON.
+    :type num_readability_spaces: nonnegative int
+    :param nan_string: If not None, floating-point NaN values will be
+                   replaced with this string instead of a JSON number.
+    :type nan_string: None or str
+    :param posinf_string: If not None, floating-point positive infinity
+                      values will be replaced with this string instead of a JSON number.
+    :type posinf_string: None or str
+    :param neginf_string: If not None, floating-point negative infinity
+                      values will be replaced with this string instead of a JSON number.
+    :type neginf_string: None or str
+    :param complex_record_fields: If not None, defines a pair of
+                              field names to interpret records as complex numbers, such as
+                              ``("real", "imag")``.
+    :type complex_record_fields: None or (str, str)
+    :param convert_bytes: If not None, this function is applied to
+                      all Python 3 bytes objects to produce something JSON serializable,
+                      such as a string using UTF-8 or Base64 encoding, lists of integers, etc.
+    :type convert_bytes: None or function
+    :param convert_other: Passed to ``json.dump`` or ``json.dumps``
+                      as ``default`` to convert any other objects that :py:obj:`ak.to_list` would return
+                      but are not JSON serializable.
+    :type convert_other: None or function
+
+Converts ``array`` (many types supported, including all Awkward Arrays and
+Records) into JSON text. Returns bytes (encoded JSON) if ``file`` is None;
+otherwise, this function returns nothing and writes to a file.
+
+This function converts the array into Python objects with :py:obj:`ak.to_list`, performs
+some conversions to make the data JSON serializable (``nan_string``,
+``posinf_string``, ``neginf_string``, ``complex_record_fields``, ``convert_bytes``,
+``convert_other``), then uses ``json.dumps`` to return a string or ``json.dump``
+to write to a file (depending on the value of ``file``).
+
+If ``line_delimited`` is True or a line-delimiter string like ``"\r\n"``/``os.linesep``,
+the output is line-delimited JSON, variously referred to as "ldjson", "ndjson", and
+"jsonl". (Use an appropriate file extension!)
+
+To pretty-print the JSON, set ``num_indent_spaces=4, num_readability_spaces=1`` (for
+example).
+
+Awkward Array types have the following JSON translations.
+
+* :py:obj:`ak.types.OptionType`: missing values are converted into None.
+* :py:obj:`ak.types.ListType`: converted into JSON lists.
+* :py:obj:`ak.types.RegularType`: also converted into JSON lists. JSON (and
+  Python) forms lose information about the regularity of list lengths.
+* :py:obj:`ak.types.ListType` or :py:obj:`ak.types.RegularType` with parameter ``"__array__"``
+  equal to ``"string"``: converted into JSON strings.
+* :py:obj:`ak.types.RecordType` without field names: converted into JSON
+  objects with numbers as strings for keys.
+* :py:obj:`ak.types.RecordType` with field names: converted into JSON objects.
+* :py:obj:`ak.types.UnionType`: JSON data are naturally heterogeneous.
+
+If the array contains any NaN (not a number), infinite values, or
+imaginary/complex types, ``nan_string``, ``posinf_string``, and/or ``neginf_string``
+_must_ be supplied.
+
+If the array contains any raw bytestrings (``"__array__"`` equal to ``"bytestring"``),
+``convert_bytes`` _must_ be supplied. To interpret as strings, use ``bytes.decode``.
+To Base64-encode, use ``lambda x: base64.b64encode(x).decode()``.
+
+Other non-serializable types are only possible through custom behaviors that
+override ``__getitem__`` (which might return arbitrary Python objects). Use
+``convert_other`` to detect these types and convert them.
+
+See also :py:obj:`ak.from_json`.
+

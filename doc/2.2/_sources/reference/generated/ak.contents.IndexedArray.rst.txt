@@ -1,0 +1,385 @@
+ak.contents.IndexedArray
+------------------------
+
+.. py:module: ak.contents.IndexedArray
+
+Defined in `awkward.contents.indexedarray <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/contents/indexedarray.py>`__ on `line 38 <https://github.com/scikit-hep/awkward-1.0/blob/1b1211e8856ad177e4c584195af765febd21974a/src/awkward/contents/indexedarray.py#L38>`__.
+
+.. py:class:: ak.contents.IndexedArray(self, index, content, *, parameters=None)
+
+IndexedArray is a general-purpose tool for *lazily* changing the order of
+and/or duplicating some ``content`` with a
+`np.take <https://docs.scipy.org/doc/numpy/reference/generated/numpy.take.html>`__
+over the integer buffer ``index.
+
+It has many uses:
+
+* representing a lazily applied slice.
+* simulating pointers into another collection.
+* emulating the dictionary encoding of Apache Arrow and Parquet.
+
+If the ``__array__`` parameter is ``"categorical"``, the contents must be unique.
+Some operations are optimized (for instance, ``==`` only compares ``index`` integers)
+and the array can be converted to and from Arrow/Parquet's dictionary encoding.
+
+To illustrate how the constructor arguments are interpreted, the following is a
+simplified implementation of ``__init__``, ``__len__``, and ``__getitem__``:
+
+.. code-block:: python
+
+
+    class IndexedArray(Content):
+        def __init__(self, index, content):
+            assert isinstance(index, (Index32, IndexU32, Index64))
+            assert isinstance(content, Content)
+            for x in index:
+                assert 0 <= x < len(content)  # index[i] must not be negative
+            self.index = index
+            self.content = content
+
+        def __len__(self):
+            return len(self.index)
+
+        def __getitem__(self, where):
+            if isinstance(where, int):
+                if where < 0:
+                    where += len(self)
+                assert 0 <= where < len(self)
+                return self.content[self.index[where]]
+
+            elif isinstance(where, slice) and where.step is None:
+                return IndexedArray(
+                    self.index[where.start : where.stop], self.content
+                )
+
+            elif isinstance(where, str):
+                return IndexedArray(self.index, self.content[where])
+
+            else:
+                raise AssertionError(where)
+
+
+
+.. _ak-contents-indexedarray-is_indexed:
+
+.. py:attribute:: ak.contents.IndexedArray.is_indexed
+    :value: True
+
+
+
+.. _ak-contents-indexedarray-index:
+
+.. py:attribute:: ak.contents.IndexedArray.index
+
+
+
+.. _ak-contents-indexedarray-content:
+
+.. py:attribute:: ak.contents.IndexedArray.content
+
+
+
+.. _ak-contents-indexedarray-copy:
+
+.. py:method:: ak.contents.IndexedArray.copy(self, index=UNSET, content=UNSET, *, parameters=UNSET)
+
+
+
+.. _ak-contents-indexedarray-__copy__:
+
+.. py:method:: ak.contents.IndexedArray.__copy__(self)
+
+
+
+.. _ak-contents-indexedarray-__deepcopy__:
+
+.. py:method:: ak.contents.IndexedArray.__deepcopy__(self, memo)
+
+
+
+.. _ak-contents-indexedarray-simplified:
+
+.. py:method:: ak.contents.IndexedArray.simplified(cls, index, content, *, parameters=None)
+
+
+
+.. _ak-contents-indexedarray-_form_with_key:
+
+.. py:method:: ak.contents.IndexedArray._form_with_key(self, getkey)
+
+
+
+.. _ak-contents-indexedarray-_to_buffers:
+
+.. py:method:: ak.contents.IndexedArray._to_buffers(self, form, getkey, container, backend, byteorder)
+
+
+
+.. _ak-contents-indexedarray-_to_typetracer:
+
+.. py:method:: ak.contents.IndexedArray._to_typetracer(self, forget_length)
+
+
+
+.. _ak-contents-indexedarray-_touch_data:
+
+.. py:method:: ak.contents.IndexedArray._touch_data(self, recursive)
+
+
+
+.. _ak-contents-indexedarray-_touch_shape:
+
+.. py:method:: ak.contents.IndexedArray._touch_shape(self, recursive)
+
+
+
+.. _ak-contents-indexedarray-length:
+
+.. py:attribute:: ak.contents.IndexedArray.length
+
+
+
+.. _ak-contents-indexedarray-__repr__:
+
+.. py:method:: ak.contents.IndexedArray.__repr__(self)
+
+
+
+.. _ak-contents-indexedarray-_repr:
+
+.. py:method:: ak.contents.IndexedArray._repr(self, indent, pre, post)
+
+
+
+.. _ak-contents-indexedarray-to_indexedoptionarray64:
+
+.. py:method:: ak.contents.IndexedArray.to_IndexedOptionArray64(self)
+
+
+
+.. _ak-contents-indexedarray-mask_as_bool:
+
+.. py:method:: ak.contents.IndexedArray.mask_as_bool(self, valid_when=True)
+
+
+
+.. _ak-contents-indexedarray-_getitem_nothing:
+
+.. py:method:: ak.contents.IndexedArray._getitem_nothing(self)
+
+
+
+.. _ak-contents-indexedarray-_getitem_at:
+
+.. py:method:: ak.contents.IndexedArray._getitem_at(self, where)
+
+
+
+.. _ak-contents-indexedarray-_getitem_range:
+
+.. py:method:: ak.contents.IndexedArray._getitem_range(self, start, stop)
+
+
+
+.. _ak-contents-indexedarray-_getitem_field:
+
+.. py:method:: ak.contents.IndexedArray._getitem_field(self, where, only_fields=())
+
+
+
+.. _ak-contents-indexedarray-_getitem_fields:
+
+.. py:method:: ak.contents.IndexedArray._getitem_fields(self, where, only_fields=())
+
+
+
+.. _ak-contents-indexedarray-_carry:
+
+.. py:method:: ak.contents.IndexedArray._carry(self, carry, allow_lazy)
+
+
+
+.. _ak-contents-indexedarray-_getitem_next_jagged_generic:
+
+.. py:method:: ak.contents.IndexedArray._getitem_next_jagged_generic(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-indexedarray-_getitem_next_jagged:
+
+.. py:method:: ak.contents.IndexedArray._getitem_next_jagged(self, slicestarts, slicestops, slicecontent, tail)
+
+
+
+.. _ak-contents-indexedarray-_getitem_next:
+
+.. py:method:: ak.contents.IndexedArray._getitem_next(self, head, tail, advanced)
+
+
+
+.. _ak-contents-indexedarray-project:
+
+.. py:method:: ak.contents.IndexedArray.project(self, mask=None)
+
+
+
+.. _ak-contents-indexedarray-_offsets_and_flattened:
+
+.. py:method:: ak.contents.IndexedArray._offsets_and_flattened(self, axis, depth)
+
+
+
+.. _ak-contents-indexedarray-_mergeable_next:
+
+.. py:method:: ak.contents.IndexedArray._mergeable_next(self, other, mergebool)
+
+
+
+.. _ak-contents-indexedarray-_merging_strategy:
+
+.. py:method:: ak.contents.IndexedArray._merging_strategy(self, others)
+
+
+
+.. _ak-contents-indexedarray-_reverse_merge:
+
+.. py:method:: ak.contents.IndexedArray._reverse_merge(self, other)
+
+
+
+.. _ak-contents-indexedarray-_mergemany:
+
+.. py:method:: ak.contents.IndexedArray._mergemany(self, others)
+
+
+
+.. _ak-contents-indexedarray-_fill_none:
+
+.. py:method:: ak.contents.IndexedArray._fill_none(self, value)
+
+
+
+.. _ak-contents-indexedarray-_local_index:
+
+.. py:method:: ak.contents.IndexedArray._local_index(self, axis, depth)
+
+
+
+.. _ak-contents-indexedarray-_unique_index:
+
+.. py:method:: ak.contents.IndexedArray._unique_index(self, index, sorted=True)
+
+
+
+.. _ak-contents-indexedarray-_numbers_to_type:
+
+.. py:method:: ak.contents.IndexedArray._numbers_to_type(self, name, including_unknown)
+
+
+
+.. _ak-contents-indexedarray-_is_unique:
+
+.. py:method:: ak.contents.IndexedArray._is_unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-indexedarray-_unique:
+
+.. py:method:: ak.contents.IndexedArray._unique(self, negaxis, starts, parents, outlength)
+
+
+
+.. _ak-contents-indexedarray-_argsort_next:
+
+.. py:method:: ak.contents.IndexedArray._argsort_next(self, negaxis, starts, shifts, parents, outlength, ascending, stable)
+
+
+
+.. _ak-contents-indexedarray-_sort_next:
+
+.. py:method:: ak.contents.IndexedArray._sort_next(self, negaxis, starts, parents, outlength, ascending, stable)
+
+
+
+.. _ak-contents-indexedarray-_combinations:
+
+.. py:method:: ak.contents.IndexedArray._combinations(self, n, replacement, recordlookup, parameters, axis, depth)
+
+
+
+.. _ak-contents-indexedarray-_reduce_next:
+
+.. py:method:: ak.contents.IndexedArray._reduce_next(self, reducer, negaxis, starts, shifts, parents, outlength, mask, keepdims, behavior)
+
+
+
+.. _ak-contents-indexedarray-_validity_error:
+
+.. py:method:: ak.contents.IndexedArray._validity_error(self, path)
+
+
+
+.. _ak-contents-indexedarray-_nbytes_part:
+
+.. py:method:: ak.contents.IndexedArray._nbytes_part(self)
+
+
+
+.. _ak-contents-indexedarray-_pad_none:
+
+.. py:method:: ak.contents.IndexedArray._pad_none(self, target, axis, depth, clip)
+
+
+
+.. _ak-contents-indexedarray-_to_arrow:
+
+.. py:method:: ak.contents.IndexedArray._to_arrow(self, pyarrow, mask_node, validbytes, length, options)
+
+
+
+.. _ak-contents-indexedarray-_to_backend_array:
+
+.. py:method:: ak.contents.IndexedArray._to_backend_array(self, allow_missing, backend)
+
+
+
+.. _ak-contents-indexedarray-_remove_structure:
+
+.. py:method:: ak.contents.IndexedArray._remove_structure(self, backend, options)
+
+
+
+.. _ak-contents-indexedarray-_recursively_apply:
+
+.. py:method:: ak.contents.IndexedArray._recursively_apply(self, action, behavior, depth, depth_context, lateral_context, options)
+
+
+
+.. _ak-contents-indexedarray-to_packed:
+
+.. py:method:: ak.contents.IndexedArray.to_packed(self)
+
+
+
+.. _ak-contents-indexedarray-_to_list:
+
+.. py:method:: ak.contents.IndexedArray._to_list(self, behavior, json_conversions)
+
+
+
+.. _ak-contents-indexedarray-_to_backend:
+
+.. py:method:: ak.contents.IndexedArray._to_backend(self, backend)
+
+
+
+.. _ak-contents-indexedarray-_is_equal_to:
+
+.. py:method:: ak.contents.IndexedArray._is_equal_to(self, other, index_dtype, numpyarray)
+
+
+
+.. _ak-contents-indexedarray-_push_inside_record_or_project:
+
+.. py:method:: ak.contents.IndexedArray._push_inside_record_or_project(self)
+

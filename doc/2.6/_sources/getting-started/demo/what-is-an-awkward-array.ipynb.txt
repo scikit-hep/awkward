@@ -1,0 +1,577 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "deletable": false,
+    "editable": false
+   },
+   "source": "<center>\n<button data-commandLinker-command=\"application:toggle-zen\" href=\"#\">Toggle fullscreen</i> <i class=\"fa-solid fa-expand\"></button>\n</center>"
+  },
+  {
+   "cell_type": "markdown",
+   "id": "53a4d322",
+   "metadata": {
+    "deletable": false,
+    "editable": false
+   },
+   "source": [
+    "- To run the code, click on the first cell (gray box) and press <kbd>Shift</kbd>+<kbd>Enter</kbd> (or click the play button) to run each cell.\n",
+    "- Or, select `Run All Cells` from the `Run` menu.\n",
+    "- Feel free to experiment, but if you need to restore the original code, reload this browser page. Any changes you make will be lost when you reload!\n",
+    "- When you leave the page, you might get a \"Changes you made may not be saved\" message, which you can ignore."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5f9ccda1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Install Awkward Array in the browser\n",
+    "import piplite; await piplite.install(\"awkward-cpp\"); await piplite.install(\"awkward==2.5.0\")\n",
+    "\n",
+    "# Import normal libraries\n",
+    "import numpy as np\n",
+    "import awkward as ak"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "55548891",
+   "metadata": {},
+   "source": [
+    "## Versatile Arrays\n",
+    "Awkward Arrays are general tree-like data structures, like JSON, but contiguous in memory and operated upon with compiled, vectorized code like NumPy.\n",
+    "\n",
+    "They look like NumPy arrays:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f6cec1a5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array([1, 2, 3])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b7a202fc",
+   "metadata": {},
+   "source": [
+    "Like NumPy, they can have multiple dimensions:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "63833e5f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array([\n",
+    "    [1, 2, 3],\n",
+    "    [4, 5, 6]\n",
+    "])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eda805b4",
+   "metadata": {},
+   "source": [
+    "These dimensions can have varying lengths; arrays can be [ragged](https://en.wikipedia.org/wiki/Jagged_array):"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "776cd2b8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array([\n",
+    "    [1, 2, 3],\n",
+    "    [4],\n",
+    "    [5, 6]\n",
+    "])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "249fb561",
+   "metadata": {},
+   "source": [
+    "Each dimension can contain missing values:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1990a7c0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array([\n",
+    "    [1, 2, 3],\n",
+    "    [4],\n",
+    "    [5, 6, None]\n",
+    "])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d741190c",
+   "metadata": {},
+   "source": [
+    "Awkward Arrays can store _numbers_:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3a25bbee",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array([\n",
+    "    [3, 141], \n",
+    "    [59, 26, 535], \n",
+    "    [8]\n",
+    "])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1082c77a",
+   "metadata": {},
+   "source": [
+    "They can also work with _dates_:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a1c1e4c6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array(\n",
+    "    [\n",
+    "        [np.datetime64(\"1815-12-10\"), np.datetime64(\"1969-07-16\")],\n",
+    "        [np.datetime64(\"1564-04-26\")],\n",
+    "    ]\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c8961b3e",
+   "metadata": {},
+   "source": [
+    "They can even work with _strings_:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "79f9fb2b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array(\n",
+    "    [\n",
+    "        [\n",
+    "            \"Benjamin List\",\n",
+    "            \"David MacMillan\",\n",
+    "        ],\n",
+    "        [\n",
+    "            \"Emmanuelle Charpentier\",\n",
+    "            \"Jennifer A. Doudna\",\n",
+    "        ],\n",
+    "    ]\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5fc94b45",
+   "metadata": {},
+   "source": [
+    "Awkward Arrays can have structure through _records_:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e544e3aa",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array(\n",
+    "    [\n",
+    "        [\n",
+    "            {\"name\": \"Benjamin List\", \"age\": 53},\n",
+    "            {\"name\": \"David MacMillan\", \"age\": 53},\n",
+    "        ],\n",
+    "        [\n",
+    "            {\"name\": \"Emmanuelle Charpentier\", \"age\": 52},\n",
+    "            {\"name\": \"Jennifer A. Doudna\", \"age\": 57},\n",
+    "        ],\n",
+    "        [\n",
+    "            {\"name\": \"Akira Yoshino\", \"age\": 73},\n",
+    "            {\"name\": \"M. Stanley Whittingham\", \"age\": 79},\n",
+    "            {\"name\": \"John B. Goodenough\", \"age\": 98},\n",
+    "        ],\n",
+    "    ]\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5f4cb826",
+   "metadata": {},
+   "source": [
+    "In fact, Awkward Arrays can represent many kinds of jagged data. They can possess complex structures that mix records, and primitive types."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5e966aee",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "ak.Array(\n",
+    "    [\n",
+    "        [\n",
+    "            {\n",
+    "                \"name\": \"Benjamin List\",\n",
+    "                \"age\": 53,\n",
+    "                \"institutions\": [\n",
+    "                    \"University of Cologne\",\n",
+    "                    \"Max Planck Institute for Coal Research\",\n",
+    "                    \"Hokkaido University\",\n",
+    "                ],\n",
+    "            },\n",
+    "            {\n",
+    "                \"name\": \"David MacMillan\",\n",
+    "                \"age\": 53,\n",
+    "                \"institutions\": None,\n",
+    "            },\n",
+    "        ]\n",
+    "    ]\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f8e40f6f",
+   "metadata": {},
+   "source": [
+    "They can even contain unions!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1b1dfd2f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.Array(\n",
+    "    [\n",
+    "        [np.datetime64(\"1815-12-10\"), \"Cassini\"],\n",
+    "        [np.datetime64(\"1564-04-26\")],\n",
+    "    ]\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d1642099",
+   "metadata": {},
+   "source": [
+    "## NumPy-like interface\n",
+    "\n",
+    "Awkward Array _looks like_ NumPy. It behaves identically to NumPy for regular arrays"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a3a8f2f5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x = ak.Array([\n",
+    "    [1, 2, 3],\n",
+    "    [4, 5, 6]\n",
+    "]);"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "544fb936",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.sum(x, axis=-1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e5e2bf85",
+   "metadata": {},
+   "source": [
+    "providing a similar high-level API, and implementing the [ufunc](https://numpy.org/doc/stable/reference/ufuncs.html) mechanism:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7782d9eb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "powers_of_two = ak.Array(\n",
+    "    [\n",
+    "        [1, 2, 4],\n",
+    "        [None, 8],\n",
+    "        [16],\n",
+    "    ]\n",
+    ");"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e9be7b61",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.sum(powers_of_two)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "46a564ca",
+   "metadata": {},
+   "source": [
+    "But generalises to the tricky kinds of data that NumPy struggles to work with. It can perform reductions through varying length lists:\n",
+    "\n",
+    "![](example-reduction-sum.svg)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3ab3b18a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.sum(powers_of_two, axis=0)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "72006260",
+   "metadata": {},
+   "source": [
+    "## Lightweight structures\n",
+    "Awkward makes it east to pull apart record structures:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e962d648",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nobel_prize_winner = ak.Array(\n",
+    "    [\n",
+    "        [\n",
+    "            {\"name\": \"Benjamin List\", \"age\": 53},\n",
+    "            {\"name\": \"David MacMillan\", \"age\": 53},\n",
+    "        ],\n",
+    "        [\n",
+    "            {\"name\": \"Emmanuelle Charpentier\", \"age\": 52},\n",
+    "            {\"name\": \"Jennifer A. Doudna\", \"age\": 57},\n",
+    "        ],\n",
+    "        [\n",
+    "            {\"name\": \"Akira Yoshino\", \"age\": 73},\n",
+    "            {\"name\": \"M. Stanley Whittingham\", \"age\": 79},\n",
+    "            {\"name\": \"John B. Goodenough\", \"age\": 98},\n",
+    "        ],\n",
+    "    ]\n",
+    ");"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b032fbff",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nobel_prize_winner.name"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "be833804",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nobel_prize_winner.age"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8ee15959",
+   "metadata": {},
+   "source": [
+    "These records are lightweight, and simple to compose:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "802172ee",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nobel_prize_winner_with_birth_year = ak.zip({\n",
+    "    \"name\": nobel_prize_winner.name,\n",
+    "    \"age\": nobel_prize_winner.age,\n",
+    "    \"birth_year\": 2021 - nobel_prize_winner.age\n",
+    "});"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fa369ccd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nobel_prize_winner_with_birth_year.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7fe7fdfe",
+   "metadata": {},
+   "source": [
+    "## High performance\n",
+    "Like NumPy, Awkward Array performs computations in fast, optimised kernels."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d59b6173",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "large_array = ak.Array([[1, 2, 3], [], [4, 5]] * 1_000_000)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a809dcb1",
+   "metadata": {},
+   "source": [
+    "We can compute the sum in `3.37 ms ± 107 µs` on a reference CPU:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d064ae4f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.sum(large_array)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b6998bbc",
+   "metadata": {},
+   "source": [
+    "The same sum can be computed with pure-Python over the flattened array in `369 ms ± 8.07 ms`:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "13fcea0e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "large_flat_array = ak.ravel(large_array)\n",
+    "\n",
+    "sum(large_flat_array)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a7bd3774",
+   "metadata": {},
+   "source": [
+    "These performance values are not benchmarks; they are only an indication of the speed of Awkward Array.\n",
+    "\n",
+    "Some problems are hard to solve with array-oriented programming. Awkward Array supports [Numba](https://numba.pydata.org/) out of the box:\n",
+    "\n",
+    "```python\n",
+    "import numba as nb\n",
+    "ak.numba.register_and_check()\n",
+    "\n",
+    "@nb.njit\n",
+    "def cumulative_sum(arr):\n",
+    "    result = 0\n",
+    "    for x in arr:\n",
+    "        for y in x:\n",
+    "            result += y\n",
+    "    return result\n",
+    "    \n",
+    "result = cumulative_sum(large_array)\n",
+    "```"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.8"
+  },
+  "mystnb": {
+   "execution_mode": "off"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

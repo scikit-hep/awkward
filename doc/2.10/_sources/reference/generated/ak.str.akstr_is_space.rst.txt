@@ -1,0 +1,14 @@
+ak.str.akstr_is_space
+=====================
+
+.. py:module:: awkward.operations.str.akstr_is_space
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_space.is_space
+
+

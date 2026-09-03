@@ -1,0 +1,36 @@
+ak.str.is_ascii
+---------------
+
+.. py:module: ak.str.is_ascii
+
+Defined in `awkward.operations.str.akstr_is_ascii <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/str/akstr_is_ascii.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/operations/str/akstr_is_ascii.py#L13>`__.
+
+.. py:function:: ak.str.is_ascii(array, *, highlevel=True, behavior=None, attrs=None)
+
+
+    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Replaces any string-valued data with True iff the string consists only of
+ASCII characters, False otherwise.
+
+Replaces any bytestring-valued data with True iff the string consists only
+of ASCII characters, False otherwise.
+
+Note: this function does not raise an error if the ``array`` does not
+contain any string or bytestring data.
+
+Requires the pyarrow library and calls
+`pyarrow.compute.string_is_ascii <https://arrow.apache.org/docs/python/generated/pyarrow.compute.string_is_ascii.html>`__
+or
+`pyarrow.compute.string_is_ascii <https://arrow.apache.org/docs/python/generated/pyarrow.compute.string_is_ascii.html>`__
+on strings and bytestrings, respectively.
+

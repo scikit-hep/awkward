@@ -1,0 +1,11 @@
+ak.write_metadata
+-----------------
+
+.. py:module: ak.write_metadata
+
+Defined in `awkward.operations.ak_to_parquet <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/operations/ak_to_parquet.py>`__ on `line 320 <https://github.com/scikit-hep/awkward-1.0/blob/5f5c3f444907b3652ce79f9bf1be15d44cbf1f7d/src/awkward/operations/ak_to_parquet.py#L320>`__.
+
+.. py:function:: ak.write_metadata(dir_path, fs, *metas, global_metadata=True)
+
+Generate metadata file(s) from list of arrow metadata instances
+

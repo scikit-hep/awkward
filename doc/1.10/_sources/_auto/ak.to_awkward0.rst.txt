@@ -1,0 +1,20 @@
+ak.to_awkward0
+--------------
+
+Defined in `awkward.operations.convert <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py>`__ on `line 1654 <https://github.com/scikit-hep/awkward-1.0/blob/425d5cb0988ddef7dc3c29914e51ef697895b298/src/awkward/operations/convert.py#L1654>`__.
+
+.. py:function:: ak.to_awkward0(array, keep_layout=False)
+
+
+    :param array: Data to convert into an Awkward 0.x array.
+    :param keep_layout: If True, stay true to the Awkward 1.x layout,
+                    ensuring zero-copy; otherwise, allow transformations that copy
+                    data for more flexibility.
+    :type keep_layout: bool
+
+Converts ``array`` (many types supported, including all Awkward Arrays and
+Records) into an Awkward 0.x array.
+
+This is only needed during the transition from the old library to the new
+library.
+

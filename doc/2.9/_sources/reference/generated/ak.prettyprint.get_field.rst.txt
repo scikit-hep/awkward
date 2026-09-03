@@ -1,0 +1,6 @@
+ak.prettyprint.get_field
+========================
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/prettyprint.py>`__ on `line 105 <https://github.com/scikit-hep/awkward/blob/e8bec70057d479d7ed07f44720cc8ca85a907584/src/awkward/prettyprint.py#L105>`__.
+
+.. py:function:: ak.prettyprint.get_field(data: awkward.contents.content.Content, field: str)

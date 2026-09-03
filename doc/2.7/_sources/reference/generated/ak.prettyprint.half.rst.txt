@@ -1,0 +1,9 @@
+ak.prettyprint.half
+-------------------
+
+.. py:module: ak.prettyprint.half
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/prettyprint.py>`__ on `line 48 <https://github.com/scikit-hep/awkward/blob/3d14f2e74c7b6d99b09e436f90de4722f5959548/src/awkward/prettyprint.py#L48>`__.
+
+.. py:function:: ak.prettyprint.half(integer)
+

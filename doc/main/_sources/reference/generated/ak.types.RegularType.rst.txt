@@ -1,0 +1,47 @@
+ak.types.RegularType
+====================
+
+Defined in `awkward.types.regulartype <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/regulartype.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/regulartype.py#L17>`__.
+
+.. py:class:: ak.types.RegularType(content: awkward.types.type.Type, size: awkward._nplikes.shape.ShapeItem, *, parameters: awkward._typing.JSONMapping | None = None)
+
+
+
+   .. py:method:: copy(*, content: awkward.types.type.Type | awkward._util.Sentinel = UNSET, size: awkward._nplikes.shape.ShapeItem | awkward._util.Sentinel = UNSET, parameters: awkward._typing.JSONMapping | awkward._util.Sentinel | None = UNSET) -> awkward._typing.Self
+
+
+   .. py:attribute:: _content
+      :type:  awkward.types.type.Type
+
+
+   .. py:attribute:: _size
+      :type:  awkward._nplikes.shape.ShapeItem
+
+
+   .. py:attribute:: _parameters
+      :type:  awkward._typing.JSONMapping | None
+      :value: None
+
+
+
+   .. py:property:: content
+      :type: awkward.types.type.Type
+
+
+
+   .. py:property:: size
+      :type: awkward._nplikes.shape.ShapeItem
+
+
+
+   .. py:method:: _get_typestr(behavior: collections.abc.Mapping | None) -> str | None
+
+
+   .. py:method:: _str(indent: str, compact: bool, behavior: collections.abc.Mapping | None) -> list[str]
+
+
+   .. py:method:: __repr__() -> str
+
+
+   .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool) -> bool
+

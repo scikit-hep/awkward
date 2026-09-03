@@ -1,0 +1,730 @@
+ak.ArrayBuilder
+---------------
+
+.. py:module: ak.ArrayBuilder
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/highlevel.py>`__ on `line 2106 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/highlevel.py#L2106>`__.
+
+.. py:class:: ak.ArrayBuilder(self, *, behavior=None, initial=1024, resize=8)
+
+
+    :param behavior: Custom :py:obj:`ak.behavior` for arrays built by
+                 this ArrayBuilder.
+    :type behavior: None or dict
+    :param initial: Initial size (in bytes) of buffers used by the ``ak::ArrayBuilder``.
+    :type initial: int
+    :param resize: Resize multiplier for buffers used by the ``ak::ArrayBuilder``;
+               should be strictly greater than 1.
+    :type resize: float
+
+General tool for building arrays of nested data structures from a sequence
+of commands. Most data types can be constructed by calling commands in the
+right order, similar to printing tokens to construct JSON output.
+
+To illustrate how this works, consider the following example.
+
+.. code-block:: python
+
+
+    b = ak.ArrayBuilder()
+
+    # fill commands   # as JSON   # current array type
+    ##########################################################################################
+    b.begin_list()    # [         # 0 * var * unknown     (initially, the type is unknown)
+    b.integer(1)      #   1,      # 0 * var * int64
+    b.integer(2)      #   2,      # 0 * var * int64
+    b.real(3)         #   3.0     # 0 * var * float64     (all the integers have become floats)
+    b.end_list()      # ],        # 1 * var * float64     (closed first list; array length is 1)
+    b.begin_list()    # [         # 1 * var * float64
+    b.end_list()      # ],        # 2 * var * float64     (closed empty list; array length is 2)
+    b.begin_list()    # [         # 2 * var * float64
+    b.integer(4)      #   4,      # 2 * var * float64
+    b.null()          #   null,   # 2 * var * ?float64    (now the floats are nullable)
+    b.integer(5)      #   5       # 2 * var * ?float64
+    b.end_list()      # ],        # 3 * var * ?float64
+    b.begin_list()    # [         # 3 * var * ?float64
+    b.begin_record()  #   {       # 3 * var * union[?float64, ?{}]
+    b.field("x")      #     "x":  # 3 * var * union[?float64, ?{x: unknown}]
+    b.integer(1)      #      1,   # 3 * var * union[?float64, ?{x: int64}]
+    b.field("y")      #      "y": # 3 * var * union[?float64, ?{x: int64, y: unknown}]
+    b.begin_list()    #      [    # 3 * var * union[?float64, ?{x: int64, y: var * unknown}]
+    b.integer(2)      #        2, # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+    b.integer(3)      #        3  # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+    b.end_list()      #      ]    # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+    b.end_record()    #   }       # 3 * var * union[?float64, ?{x: int64, y: var * int64}]
+    b.end_list()      # ]         # 4 * var * union[?float64, ?{x: int64, y: var * int64}]
+
+To get an array, we take a :py:meth:`snapshot <ak.ArrayBuilder.snapshot>` of the ArrayBuilder's current state.
+
+.. code-block:: python
+
+
+    >>> b.snapshot()
+    <Array [[1, 2, 3], ..., [{x: 1, y: ..., ...}]] type='4 * var * union[?float...'>
+    >>> b.snapshot().show()
+    [[1, 2, 3],
+     [],
+     [4, None, 5],
+     [{x: 1, y: [2, 3]}]]
+
+The full set of filling commands is the following.
+
+* :py:meth:`null <ak.ArrayBuilder.null>`: appends a None value.
+* :py:meth:`boolean <ak.ArrayBuilder.boolean>`: appends True or False.
+* :py:meth:`integer <ak.ArrayBuilder.integer>`: appends an integer.
+* :py:meth:`real <ak.ArrayBuilder.real>`: appends a floating-point value.
+* :py:meth:`complex <ak.ArrayBuilder.complex>`: appends a complex value.
+* :py:meth:`datetime <ak.ArrayBuilder.datetime>`: appends a datetime value.
+* :py:meth:`timedelta <ak.ArrayBuilder.timedelta>`: appends a timedelta value.
+* :py:meth:`bytestring <ak.ArrayBuilder.bytestring>`: appends an unencoded string (raw bytes).
+* :py:meth:`string <ak.ArrayBuilder.string>`: appends a UTF-8 encoded string.
+* :py:meth:`begin_list <ak.ArrayBuilder.begin_list>`: begins filling a list; must be closed with :py:meth:`end_list <ak.ArrayBuilder.end_list>`.
+* :py:meth:`end_list <ak.ArrayBuilder.end_list>`: ends a list.
+* :py:meth:`begin_tuple <ak.ArrayBuilder.begin_tuple>`: begins filling a tuple; must be closed with :py:meth:`end_tuple <ak.ArrayBuilder.end_tuple>`.
+* :py:meth:`index <ak.ArrayBuilder.index>`: selects a tuple slot to fill; must be followed by a command
+     that actually fills that slot.
+* :py:meth:`end_tuple <ak.ArrayBuilder.end_tuple>`: ends a tuple.
+* :py:meth:`begin_record <ak.ArrayBuilder.begin_record>`: begins filling a record; must be closed with
+     :py:meth:`end_record <ak.ArrayBuilder.end_record>`.
+* :py:meth:`field <ak.ArrayBuilder.field>`: selects a record field to fill; must be followed by a command
+     that actually fills that field.
+* :py:meth:`end_record <ak.ArrayBuilder.end_record>`: ends a record.
+* :py:meth:`append <ak.ArrayBuilder.append>`: generic method for filling :py:meth:`null <ak.ArrayBuilder.null>`, :py:meth:`boolean <ak.ArrayBuilder.boolean>`, :py:meth:`integer <ak.ArrayBuilder.integer>`, :py:meth:`real <ak.ArrayBuilder.real>`,
+     :py:meth:`bytestring <ak.ArrayBuilder.bytestring>`, :py:meth:`string <ak.ArrayBuilder.string>`, :py:obj:`ak.Array`, :py:obj:`ak.Record`, or arbitrary Python data.
+* :py:meth:`extend <ak.ArrayBuilder.extend>`: appends all the items from an iterable.
+* :py:meth:`list <ak.ArrayBuilder.list>`: context manager for :py:meth:`begin_list <ak.ArrayBuilder.begin_list>` and :py:meth:`end_list <ak.ArrayBuilder.end_list>`.
+* :py:meth:`tuple <ak.ArrayBuilder.tuple>`: context manager for :py:meth:`begin_tuple <ak.ArrayBuilder.begin_tuple>` and :py:meth:`end_tuple <ak.ArrayBuilder.end_tuple>`.
+* :py:meth:`record <ak.ArrayBuilder.record>`: context manager for :py:meth:`begin_record <ak.ArrayBuilder.begin_record>` and :py:meth:`end_record <ak.ArrayBuilder.end_record>`.
+
+ArrayBuilders can be used in `Numba <http://numba.pydata.org/>`__: they can
+be passed as arguments to a Numba-compiled function or returned as return
+values. (Since ArrayBuilder works by accumulating side-effects, it's not
+strictly necessary to return the object.)
+
+The primary limitation is that ArrayBuilders cannot be *created* and
+:py:meth:`snapshot <ak.ArrayBuilder.snapshot>` cannot be called inside the Numba-compiled function. Awkward
+Array uses Numba as a transformer: :py:obj:`ak.Array` and an empty :py:obj:`ak.ArrayBuilder`
+go in and a filled :py:obj:`ak.ArrayBuilder` is the result; :py:meth:`snapshot <ak.ArrayBuilder.snapshot>` can be called
+outside of the compiled function.
+
+Also, context managers (Python's ``with`` statement) are not supported in
+Numba yet, so the :py:meth:`list <ak.ArrayBuilder.list>`, :py:meth:`tuple <ak.ArrayBuilder.tuple>`, and :py:meth:`record <ak.ArrayBuilder.record>` methods are not available
+in Numba-compiled functions.
+
+Here is an example of filling an ArrayBuilder in Numba, which makes a
+tree of dynamic depth.
+
+.. code-block:: python
+
+
+    >>> import numba as nb
+    >>> @nb.njit
+    ... def deepnesting(builder, probability):
+    ...     if np.random.uniform(0, 1) > probability:
+    ...         builder.append(np.random.normal())
+    ...     else:
+    ...         builder.begin_list()
+    ...         for i in range(np.random.poisson(3)):
+    ...             deepnesting(builder, probability**2)
+    ...         builder.end_list()
+    ...
+    >>> builder = ak.ArrayBuilder()
+    >>> deepnesting(builder, 0.9)
+    >>> builder.snapshot()
+    <Array [[[-0.523, ..., [[2.16, ...], ...]]]] type='1 * var * var * union[fl...'>
+    >>> builder.type.show()
+    1 * var * var * union[
+        float64,
+        var * union[
+            var * union[
+                float64,
+                var * unknown
+            ],
+            float64
+        ]
+    ]
+
+Note that this is a *general* method for building arrays; if the type is
+known in advance, more specialized procedures can be faster. This should
+be considered the "least effort" approach.
+
+
+
+.. _ak-arraybuilder-_wrap:
+
+.. py:method:: ak.ArrayBuilder._wrap(cls, layout, behavior=None)
+
+
+    :param layout: Low-level builder to wrap.
+    :type layout: ``ak._ext.ArrayBuilder``
+    :param behavior: Custom :py:obj:`ak.behavior` for arrays built by
+                 this ArrayBuilder.
+    :type behavior: None or dict
+
+Wraps a low-level ``ak._ext.ArrayBuilder`` as a high-level
+:py:obj:`ak.ArrayBulider`.
+
+The :py:obj:`ak.ArrayBuilder` constructor creates a new ``ak._ext.ArrayBuilder``
+with no accumulated data, but Numba needs to wrap existing data
+when returning from a lowered function.
+
+
+
+.. _ak-arraybuilder-behavior:
+
+.. py:attribute:: ak.ArrayBuilder.behavior
+
+The ``behavior`` parameter passed into this ArrayBuilder's constructor.
+
+* If a dict, this ``behavior`` overrides the global :py:obj:`ak.behavior`.
+     Any keys in the global :py:obj:`ak.behavior` but not this ``behavior`` are
+     still valid, but any keys in both are overridden by this
+     ``behavior``. Keys with a None value are equivalent to missing keys,
+     so this ``behavior`` can effectively remove keys from the
+     global :py:obj:`ak.behavior`.
+
+* If None, the Array defaults to the global :py:obj:`ak.behavior`.
+
+See :py:obj:`ak.behavior` for a list of recognized key patterns and their
+meanings.
+
+
+
+.. _ak-arraybuilder-tolist:
+
+.. py:method:: ak.ArrayBuilder.tolist(self)
+
+Converts this Array into Python objects; same as :py:obj:`ak.to_list`
+(but without the underscore, like NumPy's
+`tolist <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html>`__).
+
+
+
+.. _ak-arraybuilder-to_list:
+
+.. py:method:: ak.ArrayBuilder.to_list(self)
+
+Converts this Array into Python objects; same as :py:obj:`ak.to_list`.
+
+
+
+.. _ak-arraybuilder-to_numpy:
+
+.. py:method:: ak.ArrayBuilder.to_numpy(self, allow_missing=True)
+
+Converts this Array into a NumPy array, if possible; same as :py:obj:`ak.to_numpy`.
+
+
+
+.. _ak-arraybuilder-type:
+
+.. py:attribute:: ak.ArrayBuilder.type
+
+The high-level type of the accumulated array; same as :py:obj:`ak.type`.
+
+Note that the outermost element of an Array's type is always an
+:py:obj:`ak.types.ArrayType`, which specifies the number of elements in the array.
+
+The type of a :py:obj:`ak.contents.Content` (from :py:obj:`ak.Array.layout`) is not
+wrapped by an :py:obj:`ak.types.ArrayType`.
+
+
+
+.. _ak-arraybuilder-typestr:
+
+.. py:attribute:: ak.ArrayBuilder.typestr
+
+The high-level type of this accumulated array, presented as a string.
+
+
+
+.. _ak-arraybuilder-__len__:
+
+.. py:method:: ak.ArrayBuilder.__len__(self)
+
+The current length of the accumulated array.
+
+
+
+.. _ak-arraybuilder-__str__:
+
+.. py:method:: ak.ArrayBuilder.__str__(self)
+
+
+
+.. _ak-arraybuilder-__repr__:
+
+.. py:method:: ak.ArrayBuilder.__repr__(self)
+
+
+
+.. _ak-arraybuilder-_repr:
+
+.. py:method:: ak.ArrayBuilder._repr(self, limit_cols)
+
+
+
+.. _ak-arraybuilder-show:
+
+.. py:method:: ak.ArrayBuilder.show(self, limit_rows=20, limit_cols=80, type=False, stream=sys.stdout)
+
+
+    :param limit_rows: Maximum number of rows (lines) to use in the output.
+    :type limit_rows: int
+    :param limit_cols: Maximum number of columns (characters wide).
+    :type limit_cols: int
+    :param type: If True, print the type as well. (Doesn't count toward number
+             of rows/lines limit.)
+    :type type: bool
+    :param stream: Stream to write the
+               output to. If None, return a string instead of writing to a stream.
+    :type stream: object with a ````write(str)```` method or None
+
+Display the contents of the array within ``limit_rows`` and ``limit_cols``, using
+ellipsis (``...``) for hidden nested data.
+
+This method takes a snapshot of the data and calls show on it, and a snapshot
+copies data.
+
+
+
+.. _ak-arraybuilder-__array__:
+
+.. py:method:: ak.ArrayBuilder.__array__(self, *args)
+
+Intercepts attempts to convert a :py:meth:`snapshot <ak.ArrayBuilder.snapshot>` of this array into a
+NumPy array and either performs a zero-copy conversion or raises
+an error.
+
+See :py:obj:`ak.Array.__array__` for a more complete description.
+
+
+
+.. _ak-arraybuilder-numba_type:
+
+.. py:attribute:: ak.ArrayBuilder.numba_type
+
+The type of this Array when it is used in Numba. It contains enough
+information to generate low-level code for accessing any element,
+down to the leaves.
+
+See `Numba documentation <https://numba.pydata.org/numba-doc/dev/reference/types.html>`__
+on types and signatures.
+
+
+
+.. _ak-arraybuilder-__bool__:
+
+.. py:method:: ak.ArrayBuilder.__bool__(self)
+
+
+
+.. _ak-arraybuilder-snapshot:
+
+.. py:method:: ak.ArrayBuilder.snapshot(self)
+
+Converts the currently accumulated data into an :py:obj:`ak.Array`.
+
+The currently accumulated data are *copied* into the new array.
+
+
+
+.. _ak-arraybuilder-null:
+
+.. py:method:: ak.ArrayBuilder.null(self)
+
+Appends a None value at the current position in the accumulated array.
+
+
+
+.. _ak-arraybuilder-boolean:
+
+.. py:method:: ak.ArrayBuilder.boolean(self, x)
+
+Appends a boolean value ``x`` at the current position in the accumulated
+array.
+
+
+
+.. _ak-arraybuilder-integer:
+
+.. py:method:: ak.ArrayBuilder.integer(self, x)
+
+Appends an integer ``x`` at the current position in the accumulated
+array.
+
+
+
+.. _ak-arraybuilder-real:
+
+.. py:method:: ak.ArrayBuilder.real(self, x)
+
+Appends a floating point number ``x`` at the current position in the
+accumulated array.
+
+
+
+.. _ak-arraybuilder-complex:
+
+.. py:method:: ak.ArrayBuilder.complex(self, x)
+
+Appends a floating point number ``x`` at the current position in the
+accumulated array.
+
+
+
+.. _ak-arraybuilder-datetime:
+
+.. py:method:: ak.ArrayBuilder.datetime(self, x)
+
+Appends a datetime value ``x`` at the current position in the
+accumulated array.
+
+
+
+.. _ak-arraybuilder-timedelta:
+
+.. py:method:: ak.ArrayBuilder.timedelta(self, x)
+
+Appends a timedelta value ``x`` at the current position in the
+accumulated array.
+
+
+
+.. _ak-arraybuilder-bytestring:
+
+.. py:method:: ak.ArrayBuilder.bytestring(self, x)
+
+Appends an unencoded string (raw bytes) ``x`` at the current position
+in the accumulated array.
+
+
+
+.. _ak-arraybuilder-string:
+
+.. py:method:: ak.ArrayBuilder.string(self, x)
+
+Appends a UTF-8 encoded string ``x`` at the current position in the
+accumulated array.
+
+
+
+.. _ak-arraybuilder-begin_list:
+
+.. py:method:: ak.ArrayBuilder.begin_list(self)
+
+Begins filling a list; must be closed with :py:meth:`end_list <ak.ArrayBuilder.end_list>`.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> builder = ak.ArrayBuilder()
+    >>> builder.begin_list()
+    >>> builder.real(1.1)
+    >>> builder.real(2.2)
+    >>> builder.real(3.3)
+    >>> builder.end_list()
+    >>> builder.begin_list()
+    >>> builder.end_list()
+    >>> builder.begin_list()
+    >>> builder.real(4.4)
+    >>> builder.real(5.5)
+    >>> builder.end_list()
+
+produces
+
+.. code-block:: python
+
+
+    >>> builder.show()
+    [[1.1, 2.2, 3.3],
+     [],
+     [4.4, 5.5]]
+
+
+
+.. _ak-arraybuilder-end_list:
+
+.. py:method:: ak.ArrayBuilder.end_list(self)
+
+Ends a list.
+
+
+
+.. _ak-arraybuilder-begin_tuple:
+
+.. py:method:: ak.ArrayBuilder.begin_tuple(self, numfields)
+
+Begins filling a tuple with ``numfields`` fields; must be closed with
+:py:meth:`end_tuple <ak.ArrayBuilder.end_tuple>`.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> builder = ak.ArrayBuilder()
+    >>> builder.begin_tuple(3)
+    >>> builder.index(0).integer(1)
+    >>> builder.index(1).real(1.1)
+    >>> builder.index(2).string("one")
+    >>> builder.end_tuple()
+    >>> builder.begin_tuple(3)
+    >>> builder.index(0).integer(2)
+    >>> builder.index(1).real(2.2)
+    >>> builder.index(2).string("two")
+    >>> builder.end_tuple()
+
+produces
+
+.. code-block:: python
+
+
+    >>> builder.show()
+    [(1, 1.1, 'one'),
+     (2, 2.2, 'two')]
+
+
+
+.. _ak-arraybuilder-index:
+
+.. py:method:: ak.ArrayBuilder.index(self, i)
+
+
+    :param i: The tuple slot to fill.
+    :type i: int
+
+This method also returns the :py:obj:`ak.ArrayBuilder`, so that it can be
+chained with the value that fills the slot.
+
+Prepares to fill a tuple slot; see :py:meth:`begin_tuple <ak.ArrayBuilder.begin_tuple>` for an example.
+
+
+
+.. _ak-arraybuilder-end_tuple:
+
+.. py:method:: ak.ArrayBuilder.end_tuple(self)
+
+Ends a tuple.
+
+
+
+.. _ak-arraybuilder-begin_record:
+
+.. py:method:: ak.ArrayBuilder.begin_record(self, name=None)
+
+Begins filling a record with an optional ``name``; must be closed with
+:py:meth:`end_record <ak.ArrayBuilder.end_record>`.
+
+For example,
+
+.. code-block:: python
+
+
+    >>> builder = ak.ArrayBuilder()
+    >>> builder.begin_record("points")
+    >>> builder.field("x").real(1)
+    >>> builder.field("y").real(1.1)
+    >>> builder.end_record()
+    >>> builder.begin_record("points")
+    >>> builder.field("x").real(2)
+    >>> builder.field("y").real(2.2)
+    >>> builder.end_record()
+
+produces
+
+.. code-block:: python
+
+
+    >>> builder.show()
+    [{x: 1, y: 1.1},
+     {x: 2, y: 2.2}]
+
+with type
+
+.. code-block:: python
+
+
+    >>> builder.type.show()
+    2 * points[
+        x: float64,
+        y: float64
+    ]
+
+The record type is named ``"points"`` because its ``"__record__"``
+parameter is set to that value:
+
+.. code-block:: python
+
+
+    >>> builder.snapshot().layout.parameters
+    {'__record__': 'points'}
+
+The ``"__record__"`` parameter can be used to add behavior to the records
+in the array, as described in :py:obj:`ak.Array`, :py:obj:`ak.Record`, and :py:obj:`ak.behavior`.
+
+
+
+.. _ak-arraybuilder-field:
+
+.. py:method:: ak.ArrayBuilder.field(self, key)
+
+
+    :param key: The field key to fill.
+    :type key: str
+
+This method also returns the :py:obj:`ak.ArrayBuilder`, so that it can be
+chained with the value that fills the slot.
+
+Prepares to fill a field; see :py:meth:`begin_record <ak.ArrayBuilder.begin_record>` for an example.
+
+
+
+.. _ak-arraybuilder-end_record:
+
+.. py:method:: ak.ArrayBuilder.end_record(self)
+
+Ends a record.
+
+
+
+.. _ak-arraybuilder-append:
+
+.. py:method:: ak.ArrayBuilder.append(self, obj)
+
+
+    :param obj: The data to append (None, bool, int, float, bytes, str, or
+            anything recognized by :py:obj:`ak.from_iter`).
+
+Appends any type, which can be a shorthand for :py:meth:`null <ak.ArrayBuilder.null>`,
+:py:meth:`boolean <ak.ArrayBuilder.boolean>`, :py:meth:`integer <ak.ArrayBuilder.integer>`, :py:meth:`real <ak.ArrayBuilder.real>`, :py:meth:`bytestring <ak.ArrayBuilder.bytestring>`, or :py:meth:`string <ak.ArrayBuilder.string>`, but also
+an :py:obj:`ak.Array` or :py:obj:`ak.Record` to *reference* values from an existing
+dataset, or any Python object to *convert* to Awkward Array.
+
+If ``obj`` is an iterable (including dict), this is equivalent to
+:py:obj:`ak.from_iter` except that it fills an existing :py:obj:`ak.ArrayBuilder`,
+rather than creating a new one.
+
+
+
+.. _ak-arraybuilder-extend:
+
+.. py:method:: ak.ArrayBuilder.extend(self, obj)
+
+
+    :param obj: Iterable of data to extend this ArrayBuilder with.
+    :type obj: iterable
+
+Appends every value from ``obj``.
+
+
+
+.. _ak-arraybuilder-list:
+
+.. py:method:: ak.ArrayBuilder.list(self)
+
+Context manager to prevent unpaired :py:meth:`begin_list <ak.ArrayBuilder.begin_list>` and :py:meth:`end_list <ak.ArrayBuilder.end_list>`. The
+example in the :py:meth:`begin_list <ak.ArrayBuilder.begin_list>` documentation can be rewritten as
+
+.. code-block:: python
+
+
+    >>> builder = ak.ArrayBuilder()
+    >>> with builder.list():
+    ...     builder.real(1.1)
+    ...     builder.real(2.2)
+    ...     builder.real(3.3)
+    ...
+    >>> with builder.list():
+    ...     pass
+    ...
+    >>> with builder.list():
+    ...     builder.real(4.4)
+    ...     builder.real(5.5)
+    ...
+
+to produce the same result.
+
+.. code-block:: python
+
+
+    >>> builder.show()
+    [[1.1, 2.2, 3.3],
+     [],
+     [4.4, 5.5]]
+
+Since context managers aren't yet supported by Numba, this method
+can't be used in Numba.
+
+
+
+.. _ak-arraybuilder-tuple:
+
+.. py:method:: ak.ArrayBuilder.tuple(self, numfields)
+
+Context manager to prevent unpaired :py:meth:`begin_tuple <ak.ArrayBuilder.begin_tuple>` and :py:meth:`end_tuple <ak.ArrayBuilder.end_tuple>`. The
+example in the :py:meth:`begin_tuple <ak.ArrayBuilder.begin_tuple>` documentation can be rewritten as
+
+.. code-block:: python
+
+
+    >>> builder = ak.ArrayBuilder()
+    >>> with builder.tuple(3):
+    ...     builder.index(0).integer(1)
+    ...     builder.index(1).real(1.1)
+    ...     builder.index(2).string("one")
+    ...
+    >>> with builder.tuple(3):
+    ...     builder.index(0).integer(2)
+    ...     builder.index(1).real(2.2)
+    ...     builder.index(2).string("two")
+    ...
+
+to produce the same result.
+
+.. code-block:: python
+
+
+    >>> builder.show()
+    [(1, 1.1, 'one'),
+     (2, 2.2, 'two')]
+
+Since context managers aren't yet supported by Numba, this method
+can't be used in Numba.
+
+
+
+.. _ak-arraybuilder-record:
+
+.. py:method:: ak.ArrayBuilder.record(self, name=None)
+
+Context manager to prevent unpaired :py:meth:`begin_record <ak.ArrayBuilder.begin_record>` and :py:meth:`end_record <ak.ArrayBuilder.end_record>`. The
+example in the :py:meth:`begin_record <ak.ArrayBuilder.begin_record>` documentation can be rewritten as
+
+.. code-block:: python
+
+
+    >>> builder = ak.ArrayBuilder()
+    >>> with builder.record("points"):
+    ...     builder.field("x").real(1)
+    ...     builder.field("y").real(1.1)
+    ...
+    >>> with builder.record("points"):
+    ...     builder.field("x").real(2)
+    ...     builder.field("y").real(2.2)
+    ...
+
+to produce the same result.
+
+.. code-block:: python
+
+
+    >>> builder.show()
+    [{x: 1, y: 1.1},
+     {x: 2, y: 2.2}]
+
+Since context managers aren't yet supported by Numba, this method
+can't be used in Numba.
+

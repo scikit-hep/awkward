@@ -1,0 +1,14 @@
+ak.str.akstr_swapcase
+=====================
+
+.. py:module:: awkward.operations.str.akstr_swapcase
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_swapcase.swapcase
+
+

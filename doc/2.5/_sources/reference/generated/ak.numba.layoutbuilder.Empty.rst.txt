@@ -1,0 +1,51 @@
+ak.numba.layoutbuilder.Empty
+----------------------------
+
+.. py:module: ak.numba.layoutbuilder.Empty
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/layoutbuilder.py>`__ on `line 97 <https://github.com/scikit-hep/awkward/blob/ee63f6ea8d2a687027967d738995a7df02dadc13/src/awkward/numba/layoutbuilder.py#L97>`__.
+
+.. py:class:: ak.numba.layoutbuilder.Empty(self)
+
+
+
+.. _ak-numba-layoutbuilder-empty-__repr__:
+
+.. py:method:: ak.numba.layoutbuilder.Empty.__repr__(self)
+
+
+
+.. _ak-numba-layoutbuilder-empty-numbatype:
+
+.. py:method:: ak.numba.layoutbuilder.Empty.numbatype(self)
+
+
+
+.. _ak-numba-layoutbuilder-empty-__len__:
+
+.. py:method:: ak.numba.layoutbuilder.Empty.__len__(self)
+
+
+
+.. _ak-numba-layoutbuilder-empty-form:
+
+.. py:attribute:: ak.numba.layoutbuilder.Empty.form
+
+
+
+.. _ak-numba-layoutbuilder-empty-clear:
+
+.. py:method:: ak.numba.layoutbuilder.Empty.clear(self)
+
+
+
+.. _ak-numba-layoutbuilder-empty-is_valid:
+
+.. py:method:: ak.numba.layoutbuilder.Empty.is_valid(self, error)
+
+
+
+.. _ak-numba-layoutbuilder-empty-snapshot:
+
+.. py:method:: ak.numba.layoutbuilder.Empty.snapshot(self)
+

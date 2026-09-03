@@ -1,0 +1,128 @@
+ak.record.Record
+================
+
+Defined in `awkward.record <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/record.py>`__ on `line 26 <https://github.com/scikit-hep/awkward/blob/db98572a975447ea3df6074962ab4c1ffa336c62/src/awkward/record.py#L26>`__.
+
+.. py:class:: ak.record.Record(array, at)
+
+   Represents a single value from a :py:obj:`ak.contents.RecordArray`.
+
+   As this is a columnar representation, the Record contains a
+   :py:obj:`ak.layout.RecordArray`, rather than the other way around.
+   Its two fields are
+
+   * ``array``: the :py:obj:`ak.layout.RecordArray` and
+   * ``at``: the index posiion where this Record is found.
+
+   The Record shares a reference with its :py:obj:`ak.layout.RecordArray`;
+   it is not a copy.
+
+
+   .. py:property:: array
+
+
+   .. py:property:: backend
+
+
+   .. py:property:: at
+
+
+   .. py:property:: fields
+
+
+   .. py:property:: is_tuple
+
+
+   .. py:method:: to_tuple() -> awkward._typing.Self
+
+
+   .. py:property:: contents
+
+
+   .. py:method:: content(index_or_field)
+
+
+   .. py:method:: __repr__()
+
+
+   .. py:method:: _repr(indent, pre, post)
+
+
+   .. py:method:: validity_error(path='layout.array')
+
+
+   .. py:property:: parameters
+
+
+   .. py:method:: parameter(key)
+
+
+   .. py:method:: purelist_parameter(key) -> awkward._typing.JSONSerializable
+
+
+   .. py:method:: purelist_parameters(*keys)
+
+
+   .. py:property:: purelist_isregular
+
+
+   .. py:property:: purelist_depth
+
+
+   .. py:property:: minmax_depth
+
+
+   .. py:property:: branch_depth
+
+
+   .. py:method:: _touch_data(recursive)
+
+
+   .. py:method:: _touch_shape(recursive)
+
+
+   .. py:method:: __getitem__(where)
+
+
+   .. py:method:: _getitem(where)
+
+
+   .. py:method:: _getitem_field(where, only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
+
+
+   .. py:method:: _getitem_fields(where, only_fields: tuple[str, Ellipsis] = ())
+
+
+   .. py:method:: to_packed(recursive: bool = True) -> awkward._typing.Self
+
+
+   .. py:method:: to_list(behavior=None)
+
+
+   .. py:method:: _to_list(behavior, json_conversions)
+
+
+   .. py:method:: to_backend(backend: awkward._backends.backend.Backend | str | None = None) -> awkward._typing.Self
+
+
+   .. py:method:: materialize() -> awkward._typing.Self
+
+
+   .. py:property:: is_all_materialized
+      :type: bool
+
+
+
+   .. py:property:: is_any_materialized
+      :type: bool
+
+
+
+   .. py:method:: __copy__() -> awkward._typing.Self
+
+
+   .. py:method:: __deepcopy__(memo)
+
+
+   .. py:method:: copy(array=UNSET, at=UNSET) -> awkward._typing.Self
+

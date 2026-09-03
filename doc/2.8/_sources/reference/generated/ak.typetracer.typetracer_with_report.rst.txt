@@ -1,0 +1,31 @@
+ak.typetracer.typetracer_with_report
+------------------------------------
+
+.. py:module: ak.typetracer.typetracer_with_report
+
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/typetracer.py>`__ on `line 177 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/typetracer.py#L177>`__.
+
+.. py:function:: ak.typetracer.typetracer_with_report(form, *, buffer_key='{form_key}', highlevel=False, behavior=None, attrs=None)
+
+
+    :param form: The form of the Awkward
+             Array to build a typetracer-backed array from.
+    :type form: :py:obj:`ak.forms.Form` or str/dict equivalent
+    :param buffer_key: Python format string containing
+                   ``"{form_key}"`` and/or ``"{attribute}"`` or a function that takes these
+                   as keyword arguments and returns a string to use as a ``form_key``
+                   for low-level typetracer buffers.
+    :type buffer_key: str or callable
+    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                  a low-level :py:obj:`ak.contents.Content` subclass.
+    :type highlevel: bool
+    :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                 high-level.
+    :type behavior: None or dict
+    :param attrs: Custom attributes for the output array, if
+              high-level.
+    :type attrs: None or dict
+
+Returns a typetracer array and associated report object built from a form
+with labelled form keys.
+

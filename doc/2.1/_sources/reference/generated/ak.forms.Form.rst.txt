@@ -1,0 +1,241 @@
+ak.forms.Form
+-------------
+
+.. py:module: ak.forms.Form
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/forms/form.py>`__ on `line 204 <https://github.com/scikit-hep/awkward-1.0/blob/32e6ce50b6c30a939ecbc4d98e52ca8bf541a385/src/awkward/forms/form.py#L204>`__.
+
+.. py:class:: ak.forms.Form(self)
+
+
+
+.. _ak-forms-form-is_numpy:
+
+.. py:attribute:: ak.forms.Form.is_numpy
+    :value: False
+
+
+
+.. _ak-forms-form-is_unknown:
+
+.. py:attribute:: ak.forms.Form.is_unknown
+    :value: False
+
+
+
+.. _ak-forms-form-is_list:
+
+.. py:attribute:: ak.forms.Form.is_list
+    :value: False
+
+
+
+.. _ak-forms-form-is_regular:
+
+.. py:attribute:: ak.forms.Form.is_regular
+    :value: False
+
+
+
+.. _ak-forms-form-is_option:
+
+.. py:attribute:: ak.forms.Form.is_option
+    :value: False
+
+
+
+.. _ak-forms-form-is_indexed:
+
+.. py:attribute:: ak.forms.Form.is_indexed
+    :value: False
+
+
+
+.. _ak-forms-form-is_record:
+
+.. py:attribute:: ak.forms.Form.is_record
+    :value: False
+
+
+
+.. _ak-forms-form-is_union:
+
+.. py:attribute:: ak.forms.Form.is_union
+    :value: False
+
+
+
+.. _ak-forms-form-_init:
+
+.. py:method:: ak.forms.Form._init(self, *, parameters, form_key)
+
+
+
+.. _ak-forms-form-parameters:
+
+.. py:attribute:: ak.forms.Form.parameters
+
+
+
+.. _ak-forms-form-is_identity_like:
+
+.. py:attribute:: ak.forms.Form.is_identity_like
+
+Return True if the content or its non-list descendents are an identity
+
+
+
+.. _ak-forms-form-parameter:
+
+.. py:method:: ak.forms.Form.parameter(self, key)
+
+
+
+.. _ak-forms-form-purelist_parameter:
+
+.. py:method:: ak.forms.Form.purelist_parameter(self, key)
+
+
+
+.. _ak-forms-form-purelist_isregular:
+
+.. py:attribute:: ak.forms.Form.purelist_isregular
+
+
+
+.. _ak-forms-form-purelist_depth:
+
+.. py:attribute:: ak.forms.Form.purelist_depth
+
+
+
+.. _ak-forms-form-minmax_depth:
+
+.. py:attribute:: ak.forms.Form.minmax_depth
+
+
+
+.. _ak-forms-form-branch_depth:
+
+.. py:attribute:: ak.forms.Form.branch_depth
+
+
+
+.. _ak-forms-form-fields:
+
+.. py:attribute:: ak.forms.Form.fields
+
+
+
+.. _ak-forms-form-is_tuple:
+
+.. py:attribute:: ak.forms.Form.is_tuple
+
+
+
+.. _ak-forms-form-form_key:
+
+.. py:attribute:: ak.forms.Form.form_key
+
+
+
+.. _ak-forms-form-__str__:
+
+.. py:method:: ak.forms.Form.__str__(self)
+
+
+
+.. _ak-forms-form-to_dict:
+
+.. py:method:: ak.forms.Form.to_dict(self, verbose=True)
+
+
+
+.. _ak-forms-form-_to_dict_extra:
+
+.. py:method:: ak.forms.Form._to_dict_extra(self, out, verbose)
+
+
+
+.. _ak-forms-form-to_json:
+
+.. py:method:: ak.forms.Form.to_json(self)
+
+
+
+.. _ak-forms-form-_repr_args:
+
+.. py:method:: ak.forms.Form._repr_args(self)
+
+
+
+.. _ak-forms-form-type:
+
+.. py:attribute:: ak.forms.Form.type
+
+
+
+.. _ak-forms-form-type_from_behavior:
+
+.. py:method:: ak.forms.Form.type_from_behavior(self, behavior)
+
+
+
+.. _ak-forms-form-columns:
+
+.. py:method:: ak.forms.Form.columns(self, list_indicator=None, column_prefix=())
+
+
+
+.. _ak-forms-form-select_columns:
+
+.. py:method:: ak.forms.Form.select_columns(self, specifier, expand_braces=True)
+
+
+
+.. _ak-forms-form-column_types:
+
+.. py:method:: ak.forms.Form.column_types(self)
+
+
+
+.. _ak-forms-form-_columns:
+
+.. py:method:: ak.forms.Form._columns(self, path, output, list_indicator)
+
+
+
+.. _ak-forms-form-_select_columns:
+
+.. py:method:: ak.forms.Form._select_columns(self, index, specifier, matches, output)
+
+
+
+.. _ak-forms-form-_column_types:
+
+.. py:method:: ak.forms.Form._column_types(self)
+
+
+
+.. _ak-forms-form-_to_dict_part:
+
+.. py:method:: ak.forms.Form._to_dict_part(self, verbose, toplevel)
+
+
+
+.. _ak-forms-form-_type:
+
+.. py:method:: ak.forms.Form._type(self, typestrs)
+
+
+
+.. _ak-forms-form-length_zero_array:
+
+.. py:method:: ak.forms.Form.length_zero_array(self, *, backend=numpy_backend, highlevel=True, behavior=None)
+
+
+
+.. _ak-forms-form-length_one_array:
+
+.. py:method:: ak.forms.Form.length_one_array(self, *, backend=numpy_backend, highlevel=True, behavior=None)
+

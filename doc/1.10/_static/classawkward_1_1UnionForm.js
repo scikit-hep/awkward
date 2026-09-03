@@ -1,0 +1,28 @@
+var classawkward_1_1UnionForm =
+[
+    [ "UnionForm", "classawkward_1_1UnionForm.html#ab0d074434e290664ad166acc3b38bf7a", null ],
+    [ "branch_depth", "classawkward_1_1UnionForm.html#ab650639cca790f5ed860651325631884", null ],
+    [ "content", "classawkward_1_1UnionForm.html#a47b263b1ed5d1cc24672020196e9ed52", null ],
+    [ "contents", "classawkward_1_1UnionForm.html#aec7f1a6f763238baaee2fc0d99199505", null ],
+    [ "dimension_optiontype", "classawkward_1_1UnionForm.html#aef4fcbd2c9d5f95d19d4c806fc3696fa", null ],
+    [ "equal", "classawkward_1_1UnionForm.html#a241ff400d7af7a6df3aae8173f6ba4a5", null ],
+    [ "fieldindex", "classawkward_1_1UnionForm.html#a6f73c84a6f5b7110357bea19bc1090d3", null ],
+    [ "getitem_field", "classawkward_1_1UnionForm.html#aa36cd2dc892885ffc11c2eca0ca51a27", null ],
+    [ "getitem_fields", "classawkward_1_1UnionForm.html#a6a8a7040ec81f1958b0bc03549453cb4", null ],
+    [ "haskey", "classawkward_1_1UnionForm.html#ac6d2196b629787828548ee041b850a42", null ],
+    [ "index", "classawkward_1_1UnionForm.html#aa56533009cc939c15d03061b540b1a70", null ],
+    [ "istuple", "classawkward_1_1UnionForm.html#a430204f51d34d7b7ed2568991291b112", null ],
+    [ "key", "classawkward_1_1UnionForm.html#a94b22314ca8a5a0480c62d587c77e36a", null ],
+    [ "keys", "classawkward_1_1UnionForm.html#a67bf845a0d736e6b587cdec05ebef0a2", null ],
+    [ "minmax_depth", "classawkward_1_1UnionForm.html#adcb2b7a1792096bb8a596db558b963b8", null ],
+    [ "numcontents", "classawkward_1_1UnionForm.html#a62c197dc5a04e303fc4cbf7bf7182826", null ],
+    [ "numfields", "classawkward_1_1UnionForm.html#ab3327ff318aa01f30c95832d8c956587", null ],
+    [ "purelist_depth", "classawkward_1_1UnionForm.html#a0062802d1249e1e3388e67e606db9060", null ],
+    [ "purelist_isregular", "classawkward_1_1UnionForm.html#aec79ff2966c075e74171fffe3166d659", null ],
+    [ "purelist_parameter", "classawkward_1_1UnionForm.html#abb74c2061a38c2cc09bf7cb0257e19ca", null ],
+    [ "shallow_copy", "classawkward_1_1UnionForm.html#a44c4b3286d46dc15c3b1ef6049541934", null ],
+    [ "tags", "classawkward_1_1UnionForm.html#a041cc6d2308149d7b11f2c9d3caf08e1", null ],
+    [ "tojson_part", "classawkward_1_1UnionForm.html#a4e9b93d0af98375af5e79b32c467f9d5", null ],
+    [ "type", "classawkward_1_1UnionForm.html#ab5a853b88335a831664bd8b6b5d3348e", null ],
+    [ "with_form_key", "classawkward_1_1UnionForm.html#a03e169f76f8c9d29dca6c15a8f35b9c0", null ]
+];

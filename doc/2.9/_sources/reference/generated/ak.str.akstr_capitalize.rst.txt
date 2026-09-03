@@ -1,0 +1,14 @@
+ak.str.akstr_capitalize
+=======================
+
+.. py:module:: awkward.operations.str.akstr_capitalize
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_capitalize.capitalize
+
+

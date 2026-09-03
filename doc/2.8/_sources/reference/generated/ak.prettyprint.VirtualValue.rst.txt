@@ -1,0 +1,15 @@
+ak.prettyprint.VirtualValue
+---------------------------
+
+.. py:module: ak.prettyprint.VirtualValue
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/prettyprint.py>`__ on `line 82 <https://github.com/scikit-hep/awkward/blob/0b5ee6e87d2a6d475c58ee0b3ff2106b415311fd/src/awkward/prettyprint.py#L82>`__.
+
+.. py:class:: ak.prettyprint.VirtualValue(self)
+
+
+
+.. _ak-prettyprint-virtualvalue-__str__:
+
+.. py:method:: ak.prettyprint.VirtualValue.__str__(self)
+

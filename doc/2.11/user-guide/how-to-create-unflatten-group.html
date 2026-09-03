@@ -1,0 +1,1097 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How to create arrays by “unflattening” or “grouping” &#8212; Awkward Array 2.11.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/awkward.css?v=b9a6aa19" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../_static/documentation_options.js?v=1647406f"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/how-to-create-unflatten-group';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.11';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <script src="../_static/js/awkward.js?v=0713b67f"></script>
+    <link rel="canonical" href="https://awkward-array.org/doc/main/user-guide/how-to-create-unflatten-group.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to create arrays with ArrayBuilder (easy and general)" href="how-to-create-arraybuilder.html" />
+    <link rel="prev" title="How to create arrays of strings" href="how-to-create-strings.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="2.11" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.11.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.11.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../getting-started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../reference/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md">
+    Contributor guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://github.com/scikit-hep/awkward/releases">
+    Release history
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scikit-hep/awkward" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/awkward" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://gitter.im/Scikit-HEP/awkward-array" title="Gitter" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-gitter fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Gitter</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar"><svg class="pst-icon svg-inline--fa" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-convert.html">Converting arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-numpy.html">NumPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-python.html">Python objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-json.html">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-arrow.html">Arrow and Parquet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-pandas.html">Pandas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-buffers.html">Generic buffers</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="how-to-convert-rdataframe.html">ROOT via RDataFrame</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="how-to-create.html">Creating new arrays</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-lists.html">Arrays of lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-records.html">Arrays of records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-missing.html">Arrays of missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-strings.html">Arrays of strings</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Unflattening and grouping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-arraybuilder.html">ArrayBuilder (easy &amp; general)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-create-constructors.html">Direct constructors (fastest)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-examine.html">Examining arrays</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-type.html">Data type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-single-item.html">Single item detail</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-list-fields.html">Listing fields/keys/columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-simple-slicing.html">Simple slicing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-examine-checking-validity.html">Checking validity</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-array-properties.html">Array properties</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-array-properties-named-axis.html">Named axes</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-math.html">Numerical math</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-numpy.html">NumPy functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-broadcasting.html">Awkward broadcasting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-reducing.html">Reducing (sum/min/any/all)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-statistics.html">Statistics (mean/var/std)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-argminmax.html">Min/max/sort one array by another</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-math-gpu.html">Awkward Arrays on GPUs</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-strings.html">Working with strings</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-read-binary.html">Reading UTF-8 binary streams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-extract-substrings.html">Extracting substrings with regex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-strings-split-and-join.html">Splitting and joining</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-filter.html">Filtering data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-num.html">By number of items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-cut-mask.html">Cuts vs. masks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-ragged.html">Using ragged arrays</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-filter-masked.html">Using arrays with missing values</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-restructure.html">Restructuring data</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-zip-project.html">Zip/unzip and project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-add-fields.html">Adding fields to records</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-flatten.html">Flattening for plots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-pad.html">Padding/clipping for machine learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-restructure-concatenate.html">Concatenating and interleaving</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-combinatorics.html">Combinatorics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-cartesian-combinations.html">Cartesian and "n choose k"</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-combinatorics-best-match.html">Best match between collections</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-numba.html">Using arrays in Numba</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-features.html">Supported features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-numba-cuda.html">Working with CUDA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-use-in-cpp.html">Using arrays in C++</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-header-only-layoutbuilder.html">Building Awkward Arrays in C++ with LayoutBuilder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how-to-use-in-cpp-cppyy.html">JIT compiling operations with C++ in cppyy</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="how-to-specialize.html">Special topics</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="how-to-specialize-differentiate-jax.html">Differentiation using JAX</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="how-to-create.html" class="nav-link">Creating arrays</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to create arrays by “unflattening” or “grouping”</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="how-to-create-arrays-by-unflattening-or-grouping">
+<h1>How to create arrays by “unflattening” or “grouping”<a class="headerlink" href="#how-to-create-arrays-by-unflattening-or-grouping" title="Link to this heading">#</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlopen</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="finding-runs-in-an-array">
+<h2>Finding runs in an array<a class="headerlink" href="#finding-runs-in-an-array" title="Link to this heading">#</a></h2>
+<p>It is often the case that one has an array of data that they wish to subdivide into common groups. Let’s imagine that we’re looking at NASA’s <a class="reference external" href="https://data.nasa.gov/resource/y77d-th95.json">Earth Meteorite Landings dataset</a>, and that we wish to find the largest meteorite in each classification. This is known as a <code class="docutils literal notranslate"><span class="pre">groupby</span></code> operation, followed by a reduction.</p>
+<p>First, we should load the data</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;../data/y77d-th95.json&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">landing</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">landing</span><span class="o">.</span><span class="n">fields</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;name&#39;,
+ &#39;id&#39;,
+ &#39;nametype&#39;,
+ &#39;recclass&#39;,
+ &#39;mass&#39;,
+ &#39;fall&#39;,
+ &#39;year&#39;,
+ &#39;reclat&#39;,
+ &#39;reclong&#39;,
+ &#39;geolocation&#39;,
+ &#39;:@computed_region_cbhk_fwbd&#39;,
+ &#39;:@computed_region_nnqa_25f4&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>In order to find the <em>largest</em> meteorite by each category, we must first group the entries into categories. This is called a <code class="docutils literal notranslate"><span class="pre">groupby</span></code> operation, whereby we are ordering the entire array into subgroups given by a particular label. To perform a <code class="docutils literal notranslate"><span class="pre">groupby</span></code> in Awkward Array, we must first sort the array by the category</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">landing_sorted_class</span> <span class="o">=</span> <span class="n">landing</span><span class="p">[</span><span class="n">ak</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">landing</span><span class="o">.</span><span class="n">recclass</span><span class="p">)]</span>
+<span class="n">landing_sorted_class</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{name: &#x27;Acapulco&#x27;, id: &#x27;10&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Acapulcoite&#x27;, ...},
+ {name: &#x27;Silistra&#x27;, id: &#x27;55584&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &#x27;Angra dos Reis (stone)&#x27;, id: &#x27;2302&#x27;, nametype: &#x27;Valid&#x27;, ...},
+ {name: &#x27;Aubres&#x27;, id: &#x27;4893&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Aubrite&#x27;, ...},
+ {name: &#x27;Bishopville&#x27;, id: &#x27;5059&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Aubrite&#x27;, ...},
+ {name: &#x27;Bustee&#x27;, id: &#x27;5181&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Aubrite&#x27;, ...},
+ {name: &#x27;Cumberland Falls&#x27;, id: &#x27;5496&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &#x27;Khor Temiki&#x27;, id: &#x27;12299&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &#x27;Mayo Belwa&#x27;, id: &#x27;15451&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Aubrite&#x27;, ...},
+ {name: &#x27;Norton County&#x27;, id: &#x27;17922&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ ...,
+ {name: &#x27;Aire-sur-la-Lys&#x27;, id: &#x27;425&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &#x27;Lusaka&#x27;, id: &#x27;14759&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Unknown&#x27;, ...},
+ {name: &#x27;Dyalpur&#x27;, id: &#x27;7757&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Ureilite&#x27;, ...},
+ {name: &#x27;Haverö&#x27;, id: &#x27;11859&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Ureilite&#x27;, ...},
+ {name: &#x27;Jalanash&#x27;, id: &#x27;12068&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Ureilite&#x27;, ...},
+ {name: &#x27;Lahrauli&#x27;, id: &#x27;12433&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Ureilite&#x27;, ...},
+ {name: &#x27;Novo-Urei&#x27;, id: &#x27;17933&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Ureilite&#x27;, ...},
+ {name: &#x27;Almahata Sitta&#x27;, id: &#x27;48915&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &#x27;Pontlyfni&#x27;, id: &#x27;18865&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}]
+--------------------------------------------------------------------------------
+backend: cpu
+nbytes: 246.5 kB
+type: 1000 * {
+    name: string,
+    id: string,
+    nametype: string,
+    re...</pre></div></div>
+</div>
+<p>This sorted array can be subdivided into sublists of the same category. To determine how long each of these sublists must be, Awkward provides <em>another</em> function <a class="reference internal" href="../reference/generated/ak.run_lengths.html#ak.run_lengths" title="ak.run_lengths"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.run_lengths()</span></code></a> which, as the name implies, finds the lengths of consecutive <em>runs</em> in an array, e.g.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">run_lengths</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[3,
+ 2,
+ 1,
+ 3]
+---
+backend: cpu
+nbytes: 32 B
+type: 4 * int64</pre></div></div>
+</div>
+<p>The function does not accept an <code class="docutils literal notranslate"><span class="pre">axis</span></code> argument; Awkward Array only supports finding runs in the innermost <code class="docutils literal notranslate"><span class="pre">axis=-1</span></code> axis of the array. Let’s find the lengths of each category sublist using <a class="reference internal" href="../reference/generated/ak.run_lengths.html#ak.run_lengths" title="ak.run_lengths"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.run_lengths()</span></code></a>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lengths</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">run_lengths</span><span class="p">(</span><span class="n">landing_sorted_class</span><span class="o">.</span><span class="n">recclass</span><span class="p">)</span>
+<span class="n">lengths</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[1,
+ 1,
+ 1,
+ 9,
+ 1,
+ 3,
+ 1,
+ 1,
+ 4,
+ 2,
+ ...,
+ 21,
+ 2,
+ 2,
+ 1,
+ 34,
+ 2,
+ 5,
+ 1,
+ 1]
+-----
+backend: cpu
+nbytes: 944 B
+type: 118 * int64</pre></div></div>
+</div>
+</section>
+<section id="dividing-an-array-into-sublists">
+<h2>Dividing an array into sublists<a class="headerlink" href="#dividing-an-array-into-sublists" title="Link to this heading">#</a></h2>
+<p>Awkward Array provides an <a class="reference internal" href="../reference/generated/ak.unflatten.html#ak.unflatten" title="ak.unflatten"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.unflatten()</span></code></a> operation that adds a new dimension to an array, using either a single integer denoting the (regular) size of the dimension, or a list of integers representing the lengths of the sublists to create e.g.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">&quot;Do&quot;</span><span class="p">,</span> <span class="s2">&quot;re&quot;</span><span class="p">,</span> <span class="s2">&quot;mi&quot;</span><span class="p">,</span> <span class="s2">&quot;fa&quot;</span><span class="p">,</span> <span class="s2">&quot;so&quot;</span><span class="p">,</span> <span class="s2">&quot;la&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[&#x27;Do&#x27;],
+ [&#x27;re&#x27;, &#x27;mi&#x27;],
+ [&#x27;fa&#x27;, &#x27;so&#x27;],
+ [&#x27;la&#x27;]]
+--------------
+backend: cpu
+nbytes: 108 B
+type: 4 * var * string</pre></div></div>
+</div>
+<p>If we pass an integer instead of a list of lengths, we get a regular array</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">&quot;Do&quot;</span><span class="p">,</span> <span class="s2">&quot;re&quot;</span><span class="p">,</span> <span class="s2">&quot;mi&quot;</span><span class="p">,</span> <span class="s2">&quot;fa&quot;</span><span class="p">,</span> <span class="s2">&quot;so&quot;</span><span class="p">,</span> <span class="s2">&quot;la&quot;</span><span class="p">],</span>
+    <span class="mi">2</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[&#x27;Do&#x27;, &#x27;re&#x27;],
+ [&#x27;mi&#x27;, &#x27;fa&#x27;],
+ [&#x27;so&#x27;, &#x27;la&#x27;]]
+--------------
+backend: cpu
+nbytes: 68 B
+type: 3 * 2 * string</pre></div></div>
+</div>
+<p>We can unflatten our sorted array using the length of runs each classification, in order to finalise our groupby operation.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">landing_by_class</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">unflatten</span><span class="p">(</span>
+    <span class="n">landing_sorted_class</span><span class="p">,</span> 
+    <span class="n">lengths</span>
+<span class="p">)</span>
+<span class="n">landing_by_class</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[[{name: &#x27;Acapulco&#x27;, id: &#x27;10&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}],
+ [{name: &#x27;Silistra&#x27;, id: &#x27;55584&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}],
+ [{name: &#x27;Angra dos Reis (stone)&#x27;, id: &#x27;2302&#x27;, nametype: &#x27;Valid&#x27;, ...}],
+ [{name: &#x27;Aubres&#x27;, id: &#x27;4893&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}, ...],
+ [{name: &quot;Sutter&#x27;s Mill&quot;, id: &#x27;55529&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;C&#x27;, ...}],
+ [{name: &#x27;Bells&#x27;, id: &#x27;5005&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;C2-ung&#x27;, ...}, ...],
+ [{name: &#x27;Ningqiang&#x27;, id: &#x27;16981&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;C3-ung&#x27;, ...}],
+ [{name: &#x27;Gujba&#x27;, id: &#x27;11449&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;CBa&#x27;, ...}],
+ [{name: &#x27;Alais&#x27;, id: &#x27;448&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;CI1&#x27;, ...}, ...],
+ [{name: &#x27;Karoonda&#x27;, id: &#x27;12264&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}, ...],
+ ...,
+ [{name: &#x27;Barcelona (stone)&#x27;, id: &#x27;4944&#x27;, nametype: &#x27;Valid&#x27;, ...}, ..., {...}],
+ [{name: &#x27;Cumulus Hills 04075&#x27;, id: &#x27;32531&#x27;, nametype: &#x27;Valid&#x27;, ...}, ...],
+ [{name: &#x27;Marjalahti&#x27;, id: &#x27;15426&#x27;, nametype: &#x27;Valid&#x27;, ...}, {...}],
+ [{name: &#x27;Rumuruti&#x27;, id: &#x27;22782&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;R3.8-6&#x27;, ...}],
+ [{name: &#x27;Andhara&#x27;, id: &#x27;2294&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}, ...],
+ [{name: &#x27;Aire-sur-la-Lys&#x27;, id: &#x27;425&#x27;, nametype: &#x27;Valid&#x27;, ...}, {...}],
+ [{name: &#x27;Dyalpur&#x27;, id: &#x27;7757&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}, ...],
+ [{name: &#x27;Almahata Sitta&#x27;, id: &#x27;48915&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}],
+ [{name: &#x27;Pontlyfni&#x27;, id: &#x27;18865&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}]]
+--------------------------------------------------------------------------------
+backend: cpu
+nbytes: 247.4 kB
+type: 118 * var * {
+    name: string,
+    id: string,
+    nametype: string,
+ ...</pre></div></div>
+</div>
+<p>We can see the categories of this grouped array by pulling out the first item of each sublist</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">landing_by_class</span><span class="o">.</span><span class="n">recclass</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[&#x27;Acapulcoite&#x27;,
+ &#x27;Achondrite-ung&#x27;,
+ &#x27;Angrite&#x27;,
+ &#x27;Aubrite&#x27;,
+ &#x27;C&#x27;,
+ &#x27;C2-ung&#x27;,
+ &#x27;C3-ung&#x27;,
+ &#x27;CBa&#x27;,
+ &#x27;CI1&#x27;,
+ &#x27;CK4&#x27;,
+ ...,
+ &#x27;OC&#x27;,
+ &#x27;Pallasite&#x27;,
+ &#x27;Pallasite, PMG&#x27;,
+ &#x27;R3.8-6&#x27;,
+ &#x27;Stone-uncl&#x27;,
+ &#x27;Unknown&#x27;,
+ &#x27;Ureilite&#x27;,
+ &#x27;Ureilite-an&#x27;,
+ &#x27;Winonaite&#x27;]
+------------------
+backend: cpu
+nbytes: 12.7 kB
+type: 118 * string</pre></div></div>
+</div>
+<p>The above three steps:</p>
+<ol class="arabic simple">
+<li><p>Sort the array</p></li>
+<li><p>Compute the length of runs within the sorted array</p></li>
+<li><p>Unflatten the sorted array by the run lengths</p></li>
+</ol>
+<p>form a <code class="docutils literal notranslate"><span class="pre">groupby</span></code> operation.</p>
+<section id="computing-the-mass-of-the-largest-meteorites">
+<h3>Computing the mass of the largest meteorites<a class="headerlink" href="#computing-the-mass-of-the-largest-meteorites" title="Link to this heading">#</a></h3>
+<p>Now that we have grouped our meteorite landings by classification, we can find the largest mass meteorite in each group. If we look at the type of the array, we can see that the <code class="docutils literal notranslate"><span class="pre">mass</span></code> field is actually a string:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">landing_by_class</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>118 * var * {
+    name: string,
+    id: string,
+    nametype: string,
+    recclass: string,
+    mass: ?string,
+    fall: string,
+    year: ?string,
+    reclat: ?string,
+    reclong: ?string,
+    geolocation: ?{
+        type: string,
+        coordinates: var * float64
+    },
+    &quot;:@computed_region_cbhk_fwbd&quot;: ?string,
+    &quot;:@computed_region_nnqa_25f4&quot;: ?string
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s convert it to a floating point number</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">landing_by_class</span><span class="p">[</span><span class="s1">&#39;mass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">strings_astype</span><span class="p">(</span><span class="n">landing_by_class</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we can find the index of the largest mass in each sublist. We’ll use <code class="docutils literal notranslate"><span class="pre">keepdims=True</span></code> in order to be able to use this array to index <code class="docutils literal notranslate"><span class="pre">landing_by_class</span></code> and pull out the corresponding record.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">i_largest_mass</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">landing_by_class</span><span class="o">.</span><span class="n">mass</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Finding the largest meteorite is then a simple case of using <code class="docutils literal notranslate"><span class="pre">i_largest_mass</span></code> as an index, and flattening the result to drop the unneeded dimension</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">largest_meteorite</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span>
+    <span class="n">landing_by_class</span><span class="p">[</span><span class="n">i_largest_mass</span><span class="p">],</span> 
+    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">largest_meteorite</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[{name: &#x27;Acapulco&#x27;, id: &#x27;10&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Acapulcoite&#x27;, ...},
+ {name: &#x27;Silistra&#x27;, id: &#x27;55584&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &#x27;Angra dos Reis (stone)&#x27;, id: &#x27;2302&#x27;, nametype: &#x27;Valid&#x27;, ...},
+ {name: &#x27;Norton County&#x27;, id: &#x27;17922&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &quot;Sutter&#x27;s Mill&quot;, id: &#x27;55529&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;C&#x27;, ...},
+ {name: &#x27;Tagish Lake&#x27;, id: &#x27;23782&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;C2-ung&#x27;, ...},
+ {name: &#x27;Ningqiang&#x27;, id: &#x27;16981&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;C3-ung&#x27;, ...},
+ {name: &#x27;Gujba&#x27;, id: &#x27;11449&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;CBa&#x27;, ...},
+ {name: &#x27;Orgueil&#x27;, id: &#x27;18026&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;CI1&#x27;, ...},
+ {name: &#x27;Karoonda&#x27;, id: &#x27;12264&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;CK4&#x27;, ...},
+ ...,
+ {name: &#x27;Kushiike&#x27;, id: &#x27;12381&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;OC&#x27;, ...},
+ {name: &#x27;Mineo&#x27;, id: &#x27;16696&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Pallasite&#x27;, ...},
+ {name: &#x27;Omolon&#x27;, id: &#x27;18019&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &#x27;Rumuruti&#x27;, id: &#x27;22782&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;R3.8-6&#x27;, ...},
+ {name: &#x27;Hatford&#x27;, id: &#x27;11855&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Stone-uncl&#x27;, ...},
+ None,
+ {name: &#x27;Novo-Urei&#x27;, id: &#x27;17933&#x27;, nametype: &#x27;Valid&#x27;, recclass: &#x27;Ureilite&#x27;, ...},
+ {name: &#x27;Almahata Sitta&#x27;, id: &#x27;48915&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...},
+ {name: &#x27;Pontlyfni&#x27;, id: &#x27;18865&#x27;, nametype: &#x27;Valid&#x27;, recclass: ..., ...}]
+--------------------------------------------------------------------------------
+backend: cpu
+nbytes: 275.3 kB
+type: 118 * ?{
+    name: string,
+    id: string,
+    nametype: string,
+    re...</pre></div></div>
+</div>
+<p>Here are there names!</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">largest_meteorite</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>[&#x27;Acapulco&#x27;,
+ &#x27;Silistra&#x27;,
+ &#x27;Angra dos Reis (stone)&#x27;,
+ &#x27;Norton County&#x27;,
+ &quot;Sutter&#x27;s Mill&quot;,
+ &#x27;Tagish Lake&#x27;,
+ &#x27;Ningqiang&#x27;,
+ &#x27;Gujba&#x27;,
+ &#x27;Orgueil&#x27;,
+ &#x27;Karoonda&#x27;,
+ ...,
+ &#x27;Kushiike&#x27;,
+ &#x27;Mineo&#x27;,
+ &#x27;Omolon&#x27;,
+ &#x27;Rumuruti&#x27;,
+ &#x27;Hatford&#x27;,
+ None,
+ &#x27;Novo-Urei&#x27;,
+ &#x27;Almahata Sitta&#x27;,
+ &#x27;Pontlyfni&#x27;]
+--------------------------
+backend: cpu
+nbytes: 17.6 kB
+type: 118 * ?string</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-to-create-strings.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">How to create arrays of strings</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="how-to-create-arraybuilder.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">How to create arrays with ArrayBuilder (easy and general)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#finding-runs-in-an-array">Finding runs in an array</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dividing-an-array-into-sublists">Dividing an array into sublists</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computing-the-mass-of-the-largest-meteorites">Computing the mass of the largest meteorites</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/scikit-hep/awkward/edit/main/docs/user-guide/how-to-create-unflatten-group.md">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/how-to-create-unflatten-group.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Awkward Array development team.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+        <div class="footer-item"><p>Support for this work was provided by NSF cooperative agreement <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1836650">OAC-1836650</a> (IRIS-HEP 1), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2323298">PHY-2323298</a> (IRIS-HEP 2), grant <a href="https://nsf.gov/awardsearch/showAward?AWD_ID=1450377">OAC-1450377</a> (DIANA/HEP), <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=1520942">PHY-1520942</a> and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2121686">PHY-2121686</a> (US-CMS LHC Ops), and <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2103945">OAC-2103945</a> (Awkward Array).</p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
