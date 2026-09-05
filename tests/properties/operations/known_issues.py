@@ -165,36 +165,29 @@ def has_issue_4262(a: ak.Array) -> bool:
     return False
 
 
-def has_issue_4263(a: ak.Array) -> bool:
-    """Return `True` if a union that no values reach is in the array.
-
-    `ak.flatten(axis=None)` and `ak.ravel` collect the values of
-    every branch and merge them with `ak._do.mergemany`; a union that
-    no values reach — judged on reachable values, so an option mask
-    or an empty list above the union counts — contributes no parts,
-    and the merge fails its `assert len(contents) != 0` instead of
-    returning an empty result. Which branch types the collection
-    keeps depends on the current implementation's internals, so every
-    such union matches here, although one with only plain numeric
-    branches happens to work. Reported:
-    https://github.com/scikit-hep/awkward/issues/4263
-    """
-    return _reaches_empty_union(a.layout)
-
-
 def has_issue_4264(a: ak.Array) -> bool:
-    """Return `True` if an option type sits under an untrimmed regular list.
+    """Return `True` if an option or a list sits under an untrimmed regular list.
 
     The caller applies the option condition (for `ak.all`, an integer
     `axis`). A `RegularArray` may validly carry content longer than
-    `size * length`, and the reducers mishandle an option node inside
-    such untrimmed content: an option directly above a list fails a
-    bare `AssertionError` in `RegularArray._reduce_next` on every
-    run, and an option above a leaf raises `IndexError` from an
-    out-of-range carry index nondeterministically (`ak.all`,
-    `ak.any`, `ak.sum`, `ak.count`, and `ak.min` are all affected).
-    With content trimmed to `size * length` the same reductions
-    succeed. Reported:
+    `size * length`, and a node reached by a reduction sizes its carry
+    from all of its own rows, ignoring which of them the caller's
+    offsets select, while the kernel fills only the entries those
+    offsets span, leaving the tail uninitialized. An option directly
+    above a list fails a bare
+    `AssertionError` in `RegularArray._reduce_next` on every run;
+    otherwise the leftover memory decides, and an out-of-range value
+    raises `IndexError` from `NumpyArray._carry` (`ak.all`, `ak.any`,
+    `ak.sum`, `ak.count`, and `ak.min` are all affected). With content
+    trimmed to `size * length` the same reductions succeed.
+
+    A list in the untrimmed content triggers it with no option node
+    present, which the issue's title and reproducers do not cover; the
+    2026-08-14 nightly drew `1 * 1 * 2 * string`, whose inner
+    `RegularArray` addresses two of its `ListOffsetArray`'s three rows.
+    Strings are lists, so they are not skipped here. A bare leaf in the
+    untrimmed content is unaffected, the reduction then reading no
+    carry. Reported:
     https://github.com/scikit-hep/awkward/issues/4264
     """
     stack = [(a.layout, False)]
@@ -202,9 +195,7 @@ def has_issue_4264(a: ak.Array) -> bool:
         node, in_untrimmed = stack.pop()
         if node.is_numpy or node.is_unknown:
             continue
-        if node.parameter("__array__") in ("string", "bytestring"):
-            continue
-        if node.is_option and in_untrimmed:
+        if (node.is_option or node.is_list) and in_untrimmed:
             return True
         if node.is_regular and node.content.length > node.size * node.length:
             in_untrimmed = True
@@ -304,56 +295,6 @@ def has_issue_4280(a: ak.Array) -> bool:
     return False
 
 
-def has_issue_4282(a: ak.Array) -> bool:
-    """Return `True` if a regular list with no variable-length dimension below it is under a union.
-
-    To restore the interleaving order of a union,
-    `UnionArray._remove_structure` broadcasts each branch against its
-    rows' positions (`ak.flatten(axis=None)`, `ak.ravel`, and
-    `axis=None` reductions reach it), which relies on the
-    replicate-per-row semantics of variable-length broadcasting; a
-    branch with only regular dimensions broadcasts by NumPy's
-    right-aligned rules instead, treating the flat positions as one
-    inner vector. An innermost regular size of 1 raises `IndexError`
-    ("cannot slice NumpyArray ...") from a position marker longer
-    than the values, another innermost size differing from the
-    branch's row count raises `ValueError` ("cannot broadcast
-    RegularArray ..."), and an innermost size equal to the row count
-    succeeds with a silently wrong order, which a no-raise test does
-    not observe. The trigger is a regular list with no
-    variable-length list anywhere below it, itself anywhere under a
-    union node, descending through list, option, indexed, and
-    record nodes; a regular list of variable-length lists is
-    `has_issue_4262`'s trigger. Which configurations reach the
-    broadcast depends on the current implementation's internals, so
-    every such regular list counts here, although multi-field-record
-    or string content, or a single-row or innermost-size-0 branch,
-    happens to work (a single-field record still flattens to one
-    leaf and stays on the affected path).
-    Reported: https://github.com/scikit-hep/awkward/issues/4282
-    """
-    stack = [(a.layout.form, False)]
-    while stack:
-        node, in_union = stack.pop()
-        if node.parameter("__array__") in ("string", "bytestring"):
-            continue
-        if node.is_union:
-            stack.extend((c, True) for c in node.contents)
-        elif node.is_record:
-            stack.extend((c, in_union) for c in node.contents)
-        elif node.is_numpy or node.is_unknown:
-            continue
-        else:
-            if (
-                in_union
-                and node.is_regular
-                and not _contains_variable_length_list(node.content)
-            ):
-                return True
-            stack.append((node.content, in_union))
-    return False
-
-
 def has_issue_4283(a: ak.Array) -> bool:
     """Return `True` if a record sits directly under an option node.
 
@@ -409,25 +350,6 @@ def _is_variable_length_list(form: ak.forms.Form) -> bool:
     if node.parameter("__array__") in ("string", "bytestring"):
         return False
     return node.is_list and not node.is_regular
-
-
-def _contains_variable_length_list(form: ak.forms.Form) -> bool:
-    """Return `True` if a `var`-type list is somewhere in the tree.
-
-    A string node is a leaf, not a list: the descent stops there.
-    """
-    stack = [form]
-    while stack:
-        node = stack.pop()
-        if node.parameter("__array__") in ("string", "bytestring"):
-            continue
-        if node.is_list and not node.is_regular:
-            return True
-        if node.is_record or node.is_union:
-            stack.extend(node.contents)
-        elif not (node.is_numpy or node.is_unknown):
-            stack.append(node.content)
-    return False
 
 
 def _contains_record_or_union(form: ak.forms.Form) -> bool:
@@ -558,28 +480,3 @@ def _overflowing_unit_span(form: ak.forms.Form) -> bool:
         for units in spans.values()
         if units
     )
-
-
-def _reaches_empty_union(layout: ak.contents.Content) -> bool:
-    """Return `True` if a union that no values reach is in the layout.
-
-    Descends through reachable values only: option and indexed nodes
-    are projected, union branches are projected one by one, and
-    record, regular, and list contents are trimmed to the range their
-    parent references.
-    """
-    if layout.is_union:
-        return layout.length == 0 or any(
-            _reaches_empty_union(layout.project(i)) for i in range(len(layout.contents))
-        )
-    if layout.is_record:
-        return any(_reaches_empty_union(c[: layout.length]) for c in layout.contents)
-    if layout.is_option or layout.is_indexed:
-        return _reaches_empty_union(layout.project())
-    # A RegularArray is also a list, so this branch must come first.
-    if layout.is_regular:
-        return _reaches_empty_union(layout.content[: layout.length * layout.size])
-    if layout.is_list:
-        lst = layout.to_ListOffsetArray64(False)
-        return _reaches_empty_union(lst.content[lst.offsets[0] : lst.offsets[-1]])
-    return False

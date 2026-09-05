@@ -20,8 +20,6 @@ combinations. GB/s is computed against input bytes only.
 NOT for committing — scratch tool for PR #4056.
 """
 
-from __future__ import annotations
-
 import argparse
 import ctypes
 import os
