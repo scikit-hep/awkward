@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -117,8 +118,28 @@ def _impl(
         layout = layout.to_ListOffsetArray64(False)
         return layout.content[layout.offsets[0] : layout.offsets[-1]]
 
+    def packed_node(layout):
+        # This comparison is defined on the packed forms of its two arguments, but
+        # the nodes that this traversal derives are built with lazy carries: a
+        # `RecordArray` becomes an `IndexedArray`, and a `ListOffsetArray` becomes
+        # a `ListArray`, whenever a projection has to reorder its content. Packing
+        # leaves behind neither class, so restore the packed class here; otherwise
+        # `same_content_types` would reject two equal arrays purely because one
+        # side's index happened to be contiguous.
+        if (
+            isinstance(layout, ak.contents.IndexedArray)
+            and layout.parameter("__array__") != "categorical"
+        ):
+            layout = layout.project()
+        if isinstance(layout, ak.contents.ListArray):
+            layout = layout.to_ListOffsetArray64(False)
+        return layout
+
     def visitor(left, right) -> bool:
-        # Most firstly, check same_content_types before any transformations
+        left = packed_node(left)
+        right = packed_node(right)
+
+        # Most firstly, check same_content_types before any further transformations
         if same_content_types and left.__class__ is not right.__class__:
             return False
 
