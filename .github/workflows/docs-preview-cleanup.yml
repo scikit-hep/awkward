@@ -1,0 +1,28 @@
+name: Docs Preview Cleanup
+on: # zizmor: ignore[dangerous-triggers] This privileged workflow runs from the base branch and only removes a preview directory.
+  pull_request_target:
+    types: [closed]
+
+concurrency:
+  group: docs-preview-cleanup-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  remove-branch-preview:
+    runs-on: ubuntu-24.04
+    name: Remove Branch Preview
+    permissions:
+      contents: write # Required to push the removal to the `gh-pages` branch.
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - name: Remove artifacts
+      uses: ./.github/actions/deploy-to-gh-pages
+      with:
+        target: doc/pr/${{ github.event.number }}
+        message: "Remove preview for PR #${{ github.event.number }}"
+        token: ${{ secrets.GITHUB_TOKEN }}
