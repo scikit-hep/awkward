@@ -17,7 +17,7 @@ np = NumpyMetadata.instance()
 class Type:
     _parameters: JSONMapping | None
 
-    def copy(self, *, parameters: JSONMapping | None | Sentinel = UNSET) -> Self:
+    def copy(self, *, parameters: JSONMapping | Sentinel | None = UNSET) -> Self:
         raise NotImplementedError
 
     @property

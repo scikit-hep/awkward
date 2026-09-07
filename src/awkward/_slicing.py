@@ -207,13 +207,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     elif isinstance(item, slice):
         return normalize_slice(item, nplike=backend.nplike)
 
-    elif isinstance(item, str):
-        return item
-
-    elif item is np.newaxis:
-        return item
-
-    elif item is Ellipsis:
+    elif isinstance(item, str) or item is np.newaxis or item is Ellipsis:
         return item
 
     elif isinstance(item, ak.highlevel.Array):

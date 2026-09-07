@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-# ruff: noqa: E731
 """GPU micro-benchmarks + memory profile for four suspected cuda.compute bottlenecks:
 
   1. awkward_missing_repeat            (constant / per-call overhead)

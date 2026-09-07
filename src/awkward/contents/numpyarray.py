@@ -750,10 +750,9 @@ class NumpyArray(NumpyMeta, Content):
                 return out.length is not unknown_length and out.length == self.length
 
     def _unique(self, negaxis, starts, offsets, outlength):
-        if self.shape[0] is not unknown_length and self.shape[0] == 0:
-            return self
-
-        elif len(self.shape) == 0:
+        if (self.shape[0] is not unknown_length and self.shape[0] == 0) or len(
+            self.shape
+        ) == 0:
             return self
 
         elif negaxis is None:
