@@ -327,6 +327,25 @@ mccabe.max-complexity = 100
 "jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
 
+[dependency-groups]
+dev = [
+    "hypothesis-awkward",
+    "numba; sys_platform != 'win32'",
+    "numexpr",
+    "pandas; sys_platform != 'win32'",
+    "pyarrow; sys_platform != 'win32'",
+    "pytest>=6",
+    "pytest-cov",
+    "pytest-xdist",
+    "PyYAML",
+]
+
 [tool.uv]
 exclude-newer = "7 days"
 exclude-newer-package = { awkward_cpp = false }
+
+[tool.uv.workspace]
+members = ["awkward-cpp"]
+
+[tool.uv.sources]
+awkward_cpp = { workspace = true }
