@@ -15,7 +15,13 @@ Parts of `awkward-cpp` are generated; building `awkward-cpp` from the repository
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward.git  # rapidjson submodule
-python -m pip install -v ./awkward-cpp   # generates headers, kernel signatures, and kernel tests
+uv sync   # uv workspace: builds awkward-cpp (generating headers, kernel signatures, and kernel tests) and installs both packages editable
+```
+
+Any `uv run ...` command does the same setup on demand and rebuilds `awkward-cpp` when its C++ sources or the kernel spec change (see `cache-keys` in `awkward-cpp/pyproject.toml`). The `dev` dependency group holds the test dependencies. Without uv:
+
+```bash
+python -m pip install -v ./awkward-cpp
 python -m pip install -e .
 ```
 
