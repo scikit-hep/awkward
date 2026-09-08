@@ -1,0 +1,20 @@
+ak.from_torch
+=============
+
+Defined in `awkward.operations.ak_from_torch <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_from_torch.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_from_torch.py#L11>`__.
+
+.. py:function:: ak.from_torch(array)
+
+
+   Converts a PyTorch Tensor into an Awkward Array.
+
+   The data is not copied: a CPU tensor shares its buffer with the Awkward
+   Array, and a CUDA tensor's buffer is shared through DLPack.
+
+   If ``array`` contains any other data types the function raises an error.
+
+   :param array: (PyTorch Tensor):
+                 Tensor to convert into an Awkward Array.
+
+   :returns: An :py:obj:`ak.Array` built from the given PyTorch tensor.
+

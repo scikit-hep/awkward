@@ -1,0 +1,7 @@
+ak.prettyprint.bytes_repr
+=========================
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/prettyprint.py>`__ on `line 455 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/prettyprint.py#L455>`__.
+
+.. py:function:: ak.prettyprint.bytes_repr(nbytes: int) -> str
+
