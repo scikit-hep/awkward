@@ -1,9 +1,10 @@
 ak.metadata_from_parquet
 ========================
 
-Defined in `awkward.operations.ak_metadata_from_parquet <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_metadata_from_parquet.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_metadata_from_parquet.py#L21>`__.
+Defined in `awkward.operations.ak_metadata_from_parquet <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_metadata_from_parquet.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_metadata_from_parquet.py#L21>`__.
 
 .. py:function:: ak.metadata_from_parquet(path, *, storage_options=None, row_groups=None, ignore_metadata=False, scan_files=True)
+
 
    Reads metadata from a Parquet file or dataset without reading the data.
 

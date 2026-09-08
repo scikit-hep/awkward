@@ -1,9 +1,10 @@
 ak.is_tuple
 ===========
 
-Defined in `awkward.operations.ak_is_tuple <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_is_tuple.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_is_tuple.py#L11>`__.
+Defined in `awkward.operations.ak_is_tuple <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_is_tuple.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_is_tuple.py#L11>`__.
 
 .. py:function:: ak.is_tuple(array)
+
 
    Returns True if a record, or the outermost record of an array, is a tuple.
 

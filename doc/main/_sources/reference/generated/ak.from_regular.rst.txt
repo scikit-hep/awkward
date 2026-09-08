@@ -1,9 +1,10 @@
 ak.from_regular
 ===============
 
-Defined in `awkward.operations.ak_from_regular <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_regular.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_regular.py#L17>`__.
+Defined in `awkward.operations.ak_from_regular <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_regular.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_regular.py#L17>`__.
 
 .. py:function:: ak.from_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None)
+
 
    Converts one or all regular axes into irregular ones.
 

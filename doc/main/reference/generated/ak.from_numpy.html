@@ -855,11 +855,25 @@
                   
   <section id="ak-from-numpy">
 <h1>ak.from_numpy<a class="headerlink" href="#ak-from-numpy" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_numpy.py">awkward.operations.ak_from_numpy</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_numpy.py#L11">line 11</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_numpy.py">awkward.operations.ak_from_numpy</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_numpy.py#L11">line 11</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.from_numpy">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">from_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regulararray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recordarray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.from_numpy" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Converts a NumPy array into an Awkward Array.</p>
+<p>The data is not copied: the Awkward Array shares the NumPy array’s
+buffers. There are two exceptions: the mask of a <code class="docutils literal notranslate"><span class="pre">np.ma.MaskedArray</span></code> is
+converted, although its data buffer is still shared, and an array of
+Unicode strings is re-encoded as UTF-8.</p>
+<p>The resulting layout can only involve the following <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> types:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a></p></li>
+<li><p><a class="reference internal" href="ak.contents.ByteMaskedArray.html#ak.contents.ByteMaskedArray" title="ak.contents.ByteMaskedArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.ByteMaskedArray</span></code></a> or <a class="reference internal" href="ak.contents.UnmaskedArray.html#ak.contents.UnmaskedArray" title="ak.contents.UnmaskedArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.UnmaskedArray</span></code></a> if the
+<code class="docutils literal notranslate"><span class="pre">array</span></code> is an np.ma.MaskedArray.</p></li>
+<li><p><a class="reference internal" href="ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a> if <code class="docutils literal notranslate"><span class="pre">regulararray=True</span></code>.</p></li>
+<li><p><a class="reference internal" href="ak.contents.RecordArray.html#ak.contents.RecordArray" title="ak.contents.RecordArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.RecordArray</span></code></a> if <code class="docutils literal notranslate"><span class="pre">recordarray=True</span></code>.</p></li>
+</ul>
+<p>See also <a class="reference internal" href="ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_numpy</span></code></a> and <a class="reference internal" href="ak.from_cupy.html#ak.from_cupy" title="ak.from_cupy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_cupy</span></code></a>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> (<em>np.ndarray</em>) – The NumPy array to convert into an Awkward Array.
@@ -882,17 +896,10 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> built from the given NumPy array.</p>
+</dd>
 </dl>
-<p>Converts a NumPy array into an Awkward Array.</p>
-<p>The resulting layout can only involve the following <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> types:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a></p></li>
-<li><p><a class="reference internal" href="ak.contents.ByteMaskedArray.html#ak.contents.ByteMaskedArray" title="ak.contents.ByteMaskedArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.ByteMaskedArray</span></code></a> or <a class="reference internal" href="ak.contents.UnmaskedArray.html#ak.contents.UnmaskedArray" title="ak.contents.UnmaskedArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.UnmaskedArray</span></code></a> if the
-<code class="docutils literal notranslate"><span class="pre">array</span></code> is an np.ma.MaskedArray.</p></li>
-<li><p><a class="reference internal" href="ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a> if <code class="docutils literal notranslate"><span class="pre">regulararray=True</span></code>.</p></li>
-<li><p><a class="reference internal" href="ak.contents.RecordArray.html#ak.contents.RecordArray" title="ak.contents.RecordArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.RecordArray</span></code></a> if <code class="docutils literal notranslate"><span class="pre">recordarray=True</span></code>.</p></li>
-</ul>
-<p>See also <a class="reference internal" href="ak.to_numpy.html#ak.to_numpy" title="ak.to_numpy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_numpy</span></code></a> and <a class="reference internal" href="ak.from_cupy.html#ak.from_cupy" title="ak.from_cupy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_cupy</span></code></a>.</p>
 </dd></dl>
 
 </section>

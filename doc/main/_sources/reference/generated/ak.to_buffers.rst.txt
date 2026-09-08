@@ -1,9 +1,10 @@
 ak.to_buffers
 =============
 
-Defined in `awkward.operations.ak_to_buffers <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_to_buffers.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_to_buffers.py#L15>`__.
+Defined in `awkward.operations.ak_to_buffers <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_buffers.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_buffers.py#L15>`__.
 
 .. py:function:: ak.to_buffers(array, container=None, buffer_key='{form_key}-{attribute}', form_key='node{id}', *, id_start=0, backend=None, byteorder=ak._util.native_byteorder)
+
 
    Decomposes an Awkward Array into a Form, length, and memory buffers.
 

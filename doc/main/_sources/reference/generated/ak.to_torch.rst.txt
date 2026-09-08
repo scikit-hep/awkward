@@ -1,9 +1,10 @@
 ak.to_torch
 ===========
 
-Defined in `awkward.operations.ak_to_torch <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_to_torch.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_to_torch.py#L14>`__.
+Defined in `awkward.operations.ak_to_torch <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_torch.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_torch.py#L14>`__.
 
 .. py:function:: ak.to_torch(array)
+
 
    Converts an Awkward Array into a PyTorch Tensor, if possible.
 

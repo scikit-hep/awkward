@@ -1,7 +1,7 @@
 ak.forms.Form
 =============
 
-Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/form.py>`__ on `line 384 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/form.py#L384>`__.
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/forms/form.py>`__ on `line 384 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/forms/form.py#L384>`__.
 
 .. py:class:: ak.forms.Form
 
@@ -10,22 +10,29 @@ Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e
    .. py:method:: _init(*, parameters: awkward._typing.JSONMapping | None, form_key: str | None)
 
 
+
    .. py:property:: form_key
+
 
 
    .. py:method:: __str__()
 
 
+
    .. py:method:: to_dict(verbose=True)
+
 
 
    .. py:method:: _to_dict_extra(out, verbose)
 
 
+
    .. py:method:: to_json()
 
 
+
    .. py:method:: _repr_args()
+
 
 
    .. py:property:: type
@@ -33,10 +40,13 @@ Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e
 
 
 
+
    .. py:method:: columns(list_indicator=None, column_prefix=())
 
 
+
    .. py:method:: select_columns(specifier, expand_braces=True, *, prune_unions_and_records: bool = True)
+
 
       select_columns returns a new Form with only columns and sub-columns selected.
       Returns an empty Form if no columns matched the specifier(s).
@@ -55,8 +65,10 @@ Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e
    .. py:method:: column_types()
 
 
+
    .. py:method:: _columns(path, output, list_indicator)
       :abstractmethod:
+
 
 
 
@@ -65,8 +77,10 @@ Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e
 
 
 
+
    .. py:method:: _select_columns(match_specifier: _SpecifierMatcher) -> Form | None
       :abstractmethod:
+
 
 
 
@@ -75,15 +89,19 @@ Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e
 
 
 
+
    .. py:method:: _to_dict_part(verbose, toplevel)
       :abstractmethod:
+
 
 
 
    .. py:method:: length_zero_array(*, backend=numpy_backend, highlevel=False, behavior=None)
 
 
+
    .. py:method:: length_one_array(*, backend=numpy_backend, highlevel=False, behavior=None)
+
 
 
    .. py:method:: _expected_from_buffers(getkey: collections.abc.Callable[[Form, str], str], recursive: bool) -> awkward._typing.Iterator[tuple[str, awkward._typing.DType]]
@@ -91,7 +109,9 @@ Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e
 
 
 
+
    .. py:method:: expected_from_buffers(buffer_key='{form_key}-{attribute}', recursive=True)
+
 
       :param buffer_key: Python format string containing
                          ``"{form_key}"`` and/or ``"{attribute}"`` or a function that takes these
@@ -111,6 +131,7 @@ Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e
    .. py:method:: is_equal_to(other: awkward._typing.Any, *, all_parameters: bool = False, form_key: bool = False) -> bool
 
 
+
    .. py:attribute:: __eq__
 
 
@@ -119,5 +140,7 @@ Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/6062e
 
 
 
+
    .. py:method:: _is_equal_to_generic(other: awkward._typing.Any, all_parameters: bool, form_key: bool) -> bool
+
 

@@ -1,7 +1,7 @@
 ak.contents.ByteMaskedArray
 ===========================
 
-Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/contents/bytemaskedarray.py>`__ on `line 59 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/contents/bytemaskedarray.py#L59>`__.
+Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/contents/bytemaskedarray.py>`__ on `line 59 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/contents/bytemaskedarray.py#L59>`__.
 
 .. py:class:: ak.contents.ByteMaskedArray(mask, content, valid_when, *, parameters=None)
 
@@ -74,7 +74,9 @@ Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkw
    .. py:property:: mask
 
 
+
    .. py:property:: valid_when
+
 
 
    .. py:attribute:: form_cls
@@ -84,10 +86,13 @@ Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkw
    .. py:method:: copy(mask=UNSET, content=UNSET, valid_when=UNSET, *, parameters=UNSET)
 
 
+
    .. py:method:: __copy__()
 
 
+
    .. py:method:: __deepcopy__(memo)
+
 
 
    .. py:method:: simplified(mask, content, valid_when, *, parameters=None)
@@ -95,22 +100,29 @@ Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkw
 
 
 
+
    .. py:method:: _form_with_key(getkey: awkward._typing.Callable[[awkward.contents.content.Content], str | None]) -> awkward.forms.bytemaskedform.ByteMaskedForm
+
 
 
    .. py:method:: _form_with_key_path(path: awkward.forms.form.FormKeyPathT) -> awkward.forms.bytemaskedform.ByteMaskedForm
 
 
+
    .. py:method:: _to_buffers(form: awkward.forms.form.Form, getkey: awkward._typing.Callable[[awkward.contents.content.Content, awkward.forms.form.Form, str], str], container: collections.abc.MutableMapping[str, awkward._nplikes.array_like.ArrayLike], backend: awkward._backends.backend.Backend, byteorder: str)
+
 
 
    .. py:method:: _to_typetracer(forget_length: bool) -> awkward._typing.Self
 
 
+
    .. py:method:: _touch_data(recursive: bool)
 
 
+
    .. py:method:: _touch_shape(recursive: bool)
+
 
 
    .. py:property:: length
@@ -118,146 +130,194 @@ Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkw
 
 
 
+
    .. py:method:: _forget_length()
+
 
 
    .. py:method:: __repr__()
 
 
+
    .. py:method:: _repr(indent, pre, post)
+
 
 
    .. py:method:: to_IndexedOptionArray64() -> awkward.contents.IndexedOptionArray
 
 
+
    .. py:method:: to_ByteMaskedArray(valid_when)
+
 
 
    .. py:method:: to_BitMaskedArray(valid_when, lsb_order)
 
 
+
    .. py:method:: mask_as_bool(valid_when=None)
+
 
 
    .. py:method:: _getitem_nothing()
 
 
+
    .. py:method:: _is_getitem_at_placeholder() -> bool
+
 
 
    .. py:method:: _is_getitem_at_virtual() -> bool
 
 
+
    .. py:method:: _getitem_at(where: awkward._nplikes.numpy_like.IndexType)
+
 
 
    .. py:method:: _getitem_range(start: awkward._nplikes.numpy_like.IndexType, stop: awkward._nplikes.numpy_like.IndexType) -> awkward.contents.content.Content
 
 
+
    .. py:method:: _getitem_field(where: str | awkward._typing.SupportsIndex, only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
+
 
 
    .. py:method:: _getitem_fields(where: list[str | awkward._typing.SupportsIndex], only_fields: tuple[str, Ellipsis] = ()) -> awkward.contents.content.Content
 
 
+
    .. py:method:: _carry(carry: awkward.index.Index, allow_lazy: bool) -> awkward.contents.content.Content
+
 
 
    .. py:method:: _nextcarry_outindex() -> tuple[int, awkward.index.Index64, awkward.index.Index64]
 
 
+
    .. py:method:: _getitem_next_jagged_generic(slicestarts, slicestops, slicecontent, tail)
+
 
 
    .. py:method:: _getitem_next_jagged(slicestarts: awkward.index.Index, slicestops: awkward.index.Index, slicecontent: awkward.contents.content.Content, tail) -> awkward.contents.content.Content
 
 
+
    .. py:method:: _getitem_next(head: awkward._slicing.SliceItem | tuple, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> awkward.contents.content.Content
+
 
 
    .. py:method:: project(mask=None)
 
 
+
    .. py:method:: _offsets_and_flattened(axis: int, depth: int) -> tuple[awkward.index.Index, awkward.contents.content.Content]
+
 
 
    .. py:method:: _mergeable_next(other: awkward.contents.content.Content, mergebool: bool, mergecastable: awkward._typing.Literal[same_kind, equiv, family]) -> bool
 
 
+
    .. py:method:: _reverse_merge(other)
+
 
 
    .. py:method:: _mergemany(others: collections.abc.Sequence[awkward.contents.content.Content]) -> awkward.contents.content.Content
 
 
+
    .. py:method:: _fill_none(value: awkward.contents.content.Content) -> awkward.contents.content.Content
+
 
 
    .. py:method:: _local_index(axis, depth)
 
 
+
    .. py:method:: _numbers_to_type(name, including_unknown)
+
 
 
    .. py:method:: _is_unique(negaxis, starts, offsets, outlength)
 
 
+
    .. py:method:: _unique(negaxis, starts, offsets, outlength)
+
 
 
    .. py:method:: _argsort_next(negaxis, starts, shifts, offsets, outlength, ascending, stable)
 
 
+
    .. py:method:: _sort_next(negaxis, starts, offsets, outlength, ascending, stable)
+
 
 
    .. py:method:: _combinations(n, replacement, recordlookup, parameters, axis, depth)
 
 
+
    .. py:method:: _reduce_next(reducer, negaxis, starts, shifts, offsets, outlength, mask, keepdims, behavior)
+
 
 
    .. py:method:: _validity_error(path)
 
 
+
    .. py:method:: _nbytes_part()
+
 
 
    .. py:method:: _pad_none(target, axis, depth, clip)
 
 
+
    .. py:method:: _to_arrow(pyarrow: awkward._typing.Any, mask_node: awkward.contents.content.Content | None, validbytes: awkward.contents.content.Content | None, length: int, options: awkward.contents.content.ToArrowOptions)
+
 
 
    .. py:method:: _to_cudf(cudf: awkward._typing.Any, mask: awkward.contents.content.Content | None, length: int)
 
 
+
    .. py:method:: _to_backend_array(allow_missing, backend)
+
 
 
    .. py:method:: _remove_structure(backend: awkward._backends.backend.Backend, options: awkward.contents.content.RemoveStructureOptions) -> list[awkward.contents.content.Content]
 
 
+
    .. py:method:: _drop_none() -> awkward.contents.content.Content
+
 
 
    .. py:method:: _recursively_apply(action: awkward.contents.content.ImplementsApplyAction, depth: int, depth_context: collections.abc.Mapping[str, awkward._typing.Any] | None, lateral_context: collections.abc.Mapping[str, awkward._typing.Any] | None, options: awkward.contents.content.ApplyActionOptions) -> awkward.contents.content.Content | None
 
 
+
    .. py:method:: _to_packed(recursive: bool = True) -> awkward._typing.Self
+
 
 
    .. py:method:: _to_list(behavior, json_conversions)
 
 
+
    .. py:method:: _to_backend(backend: awkward._backends.backend.Backend) -> awkward._typing.Self
+
 
 
    .. py:method:: _materialize(type_) -> awkward._typing.Self
 
 
+
    .. py:property:: _is_all_materialized
       :type: bool
+
 
 
 
@@ -266,5 +326,7 @@ Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkw
 
 
 
+
    .. py:method:: _is_equal_to(other: awkward._typing.Self, index_dtype: bool, numpyarray: bool, all_parameters: bool) -> bool
+
 

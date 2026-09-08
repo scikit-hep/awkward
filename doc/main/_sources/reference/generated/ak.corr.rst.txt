@@ -1,9 +1,10 @@
 ak.corr
 =======
 
-Defined in `awkward.operations.ak_corr <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_corr.py>`__ on `line 24 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_corr.py#L24>`__.
+Defined in `awkward.operations.ak_corr <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_corr.py>`__ on `line 24 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_corr.py#L24>`__.
 
 .. py:function:: ak.corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
+
 
    Computes the correlation of x and y over one or all levels of nesting.
 

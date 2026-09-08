@@ -1,9 +1,10 @@
 ak.is_valid
 ===========
 
-Defined in `awkward.operations.ak_is_valid <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_is_valid.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_is_valid.py#L11>`__.
+Defined in `awkward.operations.ak_is_valid <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_is_valid.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_is_valid.py#L11>`__.
 
 .. py:function:: ak.is_valid(array, *, exception=False)
+
 
    Returns True if the array has no structural errors and False otherwise.
 

@@ -855,18 +855,23 @@
                   
   <section id="ak-from-torch">
 <h1>ak.from_torch<a class="headerlink" href="#ak-from-torch" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_torch.py">awkward.operations.ak_from_torch</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_torch.py#L11">line 11</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_torch.py">awkward.operations.ak_from_torch</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_torch.py#L11">line 11</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.from_torch">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">from_torch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.from_torch" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Converts a PyTorch Tensor into an Awkward Array.</p>
+<p>The data is not copied: a CPU tensor shares its buffer with the Awkward
+Array, and a CUDA tensor’s buffer is shared through DLPack.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">array</span></code> contains any other data types the function raises an error.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>array</strong> – (PyTorch Tensor):
 Tensor to convert into an Awkward Array.</p>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> built from the given PyTorch tensor.</p>
+</dd>
 </dl>
-<p>Converts a PyTorch Tensor into an Awkward Array.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">array</span></code> contains any other data types the function raises an error.</p>
 </dd></dl>
 
 </section>

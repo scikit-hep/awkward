@@ -1,9 +1,10 @@
 ak.run_lengths
 ==============
 
-Defined in `awkward.operations.ak_run_lengths <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_run_lengths.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_run_lengths.py#L17>`__.
+Defined in `awkward.operations.ak_run_lengths <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_run_lengths.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_run_lengths.py#L17>`__.
 
 .. py:function:: ak.run_lengths(array, *, highlevel=True, behavior=None, attrs=None)
+
 
    Returns the lengths of runs of identical values at the deepest level.
 

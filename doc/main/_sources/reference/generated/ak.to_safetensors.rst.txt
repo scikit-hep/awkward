@@ -1,9 +1,10 @@
 ak.to_safetensors
 =================
 
-Defined in `awkward.operations.ak_to_safetensors <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_to_safetensors.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_to_safetensors.py#L14>`__.
+Defined in `awkward.operations.ak_to_safetensors <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_safetensors.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_safetensors.py#L14>`__.
 
 .. py:function:: ak.to_safetensors(array, destination, *, storage_options=None, container=None, buffer_key='{form_key}-{attribute}', form_key='node{id}', id_start=0, backend=None, byteorder=ak._util.native_byteorder)
+
 
    Writes an Awkward Array to a safetensors file.
 

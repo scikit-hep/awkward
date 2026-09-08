@@ -1,9 +1,10 @@
 ak.str.is_in
 ============
 
-Defined in `awkward.operations.str.akstr_is_in <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/str/akstr_is_in.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/str/akstr_is_in.py#L15>`__.
+Defined in `awkward.operations.str.akstr_is_in <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/str/akstr_is_in.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/str/akstr_is_in.py#L15>`__.
 
 .. py:function:: ak.str.is_in(array, value_set, *, skip_nones=False, highlevel=True, behavior=None, attrs=None)
+
 
    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
    :param value_set: Array-like data (anything :py:obj:`ak.to_layout` recognizes), set of

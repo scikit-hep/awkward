@@ -1,7 +1,7 @@
 ak.contents.Content
 ===================
 
-Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/contents/content.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/contents/content.py#L136>`__.
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/contents/content.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/contents/content.py#L136>`__.
 
 .. py:class:: ak.contents.Content
 
@@ -10,8 +10,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
    .. py:method:: _init(parameters: dict[str, awkward._typing.Any] | None, backend: awkward._backends.backend.Backend)
 
 
+
    .. py:property:: backend
       :type: awkward._backends.backend.Backend
+
 
 
 
@@ -20,7 +22,9 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: form_with_key(form_key: str | None | collections.abc.Callable = 'node{id}', id_start: int = 0) -> awkward.forms.form.Form
+
 
 
    .. py:method:: _form_with_key(getkey: collections.abc.Callable[[Content], str | None]) -> awkward.forms.form.Form
@@ -28,11 +32,14 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: form_with_key_path(root: awkward.forms.form.FormKeyPathT = ()) -> awkward.forms.form.Form
+
 
 
    .. py:method:: _form_with_key_path(path: awkward.forms.form.FormKeyPathT) -> awkward.forms.form.Form
       :abstractmethod:
+
 
 
 
@@ -43,11 +50,14 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: to_typetracer(forget_length: bool = False) -> awkward._typing.Self
+
 
 
    .. py:method:: _to_typetracer(forget_length: bool) -> awkward._typing.Self
       :abstractmethod:
+
 
 
 
@@ -56,8 +66,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _touch_shape(recursive: bool)
       :abstractmethod:
+
 
 
 
@@ -68,64 +80,84 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _to_buffers(form: awkward.forms.form.Form, getkey: collections.abc.Callable[[Content, awkward.forms.form.Form, str], str], container: collections.abc.MutableMapping[str, awkward._typing.Any] | None, backend: awkward._backends.backend.Backend, byteorder: awkward._typing.Literal[<, >]) -> tuple[awkward.forms.form.Form, int, collections.abc.Mapping[str, awkward._typing.Any]]
       :abstractmethod:
+
 
 
 
    .. py:method:: __len__() -> int
 
 
+
    .. py:method:: _repr_extra(indent: str) -> list[str]
+
 
 
    .. py:method:: maybe_to_NumpyArray()
 
 
+
    .. py:method:: _maybe_index_error(error: awkward._kernels.KernelError | None, slicer)
+
 
 
    .. py:method:: __array_ufunc__(ufunc, method, *inputs, **kwargs)
 
 
+
    .. py:method:: __array_function__(func, types, args, kwargs)
+
 
 
    .. py:method:: __array__(dtype=None, copy=None)
 
 
+
    .. py:method:: __iter__()
+
 
 
    .. py:method:: _getitem_next_field(head: awkward._slicing.SliceItem | tuple, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None)
 
 
+
    .. py:method:: _getitem_next_fields(head: awkward._slicing.SliceItem, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> Content
+
 
 
    .. py:method:: _getitem_next_newaxis(tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> awkward.contents.regulararray.RegularArray
 
 
+
    .. py:method:: _getitem_next_ellipsis(tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> Content
+
 
 
    .. py:method:: _getitem_next_regular_missing(head: awkward.contents.indexedoptionarray.IndexedOptionArray, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None, raw: Content, length: int) -> awkward.contents.regulararray.RegularArray
 
 
+
    .. py:method:: _getitem_next_missing_jagged(head: Content, tail, advanced: awkward.index.Index | None, that: Content) -> awkward.contents.regulararray.RegularArray
+
 
 
    .. py:method:: _getitem_next_missing(head: awkward.contents.indexedoptionarray.IndexedOptionArray, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> Content
 
 
+
    .. py:method:: __getitem__(where)
+
 
 
    .. py:method:: _getitem(where, named_axis: awkward._typing.Type[awkward._namedaxis.NamedAxis] = NamedAxis)
 
 
+
    .. py:method:: _is_getitem_at_placeholder() -> bool
       :abstractmethod:
+
 
 
 
@@ -134,8 +166,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _getitem_at(where: awkward._nplikes.numpy_like.IndexType)
       :abstractmethod:
+
 
 
 
@@ -144,8 +178,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _getitem_field(where: str | awkward._typing.SupportsIndex, only_fields: tuple[str, Ellipsis] = ()) -> Content
       :abstractmethod:
+
 
 
 
@@ -154,8 +190,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _getitem_next(head: awkward._slicing.SliceItem | tuple, tail: tuple[awkward._slicing.SliceItem, Ellipsis], advanced: awkward.index.Index | None) -> Content
       :abstractmethod:
+
 
 
 
@@ -164,16 +202,20 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _carry(carry: awkward.index.Index, allow_lazy: bool) -> Content
       :abstractmethod:
+
 
 
 
    .. py:method:: _local_index_axis0() -> awkward.contents.numpyarray.NumpyArray
 
 
+
    .. py:method:: _mergeable_next(other: Content, mergebool: bool, mergecastable: awkward._typing.Literal[same_kind, equiv, family]) -> bool
       :abstractmethod:
+
 
 
 
@@ -182,11 +224,14 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _merging_strategy(others: list[Content]) -> tuple[list[Content], list[Content]]
+
 
 
    .. py:method:: _local_index(axis: int, depth: int)
       :abstractmethod:
+
 
 
 
@@ -195,8 +240,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _argsort_next(negaxis: int, starts: awkward.index.Index, shifts: awkward.index.Index | None, offsets: awkward.index.Index | None, outlength: int, ascending: bool, stable: bool)
       :abstractmethod:
+
 
 
 
@@ -205,11 +252,14 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _combinations_axis0(n: int, replacement: bool, recordlookup: list[str] | None, parameters: dict | None)
+
 
 
    .. py:method:: _combinations(n: int, replacement: bool, recordlookup: list[str] | None, parameters: dict[str, awkward._typing.Any] | None, axis: int, depth: int)
       :abstractmethod:
+
 
 
 
@@ -218,12 +268,15 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:property:: nbytes
       :type: int
 
 
 
+
    .. py:method:: purelist_parameter(key: str)
+
 
       Return the value of the outermost parameter matching ``key`` in a sequence
       of nested lists, stopping at the first record or tuple layer.
@@ -234,6 +287,7 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
    .. py:method:: purelist_parameters(*keys: str)
+
 
       Return the value of the outermost parameter matching one of ``keys`` in a sequence
       of nested lists, stopping at the first record or tuple layer.
@@ -248,12 +302,15 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _unique(negaxis: awkward._typing.AxisMaybeNone, starts: awkward.index.Index, offsets: awkward.index.Index | None, outlength: int)
       :abstractmethod:
 
 
 
+
    .. py:method:: _pad_none_axis0(target: int, clip: bool) -> Content
+
 
 
    .. py:method:: _pad_none(target: int, axis: int, depth: int, clip: bool) -> Content
@@ -261,11 +318,14 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: to_arrow(list_to32: bool = False, string_to32: bool = False, bytestring_to32: bool = False, emptyarray_to=None, categorical_as_dictionary: bool = False, extensionarray: bool = True, count_nulls: bool = True, record_is_scalar: bool = False)
+
 
 
    .. py:method:: _to_arrow(pyarrow: awkward._typing.Any, mask_node: Content | None, validbytes: Content | None, length: int, options: ToArrowOptions)
       :abstractmethod:
+
 
 
 
@@ -274,7 +334,9 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: to_backend_array(allow_missing: bool = True, *, backend: awkward._backends.backend.Backend | str | None = None)
+
 
 
    .. py:method:: _to_backend_array(allow_missing: bool, backend: awkward._backends.backend.Backend)
@@ -282,11 +344,14 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: drop_none()
+
 
 
    .. py:method:: _drop_none() -> Content
       :abstractmethod:
+
 
 
 
@@ -295,15 +360,19 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _recursively_apply(action: ImplementsApplyAction, depth: int, depth_context: collections.abc.Mapping[str, awkward._typing.Any] | None, lateral_context: collections.abc.Mapping[str, awkward._typing.Any] | None, options: ApplyActionOptions) -> Content | None
       :abstractmethod:
+
 
 
 
    .. py:method:: to_json(nan_string: str | None = None, posinf_string: str | None = None, neginf_string: str | None = None, complex_record_fields: tuple[str, str] | None = None, convert_bytes: bool | None = None, behavior: dict | None = None) -> list
 
 
+
    .. py:method:: to_packed(recursive: bool = True) -> Content
+
 
 
    .. py:method:: _to_packed(recursive: bool = True) -> Content
@@ -311,7 +380,9 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: to_list(behavior: dict | None = None) -> list
+
 
 
    .. py:method:: _to_list(behavior: dict | None, json_conversions: dict[str, awkward._typing.Any] | None) -> list
@@ -319,7 +390,9 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _to_list_custom(behavior: dict | None, json_conversions: dict[str, awkward._typing.Any] | None)
+
 
 
    .. py:method:: _offsets_and_flattened(axis: int, depth: int) -> tuple[awkward.index.Index, Content]
@@ -327,7 +400,9 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: to_backend(backend: awkward._backends.backend.Backend | str | None = None) -> awkward._typing.Self
+
 
 
    .. py:method:: _to_backend(backend: awkward._backends.backend.Backend) -> awkward._typing.Self
@@ -335,7 +410,9 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: materialize(type_: type = MaterializableArray) -> awkward._typing.Self
+
 
 
    .. py:method:: _materialize(type_) -> awkward._typing.Self
@@ -343,8 +420,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:property:: is_all_materialized
       :type: bool
+
 
 
 
@@ -355,8 +434,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:property:: is_any_materialized
       :type: bool
+
 
 
 
@@ -367,11 +448,14 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: with_parameter(key: str, value: awkward._typing.Any) -> awkward._typing.Self
+
 
 
    .. py:method:: __copy__()
       :abstractmethod:
+
 
 
 
@@ -380,14 +464,18 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: is_equal_to(other: Content, index_dtype: bool = True, numpyarray: bool = True, *, all_parameters: bool = False) -> bool
+
 
 
    .. py:method:: _is_equal_to_generic(other: Content, all_parameters: bool) -> bool
 
 
+
    .. py:method:: _is_equal_to(other: awkward._typing.Self, index_dtype: bool, numpyarray: bool, all_parameters: bool) -> bool
       :abstractmethod:
+
 
 
 
@@ -396,8 +484,10 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _numbers_to_type(name: str, including_unknown: bool) -> Content
       :abstractmethod:
+
 
 
 
@@ -406,12 +496,15 @@ Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: copy(*, parameters: awkward._typing.JSONMapping | None = UNSET) -> awkward._typing.Self
       :abstractmethod:
 
 
 
+
    .. py:method:: _arrow_needs_option_type()
       :classmethod:
+
 
 

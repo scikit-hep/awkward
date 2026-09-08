@@ -855,11 +855,17 @@
                   
   <section id="ak-without-field">
 <h1>ak.without_field<a class="headerlink" href="#ak-without-field" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_without_field.py">awkward.operations.ak_without_field</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_without_field.py#L17">line 17</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_without_field.py">awkward.operations.ak_without_field</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_without_field.py#L17">line 17</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.without_field">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">without_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.without_field" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns an array or record with the named field removed.</p>
+<p>This function does not change the array in-place.</p>
+<p>See <a class="reference internal" href="ak.Array.html#ak.Array.__delitem__" title="ak.Array.__delitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__delitem__</span></code></a> and <a class="reference internal" href="ak.Record.html#ak.Record.__delitem__" title="ak.Record.__delitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record.__delitem__</span></code></a> for a variant that
+changes the high-level object in-place. (These methods internally use
+<a class="reference internal" href="#ak.without_field" title="ak.without_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.without_field</span></code></a>, so performance is not a factor in choosing one over the
+other.)</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
@@ -874,14 +880,11 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> or <a class="reference internal" href="ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a> (or low-level equivalent, if
+<code class="docutils literal notranslate"><span class="pre">highlevel=False</span></code>) with an existing field removed.</p>
+</dd>
 </dl>
-<p>Returns an <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> or <a class="reference internal" href="ak.Record.html#ak.Record" title="ak.Record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record</span></code></a> (or low-level equivalent, if
-<code class="docutils literal notranslate"><span class="pre">highlevel=False</span></code>) with an existing field removed. This function does not
-change the array in-place.</p>
-<p>See <a class="reference internal" href="ak.Array.html#ak.Array.__delitem__" title="ak.Array.__delitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__delitem__</span></code></a> and <a class="reference internal" href="ak.Record.html#ak.Record.__delitem__" title="ak.Record.__delitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Record.__delitem__</span></code></a> for a variant that
-changes the high-level object in-place. (These methods internally use
-<a class="reference internal" href="#ak.without_field" title="ak.without_field"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.without_field</span></code></a>, so performance is not a factor in choosing one over the
-other.)</p>
 </dd></dl>
 
 </section>

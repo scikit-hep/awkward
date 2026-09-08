@@ -1,7 +1,7 @@
 ak.forms.ListForm
 =================
 
-Defined in `awkward.forms.listform <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/listform.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/listform.py#L19>`__.
+Defined in `awkward.forms.listform <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/forms/listform.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/forms/listform.py#L19>`__.
 
 .. py:class:: ak.forms.ListForm(starts, stops, content, *, parameters=None, form_key=None)
 
@@ -40,13 +40,17 @@ Defined in `awkward.forms.listform <https://github.com/scikit-hep/awkward/blob/6
    .. py:property:: starts
 
 
+
    .. py:property:: stops
+
 
 
    .. py:property:: content
 
 
+
    .. py:method:: copy(starts=UNSET, stops=UNSET, content=UNSET, *, parameters=UNSET, form_key=UNSET)
+
 
 
    .. py:method:: simplified(starts, stops, content, *, parameters=None, form_key=None)
@@ -54,32 +58,43 @@ Defined in `awkward.forms.listform <https://github.com/scikit-hep/awkward/blob/6
 
 
 
+
    .. py:method:: __repr__()
+
 
 
    .. py:method:: _to_dict_part(verbose, toplevel)
 
 
+
    .. py:property:: type
+
 
 
    .. py:method:: _columns(path, output, list_indicator)
 
 
+
    .. py:method:: _prune_columns(is_inside_record_or_union: bool) -> awkward._typing.Self | None
+
 
 
    .. py:method:: _select_columns(match_specifier: awkward.forms.form._SpecifierMatcher) -> awkward._typing.Self
 
 
+
    .. py:method:: _column_types()
+
 
 
    .. py:method:: __setstate__(state)
 
 
+
    .. py:method:: _expected_from_buffers(getkey: collections.abc.Callable[[awkward.forms.form.Form, str], str], recursive: bool) -> awkward._typing.Iterator[tuple[str, awkward._typing.DType]]
 
 
+
    .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool, form_key: bool) -> bool
+
 

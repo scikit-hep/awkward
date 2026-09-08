@@ -1,7 +1,7 @@
 ak.types.Type
 =============
 
-Defined in `awkward.types.type <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/type.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/type.py#L17>`__.
+Defined in `awkward.types.type <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/types/type.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/types/type.py#L17>`__.
 
 .. py:class:: ak.types.Type
 
@@ -14,15 +14,19 @@ Defined in `awkward.types.type <https://github.com/scikit-hep/awkward/blob/6062e
 
 
 
+
    .. py:property:: parameters
       :type: awkward._typing.JSONMapping
+
 
 
 
    .. py:method:: parameter(key: str) -> awkward._typing.JSONSerializable | None
 
 
+
    .. py:method:: __str__() -> str
+
 
 
    .. py:method:: _str(indent: str, compact: bool, behavior: collections.abc.Mapping | None) -> list[str]
@@ -30,7 +34,9 @@ Defined in `awkward.types.type <https://github.com/scikit-hep/awkward/blob/6062e
 
 
 
+
    .. py:method:: show(stream=STDOUT)
+
 
 
    .. py:attribute:: _str_parameters_exclude
@@ -42,16 +48,21 @@ Defined in `awkward.types.type <https://github.com/scikit-hep/awkward/blob/6062e
    .. py:method:: _str_categorical_begin() -> str
 
 
+
    .. py:method:: _str_categorical_end() -> str
+
 
 
    .. py:method:: _str_parameters() -> str | None
 
 
+
    .. py:method:: _repr_args() -> list[str]
 
 
+
    .. py:method:: is_equal_to(other: awkward._typing.Any, *, all_parameters: bool = False) -> bool
+
 
 
    .. py:attribute:: __eq__
@@ -59,5 +70,6 @@ Defined in `awkward.types.type <https://github.com/scikit-hep/awkward/blob/6062e
 
    .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool) -> bool
       :abstractmethod:
+
 
 

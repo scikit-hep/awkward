@@ -1,13 +1,14 @@
 ak.types.RecordType
 ===================
 
-Defined in `awkward.types.recordtype <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/recordtype.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/recordtype.py#L20>`__.
+Defined in `awkward.types.recordtype <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/types/recordtype.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/types/recordtype.py#L20>`__.
 
 .. py:class:: ak.types.RecordType(contents: collections.abc.Iterable[awkward.types.type.Type], fields: collections.abc.Iterable[str], *, parameters: awkward._typing.JSONMapping | None = None)
 
 
 
    .. py:method:: copy(*, contents: collections.abc.Iterable[awkward.types.type.Type] | awkward._util.Sentinel = UNSET, fields: collections.abc.Iterable[str] | awkward._util.Sentinel | None = UNSET, parameters: awkward._typing.JSONMapping | awkward._util.Sentinel | None = UNSET) -> awkward._typing.Self
+
 
 
    .. py:attribute:: _contents
@@ -29,13 +30,16 @@ Defined in `awkward.types.recordtype <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:property:: fields
       :type: list[str]
 
 
 
+
    .. py:property:: is_tuple
       :type: bool
+
 
 
 
@@ -48,20 +52,27 @@ Defined in `awkward.types.recordtype <https://github.com/scikit-hep/awkward/blob
    .. py:method:: _str(indent: str, compact: bool, behavior: collections.abc.Mapping | None) -> list[str]
 
 
+
    .. py:method:: __repr__()
+
 
 
    .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool) -> bool
 
 
+
    .. py:method:: index_to_field(index: int) -> str
+
 
 
    .. py:method:: field_to_index(field: str) -> int
 
 
+
    .. py:method:: has_field(field: str) -> bool
 
 
+
    .. py:method:: content(index_or_field: int | str) -> awkward.types.type.Type
+
 

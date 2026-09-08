@@ -1,7 +1,7 @@
 ak.ArrayBuilder
 ===============
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/highlevel.py>`__ on `line 2610 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/highlevel.py#L2610>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/highlevel.py>`__ on `line 2610 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/highlevel.py#L2610>`__.
 
 .. py:class:: ak.ArrayBuilder(*, behavior=None, attrs=None, initial=1024, resize=8)
 
@@ -156,6 +156,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
       :classmethod:
 
 
+
       :param layout: Low-level builder to wrap.
       :type layout: ``ak._ext.ArrayBuilder``
       :param behavior: Custom :py:obj:`ak.behavior` for arrays built by
@@ -175,6 +176,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
       :type: awkward._attrs.Attrs
 
 
+
       The mapping containing top-level metadata, which is serialised
       with the array during pickling.
 
@@ -184,6 +186,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:property:: behavior
+
 
       The ``behavior`` parameter passed into this ArrayBuilder's constructor.
 
@@ -202,6 +205,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: tolist()
 
+
       Converts this Array into Python objects; same as :py:obj:`ak.to_list`
       (but without the underscore, like NumPy's
       `tolist <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html>`__).
@@ -210,17 +214,20 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: to_list()
 
+
       Converts this Array into Python objects; same as :py:obj:`ak.to_list`.
 
 
 
    .. py:method:: to_numpy(allow_missing=True)
 
+
       Converts this Array into a NumPy array, if possible; same as :py:obj:`ak.to_numpy`.
 
 
 
    .. py:property:: type
+
 
       The high-level type of the accumulated array; same as :py:obj:`ak.type`.
 
@@ -233,10 +240,12 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: typestr
 
+
       The high-level type of this accumulated array, presented as a string.
 
 
    .. py:method:: __len__()
+
 
       The current length of the accumulated array.
 
@@ -245,13 +254,17 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __str__()
 
 
+
    .. py:method:: __repr__()
+
 
 
    .. py:method:: _repr(limit_cols)
 
 
+
    .. py:method:: show(limit_rows=20, limit_cols=80, *, type=False, named_axis=False, nbytes=False, backend=False, all=False, stream=STDOUT, formatter=None, precision=3)
+
 
       :param limit_rows: Maximum number of rows (lines) to use in the output.
       :type limit_rows: int
@@ -295,6 +308,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __array__(dtype=None, copy=None)
 
+
       Intercepts attempts to convert a #snapshot of this array into a
       NumPy array and either performs a conversion if possible or raises an error.
 
@@ -305,7 +319,9 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __arrow_array__(type=None)
 
 
+
    .. py:property:: numba_type
+
 
       The type of this Array when it is used in Numba. It contains enough
       information to generate low-level code for accessing any element,
@@ -318,7 +334,9 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __bool__()
 
 
+
    .. py:method:: snapshot()
+
 
       Converts the currently accumulated data into an :py:obj:`ak.Array`.
 
@@ -328,11 +346,13 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: null()
 
+
       Appends a None value at the current position in the accumulated array.
 
 
 
    .. py:method:: boolean(x)
+
 
       Appends a boolean value ``x`` at the current position in the accumulated
       array.
@@ -341,12 +361,14 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: integer(x)
 
+
       Appends an integer ``x`` at the current position in the accumulated
       array.
 
 
 
    .. py:method:: real(x)
+
 
       Appends a floating point number ``x`` at the current position in the
       accumulated array.
@@ -355,12 +377,14 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: complex(x)
 
+
       Appends a floating point number ``x`` at the current position in the
       accumulated array.
 
 
 
    .. py:method:: datetime(x)
+
 
       Appends a datetime value ``x`` at the current position in the
       accumulated array.
@@ -369,12 +393,14 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: timedelta(x)
 
+
       Appends a timedelta value ``x`` at the current position in the
       accumulated array.
 
 
 
    .. py:method:: bytestring(x)
+
 
       Appends an unencoded string (raw bytes) ``x`` at the current position
       in the accumulated array.
@@ -383,12 +409,14 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: string(x)
 
+
       Appends a UTF-8 encoded string ``x`` at the current position in the
       accumulated array.
 
 
 
    .. py:method:: begin_list()
+
 
       Begins filling a list; must be closed with #end_list.
 
@@ -418,11 +446,13 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: end_list()
 
+
       Ends a list.
 
 
 
    .. py:method:: begin_tuple(numfields)
+
 
       Begins filling a tuple with ``numfields`` fields; must be closed with
       #end_tuple.
@@ -451,6 +481,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: index(i)
 
+
       :param i: The tuple slot to fill.
       :type i: int
 
@@ -463,11 +494,13 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: end_tuple()
 
+
       Ends a tuple.
 
 
 
    .. py:method:: begin_record(name=None)
+
 
       Begins filling a record with an optional ``name``; must be closed with
       #end_record.
@@ -511,6 +544,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: field(key)
 
+
       :param key: The field key to fill.
       :type key: str
 
@@ -523,11 +557,13 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: end_record()
 
+
       Ends a record.
 
 
 
    .. py:method:: append(obj)
+
 
       :param obj: The data to append (None, bool, int, float, bytes, str, or
                   anything recognized by :py:obj:`ak.from_iter`).
@@ -545,6 +581,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: extend(obj)
 
+
       :param obj: Iterable of data to extend this ArrayBuilder with.
       :type obj: iterable
 
@@ -553,6 +590,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:method:: list()
+
 
       Context manager to prevent unpaired #begin_list and #end_list. The
       example in the #begin_list documentation can be rewritten as
@@ -585,6 +623,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: tuple(numfields)
 
+
       Context manager to prevent unpaired #begin_tuple and #end_tuple. The
       example in the #begin_tuple documentation can be rewritten as
 
@@ -612,6 +651,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:method:: record(name=None)
+
 
       Context manager to prevent unpaired #begin_record and #end_record. The
       example in the #begin_record documentation can be rewritten as

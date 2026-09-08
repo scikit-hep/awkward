@@ -1,7 +1,7 @@
 ak.Record
 =========
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/highlevel.py>`__ on `line 1818 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/highlevel.py#L1818>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/highlevel.py>`__ on `line 1818 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/highlevel.py#L1818>`__.
 
 .. py:class:: ak.Record(data, *, behavior=None, with_name=None, check_valid=False, backend=None, attrs=None, named_axis=None)
 
@@ -57,11 +57,14 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
 
+
    .. py:method:: _update_class(restore=None)
+
 
 
    .. py:property:: attrs
       :type: awkward._attrs.Attrs
+
 
 
       The mapping containing top-level metadata, which is serialised
@@ -73,6 +76,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:property:: layout
+
 
       The :py:obj:`ak.record.Record` that contains composable :py:obj:`ak.contents.Content`
       elements to determine how the array is structured.
@@ -109,6 +113,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: behavior
 
+
       The ``behavior`` parameter passed into this Record's constructor.
 
       * If a dict, this ``behavior`` overrides the global :py:obj:`ak.behavior`.
@@ -129,12 +134,15 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
 
+
    .. py:property:: named_axis
       :type: awkward._namedaxis.AxisMapping
 
 
 
+
    .. py:method:: tolist()
+
 
       Converts this Record into Python objects; same as :py:obj:`ak.to_list`
       (but without the underscore, like NumPy's
@@ -144,11 +152,13 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: to_list()
 
+
       Converts this Record into Python objects; same as :py:obj:`ak.to_list`.
 
 
 
    .. py:property:: nbytes
+
 
       The total number of bytes in all the :py:obj:`ak.index.Index`,
       and :py:obj:`ak.contents.NumpyArray` buffers in this array tree.
@@ -161,6 +171,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: fields
 
+
       List of field names or tuple slot numbers (as strings) of this record.
 
       If this is actually a tuple its fields are string representations of
@@ -171,10 +182,12 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: is_tuple
 
+
       If True, the top-most record structure has no named fields, i.e. it's a tuple.
 
 
    .. py:method:: _ipython_key_completions_()
+
 
 
    .. py:attribute:: __iter__
@@ -183,6 +196,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:property:: type
+
 
       The high-level type of this Record; same as :py:obj:`ak.type`.
 
@@ -195,10 +209,12 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: typestr
 
+
       The high-level type of this Record, presented as a string.
 
 
    .. py:method:: __getitem__(where)
+
 
       :param where: Index of positions to
                     select from this Record.
@@ -228,6 +244,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __setitem__(where, what)
 
+
       :param where: Field name to add data to the record.
       :type where: str or tuple of str
       :param what: Data to add as the new field.
@@ -250,6 +267,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __delitem__(where)
 
+
       :param where: Field name to remove from the record.
       :type where: str or tuple of str
 
@@ -268,6 +286,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:method:: __getattr__(where)
+
 
       Whenever possible, fields can be accessed as attributes.
 
@@ -299,6 +318,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __setattr__(name, value)
 
+
       :param where: Attribute name to set
       :type where: str
 
@@ -325,6 +345,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __dir__()
 
+
       Lists all methods, properties, and field names (see #__getattr__)
       that can be accessed as attributes.
 
@@ -333,13 +354,17 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __str__()
 
 
+
    .. py:method:: __repr__()
+
 
 
    .. py:method:: _repr(limit_cols)
 
 
+
    .. py:method:: show(limit_rows=20, limit_cols=80, *, type=False, named_axis=False, nbytes=False, backend=False, all=False, stream=STDOUT, formatter=None, precision=3)
+
 
       :param limit_rows: Maximum number of rows (lines) to use in the output.
       :type limit_rows: int
@@ -381,7 +406,9 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: _repr_mimebundle_(include=None, exclude=None)
 
 
+
    .. py:method:: __array_ufunc__(ufunc, method, *inputs, **kwargs)
+
 
       Intercepts attempts to pass this Record to a NumPy
       `universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__
@@ -399,6 +426,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: numba_type
 
+
       The type of this Record when it is used in Numba. It contains enough
       information to generate low-level code for accessing any element,
       down to the leaves.
@@ -410,14 +438,19 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __reduce_ex__(protocol: int) -> tuple
 
 
+
    .. py:method:: __setstate__(state)
+
 
 
    .. py:method:: __copy__()
 
 
+
    .. py:method:: __deepcopy__(memo)
 
 
+
    .. py:method:: __bool__()
+
 

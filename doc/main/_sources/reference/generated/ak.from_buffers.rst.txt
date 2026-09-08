@@ -1,9 +1,10 @@
 ak.from_buffers
 ===============
 
-Defined in `awkward.operations.ak_from_buffers <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_buffers.py>`__ on `line 29 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_buffers.py#L29>`__.
+Defined in `awkward.operations.ak_from_buffers <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_buffers.py>`__ on `line 29 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_buffers.py#L29>`__.
 
 .. py:function:: ak.from_buffers(form, length, container, buffer_key='{form_key}-{attribute}', *, backend='cpu', byteorder=ak._util.native_byteorder, allow_noncanonical_form=False, enable_virtualarray_caching=True, highlevel=True, behavior=None, attrs=None)
+
 
    Reconstitutes an Awkward Array from a Form, length, and memory buffers.
 

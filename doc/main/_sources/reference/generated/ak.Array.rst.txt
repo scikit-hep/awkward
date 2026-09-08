@@ -1,7 +1,7 @@
 ak.Array
 ========
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/highlevel.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/highlevel.py#L136>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/highlevel.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/highlevel.py#L136>`__.
 
 .. py:class:: ak.Array(data, *, behavior=None, with_name=None, check_valid=False, backend=None, attrs=None, named_axis=None)
 
@@ -175,17 +175,21 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
 
+
    .. py:attribute:: _histogram_module_
 
 
    .. py:method:: __dask_tokenize__()
 
 
+
    .. py:method:: _update_class(restore=None)
+
 
 
    .. py:property:: attrs
       :type: awkward._attrs.Attrs
+
 
 
       The mapping containing top-level metadata, which is serialised
@@ -197,6 +201,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:property:: layout
+
 
       The composable :py:obj:`ak.contents.Content` elements that determine how this
       Array is structured.
@@ -239,6 +244,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: behavior
 
+
       The ``behavior`` parameter passed into this Array's constructor.
 
       * If a dict, this ``behavior`` overrides the global :py:obj:`ak.behavior`.
@@ -259,12 +265,15 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
 
+
    .. py:property:: named_axis
       :type: awkward._namedaxis.AxisMapping
 
 
 
+
    .. py:property:: mask
+
 
       
 
@@ -288,6 +297,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: tolist()
 
+
       Converts this Array into Python objects; same as :py:obj:`ak.to_list`
       (but without the underscore, like NumPy's
       `tolist <https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html>`__).
@@ -296,17 +306,20 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: to_list()
 
+
       Converts this Array into Python objects; same as :py:obj:`ak.to_list`.
 
 
 
    .. py:method:: to_numpy(allow_missing=True)
 
+
       Converts this Array into a NumPy array, if possible; same as :py:obj:`ak.to_numpy`.
 
 
 
    .. py:property:: nbytes
+
 
       The total number of bytes in all the :py:obj:`ak.index.Index`,
       and :py:obj:`ak.contents.NumpyArray` buffers in this array tree.
@@ -317,6 +330,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:property:: ndim
+
 
       Number of dimensions (nested variable-length lists and/or regular arrays)
       before reaching a numeric type or a record.
@@ -329,6 +343,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:property:: fields
+
 
       List of field names or tuple slot numbers (as strings) of the outermost
       record or tuple in this array.
@@ -345,13 +360,16 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: is_tuple
 
+
       If True, the top-most record structure has no named fields, i.e. it's a tuple.
 
 
    .. py:method:: _ipython_key_completions_()
 
 
+
    .. py:property:: type
+
 
       The high-level type of this Array; same as :py:obj:`ak.type`.
 
@@ -364,10 +382,12 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:property:: typestr
 
+
       The high-level type of this Array, presented as a string.
 
 
    .. py:method:: __len__()
+
 
       The length of this Array, only counting the outermost structure.
 
@@ -380,6 +400,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:method:: __iter__()
+
 
       Iterates over this Array in Python.
 
@@ -412,6 +433,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:method:: __getitem__(where)
+
 
       :param where: Index of positions to
                     select from this Array.
@@ -845,7 +867,9 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __bytes__() -> bytes
 
 
+
    .. py:method:: __setitem__(where, what)
+
 
       :param where: Field name to add to records in the array.
       :type where: str or tuple of str
@@ -905,6 +929,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __delitem__(where)
 
+
       :param where: Field name to remove from the array.
       :type where: str or tuple of str
 
@@ -922,6 +947,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:method:: __getattr__(where)
+
 
       :param where: Attribute name to lookup
       :type where: str
@@ -961,6 +987,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __setattr__(name, value)
 
+
       :param where: Attribute name to set
       :type where: str
 
@@ -987,6 +1014,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __dir__()
 
+
       Lists all methods, properties, and field names (see #__getattr__)
       that can be accessed as attributes.
 
@@ -995,13 +1023,17 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __str__()
 
 
+
    .. py:method:: __repr__()
+
 
 
    .. py:method:: _repr(limit_cols)
 
 
+
    .. py:method:: show(limit_rows=20, limit_cols=80, *, type=False, named_axis=False, nbytes=False, backend=False, all=False, stream=STDOUT, formatter=None, precision=3)
+
 
       :param limit_rows: Maximum number of rows (lines) to use in the output.
       :type limit_rows: int
@@ -1043,7 +1075,9 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: _repr_mimebundle_(include=None, exclude=None)
 
 
+
    .. py:method:: __array__(dtype=None, copy=None)
+
 
       Intercepts attempts to convert this Array into a NumPy array and
       either performs a conversion if possible or raises an error.
@@ -1077,7 +1111,9 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __arrow_array__(type=None)
 
 
+
    .. py:method:: __array_ufunc__(ufunc, method, *inputs, **kwargs)
+
 
       Intercepts attempts to pass this Array to a NumPy
       `universal functions <https://docs.scipy.org/doc/numpy/reference/ufuncs.html>`__
@@ -1146,6 +1182,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: __array_function__(func, types, args, kwargs)
 
+
       Intercepts attempts to pass this Array to those NumPy functions other
       than universal functions that have an Awkward equivalent.
 
@@ -1162,6 +1199,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
    .. py:method:: numba_type()
 
+
       The type of this Array when it is used in Numba. It contains enough
       information to generate low-level code for accessing any element,
       down to the leaves.
@@ -1174,19 +1212,25 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
    .. py:method:: __reduce_ex__(protocol: int) -> tuple
 
 
+
    .. py:method:: __setstate__(state)
+
 
 
    .. py:method:: __copy__()
 
 
+
    .. py:method:: __deepcopy__(memo)
+
 
 
    .. py:method:: __bool__()
 
 
+
    .. py:method:: cpp_type()
+
 
       The C++ type of this Array when it is used in cppyy.::
 
@@ -1199,6 +1243,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/6062e7
 
 
    .. py:method:: __cast_cpp__()
+
 
       The ``__cast_cpp__`` is called by cppyy to determine a C++ type of an ``ak.Array``.
       It returns the C++ dataset type that is already registered with cppyy with the

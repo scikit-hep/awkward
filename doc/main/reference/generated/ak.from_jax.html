@@ -855,11 +855,20 @@
                   
   <section id="ak-from-jax">
 <h1>ak.from_jax<a class="headerlink" href="#ak-from-jax" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_jax.py">awkward.operations.ak_from_jax</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_jax.py#L12">line 12</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_jax.py">awkward.operations.ak_from_jax</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_jax.py#L12">line 12</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.from_jax">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">from_jax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regulararray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primitive_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'error'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.from_jax" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Converts a JAX Array into an Awkward Array.</p>
+<p>The data is not copied: the Awkward Array shares the JAX array’s buffer.</p>
+<p>The resulting layout may involve the following <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> types
+(only):</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a></p></li>
+<li><p><a class="reference internal" href="ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a> if <code class="docutils literal notranslate"><span class="pre">regulararray=True</span></code>.</p></li>
+</ul>
+<p>See also <a class="reference internal" href="ak.to_jax.html#ak.to_jax" title="ak.to_jax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_jax</span></code></a>, <a class="reference internal" href="ak.from_numpy.html#ak.from_numpy" title="ak.from_numpy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_numpy</span></code></a> and <a class="reference internal" href="#ak.from_jax" title="ak.from_jax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_jax</span></code></a>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> (<a class="reference external" href="https://docs.jax.dev/en/latest/_autosummary/jax.Array.html#jax.Array" title="(in JAX)"><em>jax.Array</em></a>) – The JAX Array to convert into an Awkward Array.</p></li>
@@ -876,15 +885,10 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> built from the given JAX array.</p>
+</dd>
 </dl>
-<p>Converts a JAX Array into an Awkward Array.</p>
-<p>The resulting layout may involve the following <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> types
-(only):</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="ak.contents.NumpyArray.html#ak.contents.NumpyArray" title="ak.contents.NumpyArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.NumpyArray</span></code></a></p></li>
-<li><p><a class="reference internal" href="ak.contents.RegularArray.html#ak.contents.RegularArray" title="ak.contents.RegularArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.RegularArray</span></code></a> if <code class="docutils literal notranslate"><span class="pre">regulararray=True</span></code>.</p></li>
-</ul>
-<p>See also <a class="reference internal" href="ak.to_jax.html#ak.to_jax" title="ak.to_jax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_jax</span></code></a>, <a class="reference internal" href="ak.from_numpy.html#ak.from_numpy" title="ak.from_numpy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_numpy</span></code></a> and <a class="reference internal" href="#ak.from_jax" title="ak.from_jax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_jax</span></code></a>.</p>
 </dd></dl>
 
 </section>

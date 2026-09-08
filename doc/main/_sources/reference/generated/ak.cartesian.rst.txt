@@ -1,9 +1,10 @@
 ak.cartesian
 ============
 
-Defined in `awkward.operations.ak_cartesian <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_cartesian.py>`__ on `line 30 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_cartesian.py#L30>`__.
+Defined in `awkward.operations.ak_cartesian <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_cartesian.py>`__ on `line 30 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_cartesian.py#L30>`__.
 
 .. py:function:: ak.cartesian(arrays, axis=1, *, nested=None, parameters=None, with_name=None, highlevel=True, behavior=None, attrs=None)
+
 
    Computes the Cartesian product (cross product) of data from a set of arrays.
 

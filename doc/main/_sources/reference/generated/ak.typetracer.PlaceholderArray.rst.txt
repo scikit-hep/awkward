@@ -1,7 +1,7 @@
 ak.typetracer.PlaceholderArray
 ==============================
 
-Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/placeholder.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/placeholder.py#L16>`__.
+Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/_nplikes/placeholder.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/_nplikes/placeholder.py#L16>`__.
 
 .. py:class:: ak.typetracer.PlaceholderArray(nplike: awkward._nplikes.numpy_like.NumpyLike, shape: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis], dtype: awkward._typing.DType, buffer_key: str | None = None)
 
@@ -56,8 +56,10 @@ Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/
 
 
 
+
    .. py:property:: dtype
       :type: awkward._typing.DType
+
 
 
 
@@ -66,8 +68,10 @@ Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/
 
 
 
+
    .. py:property:: ndim
       :type: int
+
 
 
 
@@ -76,12 +80,15 @@ Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/
 
 
 
+
    .. py:property:: nbytes
       :type: int
 
 
 
+
    .. py:method:: materialize()
+
 
 
    .. py:property:: strides
@@ -89,95 +96,127 @@ Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/
 
 
 
+
    .. py:property:: T
+
 
 
    .. py:method:: view(dtype: numpy.typing.DTypeLike) -> awkward._typing.Self
 
 
+
    .. py:method:: __repr__()
+
 
 
    .. py:method:: __getitem__(index)
 
 
+
    .. py:method:: tolist()
+
 
 
    .. py:method:: __setitem__(key, value)
 
 
+
    .. py:method:: __bool__()
+
 
 
    .. py:method:: __int__()
 
 
+
    .. py:method:: __index__()
+
 
 
    .. py:method:: __len__() -> int
 
 
+
    .. py:method:: __add__(other)
+
 
 
    .. py:method:: __and__(other)
 
 
+
    .. py:method:: __eq__(other)
+
 
 
    .. py:method:: __floordiv__(other)
 
 
+
    .. py:method:: __ge__(other)
+
 
 
    .. py:method:: __gt__(other)
 
 
+
    .. py:method:: __invert__()
+
 
 
    .. py:method:: __le__(other)
 
 
+
    .. py:method:: __lt__(other)
+
 
 
    .. py:method:: __mul__(other)
 
 
+
    .. py:method:: __or__(other)
+
 
 
    .. py:method:: __sub__(other)
 
 
+
    .. py:method:: __truediv__(other)
+
 
 
    .. py:method:: __iter__()
 
 
+
    .. py:method:: __array__(dtype=None, copy=None)
+
 
 
    .. py:method:: __cupy_get_ndarray__()
 
 
+
    .. py:method:: __jax_array__()
+
 
 
    .. py:property:: __array_interface__
 
 
+
    .. py:property:: __cuda_array_interface__
+
 
 
    .. py:method:: __dlpack_device__()
 
 
+
    .. py:method:: __dlpack__(stream: awkward._typing.Any = None)
+
 

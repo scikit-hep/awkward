@@ -1,7 +1,7 @@
 ak.typetracer.TypeTracerArray
 =============================
 
-Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/typetracer.py>`__ on `line 239 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/typetracer.py#L239>`__.
+Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/_nplikes/typetracer.py>`__ on `line 239 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/_nplikes/typetracer.py#L239>`__.
 
 .. py:class:: ak.typetracer.TypeTracerArray
 
@@ -100,19 +100,24 @@ Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/b
    .. py:method:: __reduce__()
 
 
+
    .. py:method:: _new(dtype: awkward._typing.DType, shape: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis], form_key: str | None = None, report: TypeTracerReport | None = None)
       :classmethod:
+
 
 
 
    .. py:method:: __repr__()
 
 
+
    .. py:method:: __str__()
+
 
 
    .. py:property:: T
       :type: awkward._typing.Self
+
 
 
 
@@ -121,8 +126,10 @@ Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/b
 
 
 
+
    .. py:property:: size
       :type: awkward._nplikes.shape.ShapeItem
+
 
 
 
@@ -131,11 +138,14 @@ Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/b
 
 
 
+
    .. py:property:: strides
+
 
 
    .. py:property:: inner_shape
       :type: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis]
+
 
 
 
@@ -144,19 +154,24 @@ Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/b
 
 
 
+
    .. py:property:: report
       :type: TypeTracerReport | None
+
 
 
 
    .. py:method:: touch_shape()
 
 
+
    .. py:method:: touch_data()
+
 
 
    .. py:property:: nplike
       :type: TypeTracer
+
 
 
 
@@ -165,57 +180,75 @@ Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/b
 
 
 
+
    .. py:property:: nbytes
       :type: awkward._nplikes.shape.ShapeItem
+
 
 
 
    .. py:method:: view(dtype: numpy.typing.DTypeLike) -> awkward._typing.Self
 
 
+
    .. py:method:: forget_length() -> awkward._typing.Self
+
 
 
    .. py:method:: __iter__()
 
 
+
    .. py:method:: __array__(dtype=None, copy=None)
+
 
 
    .. py:property:: ctypes
 
 
+
    .. py:method:: __len__()
+
 
 
    .. py:method:: __getitem__(key: awkward._typing.SupportsIndex | slice | awkward._typing.EllipsisType | tuple[awkward._typing.SupportsIndex | slice | awkward._typing.EllipsisType | awkward._nplikes.numpy_like.ArrayLike, Ellipsis] | awkward._nplikes.numpy_like.ArrayLike) -> awkward._typing.Self
 
 
+
    .. py:method:: __setitem__(key: awkward._typing.SupportsIndex | slice | awkward._typing.EllipsisType | tuple[awkward._typing.SupportsIndex | slice | awkward._typing.EllipsisType | awkward._nplikes.numpy_like.ArrayLike, Ellipsis] | awkward._nplikes.numpy_like.ArrayLike, value: int | float | bool | complex | awkward._nplikes.numpy_like.ArrayLike)
+
 
 
    .. py:method:: copy()
 
 
+
    .. py:method:: __array_ufunc__(ufunc, method, *inputs, **kwargs)
+
 
 
    .. py:method:: tolist() -> list
 
 
+
    .. py:method:: __bool__() -> bool
+
 
 
    .. py:method:: __int__() -> int
 
 
+
    .. py:method:: __index__() -> int
+
 
 
    .. py:method:: __dlpack_device__() -> tuple[int, int]
 
 
+
    .. py:method:: __dlpack__(stream: awkward._typing.Any = None) -> awkward._typing.Any
+
 
 Classes
 -------

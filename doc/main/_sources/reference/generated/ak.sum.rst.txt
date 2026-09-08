@@ -1,9 +1,10 @@
 ak.sum
 ======
 
-Defined in `awkward.operations.ak_sum <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_sum.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_sum.py#L23>`__.
+Defined in `awkward.operations.ak_sum <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_sum.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_sum.py#L23>`__.
 
 .. py:function:: ak.sum(array, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
+
 
    Sums an array's elements over one or all levels of nesting.
 

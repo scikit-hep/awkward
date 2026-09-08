@@ -1,9 +1,10 @@
 ak.isclose
 ==========
 
-Defined in `awkward.operations.ak_isclose <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_isclose.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_isclose.py#L18>`__.
+Defined in `awkward.operations.ak_isclose <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_isclose.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_isclose.py#L18>`__.
 
 .. py:function:: ak.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None, attrs=None)
+
 
    Returns a boolean array of element-wise approximate-equality between two arrays.
 

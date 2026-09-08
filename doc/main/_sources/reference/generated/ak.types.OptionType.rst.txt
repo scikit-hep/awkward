@@ -1,13 +1,14 @@
 ak.types.OptionType
 ===================
 
-Defined in `awkward.types.optiontype <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/optiontype.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/types/optiontype.py#L22>`__.
+Defined in `awkward.types.optiontype <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/types/optiontype.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/types/optiontype.py#L22>`__.
 
 .. py:class:: ak.types.OptionType(content: awkward.types.type.Type, *, parameters: awkward._typing.JSONMapping | None = None)
 
 
 
    .. py:method:: copy(*, content: awkward.types.type.Type | awkward._util.Sentinel = UNSET, parameters: awkward._typing.JSONMapping | awkward._util.Sentinel | None = UNSET) -> OptionType
+
 
 
    .. py:attribute:: _content
@@ -25,14 +26,19 @@ Defined in `awkward.types.optiontype <https://github.com/scikit-hep/awkward/blob
 
 
 
+
    .. py:method:: _str(indent: str, compact: bool, behavior: collections.abc.Mapping | None) -> list[str]
+
 
 
    .. py:method:: __repr__() -> str
 
 
+
    .. py:method:: simplify_option_union() -> awkward.types.type.Type
 
 
+
    .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool) -> bool
+
 

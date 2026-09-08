@@ -1,9 +1,10 @@
 ak.mixin_class
 ==============
 
-Defined in `awkward.behaviors.mixins <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/behaviors/mixins.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/behaviors/mixins.py#L12>`__.
+Defined in `awkward.behaviors.mixins <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/behaviors/mixins.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/behaviors/mixins.py#L12>`__.
 
 .. py:function:: ak.mixin_class(registry, name=None)
+
 
    :param registry: The destination behavior mapping registry. Typically,
                     this would be the global registry :py:obj:`ak.behavior`, but one may wish

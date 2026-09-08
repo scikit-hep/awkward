@@ -1,9 +1,10 @@
 ak.zip
 ======
 
-Defined in `awkward.operations.ak_zip <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_zip.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_zip.py#L19>`__.
+Defined in `awkward.operations.ak_zip <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_zip.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_zip.py#L19>`__.
 
 .. py:function:: ak.zip(arrays, depth_limit=None, *, parameters=None, with_name=None, right_broadcast=False, optiontype_outside_record=False, highlevel=True, behavior=None, attrs=None)
+
 
    Combines arrays into records or tuples, broadcasting them together.
 

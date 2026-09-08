@@ -1,9 +1,27 @@
 ak.from_numpy
 =============
 
-Defined in `awkward.operations.ak_from_numpy <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_numpy.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_numpy.py#L11>`__.
+Defined in `awkward.operations.ak_from_numpy <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_numpy.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_numpy.py#L11>`__.
 
 .. py:function:: ak.from_numpy(array, *, regulararray=False, recordarray=True, highlevel=True, behavior=None, primitive_policy='error', attrs=None)
+
+
+   Converts a NumPy array into an Awkward Array.
+
+   The data is not copied: the Awkward Array shares the NumPy array's
+   buffers. There are two exceptions: the mask of a ``np.ma.MaskedArray`` is
+   converted, although its data buffer is still shared, and an array of
+   Unicode strings is re-encoded as UTF-8.
+
+   The resulting layout can only involve the following :py:obj:`ak.contents.Content` types:
+
+   * :py:obj:`ak.contents.NumpyArray`
+   * :py:obj:`ak.contents.ByteMaskedArray` or :py:obj:`ak.contents.UnmaskedArray` if the
+     ``array`` is an np.ma.MaskedArray.
+   * :py:obj:`ak.contents.RegularArray` if ``regulararray=True``.
+   * :py:obj:`ak.contents.RecordArray` if ``recordarray=True``.
+
+   See also :py:obj:`ak.to_numpy` and :py:obj:`ak.from_cupy`.
 
    :param array: The NumPy array to convert into an Awkward Array.
                  This array can be a np.ma.MaskedArray.
@@ -30,15 +48,5 @@ Defined in `awkward.operations.ak_from_numpy <https://github.com/scikit-hep/awkw
                  high-level.
    :type attrs: None or dict
 
-   Converts a NumPy array into an Awkward Array.
-
-   The resulting layout can only involve the following :py:obj:`ak.contents.Content` types:
-
-   * :py:obj:`ak.contents.NumpyArray`
-   * :py:obj:`ak.contents.ByteMaskedArray` or :py:obj:`ak.contents.UnmaskedArray` if the
-     ``array`` is an np.ma.MaskedArray.
-   * :py:obj:`ak.contents.RegularArray` if ``regulararray=True``.
-   * :py:obj:`ak.contents.RecordArray` if ``recordarray=True``.
-
-   See also :py:obj:`ak.to_numpy` and :py:obj:`ak.from_cupy`.
+   :returns: An :py:obj:`ak.Array` built from the given NumPy array.
 

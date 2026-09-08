@@ -1,7 +1,7 @@
 ak.typetracer.TypeTracerReport
 ==============================
 
-Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/typetracer.py>`__ on `line 181 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/_nplikes/typetracer.py#L181>`__.
+Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/_nplikes/typetracer.py>`__ on `line 181 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/_nplikes/typetracer.py#L181>`__.
 
 .. py:class:: ak.typetracer.TypeTracerReport
 
@@ -22,11 +22,14 @@ Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/b
    .. py:method:: __repr__()
 
 
+
    .. py:method:: set_labels(labels: collections.abc.Collection[str])
+
 
 
    .. py:property:: shape_touched
       :type: list[str]
+
 
 
 
@@ -35,17 +38,23 @@ Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/b
 
 
 
+
    .. py:method:: touch_shape(label: str) -> None
+
 
 
    .. py:method:: touch_data(label: str) -> None
 
 
+
    .. py:method:: commit(node_id: str) -> None
+
 
 
    .. py:method:: shape_touched_in(node_ids: collections.abc.Collection[str]) -> list[str]
 
 
+
    .. py:method:: data_touched_in(node_ids: collections.abc.Collection[str]) -> list[str]
+
 

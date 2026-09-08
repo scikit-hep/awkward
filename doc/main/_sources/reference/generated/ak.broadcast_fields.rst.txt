@@ -1,9 +1,10 @@
 ak.broadcast_fields
 ===================
 
-Defined in `awkward.operations.ak_broadcast_fields <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_broadcast_fields.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_broadcast_fields.py#L18>`__.
+Defined in `awkward.operations.ak_broadcast_fields <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_broadcast_fields.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_broadcast_fields.py#L18>`__.
 
 .. py:function:: ak.broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None)
+
 
    Returns a list of arrays whose record types contain the same fields.
 

@@ -855,11 +855,20 @@
                   
   <section id="ak-from-rdataframe">
 <h1>ak.from_rdataframe<a class="headerlink" href="#ak-from-rdataframe" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_rdataframe.py">awkward.operations.ak_from_rdataframe</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_rdataframe.py#L14">line 14</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_rdataframe.py">awkward.operations.ak_from_rdataframe</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_rdataframe.py#L14">line 14</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.from_rdataframe">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">from_rdataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'int64'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.from_rdataframe" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Converts ROOT RDataFrame columns into an Awkward Array.</p>
+<p>The data is copied: the conversion runs the RDataFrame event loop and
+writes the selected columns into newly allocated buffers.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">columns</span></code> is a string, the return value represents a single RDataFrame
+column. If <code class="docutils literal notranslate"><span class="pre">columns</span></code> is any other iterable, the return value is a record
+array, in which each field corresponds to an RDataFrame column. In
+particular, if the <code class="docutils literal notranslate"><span class="pre">columns</span></code> iterable contains only one string, it is still
+a record array, which has only one field.</p>
+<p>See also <a class="reference internal" href="ak.to_rdataframe.html#ak.to_rdataframe" title="ak.to_rdataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_rdataframe</span></code></a>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rdf</strong> (<code class="docutils literal notranslate"><span class="pre">ROOT.RDataFrame</span></code>) – ROOT RDataFrame to convert into an
@@ -880,14 +889,10 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a> built from the given ROOT RDataFrame columns.</p>
+</dd>
 </dl>
-<p>Converts ROOT RDataFrame columns into an Awkward Array.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">columns</span></code> is a string, the return value represents a single RDataFrame column.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">columns</span></code> is any other iterable, the return value is a record array, in which
-each field corresponds to an RDataFrame column. In particular, if the <code class="docutils literal notranslate"><span class="pre">columns</span></code>
-iterable contains only one string, it is still a record array, which has only
-one field.</p>
-<p>See also <a class="reference internal" href="ak.to_rdataframe.html#ak.to_rdataframe" title="ak.to_rdataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_rdataframe</span></code></a>.</p>
 </dd></dl>
 
 </section>

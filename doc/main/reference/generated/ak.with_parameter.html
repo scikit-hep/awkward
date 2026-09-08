@@ -855,11 +855,16 @@
                   
   <section id="ak-with-parameter">
 <h1>ak.with_parameter<a class="headerlink" href="#ak-with-parameter" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_with_parameter.py">awkward.operations.ak_with_parameter</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_with_parameter.py#L14">line 14</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_with_parameter.py">awkward.operations.ak_with_parameter</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_with_parameter.py#L14">line 14</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.with_parameter">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">with_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.with_parameter" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns an array with the given parameter set on the outermost layout node.</p>
+<p>Note that a “new array” is a lightweight shallow copy, not a duplication
+of large data buffers.</p>
+<p>You can also remove a single parameter with this function, since setting
+a parameter to None is equivalent to removing it.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
@@ -873,13 +878,11 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
-</dl>
-<p>This function returns a new array with a parameter set on the outermost
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array with a parameter set on the outermost
 node of its <a class="reference internal" href="ak.Array.html#ak.Array.layout" title="ak.Array.layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.layout</span></code></a>.</p>
-<p>Note that a “new array” is a lightweight shallow copy, not a duplication
-of large data buffers.</p>
-<p>You can also remove a single parameter with this function, since setting
-a parameter to None is equivalent to removing it.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

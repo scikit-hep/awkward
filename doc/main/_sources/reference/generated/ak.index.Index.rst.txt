@@ -1,7 +1,7 @@
 ak.index.Index
 ==============
 
-Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/index.py>`__ on `line 44 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/index.py#L44>`__.
+Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/index.py>`__ on `line 44 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/index.py#L44>`__.
 
 .. py:class:: ak.index.Index(data, *, metadata: dict | None = None, nplike: awkward._nplikes.numpy_like.NumpyLike | None = None)
 
@@ -24,8 +24,10 @@ Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/6062e76d21
 
 
 
+
    .. py:method:: empty(length: awkward._nplikes.shape.ShapeItem, nplike: awkward._nplikes.numpy_like.NumpyLike, dtype: awkward._typing.DType | None = None) -> Index
       :classmethod:
+
 
 
 
@@ -34,8 +36,10 @@ Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/6062e76d21
 
 
 
+
    .. py:property:: nplike
       :type: awkward._nplikes.numpy_like.NumpyLike
+
 
 
 
@@ -44,12 +48,15 @@ Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/6062e76d21
 
 
 
+
    .. py:property:: metadata
       :type: dict
 
 
 
+
    .. py:property:: ptr
+
 
 
    .. py:property:: length
@@ -57,17 +64,22 @@ Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/6062e76d21
 
 
 
+
    .. py:method:: forget_length() -> awkward._typing.Self
+
 
 
    .. py:method:: raw(nplike: awkward._nplikes.numpy_like.NumpyLike) -> awkward._nplikes.array_like.ArrayLike
 
 
+
    .. py:method:: materialize(type_) -> Index
+
 
 
    .. py:property:: is_all_materialized
       :type: bool
+
 
 
 
@@ -76,25 +88,33 @@ Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/6062e76d21
 
 
 
+
    .. py:method:: __len__() -> int
+
 
 
    .. py:property:: __cuda_array_interface__
 
 
+
    .. py:property:: __array_interface__
+
 
 
    .. py:method:: __dlpack_device__() -> tuple[int, int]
 
 
+
    .. py:method:: __dlpack__(stream: awkward._typing.Any = None) -> awkward._typing.Any
+
 
 
    .. py:method:: __repr__() -> str
 
 
+
    .. py:method:: _repr(indent: str, pre: str, post: str) -> str
+
 
 
    .. py:property:: form
@@ -102,32 +122,43 @@ Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/6062e76d21
 
 
 
+
    .. py:method:: __getitem__(where)
+
 
 
    .. py:method:: __setitem__(where, what)
 
 
+
    .. py:method:: to64() -> Index
+
 
 
    .. py:method:: __copy__() -> awkward._typing.Self
 
 
+
    .. py:method:: __deepcopy__(memo: dict) -> awkward._typing.Self
+
 
 
    .. py:method:: _nbytes_part() -> awkward._nplikes.shape.ShapeItem
 
 
+
    .. py:method:: to_nplike(nplike: awkward._nplikes.numpy_like.NumpyLike) -> awkward._typing.Self
+
 
 
    .. py:method:: is_equal_to(other: awkward._typing.Any, index_dtype: bool = True, numpyarray: bool = True) -> bool
 
 
+
    .. py:method:: _touch_data()
 
 
+
    .. py:method:: _touch_shape()
+
 

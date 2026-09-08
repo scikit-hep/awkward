@@ -1,9 +1,20 @@
 ak.from_dlpack
 ==============
 
-Defined in `awkward.operations.ak_from_dlpack <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_dlpack.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_dlpack.py#L15>`__.
+Defined in `awkward.operations.ak_from_dlpack <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_dlpack.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_dlpack.py#L15>`__.
 
 .. py:function:: ak.from_dlpack(array, *, prefer_cpu=True, regulararray=False, highlevel=True, behavior=None, primitive_policy='error', attrs=None)
+
+
+   Converts a DLPack-aware array into an Awkward Array.
+
+   The data is not copied: the buffer is shared through the DLPack protocol.
+
+   The resulting layout may involve the following :py:obj:`ak.contents.Content` types
+   (only):
+
+   * :py:obj:`ak.contents.NumpyArray`
+   * :py:obj:`ak.contents.RegularArray` if ``regulararray=True``.
 
    :param array: The DLPack-supporting array to convert into an
                  Awkward Array.
@@ -27,11 +38,5 @@ Defined in `awkward.operations.ak_from_dlpack <https://github.com/scikit-hep/awk
                  high-level.
    :type attrs: None or dict
 
-   Converts a DLPack-aware array into an Awkward Array.
-
-   The resulting layout may involve the following :py:obj:`ak.contents.Content` types
-   (only):
-
-   * :py:obj:`ak.contents.NumpyArray`
-   * :py:obj:`ak.contents.RegularArray` if ``regulararray=True``.
+   :returns: An :py:obj:`ak.Array` built from the given DLPack-aware array.
 

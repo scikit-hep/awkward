@@ -1,7 +1,7 @@
 ak.forms.IndexedForm
 ====================
 
-Defined in `awkward.forms.indexedform <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/indexedform.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/forms/indexedform.py#L22>`__.
+Defined in `awkward.forms.indexedform <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/forms/indexedform.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/forms/indexedform.py#L22>`__.
 
 .. py:class:: ak.forms.IndexedForm(index, content, *, parameters=None, form_key=None)
 
@@ -37,10 +37,13 @@ Defined in `awkward.forms.indexedform <https://github.com/scikit-hep/awkward/blo
    .. py:property:: index
 
 
+
    .. py:property:: content
 
 
+
    .. py:method:: copy(index=UNSET, content=UNSET, *, parameters=UNSET, form_key=UNSET)
+
 
 
    .. py:method:: simplified(index, content, *, parameters=None, form_key=None)
@@ -48,32 +51,43 @@ Defined in `awkward.forms.indexedform <https://github.com/scikit-hep/awkward/blo
 
 
 
+
    .. py:method:: __repr__()
+
 
 
    .. py:method:: _to_dict_part(verbose, toplevel)
 
 
+
    .. py:property:: type
+
 
 
    .. py:method:: _columns(path, output, list_indicator)
 
 
+
    .. py:method:: _prune_columns(is_inside_record_or_union: bool) -> awkward._typing.Self | None
+
 
 
    .. py:method:: _select_columns(match_specifier: awkward.forms.form._SpecifierMatcher) -> awkward._typing.Self
 
 
+
    .. py:method:: _column_types()
+
 
 
    .. py:method:: __setstate__(state)
 
 
+
    .. py:method:: _expected_from_buffers(getkey: collections.abc.Callable[[awkward.forms.form.Form, str], str], recursive: bool) -> awkward._typing.Iterator[tuple[str, awkward._typing.DType]]
 
 
+
    .. py:method:: _is_equal_to(other: awkward._typing.Any, all_parameters: bool, form_key: bool) -> bool
+
 

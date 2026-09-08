@@ -1,9 +1,15 @@
 ak.without_parameters
 =====================
 
-Defined in `awkward.operations.ak_without_parameters <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_without_parameters.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_without_parameters.py#L15>`__.
+Defined in `awkward.operations.ak_without_parameters <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_without_parameters.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_without_parameters.py#L15>`__.
 
 .. py:function:: ak.without_parameters(array, *, highlevel=True, behavior=None, attrs=None)
+
+
+   Returns an array with all parameters removed from every layout node.
+
+   Note that a "new array" is a lightweight shallow copy, not a duplication
+   of large data buffers.
 
    :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
    :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
@@ -16,9 +22,6 @@ Defined in `awkward.operations.ak_without_parameters <https://github.com/scikit-
                  high-level.
    :type attrs: None or dict
 
-   This function returns a new array without any parameters in its
-   :py:obj:`ak.Array.layout`, on nodes of any level of depth.
-
-   Note that a "new array" is a lightweight shallow copy, not a duplication
-   of large data buffers.
+   :returns: An array without any parameters in its
+             :py:obj:`ak.Array.layout`, on nodes of any level of depth.
 

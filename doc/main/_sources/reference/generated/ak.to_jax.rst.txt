@@ -1,9 +1,10 @@
 ak.to_jax
 =========
 
-Defined in `awkward.operations.ak_to_jax <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_to_jax.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_to_jax.py#L12>`__.
+Defined in `awkward.operations.ak_to_jax <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_jax.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_jax.py#L12>`__.
 
 .. py:function:: ak.to_jax(array)
+
 
    Converts an Awkward Array into a JAX Array, if possible.
 

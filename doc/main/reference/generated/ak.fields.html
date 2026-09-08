@@ -855,23 +855,26 @@
                   
   <section id="ak-fields">
 <h1>ak.fields<a class="headerlink" href="#ak-fields" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_fields.py">awkward.operations.ak_fields</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_fields.py#L14">line 14</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_fields.py">awkward.operations.ak_fields</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_fields.py#L14">line 14</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.fields">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.fields" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p>
-</dd>
-</dl>
-<p>Extracts record fields or tuple slot numbers from <code class="docutils literal notranslate"><span class="pre">array</span></code> (many types
-supported, including all Awkward Arrays and Records).</p>
+<dd><p>Returns a list of field names or tuple slot numbers for the outermost record.</p>
 <p>If the array contains nested records, only the outermost record is
 queried. If it contains tuples instead of records, this function outputs
 string representations of integers, such as <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;2&quot;</span></code>, etc.
 The records or tuples may be within multiple layers of nested lists.</p>
 <p>If the array contains neither tuples nor records, this returns an empty
 list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of the field names (or tuple slot numbers) of the outermost record of
+<code class="docutils literal notranslate"><span class="pre">array</span></code> (many types supported, including all Awkward Arrays and Records).</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

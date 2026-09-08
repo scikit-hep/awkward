@@ -1,9 +1,10 @@
 ak.argsort
 ==========
 
-Defined in `awkward.operations.ak_argsort <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_argsort.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_argsort.py#L21>`__.
+Defined in `awkward.operations.ak_argsort <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_argsort.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_argsort.py#L21>`__.
 
 .. py:function:: ak.argsort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None, attrs=None)
+
 
    Sorts an array along an axis, returning integer indexes.
 

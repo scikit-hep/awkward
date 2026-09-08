@@ -1327,25 +1327,25 @@ type: 3 * var * int64</pre></div></div>
 <span class="g g-Whitespace">     </span><span class="mi">42</span>         <span class="k">if</span> <span class="n">isgenerator</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">):</span>
 <span class="g g-Whitespace">     </span><span class="mi">43</span>             <span class="n">array_likes</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_from_numpy.py:55,</span> in <span class="ni">from_numpy</span><span class="nt">(array, regulararray, recordarray, highlevel, behavior, primitive_policy, attrs)</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_from_numpy.py:62,</span> in <span class="ni">from_numpy</span><span class="nt">(array, regulararray, recordarray, highlevel, behavior, primitive_policy, attrs)</span>
 <span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="nd">@high_level_function</span><span class="p">()</span>
 <span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="k">def</span><span class="w"> </span><span class="nf">from_numpy</span><span class="p">(</span>
 <span class="g g-Whitespace">     </span><span class="mi">12</span>     <span class="n">array</span><span class="p">,</span>
    <span class="p">(</span><span class="o">...</span><span class="p">)</span>     <span class="mi">19</span>     <span class="n">attrs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="p">):</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span><span class="sd">     Args:</span>
-<span class="g g-Whitespace">     </span><span class="mi">23</span><span class="sd">         array (np.ndarray): The NumPy array to convert into an Awkward Array.</span>
-<span class="sd">   (...)     52     See also #ak.to_numpy and #ak.from_cupy.</span>
-<span class="g g-Whitespace">     </span><span class="mi">53</span><span class="sd">     &quot;&quot;&quot;</span>
-<span class="g g-Whitespace">     </span><span class="mi">54</span>     <span class="k">return</span> <span class="n">wrap_layout</span><span class="p">(</span>
-<span class="ne">---&gt; </span><span class="mi">55</span>         <span class="n">from_arraylib</span><span class="p">(</span>
-<span class="g g-Whitespace">     </span><span class="mi">56</span>             <span class="n">array</span><span class="p">,</span> <span class="n">regulararray</span><span class="p">,</span> <span class="n">recordarray</span><span class="p">,</span> <span class="n">primitive_policy</span><span class="o">=</span><span class="n">primitive_policy</span>
-<span class="g g-Whitespace">     </span><span class="mi">57</span>         <span class="p">),</span>
-<span class="g g-Whitespace">     </span><span class="mi">58</span>         <span class="n">highlevel</span><span class="o">=</span><span class="n">highlevel</span><span class="p">,</span>
-<span class="g g-Whitespace">     </span><span class="mi">59</span>         <span class="n">behavior</span><span class="o">=</span><span class="n">behavior</span><span class="p">,</span>
-<span class="g g-Whitespace">     </span><span class="mi">60</span>         <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
-<span class="g g-Whitespace">     </span><span class="mi">61</span>     <span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">21</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;Converts a NumPy array into an Awkward Array.</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span><span class="sd"> </span>
+<span class="g g-Whitespace">     </span><span class="mi">23</span><span class="sd">     The data is not copied: the Awkward Array shares the NumPy array&#39;s</span>
+<span class="sd">   (...)     59         An #ak.Array built from the given NumPy array.</span>
+<span class="g g-Whitespace">     </span><span class="mi">60</span><span class="sd">     &quot;&quot;&quot;</span>
+<span class="g g-Whitespace">     </span><span class="mi">61</span>     <span class="k">return</span> <span class="n">wrap_layout</span><span class="p">(</span>
+<span class="ne">---&gt; </span><span class="mi">62</span>         <span class="n">from_arraylib</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">63</span>             <span class="n">array</span><span class="p">,</span> <span class="n">regulararray</span><span class="p">,</span> <span class="n">recordarray</span><span class="p">,</span> <span class="n">primitive_policy</span><span class="o">=</span><span class="n">primitive_policy</span>
+<span class="g g-Whitespace">     </span><span class="mi">64</span>         <span class="p">),</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span>         <span class="n">highlevel</span><span class="o">=</span><span class="n">highlevel</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">66</span>         <span class="n">behavior</span><span class="o">=</span><span class="n">behavior</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">67</span>         <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">68</span>     <span class="p">)</span>
 
 <span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_layout.py:406,</span> in <span class="ni">from_arraylib</span><span class="nt">(array, regulararray, recordarray, primitive_policy)</span>
 <span class="g g-Whitespace">    </span><span class="mi">403</span>         <span class="k">return</span> <span class="n">ByteMaskedArray</span><span class="p">(</span><span class="n">Index8</span><span class="p">(</span><span class="n">mask</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="n">valid_when</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>

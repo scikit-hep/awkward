@@ -1,9 +1,10 @@
 ak.from_feather
 ===============
 
-Defined in `awkward.operations.ak_from_feather <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_feather.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/6062e76d21b50e2ae83456bb793e00815e76af1e/src/awkward/operations/ak_from_feather.py#L13>`__.
+Defined in `awkward.operations.ak_from_feather <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_feather.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_from_feather.py#L13>`__.
 
 .. py:function:: ak.from_feather(path, *, columns=None, use_threads=True, memory_map=False, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None)
+
 
    Reads a Feather file as an Awkward Array (through pyarrow).
 
