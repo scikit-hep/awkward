@@ -1,0 +1,14 @@
+ak.str.akstr_match_substring_regex
+==================================
+
+.. py:module:: awkward.operations.str.akstr_match_substring_regex
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_match_substring_regex.match_substring_regex
+
+

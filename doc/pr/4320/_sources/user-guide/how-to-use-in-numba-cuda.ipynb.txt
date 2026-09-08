@@ -1,0 +1,377 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "1b68bccb-a98b-48c2-889a-10e5c4822eeb",
+   "metadata": {},
+   "source": [
+    "# How to use Awkward Arrays in Numba's CUDA target"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f80c4c0d-f4da-4e1e-adb8-90f8482d23e8",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "Awkward Array defines extentions to the Numba compiler so that Numba can understand Awkward Array types, and use them to generate efficient compiled code for execution on GPUs or multicore CPUs. The programming effort required is as simple as adding a function decorator to instruct Numba to compile for the GPU."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "a87d01b8",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "import awkward as ak\n",
+    "import numpy as np\n",
+    "import cupy as cp\n",
+    "\n",
+    "import numba.cuda"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "39b1877e",
+   "metadata": {},
+   "source": [
+    "Note, CUDA has an execution model unlike the traditional sequential model used for programming CPUs. In CUDA, the code you write will be executed by multiple threads at once (often hundreds or thousands). Your solution will be modeled by defining a thread hierarchy of grid, blocks, and threads."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3543b17a-20b2-4025-b389-778d6061c38c",
+   "metadata": {},
+   "source": [
+    "## Writing CUDA kernels that recognize Awkward Arrays"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "84394395",
+   "metadata": {},
+   "source": [
+    "For the most part, writing a CUDA kernel in Numba that reads Awkward Arrays is like writing a CUDA kernel in Numba generally. See the [Numba documentation](https://numba.pydata.org/numba-doc/latest/cuda/index.html) for the general case.\n",
+    "\n",
+    "At the time of writing, Numba's CUDA backend does not recognize Awkward Arrays until they are explicitly registered. (This may improve in the future.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "97f90216",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "ak.numba.register_and_check()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b5cc3b3b-8426-4def-96d5-be1314847bc4",
+   "metadata": {},
+   "source": [
+    "The `@numba.cuda.jit` decorator is used to create a CUDA kernel. A kernel function is a GPU function that is meant to be called from CPU code. To understand Awkward Array types the decorator extensions must include an `ak.numba.cuda` object that prepares the `ak.Array` arguments to be passed into Numba’s default argument marshalling logic."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "d4294ad6",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "@numba.cuda.jit(extensions=[ak.numba.cuda])\n",
+    "def path_length(out, array):\n",
+    "    tid = numba.cuda.grid(1)\n",
+    "    if tid < len(array):\n",
+    "        out[tid] = 0\n",
+    "        for i, x in enumerate(array[tid]):\n",
+    "            out[tid] += x"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "acecac23-fe0b-485c-8eaf-11c926124217",
+   "metadata": {},
+   "source": [
+    "The kernels cannot explicitly return a value. The result data must be written to an `out` array passed to the function (if computing a scalar, you will probably pass a one-element array).\n",
+    "\n",
+    "The kernels explicitly declare their thread hierarchy when called: i.e. the number of thread blocks and the number of threads per block (note that while a kernel is compiled once, it can be called multiple times with different block sizes or grid sizes). The `tid` is the absolute position of the current thread in the entire grid of blocks."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fd852e47-7c3d-48df-ba91-37e8672bab35",
+   "metadata": {},
+   "source": [
+    "## Awkward Arrays on the GPU"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7750e36a-db8f-49de-a954-54dd42772008",
+   "metadata": {},
+   "source": [
+    "It is a user responsibility to allocate and manage memory, for example, transferring device memory back to the host when a kernel finishes. The `ak.numba.cuda` extention only accepts `ak.Array` with a cuda backend. That way the array data are already on the device and do not need to be copied."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "03ab8a70",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<pre>[[-21.588745, -47.100098],\n",
+       " [-39.450127, -92.57792, 31.044289],\n",
+       " [27.049654],\n",
+       " [-11.373441],\n",
+       " [-35.659298, -71.42178],\n",
+       " [58.675243],\n",
+       " [-76.5687],\n",
+       " [],\n",
+       " [-0.25957778],\n",
+       " [74.10834, 76.03588],\n",
+       " ...,\n",
+       " [10.166055, -91.299965, 69.6425],\n",
+       " [16.963938],\n",
+       " [],\n",
+       " [-39.18325, -72.86962, -27.861113],\n",
+       " [102.69239, -15.388875],\n",
+       " [-13.863261],\n",
+       " [77.03036, -24.707098, -106.96817],\n",
+       " [-12.633714, -21.49314, 67.48587],\n",
+       " []]\n",
+       "------------------------------------\n",
+       "type: 1048576 * var * float32</pre>"
+      ],
+      "text/plain": [
+       "<Array [[-21.588745, -47.100098], ..., []] type='1048576 * var * float32'>"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "N = 2**20\n",
+    "\n",
+    "counts = ak.Array(cp.random.poisson(1.5, N).astype(np.int32))\n",
+    "content = ak.Array(cp.random.normal(0, 45.0, int(ak.sum(counts))).astype(np.float32))\n",
+    "array = ak.unflatten(content, counts)\n",
+    "array"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bc04225c",
+   "metadata": {},
+   "source": [
+    "For all but the simplest algorithms, it is important that you carefully consider how to use and access memory in order to minimize bandwidth requirements and contention.\n",
+    "\n",
+    "Awkward Array can operate on CUDA-device arrays through the `cupy` library."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "1614efda-99b1-410f-8115-dd2c7ce2c879",
+   "metadata": {},
+   "source": [
+    "## Kernel invocation"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "45b20ad9-adfb-4bc4-b227-e7bd9274cdfd",
+   "metadata": {},
+   "source": [
+    "Numba can use the CUDA array protocol (`__cuda_array_interface__`) to obtain a zero-copy reference to the CuPy array. We can launch a Numba kernel that operates upon our source `array` and target `result` as follows:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "9f19c009-70d7-4290-843a-cb51fc613961",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "blocksize = 256\n",
+    "numblocks = (N + blocksize - 1) // blocksize"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "ee2bbd0e",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([ -68.68884 , -100.98376 ,   27.049654, ...,  -54.644913,\n",
+       "         33.359016,    0.      ], dtype=float32)"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "result = cp.empty(len(array), dtype=np.float32)\n",
+    "\n",
+    "path_length[numblocks, blocksize](result, array)\n",
+    "\n",
+    "result"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c3378e84-e7e5-4e0b-b6ef-a1d6bc5b96f7",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "The calculation on the GPU is much faster than its CPU equivalent:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "f0fb71ec",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "180 µs ± 1.41 µs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%timeit\n",
+    "\n",
+    "path_length[numblocks, blocksize](result, array)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "844dc713",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "cpu_array = ak.to_backend(array, \"cpu\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "11a7ecec",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "7.5 ms ± 43.6 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%timeit\n",
+    "\n",
+    "ak.sum(cpu_array, axis=-1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a1d1a195-9b14-4c48-b8af-f4b01e120537",
+   "metadata": {},
+   "source": [
+    "But the result is the same."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "1d23590b",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [],
+   "source": [
+    "check_result = ak.sum(cpu_array, axis=-1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "1d97111c",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "True"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "ak.all(ak.isclose(check_result, ak.Array(result, backend=\"cpu\"), atol=1e-05))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.15"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

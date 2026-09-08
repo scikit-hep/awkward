@@ -1,0 +1,7 @@
+ak.jax.ensure_jax_config
+========================
+
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/88d8875106b5c3796492bcfed4b949b6eb007fab/src/awkward/jax.py>`__ on `line 62 <https://github.com/scikit-hep/awkward/blob/88d8875106b5c3796492bcfed4b949b6eb007fab/src/awkward/jax.py#L62>`__.
+
+.. py:function:: ak.jax.ensure_jax_config()
+

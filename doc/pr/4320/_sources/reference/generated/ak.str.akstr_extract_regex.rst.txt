@@ -1,0 +1,14 @@
+ak.str.akstr_extract_regex
+==========================
+
+.. py:module:: awkward.operations.str.akstr_extract_regex
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_extract_regex.extract_regex
+
+

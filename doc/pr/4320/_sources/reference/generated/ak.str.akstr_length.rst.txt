@@ -1,0 +1,14 @@
+ak.str.akstr_length
+===================
+
+.. py:module:: awkward.operations.str.akstr_length
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_length.length
+
+
