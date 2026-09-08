@@ -11,12 +11,20 @@ __all__ = ("from_tensorflow",)
 
 @high_level_function()
 def from_tensorflow(array):
-    """
+    """Converts a TensorFlow Tensor into an Awkward Array.
+
+    A tensor on a GPU is not copied: its buffer is shared through DLPack. A
+    tensor on a CPU is copied, because a NumPy array is mutable and a
+    TensorFlow tensor is not.
+
+    If `array` contains any other data types the function raises an error.
+
     Args:
         array: (TensorFlow Tensor):
             Tensor to convert into an Awkward Array.
-    Converts a TensorFlow Tensor into an Awkward Array.
-    If `array` contains any other data types the function raises an error.
+
+    Returns:
+        An #ak.Array built from the given TensorFlow Tensor.
     """
 
     # Dispatch
