@@ -140,6 +140,7 @@ filterwarnings = [
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
     "ignore:Jitify is performing a one-time only warm-up",
     "ignore:The JAX backend is deprecated:DeprecationWarning",
+    "ignore::awkward.errors.ExperimentalWarning",
 ]
 log_level = "INFO"
 testpaths = ["tests", "tests-cuda", "tests-cuda-kernels", "tests-cuda-kernels-explicit"]

@@ -109,7 +109,6 @@ Clone this repository _recursively_ to get the header-only C++ dependencies, the
 git clone --recursive https://github.com/scikit-hep/awkward.git
 cd awkward
 
-nox -s prepare
 python -m pip install -v ./awkward-cpp
 python -m pip install -e .
 ```

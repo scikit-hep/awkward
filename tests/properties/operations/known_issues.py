@@ -166,18 +166,28 @@ def has_issue_4262(a: ak.Array) -> bool:
 
 
 def has_issue_4264(a: ak.Array) -> bool:
-    """Return `True` if an option type sits under an untrimmed regular list.
+    """Return `True` if an option or a list sits under an untrimmed regular list.
 
     The caller applies the option condition (for `ak.all`, an integer
     `axis`). A `RegularArray` may validly carry content longer than
-    `size * length`, and the reducers mishandle an option node inside
-    such untrimmed content: an option directly above a list fails a
-    bare `AssertionError` in `RegularArray._reduce_next` on every
-    run, and an option above a leaf raises `IndexError` from an
-    out-of-range carry index nondeterministically (`ak.all`,
-    `ak.any`, `ak.sum`, `ak.count`, and `ak.min` are all affected).
-    With content trimmed to `size * length` the same reductions
-    succeed. Reported:
+    `size * length`, and a node reached by a reduction sizes its carry
+    from all of its own rows, ignoring which of them the caller's
+    offsets select, while the kernel fills only the entries those
+    offsets span, leaving the tail uninitialized. An option directly
+    above a list fails a bare
+    `AssertionError` in `RegularArray._reduce_next` on every run;
+    otherwise the leftover memory decides, and an out-of-range value
+    raises `IndexError` from `NumpyArray._carry` (`ak.all`, `ak.any`,
+    `ak.sum`, `ak.count`, and `ak.min` are all affected). With content
+    trimmed to `size * length` the same reductions succeed.
+
+    A list in the untrimmed content triggers it with no option node
+    present, which the issue's title and reproducers do not cover; the
+    2026-08-14 nightly drew `1 * 1 * 2 * string`, whose inner
+    `RegularArray` addresses two of its `ListOffsetArray`'s three rows.
+    Strings are lists, so they are not skipped here. A bare leaf in the
+    untrimmed content is unaffected, the reduction then reading no
+    carry. Reported:
     https://github.com/scikit-hep/awkward/issues/4264
     """
     stack = [(a.layout, False)]
@@ -185,9 +195,7 @@ def has_issue_4264(a: ak.Array) -> bool:
         node, in_untrimmed = stack.pop()
         if node.is_numpy or node.is_unknown:
             continue
-        if node.parameter("__array__") in ("string", "bytestring"):
-            continue
-        if node.is_option and in_untrimmed:
+        if (node.is_option or node.is_list) and in_untrimmed:
             return True
         if node.is_regular and node.content.length > node.size * node.length:
             in_untrimmed = True

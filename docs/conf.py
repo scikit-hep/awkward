@@ -129,11 +129,36 @@ def _ak_output_filename(self):
 
 
 from autoapi._objects import PythonObject, TopLevelPythonObject  # noqa: E402
+from autoapi._parser import Parser  # noqa: E402
 
 PythonObject.output_dir = _flat_output_dir
 PythonObject.output_filename = _ak_output_filename
 TopLevelPythonObject.output_dir = _flat_output_dir
 TopLevelPythonObject.output_filename = _ak_output_filename
+
+
+_parse_functiondef = Parser.parse_functiondef
+
+
+def _is_experimental_decorator(decorator):
+    """Return whether an astroid decorator node applies ``@experimental``."""
+    if decorator.as_string() == "experimental":
+        return True
+    return decorator.as_string() == "experimental()"
+
+
+def _parse_functiondef_with_experimental(self, node):
+    """Preserve the experimental marker for the AutoAPI templates."""
+    parsed = _parse_functiondef(self, node)
+    if node.decorators and any(
+        _is_experimental_decorator(decorator) for decorator in node.decorators.nodes
+    ):
+        for item in parsed:
+            item["is_experimental"] = True
+    return parsed
+
+
+Parser.parse_functiondef = _parse_functiondef_with_experimental
 
 autoapi_template_dir = "_autoapi_templates"
 
