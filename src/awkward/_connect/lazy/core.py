@@ -12,8 +12,6 @@ It is intentionally minimal and internal-only.  Backend-specific IR nodes
 subclass ``IRNode`` and implement ``lower()``.
 """
 
-from __future__ import annotations
-
 
 class IRNode:
     """

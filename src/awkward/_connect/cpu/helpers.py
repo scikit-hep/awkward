@@ -7,8 +7,6 @@ These are the CPU counterparts of ``awkward._connect.cuda.helpers`` /
 loops) and handle empty lists.
 """
 
-from __future__ import annotations
-
 import numpy as np
 
 import awkward as ak

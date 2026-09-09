@@ -12,8 +12,6 @@ large copy (e.g. a full-input duplication) before deciding the test's bound.
 Run on the GPU box:  python benchmarks/diagnose_alloc_by_callsite.py
 """
 
-from __future__ import annotations
-
 import collections
 import traceback
 

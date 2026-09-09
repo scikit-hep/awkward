@@ -1,0 +1,81 @@
+name: Squash Docs History
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type `gh-pages` to confirm that its history will be discarded
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 'docs-squash'
+  cancel-in-progress: false
+
+jobs:
+  squash:
+    runs-on: ubuntu-24.04
+    name: Squash gh-pages history
+    permissions:
+      contents: write # Required to force-push the squashed `gh-pages` branch.
+    environment:
+      name: docs
+    steps:
+      - name: Check confirmation
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "${CONFIRM}" != "gh-pages" ]; then
+            echo "::error::Type \`gh-pages\` in the confirmation field to run this workflow"
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Every documentation deployment commits a full copy of a rendered site,
+      # so the history of `gh-pages` grows without bound. Only its tip is ever
+      # served, so it can be replaced by a single commit holding the same tree.
+      - name: Squash gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # The parents of the tip are recorded in the commit itself, so a
+          # shallow fetch is enough to tell whether there is anything to squash
+          git fetch --quiet --depth=1 origin gh-pages
+          tip="$(git rev-parse FETCH_HEAD)"
+
+          if ! git cat-file commit "${tip}" | grep --quiet "^parent "; then
+            echo "\`gh-pages\` is already a single commit" >> "${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
+
+          squashed="$(
+            git \
+              -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit-tree "${tip}^{tree}" -m "Squash the documentation site
+
+          Replaces the history of \`gh-pages\` up to ${tip} with a single
+          commit holding the same content, to keep the repository small."
+          )"
+
+          git push --force \
+            "https://x-access-token:${GH_TOKEN}@github.com/${REPOSITORY}" \
+            "${squashed}:refs/heads/gh-pages"
+
+          {
+            echo "Squashed \`gh-pages\` into a single commit."
+            echo
+            echo "| | commit |"
+            echo "| --- | --- |"
+            echo "| before | \`${tip}\` |"
+            echo "| after | \`${squashed}\` |"
+          } >> "${GITHUB_STEP_SUMMARY}"

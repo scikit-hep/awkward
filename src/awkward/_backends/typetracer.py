@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from awkward._backends.backend import Backend, KernelKeyType
 from awkward._backends.dispatch import register_backend

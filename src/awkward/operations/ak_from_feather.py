@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import warnings
 
@@ -23,6 +22,8 @@ def from_feather(
     attrs=None,
 ):
     """Reads a Feather file as an Awkward Array (through pyarrow).
+
+    See also #ak.to_feather.
 
     Args:
         path (str or file-like object): Feather file to read as an Awkward Array,
@@ -49,9 +50,6 @@ def from_feather(
     Examples:
         >>> ak.from_feather("file_name.feather")
         <Array [[1.1, 2.2, 3.3], [], [4.4, 5.5]] type='3 * var * float64'>
-
-
-        See also #ak.to_feather.
     """
 
     return _impl(

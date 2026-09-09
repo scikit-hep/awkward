@@ -40,8 +40,6 @@ graphs are user-sized — a loop appending ``expr = expr + x`` thousands of
 times must fuse and evaluate without hitting the Python recursion limit.
 """
 
-from __future__ import annotations
-
 import math
 import operator
 from collections import defaultdict

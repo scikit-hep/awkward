@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from awkward.contents.bitmaskedarray import BitMaskedArray  # noqa: F401
 from awkward.contents.bytemaskedarray import ByteMaskedArray  # noqa: F401

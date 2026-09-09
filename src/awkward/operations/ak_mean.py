@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._attrs import attrs_of_obj
@@ -11,6 +10,7 @@ from awkward._layout import (
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     NAMED_AXIS_KEY,
@@ -209,6 +209,12 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
+    # The weighted mean forms x * weight, which overflows for integer inputs;
+    # promote integral data to float64 (no-op and zero copy for floats). The
+    # unweighted path reduces in int64 and needs no promotion.
+    if weight is not None:
+        x = promote_integral_to_float64(x)
+
     # Handle named axis
     named_axis = _get_named_axis(ctx)
     # Step 1: Normalize named axis to positional axis
@@ -227,6 +233,9 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
+            # Accumulate in float64 (NumPy's mean dtype), so integer/float32
+            # input neither overflows nor loses precision -- no promoted copy.
+            # dtype is ignored for complex, keeping a complex mean.
             sumwx = ak.operations.ak_sum._impl(
                 x,
                 axis,
@@ -235,6 +244,7 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 highlevel=True,
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
+                dtype=np.float64,
             )
         else:
             sumw = ak.operations.ak_sum._impl(
@@ -245,6 +255,7 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 highlevel=True,
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
+                dtype=np.float64,
             )
             sumwx = ak.operations.ak_sum._impl(
                 x * weight,
@@ -254,6 +265,7 @@ def _impl(x, weight, axis, keepdims, mask_identity, highlevel, behavior, attrs):
                 highlevel=True,
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
+                dtype=np.float64,
             )
 
         out = sumwx / sumw

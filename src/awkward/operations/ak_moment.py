@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._attrs import attrs_of_obj
@@ -9,6 +8,7 @@ from awkward._layout import (
     HighLevelContext,
     ensure_same_backend,
     maybe_highlevel_to_lowlevel,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     AxisName,
@@ -124,6 +124,9 @@ def _impl(
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
+    # sum-of-squares is float64-only, so complex falls back to the sum(x**n) path.
+    is_complex = "complex" in str(ak.type(x))
+
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
@@ -135,18 +138,48 @@ def _impl(
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            sumwxn = ak.operations.ak_sum._impl(
-                x**n,
-                axis,
-                keepdims,
-                mask_identity,
-                highlevel=True,
-                behavior=ctx.behavior,
-                attrs=ctx.attrs,
-            )
+            if is_complex:
+                # The sum-of-squares/powers reducers are float64-only, so complex
+                # input uses sum(x**n) (matching NumPy's complex moment).
+                sumwxn = ak.operations.ak_sum._impl(
+                    x**n,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            elif n == 2:
+                # E[x**2]: sum of squares accumulated in float64 directly from
+                # the input -- no x**2 buffer, no integer/float32 overflow.
+                sumwxn = ak.operations.ak_sumofsquares._impl(
+                    x,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
+            else:
+                # Other powers: sum(x**n) accumulated in float64 directly from
+                # the input -- no x**n buffer, no integer/float32 overflow.
+                sumwxn = ak.operations.ak_sumofpowers._impl(
+                    x,
+                    n,
+                    axis,
+                    keepdims,
+                    mask_identity,
+                    highlevel=True,
+                    behavior=ctx.behavior,
+                    attrs=ctx.attrs,
+                )
         else:
+            # Promote so (x**n) * weight does not overflow for integer input.
+            xp = promote_integral_to_float64(x)
             sumw = ak.operations.ak_sum._impl(
-                x * 0 + weight,
+                xp * 0 + weight,
                 axis,
                 keepdims,
                 mask_identity,
@@ -155,7 +188,7 @@ def _impl(
                 attrs=ctx.attrs,
             )
             sumwxn = ak.operations.ak_sum._impl(
-                (x**n) * weight,
+                (xp**n) * weight,
                 axis,
                 keepdims,
                 mask_identity,
