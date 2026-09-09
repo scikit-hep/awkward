@@ -20,7 +20,7 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
-    """Returns True where an element is None at a given axis depth, False otherwise.
+    """Returns an array with True where an element is None at a given axis depth, False otherwise.
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
