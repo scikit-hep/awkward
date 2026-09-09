@@ -1,7 +1,7 @@
 ak.isclose
 ==========
 
-Defined in `awkward.operations.ak_isclose <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_isclose.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_isclose.py#L18>`__.
+Defined in `awkward.operations.ak_isclose <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_isclose.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_isclose.py#L18>`__.
 
 .. py:function:: ak.isclose(a, b, rtol=1e-05, atol=1e-08, equal_nan=False, *, highlevel=True, behavior=None, attrs=None)
 

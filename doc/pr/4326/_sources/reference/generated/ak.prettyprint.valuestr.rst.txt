@@ -1,7 +1,7 @@
 ak.prettyprint.valuestr
 =======================
 
-Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/prettyprint.py>`__ on `line 360 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/prettyprint.py#L360>`__.
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/prettyprint.py>`__ on `line 360 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/prettyprint.py#L360>`__.
 
 .. py:function:: ak.prettyprint.valuestr(data: awkward._typing.Any, limit_rows: int, limit_cols: int, formatter: Formatter | None = None) -> str
 

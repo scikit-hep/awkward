@@ -1,7 +1,7 @@
 ak.from_json
 ============
 
-Defined in `awkward.operations.ak_from_json <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_from_json.py>`__ on `line 28 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_from_json.py#L28>`__.
+Defined in `awkward.operations.ak_from_json <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_from_json.py>`__ on `line 28 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_from_json.py#L28>`__.
 
 .. py:function:: ak.from_json(source, *, line_delimited=False, schema=None, nan_string=None, posinf_string=None, neginf_string=None, complex_record_fields=None, buffersize=65536, initial=1024, resize=8, highlevel=True, behavior=None, attrs=None)
 

@@ -1,7 +1,7 @@
 ak.nan_to_none
 ==============
 
-Defined in `awkward.operations.ak_nan_to_none <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_nan_to_none.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_nan_to_none.py#L16>`__.
+Defined in `awkward.operations.ak_nan_to_none <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_nan_to_none.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_nan_to_none.py#L16>`__.
 
 .. py:function:: ak.nan_to_none(array, *, highlevel: bool = True, behavior: awkward._typing.Mapping | None = None, attrs: awkward._typing.Mapping | None = None)
 

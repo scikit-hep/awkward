@@ -1,7 +1,7 @@
 ak.is_tuple
 ===========
 
-Defined in `awkward.operations.ak_is_tuple <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_is_tuple.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_is_tuple.py#L11>`__.
+Defined in `awkward.operations.ak_is_tuple <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_is_tuple.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_is_tuple.py#L11>`__.
 
 .. py:function:: ak.is_tuple(array)
 

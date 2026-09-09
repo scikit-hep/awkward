@@ -1,7 +1,7 @@
 ak.str.split_pattern
 ====================
 
-Defined in `awkward.operations.str.akstr_split_pattern <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/str/akstr_split_pattern.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/str/akstr_split_pattern.py#L12>`__.
+Defined in `awkward.operations.str.akstr_split_pattern <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/str/akstr_split_pattern.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/str/akstr_split_pattern.py#L12>`__.
 
 .. py:function:: ak.str.split_pattern(array, pattern, *, max_splits=None, reverse=False, highlevel=True, behavior=None, attrs=None)
 

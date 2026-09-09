@@ -1,7 +1,7 @@
 ak.to_parquet_row_groups
 ========================
 
-Defined in `awkward.operations.ak_to_parquet_row_groups <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_to_parquet_row_groups.py>`__ on `line 8 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_to_parquet_row_groups.py#L8>`__.
+Defined in `awkward.operations.ak_to_parquet_row_groups <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_to_parquet_row_groups.py>`__ on `line 8 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_to_parquet_row_groups.py#L8>`__.
 
 .. py:function:: ak.to_parquet_row_groups(iterator, destination, *, list_to32=False, string_to32=True, bytestring_to32=True, emptyarray_to=None, categorical_as_dictionary=False, extensionarray=True, count_nulls=True, compression='zstd', compression_level=None, row_group_size=None, data_page_size=None, parquet_flavor=None, parquet_version='2.6', parquet_page_version='1.0', parquet_metadata_statistics=True, parquet_dictionary_encoding=False, parquet_byte_stream_split=False, parquet_coerce_timestamps=None, parquet_old_int96_timestamps=None, parquet_compliant_nested=False, parquet_extra_options=None, storage_options=None)
 

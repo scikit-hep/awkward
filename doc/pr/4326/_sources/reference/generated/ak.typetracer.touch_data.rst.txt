@@ -1,7 +1,7 @@
 ak.typetracer.touch_data
 ========================
 
-Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/typetracer.py>`__ on `line 138 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/typetracer.py#L138>`__.
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/typetracer.py>`__ on `line 138 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/typetracer.py#L138>`__.
 
 .. py:function:: ak.typetracer.touch_data(array: awkward._typing.Any, *, highlevel: bool = True, behavior: collections.abc.Mapping | None = None, attrs: collections.abc.Mapping[str, awkward._typing.Any] | None = None) -> awkward.highlevel.Array | awkward.highlevel.Record
 

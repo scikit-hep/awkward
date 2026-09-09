@@ -1,7 +1,7 @@
 ak.str.ltrim
 ============
 
-Defined in `awkward.operations.str.akstr_ltrim <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/str/akstr_ltrim.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/str/akstr_ltrim.py#L12>`__.
+Defined in `awkward.operations.str.akstr_ltrim <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/str/akstr_ltrim.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/str/akstr_ltrim.py#L12>`__.
 
 .. py:function:: ak.str.ltrim(array, characters, *, highlevel=True, behavior=None, attrs=None)
 

@@ -1,7 +1,7 @@
 ak.transform
 ============
 
-Defined in `awkward.operations.ak_transform <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_transform.py>`__ on `line 26 <https://github.com/scikit-hep/awkward/blob/a07231e39d771226d13678f277eb4bc4b86596b1/src/awkward/operations/ak_transform.py#L26>`__.
+Defined in `awkward.operations.ak_transform <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_transform.py>`__ on `line 26 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_transform.py#L26>`__.
 
 .. py:function:: ak.transform(transformation, array, *more_arrays, depth_context=None, lateral_context=None, allow_records=True, broadcast_parameters_rule='intersect', left_broadcast=True, right_broadcast=True, numpy_to_regular=False, regular_to_jagged=False, return_value='simplified', expect_return_value=False, highlevel=True, behavior=None, attrs=None)
 
