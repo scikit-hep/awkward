@@ -10,8 +10,6 @@ string-array semantics, RegularArray and parameter preservation, lazy
 and silent garbage from ``transform_lists`` on ragged input.
 """
 
-from __future__ import annotations
-
 import numpy as np
 import pytest
 

@@ -7,8 +7,6 @@ which is the low-level compute/lower protocol used by the backend-specific
 ``ir_nodes`` modules.  The two systems are independent.
 """
 
-from __future__ import annotations
-
 import itertools
 from enum import Enum
 

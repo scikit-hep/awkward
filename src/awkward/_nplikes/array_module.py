@@ -747,9 +747,12 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
-        return self._module.sum(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        return self._module.sum(
+            x, axis=axis, keepdims=keepdims, out=maybe_out, dtype=dtype
+        )
 
     def max(
         self,

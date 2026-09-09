@@ -148,9 +148,12 @@ class Cupy(ArrayModuleNumpyLike):
         axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.sum(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        out = self._module.sum(
+            x, axis=axis, keepdims=keepdims, out=maybe_out, dtype=dtype
+        )
         if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:

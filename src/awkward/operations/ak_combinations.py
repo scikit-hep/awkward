@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -36,6 +35,11 @@ def combinations(
     If the normal Cartesian product is thought of as an `n` dimensional tensor,
     these represent the "upper triangle" of sets without repetition. If
     `replacement=True`, the diagonal of this "upper triangle" is included.
+
+    To get list index positions in the tuples/records, rather than data from
+    the original `array`, use #ak.argcombinations instead of #ak.combinations.
+    The #ak.argcombinations form can be particularly useful as nested indexing
+    in #ak.Array.__getitem__.
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -191,11 +195,6 @@ def combinations(
 
         but it is frequently needed for data analysis, and the logic of which
         indexes to `keep` (above) gets increasingly complicated for large `n`.
-
-        To get list index positions in the tuples/records, rather than data from
-        the original `array`, use #ak.argcombinations instead of #ak.combinations.
-        The #ak.argcombinations form can be particularly useful as nested indexing
-        in #ak.Array.__getitem__.
     """
     # Dispatch
     yield (array,)
