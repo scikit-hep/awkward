@@ -7,10 +7,12 @@ import pytest
 
 import awkward as ak
 
+INDEX = {np.int32: ak.index.Index32, np.int64: ak.index.Index64}
 
-def option(index, content, parameters=None):
+
+def option(index, content, parameters=None, dtype=np.int64):
     return ak.contents.IndexedOptionArray(
-        ak.index.Index64(np.asarray(index, dtype=np.int64)),
+        INDEX[dtype](np.asarray(index, dtype=dtype)),
         ak.contents.NumpyArray(np.asarray(content, dtype=np.float64)),
         parameters=parameters,
     )
@@ -46,6 +48,12 @@ CASES = {
     ),
     "permuted-partial-index": lambda: [
         ak.Array(option([0, -1, 1, 2, -1, 3], [1.0, 2.0, 3.0, 4.0])),
+        ak.Array(
+            option([4, -1, 2, 0, -1, 6], [10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0])
+        ),
+    ],
+    "index32-with-index64": lambda: [
+        ak.Array(option([0, -1, 1, 2, -1, 3], [1.0, 2.0, 3.0, 4.0], dtype=np.int32)),
         ak.Array(
             option([4, -1, 2, 0, -1, 6], [10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0])
         ),
