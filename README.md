@@ -253,6 +253,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/X0708a"><img src="https://avatars.githubusercontent.com/u/148707922?v=4?s=100" width="100px;" alt="aashirvad"/><br /><sub><b>aashirvad</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=X0708a" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/albert-physics"><img src="https://avatars.githubusercontent.com/u/166818822?v=4?s=100" width="100px;" alt="albert-physics"/><br /><sub><b>albert-physics</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=albert-physics" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/5U5H4NTH006"><img src="https://avatars.githubusercontent.com/u/85297765?v=4?s=100" width="100px;" alt="Sushanth Mantrala"/><br /><sub><b>Sushanth Mantrala</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=5U5H4NTH006" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/kmohrman"><img src="https://avatars.githubusercontent.com/u/36145025?v=4?s=100" width="100px;" alt="kmohrman"/><br /><sub><b>kmohrman</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=kmohrman" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
