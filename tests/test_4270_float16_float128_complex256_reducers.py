@@ -220,3 +220,32 @@ def test_complex256_sort_raises_like_complex128():
     arr = ak.values_astype(ak.Array([[1 + 1j, 2 + 0j], [3 - 1j]]), np.complex256)
     with pytest.raises(TypeError, match="not supported"):
         ak.sort(arr, axis=1)
+
+
+def _categorical_float(dtype):
+    # A categorical array keeps its unique values in the content and indexes into
+    # them; ak.is_valid / ak.validity_error check that the content is unique,
+    # which dispatches _is_unique -> _unique -> awkward_sort by the value dtype.
+    # Before this fix that raised KeyError for float16/float128 content.
+    content = ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0], dtype=dtype))
+    index = ak.index.Index64(np.array([0, 1, 1, 2, 0], dtype=np.int64))
+    return ak.Array(
+        ak.contents.IndexedArray(
+            index, content, parameters={"__array__": "categorical"}
+        )
+    )
+
+
+def test_float16_categorical_is_valid():
+    arr = _categorical_float(np.float16)
+    assert ak.to_list(arr) == [1.0, 2.0, 2.0, 3.0, 1.0]
+    assert ak.is_valid(arr)
+    assert ak.validity_error(arr) == ""
+
+
+@pytest.mark.skipif(not hasattr(np, "float128"), reason="no float128 on this platform")
+def test_float128_categorical_is_valid():
+    # float128 content reaches _unique through the float64 cast (see _unique).
+    arr = _categorical_float(np.float128)
+    assert ak.is_valid(arr)
+    assert ak.validity_error(arr) == ""
