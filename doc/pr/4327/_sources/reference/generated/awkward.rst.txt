@@ -1,0 +1,198 @@
+awkward
+=======
+
+.. py:module:: awkward
+
+
+Submodules
+----------
+
+.. autoapisummary::
+
+   awkward.behaviors
+   awkward.builder
+   awkward.contents
+   awkward.cppyy
+   awkward.errors
+   awkward.forms
+   awkward.forth
+   awkward.highlevel
+   awkward.index
+   awkward.jax
+   awkward.numba
+   awkward.operations
+   awkward.prettyprint
+   awkward.record
+   awkward.types
+   awkward.typetracer
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   awkward.behavior
+   awkward.__all__
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   awkward.Array
+   awkward.ArrayBuilder
+   awkward.Record
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.mixin_class
+   awkward.mixin_class_method
+   awkward.all
+   awkward.almost_equal
+   awkward.angle
+   awkward.any
+   awkward.argcartesian
+   awkward.argcombinations
+   awkward.argmax
+   awkward.nanargmax
+   awkward.argmin
+   awkward.nanargmin
+   awkward.argsort
+   awkward.array_equal
+   awkward.backend
+   awkward.broadcast_arrays
+   awkward.broadcast_fields
+   awkward.cartesian
+   awkward.categories
+   awkward.combinations
+   awkward.concatenate
+   awkward.copy
+   awkward.corr
+   awkward.count
+   awkward.count_nonzero
+   awkward.covar
+   awkward.drop_none
+   awkward.enforce_type
+   awkward.fields
+   awkward.fill_none
+   awkward.firsts
+   awkward.flatten
+   awkward.from_arrow
+   awkward.from_arrow_schema
+   awkward.from_avro_file
+   awkward.from_buffers
+   awkward.from_categorical
+   awkward.from_cupy
+   awkward.from_dlpack
+   awkward.from_feather
+   awkward.from_iter
+   awkward.from_jax
+   awkward.from_json
+   awkward.from_numpy
+   awkward.from_parquet
+   awkward.from_raggedtensor
+   awkward.from_rdataframe
+   awkward.from_regular
+   awkward.from_safetensors
+   awkward.from_tensorflow
+   awkward.from_torch
+   awkward.full_like
+   awkward.imag
+   awkward.is_categorical
+   awkward.is_none
+   awkward.is_tuple
+   awkward.is_valid
+   awkward.isclose
+   awkward.linear_fit
+   awkward.local_index
+   awkward.mask
+   awkward.materialize
+   awkward.max
+   awkward.nanmax
+   awkward.mean
+   awkward.nanmean
+   awkward.merge_option_of_records
+   awkward.merge_union_of_records
+   awkward.metadata_from_parquet
+   awkward.min
+   awkward.nanmin
+   awkward.moment
+   awkward.nan_to_none
+   awkward.nan_to_num
+   awkward.num
+   awkward.ones_like
+   awkward.pad_none
+   awkward.parameters
+   awkward.nanprod
+   awkward.prod
+   awkward.ptp
+   awkward.ravel
+   awkward.real
+   awkward.round
+   awkward.run_lengths
+   awkward.singletons
+   awkward.softmax
+   awkward.sort
+   awkward.nanstd
+   awkward.std
+   awkward.strings_astype
+   awkward.nansum
+   awkward.sum
+   awkward.to_arrow
+   awkward.to_arrow_table
+   awkward.to_backend
+   awkward.to_buffers
+   awkward.to_cudf
+   awkward.to_cupy
+   awkward.to_dataframe
+   awkward.to_feather
+   awkward.to_jax
+   awkward.to_json
+   awkward.to_layout
+   awkward.to_list
+   awkward.to_numpy
+   awkward.to_packed
+   awkward.to_parquet
+   awkward.to_parquet_dataset
+   awkward.to_parquet_row_groups
+   awkward.to_raggedtensor
+   awkward.to_rdataframe
+   awkward.to_regular
+   awkward.to_safetensors
+   awkward.to_tensorflow
+   awkward.to_torch
+   awkward.transform
+   awkward.type
+   awkward.unflatten
+   awkward.unzip
+   awkward.validity_error
+   awkward.values_astype
+   awkward.nanvar
+   awkward.var
+   awkward.where
+   awkward.with_field
+   awkward.with_name
+   awkward.with_named_axis
+   awkward.with_parameter
+   awkward.without_field
+   awkward.without_named_axis
+   awkward.without_parameters
+   awkward.zeros_like
+   awkward.zip
+   awkward.zip_no_broadcast
+
+
+Package Contents
+----------------
+
+.. py:data:: behavior
+   :type:  dict
+
+.. py:data:: __all__
+
