@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.9.1"
+version = "2.13.0"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -42,7 +42,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==53",
+    "awkward_cpp==56",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.21.3",
     "packaging",
@@ -58,7 +58,6 @@ init = "awkward.numba:_register"
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scikit-hep/awkward-1.0/issues"
-"Chat" = "https://gitter.im/Scikit-HEP/awkward-array"
 "Discussions" = "https://github.com/scikit-hep/awkward-1.0/discussions"
 "Documentation" = "https://awkward-array.org"
 "Homepage" = "https://github.com/scikit-hep/awkward-1.0"
@@ -89,6 +88,7 @@ include = [
     "/CONTRIBUTING.md",
     "/README.md",
     "/juliapkg.json",
+    "/kernel-specification.yml",
     "/requirements-test-full.txt",
     "/requirements-test-minimal.txt"
 ]
@@ -140,6 +140,7 @@ filterwarnings = [
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
     "ignore:Jitify is performing a one-time only warm-up",
     "ignore:The JAX backend is deprecated:DeprecationWarning",
+    "ignore::awkward.errors.ExperimentalWarning",
 ]
 log_level = "INFO"
 testpaths = ["tests", "tests-cuda", "tests-cuda-kernels", "tests-cuda-kernels-explicit"]
@@ -232,7 +233,7 @@ disable = [
 
 [tool.mypy]
 files = ["src/awkward/**/*.py"]
-python_version = "3.11"
+python_version = "3.12"
 ignore_errors = true
 enable_error_code = ["ignore-without-code", "truthy-bool"]
 
@@ -304,7 +305,6 @@ ignore = [
 typing-modules = ["awkward._typing"]
 external = []
 mccabe.max-complexity = 100
-isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._backends.backend import Backend, KernelKeyType
@@ -64,6 +63,9 @@ class CupyBackend(Backend):
         return kernel_name in (
             # core reducers
             "awkward_reduce_sum",
+            "awkward_reduce_sumofsquares",
+            "awkward_reduce_centered_sumofsquares",
+            "awkward_reduce_sumofpowers",
             "awkward_reduce_sum_bool",
             "awkward_reduce_sum_bool_complex",
             "awkward_reduce_sum_bool_complex64_64",  # alias → _bool_complex
@@ -85,6 +87,9 @@ class CupyBackend(Backend):
             "awkward_reduce_argmin_complex",
             "awkward_reduce_count_64",
             "awkward_reduce_countnonzero",
+            "awkward_NumpyArray_reduce_adjust_starts_shifts_64",
+            "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64",
+            "awkward_localindex",
             "awkward_IndexedArray_overlay_mask",
             "awkward_IndexedArray_reduce_next_64",
             "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
@@ -109,6 +114,7 @@ class CupyBackend(Backend):
             "awkward_index_rpad_and_clip_axis1",
             # sort
             "awkward_sort",
+            "awkward_argsort",
             # other kernels
             "awkward_RegularArray_getitem_carry",
             "awkward_NumpyArray_subrange_equal",
@@ -120,6 +126,7 @@ class CupyBackend(Backend):
             "awkward_ListOffsetArray_rpad_length_axis1",
             "awkward_ListOffsetArray_rpad_and_clip_axis1",
             "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+            "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
             "awkward_ListOffsetArray_local_preparenext_64",
             "awkward_ListArray_rpad_and_clip_length_axis1",
             "awkward_ListArray_min_range",
@@ -132,8 +139,13 @@ class CupyBackend(Backend):
             "awkward_IndexedArray_reduce_next_fix_offsets_64",
             "awkward_IndexedArray_ranges_next_64",
             "awkward_IndexedArray_ranges_carry_next_64",
+            "awkward_IndexedArray_flatten_nextcarry",
+            "awkward_IndexedArray_numnull",
             "awkward_IndexedArray_numnull_unique_64",
             "awkward_IndexedArray_numnull_parents",
+            "awkward_ListArray_getitem_jagged_carrylen",
+            "awkward_ListArray_getitem_jagged_descend",
+            "awkward_ListArray_getitem_jagged_numvalid",
             "awkward_IndexedArray_getitem_nextcarry_outindex",
             "awkward_IndexedArray_getitem_nextcarry",
             "awkward_IndexedArray_flatten_none2empty",
@@ -146,6 +158,24 @@ class CupyBackend(Backend):
             "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
             "awkward_BitMaskedArray_to_IndexedOptionArray",
             "awkward_BitMaskedArray_to_ByteMaskedArray",
+            "awkward_NumpyArray_rearrange_shifted",
+            "awkward_ByteMaskedArray_reduce_next_64",
+            "awkward_NumpyArray_reduce_adjust_starts_64",
+            "awkward_RegularArray_reduce_nonlocal_preparenext_64",
+            "awkward_IndexedArray_fill",
+            "awkward_IndexedArray_fill_count",
+            "awkward_IndexedArray_index_of_nulls",
+            "awkward_IndexedArray_local_preparenext_64",
+            "awkward_UnionArray_fillindex",
+            "awkward_UnionArray_fillindex_count",
+            "awkward_UnionArray_fillna",
+            "awkward_UnionArray_filltags",
+            "awkward_UnionArray_filltags_const",
+            "awkward_UnionArray_project",
+            "awkward_UnionArray_regular_index",
+            "awkward_UnionArray_regular_index_getsize",
+            "awkward_UnionArray_simplify",
+            "awkward_UnionArray_validity",
         )
 
     # ---------------------------------------------------------
@@ -156,7 +186,11 @@ class CupyBackend(Backend):
 
         return {
             "awkward_sort": cuda_compute.segmented_sort,
+            "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
+            "awkward_reduce_sumofsquares": cuda_compute.awkward_reduce_sumofsquares,
+            "awkward_reduce_centered_sumofsquares": cuda_compute.awkward_reduce_centered_sumofsquares,
+            "awkward_reduce_sumofpowers": cuda_compute.awkward_reduce_sumofpowers,
             "awkward_reduce_sum_bool": cuda_compute.awkward_reduce_sum_bool,
             "awkward_reduce_sum_int32_bool_64": cuda_compute.awkward_reduce_sum_int32_bool_64,
             "awkward_reduce_sum_int64_bool_64": cuda_compute.awkward_reduce_sum_int64_bool_64,
@@ -179,6 +213,9 @@ class CupyBackend(Backend):
             "awkward_reduce_count_64": cuda_compute.awkward_reduce_count_64,
             "awkward_reduce_countnonzero": cuda_compute.awkward_reduce_countnonzero,
             "awkward_reduce_countnonzero_complex": cuda_compute.awkward_reduce_countnonzero_complex,
+            "awkward_NumpyArray_reduce_adjust_starts_shifts_64": cuda_compute.awkward_NumpyArray_reduce_adjust_starts_shifts_64,
+            "awkward_NumpyArray_reduce_mask_ByteMaskedArray_64": cuda_compute.awkward_NumpyArray_reduce_mask_ByteMaskedArray_64,
+            "awkward_localindex": cuda_compute.awkward_localindex,
             "awkward_missing_repeat": cuda_compute.awkward_missing_repeat,
             "awkward_index_rpad_and_clip_axis0": cuda_compute.awkward_index_rpad_and_clip_axis0,
             "awkward_index_rpad_and_clip_axis1": cuda_compute.awkward_index_rpad_and_clip_axis1,
@@ -210,6 +247,7 @@ class CupyBackend(Backend):
             "awkward_ListOffsetArray_rpad_length_axis1": cuda_compute.awkward_ListOffsetArray_rpad_length_axis1,
             "awkward_ListOffsetArray_rpad_and_clip_axis1": cuda_compute.awkward_ListOffsetArray_rpad_and_clip_axis1,
             "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64,
+            "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_preparenext_64,
             "awkward_ListOffsetArray_local_preparenext_64": cuda_compute.awkward_ListOffsetArray_local_preparenext_64,
             "awkward_ListArray_rpad_and_clip_length_axis1": cuda_compute.awkward_ListArray_rpad_and_clip_length_axis1,
             "awkward_ListArray_min_range": cuda_compute.awkward_ListArray_min_range,
@@ -222,8 +260,13 @@ class CupyBackend(Backend):
             "awkward_IndexedArray_reduce_next_fix_offsets_64": cuda_compute.awkward_IndexedArray_reduce_next_fix_offsets_64,
             "awkward_IndexedArray_ranges_next_64": cuda_compute.awkward_IndexedArray_ranges_next_64,
             "awkward_IndexedArray_ranges_carry_next_64": cuda_compute.awkward_IndexedArray_ranges_carry_next_64,
+            "awkward_IndexedArray_flatten_nextcarry": cuda_compute.awkward_IndexedArray_flatten_nextcarry,
+            "awkward_IndexedArray_numnull": cuda_compute.awkward_IndexedArray_numnull,
             "awkward_IndexedArray_numnull_unique_64": cuda_compute.awkward_IndexedArray_numnull_unique_64,
             "awkward_IndexedArray_numnull_parents": cuda_compute.awkward_IndexedArray_numnull_parents,
+            "awkward_ListArray_getitem_jagged_carrylen": cuda_compute.awkward_ListArray_getitem_jagged_carrylen,
+            "awkward_ListArray_getitem_jagged_descend": cuda_compute.awkward_ListArray_getitem_jagged_descend,
+            "awkward_ListArray_getitem_jagged_numvalid": cuda_compute.awkward_ListArray_getitem_jagged_numvalid,
             "awkward_IndexedArray_getitem_nextcarry_outindex": cuda_compute.awkward_IndexedArray_getitem_nextcarry_outindex,
             "awkward_IndexedArray_getitem_nextcarry": cuda_compute.awkward_IndexedArray_getitem_nextcarry,
             "awkward_IndexedArray_flatten_none2empty": cuda_compute.awkward_IndexedArray_flatten_none2empty,
@@ -236,6 +279,24 @@ class CupyBackend(Backend):
             "awkward_ByteMaskedArray_getitem_nextcarry_outindex": cuda_compute.awkward_ByteMaskedArray_getitem_nextcarry_outindex,
             "awkward_BitMaskedArray_to_IndexedOptionArray": cuda_compute.awkward_BitMaskedArray_to_IndexedOptionArray,
             "awkward_BitMaskedArray_to_ByteMaskedArray": cuda_compute.awkward_BitMaskedArray_to_ByteMaskedArray,
+            "awkward_NumpyArray_rearrange_shifted": cuda_compute.awkward_NumpyArray_rearrange_shifted,
+            "awkward_ByteMaskedArray_reduce_next_64": cuda_compute.awkward_ByteMaskedArray_reduce_next_64,
+            "awkward_NumpyArray_reduce_adjust_starts_64": cuda_compute.awkward_NumpyArray_reduce_adjust_starts_64,
+            "awkward_RegularArray_reduce_nonlocal_preparenext_64": cuda_compute.awkward_RegularArray_reduce_nonlocal_preparenext_64,
+            "awkward_IndexedArray_fill": cuda_compute.awkward_IndexedArray_fill,
+            "awkward_IndexedArray_fill_count": cuda_compute.awkward_IndexedArray_fill_count,
+            "awkward_IndexedArray_index_of_nulls": cuda_compute.awkward_IndexedArray_index_of_nulls,
+            "awkward_IndexedArray_local_preparenext_64": cuda_compute.awkward_IndexedArray_local_preparenext_64,
+            "awkward_UnionArray_fillindex": cuda_compute.awkward_UnionArray_fillindex,
+            "awkward_UnionArray_fillindex_count": cuda_compute.awkward_UnionArray_fillindex_count,
+            "awkward_UnionArray_fillna": cuda_compute.awkward_UnionArray_fillna,
+            "awkward_UnionArray_filltags": cuda_compute.awkward_UnionArray_filltags,
+            "awkward_UnionArray_filltags_const": cuda_compute.awkward_UnionArray_filltags_const,
+            "awkward_UnionArray_project": cuda_compute.awkward_UnionArray_project,
+            "awkward_UnionArray_regular_index": cuda_compute.awkward_UnionArray_regular_index,
+            "awkward_UnionArray_regular_index_getsize": cuda_compute.awkward_UnionArray_regular_index_getsize,
+            "awkward_UnionArray_simplify": cuda_compute.awkward_UnionArray_simplify,
+            "awkward_UnionArray_validity": cuda_compute.awkward_UnionArray_validity,
         }.get(kernel_name)
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:

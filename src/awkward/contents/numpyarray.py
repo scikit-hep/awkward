@@ -611,6 +611,9 @@ class NumpyArray(NumpyMeta, Content):
         return self._backend.nplike.is_c_contiguous(self._data)
 
     def _subranges_equal(self, starts, stops, length, sorted=True):
+        if not self.is_contiguous:
+            return self.to_contiguous()._subranges_equal(starts, stops, length, sorted)
+
         is_equal = self._backend.nplike.zeros(1, dtype=np.bool_)
 
         assert (
@@ -626,9 +629,7 @@ class NumpyArray(NumpyMeta, Content):
                     stops.dtype.type,
                     np.bool_,
                 ](
-                    self._backend.nplike.astype(
-                        self._data, dtype=self.dtype, copy=True
-                    ),
+                    self._data,
                     starts.data,
                     stops.data,
                     starts.length,
@@ -644,9 +645,7 @@ class NumpyArray(NumpyMeta, Content):
                     stops.dtype.type,
                     np.bool_,
                 ](
-                    self._backend.nplike.astype(
-                        self._data, dtype=self.dtype, copy=True
-                    ),
+                    self._data,
                     starts.data,
                     stops.data,
                     starts.length,
@@ -1121,7 +1120,7 @@ class NumpyArray(NumpyMeta, Content):
                 return f"at {path} ({type(self)!r}): shape[{i}] < 0"
         for i, stride in enumerate(self.strides):
             if stride is not unknown_length and stride % self.dtype.itemsize != 0:
-                return f"at {path} ({type(self)!r}): shape[{i}] % itemsize != 0"
+                return f"at {path} ({type(self)!r}): strides[{i}] % itemsize != 0"
         return ""
 
     def _pad_none(self, target, axis, depth, clip):
@@ -1135,7 +1134,7 @@ class NumpyArray(NumpyMeta, Content):
         if posaxis is not None and posaxis + 1 != depth:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
         if not clip:
-            if target < self.length:
+            if self.length is unknown_length or target < self.length:
                 return self
             else:
                 return self._pad_none(target, axis, depth, clip=True)

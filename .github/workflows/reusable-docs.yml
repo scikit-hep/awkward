@@ -1,11 +1,6 @@
 name: Docs
 on:
   workflow_call:
-    secrets:
-      AWS_ACCOUNT_ID:
-        required: false
-      AWS_DEPLOY_ROLE:
-        required: false
 
   workflow_dispatch:
 
@@ -26,9 +21,11 @@ env:
 jobs:
   awkward-cpp-wasm:
     name: Build C++ WASM
+    permissions:
+      contents: read # This job builds code from the pull request.
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         submodules: true
         persist-credentials: false
@@ -36,7 +33,7 @@ jobs:
     - name: Generate build files
       run: pipx run nox -s prepare -- --headers --signatures --tests
 
-    - uses: pypa/cibuildwheel@294735312765b09d24a2fbec22660ce817587d55 # v4.1.0
+    - uses: pypa/cibuildwheel@4726cd35bb13f7bde50cf2761f2499ac7b3aa32c # v4.1.1
       with:
         package-dir: awkward-cpp
       env:
@@ -55,12 +52,14 @@ jobs:
   awkward-cpp-x86-64:
     runs-on: ubuntu-24.04
     name: Build C++ x86
+    permissions:
+      contents: read # This job builds code from the pull request.
     defaults:
       run:
         # Ensure conda env is activated
         shell: "bash -l {0}"
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         submodules: true
         persist-credentials: false
@@ -77,7 +76,7 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
+      uses: mamba-org/setup-micromamba@ce51e99f4bb8a82ab7158c4dc59ef4634c59c4f9 # v3.1.0
       with:
         # Cache invalidates daily by default
         cache-environment: true
@@ -93,7 +92,7 @@ jobs:
 
     - name: Cache wheel
       id: cache-awkward-cpp-x86-64-wheel
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # zizmor: ignore[cache-poisoning] Reuses a docs-only wheel cache to avoid rebuilding unchanged awkward-cpp docs dependencies.
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # zizmor: ignore[cache-poisoning] Reuses a docs-only wheel cache to avoid rebuilding unchanged awkward-cpp docs dependencies.
       with:
         path: ./awkward-cpp/dist
         key: ${{ runner.os }}-${{ env.X86_64_PYTHON_VERSION }}-awkward-x86-64-wasm-${{ hashFiles('awkward-cpp/**') }}
@@ -112,8 +111,10 @@ jobs:
   awkward:
     runs-on: ubuntu-24.04
     name: Build Python
+    permissions:
+      contents: read # This job builds code from the pull request.
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         submodules: true
         persist-credentials: false
@@ -134,14 +135,16 @@ jobs:
     needs: [awkward-cpp-x86-64, awkward]
     runs-on: ubuntu-24.04
     name: Execute cppyy notebook
+    permissions:
+      contents: read # This job builds code from the pull request.
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         submodules: true
         persist-credentials: false
 
     - name: Setup Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: "${{ env.X86_64_PYTHON_VERSION }}"
 
@@ -182,6 +185,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [awkward-cpp-x86-64, awkward, execute-cppyy]
     name: Build Docs
+    permissions:
+      contents: read # This job builds code from the pull request.
     defaults:
       run:
         # Ensure conda env is activated
@@ -189,7 +194,7 @@ jobs:
     env:
         DOCS_CANONICAL_VERSION: main
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
@@ -205,7 +210,7 @@ jobs:
       # solve with different external library versions. By default,
       # ROOT uses cxx-compiler too, so hopefully this won't be an issue
     - name: Setup Python via Conda
-      uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
+      uses: mamba-org/setup-micromamba@ce51e99f4bb8a82ab7158c4dc59ef4634c59c4f9 # v3.1.0
       with:
         # Cache invalidates daily by default
         cache-environment: true
@@ -303,52 +308,64 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'release'
     name: Deploy
     permissions:
-      id-token: write # Required to assume the AWS deployment role through OIDC.
-      contents: read
+      contents: write # Required to push the rendered docs to the `gh-pages` branch.
     env:
-      S3_BUCKET: "awkward-array.org"
-      PRODUCTION_URL: "http://awkward-array.org"
-      CLOUDFRONT_ID: "EFM4QVENUIXHS"
+      PRODUCTION_URL: "https://awkward-array.org"
     environment:
       name: docs
-      url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
+      url: ${{ env.PRODUCTION_URL }}${{ github.event_name == 'release' && '/doc/stable' || '/doc/main' }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
-        with:
-          aws-region: eu-west-2
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
       - name: Download rendered docs
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: docs
           path: built-docs
-      - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: "3.11"
       # Pushes to main trigger latest
       - name: Sync `main`
         if: github.event_name == 'push'
-        id: sync-main
-        run: |
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/main/"
-          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
-            --paths "/doc/main*"
-          echo "path=/doc/main" >> $GITHUB_OUTPUT
+        uses: ./.github/actions/deploy-to-gh-pages
+        with:
+          source: built-docs
+          target: doc/main
+          message: "Deploy `main` documentation"
+          token: ${{ secrets.GITHUB_TOKEN }}
       # Releases trigger versions
-      - name: Sync `stable`
+      - name: Read version
         if: github.event_name == 'release'
-        id: sync-stable
+        id: version
         run: |
           # Take only leading version
           version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/v?([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
-          aws s3 cp docs/switcher.json "s3://${S3_BUCKET}/doc/"
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/$version/"
-          aws s3 sync built-docs/ "s3://${S3_BUCKET}/doc/stable/"
-          aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_ID}" \
-            --paths "/doc/$version*" "/doc/stable*" "/doc/switcher.json"
-          echo "path=/doc/stable" >> $GITHUB_OUTPUT
+          # An empty version would publish the docs to `doc` itself
+          if [ -z "$version" ]; then
+            echo "::error::Could not read a version from ${GITHUB_REF_NAME}"
+            exit 1
+          fi
+          echo "version=$version" >> $GITHUB_OUTPUT
+      - name: Sync version selector
+        if: github.event_name == 'release'
+        uses: ./.github/actions/deploy-to-gh-pages
+        with:
+          source: docs/switcher.json
+          target: doc/switcher.json
+          message: "Deploy version selector"
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sync version
+        if: github.event_name == 'release'
+        uses: ./.github/actions/deploy-to-gh-pages
+        with:
+          source: built-docs
+          target: doc/${{ steps.version.outputs.version }}
+          message: "Deploy documentation for ${{ steps.version.outputs.version }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sync `stable`
+        if: github.event_name == 'release'
+        uses: ./.github/actions/deploy-to-gh-pages
+        with:
+          source: built-docs
+          target: doc/stable
+          message: "Deploy `stable` documentation"
+          token: ${{ secrets.GITHUB_TOKEN }}

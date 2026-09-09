@@ -1,5 +1,4 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -15,7 +14,16 @@ def materialize(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Materializes any virtual buffers in the array.
+
+    If the input array is not an #ak.Array or an #ak.contents.Content, an
+    error will be raised.
+
+    The buffers of the returned array are no longer `VirtualNDArray` objects
+    even if there were any. They will become one of `numpy.ndarray`,
+    `cupy.ndarray`, or `jax.numpy.ndarray` objects, depending on the array's
+    backend.
+
     Args:
         array : Array-like data (either an #ak.Array or an #ak.contents.Content).
             An array that may contain virtual buffers to be materialized.
@@ -26,12 +34,9 @@ def materialize(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Traverses the input array and materializes any virtual buffers.
-    If the input array is not an #ak.Array or an #ak.contents.Content,
-    an error will be raised.
-    The buffers of the returned array are no longer `VirtualNDArray` objects even if there were any.
-    They will become one of `numpy.ndarray`, `cupy.ndarray`, or `jax.numpy.ndarray` objects,
-    depending on the array's backend.
+    Returns:
+        An array with the same data as the input and all virtual buffers
+        materialized.
     """
     # Dispatch
     yield (array,)

@@ -42,11 +42,7 @@ jobs:
   docs:
     uses: ./.github/workflows/reusable-docs.yml
     permissions:
-      id-token: write # Required by the reusable docs deploy job for AWS OIDC.
-      contents: read
-    secrets:
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      AWS_DEPLOY_ROLE: ${{ secrets.AWS_DEPLOY_ROLE }}
+      contents: write # Required by the reusable docs deploy job to push to `gh-pages`.
 
   pass:
     name: Check CI result
@@ -66,22 +62,22 @@ jobs:
         with:
           allowed-skips: >-
             ${{
-              fromJSON(needs.change-detection.outputs.run-tests)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.run-tests)
+              && '
               tests,
               '
+              || ''
             }} ${{
-              fromJSON(needs.change-detection.outputs.build-wheels)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.build-wheels)
+              && '
               packaging-tests,
               '
+              || ''
             }} ${{
-              fromJSON(needs.change-detection.outputs.run-header-only-tests)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.run-header-only-tests)
+              && '
               header-only-tests,
               '
+              || ''
             }}
           jobs: ${{ toJSON(needs) }}

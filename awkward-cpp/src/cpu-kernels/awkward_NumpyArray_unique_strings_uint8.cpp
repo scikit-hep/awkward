@@ -11,34 +11,38 @@ ERROR awkward_NumpyArray_unique_strings_uint8(
   int64_t* __restrict__ outoffsets,
   int64_t* __restrict__ tolength) {
 
-  int64_t slen = 0;
+  // The strings are compacted toward the front of toptr in place, so a
+  // candidate string must be compared against the previously kept string at
+  // its location in the (already compacted) output, not at its original
+  // offset which may have been overwritten by the compaction.
+  int64_t laststart = 0;
+  int64_t lastlen = -1;
   int64_t index = 0;
   int64_t counter = 0;
-  int64_t start = 0;
-  int64_t k = 0;
   bool differ = false;
   outoffsets[counter++] = offsets[0];
   for (int64_t i = 0;  i < offsetslength - 1;  i++) {
+    int64_t slen = offsets[i + 1] - offsets[i];
     differ = false;
-    if (offsets[i + 1] - offsets[i] != slen) {
+    if (slen != lastlen) {
       differ = true;
     }
     else {
-      k = 0;
-      for (int64_t j = offsets[i]; j < offsets[i + 1]; j++) {
-        if (toptr[start + k++] != toptr[j]) {
+      for (int64_t k = 0; k < slen; k++) {
+        if (toptr[laststart + k] != toptr[offsets[i] + k]) {
           differ = true;
+          break;
         }
       }
     }
     if (differ) {
+      laststart = index;
       for (int64_t j = offsets[i]; j < offsets[i + 1]; j++) {
         toptr[index++] = toptr[j];
-        start = offsets[i];
-     }
-     outoffsets[counter++] = index;
-   }
-   slen = offsets[i + 1] - offsets[i];
+      }
+      lastlen = slen;
+      outoffsets[counter++] = index;
+    }
   }
   *tolength = counter;
 

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -29,6 +28,10 @@ def argcombinations(
     attrs=None,
 ):
     """Computes combinations of `n` items from an array, returning integer indexes.
+
+    The motivation and uses of this function are similar to those of
+    #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
+    complete description.
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -62,14 +65,9 @@ def argcombinations(
             high-level.
 
     Returns:
-        Computes a Cartesian product (i.e. cross product) of `array` with itself
-        that is restricted to combinations sampled without replacement,
-        like #ak.combinations, but returning integer indexes for
-        #ak.Array.__getitem__.
-
-        The motivation and uses of this function are similar to those of
-        #ak.argcartesian. See #ak.combinations and #ak.argcartesian for a more
-        complete description.
+        An array of integer indexes into the combinations of `array` with
+        itself (sampled without replacement), like #ak.combinations but for use
+        with #ak.Array.__getitem__.
     """
     # Dispatch
     yield (array,)

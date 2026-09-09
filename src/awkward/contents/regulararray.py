@@ -1076,9 +1076,8 @@ class RegularArray(RegularMeta[Content], Content):
                 )
             )
 
-            # In the offsets representation, nextstarts is just nextoffsets[:-1].
-            # The original `awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64`
-            # kernel call is no longer needed.
+            # In the offsets representation, nextstarts is just nextoffsets[:-1]
+            # (no parents->nextstarts derivation needed).
             nextstarts = nextoffsets[:-1]
 
             if reducer.needs_position:
@@ -1152,10 +1151,8 @@ class RegularArray(RegularMeta[Content], Content):
                 else:
                     assert outcontent.is_regular
 
-            # outoffsets used to come from
-            # `awkward_ListOffsetArray_reduce_local_outoffsets_64(parents, ...)`,
-            # which produced the offsets-rep of `parents`. With offsets already in
-            # hand, we just use them.
+            # In the offsets representation the output offsets are the offsets we
+            # already hold (the old parents->offsets conversion is unnecessary).
             assert (
                 offsets.length is unknown_length
                 or outlength is unknown_length
@@ -1271,7 +1268,7 @@ class RegularArray(RegularMeta[Content], Content):
             # ShapeItem is a defined type, but some nplikes don't map onto the entire space; e.g.
             # NumPy never has `None` shape items. We require that if a shape-item is used between nplikes
             # they both be the same "known-shape-ness".
-            assert self._backend.nplike.known_data == self._backend.nplike.known_data
+            assert self._backend.nplike.known_data == backend.nplike.known_data
             return self._backend.nplike.reshape(
                 out[
                     : self._backend.nplike.shape_item_as_index(self.length * self._size)
@@ -1312,7 +1309,7 @@ class RegularArray(RegularMeta[Content], Content):
                 self.length,
                 [
                     ak._connect.pyarrow.to_validbits(validbytes),
-                    pyarrow.py_buffer(akcontent._raw(*maybe_materialize(numpy))),
+                    pyarrow.py_buffer(*maybe_materialize(akcontent._raw(numpy))),
                 ],
             )
 
@@ -1464,15 +1461,9 @@ class RegularArray(RegularMeta[Content], Content):
 
         elif self.parameter("__array__") == "string":
             data = self._content.data
-            if hasattr(data, "tobytes"):
 
-                def tostring(x):
-                    return x.tobytes().decode(errors="surrogateescape")
-
-            else:
-
-                def tostring(x):
-                    return x.tostring().decode(errors="surrogateescape")
+            def tostring(x):
+                return x.tobytes().decode(errors="surrogateescape")
 
             length, size = self.length, self._size
             out = [None] * length

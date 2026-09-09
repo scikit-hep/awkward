@@ -1,14 +1,35 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
+import contextlib
 import datetime
+import io
 import os
 import time
 
 import yaml
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+@contextlib.contextmanager
+def write_if_changed(path):
+    """Yield a buffer to write to; only touch the file if the content changed
+    (ignoring the generation timestamp), so unchanged outputs keep their
+    mtimes and don't trigger rebuilds."""
+    buffer = io.StringIO()
+    yield buffer
+    content = buffer.getvalue()
+
+    def strip_stamp(text):
+        return [line for line in text.splitlines() if "AUTO GENERATED ON" not in line]
+
+    if os.path.exists(path):
+        with open(path) as file:
+            if strip_stamp(file.read()) == strip_stamp(content):
+                return
+    with open(path, "w") as file:
+        file.write(content)
 
 
 cuda_kernels_impl = [
@@ -49,17 +70,17 @@ cuda_kernels_impl = [
     # "awkward_RegularArray_getitem_next_array",
     "awkward_RegularArray_getitem_next_array_regularize",
     "awkward_RegularArray_reduce_local_nextparents_64",
-    "awkward_RegularArray_reduce_nonlocal_preparenext_64",
+    # "awkward_RegularArray_reduce_nonlocal_preparenext_64",
     # "awkward_missing_repeat",
     # "awkward_RegularArray_getitem_jagged_expand",
     # "awkward_ListArray_combinations_length",
     # "awkward_ListArray_combinations",
     "awkward_RegularArray_combinations_64",
     "awkward_ListArray_getitem_jagged_apply",
-    "awkward_ListArray_getitem_jagged_carrylen",
-    "awkward_ListArray_getitem_jagged_descend",
+    # "awkward_ListArray_getitem_jagged_carrylen",
+    # "awkward_ListArray_getitem_jagged_descend",
     "awkward_ListArray_getitem_jagged_expand",
-    "awkward_ListArray_getitem_jagged_numvalid",
+    # "awkward_ListArray_getitem_jagged_numvalid",
     "awkward_ListArray_getitem_jagged_shrink",
     "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_next_array",
@@ -69,8 +90,7 @@ cuda_kernels_impl = [
     # "awkward_ListArray_getitem_next_range_counts",
     # "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",
-    "awkward_UnionArray_regular_index",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
+    # "awkward_UnionArray_regular_index",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
     # "awkward_ListArray_localindex",
     # "awkward_NumpyArray_pad_zero_to_length",
@@ -112,7 +132,6 @@ cuda_kernels_impl = [
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     # "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
-    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
@@ -162,11 +181,10 @@ def type_to_ctype(typename):
 def include_kernels_h(specification):
     print("Generating awkward-cpp/include/awkward/kernels.h...")
 
-    with open(
+    with write_if_changed(
         os.path.join(
             CURRENT_DIR, "..", "awkward-cpp", "include", "awkward", "kernels.h"
         ),
-        "w",
     ) as header:
         header.write(
             f"""// AUTO GENERATED ON {reproducible_datetime()}
@@ -242,7 +260,7 @@ def type_to_pytype(typename, special):
 def kernel_signatures_py(specification):
     print("Generating awkward-cpp/src/awkward_cpp/_kernel_signatures.py...")
 
-    with open(
+    with write_if_changed(
         os.path.join(
             CURRENT_DIR,
             "..",
@@ -251,7 +269,6 @@ def kernel_signatures_py(specification):
             "awkward_cpp",
             "_kernel_signatures.py",
         ),
-        "w",
     ) as file:
         file.write(
             f"""# AUTO GENERATED ON {reproducible_datetime()}
@@ -346,7 +363,7 @@ def by_signature(lib):
 def kernel_signatures_cuda_py(specification):
     print("Generating src/awkward/_connect/cuda/_kernel_signatures.py...")
 
-    with open(
+    with write_if_changed(
         os.path.join(
             os.path.dirname(CURRENT_DIR),
             "src",
@@ -355,7 +372,6 @@ def kernel_signatures_cuda_py(specification):
             "cuda",
             "_kernel_signatures.py",
         ),
-        "w",
     ) as file:
         file.write(
             f"""# AUTO GENERATED ON {reproducible_datetime()}
