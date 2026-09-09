@@ -1,7 +1,7 @@
 ak.strings_astype
 =================
 
-Defined in `awkward.operations.ak_strings_astype <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_strings_astype.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_strings_astype.py#L17>`__.
+Defined in `awkward.operations.ak_strings_astype <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_strings_astype.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_strings_astype.py#L17>`__.
 
 .. py:function:: ak.strings_astype(array, to, *, highlevel=True, behavior=None, attrs=None)
 

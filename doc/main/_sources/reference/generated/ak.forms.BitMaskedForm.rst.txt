@@ -1,7 +1,7 @@
 ak.forms.BitMaskedForm
 ======================
 
-Defined in `awkward.forms.bitmaskedform <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/forms/bitmaskedform.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/forms/bitmaskedform.py#L19>`__.
+Defined in `awkward.forms.bitmaskedform <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/forms/bitmaskedform.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/forms/bitmaskedform.py#L19>`__.
 
 .. py:class:: ak.forms.BitMaskedForm(mask, content, valid_when, lsb_order, *, parameters=None, form_key=None)
 

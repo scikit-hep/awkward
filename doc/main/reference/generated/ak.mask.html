@@ -855,11 +855,31 @@
                   
   <section id="ak-mask">
 <h1>ak.mask<a class="headerlink" href="#ak-mask" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_mask.py">awkward.operations.ak_mask</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_mask.py#L18">line 18</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_mask.py">awkward.operations.ak_mask</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_mask.py#L18">line 18</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.mask">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valid_when</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.mask" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns an array with elements replaced by None where a mask condition fails.</p>
+<p>An array for which:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">valid_when</span> <span class="k">else</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>Unlike filtering data with <a class="reference internal" href="ak.Array.html#ak.Array.__getitem__" title="ak.Array.__getitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__getitem__</span></code></a>, this <code class="docutils literal notranslate"><span class="pre">output</span></code> has the
+same length as the original <code class="docutils literal notranslate"><span class="pre">array</span></code> and can therefore be used in
+calculations with it, such as
+<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/ufuncs.html">universal functions</a>.</p>
+<p>Another syntax for:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">array_of_booleans</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="o">.</span><span class="n">mask</span><span class="p">[</span><span class="n">array_of_booleans</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>(which is 5 characters away from simply filtering the <code class="docutils literal notranslate"><span class="pre">array</span></code>).</p>
+<p>See <a class="reference internal" href="ak.broadcast_arrays.html#ak.broadcast_arrays" title="ak.broadcast_arrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.broadcast_arrays</span></code></a> for details about broadcasting and the generalized
+set of broadcasting rules.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
@@ -876,15 +896,11 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array with elements replaced by None where the mask condition fails.</p>
+</dd>
 </dl>
-<p>Returns an array for which:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">valid_when</span> <span class="k">else</span> <span class="kc">None</span>
-</pre></div>
-</div>
-<p>Unlike filtering data with <a class="reference internal" href="ak.Array.html#ak.Array.__getitem__" title="ak.Array.__getitem__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array.__getitem__</span></code></a>, this <code class="docutils literal notranslate"><span class="pre">output</span></code> has the
-same length as the original <code class="docutils literal notranslate"><span class="pre">array</span></code> and can therefore be used in
-calculations with it, such as
-<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/ufuncs.html">universal functions</a>.</p>
+<p class="rubric">Examples</p>
 <p>For example, with</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
 </pre></div>
@@ -928,17 +944,6 @@ parameters are broadcasted.</p>
 <span class="go">&lt;Array [[[None, 1, None], [], ..., [5]], ...] type=&#39;2 * var * var * ?int64&#39;&gt;</span>
 </pre></div>
 </div>
-<p>See <a class="reference internal" href="ak.broadcast_arrays.html#ak.broadcast_arrays" title="ak.broadcast_arrays"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.broadcast_arrays</span></code></a> for details about broadcasting and the generalized
-set of broadcasting rules.</p>
-<p>Another syntax for:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ak</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">array_of_booleans</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="o">.</span><span class="n">mask</span><span class="p">[</span><span class="n">array_of_booleans</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>(which is 5 characters away from simply filtering the <code class="docutils literal notranslate"><span class="pre">array</span></code>).</p>
 </dd></dl>
 
 </section>

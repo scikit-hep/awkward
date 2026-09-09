@@ -1,7 +1,7 @@
 ak.to_dataframe
 ===============
 
-Defined in `awkward.operations.ak_to_dataframe <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_dataframe.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_to_dataframe.py#L23>`__.
+Defined in `awkward.operations.ak_to_dataframe <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_to_dataframe.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_to_dataframe.py#L23>`__.
 
 .. py:function:: ak.to_dataframe(array, *, how='inner', levelname=_default_levelname, anonymous='values')
 

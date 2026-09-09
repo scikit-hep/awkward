@@ -618,7 +618,7 @@
 <td><p>Computes the covariance of x and y over one or all levels of nesting.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop_none</span></code>(array[, axis, highlevel, behavior, attrs])</p></td>
-<td><p></p></td>
+<td><p>Removes missing values (None) from a given array.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">enforce_type</span></code>(array, type, *[, highlevel, behavior, attrs])</p></td>
 <td><p>Returns an array whose structure is modified to match the given type.</p></td>
@@ -627,10 +627,10 @@
 <td><p>Returns a list of field names or tuple slot numbers for the outermost record.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fill_none</span></code>(array, value[, axis, highlevel, behavior, attrs])</p></td>
-<td><p></p></td>
+<td><p>Replaces missing values (None) with a given value.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firsts</span></code>(array[, axis, highlevel, behavior, attrs])</p></td>
-<td><p></p></td>
+<td><p>Returns the first element of each list, or None for each empty list.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">flatten</span></code>(array[, axis, highlevel, behavior, attrs])</p></td>
 <td><p>Returns an array with one or all levels of nesting removed.</p></td>
@@ -702,7 +702,7 @@
 <td><p>Returns True if the array is categorical.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_none</span></code>(array[, axis, highlevel, behavior, attrs])</p></td>
-<td><p></p></td>
+<td><p>Returns an array with True where an element is None at a given axis depth, False otherwise.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_tuple</span></code>(array)</p></td>
 <td><p>Returns True if a record, or the outermost record of an array, is a tuple.</p></td>
@@ -720,7 +720,7 @@
 <td><p>Returns the within-list index of each element at a given axis depth.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mask</span></code>(array, mask, *[, valid_when, highlevel, ...])</p></td>
-<td><p></p></td>
+<td><p>Returns an array with elements replaced by None where a mask condition fails.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">materialize</span></code>(array[, highlevel, behavior, attrs])</p></td>
 <td><p>Materializes any virtual buffers in the array.</p></td>
@@ -756,10 +756,10 @@
 <td><p>Computes the <a href="#id1"><span class="problematic" id="id2">`</span></a>n`th moment over one or all levels of nesting.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nan_to_none</span></code>(array, *[, highlevel, behavior, attrs])</p></td>
-<td><p></p></td>
+<td><p>Converts NaN (&quot;not a number&quot;) into None, i.e. missing values with option-type.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nan_to_num</span></code>(array[, copy, nan, posinf, neginf, ...])</p></td>
-<td><p></p></td>
+<td><p>Replaces NaN and infinite values with finite numbers in floating-point arrays.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">num</span></code>(array[, axis, highlevel, behavior, attrs])</p></td>
 <td><p>Returns the number of elements at a given axis depth.</p></td>
@@ -795,7 +795,7 @@
 <td><p>Returns the lengths of runs of identical values at the deepest level.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">singletons</span></code>(array[, axis, highlevel, behavior, attrs])</p></td>
-<td><p></p></td>
+<td><p>Wraps each value in a length-1 list, or an empty list for each missing value.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">softmax</span></code>(x[, axis, keepdims, mask_identity, highlevel, ...])</p></td>
 <td><p>Computes the softmax over the innermost level of nesting.</p></td>

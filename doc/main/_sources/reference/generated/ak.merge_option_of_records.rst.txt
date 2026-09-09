@@ -1,7 +1,7 @@
 ak.merge_option_of_records
 ==========================
 
-Defined in `awkward.operations.ak_merge_option_of_records <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_merge_option_of_records.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_merge_option_of_records.py#L21>`__.
+Defined in `awkward.operations.ak_merge_option_of_records <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_merge_option_of_records.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_merge_option_of_records.py#L21>`__.
 
 .. py:function:: ak.merge_option_of_records(array, axis=-1, *, highlevel=True, behavior=None, attrs=None)
 

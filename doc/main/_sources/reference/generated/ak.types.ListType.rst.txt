@@ -1,7 +1,7 @@
 ak.types.ListType
 =================
 
-Defined in `awkward.types.listtype <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/types/listtype.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/types/listtype.py#L15>`__.
+Defined in `awkward.types.listtype <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/types/listtype.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/types/listtype.py#L15>`__.
 
 .. py:class:: ak.types.ListType(content: awkward.types.type.Type, *, parameters: awkward._typing.JSONMapping | None = None)
 

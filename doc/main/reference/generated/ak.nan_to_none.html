@@ -855,11 +855,13 @@
                   
   <section id="ak-nan-to-none">
 <h1>ak.nan_to_none<a class="headerlink" href="#ak-nan-to-none" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_nan_to_none.py">awkward.operations.ak_nan_to_none</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_nan_to_none.py#L16">line 16</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_nan_to_none.py">awkward.operations.ak_nan_to_none</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_nan_to_none.py#L16">line 16</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.nan_to_none">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">nan_to_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">awkward._typing.Mapping</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">awkward._typing.Mapping</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.nan_to_none" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Converts NaN (“not a number”) into None, i.e. missing values with option-type.</p>
+<p>See also <a class="reference internal" href="ak.nan_to_num.html#ak.nan_to_num" title="ak.nan_to_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.nan_to_num</span></code></a> to convert NaN or infinity to specified values.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
@@ -871,9 +873,11 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array with NaN (“not a number”) converted to None, i.e. missing
+values with option-type.</p>
+</dd>
 </dl>
-<p>Converts NaN (“not a number”) into None, i.e. missing values with option-type.</p>
-<p>See also <a class="reference internal" href="ak.nan_to_num.html#ak.nan_to_num" title="ak.nan_to_num"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.nan_to_num</span></code></a> to convert NaN or infinity to specified values.</p>
 </dd></dl>
 
 </section>

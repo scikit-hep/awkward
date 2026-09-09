@@ -1,7 +1,7 @@
 ak.nanmax
 =========
 
-Defined in `awkward.operations.ak_max <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_max.py>`__ on `line 99 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_max.py#L99>`__.
+Defined in `awkward.operations.ak_max <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_max.py>`__ on `line 99 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_max.py#L99>`__.
 
 .. py:function:: ak.nanmax(array, axis=None, *, keepdims=False, initial=None, mask_identity=True, highlevel=True, behavior=None, attrs=None)
 

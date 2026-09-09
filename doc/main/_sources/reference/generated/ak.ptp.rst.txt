@@ -1,7 +1,7 @@
 ak.ptp
 ======
 
-Defined in `awkward.operations.ak_ptp <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_ptp.py>`__ on `line 27 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_ptp.py#L27>`__.
+Defined in `awkward.operations.ak_ptp <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_ptp.py>`__ on `line 27 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_ptp.py#L27>`__.
 
 .. py:function:: ak.ptp(array, axis=None, *, keepdims=False, mask_identity=True, highlevel=True, behavior=None, attrs=None)
 

@@ -855,11 +855,13 @@
                   
   <section id="ak-singletons">
 <h1>ak.singletons<a class="headerlink" href="#ak-singletons" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_singletons.py">awkward.operations.ak_singletons</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_singletons.py#L22">line 22</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_singletons.py">awkward.operations.ak_singletons</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_singletons.py#L22">line 22</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.singletons">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">singletons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.singletons" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Wraps each value in a length-1 list, or an empty list for each missing value.</p>
+<p>See <a class="reference internal" href="ak.firsts.html#ak.firsts" title="ak.firsts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.firsts</span></code></a> to invert this function.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
@@ -880,9 +882,12 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
-</dl>
-<p>Returns a singleton list (length 1) wrapping each non-missing value and
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A singleton list (length 1) wrapping each non-missing value and
 an empty list (length 0) in place of each missing value.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
 <p>For example,</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ak</span><span class="o">.</span><span class="n">singletons</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -896,7 +901,6 @@ an empty list (length 0) in place of each missing value.</p>
 <span class="go"> [5.5]]</span>
 </pre></div>
 </div>
-<p>See <a class="reference internal" href="ak.firsts.html#ak.firsts" title="ak.firsts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.firsts</span></code></a> to invert this function.</p>
 </dd></dl>
 
 </section>

@@ -1,10 +1,12 @@
 ak.drop_none
 ============
 
-Defined in `awkward.operations.ak_drop_none <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_drop_none.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/a33c94bd675abcf973b8568084e7d31710160dcc/src/awkward/operations/ak_drop_none.py#L21>`__.
+Defined in `awkward.operations.ak_drop_none <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_drop_none.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_drop_none.py#L21>`__.
 
 .. py:function:: ak.drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None)
 
+
+   Removes missing values (None) from a given array.
 
    :param array: Data in which to remove Nones.
    :param axis: If None, the operation drops Nones at all levels
@@ -29,20 +31,21 @@ Defined in `awkward.operations.ak_drop_none <https://github.com/scikit-hep/awkwa
                  high-level.
    :type attrs: None or dict
 
-   Removes missing values (None) from a given array.
+   :returns: An array with missing values (None) removed.
+
+   .. rubric:: Examples
 
    For example, in the following ``array``,
 
-       >>> array = ak.Array([[[0]], [[None]], [[1], None], [[2, None]]])
+   >>> array = ak.Array([[[0]], [[None]], [[1], None], [[2, None]]])
 
    The None value will be removed, resulting in
 
-       >>> ak.drop_none(array)
-       <Array [[[0]], [[]], [[1]], [[2]]] type='4 * var * var * int64'>
+   >>> ak.drop_none(array)
+   <Array [[[0]], [[]], [[1]], [[2]]] type='4 * var * var * int64'>
 
    The default axis is None, however an axis can be specified:
 
-       >>> ak.drop_none(array, axis=1)
-       <Array [[[0]], [[None]], [[1]], [[2, None]]] type='4 * var * var * ?int64'>
-
+   >>> ak.drop_none(array, axis=1)
+   <Array [[[0]], [[None]], [[1]], [[2, None]]] type='4 * var * var * ?int64'>
 
