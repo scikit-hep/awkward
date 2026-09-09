@@ -1119,22 +1119,13 @@ class RecordArray(RecordMeta[Content], Content):
             contents = []
             for content in self._contents:
                 contents.append(content._pad_none(target, axis, depth, clip))
-            if len(contents) == 0:
-                return ak.contents.RecordArray(
-                    contents,
-                    self._fields,
-                    self.length,
-                    parameters=self._parameters,
-                    backend=self._backend,
-                )
-            else:
-                return ak.contents.RecordArray(
-                    contents,
-                    self._fields,
-                    self.length,
-                    parameters=self._parameters,
-                    backend=self._backend,
-                )
+            return ak.contents.RecordArray(
+                contents,
+                self._fields,
+                self.length,
+                parameters=self._parameters,
+                backend=self._backend,
+            )
 
     def _to_arrow(
         self,
@@ -1201,8 +1192,6 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _to_backend_array(self, allow_missing, backend):
-        if self.fields is None:
-            return backend.nplike.empty(self.length, dtype=[])
         contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(f"cannot convert {self} into np.ndarray")

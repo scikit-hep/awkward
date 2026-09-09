@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import ctypes
 import os
@@ -63,7 +62,14 @@ cppyy.include("rdataframe/jagged_builders.h")
 
 
 def from_rdataframe(
-    data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order
+    data_frame,
+    columns,
+    highlevel,
+    behavior,
+    attrs,
+    with_name,
+    offsets_type,
+    keep_order,
 ):
     if hasattr(data_frame, "proxied_node"):
         raise NotImplementedError("Distributed RDataFrame is not yet supported")
@@ -269,6 +275,7 @@ def from_rdataframe(
         depth_limit=1,
         highlevel=True,
         behavior=behavior,
+        attrs=attrs,
         with_name=with_name,
     )
 
@@ -278,6 +285,7 @@ def from_rdataframe(
             ak.contents.IndexedArray(sorted, out.layout),
             highlevel=True,
             behavior=behavior,
+            attrs=attrs,
         )
 
     return wrap_layout(out.layout, highlevel=highlevel, behavior=behavior)

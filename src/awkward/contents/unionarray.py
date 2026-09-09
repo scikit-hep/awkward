@@ -115,10 +115,14 @@ class UnionArray(UnionMeta[Content], Content):
                 f"{type(self).__name__} 'tags' must be an Index with dtype=int8, not {tags!r}"
             )
 
-        if not isinstance(index, Index) and index.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not (
+            isinstance(index, Index)
+            and index.dtype
+            in (
+                np.dtype(np.int32),
+                np.dtype(np.uint32),
+                np.dtype(np.int64),
+            )
         ):
             raise TypeError(
                 f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
@@ -451,7 +455,7 @@ class UnionArray(UnionMeta[Content], Content):
 
                 if isinstance(backend.nplike, Jax):
                     # function-composition of this part of the UnionArray.index with the IndexedArray.index
-                    index._data = content.index.data.at[selection].set(
+                    index._data = index.data.at[selection].set(
                         content.index.data[index.data[selection]]
                     )
                     # now we don't have an IndexedArray anymore, but we want to preserve its parameters
