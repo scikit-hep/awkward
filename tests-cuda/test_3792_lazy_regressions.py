@@ -10,8 +10,6 @@ per-character string comparison, silent cpu->cuda migration of mixed-backend
 expressions).
 """
 
-from __future__ import annotations
-
 import warnings
 
 import numpy as np

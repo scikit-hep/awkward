@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from os import fsdecode, path
 
 from awkward._dispatch import high_level_function

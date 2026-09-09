@@ -18,8 +18,6 @@ It prints a table of best-of-N milliseconds for pip vs branch and the speedup
 so you can re-diff without re-running.
 """
 
-from __future__ import annotations
-
 import argparse
 import json
 import os
