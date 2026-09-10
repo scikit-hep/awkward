@@ -7,13 +7,13 @@
 
 template <typename C>
 ERROR awkward_ListArray_combinations(
-  int64_t** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
+  int64_t** __restrict__ tocarry,
+  int64_t* __restrict__ toindex,
+  int64_t* __restrict__ fromindex,
   int64_t n,
   bool replacement,
-  const C* starts,
-  const C* stops,
+  const C* __restrict__ starts,
+  const C* __restrict__ stops,
   int64_t length) {
   for (int64_t j = 0;  j < n;  j++) {
     toindex[j] = 0;
@@ -33,60 +33,12 @@ ERROR awkward_ListArray_combinations(
   }
   return success();
 }
-ERROR awkward_ListArray32_combinations_64(
-  int64_t** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
-  int64_t n,
-  bool replacement,
-  const int32_t* starts,
-  const int32_t* stops,
-  int64_t length) {
-  return awkward_ListArray_combinations<int32_t>(
-    tocarry,
-    toindex,
-    fromindex,
-    n,
-    replacement,
-    starts,
-    stops,
-    length);
-}
-ERROR awkward_ListArrayU32_combinations_64(
-  int64_t** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
-  int64_t n,
-  bool replacement,
-  const uint32_t* starts,
-  const uint32_t* stops,
-  int64_t length) {
-  return awkward_ListArray_combinations<uint32_t>(
-    tocarry,
-    toindex,
-    fromindex,
-    n,
-    replacement,
-    starts,
-    stops,
-    length);
-}
-ERROR awkward_ListArray64_combinations_64(
-  int64_t** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
-  int64_t n,
-  bool replacement,
-  const int64_t* starts,
-  const int64_t* stops,
-  int64_t length) {
-  return awkward_ListArray_combinations<int64_t>(
-    tocarry,
-    toindex,
-    fromindex,
-    n,
-    replacement,
-    starts,
-    stops,
-    length);
-}
+
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t** tocarry, int64_t* toindex, int64_t* fromindex, int64_t n, bool replacement, const C* starts, const C* stops, int64_t length) { \
+    return awkward_ListArray_combinations<C>(tocarry, toindex, fromindex, n, replacement, starts, stops, length); \
+  }
+
+WRAPPER(awkward_ListArray32_combinations_64, int32_t)
+WRAPPER(awkward_ListArrayU32_combinations_64, uint32_t)
+WRAPPER(awkward_ListArray64_combinations_64, int64_t)

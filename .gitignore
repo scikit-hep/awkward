@@ -167,3 +167,12 @@ Testing/
 
 # MacOS
 .DS_Store
+
+
+# Symlink to AGENTS.md
+CLAUDE.md
+.claude/
+
+# Lockfiles
+uv.lock
+*pylock*

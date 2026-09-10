@@ -8,10 +8,10 @@
 
 template <typename T>
 ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded(
-  const uint8_t *fromptr,
-  const T *fromoffsets,
+  const uint8_t* __restrict__ fromptr,
+  const T* __restrict__ fromoffsets,
   int64_t offsetslength,
-  int64_t *outmaxcodepoints) {
+  int64_t* __restrict__ outmaxcodepoints) {
 
   *outmaxcodepoints = 0;
   int64_t i_code_unit = fromoffsets[0];
@@ -40,38 +40,11 @@ ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded(
   return success();
 }
 
-ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded_int32(
-  const uint8_t *fromptr,
-  const int32_t *fromoffsets,
-  int64_t offsetslength,
-  int64_t *outmaxcodepoints) {
-  return awkward_NumpyArray_prepare_utf8_to_utf32_padded<int32_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    outmaxcodepoints);
-}
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(const uint8_t *fromptr, const T *fromoffsets, int64_t offsetslength, int64_t *outmaxcodepoints) { \
+    return awkward_NumpyArray_prepare_utf8_to_utf32_padded<T>(fromptr, fromoffsets, offsetslength, outmaxcodepoints); \
+  }
 
-ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded_uint32(
-  const uint8_t *fromptr,
-  const uint32_t *fromoffsets,
-  int64_t offsetslength,
-  int64_t *outmaxcodepoints) {
-  return awkward_NumpyArray_prepare_utf8_to_utf32_padded<uint32_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    outmaxcodepoints);
-}
-
-ERROR awkward_NumpyArray_prepare_utf8_to_utf32_padded_int64(
-  const uint8_t *fromptr,
-  const int64_t *fromoffsets,
-  int64_t offsetslength,
-  int64_t *outmaxcodepoints) {
-  return awkward_NumpyArray_prepare_utf8_to_utf32_padded<int64_t>(
-    fromptr,
-    fromoffsets,
-    offsetslength,
-    outmaxcodepoints);
-}
+WRAPPER(awkward_NumpyArray_prepare_utf8_to_utf32_padded_int32, int32_t)
+WRAPPER(awkward_NumpyArray_prepare_utf8_to_utf32_padded_uint32, uint32_t)
+WRAPPER(awkward_NumpyArray_prepare_utf8_to_utf32_padded_int64, int64_t)

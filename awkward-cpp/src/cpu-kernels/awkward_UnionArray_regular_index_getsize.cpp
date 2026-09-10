@@ -6,8 +6,8 @@
 
 template <typename C>
 ERROR awkward_UnionArray_regular_index_getsize(
-  int64_t* size,
-  const C* fromtags,
+  int64_t* __restrict__ size,
+  const C* __restrict__ fromtags,
   int64_t length) {
   *size = 0;
   for (int64_t i = 0;  i < length;  i++) {
@@ -19,21 +19,11 @@ ERROR awkward_UnionArray_regular_index_getsize(
   *size = *size + 1;
   return success();
 }
-ERROR awkward_UnionArray64_regular_index_getsize(
-  int64_t* size,
-  const int64_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index_getsize<int64_t>(
-    size,
-    fromtags,
-    length);
-}
-ERROR awkward_UnionArray8_regular_index_getsize(
-  int64_t* size,
-  const int8_t* fromtags,
-  int64_t length) {
-  return awkward_UnionArray_regular_index_getsize<int8_t>(
-    size,
-    fromtags,
-    length);
-}
+
+#define WRAPPER(FUNC, C) \
+  ERROR FUNC(int64_t* size, const C* fromtags, int64_t length) { \
+    return awkward_UnionArray_regular_index_getsize<C>(size, fromtags, length); \
+  }
+
+WRAPPER(awkward_UnionArray64_regular_index_getsize, int64_t)
+WRAPPER(awkward_UnionArray8_regular_index_getsize, int8_t)

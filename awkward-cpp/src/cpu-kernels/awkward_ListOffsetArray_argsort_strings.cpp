@@ -11,12 +11,12 @@
 
 template <bool is_stable, bool is_ascending, bool is_local>
 ERROR awkward_ListOffsetArray_argsort_strings_impl(
-  int64_t* tocarry,
-  const int64_t* fromparents,
+  int64_t* __restrict__ tocarry,
+  const int64_t* __restrict__ fromparents,
   int64_t length,
-  const char* stringdata,
-  const int64_t* stringstarts,
-  const int64_t* stringstops) {
+  const char* __restrict__ stringdata,
+  const int64_t* __restrict__ stringstarts,
+  const int64_t* __restrict__ stringstops) {
 
   auto sorter =
         [&stringdata, &stringstarts, &stringstops](int64_t left, int64_t right) -> bool {
@@ -75,12 +75,12 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
 }
 
 ERROR awkward_ListOffsetArray_argsort_strings(
-  int64_t* tocarry,
-  const int64_t* fromparents,
+  int64_t* __restrict__ tocarry,
+  const int64_t* __restrict__ fromparents,
   int64_t length,
-  const uint8_t* stringdata,
-  const int64_t* stringstarts,
-  const int64_t* stringstops,
+  const uint8_t* __restrict__ stringdata,
+  const int64_t* __restrict__ stringstarts,
+  const int64_t* __restrict__ stringstops,
   bool is_stable,
   bool is_ascending,
   bool is_local) {

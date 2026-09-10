@@ -12,6 +12,7 @@
 #include <tuple>
 #include <string>
 #include <functional>
+#include <sstream>
 
 /// @brief Object of {@link BuilderOptions BuilderOptions} which sets the
 /// values of the default options.
@@ -478,10 +479,6 @@ namespace awkward {
       form() const noexcept {
         return "{ \"class\": \"EmptyArray\" }";
       }
-
-    private:
-      /// @brief Unique form ID.
-      size_t id_;
     };
 
 
@@ -634,27 +631,12 @@ namespace awkward {
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
       /// in the builder and its contents.
-      class BufferNBytesFunctor {
-      public:
-          // Constructor to capture names_nbytes by reference
-          BufferNBytesFunctor(std::map<std::string, size_t>& names_nbytes)
-              : names_nbytes_(names_nbytes) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.builder.buffer_nbytes(names_nbytes_);
-          }
-
-      private:
-          std::map<std::string, size_t>& names_nbytes_;  // reference to the map
-      };
-
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const noexcept {
-          BufferNBytesFunctor bufferNBytesFunctor(names_nbytes); // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, bufferNBytesFunctor); // pass the functor instead of the lambda
+              visit_at(contents, i, [&names_nbytes](auto& content) {
+                  content.builder.buffer_nbytes(names_nbytes);
+              });
           }
       }
 
@@ -663,54 +645,23 @@ namespace awkward {
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
-      class ToBuffersFunctor {
-      public:
-          // Constructor to capture buffers by reference
-          ToBuffersFunctor(std::map<std::string, void*>& buffers)
-              : buffers_(buffers) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.builder.to_buffers(buffers_);
-          }
-
-      private:
-          std::map<std::string, void*>& buffers_;  // reference to the map
-      };
-
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-          ToBuffersFunctor toBuffersFunctor(buffers); // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, toBuffersFunctor); // pass the functor instead of the lambda
+              visit_at(contents, i, [&buffers](auto& content) {
+                  content.builder.to_buffers(buffers);
+              });
           }
       }
       /// @brief Copies and concatenates the accumulated data in the buffers of the
       /// builder contents to user-defined pointers if the given node name matches
       /// with the node associated with that builder.
-      class ToBufferFunctor {
-      public:
-          // Constructor to capture buffer and name by reference
-          ToBufferFunctor(void* buffer, const char* name)
-              : buffer_(buffer), name_(name) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.builder.to_buffer(buffer_, name_);
-          }
-
-      private:
-          void* buffer_;            // reference to buffer
-          const char* name_;        // reference to name
-      };
-
       void
       to_buffer(void* buffer, const char* name) const noexcept {
-          ToBufferFunctor toBufferFunctor(buffer, name); // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, toBufferFunctor); // pass the functor instead of the lambda
+              visit_at(contents, i, [buffer, name](auto& content) {
+                  content.builder.to_buffer(buffer, name);
+              });
           }
       }
 
@@ -719,27 +670,12 @@ namespace awkward {
       /// to a map of user-allocated buffers.
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
-      class ToCharBuffersFunctor {
-      public:
-          // Constructor to capture buffers by reference
-          ToCharBuffersFunctor(std::map<std::string, uint8_t*>& buffers)
-              : buffers_(buffers) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.builder.to_char_buffers(buffers_);
-          }
-
-      private:
-          std::map<std::string, uint8_t*>& buffers_;  // reference to the buffers map
-      };
-
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-          ToCharBuffersFunctor toCharBuffersFunctor(buffers); // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, toCharBuffersFunctor); // pass the functor instead of the lambda
+              visit_at(contents, i, [&buffers](auto& content) {
+                  content.builder.to_char_buffers(buffers);
+              });
           }
       }
 
@@ -748,8 +684,8 @@ namespace awkward {
       /// contents in the form of a JSON-like string.
       class ContentsFormFunctor {
       public:
-          // Modify the constructor to accept a std::map instead of a std::vector
-          ContentsFormFunctor(std::stringstream& out, const std::map<size_t, std::string>& content_names)
+          // Constructor accepts any map type compatible with MAP
+          ContentsFormFunctor(std::stringstream& out, const UserDefinedMap& content_names)
               : out_(out), content_names_(content_names) {}
 
           // Template operator() to handle the content
@@ -769,7 +705,7 @@ namespace awkward {
 
       private:
           std::stringstream& out_;
-          const std::map<size_t, std::string>& content_names_;  // Store the map by reference
+          const UserDefinedMap& content_names_;  // Store the map by reference
       };
 
 
@@ -884,28 +820,14 @@ namespace awkward {
       }
 
       /// @brief Assigns a unique ID to each node.
-      class SetIdFunctor {
-      public:
-          // Constructor to capture id by reference
-          SetIdFunctor(size_t& id) : id_(id) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.set_id(id_);
-          }
-
-      private:
-          size_t& id_;  // reference to the id
-      };
-
       void
       set_id(size_t& id) noexcept {
           id_ = id;
           id++;
-          SetIdFunctor setIdFunctor(id);  // instantiate the functor with id reference
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, setIdFunctor);  // pass the functor instead of the lambda
+              visit_at(contents, i, [&id](auto& content) {
+                  content.set_id(id);
+              });
           }
       }
 
@@ -913,19 +835,12 @@ namespace awkward {
       /// @brief Clears the builder contents.
       ///
       /// Discards the accumulated data and the contents at each tuple index.
-      class ClearFunctor {
-      public:
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.clear();
-          }
-      };
       void
       clear() noexcept {
-          ClearFunctor clearFunctor;  // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, clearFunctor);  // pass the functor instead of the lambda
+              visit_at(contents, i, [](auto& content) {
+                  content.clear();
+              });
           }
       }
 
@@ -966,27 +881,12 @@ namespace awkward {
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
       /// in the builder and its contents.
-      class BufferNBytesFunctor {
-      public:
-          // Constructor to capture names_nbytes by reference
-          BufferNBytesFunctor(std::map<std::string, size_t>& names_nbytes)
-              : names_nbytes_(names_nbytes) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.buffer_nbytes(names_nbytes_);
-          }
-
-      private:
-          std::map<std::string, size_t>& names_nbytes_;  // reference to the map
-      };
-
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const noexcept {
-          BufferNBytesFunctor bufferNBytesFunctor(names_nbytes);  // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, bufferNBytesFunctor);  // pass the functor instead of the lambda
+              visit_at(contents, i, [&names_nbytes](auto& content) {
+                  content.buffer_nbytes(names_nbytes);
+              });
           }
       }
 
@@ -996,27 +896,12 @@ namespace awkward {
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
-      class ToBuffersFunctor {
-      public:
-          // Constructor to capture buffers by reference
-          ToBuffersFunctor(std::map<std::string, void*>& buffers)
-              : buffers_(buffers) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.to_buffers(buffers_);
-          }
-
-      private:
-          std::map<std::string, void*>& buffers_;  // reference to the buffers map
-      };
-
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-          ToBuffersFunctor toBuffersFunctor(buffers);  // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, toBuffersFunctor);  // pass the functor instead of the lambda
+              visit_at(contents, i, [&buffers](auto& content) {
+                  content.to_buffers(buffers);
+              });
           }
       }
 
@@ -1024,28 +909,12 @@ namespace awkward {
       /// @brief Copies and concatenates the accumulated data in the buffers of the
       /// builder contents to user-defined pointers if the given node name matches
       /// with the node associated with that builder.
-      class ToBufferFunctor {
-      public:
-          // Constructor to capture buffer and name by reference
-          ToBufferFunctor(void* buffer, const char* name)
-              : buffer_(buffer), name_(name) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.to_buffer(buffer_, name_);
-          }
-
-      private:
-          void* buffer_;            // reference to the buffer
-          const char* name_;        // reference to the name
-      };
-
       void
       to_buffer(void* buffer, const char* name) const noexcept {
-          ToBufferFunctor toBufferFunctor(buffer, name);  // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, toBufferFunctor);  // pass the functor instead of the lambda
+              visit_at(contents, i, [buffer, name](auto& content) {
+                  content.to_buffer(buffer, name);
+              });
           }
       }
 
@@ -1054,27 +923,12 @@ namespace awkward {
       /// to a map of user-allocated buffers.
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
-      class ToCharBuffersFunctor {
-      public:
-          // Constructor to capture buffers by reference
-          ToCharBuffersFunctor(std::map<std::string, uint8_t*>& buffers)
-              : buffers_(buffers) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.to_char_buffers(buffers_);
-          }
-
-      private:
-          std::map<std::string, uint8_t*>& buffers_;  // reference to the buffers map
-      };
-
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-          ToCharBuffersFunctor toCharBuffersFunctor(buffers);  // instantiate the functor
           for (size_t i = 0; i < fields_count_; i++) {
-              visit_at(contents, i, toCharBuffersFunctor);  // pass the functor instead of the lambda
+              visit_at(contents, i, [&buffers](auto& content) {
+                  content.to_char_buffers(buffers);
+              });
           }
       }
 
@@ -1137,9 +991,6 @@ namespace awkward {
           noexcept {
         return std::vector<bool>({std::get<S>(contents).is_valid(error)...});
       }
-
-      /// @brief Vector of integers of field index.
-      std::vector<int64_t> field_index_;
 
       /// @brief Form parameters.
       std::string parameters_;
@@ -1364,8 +1215,6 @@ namespace awkward {
         index_.append(i);
         if (i > max_index_) {
           max_index_ = i;
-        } else if (i < 0) {
-          max_index_ = UINTMAX_MAX;
         }
         return content_;
       }
@@ -1376,6 +1225,9 @@ namespace awkward {
       /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_index(size_t size) noexcept {
+        if (size == 0) {
+          return content_;
+        }
         size_t start = content_.length();
         size_t stop = start + size;
         if (stop - 1 > max_index_) {
@@ -1541,7 +1393,6 @@ namespace awkward {
       IndexedOption()
           : index_(
                 awkward::GrowableBuffer<PRIMITIVE>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
-            last_valid_(-1),
             max_index_(0) {
         size_t id = 0;
         set_id(id);
@@ -1554,7 +1405,6 @@ namespace awkward {
       /// @param options Initial size configuration of a buffer.
       IndexedOption(const awkward::BuilderOptions& options)
           : index_(awkward::GrowableBuffer<PRIMITIVE>(options)),
-            last_valid_(-1),
             max_index_(0) {
         size_t id = 0;
         set_id(id);
@@ -1570,15 +1420,13 @@ namespace awkward {
       /// returns the reference to the builder content.
       BUILDER&
       append_valid() noexcept {
-        last_valid_ = content_.length();
-        return append_valid(last_valid_);
+        return append_valid(content_.length());
       }
 
       /// @brief Inserts an explicit value in the `index` buffer and
       /// returns the reference to the builder content.
       BUILDER&
       append_valid(size_t i) noexcept {
-        last_valid_ = content_.length();
         index_.append(i);
         if (i > max_index_) {
           max_index_ = i;
@@ -1592,11 +1440,14 @@ namespace awkward {
       /// Just an interface; not actually faster than calling append many times.
       BUILDER&
       extend_valid(size_t size) noexcept {
+        if (size == 0) {
+          return content_;
+        }
         size_t start = content_.length();
         size_t stop = start + size;
-        last_valid_ = stop - 1;
-        if (last_valid_ > max_index_) {
-          max_index_ = last_valid_;
+        size_t last_valid = stop - 1;
+        if (last_valid > max_index_) {
+          max_index_ = last_valid;
         }
         for (size_t i = start; i < stop; i++) {
           index_.append(i);
@@ -1641,10 +1492,9 @@ namespace awkward {
       }
 
       /// @brief Discards the accumulated index and clears the content
-      /// of the builder. Also, last valid returns to `-1`.
+      /// of the builder.
       void
       clear() noexcept {
-        last_valid_ = -1;
         index_.clear();
         content_.clear();
       }
@@ -1746,9 +1596,6 @@ namespace awkward {
 
       /// @brief Unique form ID.
       size_t id_;
-
-      /// @brief Last valid index.
-      size_t last_valid_;
 
       /// @brief Keep track of maximum index value.
       size_t max_index_;
@@ -2129,7 +1976,6 @@ namespace awkward {
       BitMasked()
           : mask_(awkward::GrowableBuffer<uint8_t>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)),
             current_byte_(uint8_t(0)),
-            current_byte_ref_(mask_.append_and_get_ref(current_byte_)),
             current_index_(0) {
         size_t id = 0;
         set_id(id);
@@ -2152,7 +1998,6 @@ namespace awkward {
       BitMasked(const awkward::BuilderOptions& options)
           : mask_(awkward::GrowableBuffer<uint8_t>(options)),
             current_byte_(uint8_t(0)),
-            current_byte_ref_(mask_.append_and_get_ref(current_byte_)),
             current_index_(0) {
         size_t id = 0;
         set_id(id);
@@ -2262,15 +2107,22 @@ namespace awkward {
         mask_.clear();
         content_.clear();
         current_byte_ = 0;
-        current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
         current_index_ = 0;
       }
 
-      /// @brief Current length of the `mask` buffer.
+      /// @brief Current number of elements (bits) accumulated in the mask.
+      ///
+      /// `mask_` holds completed bytes; `current_index_` counts bits in the
+      /// partial trailing byte not yet committed to `mask_`.
       size_t
       length() const noexcept {
-        return mask_.length() > 0 ?
-          (mask_.length() - 1) * 8 + current_index_ : current_index_;
+        return mask_.length() * 8 + current_index_;
+      }
+
+      /// @brief Number of bytes the mask occupies.
+      size_t
+      mask_nbytes() const noexcept {
+        return mask_.length() + (current_index_ > 0 ? 1 : 0);
       }
 
       /// @brief Checks for validity and consistency.
@@ -2294,7 +2146,7 @@ namespace awkward {
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const
           noexcept {
-        names_nbytes["node" + std::to_string(id_) + "-mask"] = mask_.nbytes();
+        names_nbytes["node" + std::to_string(id_) + "-mask"] = mask_nbytes();
         content_.buffer_nbytes(names_nbytes);
       }
 
@@ -2305,10 +2157,8 @@ namespace awkward {
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-        mask_.concatenate_from(reinterpret_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]), 0, 1);
-        mask_.append(reinterpret_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]), mask_.length() - 1, 0, 1);
+        write_mask(reinterpret_cast<uint8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_buffers(buffers);
       }
 
@@ -2319,8 +2169,7 @@ namespace awkward {
       void
       to_buffer(void* buffer, const char* name) const noexcept {
         if (std::string(name) == std::string("node" + std::to_string(id_) + "-mask")) {
-          mask_.concatenate_from(reinterpret_cast<uint8_t*>(buffer), 0, 1);
-          mask_.append(reinterpret_cast<uint8_t*>(buffer), mask_.length() - 1, 0, 1);
+          write_mask(reinterpret_cast<uint8_t*>(buffer));
         }
         content_.to_buffer(buffer, name);
       }
@@ -2331,10 +2180,8 @@ namespace awkward {
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-        mask_.concatenate_from(reinterpret_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]), 0, 1);
-        mask_.append(reinterpret_cast<uint8_t*>(
-            buffers["node" + std::to_string(id_) + "-mask"]), mask_.length() - 1, 0, 1);
+        write_mask(reinterpret_cast<uint8_t*>(
+            buffers["node" + std::to_string(id_) + "-mask"]));
         content_.to_char_buffers(buffers);
       }
 
@@ -2359,30 +2206,42 @@ namespace awkward {
       }
 
     private:
-      /// @brief Inserts a byte in the mask buffer when `current_index_` equals `8`,
-      /// returns it reference to the `current_byte_ref_` and resets `current_byte_`
-      /// and `current_index_`.
+      // Byte is committed in append_end once eight bits are written; nothing
+      // to do at the start of an element.
       void
       append_begin() {
-        if (current_index_ == 8) {
-          current_byte_ref_ = mask_.append_and_get_ref(current_byte_);
-          current_byte_ = uint8_t(0);
-          current_index_ = 0;
-        }
       }
 
-      /// @brief Updates the `current_index_` and `current_byte_ref_` according to
-      /// the value of #valid_when.
+      /// @brief Advances `current_index_`; commits a completed byte to `mask_`
+      /// (with #valid_when inversion applied) every 8 elements.
       ///
       /// If #valid_when equals `true`: `0` indicates `null`, `1` indicates `valid`.
       /// If #valid_when equals `false`: `0` indicates `valid`, `1` indicates `null`.
       void
       append_end() {
         current_index_ += 1;
-        if (valid_when_) {
-          current_byte_ref_ = current_byte_;
-        } else {
-          current_byte_ref_ = ~current_byte_;
+        if (current_index_ == 8) {
+          mask_.append(valid_when_ ? current_byte_ : (uint8_t)(~current_byte_));
+          current_byte_ = uint8_t(0);
+          current_index_ = 0;
+        }
+      }
+
+      /// @brief Writes all mask bytes to `buffer`.
+      ///
+      /// Completed bytes (held in `mask_`) already carry the #valid_when inversion
+      /// from #append_end; the partial trailing byte is inverted here if needed.
+      void
+      write_mask(uint8_t* buffer) const noexcept {
+        if (buffer == nullptr) {
+          return;
+        }
+        if (mask_.length() > 0) {
+          mask_.concatenate(buffer);
+        }
+        if (current_index_ > 0) {
+          buffer[mask_.length()] =
+              valid_when_ ? current_byte_ : (uint8_t)(~current_byte_);
         }
       }
 
@@ -2402,9 +2261,6 @@ namespace awkward {
 
       /// @brief The current byte.
       uint8_t current_byte_;
-
-      /// @brief Stores the reference to the current byte.
-      uint8_t& current_byte_ref_;
 
       /// @brief The current index.
       size_t current_index_;
@@ -2450,9 +2306,6 @@ namespace awkward {
             index_(awkward::GrowableBuffer<INDEX>(AWKWARD_LAYOUTBUILDER_DEFAULT_OPTIONS)) {
         size_t id = 0;
         set_id(id);
-        for (size_t i = 0; i < contents_count_; i++) {
-          last_valid_index_[i] = -1;
-        }
       }
 
       /// @brief Creates a new Union layout builder by allocating new tags and index
@@ -2465,9 +2318,6 @@ namespace awkward {
             index_(awkward::GrowableBuffer<INDEX>(options)) {
         size_t id = 0;
         set_id(id);
-        for (size_t i = 0; i < contents_count_; i++) {
-          last_valid_index_[i] = -1;
-        }
       }
 
       template <std::size_t I>
@@ -2485,7 +2335,6 @@ namespace awkward {
         INDEX next_index = which_content.length();
 
         TAGS tag = (TAGS)TAG;
-        last_valid_index_[tag] = next_index;
         tags_.append(tag);
         index_.append(next_index);
 
@@ -2505,56 +2354,29 @@ namespace awkward {
       }
 
       /// @brief Assigns a unique ID to each node.
-      class SetIdFunctor {
-      public:
-          // Constructor to capture id by reference
-          SetIdFunctor(size_t& id) : id_(id) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.set_id(id_);
-          }
-
-      private:
-          size_t& id_;  // reference to the id
-      };
-
       void
       set_id(size_t& id) noexcept {
           id_ = id;
           id++;
-          SetIdFunctor setIdFunctor(id);  // instantiate the functor
           for (size_t i = 0; i < contents_count_; i++) {
-              visit_at(contents_, i, setIdFunctor);  // pass the functor instead of the lambda
+              visit_at(contents_, i, [&id](auto& content) {
+                  content.set_id(id);
+              });
           }
       }
 
 
       /// @brief Discards the accumulated tags and index, and clears
       /// the builder contents.
-      ///
-      /// Also, resets the last valid index array to `-1`.
-      class ClearContentsFunctor {
-      public:
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.clear();
-          }
-      };
-
       void
       clear() noexcept {
-          for (size_t i = 0; i < contents_count_; i++) {
-              last_valid_index_[i] = -1;
-          }
           tags_.clear();
           index_.clear();
 
-          ClearContentsFunctor clearContentsFunctor;  // instantiate the functor
           for (size_t i = 0; i < contents_count_; i++) {
-              visit_at(contents_, i, clearContentsFunctor);  // pass the functor instead of the lambda
+              visit_at(contents_, i, [](auto& content) {
+                  content.clear();
+              });
           }
       }
 
@@ -2596,35 +2418,16 @@ namespace awkward {
 
       /// @brief Retrieves the names and sizes (in bytes) of the buffers used
       /// in the builder and its contents.
-      class BufferNBytesFunctor {
-      public:
-          // Constructor to capture names_nbytes by reference
-          BufferNBytesFunctor(std::map<std::string, size_t>& names_nbytes)
-              : names_nbytes_(names_nbytes) {}
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.buffer_nbytes(names_nbytes_);
-          }
-
-      private:
-          std::map<std::string, size_t>& names_nbytes_;  // reference to the map
-      };
-
       void
       buffer_nbytes(std::map<std::string, size_t>& names_nbytes) const noexcept {
-          auto index_sequence((std::index_sequence_for<BUILDERS...>()));
-
           // Store the size of tags and index buffers
           names_nbytes["node" + std::to_string(id_) + "-tags"] = tags_.nbytes();
           names_nbytes["node" + std::to_string(id_) + "-index"] = index_.nbytes();
 
-          // Instantiate the functor to handle each content's buffer_nbytes call
-          BufferNBytesFunctor bufferNBytesFunctor(names_nbytes);
-
           for (size_t i = 0; i < contents_count_; i++) {
-              visit_at(contents_, i, bufferNBytesFunctor);  // pass the functor instead of the lambda
+              visit_at(contents_, i, [&names_nbytes](auto& content) {
+                  content.buffer_nbytes(names_nbytes);
+              });
           }
       }
 
@@ -2634,37 +2437,18 @@ namespace awkward {
       ///
       /// Used to fill the buffers map by allocating it with user-defined pointers
       /// using the same names and sizes (in bytes) obtained from #buffer_nbytes.
-      class ToBuffersFunctor {
-      public:
-          // Constructor to capture buffers by reference
-          ToBuffersFunctor(std::map<std::string, void*>& buffers)
-              : buffers_(buffers) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.to_buffers(buffers_);
-          }
-
-      private:
-          std::map<std::string, void*>& buffers_;  // reference to the buffers map
-      };
-
       void
       to_buffers(std::map<std::string, void*>& buffers) const noexcept {
-          auto index_sequence((std::index_sequence_for<BUILDERS...>()));
-
           // Concatenate tags and index buffers
           tags_.concatenate(reinterpret_cast<TAGS*>(
               buffers["node" + std::to_string(id_) + "-tags"]));
           index_.concatenate(reinterpret_cast<INDEX*>(
               buffers["node" + std::to_string(id_) + "-index"]));
 
-          // Create the functor to handle each content's to_buffers call
-          ToBuffersFunctor toBuffersFunctor(buffers);
-
           for (size_t i = 0; i < contents_count_; i++) {
-              visit_at(contents_, i, toBuffersFunctor);  // pass the functor instead of the lambda
+              visit_at(contents_, i, [&buffers](auto& content) {
+                  content.to_buffers(buffers);
+              });
           }
       }
 
@@ -2673,27 +2457,8 @@ namespace awkward {
       /// user-defined pointers if the given node name matches with any one of the nodes
       /// associated with the builder; otherwise, it searches the builder contents to
       /// locate a matching node.
-      class ToBufferFunctor {
-      public:
-          // Constructor to capture buffer and name by reference
-          ToBufferFunctor(void* buffer, const char* name)
-              : buffer_(buffer), name_(name) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.to_buffer(buffer_, name_);
-          }
-
-      private:
-          void* buffer_;            // reference to the buffer
-          const char* name_;        // reference to the name
-      };
-
       void
       to_buffer(void* buffer, const char* name) const noexcept {
-          auto index_sequence((std::index_sequence_for<BUILDERS...>()));
-
           if (std::string(name) == std::string("node" + std::to_string(id_) + "-tags")) {
               tags_.concatenate(reinterpret_cast<TAGS*>(buffer));
           }
@@ -2701,11 +2466,10 @@ namespace awkward {
               index_.concatenate(reinterpret_cast<INDEX*>(buffer));
           }
 
-          // Instantiate the functor to handle each content's to_buffer call
-          ToBufferFunctor toBufferFunctor(buffer, name);
-
           for (size_t i = 0; i < contents_count_; i++) {
-              visit_at(contents_, i, toBufferFunctor);  // pass the functor instead of the lambda
+              visit_at(contents_, i, [buffer, name](auto& content) {
+                  content.to_buffer(buffer, name);
+              });
           }
       }
 
@@ -2714,37 +2478,18 @@ namespace awkward {
       /// to a map of user-allocated buffers.
       ///
       /// The map keys and the buffer sizes are obtained from #buffer_nbytes
-      class ToCharBuffersFunctor {
-      public:
-          // Constructor to capture buffers by reference
-          ToCharBuffersFunctor(std::map<std::string, uint8_t*>& buffers)
-              : buffers_(buffers) { }
-
-          // Template operator() to handle the content
-          template <class CONTENT>
-          void operator()(CONTENT& content) const {
-              content.to_char_buffers(buffers_);
-          }
-
-      private:
-          std::map<std::string, uint8_t*>& buffers_;  // reference to the buffers map
-      };
-
       void
       to_char_buffers(std::map<std::string, uint8_t*>& buffers) const noexcept {
-          auto index_sequence((std::index_sequence_for<BUILDERS...>()));
-
           // Concatenate tags and index buffers
           tags_.concatenate(reinterpret_cast<TAGS*>(
               buffers["node" + std::to_string(id_) + "-tags"]));
           index_.concatenate(reinterpret_cast<INDEX*>(
               buffers["node" + std::to_string(id_) + "-index"]));
 
-          // Instantiate the functor to handle each content's to_char_buffers call
-          ToCharBuffersFunctor toCharBuffersFunctor(buffers);
-
           for (size_t i = 0; i < contents_count_; i++) {
-              visit_at(contents_, i, toCharBuffersFunctor);  // pass the functor instead of the lambda
+              visit_at(contents_, i, [&buffers](auto& content) {
+                  content.to_char_buffers(buffers);
+              });
           }
       }
 
@@ -2773,7 +2518,7 @@ namespace awkward {
           form_key << "node" << id_;
           std::string params("");
           if (!parameters_.empty()) {
-              params = ", \"parameters\": { " + parameters_ + " }";
+              params = "\"parameters\": { " + parameters_ + " }, ";
           }
           std::stringstream out;
           out << "{ \"class\": \"UnionArray\", \"tags\": \"" +
@@ -2826,9 +2571,6 @@ namespace awkward {
 
       /// @brief Unique form ID.
       size_t id_;
-
-      /// @brief Last valid index array.
-      size_t last_valid_index_[sizeof...(BUILDERS)];
 
       /// @brief The count of the Tuple contents in the builder.
       static constexpr size_t contents_count_ = sizeof...(BUILDERS);

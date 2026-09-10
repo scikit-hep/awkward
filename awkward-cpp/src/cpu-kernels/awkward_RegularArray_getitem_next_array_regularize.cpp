@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_RegularArray_getitem_next_array_regularize(
-  T* toarray,
-  const T* fromarray,
+  T* __restrict__ toarray,
+  const T* __restrict__ fromarray,
   int64_t lenarray,
   int64_t size) {
   for (int64_t j = 0;  j < lenarray;  j++) {
@@ -22,8 +22,8 @@ ERROR awkward_RegularArray_getitem_next_array_regularize(
   return success();
 }
 ERROR awkward_RegularArray_getitem_next_array_regularize_64(
-  int64_t* toarray,
-  const int64_t* fromarray,
+  int64_t* __restrict__ toarray,
+  const int64_t* __restrict__ fromarray,
   int64_t lenarray,
   int64_t size) {
   return awkward_RegularArray_getitem_next_array_regularize<int64_t>(

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Mapping
 
@@ -15,7 +14,10 @@ cpu = NumpyBackend.instance()
 
 @high_level_function()
 def to_rdataframe(arrays, *, flatlist_as_rvec=True):
-    """
+    """Converts an Awkward Array into ROOT RDataFrame columns.
+
+    See also #ak.from_rdataframe.
+
     Args:
         arrays (dict of arrays): Each value in this dict can be any array-like data
             that #ak.to_layout recognizes, but they must all have the same length.
@@ -24,8 +26,10 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
             Awkward Array's custom C++ classes. If False, even these "flat" lists use
             Awkward Array's custom C++ classes.
 
-    Converts an Awkward Array into ROOT Data Frame columns:
+    Returns:
+        A ROOT RDataFrame whose columns are the fields of `array`.
 
+    Examples:
         >>> x = ak.Array([
         ...     [1.1, 2.2, 3.3],
         ...     [],
@@ -43,8 +47,6 @@ def to_rdataframe(arrays, *, flatlist_as_rvec=True):
 
         >>> ak.sum(x, axis=-1) + y.a + y.b[:, 0]
         <Array [8.7, 4.2, 16.2] type='3 * float64'>
-
-    See also #ak.from_rdataframe.
     """
     # Dispatch
     yield arrays.values()

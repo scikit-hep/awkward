@@ -1,11 +1,13 @@
 name: CI
 
 on:
-  workflow_dispatch:
   pull_request:
   push:
     branches:
       - main
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,13 +36,16 @@ jobs:
 
   coverage:
     uses: ./.github/workflows/reusable-coverage.yml
-    secrets: inherit
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   docs:
     uses: ./.github/workflows/reusable-docs.yml
-    secrets: inherit
+    permissions:
+      contents: write # Required by the reusable docs deploy job to push to `gh-pages`.
 
   pass:
+    name: Check CI result
     if: always()
     needs:
       - change-detection
@@ -53,26 +58,26 @@ jobs:
 
     steps:
       - name: Decide whether the needed jobs succeeded or failed
-        uses: re-actors/alls-green@release/v1
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
         with:
           allowed-skips: >-
             ${{
-              fromJSON(needs.change-detection.outputs.run-tests)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.run-tests)
+              && '
               tests,
               '
+              || ''
             }} ${{
-              fromJSON(needs.change-detection.outputs.build-wheels)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.build-wheels)
+              && '
               packaging-tests,
               '
+              || ''
             }} ${{
-              fromJSON(needs.change-detection.outputs.run-header-only-tests)
-              && ''
-              || '
+              !fromJSON(needs.change-detection.outputs.run-header-only-tests)
+              && '
               header-only-tests,
               '
+              || ''
             }}
           jobs: ${{ toJSON(needs) }}

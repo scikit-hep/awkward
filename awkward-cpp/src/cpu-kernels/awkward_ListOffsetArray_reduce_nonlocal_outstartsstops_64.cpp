@@ -9,9 +9,9 @@
 
 ERROR
 awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
-    int64_t* outstarts,
-    int64_t* outstops,
-    const int64_t* distincts,
+    int64_t* __restrict__ outstarts,
+    int64_t* __restrict__ outstops,
+    const int64_t* __restrict__ distincts,
     int64_t lendistincts,
     int64_t outlength) {
   if (outlength > 0 && lendistincts > 0) {

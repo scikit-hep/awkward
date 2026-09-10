@@ -5,8 +5,6 @@ Pyarrow extension classes: AwkwardArrowArray and AwkwardArrowType
 See: https://arrow.apache.org/docs/python/extending_types.html
 """
 
-from __future__ import annotations
-
 import json
 
 import pyarrow

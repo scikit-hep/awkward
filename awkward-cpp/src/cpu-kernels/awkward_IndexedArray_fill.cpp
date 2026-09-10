@@ -6,9 +6,9 @@
 
 template <typename FROM, typename TO>
 ERROR awkward_IndexedArray_fill(
-  TO* toindex,
+  TO* __restrict__ toindex,
   int64_t toindexoffset,
-  const FROM* fromindex,
+  const FROM* __restrict__ fromindex,
   int64_t length,
   int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -17,42 +17,12 @@ ERROR awkward_IndexedArray_fill(
   }
   return success();
 }
-ERROR awkward_IndexedArray_fill_to64_from32(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const int32_t* fromindex,
-  int64_t length,
-  int64_t base) {
-  return awkward_IndexedArray_fill<int32_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length,
-    base);
-}
-ERROR awkward_IndexedArray_fill_to64_fromU32(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const uint32_t* fromindex,
-  int64_t length,
-  int64_t base) {
-  return awkward_IndexedArray_fill<uint32_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length,
-    base);
-}
-ERROR awkward_IndexedArray_fill_to64_from64(
-  int64_t* toindex,
-  int64_t toindexoffset,
-  const int64_t* fromindex,
-  int64_t length,
-  int64_t base) {
-  return awkward_IndexedArray_fill<int64_t, int64_t>(
-    toindex,
-    toindexoffset,
-    fromindex,
-    length,
-    base);
-}
+
+#define WRAPPER(FUNC, FROM, TO) \
+  ERROR FUNC(TO* toindex, int64_t toindexoffset, const FROM* fromindex, int64_t length, int64_t base) { \
+    return awkward_IndexedArray_fill<FROM, TO>(toindex, toindexoffset, fromindex, length, base); \
+  }
+
+WRAPPER(awkward_IndexedArray_fill_to64_from32, int32_t, int64_t)
+WRAPPER(awkward_IndexedArray_fill_to64_fromU32, uint32_t, int64_t)
+WRAPPER(awkward_IndexedArray_fill_to64_from64, int64_t, int64_t)

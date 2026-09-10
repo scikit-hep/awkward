@@ -31,9 +31,7 @@ public:
       throw py::type_error("obj.read(num_bytes) returned a larger bytes object than num_bytes");
     }
 
-    std::strncpy(buffer, PyBytes_AsString(data.ptr()), std::min(num_bytes, num_bytes_read));
-
-    py::gil_scoped_release release;
+    std::memcpy(buffer, PyBytes_AsString(data.ptr()), (size_t)num_bytes_read);
 
     return num_bytes_read;
   }

@@ -2,8 +2,14 @@ name: Codecov
 
 on:
   workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: 'coverage-${{ github.head_ref || github.run_id }}'
@@ -23,6 +29,15 @@ jobs:
     env:
       PIP_ONLY_BINARY: cmake
       PYTHON_VERSION: "3.10"
+      # The runner has many cores; without these limits, JAX/XLA, OpenBLAS,
+      # OpenMP, and numexpr each spawn a worker thread per core in the one
+      # test process. PJRT_NPROC caps the XLA CPU client's thread pools
+      # (xla/pjrt/utils.cc, DefaultThreadPoolSize).
+      PJRT_NPROC: "2"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_MAX_THREADS: "4"
 
     # Required for miniconda to activate conda
     defaults:
@@ -35,12 +50,13 @@ jobs:
           rm -rf * .[!.]* || echo "Nothing to clean"
           rm -rf ~/micromamba* || echo "Nothing to clean"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
+          persist-credentials: false
 
       - name: Get micromamba
-        uses: mamba-org/setup-micromamba@v3
+        uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
         with:
           environment-name: test-env
           init-shell: bash
@@ -49,7 +65,7 @@ jobs:
             -c rapidsai
             python=${{ env.PYTHON_VERSION }}
             pandas>=0.24.0
-            cccl-python
+            cccl-python>=1.0.2
             cupy>=14
             cuda-version=13
             cuda-toolkit
@@ -63,7 +79,7 @@ jobs:
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
-        uses: actions/cache@v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ./awkward-cpp/dist
           key: ${{ github.job }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('awkward-cpp/**') }}
@@ -103,13 +119,13 @@ jobs:
           --cov=awkward --cov-report=term --cov-report=xml:cuda-virtual-coverage.xml
 
       - name: Upload Codecov results
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: test_results

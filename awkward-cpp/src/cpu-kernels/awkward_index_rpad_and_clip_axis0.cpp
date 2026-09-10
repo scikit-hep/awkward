@@ -6,7 +6,7 @@
 
 template <typename T>
 ERROR awkward_index_rpad_and_clip_axis0(
-  T* toindex,
+  T* __restrict__ toindex,
   int64_t target,
   int64_t length) {
   int64_t shorter = (target < length ? target : length);
@@ -19,7 +19,7 @@ ERROR awkward_index_rpad_and_clip_axis0(
   return success();
 }
 ERROR awkward_index_rpad_and_clip_axis0_64(
-  int64_t* toindex,
+  int64_t* __restrict__ toindex,
   int64_t target,
   int64_t length) {
   return awkward_index_rpad_and_clip_axis0<int64_t>(

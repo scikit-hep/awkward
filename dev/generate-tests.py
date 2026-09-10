@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import copy
 import datetime
@@ -18,10 +17,31 @@ from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-try:
-    yaml_loader = yaml.CSafeLoader if sys._is_gil_enabled() else yaml.SafeLoader
-except AttributeError:
-    yaml_loader = yaml.CSafeLoader
+# Kernels dispatched to `cuda.compute` rather than compiled CUDA: these raise
+# errors eagerly (inside the call) instead of after `ak_cu.synchronize_cuda()`.
+# IMPORTANT: whenever an error-raising kernel moves to `cuda.compute` (or back),
+# this set must be updated to match, or the generated CUDA unit tests will
+# wrap `pytest.raises` around the wrong statement.
+CUDA_COMPUTE_KERNELS = {
+    "awkward_ListArray_compact_offsets",
+    "awkward_ListArray_broadcast_tooffsets",
+    "awkward_RegularArray_getitem_next_at",
+    "awkward_IndexedArray_validity",
+    "awkward_IndexedArray_getitem_nextcarry_outindex",
+    "awkward_IndexedArray_getitem_nextcarry",
+    "awkward_IndexedArray_flatten_none2empty",
+    "awkward_ListArray_getitem_jagged_descend",
+    "awkward_ListArray_getitem_jagged_numvalid",
+    "awkward_IndexedArray_flatten_nextcarry",
+    "awkward_UnionArray_validity",
+}
+
+# The C loader may be missing (pyyaml built without libyaml) and is avoided on
+# free-threaded builds.
+if getattr(sys, "_is_gil_enabled", lambda: True)():
+    yaml_loader = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+else:
+    yaml_loader = yaml.SafeLoader
 
 
 def reproducible_datetime():
@@ -921,7 +941,6 @@ cuda_kernels_tests = [
     "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_rpad_axis1",
     "awkward_UnionArray_regular_index",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
     "awkward_ListArray_localindex",
     "awkward_NumpyArray_pad_zero_to_length",
@@ -963,14 +982,12 @@ cuda_kernels_tests = [
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
-    "awkward_ListOffsetArray_reduce_local_outoffsets_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
     "awkward_UnionArray_regular_index_getsize",
     "awkward_UnionArray_simplify",
     "awkward_UnionArray_simplify_one",
-    "awkward_RecordArray_reduce_nonlocal_outoffsets_64",
     "awkward_reduce_count_64",
     "awkward_reduce_max",
     "awkward_reduce_max_complex",
@@ -1567,19 +1584,33 @@ def gencudaunittests(specdict):
                                 count += 1
                             else:
                                 args += ", " + arg.name
-                        f.write(" " * 4 + "funcC(" + args + ")\n")
+                        raises_error_eagerly = (
+                            spec.templatized_kernel_name in CUDA_COMPUTE_KERNELS
+                        )
+
                         if test["error"]:
-                            f.write(
-                                f"""
-    error_message = re.escape("{test["message"]} in compiled CUDA code ({spec.templatized_kernel_name})")
-"""
-                            )
-                            f.write(
-                                """    with pytest.raises(ValueError, match=rf"{error_message}"):
-        ak_cu.synchronize_cuda()
-"""
-                            )
+                            error_message_line = f'    error_message = re.escape("{test["message"]} in compiled CUDA code ({spec.templatized_kernel_name})")\n'
+                            if raises_error_eagerly:
+                                # call a kernel directly inside `pytest.raises()`
+                                f.write(
+                                    "\n"
+                                    + error_message_line
+                                    + '    with pytest.raises(ValueError, match=rf"{error_message}"):\n'
+                                    + " " * 8
+                                    + "funcC("
+                                    + args
+                                    + ")\n"
+                                )
+                            else:
+                                f.write(" " * 4 + "funcC(" + args + ")\n")
+                                f.write(
+                                    "\n"
+                                    + error_message_line
+                                    + '    with pytest.raises(ValueError, match=rf"{error_message}"):\n'
+                                    "        ak_cu.synchronize_cuda()\n"
+                                )
                         else:
+                            f.write(" " * 4 + "funcC(" + args + ")\n")
                             f.write(
                                 """
     try:

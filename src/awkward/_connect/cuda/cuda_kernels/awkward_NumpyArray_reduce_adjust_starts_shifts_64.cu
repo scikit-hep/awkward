@@ -1,11 +1,14 @@
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
+// See `awkward_NumpyArray_reduce_adjust_starts_64.cu` for the rationale:
+// `parents[toptr[k]] == k` by construction, so we use the thread/bin index
+// directly. The `offsets` slot is kept in the signature for symmetry.
 template <typename T, typename C, typename U, typename V>
 __global__ void
 awkward_NumpyArray_reduce_adjust_starts_shifts_64(
     T* toptr,
     int64_t outlength,
-    const C* parents,
+    const C* /* offsets */,
     const U* starts,
     const V* shifts,
     uint64_t invocation_index,
@@ -19,9 +22,6 @@ awkward_NumpyArray_reduce_adjust_starts_shifts_64(
     int64_t i = toptr[thread_id];
     if (i < 0) return;
 
-    int64_t parent = parents[i];
-    int64_t start  = starts[parent];
-
-    toptr[thread_id] += shifts[i] - start;
+    toptr[thread_id] += shifts[i] - starts[thread_id];
   }
 }
