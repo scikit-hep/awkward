@@ -1,7 +1,7 @@
 ak.metadata_from_parquet
 ========================
 
-Defined in `awkward.operations.ak_metadata_from_parquet <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_metadata_from_parquet.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/b75f4427a0a950a3e5472b9d5e06f2f4c636b993/src/awkward/operations/ak_metadata_from_parquet.py#L21>`__.
+Defined in `awkward.operations.ak_metadata_from_parquet <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/operations/ak_metadata_from_parquet.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/operations/ak_metadata_from_parquet.py#L21>`__.
 
 .. py:function:: ak.metadata_from_parquet(path, *, storage_options=None, row_groups=None, ignore_metadata=False, scan_files=True)
 
