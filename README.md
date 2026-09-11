@@ -103,17 +103,23 @@ Because of the two packages (`awkward-cpp` may be updated in GitHub but not on P
 
 # Installation for developers
 
-Clone this repository _recursively_ to get the header-only C++ dependencies, then generate sources with [nox](https://nox.thea.codes/), compile and install `awkward-cpp`, and finally install `awkward` as an editable installation:
+Clone this repository _recursively_ to get the header-only C++ dependencies. The repository is a [uv](https://docs.astral.sh/uv/) workspace, so `uv sync` (or any `uv run` command) compiles `awkward-cpp` and installs both packages as editable installations:
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward.git
 cd awkward
 
+uv sync
+```
+
+Without uv, compile and install `awkward-cpp`, then install `awkward` as an editable installation:
+
+```bash
 python -m pip install -v ./awkward-cpp
 python -m pip install -e .
 ```
 
-Tests can be run in parallel with [pytest](https://docs.pytest.org/):
+Tests can be run in parallel with [pytest](https://docs.pytest.org/) (prefix with `uv run` if you use uv):
 
 ```bash
 python -m pytest -n auto tests
