@@ -240,6 +240,28 @@ def _has_issue_4274(layout: ak.contents.Content) -> bool:
     )
 
 
+def _has_issue_4316(layout: ak.contents.Content) -> bool:
+    """`ak.array_equal`, the roundtrip's oracle, returns `False` for two
+    equal unions when one side's index into a list child is a permutation
+    of the other's and the list's content is a record or a list: the
+    visitor in `ak_almost_equal` carries the used child lazily, the list
+    branch then compacts the permuted side with another lazy carry, which
+    wraps a record in an `IndexedArray` and turns a list into a
+    `ListArray`, and the `same_content_types` class check fails before
+    the projection that would undo it (#4316). The roundtrip pairs such
+    sides whenever `to_packed` renumbers the original's index (an
+    over-long child, or a union that was sliced) while the reconstruction
+    keeps the drawn permutation. A regular list child compares equal
+    through the roundtrip but not in general (`1 * var * {}`), so it is
+    excluded too.
+    """
+    if layout.is_union and any(
+        x.is_list and _carried_lazily(x.content) for x in layout.contents
+    ):
+        return True
+    return any(_has_issue_4316(x) for x in _children(layout))
+
+
 def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
     """The direct child layouts of a node."""
     if layout.is_record or layout.is_union:
@@ -247,6 +269,15 @@ def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
     if layout.is_option or layout.is_indexed or layout.is_list:
         return [layout.content]
     return []
+
+
+def _carried_lazily(layout: ak.contents.Content) -> bool:
+    """Whether a lazy carry changes the node's class: a record becomes an
+    `IndexedArray` and a list a `ListArray`. Indexed and option wrappers
+    are looked through because `to_packed` projects them."""
+    while layout.is_indexed or layout.is_option:
+        layout = layout.content
+    return layout.is_list or layout.is_record
 
 
 def _strip_options(
@@ -269,7 +300,14 @@ def _strip_options(
         allow_byte_masked=False,
         allow_bit_masked=False,
         allow_unmasked=False,
-    ).filter(lambda a: arrow_compatible(a) and not has_issues(a))
+    ).filter(
+        # `ak.array_equal`, not the conversion, misjudges a union whose
+        # index into a list-of-records (or list-of-lists) child the
+        # packing renumbers on one side only (#4316)
+        lambda a: (
+            arrow_compatible(a) and not has_issues(a) and not _has_issue_4316(a.layout)
+        )
+    )
 )
 def test_roundtrip(a: ak.Array) -> None:
     """`to_arrow` followed by `from_arrow` reconstructs the array."""
