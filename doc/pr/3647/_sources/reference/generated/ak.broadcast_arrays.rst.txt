@@ -1,7 +1,7 @@
 ak.broadcast_arrays
 ===================
 
-Defined in `awkward.operations.ak_broadcast_arrays <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_broadcast_arrays.py>`__ on `line 28 <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_broadcast_arrays.py#L28>`__.
+Defined in `awkward.operations.ak_broadcast_arrays <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_broadcast_arrays.py>`__ on `line 28 <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_broadcast_arrays.py#L28>`__.
 
 .. py:function:: ak.broadcast_arrays(*arrays, depth_limit=None, broadcast_parameters_rule='one_to_one', left_broadcast=True, right_broadcast=True, highlevel=True, behavior=None, attrs=None)
 

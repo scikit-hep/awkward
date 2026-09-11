@@ -1,7 +1,7 @@
 ak.typetracer.typetracer_with_report
 ====================================
 
-Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/typetracer.py>`__ on `line 177 <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/typetracer.py#L177>`__.
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/typetracer.py>`__ on `line 177 <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/typetracer.py#L177>`__.
 
 .. py:function:: ak.typetracer.typetracer_with_report(form: awkward.forms.Form | str | collections.abc.Mapping, *, buffer_key: str | collections.abc.Callable = '{form_key}', highlevel: bool = False, behavior: collections.abc.Mapping | None = None, attrs: collections.abc.Mapping[str, awkward._typing.Any] | None = None) -> tuple[awkward.contents.Content, awkward._nplikes.typetracer.TypeTracerReport]
 

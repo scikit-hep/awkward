@@ -1,7 +1,7 @@
 ak.to_parquet
 =============
 
-Defined in `awkward.operations.ak_to_parquet <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_to_parquet.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_to_parquet.py#L23>`__.
+Defined in `awkward.operations.ak_to_parquet <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_to_parquet.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_to_parquet.py#L23>`__.
 
 .. py:function:: ak.to_parquet(array, destination, *, list_to32=False, string_to32=True, bytestring_to32=True, emptyarray_to=None, categorical_as_dictionary=False, extensionarray=True, count_nulls=True, compression='zstd', compression_level=None, row_group_size=None, data_page_size=None, parquet_flavor=None, parquet_version='2.6', parquet_page_version='1.0', parquet_metadata_statistics=True, parquet_dictionary_encoding=False, parquet_byte_stream_split=False, parquet_coerce_timestamps=None, parquet_old_int96_timestamps=None, parquet_compliant_nested=False, parquet_extra_options=None, storage_options=None)
 

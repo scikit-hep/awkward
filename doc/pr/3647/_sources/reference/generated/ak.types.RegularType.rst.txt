@@ -1,7 +1,7 @@
 ak.types.RegularType
 ====================
 
-Defined in `awkward.types.regulartype <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/types/regulartype.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/types/regulartype.py#L17>`__.
+Defined in `awkward.types.regulartype <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/types/regulartype.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/types/regulartype.py#L17>`__.
 
 .. py:class:: ak.types.RegularType(content: awkward.types.type.Type, size: awkward._nplikes.shape.ShapeItem, *, parameters: awkward._typing.JSONMapping | None = None)
 

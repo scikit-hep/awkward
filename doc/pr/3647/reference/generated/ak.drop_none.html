@@ -827,11 +827,12 @@
                   
   <section id="ak-drop-none">
 <h1>ak.drop_none<a class="headerlink" href="#ak-drop-none" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_drop_none.py">awkward.operations.ak_drop_none</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_drop_none.py#L21">line 21</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_drop_none.py">awkward.operations.ak_drop_none</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_drop_none.py#L21">line 21</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.drop_none">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">drop_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.drop_none" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Removes missing values (None) from a given array.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Data in which to remove Nones.</p></li>
@@ -854,8 +855,11 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array with missing values (None) removed.</p>
+</dd>
 </dl>
-<p>Removes missing values (None) from a given array.</p>
+<p class="rubric">Examples</p>
 <p>For example, in the following <code class="docutils literal notranslate"><span class="pre">array</span></code>,</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">array</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[[</span><span class="kc">None</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">],</span> <span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">]]])</span>
 </pre></div>

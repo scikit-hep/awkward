@@ -1,7 +1,7 @@
 ak.str.count_substring
 ======================
 
-Defined in `awkward.operations.str.akstr_count_substring <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/str/akstr_count_substring.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/str/akstr_count_substring.py#L12>`__.
+Defined in `awkward.operations.str.akstr_count_substring <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/str/akstr_count_substring.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/str/akstr_count_substring.py#L12>`__.
 
 .. py:function:: ak.str.count_substring(array, pattern, *, ignore_case=False, highlevel=True, behavior=None, attrs=None)
 

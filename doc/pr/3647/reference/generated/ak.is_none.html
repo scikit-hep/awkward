@@ -827,11 +827,12 @@
                   
   <section id="ak-is-none">
 <h1>ak.is_none<a class="headerlink" href="#ak-is-none" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_is_none.py">awkward.operations.ak_is_none</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_is_none.py#L22">line 22</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_is_none.py">awkward.operations.ak_is_none</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_is_none.py#L22">line 22</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.is_none">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">is_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.is_none" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns an array with True where an element is None at a given axis depth, False otherwise.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
@@ -852,9 +853,11 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
-</dl>
-<p>Returns an array whose value is True where an element of <code class="docutils literal notranslate"><span class="pre">array</span></code> is None;
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array whose value is True where an element of <code class="docutils literal notranslate"><span class="pre">array</span></code> is None;
 False otherwise (at a given <code class="docutils literal notranslate"><span class="pre">axis</span></code> depth).</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

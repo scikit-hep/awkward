@@ -827,11 +827,14 @@
                   
   <section id="ak-nan-to-num">
 <h1>ak.nan_to_num<a class="headerlink" href="#ak-nan-to-num" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_nan_to_num.py">awkward.operations.ak_nan_to_num</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1091d0ad7683fe89466cc4a52c93f1e70f058640/src/awkward/operations/ak_nan_to_num.py#L19">line 19</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_nan_to_num.py">awkward.operations.ak_nan_to_num</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f0b34c298fe7777ab945d5e9d0ee9cd033807aef/src/awkward/operations/ak_nan_to_num.py#L19">line 19</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.nan_to_num">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">nan_to_num</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">posinf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neginf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">awkward._typing.Mapping</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">awkward._typing.Mapping</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.nan_to_num" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Replaces NaN and infinite values with finite numbers in floating-point arrays.</p>
+<p>See also <a class="reference internal" href="ak.nan_to_none.html#ak.nan_to_none" title="ak.nan_to_none"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.nan_to_none</span></code></a> to convert NaN to None, i.e. missing values with
+option-type.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
@@ -849,10 +852,13 @@ high-level.</p></li>
 high-level.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array with NaN (“not a number”) or infinity replaced by the specified
+finite values, following
+<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html">np.nan_to_num</a>
+for Awkward Arrays.</p>
+</dd>
 </dl>
-<p>Implements <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html">np.nan_to_num</a>
-for Awkward Arrays, which replaces NaN (“not a number”) or infinity with specified values.</p>
-<p>See also <a class="reference internal" href="ak.nan_to_none.html#ak.nan_to_none" title="ak.nan_to_none"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.nan_to_none</span></code></a> to convert NaN to None, i.e. missing values with option-type.</p>
 </dd></dl>
 
 </section>
