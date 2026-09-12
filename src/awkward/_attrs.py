@@ -43,6 +43,19 @@ def without_transient_attrs(attrs: dict[str, Any]) -> JSONMapping:
     return {k: v for k, v in attrs.items() if not k.startswith("@")}
 
 
+def serializable_attrs_of(obj) -> "JSONMapping | None":
+    """
+    The attrs of a high-level object that should be written out when it is
+    serialized: transient attrs (those whose key starts with `"@"`) are dropped,
+    as they may hold arbitrary, non-serializable objects. Returns None if there
+    is nothing to write.
+    """
+    attrs = attrs_of_obj(obj)
+    if not attrs:
+        return None
+    return without_transient_attrs(dict(attrs)) or None
+
+
 class Attrs(Mapping):
     def __init__(self, data: Mapping[str, Any]):
         self._data = {_enforce_str_key(k): v for k, v in data.items()}

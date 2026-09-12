@@ -14,6 +14,32 @@ from .extn_types import (
 )
 
 AWKWARD_INFO_KEY = b"awkward_array_metadata"  # metadata field in Table schema
+AWKWARD_ATTRS_KEY = b"AWKWARD_ATTRS"  # array attrs in the Table schema metadata
+PANDAS_ATTRS_KEY = b"PANDAS_ATTRS"  # the same, for tables written by pandas
+
+
+def table_with_attrs(table: pyarrow.Table, attrs: dict) -> pyarrow.Table:
+    """
+    Returns `table` with `attrs` (which must be JSON-compatible) stored in its
+    schema metadata, alongside any metadata the table already has.
+    """
+    metadata = {} if table.schema.metadata is None else table.schema.metadata.copy()
+    metadata[AWKWARD_ATTRS_KEY] = json.dumps(attrs).encode(errors="surrogatescape")
+    return table.replace_schema_metadata(metadata)
+
+
+def attrs_from_schema_metadata(metadata: dict | None) -> dict:
+    """
+    Extracts the array attrs from a Table or RecordBatch schema's metadata,
+    accepting those written by pandas as well as by Awkward. Returns an empty
+    dict if there are none.
+    """
+    if not metadata:
+        return {}
+    for key in (PANDAS_ATTRS_KEY, AWKWARD_ATTRS_KEY):
+        if key in metadata:
+            return json.loads(metadata[key].decode(errors="surrogatescape"))
+    return {}
 
 
 def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Table:
