@@ -494,33 +494,30 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         and np.issubdtype(item.content.dtype, np.bool_)
     ):
         if item_backend.nplike.known_data:
+            nplike = item_backend.nplike
             item = item.to_ListOffsetArray64(True)
-            localindex = ak._do.local_index(item, axis=1)
-
-            flat_index = ak._do.flatten(localindex, axis=1)
             flat_mask = ak._do.flatten(item, axis=1)
+            assert flat_mask.is_numpy
+            mask_data = flat_mask.data
 
-            assert flat_index.is_numpy and flat_mask.is_numpy
-            nextcontent = flat_index.data[flat_mask.data]
-
-            cumsum = item_backend.nplike.empty(
-                flat_mask.data.shape[0] + 1, dtype=np.int64
-            )
-            if isinstance(item_backend.nplike, Jax):
+            cumsum = nplike.empty(mask_data.shape[0] + 1, dtype=np.int64)
+            if isinstance(nplike, Jax):
                 cumsum = cumsum.at[0].set(0)
-                cumsum = cumsum.at[1:].set(
-                    item_backend.nplike.asarray(
-                        item_backend.nplike.cumsum(flat_mask.data)
-                    )
-                )
+                cumsum = cumsum.at[1:].set(nplike.asarray(nplike.cumsum(mask_data)))
             else:
                 cumsum[0] = 0
-                cumsum[1:] = item_backend.nplike.asarray(
-                    item_backend.nplike.cumsum(flat_mask.data)
-                )
+                nplike.cumsum(mask_data, maybe_out=cumsum[1:])
 
-            item_offsets = item_backend.nplike.asarray(item.offsets.data)
-            nextoffsets = ak.index.Index(cumsum[item_offsets])
+            item_offsets = nplike.asarray(item.offsets.data)
+            nextoffsets_data = cumsum[item_offsets]
+            nextoffsets = ak.index.Index(nextoffsets_data)
+
+            # position of each selected element within its own list: its flat
+            # position minus the start of the list it belongs to
+            (selected,) = nplike.nonzero(mask_data)
+            nextcontent = selected - nplike.repeat(
+                item_offsets[:-1], nextoffsets_data[1:] - nextoffsets_data[:-1]
+            )
 
         else:
             item._touch_data(recursive=False)
@@ -575,7 +572,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 cumsum = cumsum.at[1:].set(item_backend.nplike.cumsum(expanded))
             else:
                 cumsum[0] = 0
-                cumsum[1:] = item_backend.nplike.cumsum(expanded)
+                item_backend.nplike.cumsum(expanded, maybe_out=cumsum[1:])
             item_offsets = item_backend.nplike.asarray(item.offsets.data)
             nextoffsets = ak.index.Index(cumsum[item_offsets])
 
