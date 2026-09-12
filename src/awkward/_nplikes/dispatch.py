@@ -10,7 +10,7 @@ from awkward._util import UNSET, Sentinel
 D = TypeVar("D")
 
 
-_type_to_nplike: dict[type, NumpyLike] = {}
+_type_to_nplike: dict[type, NumpyLike | None] = {}
 _nplike_classes: list[type[NumpyLike]] = []
 
 
@@ -19,6 +19,8 @@ N = TypeVar("N", bound="type[NumpyLike]")
 
 def register_nplike(cls: N) -> N:
     _nplike_classes.append(cls)
+    # a new nplike may recognise types previously cached as unrecognised
+    _type_to_nplike.clear()
     return cls
 
 
@@ -40,7 +42,7 @@ def nplike_of_obj(
 
     cls = type(obj)
     try:
-        return _type_to_nplike[cls]
+        nplike = _type_to_nplike[cls]
     except KeyError:
         # Try and find the nplike for this type
         # caching the result by type
@@ -50,14 +52,16 @@ def nplike_of_obj(
         # TODO: replace this whole function with a more generic lookup registration system
         if isinstance(obj, VirtualNDArray):
             return obj.nplike
+        nplike = None
         for nplike_cls in _nplike_classes:
             if nplike_cls.is_own_array_type(cls):
                 nplike = nplike_cls.instance()
                 break
-        else:
-            if default is UNSET:
-                raise TypeError(f"cannot find nplike for {cls.__name__}")
-            else:
-                return cast(D, default)
         _type_to_nplike[cls] = nplike
-        return nplike
+
+    if nplike is None:
+        if default is UNSET:
+            raise TypeError(f"cannot find nplike for {cls.__name__}")
+        else:
+            return cast(D, default)
+    return nplike
