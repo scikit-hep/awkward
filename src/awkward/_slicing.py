@@ -515,9 +515,12 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             # position of each selected element within its own list: its flat
             # position minus the start of the list it belongs to
             (selected,) = nplike.nonzero(mask_data)
-            nextcontent = selected - nplike.repeat(
-                item_offsets[:-1], nextoffsets_data[1:] - nextoffsets_data[:-1]
+            # `repeat` needs counts it can cast to an index, which is 32-bit on
+            # 32-bit platforms
+            counts = nplike.astype(
+                nextoffsets_data[1:] - nextoffsets_data[:-1], dtype=np.intp, copy=False
             )
+            nextcontent = selected - nplike.repeat(item_offsets[:-1], counts)
 
         else:
             item._touch_data(recursive=False)
