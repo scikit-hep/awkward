@@ -4,7 +4,7 @@ import os
 import warnings
 from collections.abc import Callable
 from functools import wraps
-from inspect import currentframe
+from inspect import currentframe, isfunction
 
 from awkward._typing import ParamSpec, TypeVar, overload
 from awkward.errors import ExperimentalWarning
@@ -48,7 +48,7 @@ def experimental(
     the marked API usable from the second call on.
 
     Args:
-        func (callable or None): The function to mark, in the
+        func (function or None): The function to mark, in the
             ``@experimental`` form; None, in the ``@experimental()`` form.
 
     Returns:
@@ -86,7 +86,12 @@ def experimental(
     if func is None:
         # @experimental() -- the parenthesized form
         return experimental
-    if not callable(func):
+    if not isfunction(func):
+        if callable(func) or isinstance(func, (classmethod, property, staticmethod)):
+            raise TypeError(
+                "@experimental must directly decorate a plain function; place it below "
+                f"descriptor decorators (got {func!r})"
+            )
         raise TypeError(
             "@experimental accepts no arguments; use @experimental or "
             f"@experimental() (got {func!r})"
