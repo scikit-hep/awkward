@@ -46,8 +46,6 @@ V = TypeVar("V")
 
 def _has_integral_leaf(layout) -> bool:
     """True if any NumpyArray leaf of ``layout`` is bool/integer (dtype kind b, i, u)."""
-    import awkward as ak
-
     found = False
 
     def action(node, **kwargs):
@@ -69,8 +67,6 @@ def promote_integral_to_float64(array):
     common (already-floating) case. The cast is performed by the array's own
     backend, so on GPU it stays on device -- no host transfer.
     """
-    import awkward as ak
-
     if _has_integral_leaf(array.layout):
         return ak.operations.ak_values_astype._impl(
             array,
