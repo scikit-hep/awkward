@@ -29,6 +29,7 @@ from awkward._typing import (
     EllipsisType,
     Final,
     Literal,
+    NominalMeta,
     Self,
     SupportsIndex,
     TypeGuard,
@@ -236,7 +237,7 @@ class TypeTracerReport:
         return list(out)
 
 
-class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike):
+class TypeTracerArray(NDArrayOperatorsMixin, ArrayLike, metaclass=NominalMeta):
     _dtype: numpy.dtype
     _shape: tuple[ShapeItem, ...]
 
@@ -602,7 +603,7 @@ def try_touch_shape(array: Any):
 
 
 @register_nplike
-class TypeTracer(NumpyLike[TypeTracerArray]):
+class TypeTracer(NumpyLike[TypeTracerArray], metaclass=NominalMeta):
     known_data: Final = False
     is_eager: Final = True
     supports_structured_dtypes: Final = True
