@@ -795,41 +795,32 @@ def apply_step(
                     mask = backend.nplike.logical_or(mask, m, maybe_out=mask)
 
         nextmask = Index8(mask.view(np.int8))
+        # `mask` folds in the missing entries of every option input, so projecting an input
+        # under it is a gather at the positions where the mask is clear
+        valid_positions = backend.nplike.nonzero(backend.nplike.logical_not(mask))[0]
+        valid_count = backend.nplike.shape_item_as_index(valid_positions.shape[0])
         index = backend.nplike.full(mask.shape[0], np.int64(-1), dtype=np.int64)
         if isinstance(backend.nplike, Jax):
-            index = index.at[~mask].set(
-                backend.nplike.arange(
-                    backend.nplike.shape_item_as_index(mask.shape[0])
-                    - backend.nplike.count_nonzero(mask),
-                    dtype=np.int64,
-                )
+            index = index.at[valid_positions].set(
+                backend.nplike.arange(valid_count, dtype=np.int64)
             )
         else:
-            index[~mask] = backend.nplike.arange(
-                backend.nplike.shape_item_as_index(mask.shape[0])
-                - backend.nplike.count_nonzero(mask),
-                dtype=np.int64,
-            )
+            index[valid_positions] = backend.nplike.arange(valid_count, dtype=np.int64)
         index = Index64(index)
-        if any(not x.is_option for x in contents):
-            nextindex = backend.nplike.arange(
-                backend.nplike.shape_item_as_index(mask.shape[0]),
-                dtype=np.int64,
-            )
-            if isinstance(backend.nplike, Jax):
-                nextindex = nextindex.at[mask].set(-1)
-            else:
-                nextindex[mask] = -1
-            nextindex = Index64(nextindex)
+        valid_carry = Index64(valid_positions)
 
         nextinputs = []
         nextparameters = []
         for x in inputs:
-            if isinstance(x, optiontypes):
+            if isinstance(x, IndexedOptionArray):
+                carry = Index64(x.index.raw(backend.nplike)[valid_positions])
+                nextinputs.append(x.content._carry(carry, True))
+                nextparameters.append(x._parameters)
+            elif isinstance(x, optiontypes):
                 nextinputs.append(x.project(nextmask))
                 nextparameters.append(x._parameters)
             elif isinstance(x, Content):
-                nextinputs.append(IndexedOptionArray(nextindex, x).project(nextmask))
+                nextinputs.append(x._carry(valid_carry, True))
                 nextparameters.append(x._parameters)
             else:
                 nextinputs.append(x)
