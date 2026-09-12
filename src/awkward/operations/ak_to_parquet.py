@@ -1,7 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
-import json
 from collections.abc import Mapping, Sequence
 from os import fsdecode
 
@@ -9,8 +8,11 @@ import fsspec
 
 import awkward as ak
 import awkward._connect.pyarrow
-from awkward._attrs import without_transient_attrs
-from awkward._connect.pyarrow import convert_awkward_arrow_table_to_native
+from awkward._attrs import serializable_attrs_of
+from awkward._connect.pyarrow import (
+    convert_awkward_arrow_table_to_native,
+    table_with_attrs,
+)
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -417,17 +419,9 @@ def _impl(
 
     # when writing row groups iteratively, the attrs are those of the first array
     attrs_from = first_array if write_iteratively else array
-    if hasattr(attrs_from, "attrs") and attrs_from.attrs:
-        serializable_attrs = without_transient_attrs(attrs_from.attrs.to_dict())
-
-        # Only modify table metadata if there are actual non-transient attrs
-        if serializable_attrs:
-            existing_metadata = table.schema.metadata or {}
-            merged_metadata = {
-                **existing_metadata,
-                b"AWKWARD_ATTRS": json.dumps(serializable_attrs).encode("utf-8"),
-            }
-            table = table.replace_schema_metadata(merged_metadata)
+    serializable_attrs = serializable_attrs_of(attrs_from)
+    if serializable_attrs is not None:
+        table = table_with_attrs(table, serializable_attrs)
 
     if parquet_extra_options is None:
         parquet_extra_options = {}
