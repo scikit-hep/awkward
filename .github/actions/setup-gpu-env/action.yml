@@ -17,14 +17,17 @@ runs:
       with:
         environment-name: test-env
         init-shell: bash
-        # TODO: run the tests with cudf again when it supports numba-cuda>=0.23.0
+        # cudf is published on the "rapidsai" channel, not conda-forge
+        # (a migration to conda-forge is expected).
         # TODO: drop the numpy pin when a numba-cuda release supports
         # numpy 2.5 (NVIDIA/numba-cuda#907): numba-cuda 0.30.4 references
         # the removed np.row_stack at import time
         create-args: >-
+          -c rapidsai
           python=3.13
           pandas>=0.24
           cccl-python>=1.0.2
+          cudf>=25.02
           cupy>=14
           cuda-version=${{ inputs.cuda-version }}
           cxx-compiler
