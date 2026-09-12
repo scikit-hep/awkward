@@ -73,6 +73,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         "_nplike",
         "_shape",
         "_shape_generator",
+        "_shape_is_known",
     )
 
     def __init__(
@@ -91,14 +92,23 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             raise TypeError(
                 f"The nplike {type(nplike)} does not support virtual arrays"
             )
-        if not all(is_integer(dim) or dim is unknown_length for dim in shape):
-            raise TypeError(
-                f"Only shapes of integer dimensions or unknown_length are supported for {type(self).__name__}. Received shape {shape}"
-            )
+        normalised: list[ShapeItem] = []
+        shape_is_known = True
+        for dim in shape:
+            if dim is unknown_length:
+                shape_is_known = False
+                normalised.append(dim)
+            elif is_integer(dim):
+                normalised.append(int(dim))
+            else:
+                raise TypeError(
+                    f"Only shapes of integer dimensions or unknown_length are supported for {type(self).__name__}. Received shape {shape}"
+                )
 
         # array metadata
         self._nplike = nplike
-        self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
+        self._shape = tuple(normalised)
+        self._shape_is_known = shape_is_known
         self._dtype = np.dtype(dtype)
         self._array: Sentinel | ArrayLike = UNMATERIALIZED
 
@@ -124,7 +134,8 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
     @property
     def shape(self) -> tuple[ShapeItem, ...]:
-        self.get_shape()
+        if not self._shape_is_known:
+            self.get_shape()
         return self._shape
 
     @property
@@ -156,7 +167,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return self.materialize().strides  # type: ignore[attr-defined]
 
     def get_shape(self) -> None:
-        if any(dim is unknown_length for dim in self._shape):
+        if not self._shape_is_known:
             if self._shape_generator is not None:
                 shape = self._shape_generator()
             else:
@@ -175,6 +186,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                     f"Only shapes of integer dimensions are supported for materialized shapes. Received shape {shape}"
                 )
             self._shape = tuple(map(int, shape))
+            self._shape_is_known = True
             self._shape_generator = assert_never
 
     def materialize(self) -> ArrayLike:
@@ -194,6 +206,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                     f"{type(self).__name__} had dtype {self._dtype} before materialization while the materialized array has dtype {array.dtype}"
                 )
             self._shape = array.shape
+            self._shape_is_known = True
             if self.__enable_caching__:
                 self._array = array
                 self._shape_generator = assert_never
@@ -319,41 +332,41 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return repr(self) if self._shape else "??"
 
     def __getitem__(self, index):
-        (index,) = maybe_materialize(index)
+        # a slice is never materializable, so it can skip `maybe_materialize`
+        if not isinstance(index, slice):
+            (index,) = maybe_materialize(index)
+            return self.materialize().__getitem__(index)
+
         if self._array is not UNMATERIALIZED:
             return self._array.__getitem__(index)
 
-        if isinstance(index, slice):
-            if (
-                index.start is unknown_length
-                or index.stop is unknown_length
-                or index.step is unknown_length
-            ):
-                raise TypeError(
-                    f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided"
-                )
-            else:
-                length = self.shape[0]
-                start, stop, step = index.indices(length)
-                # if the slice is _exactly_ slicing the whole array, we can return self directly
-                # this avoids unnecessary VirtualNDArray creation and method-chaining
-                if start == 0 and step == 1 and stop == length:
-                    return self
-                new_length = max(
-                    0, (stop - start + (step - (1 if step > 0 else -1))) // step
-                )
-
-            return type(self)(
-                self._nplike,
-                (new_length, *self.shape[1:]),
-                self._dtype,
-                lambda: self.materialize()[index],
-                None,
-                self._buffer_key,
-                __enable_caching__=self.__enable_caching__,
+        if (
+            index.start is unknown_length
+            or index.stop is unknown_length
+            or index.step is unknown_length
+        ):
+            raise TypeError(
+                f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided"
             )
-        else:
-            return self.materialize().__getitem__(index)
+
+        shape = self.shape
+        length = shape[0]
+        start, stop, step = index.indices(length)
+        # if the slice is _exactly_ slicing the whole array, we can return self directly
+        # this avoids unnecessary VirtualNDArray creation and method-chaining
+        if start == 0 and step == 1 and stop == length:
+            return self
+        new_length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
+
+        return type(self)(
+            self._nplike,
+            (new_length, *shape[1:]),
+            self._dtype,
+            lambda: self.materialize()[index],
+            None,
+            self._buffer_key,
+            __enable_caching__=self.__enable_caching__,
+        )
 
     def __setitem__(self, key, value):
         array = self.materialize()
