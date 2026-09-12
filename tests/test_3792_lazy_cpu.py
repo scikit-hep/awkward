@@ -71,7 +71,7 @@ def test_memoization_of_none_result():
     class NoneSpy(IRNode):
         def lower(self, x):
             calls.append(1)
-            return None
+            return
 
     n = NoneSpy(10)
     assert n.compute() is None

@@ -29,14 +29,14 @@ repos:
     additional_dependencies: [pyyaml]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: c59bba8fb259db0fec2bbb77ad8ba51ea7341b56  # frozen: v0.15.20
+  rev: 321478e58f4938179c6b86e4ddfa923d1547a49b  # frozen: v0.16.6
   hooks:
   - id: ruff-check
     args: ["--fix", "--show-fixes"]
   - id: ruff-format
 
 - repo: https://github.com/codespell-project/codespell
-  rev: 2ccb47ff45ad361a21071a7eedda4c37e6ae8c5a  # frozen: v2.4.2
+  rev: 57b21406f092110c18776e39b0bda50d37c945c8  # frozen: v2.4.3
   hooks:
   - id: codespell
     args: ["-L", "ue,subjet,parms,fo,numer,thre,nin,nout"]
@@ -50,7 +50,7 @@ repos:
     exclude: .pre-commit-config.yaml
 
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: "745eface02aef23e168a8afb6b5737818efbea95"  # frozen: v0.11.0.1
+  rev: "a6564f5d57444e123433a5c9af733e3975c77229"  # frozen: v0.11.0.1-1
   hooks:
   - id: shellcheck
 
@@ -64,13 +64,13 @@ repos:
     files: ^tests/
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 1a4bb160cab6417b3045e1b37b6b72449243e658  # frozen: 0.37.4
+  rev: c4654a7e007c9619a5eb63c39a456572a0fa1851  # frozen: 0.38.0
   hooks:
     - id: check-github-workflows
       args: ["--verbose"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # frozen: v2.1.0
+  rev: 7ff8d35ae36a7d2b968f2f90b4c723e292e594ee  # frozen: v2.3.1
   hooks:
     - id: mypy
       files: src
@@ -78,12 +78,12 @@ repos:
         - numpy>=1.24
 
 - repo: https://github.com/abravalheri/validate-pyproject
-  rev: 4b2e70d08cb2ccd26d1fba73588de41c7a5d50b7  # frozen: v0.25
+  rev: 17e12779811926f000bdfa1795f9e3735dd71ac3  # frozen: 0.26
   hooks:
     - id: validate-pyproject
 
 - repo: https://github.com/zizmorcore/zizmor-pre-commit
-  rev: e3eebf65325ccc992422292cb7a4baee967cf815  # frozen: v1.26.1
+  rev: cef8b8350da46d8114c7e6b7272aebdccdf193ce  # frozen: v1.30.0
   hooks:
     - id: zizmor
       args: [--persona=pedantic]

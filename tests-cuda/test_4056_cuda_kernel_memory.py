@@ -77,7 +77,7 @@ INPUT_BYTES_COMPLEX = N * 16
 
 def test_sum_complex_memory():
     array = _ragged_complex(N)
-    fn = lambda: ak.sum(array, axis=1)  # noqa: E731
+    fn = lambda: ak.sum(array, axis=1)
     _assert_no_leak(fn)
     # A pure segmented reduce needs only the output (plus O(rows) scratch);
     # anything on the order of the input signals an intermediate copy.
@@ -86,7 +86,7 @@ def test_sum_complex_memory():
 
 def test_prod_complex_memory():
     array = _ragged_complex(N)
-    fn = lambda: ak.prod(array, axis=1)  # noqa: E731
+    fn = lambda: ak.prod(array, axis=1)
     _assert_no_leak(fn)
     assert _allocated_bytes(fn) < 0.5 * INPUT_BYTES_COMPLEX
 
@@ -99,7 +99,7 @@ def test_sum_bool_complex_memory():
     # copy (16N). If the map is fused via TransformIterator, tighten the
     # bound to match the reducers above.
     array = _ragged_complex(N)
-    fn = lambda: ak.any(array, axis=1)  # noqa: E731
+    fn = lambda: ak.any(array, axis=1)
     _assert_no_leak(fn)
     assert _allocated_bytes(fn) < 0.5 * INPUT_BYTES_COMPLEX
 
@@ -108,7 +108,7 @@ def test_rpad_and_clip_axis1_memory():
     array = _ragged_float(N)
     target = 128
     output_bytes = len(array) * target * 8
-    fn = lambda: ak.pad_none(array, target, axis=1, clip=True)  # noqa: E731
+    fn = lambda: ak.pad_none(array, target, axis=1, clip=True)
     _assert_no_leak(fn)
     # Index generation is a single fused transform; allow the output index
     # plus the option-type wrapping, but not multiples of it.
@@ -121,7 +121,7 @@ def test_missing_repeat_memory():
     array = ak.to_backend(ak.Array(data), "cuda")
     slicer = [0, None, cols - 1]
     output_bytes = rows * len(slicer) * 8
-    fn = lambda: array[:, slicer]  # noqa: E731
+    fn = lambda: array[:, slicer]
     _assert_no_leak(fn)
     # The per-call allocation here is dominated by the slicing machinery, not the
     # kernels: NumpyArray._carry gathers the selected content (~2x output) and the

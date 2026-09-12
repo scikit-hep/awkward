@@ -117,5 +117,5 @@ class Meta:
     def dimension_optiontype(self) -> bool:
         raise NotImplementedError
 
-    def copy(self, *, parameters: JSONMapping | None | Sentinel = UNSET) -> Self:
+    def copy(self, *, parameters: JSONMapping | Sentinel | None = UNSET) -> Self:
         raise NotImplementedError
