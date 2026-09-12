@@ -78,6 +78,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
     ) -> ArrayLikeT | PlaceholderArray | VirtualNDArray:
+        # already the exact array type this nplike owns, and nothing to do
+        if (
+            not copy
+            and type(obj) is self._module.ndarray
+            and (dtype is None or obj.dtype == dtype)
+        ):
+            return obj
         if isinstance(obj, PlaceholderArray):
             assert obj.dtype == dtype or dtype is None
             return obj
@@ -88,7 +95,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                 # if we are not copying and the dtype is _exactly_ the dtype of the existing array
                 # or dtype is None, we can return the VirtualNDArray directly
                 # this avoids unnecessary VirtualNDArray creation and method-chaining
-                if not copy and (obj.dtype == dtype or dtype is None):
+                if not copy and (dtype is None or obj.dtype == dtype):
                     return obj
                 return VirtualNDArray(
                     obj._nplike,
