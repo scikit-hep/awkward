@@ -16,6 +16,7 @@ myst-nb~=1.0
 myst-parser~=2.0
 sphinx-external-toc
 sphinx-autoapi
+sphinx-llm
 ipyleaflet
 
 numpy
