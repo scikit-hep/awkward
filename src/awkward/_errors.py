@@ -5,12 +5,12 @@ import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import wraps
-from weakref import ref as weak_ref
 
 import numpy
 
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any, ParamSpec, TypeVar
+from awkward._util import Sentinel
 
 np = NumpyMetadata.instance()
 
@@ -20,32 +20,9 @@ T = TypeVar("T")
 S = TypeVar("S")
 P = ParamSpec("P")
 
-
-class WeakMethodProxy:
-    """A proxy for a method of a weakly referenced object"""
-
-    def __init__(self, method):
-        self._this = weak_ref(method.__self__)
-        self._impl = method.__func__
-
-    def __call__(self, *args, **kwargs):
-        this = self._this()
-        method = self._impl.__get__(this, type(this))
-        return method(*args, **kwargs)
-
-
-class PartialFunction:
-    """Analogue of `functools.partial`, but as a distinct type"""
-
-    __slots__ = ("args", "func", "kwargs")
-
-    def __init__(self, func, *args, **kwargs):
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
-
-    def __call__(self):
-        return self.func(*self.args, **self.kwargs)
+# Placeholder for a note fragment whose rendering has been deferred until the
+# exception is actually raised.
+UNFORMATTED = Sentinel("UNFORMATTED", None)
 
 
 class ErrorContext:
@@ -59,12 +36,23 @@ class ErrorContext:
     def __init__(self, **kwargs):
         self._kwargs = kwargs
 
+    def _populate(self) -> None:
+        """Build ``self._kwargs``.
+
+        Only the context that actually becomes primary can decorate an
+        exception, so subclasses defer their (comparatively expensive)
+        argument bookkeeping to here.
+        """
+
     def __enter__(self):
         # Make it strictly non-reenterant. Only one ErrorContext (per thread) is primary.
-        if self.primary() is None:
-            self._slate.__dict__.clear()
-            self._slate.__dict__.update(self._kwargs)
-            self._slate.__dict__["__primary_context__"] = self
+        slate = self._slate.__dict__
+        if slate.get("__primary_context__") is None:
+            if self._kwargs is None:
+                self._populate()
+            slate.clear()
+            slate.update(self._kwargs)
+            slate["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
         if (
@@ -202,28 +190,31 @@ class OperationErrorContext(ErrorContext):
         return False
 
     def __init__(self, name, args: Iterable[Any], kwargs: Mapping[str, Any]):
-        string_args: list[str] | PartialFunction
-        string_kwargs: dict[str, str] | PartialFunction
-        if self.primary() is None and (
-            self.any_backend_is_delayed(args)
-            or self.any_backend_is_delayed(kwargs.values())
+        self._name = name
+        self._raw_args = args
+        self._raw_kwargs = kwargs
+        self._kwargs = None
+
+    def _populate(self) -> None:
+        args = self._raw_args
+        kwargs = self._raw_kwargs
+        string_args: list[str] | Sentinel
+        string_kwargs: dict[str, str] | Sentinel
+        if self.any_backend_is_delayed(args) or self.any_backend_is_delayed(
+            kwargs.values()
         ):
             string_args = self._format_args(args)
             string_kwargs = self._format_kwargs(kwargs)
         else:
-            # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
-            # --> in either case, delay string generation
-            string_args = PartialFunction(WeakMethodProxy(self._format_args), args)
-            string_kwargs = PartialFunction(
-                WeakMethodProxy(self._format_kwargs), kwargs
-            )
+            # --> delay string generation
+            string_args = string_kwargs = UNFORMATTED
 
-        super().__init__(
-            name=name,
-            args=string_args,
-            kwargs=string_kwargs,
-        )
+        self._kwargs = {
+            "name": self._name,
+            "args": string_args,
+            "kwargs": string_kwargs,
+        }
 
     def _format_args(self, arguments: Iterable) -> list[str]:
         string_arguments = []
@@ -244,20 +235,24 @@ class OperationErrorContext(ErrorContext):
 
     @property
     def name(self):
-        return self._kwargs["name"]
+        return self._name
 
     @property
     def args(self) -> list:
+        if self._kwargs is None:
+            self._populate()
         out = self._kwargs["args"]
-        if isinstance(out, PartialFunction):
-            out = self._kwargs["args"] = out()
+        if out is UNFORMATTED:
+            out = self._kwargs["args"] = self._format_args(self._raw_args)
         return out
 
     @property
     def kwargs(self) -> dict:
+        if self._kwargs is None:
+            self._populate()
         out = self._kwargs["kwargs"]
-        if isinstance(out, PartialFunction):
-            out = self._kwargs["kwargs"] = out()
+        if out is UNFORMATTED:
+            out = self._kwargs["kwargs"] = self._format_kwargs(self._raw_kwargs)
         return out
 
     def format_exception(self, exception: Exception) -> str:
@@ -286,42 +281,51 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        from awkward._backends.dispatch import backend_of_obj
-        from awkward._backends.numpy import NumpyBackend
+        self._raw_array = array
+        self._raw_where = where
+        self._kwargs = None
 
-        numpy_backend = NumpyBackend.instance()
-        if self.primary() is not None or all(
-            backend_of_obj(x, default=numpy_backend).nplike.is_eager
-            for x in (array, where)
+    def _populate(self) -> None:
+        from awkward._backends.dispatch import backend_of_obj
+
+        array = self._raw_array
+        where = self._raw_where
+        # an object with no backend at all cannot be delayed
+        array_backend = backend_of_obj(array, default=None)
+        where_backend = backend_of_obj(where, default=None)
+        if (array_backend is None or array_backend.nplike.is_eager) and (
+            where_backend is None or where_backend.nplike.is_eager
         ):
-            # if primary is not None: we won't be setting an ErrorContext
             # if all nplikes are eager: no accumulation of large arrays
-            # --> in either case, delay string generation
-            formatted_array = PartialFunction(
-                WeakMethodProxy(self.format_argument), self._width, array
-            )
-            formatted_slice = PartialFunction(self.format_slice, where)
+            # --> delay string generation
+            formatted_array = formatted_slice = UNFORMATTED
         else:
             formatted_array = self.format_argument(self._width, array)
             formatted_slice = self.format_slice(where)
 
-        super().__init__(
-            array=formatted_array,
-            where=formatted_slice,
-        )
+        self._kwargs = {
+            "array": formatted_array,
+            "where": formatted_slice,
+        }
 
     @property
     def array(self):
+        if self._kwargs is None:
+            self._populate()
         out = self._kwargs["array"]
-        if isinstance(out, PartialFunction):
-            out = self._kwargs["array"] = out()
+        if out is UNFORMATTED:
+            out = self._kwargs["array"] = self.format_argument(
+                self._width, self._raw_array
+            )
         return out
 
     @property
     def where(self):
+        if self._kwargs is None:
+            self._populate()
         out = self._kwargs["where"]
-        if isinstance(out, PartialFunction):
-            out = self._kwargs["where"] = out()
+        if out is UNFORMATTED:
+            out = self._kwargs["where"] = self.format_slice(self._raw_where)
         return out
 
     def format_exception(self, exception):
