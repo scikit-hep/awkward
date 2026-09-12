@@ -3,11 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <script data-domain="awkward-array.org" defer="defer" src="https://views.scientific-python.org/js/plausible.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.35.2/js/jquery.terminal.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.35.2/js/unix_formatting.min.js"></script>
+    <!--
+      Keep these pinned to exact versions with matching integrity hashes: a
+      floating version silently pulls in whatever npm serves next, which is how
+      jQuery 4.0 (which dropped $.isFunction) broke this page. The hashes are
+      the sha384 of the files published in the npm tarballs; regenerate them
+      when bumping a version. unix_formatting is loaded unminified because
+      upstream ships no unix_formatting.min.js -- requesting one makes jsDelivr
+      generate it with Terser, and hashing generated output would break the
+      page whenever jsDelivr updates its minifier.
+    -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"
+      integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.46.2/js/jquery.terminal.min.js"
+      integrity="sha384-sLazBX/OQO51RGgWRoCaVomfEqMurYaCRa8YLLtrLg8bwves0t7R/mJTtKFQEdiV"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.46.2/js/unix_formatting.js"
+      integrity="sha384-VPARveXmiYVYTIsW12NagfB4SkaxoUOrUIawckkeL7thEc6oKFceIYYIGszXOTGm"
+      crossorigin="anonymous"
+    ></script>
     <link
-      href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.35.2/css/jquery.terminal.min.css"
+      href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.46.2/css/jquery.terminal.min.css"
+      integrity="sha384-2qGn13i031N9CesSTCyHkYT4O2VMEbb64dKZd8WS5w8Fs6Yi8XiZo91SEQJRIA9t"
+      crossorigin="anonymous"
       rel="stylesheet"
     />
     <style>
@@ -73,7 +97,7 @@
       }
 
       async function main() {
-        let indexURL = "https://cdn.jsdelivr.net/pyodide/v0.26.3/full/";
+        let indexURL = "https://cdn.jsdelivr.net/pyodide/v314.0.4/full/";
         const urlParams = new URLSearchParams(window.location.search);
         const buildParam = urlParams.get("build");
         if (buildParam) {
@@ -272,7 +296,7 @@
               import micropip
               import asyncio
               loop = asyncio.get_event_loop()
-              loop.run_until_complete(micropip.install("awkward==2.6.4"))
+              loop.run_until_complete(micropip.install("awkward"))
             `,
             { globals: namespace },
           ).then(function() {
