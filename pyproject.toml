@@ -179,6 +179,7 @@ disable = [
     "import-outside-toplevel",
     "inconsistent-return-statements",
     "invalid-class-object",
+    "invalid-metaclass",
     "invalid-name",
     "invalid-unary-operand-type",
     "keyword-arg-before-vararg",
