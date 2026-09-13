@@ -1,0 +1,7 @@
+ak.forms.from_type
+==================
+
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/f6283266f637920541b53a66f2205832961729a9/src/awkward/forms/form.py>`__ on `line 209 <https://github.com/scikit-hep/awkward/blob/f6283266f637920541b53a66f2205832961729a9/src/awkward/forms/form.py#L209>`__.
+
+.. py:function:: ak.forms.from_type(type_: awkward.types.Type) -> Form
+

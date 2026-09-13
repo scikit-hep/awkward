@@ -1,0 +1,11 @@
+ak.index.IndexU32
+=================
+
+Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/f6283266f637920541b53a66f2205832961729a9/src/awkward/index.py>`__ on `line 321 <https://github.com/scikit-hep/awkward/blob/f6283266f637920541b53a66f2205832961729a9/src/awkward/index.py#L321>`__.
+
+.. py:class:: ak.index.IndexU32(data, *, metadata: dict | None = None, nplike: awkward._nplikes.numpy_like.NumpyLike | None = None)
+
+
+
+   .. py:attribute:: _expected_dtype
+
