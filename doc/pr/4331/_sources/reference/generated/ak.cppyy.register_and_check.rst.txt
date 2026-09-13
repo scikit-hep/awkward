@@ -1,0 +1,7 @@
+ak.cppyy.register_and_check
+===========================
+
+Defined in `awkward.cppyy <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/cppyy.py>`__ on `line 9 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/cppyy.py#L9>`__.
+
+.. py:function:: ak.cppyy.register_and_check()
+

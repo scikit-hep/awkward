@@ -1,0 +1,7 @@
+ak.prettyprint.alternate
+========================
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/prettyprint.py>`__ on `line 52 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/prettyprint.py#L52>`__.
+
+.. py:function:: ak.prettyprint.alternate(length: int)
+
