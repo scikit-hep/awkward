@@ -1,0 +1,25 @@
+var classawkward_1_1Builder =
+[
+    [ "~Builder", "classawkward_1_1Builder.html#a171953b19e37a697b95309bdb99bdac6", null ],
+    [ "active", "classawkward_1_1Builder.html#a63fb7653fe206c5e9adef8f7ad6b4d7a", null ],
+    [ "beginlist", "classawkward_1_1Builder.html#a760c753587e5b21196d8942e60d5a068", null ],
+    [ "beginrecord", "classawkward_1_1Builder.html#ac06baafa9cd114b60498986ecdcbf08e", null ],
+    [ "begintuple", "classawkward_1_1Builder.html#ac600f04f3df4491fdb4e227a48c27906", null ],
+    [ "boolean", "classawkward_1_1Builder.html#ad938ad0f5086a2596f2bb21577b57f4a", null ],
+    [ "classname", "classawkward_1_1Builder.html#aa0cb9edc4bd4e3ccb8531c6820db1c56", null ],
+    [ "clear", "classawkward_1_1Builder.html#a5eeb94d22b8366d1b68d0614384802fe", null ],
+    [ "complex", "classawkward_1_1Builder.html#aaf65e43a63693e4ac56abebf1bc36a70", null ],
+    [ "datetime", "classawkward_1_1Builder.html#a328ae6a455d4557a648b3469784de89d", null ],
+    [ "endlist", "classawkward_1_1Builder.html#a5b59a6dbc37211fc122d3f6098ec3f3f", null ],
+    [ "endrecord", "classawkward_1_1Builder.html#af874eed2753db93d71ae91bb48be79d3", null ],
+    [ "endtuple", "classawkward_1_1Builder.html#a9d4e1bf49c17235b8e490546a65f5fff", null ],
+    [ "field", "classawkward_1_1Builder.html#a27c96acc30a0b2e2f23d9c46909dba5c", null ],
+    [ "index", "classawkward_1_1Builder.html#ab3bc6b48830c17426a75cb7ee7c6c51e", null ],
+    [ "integer", "classawkward_1_1Builder.html#a0ddff9ce4198f762c1a9b9d69bd7e44b", null ],
+    [ "length", "classawkward_1_1Builder.html#afa9d40043400795d0509d1ecdab7e32e", null ],
+    [ "null", "classawkward_1_1Builder.html#a9506f728f5821db53aaa469597483302", null ],
+    [ "real", "classawkward_1_1Builder.html#afcc59887bbd7774daea8c1cd4de875a9", null ],
+    [ "string", "classawkward_1_1Builder.html#a808a5ac33b71d9e7fdf725c287422633", null ],
+    [ "timedelta", "classawkward_1_1Builder.html#aaa43e4feed565a9872bcd576840fd11a", null ],
+    [ "to_buffers", "classawkward_1_1Builder.html#a24ef6967f0648462def1c03e00e8a610", null ]
+];
