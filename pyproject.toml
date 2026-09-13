@@ -131,6 +131,9 @@ addopts = [
 xfail_strict = true
 markers = [
     "cuda: marks tests that require a CUDA-capable GPU",
+    # Registered here so that --strict-markers accepts it on the jobs that do
+    # not install pytest-run-parallel, which is the plugin that acts on it.
+    "thread_unsafe: marks tests that must not run under --parallel-threads",
 ]
 filterwarnings = [
     "error",
