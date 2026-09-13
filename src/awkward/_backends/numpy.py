@@ -26,6 +26,13 @@ class NumpyBackend(Backend):
 
     def __init__(self):
         self._numpy = Numpy.instance()
+        self._kernels: dict[KernelKeyType, NumpyKernel] = {}
 
     def __getitem__(self, index: KernelKeyType) -> NumpyKernel:
-        return NumpyKernel(awkward_cpp.cpu_kernels.kernel[index], index)
+        try:
+            return self._kernels[index]
+        except KeyError:
+            kernel = self._kernels[index] = NumpyKernel(
+                awkward_cpp.cpu_kernels.kernel[index], index
+            )
+            return kernel

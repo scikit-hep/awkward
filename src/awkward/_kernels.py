@@ -69,33 +69,48 @@ class CTypesFunc(Protocol):
 
 
 class NumpyKernel(BaseKernel):
-    @classmethod
-    def _cast(cls, x, t):
-        if issubclass(t, ctypes._Pointer):
-            # Do we have a NumPy-owned array?
-            if numpy.is_own_array(x):
-                assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
-                if x.ndim > 0:
-                    return ctypes.cast(numpy.memory_ptr(x), t)
-                else:
-                    return x
-            # Or, do we have a ctypes type
-            elif hasattr(x, "_b_base_"):
-                return ctypes.cast(x, t)
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
+        argtypes = impl.argtypes
+        self._is_pointer = tuple(issubclass(t, ctypes._Pointer) for t in argtypes)
+        # Building a typed ctypes pointer for each buffer costs several times as
+        # much as the call itself, so re-prototype the same function address
+        # with `void *` parameters and hand it plain addresses instead.
+        self._call = ctypes.CFUNCTYPE(
+            impl.restype,
+            *(
+                ctypes.c_void_p if is_pointer else t
+                for is_pointer, t in zip(self._is_pointer, argtypes, strict=True)
+            ),
+        )(ctypes.cast(impl, ctypes.c_void_p).value)
+
+    @staticmethod
+    def _pointer_of(x):
+        # Do we have a NumPy-owned array?
+        if numpy.is_own_array(x):
+            assert x.flags.c_contiguous, "kernel expects contiguous array"
+            if x.ndim > 0:
+                return x.ctypes.data
             else:
-                raise AssertionError(
-                    f"Only NumPy buffers should be passed to Numpy Kernels, received {x} (ptr type={type(t).__name__})"
-                )
+                return x
+        # Or, do we have a ctypes type
+        elif hasattr(x, "_b_base_"):
+            return ctypes.cast(x, ctypes.c_void_p)
         else:
-            return x
+            raise AssertionError(
+                f"Only NumPy buffers should be passed to Numpy Kernels, received {x}"
+            )
 
     def __call__(self, *args) -> None:
-        assert len(args) == len(self._impl.argtypes)
+        assert len(args) == len(self._is_pointer)
 
         args = maybe_materialize(*args)
 
-        return self._impl(
-            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes, strict=True))
+        return self._call(
+            *(
+                self._pointer_of(x) if is_pointer else x
+                for x, is_pointer in zip(args, self._is_pointer, strict=True)
+            )
         )
 
 
