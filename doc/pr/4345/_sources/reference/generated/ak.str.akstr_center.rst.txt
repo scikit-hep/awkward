@@ -1,0 +1,14 @@
+ak.str.akstr_center
+===================
+
+.. py:module:: awkward.operations.str.akstr_center
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_center.center
+
+
