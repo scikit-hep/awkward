@@ -1,7 +1,7 @@
 ak.str.repeat
 =============
 
-Defined in `awkward.operations.str.akstr_repeat <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/str/akstr_repeat.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/str/akstr_repeat.py#L23>`__.
+Defined in `awkward.operations.str.akstr_repeat <https://github.com/scikit-hep/awkward/blob/af8dcb76aab2b138686abd0031756c8abe43e2b7/src/awkward/operations/str/akstr_repeat.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/af8dcb76aab2b138686abd0031756c8abe43e2b7/src/awkward/operations/str/akstr_repeat.py#L23>`__.
 
 .. py:function:: ak.str.repeat(array, num_repeats, *, highlevel=True, behavior=None, attrs=None)
 

@@ -1,7 +1,7 @@
 ak.contents.Content
 ===================
 
-Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/contents/content.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/contents/content.py#L136>`__.
+Defined in `awkward.contents.content <https://github.com/scikit-hep/awkward/blob/af8dcb76aab2b138686abd0031756c8abe43e2b7/src/awkward/contents/content.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/af8dcb76aab2b138686abd0031756c8abe43e2b7/src/awkward/contents/content.py#L136>`__.
 
 .. py:class:: ak.contents.Content
 

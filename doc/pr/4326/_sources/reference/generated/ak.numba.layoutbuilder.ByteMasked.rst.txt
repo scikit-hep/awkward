@@ -1,7 +1,7 @@
 ak.numba.layoutbuilder.ByteMasked
 =================================
 
-Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/numba/layoutbuilder.py>`__ on `line 342 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/numba/layoutbuilder.py#L342>`__.
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/af8dcb76aab2b138686abd0031756c8abe43e2b7/src/awkward/numba/layoutbuilder.py>`__ on `line 342 <https://github.com/scikit-hep/awkward/blob/af8dcb76aab2b138686abd0031756c8abe43e2b7/src/awkward/numba/layoutbuilder.py#L342>`__.
 
 .. py:class:: ak.numba.layoutbuilder.ByteMasked(content, *, valid_when=True, parameters=None, initial=1024, resize=8.0)
 

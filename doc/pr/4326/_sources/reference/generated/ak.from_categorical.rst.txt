@@ -1,7 +1,7 @@
 ak.from_categorical
 ===================
 
-Defined in `awkward.operations.ak_from_categorical <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_from_categorical.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/0a5fd09b61a09a8886665829183f1450c72ce85e/src/awkward/operations/ak_from_categorical.py#L12>`__.
+Defined in `awkward.operations.ak_from_categorical <https://github.com/scikit-hep/awkward/blob/af8dcb76aab2b138686abd0031756c8abe43e2b7/src/awkward/operations/ak_from_categorical.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/af8dcb76aab2b138686abd0031756c8abe43e2b7/src/awkward/operations/ak_from_categorical.py#L12>`__.
 
 .. py:function:: ak.from_categorical(array, *, highlevel=True, behavior=None, attrs=None)
 
