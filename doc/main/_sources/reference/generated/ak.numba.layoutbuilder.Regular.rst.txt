@@ -1,7 +1,7 @@
 ak.numba.layoutbuilder.Regular
 ==============================
 
-Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/numba/layoutbuilder.py>`__ on `line 197 <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/numba/layoutbuilder.py#L197>`__.
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/numba/layoutbuilder.py>`__ on `line 197 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/numba/layoutbuilder.py#L197>`__.
 
 .. py:class:: ak.numba.layoutbuilder.Regular(content, size, *, parameters=None)
 

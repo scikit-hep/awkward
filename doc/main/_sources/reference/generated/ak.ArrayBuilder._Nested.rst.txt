@@ -1,7 +1,7 @@
 ak.ArrayBuilder._Nested
 =======================
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/highlevel.py>`__ on `line 3240 <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/highlevel.py#L3240>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/highlevel.py>`__ on `line 3252 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/highlevel.py#L3252>`__.
 
 .. py:class:: ak.ArrayBuilder._Nested(arraybuilder)
 
