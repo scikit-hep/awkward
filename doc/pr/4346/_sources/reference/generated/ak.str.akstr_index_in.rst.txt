@@ -1,0 +1,14 @@
+ak.str.akstr_index_in
+=====================
+
+.. py:module:: awkward.operations.str.akstr_index_in
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_index_in.index_in
+
+
