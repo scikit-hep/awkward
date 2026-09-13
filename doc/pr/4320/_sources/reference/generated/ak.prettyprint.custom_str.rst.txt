@@ -1,7 +1,0 @@
-ak.prettyprint.custom_str
-=========================
-
-Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/88d8875106b5c3796492bcfed4b949b6eb007fab/src/awkward/prettyprint.py>`__ on `line 124 <https://github.com/scikit-hep/awkward/blob/88d8875106b5c3796492bcfed4b949b6eb007fab/src/awkward/prettyprint.py#L124>`__.
-
-.. py:function:: ak.prettyprint.custom_str(current: awkward._typing.Any) -> str | None
-
