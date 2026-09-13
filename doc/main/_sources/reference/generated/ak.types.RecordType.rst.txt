@@ -1,7 +1,7 @@
 ak.types.RecordType
 ===================
 
-Defined in `awkward.types.recordtype <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/types/recordtype.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/types/recordtype.py#L20>`__.
+Defined in `awkward.types.recordtype <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/types/recordtype.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/types/recordtype.py#L20>`__.
 
 .. py:class:: ak.types.RecordType(contents: collections.abc.Iterable[awkward.types.type.Type], fields: collections.abc.Iterable[str], *, parameters: awkward._typing.JSONMapping | None = None)
 

@@ -1,7 +1,7 @@
 ak.prettyprint.FormatterOptions
 ===============================
 
-Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/prettyprint.py>`__ on `line 24 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/prettyprint.py#L24>`__.
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/prettyprint.py>`__ on `line 24 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/prettyprint.py#L24>`__.
 
 .. py:class:: ak.prettyprint.FormatterOptions
 

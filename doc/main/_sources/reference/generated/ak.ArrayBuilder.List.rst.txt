@@ -1,7 +1,7 @@
 ak.ArrayBuilder.List
 ====================
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/highlevel.py>`__ on `line 3265 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/highlevel.py#L3265>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/highlevel.py>`__ on `line 3265 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/highlevel.py#L3265>`__.
 
 .. py:class:: ak.ArrayBuilder.List(arraybuilder)
 

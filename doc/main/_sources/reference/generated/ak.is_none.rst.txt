@@ -1,7 +1,7 @@
 ak.is_none
 ==========
 
-Defined in `awkward.operations.ak_is_none <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/operations/ak_is_none.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/operations/ak_is_none.py#L22>`__.
+Defined in `awkward.operations.ak_is_none <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/ak_is_none.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/ak_is_none.py#L22>`__.
 
 .. py:function:: ak.is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None)
 

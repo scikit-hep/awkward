@@ -1,7 +1,7 @@
 ak.types.NumpyType
 ==================
 
-Defined in `awkward.types.numpytype <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/types/numpytype.py>`__ on `line 100 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/types/numpytype.py#L100>`__.
+Defined in `awkward.types.numpytype <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/types/numpytype.py>`__ on `line 100 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/types/numpytype.py#L100>`__.
 
 .. py:class:: ak.types.NumpyType(primitive: str, *, parameters: awkward._typing.JSONMapping | None = None)
 

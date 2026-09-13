@@ -1,7 +1,7 @@
 ak.jax.assert_registered
 ========================
 
-Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/jax.py>`__ on `line 143 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/jax.py#L143>`__.
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/jax.py>`__ on `line 143 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/jax.py#L143>`__.
 
 .. py:function:: ak.jax.assert_registered()
 

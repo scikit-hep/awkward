@@ -1,7 +1,7 @@
 ak.from_arrow
 =============
 
-Defined in `awkward.operations.ak_from_arrow <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/operations/ak_from_arrow.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/f82b1341feaf9c411aba7facfb45b97ad3ecaf45/src/awkward/operations/ak_from_arrow.py#L15>`__.
+Defined in `awkward.operations.ak_from_arrow <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/ak_from_arrow.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/ak_from_arrow.py#L15>`__.
 
 .. py:function:: ak.from_arrow(array, *, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None)
 
