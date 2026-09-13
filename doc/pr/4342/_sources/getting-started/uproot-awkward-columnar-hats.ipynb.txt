@@ -1,0 +1,717 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "ae14d3ce-0dc5-4a62-bed2-a0f75e72887c",
+   "metadata": {},
+   "source": [
+    "# Uproot Awkward Columnar HATS"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d2fa2b35-5e1c-4be2-aa58-385f3b370683",
+   "metadata": {},
+   "source": [
+    "_Originally presented as [part](https://github.com/jpivarski-talks/2021-06-14-uproot-awkward-columnar-hats/blob/main/3-awkward-array.ipynb) of [CMS HATS training on June 14, 2021](https://indico.cern.ch/event/1042866/)._"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0f98f8c2-91ce-4a15-b06a-c20f1d40256b",
+   "metadata": {},
+   "source": [
+    "<br><br><br><br><br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8da7642a-d311-488c-be06-8fd51114b71c",
+   "metadata": {},
+   "source": [
+    "## What about an array of lists?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c8e59475-25c6-41b1-a37c-3553517b3a98",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import skhep_testdata\n",
+    "import awkward as ak\n",
+    "import numpy as np\n",
+    "import uproot"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b3a79fec-71a0-40fd-83c6-0c3369cf7597",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "events = uproot.open(skhep_testdata.data_path(\"uproot-HZZ.root\"))[\"events\"]\n",
+    "events.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "39208788-6a41-4afe-be49-9b42321a899f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "events[\"Muon_Px\"].array()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "98d28d9b-96bd-4316-b26c-42f12db10614",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "events[\"Muon_Px\"].array(entry_stop=20).tolist()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e163f018-cd77-47eb-be1a-e90e8252a796",
+   "metadata": {},
+   "source": [
+    "This is what Awkward Array was made for. NumPy's equivalent is cumbersome and inefficient."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6a406416-f5b6-49aa-afb9-720446a8b990",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "jagged_numpy = events[\"Muon_Px\"].array(entry_stop=20, library=\"np\")\n",
+    "jagged_numpy"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0f6366b4-a61f-4b59-9574-ce2a203d6d39",
+   "metadata": {},
+   "source": [
+    "What if I want the first item in each list as an array?"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d93944f5-cdc2-4280-82a3-9bc4865e2f25",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "np.array([x[0] for x in jagged_numpy])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f611c7ac-aa33-4446-aea9-4dc1224e488a",
+   "metadata": {},
+   "source": [
+    "This violates the rule from [1-python-performance.ipynb](https://github.com/jpivarski-talks/2021-06-14-uproot-awkward-columnar-hats/blob/main/1-python-performance.ipynb): don't iterate in Python."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e8bb7a35-4a43-4956-ab78-613742726ae5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "jagged_awkward = events[\"Muon_Px\"].array(entry_stop=20, library=\"ak\")\n",
+    "jagged_awkward"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "73d7617c-5951-448b-8202-77ee6ae4354b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "jagged_awkward[:, 0]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0c1cdce9-4b40-4878-a3a9-a42cf858a910",
+   "metadata": {},
+   "source": [
+    "<br><br><br><br><br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "237987c8-97ff-4002-adf1-b735ff0bc640",
+   "metadata": {},
+   "source": [
+    "## Awkward Array is a general-purpose library: NumPy-like idioms on JSON-like data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9eaca985-580b-4564-a9be-a05cf434fb89",
+   "metadata": {},
+   "source": [
+    "![](pivarski-one-slide-summary.svg)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "93577b1f-2008-4ae1-a4d9-d78da0859d44",
+   "metadata": {},
+   "source": [
+    "<br><br><br><br><br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3632e9fe-91c7-4319-9041-0abda61b0a62",
+   "metadata": {},
+   "source": [
+    "## Main idea: slicing through structure is computationally inexpensive"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bebb13ec-3c82-4c85-a4fa-8668fbe383f4",
+   "metadata": {},
+   "source": [
+    "Slicing by field name doesn't modify any large buffers and [ak.zip](https://awkward-array.readthedocs.io/en/latest/_auto/ak.zip.html) only scans them to ensure they're compatible (not even that if `depth_limit=1`)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c272052a-1a9e-4fe3-951b-db38a6cceb40",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "array = events.arrays()\n",
+    "array"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d93d9d83-a5f6-49d2-a1d6-9e985b94465c",
+   "metadata": {},
+   "source": [
+    "Think of this as zero-cost:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8c6f8d39-75f3-4d6e-867f-c60bd16d83ba",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "array.Muon_Px, array.Muon_Py, array.Muon_Pz"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e2ed505d-6eca-4807-b43b-880ed4c4fd0c",
+   "metadata": {},
+   "source": [
+    "Think of this as zero-cost:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "684275da-c070-4523-ab77-1f4e1727cf0e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.zip({\"px\": array.Muon_Px, \"py\": array.Muon_Py, \"pz\": array.Muon_Pz})"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f534ea92-4d94-4265-9166-c3789548cfb1",
+   "metadata": {},
+   "source": [
+    "(The above is a manual version of `how=\"zip\"`.)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "74f6e268-26ff-45ff-af49-24e1fc4be70c",
+   "metadata": {},
+   "source": [
+    "<br><br><br>\n",
+    "\n",
+    "NumPy ufuncs work on these arrays (if they're \"[broadcastable](https://awkward-array.readthedocs.io/en/latest/_auto/ak.broadcast_arrays.html)\")."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c107261e-e687-4844-aad3-65ce162531c3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "np.sqrt(array.Muon_Px**2 + array.Muon_Py**2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9f96c45a-dac4-4bf8-bc0d-e8e539129ee4",
+   "metadata": {},
+   "source": [
+    "<br><br><br>\n",
+    "\n",
+    "And there are specialized operations that only make sense in a variable-length context.\n",
+    "\n",
+    "{func}`ak.cartesian`\n",
+    "\n",
+    "![](cartoon-cartesian.png)\n",
+    "\n",
+    "{func}`ak.combinations`\n",
+    "\n",
+    "![](cartoon-combinations.png)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "020c5f92-13d5-48b6-a29d-8ae19827becf",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.cartesian((array.Muon_Px, array.Jet_Px))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f7976a9d-4e14-4f71-821b-b07659701bec",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.combinations(array.Muon_Px, 2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b836817e-1fea-405a-ae1e-92ba4f6c09cb",
+   "metadata": {},
+   "source": [
+    "<br><br><br><br><br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2b021955-b508-4fe1-9e91-98cd5ab93241",
+   "metadata": {},
+   "source": [
+    "## Arrays can have custom [behavior](https://awkward-array.readthedocs.io/en/latest/ak.behavior.html)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f7f35dea-5745-4953-8053-36d744a5c196",
+   "metadata": {},
+   "source": [
+    "The following come from the new [Vector](https://github.com/scikit-hep/vector#readme) library."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a09f2884-dc3b-4f15-a4e0-3afbcd77a984",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import vector\n",
+    "vector.register_awkward()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0f497377-398d-4c11-ad08-8483c61f2239",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "muons = ak.zip({\"px\": array.Muon_Px, \"py\": array.Muon_Py, \"pz\": array.Muon_Pz, \"E\": array.Muon_E}, with_name=\"Momentum4D\")\n",
+    "muons"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3099e3d5-2dc6-41ec-8cb9-372923904c45",
+   "metadata": {},
+   "source": [
+    "This is an array of lists of vectors, and methods like `pt`, `eta`, `phi` apply through the whole array."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "877cac01-693b-435d-9e6f-f67325cbe9d0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "muons.pt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "67d0cb46-a576-4de4-8968-f7734a049fad",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "muons.eta"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "830140bb-fe03-4c78-8178-f15a8748dd60",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "muons.phi"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7e56579b-d3e2-4fa3-9774-da3f15fbe0a5",
+   "metadata": {},
+   "source": [
+    "<br><br><br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a4e6b57c-09d2-4b2d-b112-8a89f04c9e75",
+   "metadata": {},
+   "source": [
+    "Let's try an example: ΔR(muons, jets)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0646a94b-7e04-48e5-b1b9-cf347e0b16d7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "jets = ak.zip({\"px\": array.Jet_Px, \"py\": array.Jet_Py, \"pz\": array.Jet_Pz, \"E\": array.Jet_E}, with_name=\"Momentum4D\")\n",
+    "jets"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "38732ecc-4850-4e11-956e-7413a0845cbb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.num(muons), ak.num(jets)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1933b22d-42fe-45dd-a0cd-cfbf949053bc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ms, js = ak.unzip(ak.cartesian((muons, jets)))\n",
+    "ms, js"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ac76799e-b86d-4872-a09f-aeb9d3ed6fb7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.num(ms), ak.num(js)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0206ebe6-b580-4872-9b16-58d606e92b09",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ms.deltaR(js)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "12b2c1e7-5cfd-44b8-8870-d37878422a28",
+   "metadata": {},
+   "source": [
+    "<br><br><br>\n",
+    "\n",
+    "And another: muon pairs (all combinations, not just the first two per event)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b366c0b7-a4e3-4ebc-b4e2-a6150019ca16",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.num(muons)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "207bf9a9-84c0-428a-815e-6de6fb8694a3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "m1, m2 = ak.unzip(ak.combinations(muons, 2))\n",
+    "m1, m2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a3b698ef-989d-4185-8de0-62a70087072c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "ak.num(m1), ak.num(m2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6d2444a8-a7ef-4731-b3cd-923c0ed0c7ea",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "m1 + m2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9bc067cb-a97e-4333-92b4-48d705fe5107",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "(m1 + m2).mass"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2722fa73-649d-43f2-8312-2703776a9433",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import hist\n",
+    "\n",
+    "hist.Hist.new.Reg(120, 0, 120, name=\"mass\").Double().fill(\n",
+    "    ak.flatten((m1 + m2).mass)\n",
+    ").plot()\n",
+    "\n",
+    "None"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0a2bbb34-0e56-42e3-9251-8e53b7df1f16",
+   "metadata": {},
+   "source": [
+    "<br><br><br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4e3f780c-5fcd-4281-b4dd-be0a1c5f1ace",
+   "metadata": {},
+   "source": [
+    "### It doesn't matter which coordinates were used to construct it"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "118fd5b1-894f-486d-9e23-548ba1c84c63",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "array2 = uproot.open(\n",
+    "    \"https://github.com/jpivarski-talks/2023-12-18-hsf-india-tutorial-bhubaneswar/raw/main/data/SMHiggsToZZTo4L.root:Events\"\n",
+    ").arrays([\"Muon_pt\", \"Muon_eta\", \"Muon_phi\", \"Muon_charge\"], entry_stop=100000)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d266244f-461d-4590-9214-1d4380a8866d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import particle\n",
+    "\n",
+    "muons2 = ak.zip({\"pt\": array2.Muon_pt, \"eta\": array2.Muon_eta, \"phi\": array2.Muon_phi, \"q\": array2.Muon_charge}, with_name=\"Momentum4D\")\n",
+    "muons2[\"mass\"] = particle.Particle.findall(\"mu-\")[0].mass / 1000.0\n",
+    "muons2"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d0391ff6-7281-46ff-801e-0b8928347fc3",
+   "metadata": {},
+   "source": [
+    "As long as you use properties (dots, not strings in brackets), you don't need to care what coordinates it's based on."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7eb3b75b-f5a3-4658-a9cc-c0b29d1b0e4b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "muons2.px"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6566a49c-4ce4-481a-9931-b8c2e95e80a6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "muons2.py"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8d13dc67-35b1-4fad-8e98-f0d9733f577d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "muons2.pz"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7eef9466-6d63-4e9e-b1c9-c0ea896a6118",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "muons2.E"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0da4eb75-6b02-4cca-b770-0944f40a5da8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "m1, m2 = ak.unzip(ak.combinations(muons2, 2))\n",
+    "hist.Hist.new.Log(200, 0.1, 120, name=\"mass\").Double().fill(\n",
+    "    ak.flatten((m1 + m2).mass)\n",
+    ").plot()\n",
+    "\n",
+    "None"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9758607a-8216-47ee-a41a-2e47694fd6cb",
+   "metadata": {},
+   "source": [
+    "<br><br><br>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8b93a41f-3099-4889-ba46-55b87bd64e71",
+   "metadata": {},
+   "source": [
+    "## Awkward Arrays and Vector in Numba"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e84b6e59-dbee-4cf6-9349-8b989935e3ca",
+   "metadata": {},
+   "source": [
+    "Remember Numba, the JIT-compiler from [1-python-performance.ipynb](https://github.com/jpivarski-talks/2021-06-14-uproot-awkward-columnar-hats/blob/main/1-python-performance.ipynb)? Awkward Array and Vector have been implemented in Numba's compiler."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "27f91719-7143-47d1-bc93-ece0e14d1515",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numba as nb\n",
+    "\n",
+    "@nb.njit\n",
+    "def first_big_dimuon(events):\n",
+    "    for event in events:\n",
+    "        for i in range(len(event)):\n",
+    "            mu1 = event[i]\n",
+    "            for j in range(i + 1, len(event)):\n",
+    "                mu2 = event[j]\n",
+    "                dimuon = mu1 + mu2\n",
+    "                if dimuon.mass > 10:\n",
+    "                    return dimuon"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "aa36234f-f1f8-432d-80e4-697072a8be85",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "first_big_dimuon(muons2)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.10.14"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

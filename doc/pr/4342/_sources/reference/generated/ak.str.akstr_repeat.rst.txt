@@ -1,0 +1,14 @@
+ak.str.akstr_repeat
+===================
+
+.. py:module:: awkward.operations.str.akstr_repeat
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_repeat.repeat
+
+
