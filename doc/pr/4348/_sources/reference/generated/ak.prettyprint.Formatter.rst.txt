@@ -1,0 +1,36 @@
+ak.prettyprint.Formatter
+========================
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/237ed6e66158d2cfe9164be0f416f27c137d8e42/src/awkward/prettyprint.py>`__ on `line 285 <https://github.com/scikit-hep/awkward/blob/237ed6e66158d2cfe9164be0f416f27c137d8e42/src/awkward/prettyprint.py#L285>`__.
+
+.. py:class:: ak.prettyprint.Formatter(formatters: FormatterOptions | None = None, precision: int = 3)
+
+   .. py:attribute:: _formatters
+      :type:  FormatterOptions
+
+
+   .. py:attribute:: _precision
+      :type:  int
+      :value: 3
+
+
+
+   .. py:attribute:: _cache
+      :type:  dict[type, FormatterType]
+
+
+   .. py:method:: __call__(obj: awkward._typing.Any) -> str
+
+
+
+   .. py:method:: _format_complex(data: complex) -> str
+
+
+
+   .. py:method:: _format_real(data: float) -> str
+
+
+
+   .. py:method:: _find_formatter_impl(cls: type) -> FormatterType
+
+

@@ -1,0 +1,10 @@
+ak.jax.register_and_check
+=========================
+
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/237ed6e66158d2cfe9164be0f416f27c137d8e42/src/awkward/jax.py>`__ on `line 31 <https://github.com/scikit-hep/awkward/blob/237ed6e66158d2cfe9164be0f416f27c137d8e42/src/awkward/jax.py#L31>`__.
+
+.. py:function:: ak.jax.register_and_check()
+
+
+   Register Awkward Array node types with JAX's tree mechanism.
+
