@@ -169,6 +169,30 @@ kernels:
                   k = k + 1
     automatic-tests: true
 
+  - name: awkward_ListOffsetArray_getitem_boolmask
+    specializations:
+      - name: awkward_ListOffsetArray_getitem_boolmask_64
+        args:
+          - {name: tooffsets, type: "List[int64_t]", dir: out}
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+          - {name: mask, type: "Const[List[int8_t]]", dir: in, role: ByteMaskedArray-mask}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: carrylength, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_ListOffsetArray_getitem_boolmask(tooffsets, tocarry, mask, fromoffsets, length, carrylength):
+          k = 0
+          tooffsets[0] = 0
+          for i in range(length):
+              start = fromoffsets[i]
+              for j in range(start, fromoffsets[i + 1]):
+                  if k < carrylength:
+                      tocarry[k] = j - start
+                  k = k + (1 if mask[j] != 0 else 0)
+              tooffsets[i + 1] = k
+    automatic-tests: true
+
   - name: awkward_ByteMaskedArray_getitem_nextcarry_outindex
     specializations:
       - name: awkward_ByteMaskedArray_getitem_nextcarry_outindex_64

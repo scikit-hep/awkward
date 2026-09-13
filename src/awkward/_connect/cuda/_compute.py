@@ -1356,6 +1356,38 @@ def awkward_ByteMaskedArray_getitem_nextcarry(tocarry, mask, length, validwhen):
     tocarry[: len(valid_indices)] = valid_indices
 
 
+# Turns a jagged boolean mask into the positions it selects within each list,
+# together with the offsets of the result.
+# Example:
+# mask = [1, 0, 1, 1], fromoffsets = [0, 2, 4], length = 2
+# tooffsets = [0, 1, 3], tocarry = [0, 0, 1]
+def awkward_ListOffsetArray_getitem_boolmask(
+    tooffsets, tocarry, mask, fromoffsets, length, carrylength
+):
+    tooffsets[0] = 0
+    if length == 0:
+        return
+
+    offsets = fromoffsets[: length + 1].astype(cp.int64, copy=False)
+    begin, end = int(offsets[0]), int(offsets[length])
+    selected_mask = mask[begin:end] != 0
+
+    # running number of selected elements, so that the offsets of the result are
+    # a gather at the offsets of the input
+    cumsum = cp.empty(selected_mask.size + 1, dtype=cp.int64)
+    cumsum[0] = 0
+    cp.cumsum(selected_mask, out=cumsum[1:])
+    tooffsets[: length + 1] = cumsum[offsets - begin]
+
+    if carrylength == 0:
+        return
+
+    # each selected element's position minus the start of the list it belongs to
+    positions = cp.nonzero(selected_mask)[0]
+    starts = cp.repeat(offsets[:length] - begin, cp.diff(tooffsets[: length + 1]))
+    tocarry[:carrylength] = (positions - starts)[:carrylength]
+
+
 # Counts null (invalid) entries: positions where (mask[i] != 0) != validwhen.
 # Examples:
 # mask = [0, 1, 0, 1, 1], validwhen=True  → numnull = 2  (positions 0 and 2 are null)

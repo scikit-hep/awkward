@@ -498,29 +498,30 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             item = item.to_ListOffsetArray64(True)
             flat_mask = ak._do.flatten(item, axis=1)
             assert flat_mask.is_numpy
-            mask_data = flat_mask.data
 
-            cumsum = nplike.empty(mask_data.shape[0] + 1, dtype=np.int64)
-            if isinstance(nplike, Jax):
-                cumsum = cumsum.at[0].set(0)
-                cumsum = cumsum.at[1:].set(nplike.asarray(nplike.cumsum(mask_data)))
-            else:
-                cumsum[0] = 0
-                nplike.cumsum(mask_data, maybe_out=cumsum[1:])
-
-            item_offsets = nplike.asarray(item.offsets.data)
-            nextoffsets_data = cumsum[item_offsets]
-            nextoffsets = ak.index.Index(nextoffsets_data)
-
-            # position of each selected element within its own list: its flat
-            # position minus the start of the list it belongs to
-            (selected,) = nplike.nonzero(mask_data)
-            # `repeat` needs counts it can cast to an index, which is 32-bit on
-            # 32-bit platforms
-            counts = nplike.astype(
-                nextoffsets_data[1:] - nextoffsets_data[:-1], dtype=np.intp, copy=False
+            # bool and int8 have the same width, so this is a view, not a copy
+            mask_data = nplike.ascontiguousarray(flat_mask.data).view(np.int8)
+            offsets = item.offsets
+            nextoffsets = ak.index.Index64.empty(offsets.length, nplike)
+            carrylength = nplike.index_as_shape_item(nplike.count_nonzero(mask_data))
+            nextcarry = ak.index.Index64.empty(carrylength, nplike)
+            item_backend.maybe_kernel_error(
+                item_backend[
+                    "awkward_ListOffsetArray_getitem_boolmask",
+                    nextoffsets.dtype.type,
+                    nextcarry.dtype.type,
+                    mask_data.dtype.type,
+                    offsets.dtype.type,
+                ](
+                    nextoffsets.data,
+                    nextcarry.data,
+                    mask_data,
+                    offsets.data,
+                    item.length,
+                    carrylength,
+                )
             )
-            nextcontent = selected - nplike.repeat(item_offsets[:-1], counts)
+            nextcontent = nextcarry.data
 
         else:
             item._touch_data(recursive=False)
