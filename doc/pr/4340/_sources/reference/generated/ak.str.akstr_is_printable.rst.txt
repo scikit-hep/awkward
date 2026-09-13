@@ -1,0 +1,14 @@
+ak.str.akstr_is_printable
+=========================
+
+.. py:module:: awkward.operations.str.akstr_is_printable
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_printable.is_printable
+
+
