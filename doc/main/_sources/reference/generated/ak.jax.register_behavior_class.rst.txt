@@ -1,7 +1,7 @@
 ak.jax.register_behavior_class
 ==============================
 
-Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/jax.py>`__ on `line 86 <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/jax.py#L86>`__.
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/jax.py>`__ on `line 86 <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/jax.py#L86>`__.
 
 .. py:function:: ak.jax.register_behavior_class(cls: HighLevelType)
 

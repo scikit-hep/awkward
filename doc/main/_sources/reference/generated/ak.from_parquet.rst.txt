@@ -1,7 +1,7 @@
 ak.from_parquet
 ===============
 
-Defined in `awkward.operations.ak_from_parquet <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/operations/ak_from_parquet.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/operations/ak_from_parquet.py#L19>`__.
+Defined in `awkward.operations.ak_from_parquet <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/operations/ak_from_parquet.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/operations/ak_from_parquet.py#L19>`__.
 
 .. py:function:: ak.from_parquet(path, *, columns=None, row_groups=None, storage_options=None, max_gap=64000, max_block=256000000, footer_sample_size=1000000, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None)
 

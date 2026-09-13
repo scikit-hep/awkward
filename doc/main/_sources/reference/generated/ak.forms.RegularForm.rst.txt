@@ -1,7 +1,7 @@
 ak.forms.RegularForm
 ====================
 
-Defined in `awkward.forms.regularform <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/forms/regularform.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/forms/regularform.py#L21>`__.
+Defined in `awkward.forms.regularform <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/forms/regularform.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/forms/regularform.py#L21>`__.
 
 .. py:class:: ak.forms.RegularForm(content, size, *, parameters=None, form_key=None)
 

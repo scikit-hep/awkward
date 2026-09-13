@@ -1,7 +1,7 @@
 ak.contents.RegularArray
 ========================
 
-Defined in `awkward.contents.regulararray <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/contents/regulararray.py>`__ on `line 74 <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/contents/regulararray.py#L74>`__.
+Defined in `awkward.contents.regulararray <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/contents/regulararray.py>`__ on `line 74 <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/contents/regulararray.py#L74>`__.
 
 .. py:class:: ak.contents.RegularArray(content, size, zeros_length=0, zeros_length_generator=None, *, parameters=None)
 

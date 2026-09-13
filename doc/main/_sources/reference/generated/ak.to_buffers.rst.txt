@@ -1,7 +1,7 @@
 ak.to_buffers
 =============
 
-Defined in `awkward.operations.ak_to_buffers <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/operations/ak_to_buffers.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/6fef0707ea93e67180e11df86f995af4875c96ee/src/awkward/operations/ak_to_buffers.py#L15>`__.
+Defined in `awkward.operations.ak_to_buffers <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/operations/ak_to_buffers.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/1fe12ca0a4fad064a7b994355bb1d94e81083838/src/awkward/operations/ak_to_buffers.py#L15>`__.
 
 .. py:function:: ak.to_buffers(array, container=None, buffer_key='{form_key}-{attribute}', form_key='node{id}', *, id_start=0, backend=None, byteorder=ak._util.native_byteorder)
 
