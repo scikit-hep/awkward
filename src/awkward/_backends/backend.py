@@ -42,7 +42,7 @@ class Backend(PublicSingleton, ABC):
             return kernel
 
     @abstractmethod
-    def _new_kernel(self, key: KernelKeyType) -> KernelType:
+    def _new_kernel(self, index: KernelKeyType) -> KernelType:
         raise NotImplementedError
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:
