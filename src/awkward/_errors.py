@@ -10,7 +10,6 @@ import numpy
 
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any, ParamSpec, TypeVar
-from awkward._util import Sentinel
 
 np = NumpyMetadata.instance()
 
@@ -19,10 +18,6 @@ E = TypeVar("E", bound=Exception)
 T = TypeVar("T")
 S = TypeVar("S")
 P = ParamSpec("P")
-
-# Placeholder for a note fragment whose rendering has been deferred until the
-# exception is actually raised.
-UNFORMATTED = Sentinel("UNFORMATTED", None)
 
 
 class ErrorContext:
@@ -33,25 +28,22 @@ class ErrorContext:
     def primary(cls):
         return cls._slate.__dict__.get("__primary_context__")
 
-    def __init__(self, **kwargs):
-        self._kwargs = kwargs
+    def _format_if_delayed(self) -> None:
+        """Format the note's argument strings now if a delayed backend is involved.
 
-    def _populate(self) -> None:
-        """Build ``self._kwargs``.
-
-        Only the context that actually becomes primary can decorate an
-        exception, so subclasses defer their (comparatively expensive)
-        argument bookkeeping to here.
+        Only the primary context ever decorates an exception, and exceptions are
+        rare, so subclasses format their arguments lazily, when the note is read.
+        A delayed backend (CUDA) is the exception: its errors surface later, at
+        synchronization, from a context that is kept alive until then and must
+        not pin its (potentially large) arguments. This runs from ``__enter__``,
+        only for the context that becomes primary.
         """
 
     def __enter__(self):
         # Make it strictly non-reenterant. Only one ErrorContext (per thread) is primary.
         slate = self._slate.__dict__
         if slate.get("__primary_context__") is None:
-            if self._kwargs is None:
-                self._populate()
-            slate.clear()
-            slate.update(self._kwargs)
+            self._format_if_delayed()
             slate["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
@@ -191,30 +183,19 @@ class OperationErrorContext(ErrorContext):
 
     def __init__(self, name, args: Iterable[Any], kwargs: Mapping[str, Any]):
         self._name = name
+        # Formatted lazily, when the note is read (or by _format_if_delayed).
         self._raw_args = args
         self._raw_kwargs = kwargs
-        self._kwargs = None
+        self._args: list[str] | None = None
+        self._kwargs: dict[str, str] | None = None
 
-    def _populate(self) -> None:
-        args = self._raw_args
-        kwargs = self._raw_kwargs
-        string_args: list[str] | Sentinel
-        string_kwargs: dict[str, str] | Sentinel
-        if self.any_backend_is_delayed(args) or self.any_backend_is_delayed(
-            kwargs.values()
+    def _format_if_delayed(self) -> None:
+        if self.any_backend_is_delayed(self._raw_args) or self.any_backend_is_delayed(
+            self._raw_kwargs.values()
         ):
-            string_args = self._format_args(args)
-            string_kwargs = self._format_kwargs(kwargs)
-        else:
-            # if all nplikes are eager: no accumulation of large arrays
-            # --> delay string generation
-            string_args = string_kwargs = UNFORMATTED
-
-        self._kwargs = {
-            "name": self._name,
-            "args": string_args,
-            "kwargs": string_kwargs,
-        }
+            self._args = self._format_args(self._raw_args)
+            self._kwargs = self._format_kwargs(self._raw_kwargs)
+            del self._raw_args, self._raw_kwargs
 
     def _format_args(self, arguments: Iterable) -> list[str]:
         string_arguments = []
@@ -238,22 +219,16 @@ class OperationErrorContext(ErrorContext):
         return self._name
 
     @property
-    def args(self) -> list:
-        if self._kwargs is None:
-            self._populate()
-        out = self._kwargs["args"]
-        if out is UNFORMATTED:
-            out = self._kwargs["args"] = self._format_args(self._raw_args)
-        return out
+    def args(self) -> list[str]:
+        if self._args is None:
+            self._args = self._format_args(self._raw_args)
+        return self._args
 
     @property
-    def kwargs(self) -> dict:
+    def kwargs(self) -> dict[str, str]:
         if self._kwargs is None:
-            self._populate()
-        out = self._kwargs["kwargs"]
-        if out is UNFORMATTED:
-            out = self._kwargs["kwargs"] = self._format_kwargs(self._raw_kwargs)
-        return out
+            self._kwargs = self._format_kwargs(self._raw_kwargs)
+        return self._kwargs
 
     def format_exception(self, exception: Exception) -> str:
         return f"{exception}\n{self.note}"
@@ -281,52 +256,37 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
+        # Formatted lazily, when the note is read (or by _format_if_delayed).
         self._raw_array = array
         self._raw_where = where
-        self._kwargs = None
+        self._array: str | None = None
+        self._where: str | None = None
 
-    def _populate(self) -> None:
+    def _format_if_delayed(self) -> None:
         from awkward._backends.dispatch import backend_of_obj
 
-        array = self._raw_array
-        where = self._raw_where
+        backends = [
+            backend_of_obj(x, default=None) for x in (self._raw_array, self._raw_where)
+        ]
         # an object with no backend at all cannot be delayed
-        array_backend = backend_of_obj(array, default=None)
-        where_backend = backend_of_obj(where, default=None)
-        if (array_backend is None or array_backend.nplike.is_eager) and (
-            where_backend is None or where_backend.nplike.is_eager
+        if any(
+            backend is not None and not backend.nplike.is_eager for backend in backends
         ):
-            # if all nplikes are eager: no accumulation of large arrays
-            # --> delay string generation
-            formatted_array = formatted_slice = UNFORMATTED
-        else:
-            formatted_array = self.format_argument(self._width, array)
-            formatted_slice = self.format_slice(where)
-
-        self._kwargs = {
-            "array": formatted_array,
-            "where": formatted_slice,
-        }
+            self._array = self.format_argument(self._width, self._raw_array)
+            self._where = self.format_slice(self._raw_where)
+            del self._raw_array, self._raw_where
 
     @property
-    def array(self):
-        if self._kwargs is None:
-            self._populate()
-        out = self._kwargs["array"]
-        if out is UNFORMATTED:
-            out = self._kwargs["array"] = self.format_argument(
-                self._width, self._raw_array
-            )
-        return out
+    def array(self) -> str:
+        if self._array is None:
+            self._array = self.format_argument(self._width, self._raw_array)
+        return self._array
 
     @property
-    def where(self):
-        if self._kwargs is None:
-            self._populate()
-        out = self._kwargs["where"]
-        if out is UNFORMATTED:
-            out = self._kwargs["where"] = self.format_slice(self._raw_where)
-        return out
+    def where(self) -> str:
+        if self._where is None:
+            self._where = self.format_slice(self._raw_where)
+        return self._where
 
     def format_exception(self, exception):
         return f"{exception}\n{self.note}"
