@@ -25,9 +25,16 @@ For this example, we'll to use the Chicago taxi trips dataset from [10 minutes t
 First, let's load the dataset using the {func}`ak.from_parquet` function. We will only load the first row group, for the sake of this demonstration:
 
 ```{code-cell} ipython3
+import os
+
 import awkward as ak
 
-url = "https://zenodo.org/records/14537442/files/chicago-taxi.parquet"
+# Use the cached local copy when the docs build provides one
+# (see docs/conf.py); otherwise fall back to the dataset on Zenodo.
+url = os.environ.get(
+    "AWKWARD_CHICAGO_TAXI_PARQUET",
+    "https://zenodo.org/records/14537442/files/chicago-taxi.parquet",
+)
 taxi = ak.from_parquet(
     url,
     row_groups=[0],

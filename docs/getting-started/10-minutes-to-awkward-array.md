@@ -35,6 +35,14 @@ slideshow:
   slide_type: ''
 tags: [hide-cell]
 ---
+import os
+
+# Read from the cached local copy when the docs build provides one
+# (see docs/conf.py); otherwise fall back to the dataset on Zenodo.
+chicago_taxi = os.environ.get(
+    "AWKWARD_CHICAGO_TAXI_PARQUET",
+    "https://zenodo.org/records/14537442/files/chicago-taxi.parquet",
+)
 %config InteractiveShell.ast_node_interactivity = "last_expr_or_assign"
 ```
 
@@ -42,9 +50,7 @@ tags: [hide-cell]
 import numpy as np
 import awkward as ak
 
-metadata = ak.metadata_from_parquet(
-    "https://zenodo.org/records/14537442/files/chicago-taxi.parquet"
-)
+metadata = ak.metadata_from_parquet(chicago_taxi)
 ```
 
 Of particular interest here is the `num_row_groups` value. Parquet has the concept of *row groups*: contiguous rows of data in the file, and the smallest granularity that can be read.
@@ -59,7 +65,7 @@ There are a lot of different columns here (`trip.sec`, `trip.begin.lon`, `trip.p
 
 ```{code-cell} ipython3
 taxi = ak.from_parquet(
-    "https://zenodo.org/records/14537442/files/chicago-taxi.parquet",
+    chicago_taxi,
     row_groups=[0],
     columns=["trip.km", "trip.begin.l*", "trip.end.l*", "trip.path.*"],
 )

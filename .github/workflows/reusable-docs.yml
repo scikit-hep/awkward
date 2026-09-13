@@ -267,6 +267,15 @@ jobs:
         name: how-to-use-in-cpp-cppyy
         path: docs/user-guide
 
+    - name: Cache Chicago taxi example dataset
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # zizmor: ignore[cache-poisoning] Caches an immutable public Zenodo dataset used only to render docs notebooks, avoiding a 611 MB re-download and Zenodo outages each build.
+      with:
+        # conf.py downloads the file here on a cache miss and points the
+        # notebooks at it via AWKWARD_CHICAGO_TAXI_PARQUET; a cache hit means
+        # the build never contacts Zenodo.
+        path: docs/_cache/chicago-taxi.parquet
+        key: chicago-taxi-parquet-zenodo-record-14537442
+
     - name: Generate Python documentation
       run: sphinx-build -M html . _build/ -T
       working-directory: docs

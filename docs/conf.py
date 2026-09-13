@@ -36,6 +36,68 @@ report_analytics = os.environ.get("DOCS_REPORT_ANALYTICS", False)
 show_version_switcher = os.environ.get("DOCS_SHOW_VERSION", False)
 run_cuda_notebooks = os.environ.get("DOCS_RUN_CUDA", False)
 
+# -- Cached example datasets -------------------------------------------------
+# The getting-started and how-to notebooks read a 611 MB Chicago taxi Parquet
+# file hosted on Zenodo. Fetching it live during the build makes the docs build
+# fail whenever Zenodo is slow or returns a 5xx (e.g. the 504 Gateway Time-out
+# seen in CI). Download it once to a local cache (with retries) and expose the
+# local path to the notebooks through AWKWARD_CHICAGO_TAXI_PARQUET, so they read
+# the cached copy instead of hitting the network. In CI the same path is
+# restored from actions/cache, so a healthy run never touches Zenodo at all.
+# If the env var is already set (CI override, or a developer's local copy) it is
+# used as-is; if the download cannot complete we fall back to the remote URL so
+# behaviour is no worse than before.
+CHICAGO_TAXI_URL = (
+    "https://zenodo.org/records/14537442/files/chicago-taxi.parquet"
+)
+
+
+def _ensure_chicago_taxi_dataset():
+    override = os.environ.get("AWKWARD_CHICAGO_TAXI_PARQUET")
+    if override:
+        return override
+
+    cache_dir = pathlib.Path(__file__).parent / "_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    target = cache_dir / "chicago-taxi.parquet"
+
+    if not target.exists() or target.stat().st_size == 0:
+        import shutil
+        import time
+        import urllib.request
+
+        tmp = target.with_name(target.name + ".part")
+        last_err = None
+        for attempt in range(1, 6):
+            try:
+                with urllib.request.urlopen(
+                    CHICAGO_TAXI_URL, timeout=120
+                ) as response, open(tmp, "wb") as handle:
+                    shutil.copyfileobj(response, handle)
+                tmp.replace(target)
+                last_err = None
+                break
+            except Exception as err:  # noqa: BLE001 -- retry any network failure
+                last_err = err
+                if tmp.exists():
+                    tmp.unlink()
+                time.sleep(min(2 ** attempt, 30))
+
+        if last_err is not None:
+            print(
+                f"WARNING: could not cache {CHICAGO_TAXI_URL} "
+                f"({last_err!r}); notebooks will use the remote URL"
+            )
+            os.environ["AWKWARD_CHICAGO_TAXI_PARQUET"] = CHICAGO_TAXI_URL
+            return CHICAGO_TAXI_URL
+
+    os.environ["AWKWARD_CHICAGO_TAXI_PARQUET"] = os.fspath(target)
+    return os.fspath(target)
+
+
+_ensure_chicago_taxi_dataset()
+
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
