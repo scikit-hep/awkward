@@ -25,6 +25,7 @@ class NumpyBackend(Backend):
         return self._numpy
 
     def __init__(self):
+        super().__init__()
         self._numpy = Numpy.instance()
 
     def _new_kernel(self, index: KernelKeyType) -> NumpyKernel:

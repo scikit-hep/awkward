@@ -25,6 +25,7 @@ class CupyBackend(Backend):
         return self._cupy
 
     def __init__(self):
+        super().__init__()
         self._cupy = Cupy.instance()
 
     def _new_kernel(

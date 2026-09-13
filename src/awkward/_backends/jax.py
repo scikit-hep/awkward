@@ -35,6 +35,7 @@ class JaxBackend(Backend):
             DeprecationWarning,
             stacklevel=2,
         )
+        super().__init__()
         ak.jax.ensure_jax_config()
         self._jax = Jax.instance()
 

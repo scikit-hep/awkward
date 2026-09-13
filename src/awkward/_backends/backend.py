@@ -24,7 +24,8 @@ KernelType: TypeAlias = "Callable[..., KernelError | None]"
 class Backend(PublicSingleton, ABC):
     name: str
 
-    _kernels: dict[KernelKeyType, KernelType]
+    def __init__(self):
+        self._kernels: dict[KernelKeyType, KernelType] = {}
 
     @property
     @abstractmethod
@@ -32,15 +33,13 @@ class Backend(PublicSingleton, ABC):
         raise NotImplementedError
 
     def __getitem__(self, key: KernelKeyType) -> KernelType:
-        # a kernel is immutable and its lookup is on every operation's hot path
+        # a kernel is immutable, and this lookup is on every operation's hot path
+        kernels = self._kernels
         try:
-            return self._kernels[key]
-        except AttributeError:
-            self._kernels = {}
+            return kernels[key]
         except KeyError:
-            pass
-        kernel = self._kernels[key] = self._new_kernel(key)
-        return kernel
+            kernel = kernels[key] = self._new_kernel(key)
+            return kernel
 
     @abstractmethod
     def _new_kernel(self, key: KernelKeyType) -> KernelType:

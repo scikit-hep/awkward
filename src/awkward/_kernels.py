@@ -69,7 +69,12 @@ class CTypesFunc(Protocol):
 
 
 class CTypesKernel(BaseKernel):
-    """A kernel compiled into awkward-cpp, called through ctypes."""
+    """A kernel compiled into awkward-cpp, called through ctypes.
+
+    The NumPy and JAX backends both dispatch to these functions -- which is why
+    the JAX backend requires its buffers to live on the CPU -- so they share the
+    calling convention here and differ only in how a buffer's address is taken.
+    """
 
     def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
         super().__init__(impl, key)
@@ -187,15 +192,6 @@ class CupyKernel(BaseKernel):
         # Number of threads are given by `length`
         return min(length, 1024), 1, 1
 
-    def _cast(self, x, type_):
-        if type_:
-            # Do we have a CuPy-owned array?
-            if self._cupy.is_own_array(x):
-                assert self._cupy.is_c_contiguous(x)
-            return x
-        else:
-            return x
-
     def __call__(self, *args) -> None:
         import awkward._connect.cuda as ak_cuda
 
@@ -224,7 +220,12 @@ class CupyKernel(BaseKernel):
             ak_cuda.synchronize_cuda(cupy.cuda.get_current_stream())
         assert len(args) == len(self._impl.is_ptr)
 
-        args = [self._cast(x, t) for x, t in zip(args, self._impl.is_ptr, strict=True)]
+        # a CuPy kernel takes the arrays themselves, so there is nothing to convert
+        assert all(
+            self._cupy.is_c_contiguous(x)
+            for x, is_ptr in zip(args, self._impl.is_ptr, strict=True)
+            if is_ptr and self._cupy.is_own_array(x)
+        ), "kernel expects contiguous arrays"
 
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.
