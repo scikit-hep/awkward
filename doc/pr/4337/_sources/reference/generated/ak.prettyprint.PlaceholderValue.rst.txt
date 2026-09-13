@@ -1,0 +1,10 @@
+ak.prettyprint.PlaceholderValue
+===============================
+
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/47e56c75914e2714f0879496e42f9702879cce68/src/awkward/prettyprint.py>`__ on `line 77 <https://github.com/scikit-hep/awkward/blob/47e56c75914e2714f0879496e42f9702879cce68/src/awkward/prettyprint.py#L77>`__.
+
+.. py:class:: ak.prettyprint.PlaceholderValue
+
+   .. py:method:: __str__()
+
+
