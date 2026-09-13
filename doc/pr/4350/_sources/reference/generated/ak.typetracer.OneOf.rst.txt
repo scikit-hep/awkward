@@ -1,0 +1,25 @@
+ak.typetracer.OneOf
+===================
+
+Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/eb8319fc07e72e9c77dc6c53b77980ef89c43fe4/src/awkward/_nplikes/typetracer.py>`__ on `line 97 <https://github.com/scikit-hep/awkward/blob/eb8319fc07e72e9c77dc6c53b77980ef89c43fe4/src/awkward/_nplikes/typetracer.py#L97>`__.
+
+.. py:class:: ak.typetracer.OneOf(contents)
+
+   .. py:attribute:: _contents
+
+
+   .. py:property:: contents
+
+
+
+   .. py:method:: __eq__(other)
+
+
+
+   .. py:method:: __repr__()
+
+
+
+   .. py:method:: __str__()
+
+

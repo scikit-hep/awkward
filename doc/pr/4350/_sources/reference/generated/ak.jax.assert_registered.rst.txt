@@ -1,0 +1,10 @@
+ak.jax.assert_registered
+========================
+
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/eb8319fc07e72e9c77dc6c53b77980ef89c43fe4/src/awkward/jax.py>`__ on `line 143 <https://github.com/scikit-hep/awkward/blob/eb8319fc07e72e9c77dc6c53b77980ef89c43fe4/src/awkward/jax.py#L143>`__.
+
+.. py:function:: ak.jax.assert_registered()
+
+
+   Ensure that JAX integration is registered. Raise a RuntimeError if not.
+

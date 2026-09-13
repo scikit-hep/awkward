@@ -1,0 +1,21 @@
+# ak.fields
+
+Defined in [awkward.operations.ak_fields](https://github.com/scikit-hep/awkward/blob/eb8319fc07e72e9c77dc6c53b77980ef89c43fe4/src/awkward/operations/ak_fields.py) on [line 14](https://github.com/scikit-hep/awkward/blob/eb8319fc07e72e9c77dc6c53b77980ef89c43fe4/src/awkward/operations/ak_fields.py#L14).
+
+#### ak.fields(array)
+
+Returns a list of field names or tuple slot numbers for the outermost record.
+
+If the array contains nested records, only the outermost record is
+queried. If it contains tuples instead of records, this function outputs
+string representations of integers, such as `"0"`, `"1"`, `"2"`, etc.
+The records or tuples may be within multiple layers of nested lists.
+
+If the array contains neither tuples nor records, this returns an empty
+list.
+
+* **Parameters:**
+  **array** – Array-like data (anything [`ak.to_layout`](sphinx-llm:403123410bfd489c81c0ce600f3e7695#ak.to_layout) recognizes).
+* **Returns:**
+  A list of the field names (or tuple slot numbers) of the outermost record of
+  `array` (many types supported, including all Awkward Arrays and Records).
