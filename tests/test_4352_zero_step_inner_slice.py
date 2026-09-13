@@ -9,8 +9,7 @@ import awkward as ak
 
 # NumPy rejects a zero step in every dimension; Awkward used to do so only for
 # the outermost one, and spun forever inside `awkward_ListArray_getitem_next_*`
-# for an inner one. Every assertion below is a `pytest.raises`, so a regression
-# fails fast rather than hanging CI.
+# for an inner one.
 
 listoffset = ak.contents.ListOffsetArray(
     ak.index.Index64(np.array([0, 3, 6], dtype=np.int64)),
