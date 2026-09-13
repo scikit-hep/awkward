@@ -1,0 +1,10 @@
+ak.jax.import_jax
+=================
+
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/3670ff3c02136746a1cb6c161f91642d91c83e8a/src/awkward/jax.py>`__ on `line 160 <https://github.com/scikit-hep/awkward/blob/3670ff3c02136746a1cb6c161f91642d91c83e8a/src/awkward/jax.py#L160>`__.
+
+.. py:function:: ak.jax.import_jax()
+
+
+   Ensure that JAX integration is registered, and return the JAX module. Raise a RuntimeError if not.
+

@@ -1,0 +1,14 @@
+ak.str.akstr_count_substring_regex
+==================================
+
+.. py:module:: awkward.operations.str.akstr_count_substring_regex
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_count_substring_regex.count_substring_regex
+
+

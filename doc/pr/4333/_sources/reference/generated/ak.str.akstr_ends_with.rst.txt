@@ -1,0 +1,14 @@
+ak.str.akstr_ends_with
+======================
+
+.. py:module:: awkward.operations.str.akstr_ends_with
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_ends_with.ends_with
+
+

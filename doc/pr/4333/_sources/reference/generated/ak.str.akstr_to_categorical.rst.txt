@@ -1,0 +1,14 @@
+ak.str.akstr_to_categorical
+===========================
+
+.. py:module:: awkward.operations.str.akstr_to_categorical
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_to_categorical.to_categorical
+
+
