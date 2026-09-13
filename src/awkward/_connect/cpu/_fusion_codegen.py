@@ -25,8 +25,6 @@ Anything else raises :class:`FusionUnsupported` and the executor falls back to
 eager evaluation.
 """
 
-from __future__ import annotations
-
 import functools
 
 import numpy as np

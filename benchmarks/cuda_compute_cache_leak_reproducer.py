@@ -53,8 +53,6 @@ installed. Run:
     python cuda_compute_cache_leak_reproducer.py
 """
 
-from __future__ import annotations
-
 import gc
 import sys
 

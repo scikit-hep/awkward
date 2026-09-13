@@ -21,8 +21,6 @@ Backend-specific nodes and kernels live in ``awkward._connect.cuda``
 (CCCL / cuda.compute) and ``awkward._connect.cpu`` (NumPy).
 """
 
-from __future__ import annotations
-
 from awkward._connect.lazy._fusion import FusedNode, fuse, fusion_stats
 from awkward._connect.lazy._lazy_impl import LazyAwkwardArray, lazy
 from awkward._connect.lazy.core import (

@@ -31,8 +31,6 @@ pays JIT on first call and the astype copy on widening dtypes.
 NOT for committing — scratch tool for the PR #4056 re-enable/delete decision.
 """
 
-from __future__ import annotations
-
 import argparse
 import statistics
 

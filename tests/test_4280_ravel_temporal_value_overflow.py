@@ -168,9 +168,11 @@ def test_neighbouring_merge_failures_are_unchanged():
     # they had. The known-issue predicates of the property tests rely on it.
 
     # #4278: a unit factor NumPy refuses, before any value is converted.
+    # The branch must hold a value: since #4303 an empty one contributes no
+    # part to the merge, leaving nothing for the factor to be computed from.
     with pytest.raises(OverflowError):
         ak.flatten(
-            union_of(np.array([], "m8[as]"), np.array(["NaT"], "m8[m]")), axis=None
+            union_of(np.array([1], "m8[as]"), np.array(["NaT"], "m8[m]")), axis=None
         )
 
     # #4261: leaves of families that do not promote.
@@ -186,12 +188,16 @@ def test_neighbouring_merge_failures_are_unchanged():
         ak.ravel(record_of(np.array([1], "m8[ms]"), np.array([1], "m8[M]")))
 
 
-def test_reductions_with_axis_none_raise():
-    array = union_of(np.array([US_PS_LIMIT + 1], "m8[us]"), np.array([0], "m8[ps]"))
-    with pytest.raises(ValueError, match=MESSAGE):
-        ak.sum(array, axis=None)
-    with pytest.raises(ValueError, match=MESSAGE):
-        ak.all(array, axis=None)
+def test_reductions_with_axis_none_are_refused_before_the_merge():
+    # The issue reports `axis=None` reductions reaching the merge as well.
+    # Since #4303 a union flattens to one part per element, so `ak._do.reduce`
+    # refuses it with its own documented error before any merge happens; a
+    # record it refuses earlier still. The range check is unreachable this way,
+    # and these reductions never see an out-of-range temporal value.
+    union = union_of(np.array([US_PS_LIMIT + 1], "m8[us]"), np.array([0], "m8[ps]"))
+    for reducer in (ak.sum, ak.all):
+        with pytest.raises(ValueError, match="irreducible unions"):
+            reducer(union, axis=None)
 
 
 def test_error_names_the_units_and_the_value():

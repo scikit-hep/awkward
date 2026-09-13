@@ -20,8 +20,6 @@ Any row with ``op_captures_cupy_array=True`` is a leaker to vectorise. Edit
 Run on the GPU box:  python benchmarks/diagnose_compute_leaks.py
 """
 
-from __future__ import annotations
-
 import collections
 import traceback
 

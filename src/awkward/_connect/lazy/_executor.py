@@ -9,8 +9,6 @@ and ``awkward._connect.cuda.ir_nodes``; they require a callable predicate
 rather than a materialized boolean array, so they are not used here.
 """
 
-from __future__ import annotations
-
 from collections import OrderedDict
 
 import awkward as ak

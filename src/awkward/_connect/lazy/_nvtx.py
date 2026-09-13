@@ -2,8 +2,6 @@
 
 """Shared no-op fallback for the optional ``nvtx`` profiling annotations."""
 
-from __future__ import annotations
-
 try:
     import nvtx
 except ImportError:

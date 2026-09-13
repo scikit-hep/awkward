@@ -9,8 +9,6 @@ The generic execution machinery (``IRNode``, ``compute``, ``reset_cache``,
 shared with the eager helper functions.
 """
 
-from __future__ import annotations
-
 from awkward._connect.lazy.core import (  # noqa: F401
     Input,
     IRNode,

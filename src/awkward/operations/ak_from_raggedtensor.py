@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import re
 
@@ -12,14 +11,19 @@ __all__ = ("from_raggedtensor",)
 
 @high_level_function()
 def from_raggedtensor(array):
-    """
+    """Converts a TensorFlow RaggedTensor into an Awkward Array.
+
+    The underlying buffers (flat values and row splits) are shared through
+    DLPack if the RaggedTensor is on a GPU; on a CPU, they are copied.
+
+    If `array` contains any other data types the function raises an error.
+
     Args:
         array: (`tensorflow.RaggedTensor`):
             RaggedTensor to convert into an  Awkward Array.
 
-    Converts a TensorFlow RaggedTensor into an Awkward Array.
-
-    If `array` contains any other data types the function raises an error.
+    Returns:
+        An #ak.Array built from the given TensorFlow RaggedTensor.
     """
 
     # Dispatch

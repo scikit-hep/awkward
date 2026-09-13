@@ -9,8 +9,6 @@ implementations in ``awkward._connect.cpu.helpers``.  The node set mirrors
 ``awkward._connect.cuda.ir_nodes``.
 """
 
-from __future__ import annotations
-
 from awkward._connect.lazy.core import (  # noqa: F401
     Input,
     IRNode,

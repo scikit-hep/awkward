@@ -47,7 +47,6 @@ Expected: A fires ~N transform kernels (+1 reduce); B fires 1; C fires 1.
 Usage:  python studies/cccl/probe_fusion_mechanism.py [--n 2000000]
 """
 
-from __future__ import annotations
 
 import argparse
 import functools

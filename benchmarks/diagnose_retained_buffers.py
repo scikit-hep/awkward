@@ -11,8 +11,6 @@ buffers and print the chain of holder types.
 Run on the GPU box:  python benchmarks/diagnose_retained_buffers.py
 """
 
-from __future__ import annotations
-
 import collections
 import gc
 
