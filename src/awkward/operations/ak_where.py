@@ -8,6 +8,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._parameters import parameters_intersect
 
 __all__ = ("where",)
 
@@ -87,6 +88,28 @@ def _impl1(condition, mergebool, highlevel, behavior, attrs):
     )
 
 
+def _numeric_leaf(obj, backend):
+    """The buffer and leaf layout of ``obj`` if it is a bare numeric leaf, else None."""
+    if isinstance(obj, ak.contents.NumpyArray):
+        if obj.backend is not backend:
+            return None
+        leaf, data = obj, obj.data
+    elif isinstance(obj, ak.contents.Content):
+        return None
+    else:
+        # a promoted scalar is 0-d, which `where` broadcasts
+        data = backend.nplike.asarray(obj)
+        leaf = None
+    if data.ndim > 1 or not backend.nplike.is_own_array(data):
+        return None
+    if leaf is None:
+        leaf = ak.contents.NumpyArray(
+            data if data.ndim == 1 else backend.nplike.reshape(data, (1,)),
+            backend=backend,
+        )
+    return data, leaf
+
+
 def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layouts = ensure_same_backend(
@@ -99,6 +122,27 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
         x, y, condition = inputs
         if isinstance(condition, ak.contents.NumpyArray):
             npcondition = backend.nplike.asarray(condition.data)
+
+            # Two plain numeric buffers merge to a single buffer whose dtype is
+            # exactly NumPy's promotion of the two, so `where` can do the whole
+            # job without building (and immediately simplifying) a UnionArray.
+            x_leaf = _numeric_leaf(x, backend)
+            y_leaf = None if x_leaf is None else _numeric_leaf(y, backend)
+            if (
+                x_leaf is not None
+                and y_leaf is not None
+                and ak._do.mergeable(x_leaf[1], y_leaf[1], mergebool=mergebool)
+            ):
+                return (
+                    ak.contents.NumpyArray(
+                        backend.nplike.where(npcondition, x_leaf[0], y_leaf[0]),
+                        parameters=parameters_intersect(
+                            x_leaf[1]._parameters, y_leaf[1]._parameters
+                        ),
+                        backend=backend,
+                    ),
+                )
+
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
                 backend.nplike.arange(tags.length, dtype=np.int64),
