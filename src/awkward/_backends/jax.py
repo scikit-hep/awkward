@@ -38,7 +38,7 @@ class JaxBackend(Backend):
         ak.jax.ensure_jax_config()
         self._jax = Jax.instance()
 
-    def __getitem__(self, index: KernelKeyType) -> JaxKernel:
+    def _new_kernel(self, index: KernelKeyType) -> JaxKernel:
         # JAX uses Awkward's C++ kernels for index-only operations
         return JaxKernel(awkward_cpp.cpu_kernels.kernel[index], index)
 

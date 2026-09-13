@@ -27,7 +27,7 @@ class CupyBackend(Backend):
     def __init__(self):
         self._cupy = Cupy.instance()
 
-    def __getitem__(
+    def _new_kernel(
         self, index: KernelKeyType
     ) -> CudaComputeKernel | CupyKernel | NumpyKernel:
         from awkward._connect import cuda
