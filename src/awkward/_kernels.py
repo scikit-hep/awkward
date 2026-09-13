@@ -62,12 +62,6 @@ class BaseKernel(Kernel):
         )
 
 
-class CTypesFunc(Protocol):
-    argtypes: tuple[Any, ...]
-
-    def __call__(self, *args) -> Any: ...
-
-
 class CTypesKernel(BaseKernel):
     """A kernel compiled into awkward-cpp, called through ctypes.
 
