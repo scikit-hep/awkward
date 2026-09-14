@@ -1,0 +1,14 @@
+ak.str.akstr_is_alnum
+=====================
+
+.. py:module:: awkward.operations.str.akstr_is_alnum
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_alnum.is_alnum
+
+

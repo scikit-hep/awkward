@@ -1,0 +1,21 @@
+ak.ArrayBuilder.List
+====================
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/highlevel.py>`__ on `line 3265 <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/highlevel.py#L3265>`__.
+
+.. py:class:: ak.ArrayBuilder.List(arraybuilder)
+
+
+
+   .. py:attribute:: _name
+      :value: 'list'
+
+
+
+   .. py:method:: __enter__()
+
+
+
+   .. py:method:: __exit__(type, value, traceback)
+
+
