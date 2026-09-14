@@ -5,16 +5,16 @@ from __future__ import annotations
 import gc
 import weakref
 
-import numpy as np
 import pytest
 
 import awkward as ak
 from awkward._errors import OperationErrorContext, SlicingErrorContext
 from awkward._nplikes.numpy import Numpy
+from awkward.errors import AxisError
 
 
 def test_operation_note_still_reports_name_args_and_kwargs():
-    with pytest.raises(np.exceptions.AxisError) as excinfo:
+    with pytest.raises(AxisError) as excinfo:
         ak.num(ak.Array([1, 2, 3]), axis=1)
 
     (note,) = excinfo.value.__notes__
@@ -48,7 +48,7 @@ def test_lazy_path_does_not_format_when_nothing_is_raised(monkeypatch):
     assert ak.num(array, axis=1).to_list() == [3, 0, 2]
     assert calls == []
 
-    with pytest.raises(np.exceptions.AxisError):
+    with pytest.raises(AxisError):
         ak.num(array, axis=2)
     assert len(calls) == 1
 
