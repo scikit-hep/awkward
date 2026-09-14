@@ -28,7 +28,13 @@ class Unrecognised:
 
 @pytest.fixture
 def pristine_registries():
-    """Restore the module-level factory lists and lookup caches afterwards."""
+    """Restore the module-level factory lists and lookup caches afterwards.
+
+    The registries are process-global, so a test that adds to them must be
+    marked `thread_unsafe`: under pytest-run-parallel the same test body runs
+    on several threads at once, and one thread's registration would otherwise
+    satisfy another thread's lookup before it has had its turn to fail.
+    """
     factories = _backend_lookup_factories[:]
     nplikes = _nplike_classes[:]
     try:
@@ -70,6 +76,9 @@ def test_recognised_types_still_resolve():
     assert nplike_of_obj(array) is nplike_of_obj(np.arange(5))
 
 
+@pytest.mark.thread_unsafe(
+    reason="registering a lookup factory mutates process-global registries"
+)
 def test_register_backend_lookup_factory_invalidates_cache(pristine_registries):
     obj = Unrecognised()
     cpu = regularize_backend("cpu")
@@ -85,6 +94,9 @@ def test_register_backend_lookup_factory_invalidates_cache(pristine_registries):
     assert backend_of_obj(obj) is cpu
 
 
+@pytest.mark.thread_unsafe(
+    reason="registering an nplike mutates process-global registries"
+)
 def test_register_nplike_invalidates_cache(pristine_registries):
     obj = Unrecognised()
     with pytest.raises(TypeError):
