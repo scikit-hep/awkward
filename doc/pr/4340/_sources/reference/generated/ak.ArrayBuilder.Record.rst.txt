@@ -1,7 +1,7 @@
 ak.ArrayBuilder.Record
 ======================
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/edde7a66ad54ef294324fbfa93c9c564a4eddfb5/src/awkward/highlevel.py>`__ on `line 3334 <https://github.com/scikit-hep/awkward/blob/edde7a66ad54ef294324fbfa93c9c564a4eddfb5/src/awkward/highlevel.py#L3334>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/2000a91bbe8ca2e5ec85e5bbfce10b31e4804baa/src/awkward/highlevel.py>`__ on `line 3346 <https://github.com/scikit-hep/awkward/blob/2000a91bbe8ca2e5ec85e5bbfce10b31e4804baa/src/awkward/highlevel.py#L3346>`__.
 
 .. py:class:: ak.ArrayBuilder.Record(arraybuilder, name)
 
