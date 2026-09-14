@@ -1,7 +1,7 @@
 ak.prettyprint.VirtualValue
 ===========================
 
-Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/prettyprint.py>`__ on `line 82 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/prettyprint.py#L82>`__.
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/prettyprint.py>`__ on `line 82 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/prettyprint.py#L82>`__.
 
 .. py:class:: ak.prettyprint.VirtualValue
 

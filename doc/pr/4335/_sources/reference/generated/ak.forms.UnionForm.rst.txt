@@ -1,7 +1,7 @@
 ak.forms.UnionForm
 ==================
 
-Defined in `awkward.forms.unionform <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/forms/unionform.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/forms/unionform.py#L20>`__.
+Defined in `awkward.forms.unionform <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/forms/unionform.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/forms/unionform.py#L20>`__.
 
 .. py:class:: ak.forms.UnionForm(tags, index, contents, *, parameters=None, form_key=None)
 

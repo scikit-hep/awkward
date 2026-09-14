@@ -1,7 +1,7 @@
 ak.argmin
 =========
 
-Defined in `awkward.operations.ak_argmin <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/ak_argmin.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/ak_argmin.py#L23>`__.
+Defined in `awkward.operations.ak_argmin <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_argmin.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_argmin.py#L23>`__.
 
 .. py:function:: ak.argmin(array, axis=None, *, keepdims=False, mask_identity=True, highlevel=True, behavior=None, attrs=None)
 

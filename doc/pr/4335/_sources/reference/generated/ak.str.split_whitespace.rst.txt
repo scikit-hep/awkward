@@ -1,7 +1,7 @@
 ak.str.split_whitespace
 =======================
 
-Defined in `awkward.operations.str.akstr_split_whitespace <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/str/akstr_split_whitespace.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/str/akstr_split_whitespace.py#L12>`__.
+Defined in `awkward.operations.str.akstr_split_whitespace <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/str/akstr_split_whitespace.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/str/akstr_split_whitespace.py#L12>`__.
 
 .. py:function:: ak.str.split_whitespace(array, *, max_splits=None, reverse=False, highlevel=True, behavior=None, attrs=None)
 

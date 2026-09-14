@@ -1,7 +1,7 @@
 ak.forms.IndexedOptionForm
 ==========================
 
-Defined in `awkward.forms.indexedoptionform <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/forms/indexedoptionform.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/forms/indexedoptionform.py#L22>`__.
+Defined in `awkward.forms.indexedoptionform <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/forms/indexedoptionform.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/forms/indexedoptionform.py#L22>`__.
 
 .. py:class:: ak.forms.IndexedOptionForm(index, content, *, parameters=None, form_key=None)
 

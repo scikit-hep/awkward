@@ -1,7 +1,7 @@
 ak.concatenate
 ==============
 
-Defined in `awkward.operations.ak_concatenate <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/ak_concatenate.py>`__ on `line 35 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/ak_concatenate.py#L35>`__.
+Defined in `awkward.operations.ak_concatenate <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_concatenate.py>`__ on `line 35 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_concatenate.py#L35>`__.
 
 .. py:function:: ak.concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None, attrs=None)
 

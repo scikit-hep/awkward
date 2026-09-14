@@ -1,7 +1,7 @@
 ak.round
 ========
 
-Defined in `awkward.operations.ak_round <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/ak_round.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/ak_round.py#L18>`__.
+Defined in `awkward.operations.ak_round <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_round.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_round.py#L18>`__.
 
 .. py:function:: ak.round(array, decimals: int = 0, out=UNSUPPORTED, highlevel=True, behavior=None, attrs=None)
 

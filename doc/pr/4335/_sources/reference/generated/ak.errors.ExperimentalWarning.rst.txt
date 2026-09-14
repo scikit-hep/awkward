@@ -1,7 +1,7 @@
 ak.errors.ExperimentalWarning
 =============================
 
-Defined in `awkward.errors <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/errors.py>`__ on `line 9 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/errors.py#L9>`__.
+Defined in `awkward.errors <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/errors.py>`__ on `line 9 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/errors.py#L9>`__.
 
 .. py:exception:: ak.errors.ExperimentalWarning
 

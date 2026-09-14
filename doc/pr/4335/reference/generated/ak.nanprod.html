@@ -827,7 +827,7 @@
                   
   <section id="ak-nanprod">
 <h1>ak.nanprod<a class="headerlink" href="#ak-nanprod" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/ak_prod.py">awkward.operations.ak_prod</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/ak_prod.py#L83">line 83</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_prod.py">awkward.operations.ak_prod</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_prod.py#L83">line 83</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.nanprod">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">nanprod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_identity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.nanprod" title="Link to this definition">#</a></dt>
@@ -842,7 +842,7 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
-<li><p><strong>axis</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – If None, combine all values from the array into
+<li><p><strong>axis</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – If None, combine all values from the array into
 a single scalar result; if an int, group by that axis: <code class="docutils literal notranslate"><span class="pre">0</span></code> is the
 outermost, <code class="docutils literal notranslate"><span class="pre">1</span></code> is the first level of nested lists, etc., and
 negative <code class="docutils literal notranslate"><span class="pre">axis</span></code> counts from the innermost: <code class="docutils literal notranslate"><span class="pre">-1</span></code> is the innermost,
@@ -851,11 +851,11 @@ name of the axis which maps to an int if named axes are present.
 Named axes are attached to an array using <a class="reference internal" href="ak.with_named_axis.html#ak.with_named_axis" title="ak.with_named_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.with_named_axis</span></code></a> and
 removed with <a class="reference internal" href="ak.without_named_axis.html#ak.without_named_axis" title="ak.without_named_axis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.without_named_axis</span></code></a>; also see the
 <a class="reference external" href="../../user-guide/how-to-array-properties-named-axis.html">Named axes user guide</a>.</p></li>
-<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If False, this reducer decreases the number of
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If False, this reducer decreases the number of
 dimensions by 1; if True, the reduced values are wrapped in a new
 length-1 dimension so that the result of this operation may be
 broadcasted with the original array.</p></li>
-<li><p><strong>mask_identity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, reducing over empty lists results in
+<li><p><strong>mask_identity</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, reducing over empty lists results in
 None (an option type); otherwise, reducing over empty lists
 results in the operation’s identity.</p></li>
 </ul>

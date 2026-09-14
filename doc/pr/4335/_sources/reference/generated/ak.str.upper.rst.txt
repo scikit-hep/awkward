@@ -1,7 +1,7 @@
 ak.str.upper
 ============
 
-Defined in `awkward.operations.str.akstr_upper <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/str/akstr_upper.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/e2e952eb6591681515adbd8669f3456344cebe24/src/awkward/operations/str/akstr_upper.py#L12>`__.
+Defined in `awkward.operations.str.akstr_upper <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/str/akstr_upper.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/str/akstr_upper.py#L12>`__.
 
 .. py:function:: ak.str.upper(array, *, highlevel=True, behavior=None, attrs=None)
 
