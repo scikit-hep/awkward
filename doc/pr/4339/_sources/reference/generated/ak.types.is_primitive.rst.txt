@@ -1,0 +1,7 @@
+ak.types.is_primitive
+=====================
+
+Defined in `awkward.types.numpytype <https://github.com/scikit-hep/awkward/blob/649921be83b6f290bb68af8169a3541148b80023/src/awkward/types/numpytype.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/649921be83b6f290bb68af8169a3541148b80023/src/awkward/types/numpytype.py#L20>`__.
+
+.. py:function:: ak.types.is_primitive(primitive)
+

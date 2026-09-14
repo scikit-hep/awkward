@@ -1,0 +1,14 @@
+ak.str.akstr_slice
+==================
+
+.. py:module:: awkward.operations.str.akstr_slice
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_slice.slice
+
+

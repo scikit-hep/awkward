@@ -1,0 +1,19 @@
+ak.behaviors.categorical
+========================
+
+.. py:module:: awkward.behaviors.categorical
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   awkward.behaviors.categorical.CategoricalBehavior
+
+
+Module Contents
+---------------
+
+.. py:data:: CategoricalBehavior
+
