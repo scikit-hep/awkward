@@ -1,7 +1,7 @@
 ak.str.trim_whitespace
 ======================
 
-Defined in `awkward.operations.str.akstr_trim_whitespace <https://github.com/scikit-hep/awkward/blob/6ee639d8789106dce00663ebc8d058450d858d27/src/awkward/operations/str/akstr_trim_whitespace.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/6ee639d8789106dce00663ebc8d058450d858d27/src/awkward/operations/str/akstr_trim_whitespace.py#L12>`__.
+Defined in `awkward.operations.str.akstr_trim_whitespace <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/operations/str/akstr_trim_whitespace.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/operations/str/akstr_trim_whitespace.py#L12>`__.
 
 .. py:function:: ak.str.trim_whitespace(array, *, highlevel=True, behavior=None, attrs=None)
 

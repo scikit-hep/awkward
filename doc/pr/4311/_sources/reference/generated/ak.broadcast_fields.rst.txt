@@ -1,7 +1,7 @@
 ak.broadcast_fields
 ===================
 
-Defined in `awkward.operations.ak_broadcast_fields <https://github.com/scikit-hep/awkward/blob/6ee639d8789106dce00663ebc8d058450d858d27/src/awkward/operations/ak_broadcast_fields.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/6ee639d8789106dce00663ebc8d058450d858d27/src/awkward/operations/ak_broadcast_fields.py#L18>`__.
+Defined in `awkward.operations.ak_broadcast_fields <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/operations/ak_broadcast_fields.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/operations/ak_broadcast_fields.py#L18>`__.
 
 .. py:function:: ak.broadcast_fields(*arrays, highlevel=True, behavior=None, attrs=None)
 

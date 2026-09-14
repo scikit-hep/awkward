@@ -1,7 +1,7 @@
 ak.from_regular
 ===============
 
-Defined in `awkward.operations.ak_from_regular <https://github.com/scikit-hep/awkward/blob/6ee639d8789106dce00663ebc8d058450d858d27/src/awkward/operations/ak_from_regular.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/6ee639d8789106dce00663ebc8d058450d858d27/src/awkward/operations/ak_from_regular.py#L17>`__.
+Defined in `awkward.operations.ak_from_regular <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/operations/ak_from_regular.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/operations/ak_from_regular.py#L17>`__.
 
 .. py:function:: ak.from_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None)
 
