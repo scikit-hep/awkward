@@ -1,7 +1,7 @@
 ak.types.ScalarType
 ===================
 
-Defined in `awkward.types.scalartype <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/types/scalartype.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/types/scalartype.py#L12>`__.
+Defined in `awkward.types.scalartype <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/types/scalartype.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/types/scalartype.py#L12>`__.
 
 .. py:class:: ak.types.ScalarType(content: awkward.types.type.Type, behavior: collections.abc.Mapping | None = None)
 

@@ -1,7 +1,7 @@
 ak.forms.IndexedForm
 ====================
 
-Defined in `awkward.forms.indexedform <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/forms/indexedform.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/forms/indexedform.py#L22>`__.
+Defined in `awkward.forms.indexedform <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/forms/indexedform.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/forms/indexedform.py#L22>`__.
 
 .. py:class:: ak.forms.IndexedForm(index, content, *, parameters=None, form_key=None)
 

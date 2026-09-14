@@ -1,7 +1,7 @@
 ak.mask
 =======
 
-Defined in `awkward.operations.ak_mask <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/operations/ak_mask.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/operations/ak_mask.py#L18>`__.
+Defined in `awkward.operations.ak_mask <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_mask.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_mask.py#L18>`__.
 
 .. py:function:: ak.mask(array, mask, *, valid_when=True, highlevel=True, behavior=None, attrs=None)
 

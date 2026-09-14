@@ -1,7 +1,7 @@
 ak.nanvar
 =========
 
-Defined in `awkward.operations.ak_var <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/operations/ak_var.py>`__ on `line 128 <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/operations/ak_var.py#L128>`__.
+Defined in `awkward.operations.ak_var <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_var.py>`__ on `line 128 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_var.py#L128>`__.
 
 .. py:function:: ak.nanvar(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True, highlevel=True, behavior=None, attrs=None)
 

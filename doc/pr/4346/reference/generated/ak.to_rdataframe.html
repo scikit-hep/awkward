@@ -827,7 +827,7 @@
                   
   <section id="ak-to-rdataframe">
 <h1>ak.to_rdataframe<a class="headerlink" href="#ak-to-rdataframe" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/operations/ak_to_rdataframe.py">awkward.operations.ak_to_rdataframe</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/operations/ak_to_rdataframe.py#L16">line 16</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_to_rdataframe.py">awkward.operations.ak_to_rdataframe</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_to_rdataframe.py#L16">line 16</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.to_rdataframe">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">to_rdataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arrays</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flatlist_as_rvec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.to_rdataframe" title="Link to this definition">#</a></dt>
@@ -836,9 +836,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>arrays</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> of </em><em>arrays</em>) – Each value in this dict can be any array-like data
+<li><p><strong>arrays</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> of </em><em>arrays</em>) – Each value in this dict can be any array-like data
 that <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes, but they must all have the same length.</p></li>
-<li><p><strong>flatlist_as_rvec</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, lists of primitive types (numbers, booleans, etc.)
+<li><p><strong>flatlist_as_rvec</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, lists of primitive types (numbers, booleans, etc.)
 are presented to C++ as <code class="docutils literal notranslate"><span class="pre">ROOT::RVec&lt;primitive&gt;</span></code>, but all other types use
 Awkward Array’s custom C++ classes. If False, even these “flat” lists use
 Awkward Array’s custom C++ classes.</p></li>

@@ -1,7 +1,7 @@
 ak.forms.from_json
 ==================
 
-Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/forms/form.py>`__ on `line 205 <https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/forms/form.py#L205>`__.
+Defined in `awkward.forms.form <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/forms/form.py>`__ on `line 205 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/forms/form.py#L205>`__.
 
 .. py:function:: ak.forms.from_json(input: str) -> Form
 

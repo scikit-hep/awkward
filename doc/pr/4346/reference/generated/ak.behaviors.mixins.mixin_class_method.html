@@ -420,7 +420,7 @@
                   
   <section id="ak-behaviors-mixins-mixin-class-method">
 <h1>ak.behaviors.mixins.mixin_class_method<a class="headerlink" href="#ak-behaviors-mixins-mixin-class-method" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/behaviors/mixins.py">awkward.behaviors.mixins</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/c0a230d71f7e18b7bcfc949ee426b8a6b8b78c01/src/awkward/behaviors/mixins.py#L73">line 73</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/behaviors/mixins.py">awkward.behaviors.mixins</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/behaviors/mixins.py#L73">line 73</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.behaviors.mixins.mixin_class_method">
 <span class="sig-prename descclassname"><span class="pre">ak.behaviors.mixins.</span></span><span class="sig-name descname"><span class="pre">mixin_class_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ufunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.behaviors.mixins.mixin_class_method" title="Link to this definition">#</a></dt>
@@ -429,11 +429,11 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ufunc</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="(in NumPy v2.5)"><em>numpy.ufunc</em></a>) – A universal function (or NEP18 callable) that is
 hooked in Awkward Array, i.e. it can be the first argument of a behavior.</p></li>
-<li><p><strong>rhs</strong> (<em>Set</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em>] or </em><em>None</em>) – Set of right-hand side argument types, optional
+<li><p><strong>rhs</strong> (<em>Set</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em>] or </em><em>None</em>) – Set of right-hand side argument types, optional
 if wrapping a unary function. The left-hand side is expected to
 always be <code class="docutils literal notranslate"><span class="pre">self</span></code> of the parent class. The current class is implicitly
 included in this set.</p></li>
-<li><p><strong>transpose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If true, automatically create a transpose signature
+<li><p><strong>transpose</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If true, automatically create a transpose signature
 (only makes sense for binary ufuncs).</p></li>
 </ul>
 </dd>
