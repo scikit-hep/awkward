@@ -34,7 +34,14 @@ def test_primitive_round_trip(primitive):
     assert str(ak.type(layout)) == f"3 * {primitive}"
 
 
-@pytest.mark.parametrize("dtype", [np.dtype(object), np.dtype(">f8")])
+@pytest.mark.parametrize(
+    "dtype",
+    [
+        np.dtype(object),
+        # byte-swapped relative to this machine, whichever endianness that is
+        np.dtype("float64").newbyteorder(),
+    ],
+)
 def test_unsupported_dtype(dtype):
     with pytest.raises(TypeError, match="unsupported dtype"):
         dtype_to_primitive(dtype)
@@ -54,10 +61,13 @@ def test_datetime_and_timedelta_units(primitive):
     assert str(ak.type(layout)) == f"3 * {primitive}"
 
 
-@pytest.mark.parametrize("primitive", [">M8[ns]", ">m8[us]"])
+@pytest.mark.parametrize("primitive", ["datetime64[ns]", "timedelta64[us]"])
 def test_non_native_byteorder_is_rejected(primitive):
-    dtype = np.dtype(primitive)
+    # not hard-coded to ">": on a big-endian machine (s390x) that is the native
+    # order, and "<" is the one that must be rejected
+    dtype = np.dtype(primitive).newbyteorder()
     assert dtype.kind in "mM"
+    assert not dtype.isnative
     with pytest.raises(TypeError, match="unsupported dtype"):
         dtype_to_primitive(dtype)
     with pytest.raises(TypeError, match="unsupported dtype"):
