@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ctypes
+import importlib
 
 import awkward_cpp
 import numpy as np
@@ -38,6 +39,16 @@ def test_failed_lookup_is_not_cached():
         with pytest.raises(KeyError):
             backend[MISSING_KEY]
     assert MISSING_KEY not in backend._kernels
+
+
+@pytest.mark.parametrize("module,path", [("cupy", "cupy"), ("jax", "jax")])
+def test_fresh_device_backend_has_empty_kernel_cache(module, path):
+    pytest.importorskip(module)
+    if module == "jax":
+        ak.jax.register_and_check()
+    backend_module = importlib.import_module(f"awkward._backends.{path}")
+    cls = getattr(backend_module, f"{module.capitalize()}Backend")
+    assert fresh_backend(cls)._kernels == {}
 
 
 def test_ctypes_kernel_pointer_of_is_abstract():
@@ -127,3 +138,15 @@ def test_kernels_still_give_the_same_answers():
 
     typetracer = array.layout.to_typetracer(forget_length=True)
     assert str(ak.num(ak.Array(typetracer)).type) == "## * int64"
+
+
+def test_jax_pointer_of_rejects_autodiff_tracer(jax_kernel):
+    jax = pytest.importorskip("jax")
+
+    def f(x):
+        with pytest.raises(ValueError, match="not differentiable"):
+            jax_kernel._pointer_of(x)
+        return x
+
+    one = jax.numpy.array([1.0])
+    jax.jvp(f, (one,), (one,))
