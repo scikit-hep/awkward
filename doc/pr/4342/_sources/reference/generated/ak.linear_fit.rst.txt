@@ -1,7 +1,7 @@
 ak.linear_fit
 =============
 
-Defined in `awkward.operations.ak_linear_fit <https://github.com/scikit-hep/awkward/blob/2a6b69547fcdd35595ab86b09f128223cf60a34a/src/awkward/operations/ak_linear_fit.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/2a6b69547fcdd35595ab86b09f128223cf60a34a/src/awkward/operations/ak_linear_fit.py#L20>`__.
+Defined in `awkward.operations.ak_linear_fit <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/operations/ak_linear_fit.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/operations/ak_linear_fit.py#L20>`__.
 
 .. py:function:: ak.linear_fit(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
 

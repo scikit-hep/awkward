@@ -1,7 +1,7 @@
 ak.merge_union_of_records
 =========================
 
-Defined in `awkward.operations.ak_merge_union_of_records <https://github.com/scikit-hep/awkward/blob/2a6b69547fcdd35595ab86b09f128223cf60a34a/src/awkward/operations/ak_merge_union_of_records.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/2a6b69547fcdd35595ab86b09f128223cf60a34a/src/awkward/operations/ak_merge_union_of_records.py#L22>`__.
+Defined in `awkward.operations.ak_merge_union_of_records <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/operations/ak_merge_union_of_records.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/operations/ak_merge_union_of_records.py#L22>`__.
 
 .. py:function:: ak.merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None, attrs=None)
 

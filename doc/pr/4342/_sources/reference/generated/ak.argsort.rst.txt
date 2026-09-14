@@ -1,7 +1,7 @@
 ak.argsort
 ==========
 
-Defined in `awkward.operations.ak_argsort <https://github.com/scikit-hep/awkward/blob/2a6b69547fcdd35595ab86b09f128223cf60a34a/src/awkward/operations/ak_argsort.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/2a6b69547fcdd35595ab86b09f128223cf60a34a/src/awkward/operations/ak_argsort.py#L21>`__.
+Defined in `awkward.operations.ak_argsort <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/operations/ak_argsort.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/operations/ak_argsort.py#L21>`__.
 
 .. py:function:: ak.argsort(array, axis=-1, *, ascending=True, stable=True, highlevel=True, behavior=None, attrs=None)
 
