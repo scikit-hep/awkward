@@ -1,0 +1,15 @@
+ak.behaviors.mixins
+===================
+
+.. py:module:: awkward.behaviors.mixins
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.behaviors.mixins.mixin_class
+   awkward.behaviors.mixins.mixin_class_method
+
+
