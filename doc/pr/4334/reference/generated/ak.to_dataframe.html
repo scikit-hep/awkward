@@ -827,7 +827,7 @@
                   
   <section id="ak-to-dataframe">
 <h1>ak.to_dataframe<a class="headerlink" href="#ak-to-dataframe" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/ak_to_dataframe.py">awkward.operations.ak_to_dataframe</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/ak_to_dataframe.py#L23">line 23</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_to_dataframe.py">awkward.operations.ak_to_dataframe</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_to_dataframe.py#L23">line 23</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.to_dataframe">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inner'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levelname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">_default_levelname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anonymous</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'values'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.to_dataframe" title="Link to this definition">#</a></dt>
@@ -844,13 +844,13 @@ to merge them into a single DataFrame with the associated loss of data.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
-<li><p><strong>how</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Passed to
+<li><p><strong>how</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Passed to
 <a class="reference external" href="https://pandas.pydata.org/pandas-docs/version/1.0.3/reference/api/pandas.merge.html">pd.merge</a>
 to combine DataFrames for each multiplicity into one DataFrame. If
 None, a list of Pandas DataFrames is returned.</p></li>
 <li><p><strong>levelname</strong> (<em>int -&gt; str</em>) – Computes a name for each level of the row index
 from the number of levels deep.</p></li>
-<li><p><strong>anonymous</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name to use if the <code class="docutils literal notranslate"><span class="pre">array</span></code> does not contain
+<li><p><strong>anonymous</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Column name to use if the <code class="docutils literal notranslate"><span class="pre">array</span></code> does not contain
 records; otherwise, column names are derived from record fields.</p></li>
 </ul>
 </dd>

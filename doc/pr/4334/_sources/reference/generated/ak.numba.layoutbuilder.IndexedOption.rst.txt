@@ -1,7 +1,7 @@
 ak.numba.layoutbuilder.IndexedOption
 ====================================
 
-Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/numba/layoutbuilder.py>`__ on `line 263 <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/numba/layoutbuilder.py#L263>`__.
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/numba/layoutbuilder.py>`__ on `line 263 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/numba/layoutbuilder.py#L263>`__.
 
 .. py:class:: ak.numba.layoutbuilder.IndexedOption(dtype, content, *, parameters=None, initial=1024, resize=8.0)
 

@@ -1,7 +1,7 @@
 ak.count
 ========
 
-Defined in `awkward.operations.ak_count <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/ak_count.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/ak_count.py#L22>`__.
+Defined in `awkward.operations.ak_count <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_count.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_count.py#L22>`__.
 
 .. py:function:: ak.count(array, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
 

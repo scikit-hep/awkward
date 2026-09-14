@@ -1,7 +1,7 @@
 ak.contents.NumpyArray
 ======================
 
-Defined in `awkward.contents.numpyarray <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/contents/numpyarray.py>`__ on `line 63 <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/contents/numpyarray.py#L63>`__.
+Defined in `awkward.contents.numpyarray <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/contents/numpyarray.py>`__ on `line 63 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/contents/numpyarray.py#L63>`__.
 
 .. py:class:: ak.contents.NumpyArray(data: awkward._nplikes.array_like.ArrayLike, *, parameters=None, backend=None)
 

@@ -1,7 +1,7 @@
 ak.types.UnknownType
 ====================
 
-Defined in `awkward.types.unknowntype <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/types/unknowntype.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/types/unknowntype.py#L13>`__.
+Defined in `awkward.types.unknowntype <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/types/unknowntype.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/types/unknowntype.py#L13>`__.
 
 .. py:class:: ak.types.UnknownType(*, parameters: awkward._typing.JSONMapping | None = None)
 

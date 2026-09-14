@@ -1,7 +1,7 @@
 ak.parameters
 =============
 
-Defined in `awkward.operations.ak_parameters <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/ak_parameters.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/ak_parameters.py#L19>`__.
+Defined in `awkward.operations.ak_parameters <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_parameters.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_parameters.py#L19>`__.
 
 .. py:function:: ak.parameters(array)
 

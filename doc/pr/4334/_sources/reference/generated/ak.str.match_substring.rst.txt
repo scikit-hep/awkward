@@ -1,7 +1,7 @@
 ak.str.match_substring
 ======================
 
-Defined in `awkward.operations.str.akstr_match_substring <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/str/akstr_match_substring.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/str/akstr_match_substring.py#L12>`__.
+Defined in `awkward.operations.str.akstr_match_substring <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/str/akstr_match_substring.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/str/akstr_match_substring.py#L12>`__.
 
 .. py:function:: ak.str.match_substring(array, pattern, *, ignore_case=False, highlevel=True, behavior=None, attrs=None)
 

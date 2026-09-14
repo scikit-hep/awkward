@@ -827,17 +827,17 @@
                   
   <section id="ak-arraybuilder">
 <h1>ak.ArrayBuilder<a class="headerlink" href="#ak-arraybuilder" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/highlevel.py">awkward.highlevel</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/highlevel.py#L2610">line 2610</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/highlevel.py">awkward.highlevel</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/highlevel.py#L2622">line 2622</a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ak.ArrayBuilder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">ArrayBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for arrays built by
+<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for arrays built by
 this ArrayBuilder.</p></li>
-<li><p><strong>initial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Initial size (in bytes) of buffers used by the <code class="docutils literal notranslate"><span class="pre">ak::ArrayBuilder</span></code>.</p></li>
-<li><p><strong>resize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Resize multiplier for buffers used by the <code class="docutils literal notranslate"><span class="pre">ak::ArrayBuilder</span></code>;
+<li><p><strong>initial</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Initial size (in bytes) of buffers used by the <code class="docutils literal notranslate"><span class="pre">ak::ArrayBuilder</span></code>.</p></li>
+<li><p><strong>resize</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Resize multiplier for buffers used by the <code class="docutils literal notranslate"><span class="pre">ak::ArrayBuilder</span></code>;
 should be strictly greater than 1.</p></li>
 </ul>
 </dd>
@@ -993,7 +993,7 @@ be considered the “least effort” approach.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>layout</strong> (<code class="docutils literal notranslate"><span class="pre">ak._ext.ArrayBuilder</span></code>) – Low-level builder to wrap.</p></li>
-<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for arrays built by
+<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for arrays built by
 this ArrayBuilder.</p></li>
 </ul>
 </dd>
@@ -1098,17 +1098,17 @@ wrapped by an <a class="reference internal" href="ak.types.ArrayType.html#ak.typ
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>limit_rows</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum number of rows (lines) to use in the output.</p></li>
-<li><p><strong>limit_cols</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum number of columns (characters wide).</p></li>
-<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the type as well. (Doesn’t count toward number
+<li><p><strong>limit_rows</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum number of rows (lines) to use in the output.</p></li>
+<li><p><strong>limit_cols</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum number of columns (characters wide).</p></li>
+<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the type as well. (Doesn’t count toward number
 of rows/lines limit.)</p></li>
-<li><p><strong>named_axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the named axis as well. (Doesn’t count toward number
+<li><p><strong>named_axis</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the named axis as well. (Doesn’t count toward number
 of rows/lines limit.)</p></li>
-<li><p><strong>nbytes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the number of bytes as well. (Doesn’t count toward number
+<li><p><strong>nbytes</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the number of bytes as well. (Doesn’t count toward number
 of rows/lines limit.)</p></li>
-<li><p><strong>backend</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the backend of the array as well. (Doesn’t count toward number
+<li><p><strong>backend</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the backend of the array as well. (Doesn’t count toward number
 of rows/lines limit.)</p></li>
-<li><p><strong>all</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the ‘type’, ‘named axis’, ‘nbytes’, and ‘backend’ of the array. (Doesn’t count toward number
+<li><p><strong>all</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, print the ‘type’, ‘named axis’, ‘nbytes’, and ‘backend’ of the array. (Doesn’t count toward number
 of rows/lines limit.)</p></li>
 <li><p><strong>stream</strong> (object with a <code class="docutils literal notranslate"><span class="pre">write(str)</span></code> method or None) – Stream to write the
 output to. If None, return a string instead of writing to a stream.</p></li>
@@ -1291,7 +1291,7 @@ accumulated array.</p>
 <span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.index" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The tuple slot to fill.</p>
+<dd class="field-odd"><p><strong>i</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – The tuple slot to fill.</p>
 </dd>
 </dl>
 <p>This method also returns the <a class="reference internal" href="#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>, so that it can be
@@ -1351,7 +1351,7 @@ in the array, as described in <a class="reference internal" href="ak.Array.html#
 <span class="sig-name descname"><span class="pre">field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.ArrayBuilder.field" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The field key to fill.</p>
+<dd class="field-odd"><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The field key to fill.</p>
 </dd>
 </dl>
 <p>This method also returns the <a class="reference internal" href="#ak.ArrayBuilder" title="ak.ArrayBuilder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.ArrayBuilder</span></code></a>, so that it can be

@@ -827,7 +827,7 @@
                   
   <section id="ak-to-parquet-dataset">
 <h1>ak.to_parquet_dataset<a class="headerlink" href="#ak-to-parquet-dataset" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/ak_to_parquet_dataset.py">awkward.operations.ak_to_parquet_dataset</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/575dd5c114dbb057405b0085596f6eb099aa1e03/src/awkward/operations/ak_to_parquet_dataset.py#L9">line 9</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_to_parquet_dataset.py">awkward.operations.ak_to_parquet_dataset</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_to_parquet_dataset.py#L9">line 9</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.to_parquet_dataset">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">to_parquet_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.to_parquet_dataset" title="Link to this definition">#</a></dt>
@@ -839,14 +839,14 @@ within the multi-file dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – A directory in which to write <code class="docutils literal notranslate"><span class="pre">_common_metadata</span></code>
+<li><p><strong>directory</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – A directory in which to write <code class="docutils literal notranslate"><span class="pre">_common_metadata</span></code>
 and <code class="docutils literal notranslate"><span class="pre">_metadata</span></code>, making the directory of Parquet files into a dataset.</p></li>
-<li><p><strong>filenames</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – If None, the <code class="docutils literal notranslate"><span class="pre">directory</span></code> will be
+<li><p><strong>filenames</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – If None, the <code class="docutils literal notranslate"><span class="pre">directory</span></code> will be
 recursively searched for files ending in <code class="docutils literal notranslate"><span class="pre">filename_extension</span></code> and
 sorted lexicographically. Otherwise, this explicit list of files is
 taken and row-groups are concatenated in its given order. If any
 filenames are relative, they are interpreted relative to <code class="docutils literal notranslate"><span class="pre">directory</span></code>.</p></li>
-<li><p><strong>filename_extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename extension (including <code class="docutils literal notranslate"><span class="pre">.</span></code>) to use to
+<li><p><strong>filename_extension</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Filename extension (including <code class="docutils literal notranslate"><span class="pre">.</span></code>) to use to
 search for files recursively. Ignored if <code class="docutils literal notranslate"><span class="pre">filenames</span></code> is None.</p></li>
 </ul>
 </dd>
