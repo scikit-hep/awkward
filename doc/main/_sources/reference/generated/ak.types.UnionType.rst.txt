@@ -1,7 +1,7 @@
 ak.types.UnionType
 ==================
 
-Defined in `awkward.types.uniontype <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/types/uniontype.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/types/uniontype.py#L16>`__.
+Defined in `awkward.types.uniontype <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/types/uniontype.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/types/uniontype.py#L16>`__.
 
 .. py:class:: ak.types.UnionType(contents: collections.abc.Iterable[awkward.types.type.Type], *, parameters: awkward._typing.JSONMapping | None = None)
 

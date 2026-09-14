@@ -1,7 +1,7 @@
 ak.str.is_in
 ============
 
-Defined in `awkward.operations.str.akstr_is_in <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/str/akstr_is_in.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/str/akstr_is_in.py#L15>`__.
+Defined in `awkward.operations.str.akstr_is_in <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/str/akstr_is_in.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/str/akstr_is_in.py#L15>`__.
 
 .. py:function:: ak.str.is_in(array, value_set, *, skip_nones=False, highlevel=True, behavior=None, attrs=None)
 

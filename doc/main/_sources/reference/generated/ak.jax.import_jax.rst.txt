@@ -1,7 +1,7 @@
 ak.jax.import_jax
 =================
 
-Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/jax.py>`__ on `line 160 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/jax.py#L160>`__.
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/jax.py>`__ on `line 160 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/jax.py#L160>`__.
 
 .. py:function:: ak.jax.import_jax()
 

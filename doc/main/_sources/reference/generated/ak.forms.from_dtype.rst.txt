@@ -1,7 +1,7 @@
 ak.forms.from_dtype
 ===================
 
-Defined in `awkward.forms.numpyform <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/forms/numpyform.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/forms/numpyform.py#L23>`__.
+Defined in `awkward.forms.numpyform <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/forms/numpyform.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/forms/numpyform.py#L23>`__.
 
 .. py:function:: ak.forms.from_dtype(dtype, parameters: awkward._typing.JSONMapping | None = None, *, time_units_as_parameter: bool = False)
 

@@ -1,7 +1,7 @@
 ak.numba.layoutbuilder.Empty
 ============================
 
-Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/numba/layoutbuilder.py>`__ on `line 96 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/numba/layoutbuilder.py#L96>`__.
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/numba/layoutbuilder.py>`__ on `line 96 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/numba/layoutbuilder.py#L96>`__.
 
 .. py:class:: ak.numba.layoutbuilder.Empty
 

@@ -1,7 +1,7 @@
 ak.values_astype
 ================
 
-Defined in `awkward.operations.ak_values_astype <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/ak_values_astype.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/ak_values_astype.py#L15>`__.
+Defined in `awkward.operations.ak_values_astype <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/ak_values_astype.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/ak_values_astype.py#L15>`__.
 
 .. py:function:: ak.values_astype(array, to, *, including_unknown=False, highlevel=True, behavior=None, attrs=None)
 

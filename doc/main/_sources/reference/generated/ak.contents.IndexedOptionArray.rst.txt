@@ -1,7 +1,7 @@
 ak.contents.IndexedOptionArray
 ==============================
 
-Defined in `awkward.contents.indexedoptionarray <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/contents/indexedoptionarray.py>`__ on `line 57 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/contents/indexedoptionarray.py#L57>`__.
+Defined in `awkward.contents.indexedoptionarray <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/contents/indexedoptionarray.py>`__ on `line 57 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/contents/indexedoptionarray.py#L57>`__.
 
 .. py:class:: ak.contents.IndexedOptionArray(index, content, *, parameters=None)
 

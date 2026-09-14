@@ -1,7 +1,7 @@
 ak.str.replace_slice
 ====================
 
-Defined in `awkward.operations.str.akstr_replace_slice <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/str/akstr_replace_slice.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/str/akstr_replace_slice.py#L12>`__.
+Defined in `awkward.operations.str.akstr_replace_slice <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/str/akstr_replace_slice.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/str/akstr_replace_slice.py#L12>`__.
 
 .. py:function:: ak.str.replace_slice(array, start, stop, replacement, *, highlevel=True, behavior=None, attrs=None)
 

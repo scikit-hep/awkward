@@ -1,7 +1,7 @@
 ak.to_cupy
 ==========
 
-Defined in `awkward.operations.ak_to_cupy <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/ak_to_cupy.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/operations/ak_to_cupy.py#L12>`__.
+Defined in `awkward.operations.ak_to_cupy <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/ak_to_cupy.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/ak_to_cupy.py#L12>`__.
 
 .. py:function:: ak.to_cupy(array)
 

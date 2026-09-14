@@ -1,7 +1,7 @@
 ak.Record
 =========
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/highlevel.py>`__ on `line 1830 <https://github.com/scikit-hep/awkward/blob/264bf27efa86a645df5f2e88a295e0319ed92ccd/src/awkward/highlevel.py#L1830>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/highlevel.py>`__ on `line 1830 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/highlevel.py#L1830>`__.
 
 .. py:class:: ak.Record(data, *, behavior=None, with_name=None, check_valid=False, backend=None, attrs=None, named_axis=None)
 
