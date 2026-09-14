@@ -1,7 +1,0 @@
-ak.prettyprint.valuestr_horiz
-=============================
-
-Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/prettyprint.py>`__ on `line 147 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/prettyprint.py#L147>`__.
-
-.. py:function:: ak.prettyprint.valuestr_horiz(data: awkward._typing.Any, limit_cols: int, formatter: Formatter) -> tuple[int, list[str]]
-

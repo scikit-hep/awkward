@@ -1,7 +1,0 @@
-ak.prettyprint.half
-===================
-
-Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/prettyprint.py>`__ on `line 48 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/prettyprint.py#L48>`__.
-
-.. py:function:: ak.prettyprint.half(integer: int) -> int
-

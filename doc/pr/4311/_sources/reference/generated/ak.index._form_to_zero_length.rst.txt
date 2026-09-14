@@ -1,7 +1,0 @@
-ak.index._form_to_zero_length
-=============================
-
-Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/index.py>`__ on `line 36 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/index.py#L36>`__.
-
-.. py:function:: ak.index._form_to_zero_length(form: str) -> Index
-

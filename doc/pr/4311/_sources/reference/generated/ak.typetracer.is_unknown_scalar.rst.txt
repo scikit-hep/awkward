@@ -1,7 +1,0 @@
-ak.typetracer.is_unknown_scalar
-===============================
-
-Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/_nplikes/typetracer.py>`__ on `line 53 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/_nplikes/typetracer.py#L53>`__.
-
-.. py:function:: ak.typetracer.is_unknown_scalar(array: awkward._typing.Any) -> awkward._typing.TypeGuard[TypeTracerArray]
-

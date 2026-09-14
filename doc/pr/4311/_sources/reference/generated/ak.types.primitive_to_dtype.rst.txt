@@ -1,7 +1,0 @@
-ak.types.primitive_to_dtype
-===========================
-
-Defined in `awkward.types.numpytype <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/types/numpytype.py>`__ on `line 30 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/types/numpytype.py#L30>`__.
-
-.. py:function:: ak.types.primitive_to_dtype(primitive)
-

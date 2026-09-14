@@ -1,7 +1,0 @@
-ak.record.find_record_backend
-=============================
-
-Defined in `awkward.record <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/record.py>`__ on `line 267 <https://github.com/scikit-hep/awkward/blob/7f6a9192fc62d8ec3caeddc374c3ea6d9d2f794b/src/awkward/record.py#L267>`__.
-
-.. py:function:: ak.record.find_record_backend(obj: type)
-
