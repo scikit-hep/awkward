@@ -1,7 +1,7 @@
 ak.mixin_class
 ==============
 
-Defined in `awkward.behaviors.mixins <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/behaviors/mixins.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/behaviors/mixins.py#L12>`__.
+Defined in `awkward.behaviors.mixins <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/behaviors/mixins.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/behaviors/mixins.py#L12>`__.
 
 .. py:function:: ak.mixin_class(registry, name=None)
 

@@ -1,7 +1,7 @@
 ak.without_field
 ================
 
-Defined in `awkward.operations.ak_without_field <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/ak_without_field.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/ak_without_field.py#L17>`__.
+Defined in `awkward.operations.ak_without_field <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_without_field.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_without_field.py#L17>`__.
 
 .. py:function:: ak.without_field(array, where, *, highlevel=True, behavior=None, attrs=None)
 

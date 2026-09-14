@@ -1,7 +1,7 @@
 ak.contents.IndexedArray
 ========================
 
-Defined in `awkward.contents.indexedarray <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/contents/indexedarray.py>`__ on `line 57 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/contents/indexedarray.py#L57>`__.
+Defined in `awkward.contents.indexedarray <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/contents/indexedarray.py>`__ on `line 57 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/contents/indexedarray.py#L57>`__.
 
 .. py:class:: ak.contents.IndexedArray(index, content, *, parameters=None)
 

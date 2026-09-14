@@ -1,7 +1,7 @@
 ak.array_equal
 ==============
 
-Defined in `awkward.operations.ak_array_equal <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/ak_array_equal.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/ak_array_equal.py#L12>`__.
+Defined in `awkward.operations.ak_array_equal <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_array_equal.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_array_equal.py#L12>`__.
 
 .. py:function:: ak.array_equal(a1, a2, equal_nan: bool = False, dtype_exact: bool = True, same_content_types: bool = True, check_parameters: bool = True, check_regular: bool = True, check_named_axis: bool = True)
 

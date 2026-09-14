@@ -1,7 +1,7 @@
 ak.str.join_element_wise
 ========================
 
-Defined in `awkward.operations.str.akstr_join_element_wise <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/str/akstr_join_element_wise.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/str/akstr_join_element_wise.py#L20>`__.
+Defined in `awkward.operations.str.akstr_join_element_wise <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/str/akstr_join_element_wise.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/str/akstr_join_element_wise.py#L20>`__.
 
 .. py:function:: ak.str.join_element_wise(*arrays, highlevel=True, behavior=None, attrs=None)
 

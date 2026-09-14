@@ -1,7 +1,7 @@
 ak.unflatten
 ============
 
-Defined in `awkward.operations.ak_unflatten <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/ak_unflatten.py>`__ on `line 25 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/ak_unflatten.py#L25>`__.
+Defined in `awkward.operations.ak_unflatten <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_unflatten.py>`__ on `line 25 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_unflatten.py#L25>`__.
 
 .. py:function:: ak.unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=None)
 

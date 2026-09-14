@@ -1,7 +1,7 @@
 ak.str.lpad
 ===========
 
-Defined in `awkward.operations.str.akstr_lpad <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/str/akstr_lpad.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/str/akstr_lpad.py#L12>`__.
+Defined in `awkward.operations.str.akstr_lpad <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/str/akstr_lpad.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/str/akstr_lpad.py#L12>`__.
 
 .. py:function:: ak.str.lpad(array, width, padding=' ', *, highlevel=True, behavior=None, attrs=None)
 

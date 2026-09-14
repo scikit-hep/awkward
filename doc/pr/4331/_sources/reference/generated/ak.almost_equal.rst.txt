@@ -1,7 +1,7 @@
 ak.almost_equal
 ===============
 
-Defined in `awkward.operations.ak_almost_equal <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/ak_almost_equal.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/3bc630e80315fb0f23504bf8946d5837c112642c/src/awkward/operations/ak_almost_equal.py#L21>`__.
+Defined in `awkward.operations.ak_almost_equal <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_almost_equal.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_almost_equal.py#L21>`__.
 
 .. py:function:: ak.almost_equal(left, right, *, rtol: float = 1e-05, atol: float = 1e-08, dtype_exact: bool = True, check_parameters: bool = True, check_regular: bool = True, check_named_axis: bool = True)
 
