@@ -60,7 +60,10 @@ jobs:
         with:
           environment-name: test-env
           init-shell: bash
-          # TODO: run the tests with cudf again when it supports numba-cuda>=0.23.0
+          # TODO: add cudf here once this environment can be created on the
+          # self-hosted runner; with cudf the create step fails before any
+          # test runs, so the cudf tests run in the GPU test jobs instead
+          # (see .github/actions/setup-gpu-env).
           create-args: >-
             -c rapidsai
             python=${{ env.PYTHON_VERSION }}
