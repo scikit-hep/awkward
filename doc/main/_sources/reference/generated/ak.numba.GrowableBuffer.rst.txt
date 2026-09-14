@@ -1,7 +1,7 @@
 ak.numba.GrowableBuffer
 =======================
 
-Defined in `awkward.numba.__init__ <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/numba/__init__.py>`__ on `line 43 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/numba/__init__.py#L43>`__.
+Defined in `awkward.numba.__init__ <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/numba/__init__.py>`__ on `line 43 <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/numba/__init__.py#L43>`__.
 
 .. py:class:: ak.numba.GrowableBuffer(dtype, *, initial=1024, resize=8.0)
 

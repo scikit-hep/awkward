@@ -1,7 +1,7 @@
 ak.str.index_in
 ===============
 
-Defined in `awkward.operations.str.akstr_index_in <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/str/akstr_index_in.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/str/akstr_index_in.py#L15>`__.
+Defined in `awkward.operations.str.akstr_index_in <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/str/akstr_index_in.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/str/akstr_index_in.py#L15>`__.
 
 .. py:function:: ak.str.index_in(array, value_set, *, skip_nones=False, highlevel=True, behavior=None, attrs=None)
 

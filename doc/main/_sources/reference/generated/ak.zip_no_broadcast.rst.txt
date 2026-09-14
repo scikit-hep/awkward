@@ -1,7 +1,7 @@
 ak.zip_no_broadcast
 ===================
 
-Defined in `awkward.operations.ak_zip_no_broadcast <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/ak_zip_no_broadcast.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/ak_zip_no_broadcast.py#L19>`__.
+Defined in `awkward.operations.ak_zip_no_broadcast <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/ak_zip_no_broadcast.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/ak_zip_no_broadcast.py#L19>`__.
 
 .. py:function:: ak.zip_no_broadcast(arrays, *, parameters=None, with_name=None, highlevel=True, behavior=None, attrs=None)
 

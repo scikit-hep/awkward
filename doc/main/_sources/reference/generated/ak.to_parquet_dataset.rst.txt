@@ -1,7 +1,7 @@
 ak.to_parquet_dataset
 =====================
 
-Defined in `awkward.operations.ak_to_parquet_dataset <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/ak_to_parquet_dataset.py>`__ on `line 9 <https://github.com/scikit-hep/awkward/blob/85b6eec011d33dcaddcf0b6d7648825ab4a327ec/src/awkward/operations/ak_to_parquet_dataset.py#L9>`__.
+Defined in `awkward.operations.ak_to_parquet_dataset <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/ak_to_parquet_dataset.py>`__ on `line 9 <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/ak_to_parquet_dataset.py#L9>`__.
 
 .. py:function:: ak.to_parquet_dataset(directory, filenames=None, storage_options=None)
 
