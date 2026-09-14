@@ -91,8 +91,6 @@ def _impl1(condition, mergebool, highlevel, behavior, attrs):
 def _numeric_leaf(obj, backend):
     """The buffer and leaf layout of ``obj`` if it is a bare numeric leaf, else None."""
     if isinstance(obj, ak.contents.NumpyArray):
-        if obj.backend is not backend:
-            return None
         leaf, data = obj, obj.data
     elif isinstance(obj, ak.contents.Content):
         return None
