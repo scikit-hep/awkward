@@ -1019,13 +1019,13 @@ type: 2 * float64</pre></div></div>
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">25</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
 <span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">array2</span><span class="o">.</span><span class="n">x</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1317,</span> in <span class="ni">Array.__getattr__</span><span class="nt">(self, where)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1312</span>         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1313</span>             <span class="sa">f</span><span class="s2">&quot;while trying to get field </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">, an exception &quot;</span>
-<span class="g g-Whitespace">   </span><span class="mi">1314</span>             <span class="sa">f</span><span class="s2">&quot;occurred:</span><span class="se">\n</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">err</span><span class="si">!s}</span><span class="s2">&quot;</span>
-<span class="g g-Whitespace">   </span><span class="mi">1315</span>         <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
-<span class="g g-Whitespace">   </span><span class="mi">1316</span> <span class="k">else</span><span class="p">:</span>
-<span class="ne">-&gt; </span><span class="mi">1317</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no field named </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1329,</span> in <span class="ni">Array.__getattr__</span><span class="nt">(self, where)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1324</span>         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1325</span>             <span class="sa">f</span><span class="s2">&quot;while trying to get field </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">, an exception &quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1326</span>             <span class="sa">f</span><span class="s2">&quot;occurred:</span><span class="se">\n</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">err</span><span class="si">!s}</span><span class="s2">&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1327</span>         <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+<span class="g g-Whitespace">   </span><span class="mi">1328</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1329</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no field named </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="ne">AttributeError</span>: no field named &#39;x&#39;
 </pre></div>

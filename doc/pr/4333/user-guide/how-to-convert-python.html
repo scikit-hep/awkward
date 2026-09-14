@@ -1777,14 +1777,14 @@ type: {
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">69</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
 <span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ak</span><span class="o">.</span><span class="n">Record</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="mf">3.3</span><span class="p">))</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1892,</span> in <span class="ni">Record.__init__</span><span class="nt">(self, data, behavior, with_name, check_valid, backend, attrs, named_axis)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1889</span>     <span class="n">layout</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">Record</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">RecordArray</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">fields</span><span class="p">),</span> <span class="n">at</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1891</span> <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
-<span class="ne">-&gt; </span><span class="mi">1892</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1893</span>         <span class="s2">&quot;could not convert non-dict into an ak.Record; try ak.Array&quot;</span>
-<span class="g g-Whitespace">   </span><span class="mi">1894</span>     <span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1896</span> <span class="k">else</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1897</span>     <span class="n">layout</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1904,</span> in <span class="ni">Record.__init__</span><span class="nt">(self, data, behavior, with_name, check_valid, backend, attrs, named_axis)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1901</span>     <span class="n">layout</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">Record</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">RecordArray</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">fields</span><span class="p">),</span> <span class="n">at</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1903</span> <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+<span class="ne">-&gt; </span><span class="mi">1904</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1905</span>         <span class="s2">&quot;could not convert non-dict into an ak.Record; try ak.Array&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1906</span>     <span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1908</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1909</span>     <span class="n">layout</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="ne">TypeError</span>: could not convert non-dict into an ak.Record; try ak.Array
 </pre></div>

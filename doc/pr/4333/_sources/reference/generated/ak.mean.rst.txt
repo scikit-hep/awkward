@@ -1,7 +1,7 @@
 ak.mean
 =======
 
-Defined in `awkward.operations.ak_mean <https://github.com/scikit-hep/awkward/blob/3670ff3c02136746a1cb6c161f91642d91c83e8a/src/awkward/operations/ak_mean.py>`__ on `line 29 <https://github.com/scikit-hep/awkward/blob/3670ff3c02136746a1cb6c161f91642d91c83e8a/src/awkward/operations/ak_mean.py#L29>`__.
+Defined in `awkward.operations.ak_mean <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_mean.py>`__ on `line 29 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_mean.py#L29>`__.
 
 .. py:function:: ak.mean(x, weight=None, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
 
