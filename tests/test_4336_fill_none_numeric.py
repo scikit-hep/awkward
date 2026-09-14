@@ -154,7 +154,7 @@ def test_multidimensional_content():
     array = ak.Array(
         ak.contents.IndexedOptionArray(
             ak.index.Index64(np.array([0, -1, 1], dtype=np.int64)),
-            ak.contents.NumpyArray(np.arange(6).reshape(2, 3)),
+            ak.contents.NumpyArray(np.arange(6, dtype=np.int64).reshape(2, 3)),
         )
     )
     result = ak.fill_none(array, 0, axis=-1)
