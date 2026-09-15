@@ -1,0 +1,24 @@
+ak.ArrayBuilder.Record
+======================
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/4aa09fbe6fc1f097aa212af476d3c148047ed4eb/src/awkward/highlevel.py>`__ on `line 3346 <https://github.com/scikit-hep/awkward/blob/4aa09fbe6fc1f097aa212af476d3c148047ed4eb/src/awkward/highlevel.py#L3346>`__.
+
+.. py:class:: ak.ArrayBuilder.Record(arraybuilder, name)
+
+
+
+   .. py:attribute:: _name
+      :value: 'record'
+
+
+
+   .. py:attribute:: _record_name
+
+
+   .. py:method:: __enter__()
+
+
+
+   .. py:method:: __exit__(type, value, traceback)
+
+

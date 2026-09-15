@@ -1,0 +1,38 @@
+ak.numba.layoutbuilder.LayoutBuilder
+====================================
+
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/4aa09fbe6fc1f097aa212af476d3c148047ed4eb/src/awkward/numba/layoutbuilder.py>`__ on `line 10 <https://github.com/scikit-hep/awkward/blob/4aa09fbe6fc1f097aa212af476d3c148047ed4eb/src/awkward/numba/layoutbuilder.py#L10>`__.
+
+.. py:class:: ak.numba.layoutbuilder.LayoutBuilder
+
+   .. py:method:: _init(parameters)
+
+
+
+   .. py:property:: parameters
+
+
+
+   .. py:method:: __len__()
+
+
+
+   .. py:method:: numbatype()
+
+
+
+   .. py:method:: snapshot()
+
+
+
+   .. py:property:: form
+
+
+
+   .. py:method:: clear()
+
+
+
+   .. py:method:: is_valid(error: str)
+
+
