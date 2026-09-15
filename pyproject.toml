@@ -131,6 +131,9 @@ addopts = [
 xfail_strict = true
 markers = [
     "cuda: marks tests that require a CUDA-capable GPU",
+    # Registered here so that --strict-markers accepts it on the jobs that do
+    # not install pytest-run-parallel, which is the plugin that acts on it.
+    "thread_unsafe: marks tests that must not run under --parallel-threads",
 ]
 filterwarnings = [
     "error",
@@ -140,7 +143,7 @@ filterwarnings = [
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
     "ignore:Jitify is performing a one-time only warm-up",
     "ignore:The JAX backend is deprecated:DeprecationWarning",
-    "ignore::awkward.errors.ExperimentalWarning",
+    'ignore:.* is experimental\.:UserWarning',
 ]
 log_level = "INFO"
 testpaths = ["tests", "tests-cuda", "tests-cuda-kernels", "tests-cuda-kernels-explicit"]
