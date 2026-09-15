@@ -22,7 +22,7 @@ jobs:
       actions: read # Required to download the artifacts of the CI run.
       pull-requests: write # Required to comment with the preview URL.
     env:
-      S3_BUCKET: "preview.awkward-array.org"
+      S3_BUCKET: "preview-awkward-array-org"
       DEPLOY_URL: "https://preview.awkward-array.org"
       AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

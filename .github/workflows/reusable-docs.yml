@@ -321,7 +321,7 @@ jobs:
     permissions:
       contents: read
     env:
-      S3_BUCKET: "awkward-array.org"
+      S3_BUCKET: "awkward-array-org"
       PRODUCTION_URL: "https://awkward-array.org"
       AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
