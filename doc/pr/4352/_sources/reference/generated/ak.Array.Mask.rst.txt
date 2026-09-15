@@ -1,0 +1,13 @@
+ak.Array.Mask
+=============
+
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/f3b3f3ee50ee4a227dba93611c59f5c279c63683/src/awkward/highlevel.py>`__ on `line 506 <https://github.com/scikit-hep/awkward/blob/f3b3f3ee50ee4a227dba93611c59f5c279c63683/src/awkward/highlevel.py#L506>`__.
+
+.. py:class:: ak.Array.Mask(array)
+
+   .. py:attribute:: _array
+
+
+   .. py:method:: __getitem__(where)
+
+

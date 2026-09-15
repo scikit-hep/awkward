@@ -1,0 +1,14 @@
+ak.str.akstr_is_ascii
+=====================
+
+.. py:module:: awkward.operations.str.akstr_is_ascii
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_ascii.is_ascii
+
+
