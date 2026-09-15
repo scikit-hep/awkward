@@ -35,7 +35,7 @@ jobs:
       AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
     environment:
       name: docs
-      url: "${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}"
+      url: "${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}/"
     steps:
     - name: Download rendered docs
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -113,5 +113,5 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO: ${{ github.repository }}
         PR_NUMBER: ${{ steps.pr_number.outputs.pr_number }}
-        PREVIEW_URL: ${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}
+        PREVIEW_URL: ${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}/
       run: gh pr comment "${PR_NUMBER}" --repo "${REPO}" --body "The documentation preview is ready to be viewed at <${PREVIEW_URL}>"

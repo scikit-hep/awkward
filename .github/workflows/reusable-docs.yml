@@ -351,7 +351,7 @@ jobs:
         run: |
           aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
             built-docs/ "s3://${S3_BUCKET}/doc/main/"
-          echo "path=/doc/main" >> $GITHUB_OUTPUT
+          echo "path=/doc/main/" >> $GITHUB_OUTPUT
       # Releases trigger versions
       - name: Sync `stable`
         if: github.event_name == 'release'
@@ -370,7 +370,7 @@ jobs:
             built-docs/ "s3://${S3_BUCKET}/doc/$version/"
           aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
             built-docs/ "s3://${S3_BUCKET}/doc/stable/"
-          echo "path=/doc/stable" >> $GITHUB_OUTPUT
+          echo "path=/doc/stable/" >> $GITHUB_OUTPUT
       - name: Purge the Cloudflare cache
         uses: ./.github/actions/purge-cloudflare-cache
         with:
