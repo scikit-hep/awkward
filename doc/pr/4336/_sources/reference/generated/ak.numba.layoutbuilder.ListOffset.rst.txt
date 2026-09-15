@@ -1,7 +1,7 @@
 ak.numba.layoutbuilder.ListOffset
 =================================
 
-Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/numba/layoutbuilder.py>`__ on `line 128 <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/numba/layoutbuilder.py#L128>`__.
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/numba/layoutbuilder.py>`__ on `line 128 <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/numba/layoutbuilder.py#L128>`__.
 
 .. py:class:: ak.numba.layoutbuilder.ListOffset(dtype, content, *, parameters=None, initial=1024, resize=8.0)
 

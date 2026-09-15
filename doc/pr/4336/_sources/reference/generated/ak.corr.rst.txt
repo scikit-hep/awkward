@@ -1,7 +1,7 @@
 ak.corr
 =======
 
-Defined in `awkward.operations.ak_corr <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/operations/ak_corr.py>`__ on `line 24 <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/operations/ak_corr.py#L24>`__.
+Defined in `awkward.operations.ak_corr <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/operations/ak_corr.py>`__ on `line 24 <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/operations/ak_corr.py#L24>`__.
 
 .. py:function:: ak.corr(x, y, weight=None, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
 

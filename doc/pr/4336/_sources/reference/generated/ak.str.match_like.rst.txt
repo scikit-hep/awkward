@@ -1,7 +1,7 @@
 ak.str.match_like
 =================
 
-Defined in `awkward.operations.str.akstr_match_like <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/operations/str/akstr_match_like.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/operations/str/akstr_match_like.py#L12>`__.
+Defined in `awkward.operations.str.akstr_match_like <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/operations/str/akstr_match_like.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/operations/str/akstr_match_like.py#L12>`__.
 
 .. py:function:: ak.str.match_like(array, pattern, *, ignore_case=False, highlevel=True, behavior=None, attrs=None)
 

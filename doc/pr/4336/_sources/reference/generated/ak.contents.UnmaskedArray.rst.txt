@@ -1,7 +1,7 @@
 ak.contents.UnmaskedArray
 =========================
 
-Defined in `awkward.contents.unmaskedarray <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/contents/unmaskedarray.py>`__ on `line 56 <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/contents/unmaskedarray.py#L56>`__.
+Defined in `awkward.contents.unmaskedarray <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/contents/unmaskedarray.py>`__ on `line 56 <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/contents/unmaskedarray.py#L56>`__.
 
 .. py:class:: ak.contents.UnmaskedArray(content, *, parameters=None)
 

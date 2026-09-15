@@ -1,7 +1,7 @@
 ak.from_feather
 ===============
 
-Defined in `awkward.operations.ak_from_feather <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/operations/ak_from_feather.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/operations/ak_from_feather.py#L13>`__.
+Defined in `awkward.operations.ak_from_feather <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/operations/ak_from_feather.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/operations/ak_from_feather.py#L13>`__.
 
 .. py:function:: ak.from_feather(path, *, columns=None, use_threads=True, memory_map=False, generate_bitmasks=False, highlevel=True, behavior=None, attrs=None)
 

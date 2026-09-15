@@ -1,7 +1,7 @@
 ak.contents.RecordArray
 =======================
 
-Defined in `awkward.contents.recordarray <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/contents/recordarray.py>`__ on `line 114 <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/contents/recordarray.py#L114>`__.
+Defined in `awkward.contents.recordarray <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/contents/recordarray.py>`__ on `line 114 <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/contents/recordarray.py#L114>`__.
 
 .. py:class:: ak.contents.RecordArray(contents: collections.abc.Iterable[awkward.contents.content.Content], fields: collections.abc.Iterable[str] | None, length: int | type[awkward._nplikes.shape.unknown_length] | None = None, length_generator: awkward._typing.Callable[[], awkward._nplikes.shape.ShapeItem] | None = None, *, parameters=None, backend=None)
 

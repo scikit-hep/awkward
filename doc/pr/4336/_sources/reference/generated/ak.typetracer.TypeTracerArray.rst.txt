@@ -1,7 +1,7 @@
 ak.typetracer.TypeTracerArray
 =============================
 
-Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/_nplikes/typetracer.py>`__ on `line 239 <https://github.com/scikit-hep/awkward/blob/399231f07ca2511d358322d8b6832304307d141b/src/awkward/_nplikes/typetracer.py#L239>`__.
+Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/_nplikes/typetracer.py>`__ on `line 239 <https://github.com/scikit-hep/awkward/blob/9d50083e0b63bbb52d9ee79093b3a01f9427e7d1/src/awkward/_nplikes/typetracer.py#L239>`__.
 
 .. py:class:: ak.typetracer.TypeTracerArray
 
