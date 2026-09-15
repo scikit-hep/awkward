@@ -1,7 +1,7 @@
 ak.pad_none
 ===========
 
-Defined in `awkward.operations.ak_pad_none <https://github.com/scikit-hep/awkward/blob/d178eb33930a0306dca1a91d0466a21200f0e361/src/awkward/operations/ak_pad_none.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/d178eb33930a0306dca1a91d0466a21200f0e361/src/awkward/operations/ak_pad_none.py#L20>`__.
+Defined in `awkward.operations.ak_pad_none <https://github.com/scikit-hep/awkward/blob/6b0f6af4cfb301f578cf4d816a71c1c3e4be9929/src/awkward/operations/ak_pad_none.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/6b0f6af4cfb301f578cf4d816a71c1c3e4be9929/src/awkward/operations/ak_pad_none.py#L20>`__.
 
 .. py:function:: ak.pad_none(array, target, axis=1, *, clip=False, highlevel=True, behavior=None, attrs=None)
 

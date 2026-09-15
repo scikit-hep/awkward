@@ -827,7 +827,7 @@
                   
   <section id="ak-from-buffers">
 <h1>ak.from_buffers<a class="headerlink" href="#ak-from-buffers" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/d178eb33930a0306dca1a91d0466a21200f0e361/src/awkward/operations/ak_from_buffers.py">awkward.operations.ak_from_buffers</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/d178eb33930a0306dca1a91d0466a21200f0e361/src/awkward/operations/ak_from_buffers.py#L29">line 29</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6b0f6af4cfb301f578cf4d816a71c1c3e4be9929/src/awkward/operations/ak_from_buffers.py">awkward.operations.ak_from_buffers</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/6b0f6af4cfb301f578cf4d816a71c1c3e4be9929/src/awkward/operations/ak_from_buffers.py#L29">line 29</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.from_buffers">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">from_buffers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">form</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'{form_key}-{attribute}'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ak._util.native_byteorder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_noncanonical_form</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_virtualarray_caching</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.from_buffers" title="Link to this definition">#</a></dt>
@@ -864,26 +864,26 @@ simplification rules were removed.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>form</strong> (<a class="reference internal" href="ak.forms.Form.html#ak.forms.Form" title="ak.forms.Form"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.forms.Form</span></code></a> or str/dict equivalent) – The form of the Awkward
 Array to reconstitute from named buffers.</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Length of the array. (The output of this function is always
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Length of the array. (The output of this function is always
 single-partition.)</p></li>
 <li><p><strong>container</strong> (<em>Mapping</em><em>, </em><em>such as dict</em>) – The str → Python buffers that
 represent the decomposed Awkward Array. This <code class="docutils literal notranslate"><span class="pre">container</span></code> is only
 assumed to have a <code class="docutils literal notranslate"><span class="pre">__getitem__</span></code> method that accepts strings as keys.</p></li>
-<li><p><strong>buffer_key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>callable</em>) – Python format string containing
+<li><p><strong>buffer_key</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>callable</em>) – Python format string containing
 <code class="docutils literal notranslate"><span class="pre">&quot;{form_key}&quot;</span></code> and/or <code class="docutils literal notranslate"><span class="pre">&quot;{attribute}&quot;</span></code> or a function that takes these
 as keyword arguments and returns a string to use as a key for a buffer
 in the <code class="docutils literal notranslate"><span class="pre">container</span></code>.</p></li>
-<li><p><strong>backend</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Library to use to generate values that are
+<li><p><strong>backend</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Library to use to generate values that are
 put into the new array. The default, cpu, makes NumPy
 arrays, which are in main memory (e.g. not GPU). If all the values in
 <code class="docutils literal notranslate"><span class="pre">container</span></code> have the same <code class="docutils literal notranslate"><span class="pre">backend</span></code> as this, they won’t be copied.</p></li>
 <li><p><strong>byteorder</strong> (<code class="docutils literal notranslate"><span class="pre">&quot;&lt;&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;&gt;&quot;</span></code>) – Endianness of buffers read from <code class="docutils literal notranslate"><span class="pre">container</span></code>.
 If the byteorder does not match the current system byteorder, the
 arrays will be copied.</p></li>
-<li><p><strong>allow_noncanonical_form</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, non-canonical forms will be
+<li><p><strong>allow_noncanonical_form</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, non-canonical forms will be
 simplified to produce arrays with canonical layouts; otherwise,
 an exception will be thrown for such forms.</p></li>
-<li><p><strong>enable_virtualarray_caching</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> or </em><em>callable</em>) – If True (the default),
+<li><p><strong>enable_virtualarray_caching</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> or </em><em>callable</em>) – If True (the default),
 all VirtualNDArray buffers that get created will cache their
 materialized buffers on themselves when they get materialized.
 If a callable is given, it must accept two arguments, <code class="docutils literal notranslate"><span class="pre">form_key</span></code> and <code class="docutils literal notranslate"><span class="pre">attribute</span></code>,
@@ -891,11 +891,11 @@ and return a boolean indicating whether caching should be enabled for the
 given buffer. The <code class="docutils literal notranslate"><span class="pre">form_key</span></code> and <code class="docutils literal notranslate"><span class="pre">attribute</span></code> are the same as those passed to
 the <code class="docutils literal notranslate"><span class="pre">buffer_key</span></code> function. If False, all VirtualNDArrays will not cache
 their materialized buffers on themselves.</p></li>
-<li><p><strong>highlevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, return an <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>; otherwise, return
+<li><p><strong>highlevel</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, return an <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>; otherwise, return
 a low-level <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> subclass.</p></li>
-<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for the output array, if
+<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for the output array, if
 high-level.</p></li>
-<li><p><strong>attrs</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom attributes for the output array, if
+<li><p><strong>attrs</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom attributes for the output array, if
 high-level.</p></li>
 </ul>
 </dd>

@@ -534,16 +534,9 @@
 <p>First, let’s load the dataset using the <a class="reference internal" href="../reference/generated/ak.from_parquet.html#ak.from_parquet" title="ak.from_parquet"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.from_parquet()</span></code></a> function. We will only load the first row group, for the sake of this demonstration:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
-
-<span class="c1"># Use the cached local copy when the docs build provides one</span>
-<span class="c1"># (see docs/conf.py); otherwise fall back to the dataset on Zenodo.</span>
-<span class="n">url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-    <span class="s2">&quot;AWKWARD_CHICAGO_TAXI_PARQUET&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;https://zenodo.org/records/14537442/files/chicago-taxi.parquet&quot;</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://test-files.awkward-array.org/chicago-taxi.parquet&quot;</span>
 <span class="n">taxi</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_parquet</span><span class="p">(</span>
     <span class="n">url</span><span class="p">,</span>
     <span class="n">row_groups</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
