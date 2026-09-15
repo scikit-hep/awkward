@@ -18,7 +18,16 @@ from awkward._nplikes.numpy_like import (
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.virtual import VirtualNDArray
-from awkward._typing import TYPE_CHECKING, Any, DType, Final, Literal, TypeVar, cast
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    DType,
+    Final,
+    Literal,
+    NominalMeta,
+    TypeVar,
+    cast,
+)
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
@@ -56,7 +65,7 @@ def _nplike_unique_has_equal_nan(module: Any) -> bool:
 ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
 
 
-class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
+class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT], metaclass=NominalMeta):
     """
     Some methods maintain virtualness while others are required to materialize the array.
     The `maybe_materialize` function is used for that purpose.

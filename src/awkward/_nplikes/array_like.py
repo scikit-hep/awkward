@@ -10,6 +10,7 @@ from awkward._typing import (
     Any,
     DType,
     EllipsisType,
+    NominalMeta,
     Protocol,
     Self,
     SupportsIndex,
@@ -140,7 +141,7 @@ class ArrayLike(Protocol):
     def __invert__(self) -> Self: ...
 
 
-class MaterializableArray(ArrayLike):
+class MaterializableArray(ArrayLike, metaclass=NominalMeta):
     @abstractmethod
     def materialize(self) -> ArrayLike: ...
 
