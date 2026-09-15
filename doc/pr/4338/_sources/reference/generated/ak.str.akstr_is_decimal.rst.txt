@@ -1,0 +1,14 @@
+ak.str.akstr_is_decimal
+=======================
+
+.. py:module:: awkward.operations.str.akstr_is_decimal
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_decimal.is_decimal
+
+

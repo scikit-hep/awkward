@@ -1,0 +1,14 @@
+ak.str.akstr_join_element_wise
+==============================
+
+.. py:module:: awkward.operations.str.akstr_join_element_wise
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_join_element_wise.join_element_wise
+
+
