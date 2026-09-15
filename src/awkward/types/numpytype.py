@@ -46,7 +46,7 @@ def primitive_to_dtype(primitive):
 
 @lru_cache
 def dtype_to_primitive(dtype):
-    if dtype.kind.upper() == "M" and dtype == dtype.newbyteorder("="):
+    if dtype.kind in "mM" and dtype == dtype.newbyteorder("="):
         return str(dtype)
     else:
         out = _dtype_to_primitive_dict.get(dtype)
