@@ -1,7 +1,7 @@
 ak.prettyprint.highlevel_array_show_rows
 ========================================
 
-Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/23440bf96688bf5ac24eecfc74809a654c778f6b/src/awkward/prettyprint.py>`__ on `line 469 <https://github.com/scikit-hep/awkward/blob/23440bf96688bf5ac24eecfc74809a654c778f6b/src/awkward/prettyprint.py#L469>`__.
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/205c131f0c6fd2dc48ff12b0c9161ea8cb2c4e37/src/awkward/prettyprint.py>`__ on `line 469 <https://github.com/scikit-hep/awkward/blob/205c131f0c6fd2dc48ff12b0c9161ea8cb2c4e37/src/awkward/prettyprint.py#L469>`__.
 
 .. py:function:: ak.prettyprint.highlevel_array_show_rows(array, limit_rows=20, limit_cols=80, type=False, named_axis=False, nbytes=False, backend=False, *, formatter=None, precision=3) -> list[str]
 

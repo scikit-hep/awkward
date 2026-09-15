@@ -1,7 +1,7 @@
 ak.backend
 ==========
 
-Defined in `awkward.operations.ak_backend <https://github.com/scikit-hep/awkward/blob/23440bf96688bf5ac24eecfc74809a654c778f6b/src/awkward/operations/ak_backend.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/23440bf96688bf5ac24eecfc74809a654c778f6b/src/awkward/operations/ak_backend.py#L11>`__.
+Defined in `awkward.operations.ak_backend <https://github.com/scikit-hep/awkward/blob/205c131f0c6fd2dc48ff12b0c9161ea8cb2c4e37/src/awkward/operations/ak_backend.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/205c131f0c6fd2dc48ff12b0c9161ea8cb2c4e37/src/awkward/operations/ak_backend.py#L11>`__.
 
 .. py:function:: ak.backend(*arrays)
 
