@@ -1,7 +1,7 @@
 ak.zeros_like
 =============
 
-Defined in `awkward.operations.ak_zeros_like <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_zeros_like.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/operations/ak_zeros_like.py#L17>`__.
+Defined in `awkward.operations.ak_zeros_like <https://github.com/scikit-hep/awkward/blob/f98f7b0f2fafe6a6087b174858b9e05674ca4bfd/src/awkward/operations/ak_zeros_like.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/f98f7b0f2fafe6a6087b174858b9e05674ca4bfd/src/awkward/operations/ak_zeros_like.py#L17>`__.
 
 .. py:function:: ak.zeros_like(array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None, attrs=None)
 

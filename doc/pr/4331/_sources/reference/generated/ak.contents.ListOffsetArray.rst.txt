@@ -1,7 +1,7 @@
 ak.contents.ListOffsetArray
 ===========================
 
-Defined in `awkward.contents.listoffsetarray <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/contents/listoffsetarray.py>`__ on `line 56 <https://github.com/scikit-hep/awkward/blob/5ad21358a1e0d3d634a04c2a8970054c07c77a2a/src/awkward/contents/listoffsetarray.py#L56>`__.
+Defined in `awkward.contents.listoffsetarray <https://github.com/scikit-hep/awkward/blob/f98f7b0f2fafe6a6087b174858b9e05674ca4bfd/src/awkward/contents/listoffsetarray.py>`__ on `line 56 <https://github.com/scikit-hep/awkward/blob/f98f7b0f2fafe6a6087b174858b9e05674ca4bfd/src/awkward/contents/listoffsetarray.py#L56>`__.
 
 .. py:class:: ak.contents.ListOffsetArray(offsets, content, *, parameters=None)
 
