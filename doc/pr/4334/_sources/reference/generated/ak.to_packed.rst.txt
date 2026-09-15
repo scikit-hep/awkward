@@ -1,7 +1,7 @@
 ak.to_packed
 ============
 
-Defined in `awkward.operations.ak_to_packed <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_to_packed.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_to_packed.py#L14>`__.
+Defined in `awkward.operations.ak_to_packed <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_to_packed.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_to_packed.py#L14>`__.
 
 .. py:function:: ak.to_packed(array, *, highlevel=True, behavior=None, attrs=None)
 

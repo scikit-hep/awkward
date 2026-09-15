@@ -1,7 +1,7 @@
 ak.contents.ListArray
 =====================
 
-Defined in `awkward.contents.listarray <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/contents/listarray.py>`__ on `line 55 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/contents/listarray.py#L55>`__.
+Defined in `awkward.contents.listarray <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/contents/listarray.py>`__ on `line 55 <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/contents/listarray.py#L55>`__.
 
 .. py:class:: ak.contents.ListArray(starts, stops, content, *, parameters=None)
 

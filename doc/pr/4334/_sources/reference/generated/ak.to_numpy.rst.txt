@@ -1,7 +1,7 @@
 ak.to_numpy
 ===========
 
-Defined in `awkward.operations.ak_to_numpy <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_to_numpy.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_to_numpy.py#L12>`__.
+Defined in `awkward.operations.ak_to_numpy <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_to_numpy.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_to_numpy.py#L12>`__.
 
 .. py:function:: ak.to_numpy(array, *, allow_missing=True)
 

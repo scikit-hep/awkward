@@ -1,7 +1,7 @@
 ak.nanstd
 =========
 
-Defined in `awkward.operations.ak_std <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_std.py>`__ on `line 107 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_std.py#L107>`__.
+Defined in `awkward.operations.ak_std <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_std.py>`__ on `line 107 <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_std.py#L107>`__.
 
 .. py:function:: ak.nanstd(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True, highlevel=True, behavior=None, attrs=None)
 

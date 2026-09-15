@@ -1,7 +1,7 @@
 ak.argcombinations
 ==================
 
-Defined in `awkward.operations.ak_argcombinations <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_argcombinations.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_argcombinations.py#L17>`__.
+Defined in `awkward.operations.ak_argcombinations <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_argcombinations.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_argcombinations.py#L17>`__.
 
 .. py:function:: ak.argcombinations(array, n, *, replacement=False, axis=1, fields=None, parameters=None, with_name=None, highlevel=True, behavior=None, attrs=None)
 

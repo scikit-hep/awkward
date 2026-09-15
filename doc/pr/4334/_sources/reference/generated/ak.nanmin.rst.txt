@@ -1,7 +1,7 @@
 ak.nanmin
 =========
 
-Defined in `awkward.operations.ak_min <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_min.py>`__ on `line 99 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_min.py#L99>`__.
+Defined in `awkward.operations.ak_min <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_min.py>`__ on `line 99 <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_min.py#L99>`__.
 
 .. py:function:: ak.nanmin(array, axis=None, *, keepdims=False, initial=None, mask_identity=True, highlevel=True, behavior=None, attrs=None)
 

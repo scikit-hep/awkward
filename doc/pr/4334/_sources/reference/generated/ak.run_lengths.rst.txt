@@ -1,7 +1,7 @@
 ak.run_lengths
 ==============
 
-Defined in `awkward.operations.ak_run_lengths <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_run_lengths.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/operations/ak_run_lengths.py#L17>`__.
+Defined in `awkward.operations.ak_run_lengths <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_run_lengths.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/operations/ak_run_lengths.py#L17>`__.
 
 .. py:function:: ak.run_lengths(array, *, highlevel=True, behavior=None, attrs=None)
 

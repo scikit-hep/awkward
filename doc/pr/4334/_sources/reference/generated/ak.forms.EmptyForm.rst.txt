@@ -1,7 +1,7 @@
 ak.forms.EmptyForm
 ==================
 
-Defined in `awkward.forms.emptyform <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/forms/emptyform.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/1c79f1cd17abce9776ed21aefebaebe386ee278a/src/awkward/forms/emptyform.py#L21>`__.
+Defined in `awkward.forms.emptyform <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/forms/emptyform.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/477de54ae98acb08d8373f9194365a92e5807a5b/src/awkward/forms/emptyform.py#L21>`__.
 
 .. py:class:: ak.forms.EmptyForm(*, parameters: awkward.forms.form.JSONMapping | None = None, form_key: str | None = None)
 
