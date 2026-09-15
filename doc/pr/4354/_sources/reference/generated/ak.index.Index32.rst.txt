@@ -1,7 +1,7 @@
 ak.index.Index32
 ================
 
-Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/9364a3d87e78a716bc6ab3f965e9c42ff2c15fa1/src/awkward/index.py>`__ on `line 317 <https://github.com/scikit-hep/awkward/blob/9364a3d87e78a716bc6ab3f965e9c42ff2c15fa1/src/awkward/index.py#L317>`__.
+Defined in `awkward.index <https://github.com/scikit-hep/awkward/blob/23440bf96688bf5ac24eecfc74809a654c778f6b/src/awkward/index.py>`__ on `line 317 <https://github.com/scikit-hep/awkward/blob/23440bf96688bf5ac24eecfc74809a654c778f6b/src/awkward/index.py#L317>`__.
 
 .. py:class:: ak.index.Index32(data, *, metadata: dict | None = None, nplike: awkward._nplikes.numpy_like.NumpyLike | None = None)
 
