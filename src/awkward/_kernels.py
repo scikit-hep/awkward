@@ -62,44 +62,66 @@ class BaseKernel(Kernel):
         )
 
 
-class CTypesFunc(Protocol):
-    argtypes: tuple[Any, ...]
+class CTypesKernel(BaseKernel):
+    """A kernel compiled into awkward-cpp, called through ctypes.
 
-    def __call__(self, *args) -> Any: ...
+    The NumPy and JAX backends both dispatch to these functions -- which is why
+    the JAX backend requires its buffers to live on the CPU -- so they share the
+    calling convention here and differ only in how a buffer's address is taken.
+    """
 
+    def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
+        super().__init__(impl, key)
+        argtypes = impl.argtypes
+        self._is_pointer = tuple(issubclass(t, ctypes._Pointer) for t in argtypes)
+        # Building a typed ctypes pointer for each buffer costs several times as
+        # much as the call itself, so re-prototype the same function address
+        # with `void *` parameters and hand it plain addresses instead.
+        self._call = ctypes.CFUNCTYPE(
+            impl.restype,
+            *(
+                ctypes.c_void_p if is_pointer else t
+                for is_pointer, t in zip(self._is_pointer, argtypes, strict=True)
+            ),
+        )(ctypes.cast(impl, ctypes.c_void_p).value)
 
-class NumpyKernel(BaseKernel):
-    @classmethod
-    def _cast(cls, x, t):
-        if issubclass(t, ctypes._Pointer):
-            # Do we have a NumPy-owned array?
-            if numpy.is_own_array(x):
-                assert numpy.is_c_contiguous(x), "kernel expects contiguous array"
-                if x.ndim > 0:
-                    return ctypes.cast(numpy.memory_ptr(x), t)
-                else:
-                    return x
-            # Or, do we have a ctypes type
-            elif hasattr(x, "_b_base_"):
-                return ctypes.cast(x, t)
-            else:
-                raise AssertionError(
-                    f"Only NumPy buffers should be passed to Numpy Kernels, received {x} (ptr type={type(t).__name__})"
-                )
-        else:
-            return x
+    def _pointer_of(self, x):
+        """The address of ``x``'s buffer, rejecting anything this backend cannot pass."""
+        raise NotImplementedError
 
     def __call__(self, *args) -> None:
-        assert len(args) == len(self._impl.argtypes)
+        assert len(args) == len(self._is_pointer)
 
         args = maybe_materialize(*args)
+        pointer_of = self._pointer_of
 
-        return self._impl(
-            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes, strict=True))
+        return self._call(
+            *(
+                pointer_of(x) if is_pointer else x
+                for x, is_pointer in zip(args, self._is_pointer, strict=True)
+            )
         )
 
 
-class JaxKernel(BaseKernel):
+class NumpyKernel(CTypesKernel):
+    def _pointer_of(self, x):
+        # Do we have a NumPy-owned array?
+        if numpy.is_own_array(x):
+            assert x.flags.c_contiguous, "kernel expects contiguous array"
+            if x.ndim > 0:
+                return x.ctypes.data
+            else:
+                return x
+        # Or, do we have a ctypes type
+        elif hasattr(x, "_b_base_"):
+            return ctypes.cast(x, ctypes.c_void_p)
+        else:
+            raise AssertionError(
+                f"Only NumPy buffers should be passed to Numpy Kernels, received {x}"
+            )
+
+
+class JaxKernel(CTypesKernel):
     def __init__(self, impl: Callable[..., Any], key: KernelKeyType):
         super().__init__(impl, key)
 
@@ -110,45 +132,33 @@ class JaxKernel(BaseKernel):
         if parse_version(jax_module.__version__) >= parse_version("0.7.0"):
             self._ad_tracer_types += (jax_module._src.interpreters.ad.LinearizeTracer,)
 
-    def _cast(self, x, t):
-        if issubclass(t, ctypes._Pointer):
-            # Do we have a JAX-owned array?
-            if self._jax.is_own_array(x):
-                if self._jax.is_tracer_type(type(x)):
-                    # general message for any invalid JAX input type
-                    msg = f"Encountered {x} as an (invalid) input to the '{self._key[0]}' Awkward C++ kernel."
-                    # message specification for autodiff (i.e. when encountering a JVPTracer)
-                    if isinstance(x, self._ad_tracer_types):
-                        msg += " This kernel is not differentiable by the JAX backend."
-                    raise ValueError(msg)
-                assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
-                if x.ndim > 0:
-                    if x.device.platform != "cpu":
-                        raise RuntimeError(
-                            "The JAX backend requires CPU JAX buffers to be the default. You can make CPU the default backend"
-                            " with jax.config.update('jax_platform_name', 'cpu') or by setting JAX_PLATFORM_NAME=cpu."
-                        )
-                    return ctypes.cast(self._jax.memory_ptr(x), t)
-                else:
-                    return x
-            # Or, do we have a ctypes type
-            elif hasattr(x, "_b_base_"):
-                return ctypes.cast(x, t)
+    def _pointer_of(self, x):
+        # Do we have a JAX-owned array?
+        if self._jax.is_own_array(x):
+            if self._jax.is_tracer_type(type(x)):
+                # general message for any invalid JAX input type
+                msg = f"Encountered {x} as an (invalid) input to the '{self._key[0]}' Awkward C++ kernel."
+                # message specification for autodiff (i.e. when encountering a JVPTracer)
+                if isinstance(x, self._ad_tracer_types):
+                    msg += " This kernel is not differentiable by the JAX backend."
+                raise ValueError(msg)
+            assert self._jax.is_c_contiguous(x), "kernel expects contiguous array"
+            if x.ndim > 0:
+                if x.device.platform != "cpu":
+                    raise RuntimeError(
+                        "The JAX backend requires CPU JAX buffers to be the default. You can make CPU the default backend"
+                        " with jax.config.update('jax_platform_name', 'cpu') or by setting JAX_PLATFORM_NAME=cpu."
+                    )
+                return self._jax.memory_ptr(x)
             else:
-                raise AssertionError(
-                    f"Only JAX buffers should be passed to JAX Kernels, received {x} (ptr type={type(t).__name__})"
-                )
+                return x
+        # Or, do we have a ctypes type
+        elif hasattr(x, "_b_base_"):
+            return ctypes.cast(x, ctypes.c_void_p)
         else:
-            return x
-
-    def __call__(self, *args) -> None:
-        assert len(args) == len(self._impl.argtypes)
-
-        args = maybe_materialize(*args)
-
-        return self._impl(
-            *(self._cast(x, t) for x, t in zip(args, self._impl.argtypes, strict=True))
-        )
+            raise AssertionError(
+                f"Only JAX buffers should be passed to JAX Kernels, received {x}"
+            )
 
 
 class CupyKernel(BaseKernel):
@@ -175,15 +185,6 @@ class CupyKernel(BaseKernel):
         # CUDA blocks are limited to 1024 threads per block
         # Number of threads are given by `length`
         return min(length, 1024), 1, 1
-
-    def _cast(self, x, type_):
-        if type_:
-            # Do we have a CuPy-owned array?
-            if self._cupy.is_own_array(x):
-                assert self._cupy.is_c_contiguous(x)
-            return x
-        else:
-            return x
 
     def __call__(self, *args) -> None:
         import awkward._connect.cuda as ak_cuda
@@ -213,7 +214,12 @@ class CupyKernel(BaseKernel):
             ak_cuda.synchronize_cuda(cupy.cuda.get_current_stream())
         assert len(args) == len(self._impl.is_ptr)
 
-        args = [self._cast(x, t) for x, t in zip(args, self._impl.is_ptr, strict=True)]
+        # a CuPy kernel takes the arrays themselves, so there is nothing to convert
+        assert all(
+            self._cupy.is_c_contiguous(x)
+            for x, is_ptr in zip(args, self._impl.is_ptr, strict=True)
+            if is_ptr and self._cupy.is_own_array(x)
+        ), "kernel expects contiguous arrays"
 
         # The first arg is the invocation index which raises itself by 8 in the kernel if there was no error before.
         # The second arg is the error_code.
