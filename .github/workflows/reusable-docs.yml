@@ -1,6 +1,17 @@
 name: Docs
 on:
   workflow_call:
+    secrets:
+      R2_ACCOUNT_ID:
+        required: false
+      R2_ACCESS_KEY_ID:
+        required: false
+      R2_SECRET_ACCESS_KEY:
+        required: false
+      CLOUDFLARE_ZONE_ID:
+        required: false
+      CLOUDFLARE_API_TOKEN:
+        required: false
 
   workflow_dispatch:
 
@@ -308,12 +319,22 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'release'
     name: Deploy
     permissions:
-      contents: write # Required to push the rendered docs to the `gh-pages` branch.
+      contents: read
     env:
+      S3_BUCKET: "awkward-array.org"
       PRODUCTION_URL: "https://awkward-array.org"
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      # R2 is a single global bucket, but the CLI still wants a region
+      AWS_DEFAULT_REGION: auto
+      R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+      # R2 rejects the additional checksums that recent versions of the AWS CLI
+      # send by default
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
     environment:
       name: docs
-      url: ${{ env.PRODUCTION_URL }}${{ github.event_name == 'release' && '/doc/stable' || '/doc/main' }}
+      url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -326,16 +347,15 @@ jobs:
       # Pushes to main trigger latest
       - name: Sync `main`
         if: github.event_name == 'push'
-        uses: ./.github/actions/deploy-to-gh-pages
-        with:
-          source: built-docs
-          target: doc/main
-          message: "Deploy `main` documentation"
-          token: ${{ secrets.GITHUB_TOKEN }}
+        id: sync-main
+        run: |
+          aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
+            built-docs/ "s3://${S3_BUCKET}/doc/main/"
+          echo "path=/doc/main" >> $GITHUB_OUTPUT
       # Releases trigger versions
-      - name: Read version
+      - name: Sync `stable`
         if: github.event_name == 'release'
-        id: version
+        id: sync-stable
         run: |
           # Take only leading version
           version=$(echo "${GITHUB_REF_NAME}" | sed -n -E "s/v?([0-9]+\.[0-9]+)\.[0-9]+/\1/p")
@@ -344,28 +364,15 @@ jobs:
             echo "::error::Could not read a version from ${GITHUB_REF_NAME}"
             exit 1
           fi
-          echo "version=$version" >> $GITHUB_OUTPUT
-      - name: Sync version selector
-        if: github.event_name == 'release'
-        uses: ./.github/actions/deploy-to-gh-pages
+          aws s3 cp --endpoint-url "${R2_ENDPOINT}" \
+            docs/switcher.json "s3://${S3_BUCKET}/doc/"
+          aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
+            built-docs/ "s3://${S3_BUCKET}/doc/$version/"
+          aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
+            built-docs/ "s3://${S3_BUCKET}/doc/stable/"
+          echo "path=/doc/stable" >> $GITHUB_OUTPUT
+      - name: Purge the Cloudflare cache
+        uses: ./.github/actions/purge-cloudflare-cache
         with:
-          source: docs/switcher.json
-          target: doc/switcher.json
-          message: "Deploy version selector"
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Sync version
-        if: github.event_name == 'release'
-        uses: ./.github/actions/deploy-to-gh-pages
-        with:
-          source: built-docs
-          target: doc/${{ steps.version.outputs.version }}
-          message: "Deploy documentation for ${{ steps.version.outputs.version }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Sync `stable`
-        if: github.event_name == 'release'
-        uses: ./.github/actions/deploy-to-gh-pages
-        with:
-          source: built-docs
-          target: doc/stable
-          message: "Deploy `stable` documentation"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}

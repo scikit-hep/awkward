@@ -1,0 +1,41 @@
+name: Purge the Cloudflare cache
+description: Drop the cached copies of the documentation site held at the Cloudflare edge.
+
+inputs:
+  zone-id:
+    description: Zone holding the documentation site.
+    required: true
+  api-token:
+    description: API token with the `Cache Purge` permission on the zone.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Purge the Cloudflare cache
+      shell: bash
+      env:
+        ZONE_ID: ${{ inputs.zone-id }}
+        API_TOKEN: ${{ inputs.api-token }}
+      run: |
+        set -euo pipefail
+
+        # This replaces the CloudFront invalidation that used to be scoped to
+        # the deployed prefix. Cloudflare only offers purge-by-prefix on
+        # Enterprise plans, so purge the whole zone instead; it serves nothing
+        # but the documentation site, and R2 has no egress fee for refilling it
+        response="$(
+          curl --silent --show-error --fail-with-body \
+            --request POST \
+            --url "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache" \
+            --header "Authorization: Bearer ${API_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data '{"purge_everything": true}'
+        )"
+
+        # A refused purge is reported in the body of a `200` response
+        if [ "$(jq --raw-output '.success' <<< "${response}")" != "true" ]; then
+          echo "::error::Failed to purge the Cloudflare cache"
+          jq --raw-output '.errors' <<< "${response}"
+          exit 1
+        fi
