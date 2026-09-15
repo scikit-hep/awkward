@@ -1,7 +1,7 @@
 ak.to_rdataframe
 ================
 
-Defined in `awkward.operations.ak_to_rdataframe <https://github.com/scikit-hep/awkward/blob/2000a91bbe8ca2e5ec85e5bbfce10b31e4804baa/src/awkward/operations/ak_to_rdataframe.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/2000a91bbe8ca2e5ec85e5bbfce10b31e4804baa/src/awkward/operations/ak_to_rdataframe.py#L16>`__.
+Defined in `awkward.operations.ak_to_rdataframe <https://github.com/scikit-hep/awkward/blob/abb2e9129debabbbc7aa9f187fbddcd1799f2b2e/src/awkward/operations/ak_to_rdataframe.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/abb2e9129debabbbc7aa9f187fbddcd1799f2b2e/src/awkward/operations/ak_to_rdataframe.py#L16>`__.
 
 .. py:function:: ak.to_rdataframe(arrays, *, flatlist_as_rvec=True)
 
