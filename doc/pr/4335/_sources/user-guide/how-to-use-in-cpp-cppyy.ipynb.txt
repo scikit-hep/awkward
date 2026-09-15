@@ -40,10 +40,10 @@
    "id": "48778e8a",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:10.514492Z",
-     "iopub.status.busy": "2026-09-14T20:46:10.514279Z",
-     "iopub.status.idle": "2026-09-14T20:46:10.696555Z",
-     "shell.execute_reply": "2026-09-14T20:46:10.695814Z"
+     "iopub.execute_input": "2026-09-15T19:37:14.149764Z",
+     "iopub.status.busy": "2026-09-15T19:37:14.149647Z",
+     "iopub.status.idle": "2026-09-15T19:37:14.291021Z",
+     "shell.execute_reply": "2026-09-15T19:37:14.290429Z"
     }
    },
    "outputs": [
@@ -69,10 +69,10 @@
    "id": "dd32d294",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:10.698710Z",
-     "iopub.status.busy": "2026-09-14T20:46:10.698461Z",
-     "iopub.status.idle": "2026-09-14T20:46:10.702266Z",
-     "shell.execute_reply": "2026-09-14T20:46:10.701638Z"
+     "iopub.execute_input": "2026-09-15T19:37:14.292507Z",
+     "iopub.status.busy": "2026-09-15T19:37:14.292325Z",
+     "iopub.status.idle": "2026-09-15T19:37:14.295353Z",
+     "shell.execute_reply": "2026-09-15T19:37:14.294781Z"
     }
    },
    "outputs": [],
@@ -86,10 +86,10 @@
    "id": "a87d01b8",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:10.704082Z",
-     "iopub.status.busy": "2026-09-14T20:46:10.703926Z",
-     "iopub.status.idle": "2026-09-14T20:46:12.296086Z",
-     "shell.execute_reply": "2026-09-14T20:46:12.295160Z"
+     "iopub.execute_input": "2026-09-15T19:37:14.296527Z",
+     "iopub.status.busy": "2026-09-15T19:37:14.296405Z",
+     "iopub.status.idle": "2026-09-15T19:37:15.354613Z",
+     "shell.execute_reply": "2026-09-15T19:37:15.353969Z"
     },
     "tags": []
    },
@@ -108,19 +108,18 @@
      "text": [
       "/opt/hostedtoolcache/Python/3.11.0/x64/lib/python3.11/site-packages/cppyy_backend/loader.py:139: UserWarning: No precompiled header available (failed to build); this may impact performance.\n",
       "  warnings.warn('No precompiled header available (%s); this may impact performance.' % msg)\n",
-      "input_line_10:2:45: error: "
+      "input_line_10:2:45: error: explicit instantiation of '_M_use_local_data' does not refer to a function template, variable template, member function, member class, or static data member\n",
+      "template std::string::pointer  std::string::_M_use_local_data();\n",
+      "                                            ^\n",
+      "input_line_10:3:46: error: explicit instantiation of '_M_use_local_data' does not refer to a function template, variable template, member function, member class, or static data member\n",
+      "template std::wstring::pointer std::wstring::_M_use_local_data();\n",
+      "                                             ^\n"
      ]
     },
     {
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "explicit instantiation of '_M_use_local_data' does not refer to a function template, variable template, member function, member class, or static data member\n",
-      "template std::string::pointer  std::string::_M_use_local_data();\n",
-      "                                            ^\n",
-      "input_line_10:3:46: error: explicit instantiation of '_M_use_local_data' does not refer to a function template, variable template, member function, member class, or static data member\n",
-      "template std::wstring::pointer std::wstring::_M_use_local_data();\n",
-      "                                             ^\n",
       "/opt/hostedtoolcache/Python/3.11.0/x64/lib/python3.11/site-packages/cppyy/__init__.py:356: UserWarning: CPyCppyy API not found (tried: /opt/hostedtoolcache/Python/3.11.0/x64/lib/python3.11/site-packages/../../../include/python3.11); set CPPYY_API_PATH envar to the 'CPyCppyy' API directory to fix\n",
       "  warnings.warn(\"CPyCppyy API not found (tried: %s); set CPPYY_API_PATH envar to the 'CPyCppyy' API directory to fix\" % apipath_extra)\n"
      ]
@@ -155,10 +154,10 @@
    "id": "97f90216",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:12.297909Z",
-     "iopub.status.busy": "2026-09-14T20:46:12.297645Z",
-     "iopub.status.idle": "2026-09-14T20:46:12.304390Z",
-     "shell.execute_reply": "2026-09-14T20:46:12.303820Z"
+     "iopub.execute_input": "2026-09-15T19:37:15.356037Z",
+     "iopub.status.busy": "2026-09-15T19:37:15.355861Z",
+     "iopub.status.idle": "2026-09-15T19:37:15.361036Z",
+     "shell.execute_reply": "2026-09-15T19:37:15.360574Z"
     },
     "tags": []
    },
@@ -211,10 +210,10 @@
    "id": "d4294ad6",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:12.306319Z",
-     "iopub.status.busy": "2026-09-14T20:46:12.306164Z",
-     "iopub.status.idle": "2026-09-14T20:46:12.319124Z",
-     "shell.execute_reply": "2026-09-14T20:46:12.318460Z"
+     "iopub.execute_input": "2026-09-15T19:37:15.362407Z",
+     "iopub.status.busy": "2026-09-15T19:37:15.362292Z",
+     "iopub.status.idle": "2026-09-15T19:37:15.372466Z",
+     "shell.execute_reply": "2026-09-15T19:37:15.371865Z"
     },
     "tags": []
    },
@@ -266,10 +265,10 @@
    "id": "03ab8a70",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:12.321180Z",
-     "iopub.status.busy": "2026-09-14T20:46:12.321001Z",
-     "iopub.status.idle": "2026-09-14T20:46:12.434411Z",
-     "shell.execute_reply": "2026-09-14T20:46:12.433542Z"
+     "iopub.execute_input": "2026-09-15T19:37:15.373643Z",
+     "iopub.status.busy": "2026-09-15T19:37:15.373530Z",
+     "iopub.status.idle": "2026-09-15T19:37:15.500560Z",
+     "shell.execute_reply": "2026-09-15T19:37:15.500041Z"
     },
     "tags": []
    },
@@ -277,7 +276,7 @@
     {
      "data": {
       "text/plain": [
-       "'awkward::ListArray_5pDCDRoidA'"
+       "'awkward::ListArray_KB7MdrqAA'"
       ]
      },
      "execution_count": 6,
@@ -305,10 +304,10 @@
    "id": "0bea9b7d",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:12.436071Z",
-     "iopub.status.busy": "2026-09-14T20:46:12.435915Z",
-     "iopub.status.idle": "2026-09-14T20:46:12.491214Z",
-     "shell.execute_reply": "2026-09-14T20:46:12.490491Z"
+     "iopub.execute_input": "2026-09-15T19:37:15.502056Z",
+     "iopub.status.busy": "2026-09-15T19:37:15.501936Z",
+     "iopub.status.idle": "2026-09-15T19:37:15.545021Z",
+     "shell.execute_reply": "2026-09-15T19:37:15.544518Z"
     }
    },
    "outputs": [],
@@ -322,10 +321,10 @@
    "id": "f0fb71ec",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:12.493145Z",
-     "iopub.status.busy": "2026-09-14T20:46:12.492966Z",
-     "iopub.status.idle": "2026-09-14T20:46:17.002187Z",
-     "shell.execute_reply": "2026-09-14T20:46:17.001451Z"
+     "iopub.execute_input": "2026-09-15T19:37:15.546453Z",
+     "iopub.status.busy": "2026-09-15T19:37:15.546328Z",
+     "iopub.status.idle": "2026-09-15T19:37:19.102631Z",
+     "shell.execute_reply": "2026-09-15T19:37:19.102048Z"
     },
     "tags": []
    },
@@ -334,7 +333,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "5.32 μs ± 25.9 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)\n"
+      "4.19 μs ± 26.7 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)\n"
      ]
     }
    ],
@@ -350,10 +349,10 @@
    "id": "11a7ecec",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:17.003976Z",
-     "iopub.status.busy": "2026-09-14T20:46:17.003824Z",
-     "iopub.status.idle": "2026-09-14T20:46:27.821939Z",
-     "shell.execute_reply": "2026-09-14T20:46:27.821006Z"
+     "iopub.execute_input": "2026-09-15T19:37:19.104029Z",
+     "iopub.status.busy": "2026-09-15T19:37:19.103887Z",
+     "iopub.status.idle": "2026-09-15T19:37:27.421281Z",
+     "shell.execute_reply": "2026-09-15T19:37:27.420675Z"
     },
     "tags": []
    },
@@ -362,7 +361,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "133 μs ± 678 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)\n"
+      "102 μs ± 191 ns per loop (mean ± std. dev. of 7 runs, 10,000 loops each)\n"
      ]
     }
    ],
@@ -386,10 +385,10 @@
    "id": "1d23590b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-09-14T20:46:27.823652Z",
-     "iopub.status.busy": "2026-09-14T20:46:27.823488Z",
-     "iopub.status.idle": "2026-09-14T20:46:27.826433Z",
-     "shell.execute_reply": "2026-09-14T20:46:27.825799Z"
+     "iopub.execute_input": "2026-09-15T19:37:27.422804Z",
+     "iopub.status.busy": "2026-09-15T19:37:27.422678Z",
+     "iopub.status.idle": "2026-09-15T19:37:27.425089Z",
+     "shell.execute_reply": "2026-09-15T19:37:27.424613Z"
     },
     "tags": []
    },

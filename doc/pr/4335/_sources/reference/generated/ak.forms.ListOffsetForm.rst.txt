@@ -1,7 +1,7 @@
 ak.forms.ListOffsetForm
 =======================
 
-Defined in `awkward.forms.listoffsetform <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/forms/listoffsetform.py>`__ on `line 27 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/forms/listoffsetform.py#L27>`__.
+Defined in `awkward.forms.listoffsetform <https://github.com/scikit-hep/awkward/blob/1f87cb04abb150b12cb64ae1521e7bdc47a0dff8/src/awkward/forms/listoffsetform.py>`__ on `line 27 <https://github.com/scikit-hep/awkward/blob/1f87cb04abb150b12cb64ae1521e7bdc47a0dff8/src/awkward/forms/listoffsetform.py#L27>`__.
 
 .. py:class:: ak.forms.ListOffsetForm(offsets: str, content: awkward.forms.form.Form, *, parameters: awkward._typing.JSONMapping | None = None, form_key: str | None = None)
 

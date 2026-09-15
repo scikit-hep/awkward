@@ -1,7 +1,7 @@
 ak.str.trim
 ===========
 
-Defined in `awkward.operations.str.akstr_trim <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/str/akstr_trim.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/str/akstr_trim.py#L12>`__.
+Defined in `awkward.operations.str.akstr_trim <https://github.com/scikit-hep/awkward/blob/1f87cb04abb150b12cb64ae1521e7bdc47a0dff8/src/awkward/operations/str/akstr_trim.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/1f87cb04abb150b12cb64ae1521e7bdc47a0dff8/src/awkward/operations/str/akstr_trim.py#L12>`__.
 
 .. py:function:: ak.str.trim(array, characters, *, highlevel=True, behavior=None, attrs=None)
 

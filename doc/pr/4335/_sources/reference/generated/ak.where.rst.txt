@@ -1,7 +1,7 @@
 ak.where
 ========
 
-Defined in `awkward.operations.ak_where <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_where.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_where.py#L20>`__.
+Defined in `awkward.operations.ak_where <https://github.com/scikit-hep/awkward/blob/1f87cb04abb150b12cb64ae1521e7bdc47a0dff8/src/awkward/operations/ak_where.py>`__ on `line 20 <https://github.com/scikit-hep/awkward/blob/1f87cb04abb150b12cb64ae1521e7bdc47a0dff8/src/awkward/operations/ak_where.py#L20>`__.
 
 .. py:function:: ak.where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs=None)
 

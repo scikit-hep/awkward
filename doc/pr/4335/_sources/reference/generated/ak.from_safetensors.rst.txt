@@ -1,7 +1,7 @@
 ak.from_safetensors
 ===================
 
-Defined in `awkward.operations.ak_from_safetensors <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_from_safetensors.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/03e1327e66759d54e716c1a7d54ae39799c6b087/src/awkward/operations/ak_from_safetensors.py#L13>`__.
+Defined in `awkward.operations.ak_from_safetensors <https://github.com/scikit-hep/awkward/blob/1f87cb04abb150b12cb64ae1521e7bdc47a0dff8/src/awkward/operations/ak_from_safetensors.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/1f87cb04abb150b12cb64ae1521e7bdc47a0dff8/src/awkward/operations/ak_from_safetensors.py#L13>`__.
 
 .. py:function:: ak.from_safetensors(source, *, storage_options=None, virtual=False, buffer_key='{form_key}-{attribute}', backend='cpu', byteorder='<', allow_noncanonical_form=False, highlevel=True, behavior=None, attrs=None)
 
