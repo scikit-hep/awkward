@@ -86,6 +86,20 @@ cmake.version = ">=3.29"
 if.from-sdist = false
 build.requires = ["pyyaml", "numpy"]
 
+# Rebuild the editable workspace install when the C++ sources or the kernel
+# spec change, not only when pyproject.toml changes.
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "CMakeLists.txt" },
+    { file = "include/**/*.h" },
+    { file = "src/**/*.cpp" },
+    { file = "src/**/*.py" },
+    { file = "../header-only/**/*.h" },
+    { file = "../dev/*.py" },
+    { file = "../kernel-specification.yml" },
+    { file = "../kernel-test-data.json" },
+]
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
@@ -110,6 +124,9 @@ build-verbosity = 1
 [tool.cibuildwheel.environment]
 PIP_ONLY_BINARY = "cmake,numpy"
 UV_ONLY_BINARY = "cmake,numpy"
+# The test step installs the repository root with uv; do not replace the wheel
+# under test with the awkward-cpp workspace source.
+UV_NO_SOURCES = "1"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-win*"
