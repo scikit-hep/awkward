@@ -17,7 +17,7 @@ from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
@@ -57,6 +57,117 @@ if TYPE_CHECKING:
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+
+# Every linear datetime64/timedelta64 unit, as an exact number of attoseconds.
+# The calendar units (month, year) are absent: their length varies, so no
+# constant factor converts them to a linear unit.
+_ATTOSECONDS_PER_TIME_UNIT: Final = {
+    "as": 1,
+    "fs": 10**3,
+    "ps": 10**6,
+    "ns": 10**9,
+    "us": 10**12,
+    "ms": 10**15,
+    "s": 10**18,
+    "m": 60 * 10**18,
+    "h": 3600 * 10**18,
+    "D": 86400 * 10**18,
+    "W": 604800 * 10**18,
+}
+
+
+def _linear_time_step(dtype: np.dtype) -> int | None:
+    """One step of a temporal `dtype`, in attoseconds, or None if it has none.
+
+    A dtype that is neither datetime64 nor timedelta64, one in a calendar
+    unit (month, year), and one in the deprecated generic unit all give
+    None: none of them converts to another unit by a constant factor.
+    """
+    if not (
+        np.issubdtype(dtype, np.datetime64) or np.issubdtype(dtype, np.timedelta64)
+    ):
+        return None
+    unit, step = np.datetime_data(dtype)
+    attoseconds = _ATTOSECONDS_PER_TIME_UNIT.get(unit)
+    return None if attoseconds is None else step * attoseconds
+
+
+def _check_temporal_merge_range(arrays: Sequence[ArrayLike], nplike: NumpyLike) -> None:
+    """Raise if merging `arrays` would put a temporal value out of range.
+
+    Temporal leaves of one family merge by converting every value to the
+    unit of the merged array, and a value whose magnitude exceeds
+    `(2**63 - 1) // factor`, for that leaf's conversion `factor`, has no
+    int64 representation in that unit. NumPy 2.5.0 and later raise
+    `OverflowError` from the cast, and earlier versions wrap the value
+    around silently, so the range is checked here to give one documented
+    error on every supported version.
+
+    Only the values decide: the same pair of dtypes merges or does not,
+    depending on what the arrays hold. A pair of units whose conversion
+    factor NumPy itself refuses (#4278) is left to the merge, which still
+    raises NumPy's `OverflowError` for it.
+
+    Reading values that the merge itself would not read is worse than
+    the missed diagnostic, so unknown, placeholder, and unmaterialized
+    virtual data go unchecked.
+    """
+    if not nplike.known_data:
+        return
+
+    dtypes = {array.dtype for array in arrays}
+    if len(dtypes) < 2:
+        return
+    try:
+        merged_dtype = np.result_type(*dtypes)
+    except Exception:
+        # These dtypes have no common type at all; let the merge say so.
+        return
+    merged_step = _linear_time_step(merged_dtype)
+    if merged_step is None:
+        return
+
+    for array in arrays:
+        # A placeholder holds no values, and `concat` builds the merge of
+        # an unmaterialized virtual array without materializing it, so
+        # checking one here would force the very read the merge avoids.
+        if isinstance(array, PlaceholderArray) or (
+            isinstance(array, VirtualNDArray) and not array.is_materialized
+        ):
+            continue
+        step = _linear_time_step(array.dtype)
+        # A step no coarser than the merged one converts by a factor of 1,
+        # leaving every value in range; `<=` rather than `==` also keeps
+        # `limit` below int64, so building the bounds cannot overflow.
+        if step is None or step <= merged_step:
+            continue
+        # `(2**63 - 1) // (step // merged_step)`, but without the division:
+        # `merged_step` does not always divide `step` (NumPy's common
+        # divisor is not the exact greatest one for some unit multipliers),
+        # and truncating the factor would loosen the bound.
+        limit = (2**63 - 1) * merged_step // step
+        # The bounds are built in the array's own temporal dtype so that
+        # the comparison runs there too: `NaT` is unordered, so it fails
+        # both tests and needs no mask. Comparing an int64 view instead
+        # would take `NaT`, which is int64's minimum, for a value far
+        # below the lower bound.
+        lowest = nplike.asarray(-limit, dtype=array.dtype)
+        highest = nplike.asarray(limit, dtype=array.dtype)
+        out_of_range = nplike.logical_or(array < lowest, array > highest)
+        if not nplike.any(out_of_range):
+            continue
+        positions = nplike.nonzero(out_of_range)
+        position = positions[0][0]
+        # Reported as plain integers, in units of the dtype named beside
+        # them: printing a temporal scalar scales it by the dtype's unit
+        # multiplier, which overflows for the values that get here.
+        value = int(nplike.astype(array[position : position + 1], np.int64)[0])
+        raise ValueError(
+            f"cannot merge {array.dtype} with {merged_dtype}: the merged array "
+            f"takes the unit {merged_dtype}, which cannot represent {value}; "
+            f"only {array.dtype} values from {-limit} to {limit} fit. Cast "
+            f"the leaves to one unit with ak.values_astype to merge them."
+        )
 
 
 @final
@@ -568,6 +679,8 @@ class NumpyArray(NumpyMeta, Content):
                     + " with "
                     + type(array).__name__
                 )
+
+        _check_temporal_merge_range(contiguous_arrays, self._backend.nplike)
 
         contiguous_arrays = self._backend.nplike.concat(contiguous_arrays)
 
