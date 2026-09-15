@@ -72,10 +72,23 @@ class Cupy(ArrayModuleNumpyLike):
         # https://github.com/cupy/cupy/issues/3849
         if isinstance(repeats, self._module.ndarray):
             all_stops = self._module.cumsum(repeats)
-            parents = self._module.zeros(all_stops[-1].item(), dtype=int)
-            stops, stop_counts = self._module.unique(all_stops[:-1], return_counts=True)
-            parents[stops] = stop_counts
-            self._module.cumsum(parents, out=parents)
+            total = int(all_stops[-1].item()) if all_stops.size else 0
+            parents = self._module.zeros(total, dtype=int)
+            if total > 0:
+                stops, stop_counts = self._module.unique(
+                    all_stops[:-1], return_counts=True
+                )
+                # trailing zero-repeats make `all_stops[:-1]` contain boundary
+                # values equal to `total`, which is one past the end of
+                # `parents` -- drop those or the assignment below writes out
+                # of bounds (silently corrupts the GPU memory pool on CUDA
+                # instead of raising, since the write lands in still-mapped
+                # pool memory)
+                in_bounds = stops < total
+                stops = stops[in_bounds]
+                stop_counts = stop_counts[in_bounds]
+                parents[stops] = stop_counts
+                self._module.cumsum(parents, out=parents)
             return x[parents]
         else:
             return self._module.repeat(x, repeats=repeats)
