@@ -1,7 +1,7 @@
 ak.contents.UnionArray
 ======================
 
-Defined in `awkward.contents.unionarray <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/contents/unionarray.py>`__ on `line 58 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/contents/unionarray.py#L58>`__.
+Defined in `awkward.contents.unionarray <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/contents/unionarray.py>`__ on `line 58 <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/contents/unionarray.py#L58>`__.
 
 .. py:class:: ak.contents.UnionArray(tags, index, contents, *, parameters=None)
 

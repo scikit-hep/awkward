@@ -1,7 +1,7 @@
 ak.std
 ======
 
-Defined in `awkward.operations.ak_std <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_std.py>`__ on `line 29 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_std.py#L29>`__.
+Defined in `awkward.operations.ak_std <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/operations/ak_std.py>`__ on `line 29 <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/operations/ak_std.py#L29>`__.
 
 .. py:function:: ak.std(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
 

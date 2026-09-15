@@ -1,7 +1,7 @@
 ak.Array.Mask
 =============
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/highlevel.py>`__ on `line 506 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/highlevel.py#L506>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/highlevel.py>`__ on `line 506 <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/highlevel.py#L506>`__.
 
 .. py:class:: ak.Array.Mask(array)
 

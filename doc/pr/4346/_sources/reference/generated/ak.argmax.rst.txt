@@ -1,7 +1,7 @@
 ak.argmax
 =========
 
-Defined in `awkward.operations.ak_argmax <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_argmax.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_argmax.py#L23>`__.
+Defined in `awkward.operations.ak_argmax <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/operations/ak_argmax.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/operations/ak_argmax.py#L23>`__.
 
 .. py:function:: ak.argmax(array, axis=None, *, keepdims=False, mask_identity=True, highlevel=True, behavior=None, attrs=None)
 

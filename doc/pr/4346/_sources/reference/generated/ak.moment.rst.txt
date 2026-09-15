@@ -1,7 +1,7 @@
 ak.moment
 =========
 
-Defined in `awkward.operations.ak_moment <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_moment.py>`__ on `line 26 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_moment.py#L26>`__.
+Defined in `awkward.operations.ak_moment <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/operations/ak_moment.py>`__ on `line 26 <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/operations/ak_moment.py#L26>`__.
 
 .. py:function:: ak.moment(x, n, weight=None, axis=None, *, keepdims: bool = False, mask_identity: bool = False, highlevel: bool = True, behavior: awkward._typing.Mapping | None = None, attrs: awkward._typing.Mapping | None = None)
 

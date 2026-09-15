@@ -1,7 +1,7 @@
 ak.numba.layoutbuilder.Tuple
 ============================
 
-Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/numba/layoutbuilder.py>`__ on `line 713 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/numba/layoutbuilder.py#L713>`__.
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/numba/layoutbuilder.py>`__ on `line 713 <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/numba/layoutbuilder.py#L713>`__.
 
 .. py:class:: ak.numba.layoutbuilder.Tuple(contents, *, parameters=None)
 

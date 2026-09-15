@@ -1,7 +1,7 @@
 ak.to_arrow_table
 =================
 
-Defined in `awkward.operations.ak_to_arrow_table <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_to_arrow_table.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/fadc23d3e9f0a484293a412825e5286e4660dc00/src/awkward/operations/ak_to_arrow_table.py#L17>`__.
+Defined in `awkward.operations.ak_to_arrow_table <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/operations/ak_to_arrow_table.py>`__ on `line 17 <https://github.com/scikit-hep/awkward/blob/bce5337b07d1bca1a180d5d1d263bf132028e788/src/awkward/operations/ak_to_arrow_table.py#L17>`__.
 
 .. py:function:: ak.to_arrow_table(array, *, list_to32=False, string_to32=False, bytestring_to32=False, emptyarray_to=None, categorical_as_dictionary=False, extensionarray=True, count_nulls=True)
 
