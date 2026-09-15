@@ -1,7 +1,7 @@
 ak.ArrayBuilder
 ===============
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/387a514d283e16cecd1edb637427244bb3b61fcc/src/awkward/highlevel.py>`__ on `line 2622 <https://github.com/scikit-hep/awkward/blob/387a514d283e16cecd1edb637427244bb3b61fcc/src/awkward/highlevel.py#L2622>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/0f8c5c5fda703352039ad788c4d40f3184759fd6/src/awkward/highlevel.py>`__ on `line 2622 <https://github.com/scikit-hep/awkward/blob/0f8c5c5fda703352039ad788c4d40f3184759fd6/src/awkward/highlevel.py#L2622>`__.
 
 .. py:class:: ak.ArrayBuilder(*, behavior=None, attrs=None, initial=1024, resize=8)
 
