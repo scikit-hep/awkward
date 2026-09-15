@@ -95,9 +95,9 @@ jobs:
       # to, so let the edge revalidate it rather than purging the zone for
       # every push
       run: |
-        aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
+        aws s3 sync --endpoint-url "${R2_ENDPOINT}" --delete \
           --cache-control "public, max-age=0, must-revalidate" \
-          "${RUNNER_TEMP}/artifacts/" "s3://${S3_BUCKET}/PR${STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER}"
+          "${RUNNER_TEMP}/artifacts/" "s3://${S3_BUCKET}/PR${STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER}/"
       env:
         STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER: ${{ steps.pr_number.outputs.pr_number }}
     - name: Try to find previous bot comment

@@ -349,7 +349,7 @@ jobs:
         if: github.event_name == 'push'
         id: sync-main
         run: |
-          aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
+          aws s3 sync --endpoint-url "${R2_ENDPOINT}" --delete \
             built-docs/ "s3://${S3_BUCKET}/doc/main/"
           echo "path=/doc/main/" >> $GITHUB_OUTPUT
       # Releases trigger versions
@@ -366,9 +366,9 @@ jobs:
           fi
           aws s3 cp --endpoint-url "${R2_ENDPOINT}" \
             docs/switcher.json "s3://${S3_BUCKET}/doc/"
-          aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
+          aws s3 sync --endpoint-url "${R2_ENDPOINT}" --delete \
             built-docs/ "s3://${S3_BUCKET}/doc/$version/"
-          aws s3 sync --endpoint-url "${R2_ENDPOINT}" \
+          aws s3 sync --endpoint-url "${R2_ENDPOINT}" --delete \
             built-docs/ "s3://${S3_BUCKET}/doc/stable/"
           echo "path=/doc/stable/" >> $GITHUB_OUTPUT
       - name: Purge the Cloudflare cache
