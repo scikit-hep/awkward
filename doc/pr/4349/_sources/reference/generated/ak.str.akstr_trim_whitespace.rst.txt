@@ -1,0 +1,14 @@
+ak.str.akstr_trim_whitespace
+============================
+
+.. py:module:: awkward.operations.str.akstr_trim_whitespace
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_trim_whitespace.trim_whitespace
+
+

@@ -1,0 +1,14 @@
+ak.str.akstr_rtrim
+==================
+
+.. py:module:: awkward.operations.str.akstr_rtrim
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_rtrim.rtrim
+
+
