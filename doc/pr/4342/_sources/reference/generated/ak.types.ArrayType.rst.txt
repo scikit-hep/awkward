@@ -1,7 +1,7 @@
 ak.types.ArrayType
 ==================
 
-Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/types/arraytype.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/types/arraytype.py#L14>`__.
+Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward/blob/99dbe9455c3df9cdb3c06312c393582a7c78dec3/src/awkward/types/arraytype.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/99dbe9455c3df9cdb3c06312c393582a7c78dec3/src/awkward/types/arraytype.py#L14>`__.
 
 .. py:class:: ak.types.ArrayType(content: awkward.types.type.Type, length: awkward._nplikes.shape.ShapeItem, behavior: collections.abc.Mapping | None = None)
 

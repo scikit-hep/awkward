@@ -1,7 +1,7 @@
 ak.from_dlpack
 ==============
 
-Defined in `awkward.operations.ak_from_dlpack <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/operations/ak_from_dlpack.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/553de7e0c8f9c773d005ff13186c15542f0d5675/src/awkward/operations/ak_from_dlpack.py#L15>`__.
+Defined in `awkward.operations.ak_from_dlpack <https://github.com/scikit-hep/awkward/blob/99dbe9455c3df9cdb3c06312c393582a7c78dec3/src/awkward/operations/ak_from_dlpack.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/99dbe9455c3df9cdb3c06312c393582a7c78dec3/src/awkward/operations/ak_from_dlpack.py#L15>`__.
 
 .. py:function:: ak.from_dlpack(array, *, prefer_cpu=True, regulararray=False, highlevel=True, behavior=None, primitive_policy='error', attrs=None)
 
