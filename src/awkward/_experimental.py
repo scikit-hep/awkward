@@ -3,8 +3,8 @@
 import os
 import warnings
 from collections.abc import Callable
-from functools import wraps
-from inspect import currentframe
+from functools import cached_property, wraps
+from inspect import currentframe, isfunction
 
 from awkward._typing import ParamSpec, TypeVar, overload
 from awkward.errors import ExperimentalWarning
@@ -48,8 +48,11 @@ def experimental(
     the marked API usable from the second call on.
 
     Args:
-        func (callable or None): The function to mark, in the
+        func (function or None): The function to mark, in the
             ``@experimental`` form; None, in the ``@experimental()`` form.
+            Anything else raises ``TypeError``: the mark takes a plain
+            function, not the ``staticmethod``, ``classmethod``, or
+            ``property`` object produced by a decorator written below it.
 
     Returns:
         The function wrapped to warn on first use, with the signature, name,
@@ -86,7 +89,22 @@ def experimental(
     if func is None:
         # @experimental() -- the parenthesized form
         return experimental
-    if not callable(func):
+    if not isfunction(func):
+        # Checked before the general callable case: staticmethod objects are
+        # themselves callable, so the mark cannot tell placement mistakes
+        # from plain functions by callability alone.
+        if isinstance(func, (staticmethod, classmethod, property, cached_property)):
+            raise TypeError(
+                f"@experimental received a {type(func).__name__} object: place "
+                "@experimental directly above the def, below decorators such "
+                "as @property, @classmethod, @staticmethod, and "
+                "@high_level_function()"
+            )
+        if callable(func):
+            raise TypeError(
+                "@experimental marks a plain function, not a "
+                f"{type(func).__name__} object"
+            )
         raise TypeError(
             "@experimental accepts no arguments; use @experimental or "
             f"@experimental() (got {func!r})"
