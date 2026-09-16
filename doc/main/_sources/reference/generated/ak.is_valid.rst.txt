@@ -1,7 +1,7 @@
 ak.is_valid
 ===========
 
-Defined in `awkward.operations.ak_is_valid <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/ak_is_valid.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/ak_is_valid.py#L11>`__.
+Defined in `awkward.operations.ak_is_valid <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_is_valid.py>`__ on `line 11 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_is_valid.py#L11>`__.
 
 .. py:function:: ak.is_valid(array, *, exception=False)
 

@@ -1,7 +1,7 @@
 ak.angle
 ========
 
-Defined in `awkward.operations.ak_angle <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/ak_angle.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/08dcbdc3d23cf56508ac629ebc04d187c6ca9bd8/src/awkward/operations/ak_angle.py#L16>`__.
+Defined in `awkward.operations.ak_angle <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_angle.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_angle.py#L16>`__.
 
 .. py:function:: ak.angle(val, deg=False, highlevel=True, behavior=None, attrs=None)
 
