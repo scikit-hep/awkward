@@ -1,7 +1,0 @@
-ak.numba.register_and_check
-===========================
-
-Defined in `awkward.numba.__init__ <https://github.com/scikit-hep/awkward/blob/6b0f6af4cfb301f578cf4d816a71c1c3e4be9929/src/awkward/numba/__init__.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/6b0f6af4cfb301f578cf4d816a71c1c3e4be9929/src/awkward/numba/__init__.py#L16>`__.
-
-.. py:function:: ak.numba.register_and_check()
-
