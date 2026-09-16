@@ -1,0 +1,14 @@
+ak.str.akstr_match_like
+=======================
+
+.. py:module:: awkward.operations.str.akstr_match_like
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_match_like.match_like
+
+
