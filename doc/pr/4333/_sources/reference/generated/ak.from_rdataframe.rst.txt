@@ -1,7 +1,7 @@
 ak.from_rdataframe
 ==================
 
-Defined in `awkward.operations.ak_from_rdataframe <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_from_rdataframe.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_from_rdataframe.py#L14>`__.
+Defined in `awkward.operations.ak_from_rdataframe <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_from_rdataframe.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_from_rdataframe.py#L14>`__.
 
 .. py:function:: ak.from_rdataframe(rdf, columns, *, keep_order=False, offsets_type='int64', with_name=None, highlevel=True, behavior=None, attrs=None)
 

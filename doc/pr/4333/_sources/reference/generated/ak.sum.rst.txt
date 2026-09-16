@@ -1,7 +1,7 @@
 ak.sum
 ======
 
-Defined in `awkward.operations.ak_sum <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_sum.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_sum.py#L23>`__.
+Defined in `awkward.operations.ak_sum <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_sum.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_sum.py#L23>`__.
 
 .. py:function:: ak.sum(array, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
 

@@ -1,7 +1,7 @@
 ak.from_avro_file
 =================
 
-Defined in `awkward.operations.ak_from_avro_file <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_from_avro_file.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_from_avro_file.py#L16>`__.
+Defined in `awkward.operations.ak_from_avro_file <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_from_avro_file.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_from_avro_file.py#L16>`__.
 
 .. py:function:: ak.from_avro_file(file, limit_entries=None, *, debug_forth=False, highlevel=True, behavior=None, attrs=None)
 

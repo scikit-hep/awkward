@@ -1,7 +1,7 @@
 ak.numba.layoutbuilder.Union
 ============================
 
-Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/numba/layoutbuilder.py>`__ on `line 781 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/numba/layoutbuilder.py#L781>`__.
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/numba/layoutbuilder.py>`__ on `line 781 <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/numba/layoutbuilder.py#L781>`__.
 
 .. py:class:: ak.numba.layoutbuilder.Union(tags_dtype, index_dtype, contents, *, parameters=None, initial=1024, resize=8.0)
 

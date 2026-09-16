@@ -1,7 +1,7 @@
 ak.prettyprint.valuestr_horiz
 =============================
 
-Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/prettyprint.py>`__ on `line 147 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/prettyprint.py#L147>`__.
+Defined in `awkward.prettyprint <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/prettyprint.py>`__ on `line 147 <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/prettyprint.py#L147>`__.
 
 .. py:function:: ak.prettyprint.valuestr_horiz(data: awkward._typing.Any, limit_cols: int, formatter: Formatter) -> tuple[int, list[str]]
 

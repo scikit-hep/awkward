@@ -1,7 +1,7 @@
 ak.drop_none
 ============
 
-Defined in `awkward.operations.ak_drop_none <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_drop_none.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_drop_none.py#L21>`__.
+Defined in `awkward.operations.ak_drop_none <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_drop_none.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_drop_none.py#L21>`__.
 
 .. py:function:: ak.drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None)
 

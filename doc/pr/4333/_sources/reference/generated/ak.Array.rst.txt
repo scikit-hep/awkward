@@ -1,7 +1,7 @@
 ak.Array
 ========
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/highlevel.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/highlevel.py#L136>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/highlevel.py>`__ on `line 136 <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/highlevel.py#L136>`__.
 
 .. py:class:: ak.Array(data, *, behavior=None, with_name=None, check_valid=False, backend=None, attrs=None, named_axis=None)
 

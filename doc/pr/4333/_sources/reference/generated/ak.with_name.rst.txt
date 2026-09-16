@@ -1,7 +1,7 @@
 ak.with_name
 ============
 
-Defined in `awkward.operations.ak_with_name <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_with_name.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/47bf38bd02949adbed20ca29b7304e0ac4c0e470/src/awkward/operations/ak_with_name.py#L15>`__.
+Defined in `awkward.operations.ak_with_name <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_with_name.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/afb9c2027d4d6b225f2c0263411da09273d8a874/src/awkward/operations/ak_with_name.py#L15>`__.
 
 .. py:function:: ak.with_name(array, name, *, highlevel=True, behavior=None, attrs=None)
 
