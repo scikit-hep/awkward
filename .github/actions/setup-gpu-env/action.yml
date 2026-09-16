@@ -26,7 +26,7 @@ runs:
           -c rapidsai
           python=3.13
           pandas>=0.24
-          cccl-python>=1.0.2
+          cccl-python>=1.0.2,<=1.1.1
           cudf>=25.02
           cupy>=14
           cuda-version=${{ inputs.cuda-version }}

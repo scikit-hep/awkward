@@ -75,7 +75,7 @@ jobs:
           create-args: >-
             python=${{ env.PYTHON_VERSION }}
             pandas>=3.0.0,<3.0.4
-            cccl-python>=1.0.2
+            cccl-python>=1.0.2,<=1.1.1
             cupy>=14
             cuda-version=13
             cuda-toolkit
