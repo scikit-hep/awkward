@@ -1,7 +1,7 @@
 ak.real
 =======
 
-Defined in `awkward.operations.ak_real <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_real.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_real.py#L16>`__.
+Defined in `awkward.operations.ak_real <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_real.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_real.py#L16>`__.
 
 .. py:function:: ak.real(array, highlevel=True, behavior=None, attrs=None)
 

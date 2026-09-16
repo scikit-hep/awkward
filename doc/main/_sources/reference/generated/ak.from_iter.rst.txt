@@ -1,7 +1,7 @@
 ak.from_iter
 ============
 
-Defined in `awkward.operations.ak_from_iter <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_from_iter.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_from_iter.py#L18>`__.
+Defined in `awkward.operations.ak_from_iter <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_from_iter.py>`__ on `line 18 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_from_iter.py#L18>`__.
 
 .. py:function:: ak.from_iter(iterable, *, allow_record=True, highlevel=True, behavior=None, attrs=None, initial=1024, resize=8)
 

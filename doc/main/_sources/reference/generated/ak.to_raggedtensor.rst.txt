@@ -1,7 +1,7 @@
 ak.to_raggedtensor
 ==================
 
-Defined in `awkward.operations.ak_to_raggedtensor <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_to_raggedtensor.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_to_raggedtensor.py#L14>`__.
+Defined in `awkward.operations.ak_to_raggedtensor <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_to_raggedtensor.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_to_raggedtensor.py#L14>`__.
 
 .. py:function:: ak.to_raggedtensor(array)
 

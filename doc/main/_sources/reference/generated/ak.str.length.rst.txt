@@ -1,7 +1,7 @@
 ak.str.length
 =============
 
-Defined in `awkward.operations.str.akstr_length <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/str/akstr_length.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/str/akstr_length.py#L12>`__.
+Defined in `awkward.operations.str.akstr_length <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/str/akstr_length.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/str/akstr_length.py#L12>`__.
 
 .. py:function:: ak.str.length(array, *, highlevel=True, behavior=None, attrs=None)
 

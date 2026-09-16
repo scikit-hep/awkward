@@ -1,7 +1,7 @@
 ak.behaviors.mixins.mixin_class_method
 ======================================
 
-Defined in `awkward.behaviors.mixins <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/behaviors/mixins.py>`__ on `line 73 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/behaviors/mixins.py#L73>`__.
+Defined in `awkward.behaviors.mixins <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/behaviors/mixins.py>`__ on `line 73 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/behaviors/mixins.py#L73>`__.
 
 .. py:function:: ak.behaviors.mixins.mixin_class_method(ufunc, rhs=None, *, transpose=True)
 

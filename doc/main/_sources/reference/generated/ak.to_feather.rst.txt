@@ -1,7 +1,7 @@
 ak.to_feather
 =============
 
-Defined in `awkward.operations.ak_to_feather <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_to_feather.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/operations/ak_to_feather.py#L16>`__.
+Defined in `awkward.operations.ak_to_feather <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_to_feather.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_to_feather.py#L16>`__.
 
 .. py:function:: ak.to_feather(array, destination, *, list_to32=False, string_to32=True, bytestring_to32=True, emptyarray_to=None, categorical_as_dictionary=False, extensionarray=True, count_nulls=True, compression='zstd', compression_level=None, chunksize=None, feather_version=2)
 

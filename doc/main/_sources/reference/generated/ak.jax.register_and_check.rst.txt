@@ -1,7 +1,7 @@
 ak.jax.register_and_check
 =========================
 
-Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/jax.py>`__ on `line 31 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/jax.py#L31>`__.
+Defined in `awkward.jax <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/jax.py>`__ on `line 31 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/jax.py#L31>`__.
 
 .. py:function:: ak.jax.register_and_check()
 

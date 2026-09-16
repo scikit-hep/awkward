@@ -1,7 +1,7 @@
 ak.typetracer.PlaceholderArray
 ==============================
 
-Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/_nplikes/placeholder.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/5342e8d1c82f1985f0697f53fec26ef83dc71799/src/awkward/_nplikes/placeholder.py#L16>`__.
+Defined in `awkward._nplikes.placeholder <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/_nplikes/placeholder.py>`__ on `line 16 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/_nplikes/placeholder.py#L16>`__.
 
 .. py:class:: ak.typetracer.PlaceholderArray(nplike: awkward._nplikes.numpy_like.NumpyLike, shape: tuple[awkward._nplikes.shape.ShapeItem, Ellipsis], dtype: awkward._typing.DType, buffer_key: str | None = None)
 
