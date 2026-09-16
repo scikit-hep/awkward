@@ -84,6 +84,16 @@ jobs:
             root=6.36.06
             pipx
 
+      # llvmlite dlopens libllvmlite.so, and the loader resolves its libstdc++
+      # against the host's /lib64 copy, which on this runner predates
+      # GLIBCXX_3.4.30 -- so `import numba` fails, and with it anything that
+      # imports cudf. The environment already ships a newer libstdc++ (cxx-compiler,
+      # numba-cuda and root all depend on libstdcxx >= 14); this just puts it first.
+      - name: Put the environment's libstdc++ ahead of the host's
+        run: |
+          test -n "${CONDA_PREFIX}" || { echo "CONDA_PREFIX is not set"; exit 1; }
+          echo "LD_LIBRARY_PATH=${CONDA_PREFIX}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" >> "$GITHUB_ENV"
+
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
 
