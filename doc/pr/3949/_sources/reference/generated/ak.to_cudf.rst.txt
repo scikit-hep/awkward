@@ -1,0 +1,22 @@
+ak.to_cudf
+==========
+
+Defined in `awkward.operations.ak_to_cudf <https://github.com/scikit-hep/awkward/blob/6eb599130e0be93171630586b715aaeb3725b666/src/awkward/operations/ak_to_cudf.py>`__ on `line 10 <https://github.com/scikit-hep/awkward/blob/6eb599130e0be93171630586b715aaeb3725b666/src/awkward/operations/ak_to_cudf.py#L10>`__.
+
+.. py:function:: ak.to_cudf(array)
+
+
+   Converts an Awkward Array into a cuDF Series.
+
+   Buffers that are not already in GPU memory will be transferred, and some
+   structural reformatting may happen to account for differences in
+   architecture.
+
+   This function requires the ``cudf`` library and a compatible GPU.
+
+   See also :py:obj:`ak.to_cupy`, :py:obj:`ak.from_cupy`, :py:obj:`ak.to_dataframe`.
+
+   :param array: Array-like data (anything :py:obj:`ak.to_layout` recognizes).
+
+   :returns: A cuDF Series with the same data as ``array``.
+
