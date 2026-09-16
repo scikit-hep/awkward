@@ -1,7 +1,7 @@
 ak.nansum
 =========
 
-Defined in `awkward.operations.ak_sum <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_sum.py>`__ on `line 228 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_sum.py#L228>`__.
+Defined in `awkward.operations.ak_sum <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_sum.py>`__ on `line 228 <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_sum.py#L228>`__.
 
 .. py:function:: ak.nansum(array, axis=None, *, keepdims=False, mask_identity=False, highlevel=True, behavior=None, attrs=None)
 

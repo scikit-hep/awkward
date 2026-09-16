@@ -1,7 +1,7 @@
 ak.to_cudf
 ==========
 
-Defined in `awkward.operations.ak_to_cudf <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_to_cudf.py>`__ on `line 10 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_to_cudf.py#L10>`__.
+Defined in `awkward.operations.ak_to_cudf <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_to_cudf.py>`__ on `line 10 <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_to_cudf.py#L10>`__.
 
 .. py:function:: ak.to_cudf(array)
 
@@ -12,9 +12,7 @@ Defined in `awkward.operations.ak_to_cudf <https://github.com/scikit-hep/awkward
    structural reformatting may happen to account for differences in
    architecture.
 
-   This function requires the ``cudf`` library (< 25.12.00) and a compatible
-   GPU. cuDF versions 25.12.00 and later are not currently supported due to
-   incompatible changes in cuDF internals.
+   This function requires the ``cudf`` library and a compatible GPU.
 
    See also :py:obj:`ak.to_cupy`, :py:obj:`ak.from_cupy`, :py:obj:`ak.to_dataframe`.
 

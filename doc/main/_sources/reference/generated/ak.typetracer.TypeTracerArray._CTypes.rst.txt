@@ -1,7 +1,7 @@
 ak.typetracer.TypeTracerArray._CTypes
 =====================================
 
-Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/typetracer.py>`__.
+Defined in `awkward.typetracer <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/typetracer.py>`__.
 
 .. py:class:: ak.typetracer.TypeTracerArray._CTypes
 

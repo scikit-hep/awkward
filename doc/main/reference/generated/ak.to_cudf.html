@@ -855,7 +855,7 @@
                   
   <section id="ak-to-cudf">
 <h1>ak.to_cudf<a class="headerlink" href="#ak-to-cudf" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_to_cudf.py">awkward.operations.ak_to_cudf</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_to_cudf.py#L10">line 10</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_to_cudf.py">awkward.operations.ak_to_cudf</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_to_cudf.py#L10">line 10</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.to_cudf">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">to_cudf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.to_cudf" title="Link to this definition">#</a></dt>
@@ -863,9 +863,7 @@
 <p>Buffers that are not already in GPU memory will be transferred, and some
 structural reformatting may happen to account for differences in
 architecture.</p>
-<p>This function requires the <code class="docutils literal notranslate"><span class="pre">cudf</span></code> library (&lt; 25.12.00) and a compatible
-GPU. cuDF versions 25.12.00 and later are not currently supported due to
-incompatible changes in cuDF internals.</p>
+<p>This function requires the <code class="docutils literal notranslate"><span class="pre">cudf</span></code> library and a compatible GPU.</p>
 <p>See also <a class="reference internal" href="ak.to_cupy.html#ak.to_cupy" title="ak.to_cupy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_cupy</span></code></a>, <a class="reference internal" href="ak.from_cupy.html#ak.from_cupy" title="ak.from_cupy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.from_cupy</span></code></a>, <a class="reference internal" href="ak.to_dataframe.html#ak.to_dataframe" title="ak.to_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_dataframe</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

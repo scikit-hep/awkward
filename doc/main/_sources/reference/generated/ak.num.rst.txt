@@ -1,7 +1,7 @@
 ak.num
 ======
 
-Defined in `awkward.operations.ak_num <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_num.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/operations/ak_num.py#L23>`__.
+Defined in `awkward.operations.ak_num <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_num.py>`__ on `line 23 <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_num.py#L23>`__.
 
 .. py:function:: ak.num(array, axis=1, *, highlevel: bool = True, behavior: awkward._typing.Mapping | None = None, attrs: awkward._typing.Mapping | None = None)
 

@@ -88,6 +88,7 @@ Functions
    awkward.from_avro_file
    awkward.from_buffers
    awkward.from_categorical
+   awkward.from_cudf
    awkward.from_cupy
    awkward.from_dlpack
    awkward.from_feather

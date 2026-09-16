@@ -1,7 +1,7 @@
 ak.numba.layoutbuilder.Unmasked
 ===============================
 
-Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/numba/layoutbuilder.py>`__ on `line 592 <https://github.com/scikit-hep/awkward/blob/07f4ba99c681dae3ee4b995a55e5e8eef625d485/src/awkward/numba/layoutbuilder.py#L592>`__.
+Defined in `awkward.numba.layoutbuilder <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/numba/layoutbuilder.py>`__ on `line 592 <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/numba/layoutbuilder.py#L592>`__.
 
 .. py:class:: ak.numba.layoutbuilder.Unmasked(content, *, parameters=None)
 

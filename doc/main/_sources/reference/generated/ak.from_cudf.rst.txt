@@ -1,0 +1,37 @@
+ak.from_cudf
+============
+
+Defined in `awkward.operations.ak_from_cudf <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_from_cudf.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_from_cudf.py#L12>`__.
+
+.. py:function:: ak.from_cudf(obj, *, highlevel=True, behavior=None, attrs=None)
+
+
+   :param obj: The cuDF object to convert into an
+               Awkward Array.
+   :type obj: cudf.Series or cudf.DataFrame
+   :param highlevel: If True, return an :py:obj:`ak.Array`; otherwise, return
+                     a low-level :py:obj:`ak.contents.Content` subclass.
+   :type highlevel: bool
+   :param behavior: Custom :py:obj:`ak.behavior` for the output array, if
+                    high-level.
+   :type behavior: None or dict
+   :param attrs: Custom attributes for the output array, if
+                 high-level.
+   :type attrs: None or dict
+
+   Converts a cuDF Series or DataFrame into an Awkward Array by recursively
+   traversing pylibcudf columns and wrapping GPU buffers with CuPy.
+
+   Categorical columns become a ``"categorical"`` :py:obj:`ak.contents.IndexedArray`
+   over the distinct categories, just as :py:obj:`ak.from_arrow` does for Arrow
+   dictionary types.  Their codes are widened to ``int64`` on the device
+   (Awkward's index cannot hold cuDF's narrower code dtypes), so this is the
+   one column type that is not wrapped zero-copy.
+
+   Note: DataFrame column names and order are preserved. Arrow/cuDF column
+   metadata beyond field names (e.g. time-zone annotations,
+   extension-type metadata) is not yet propagated and will be addressed in a
+   follow-up.
+
+   See also :py:obj:`ak.to_cudf`, :py:obj:`ak.from_cupy`, and :py:obj:`ak.from_dlpack`.
+
