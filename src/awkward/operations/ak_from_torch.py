@@ -9,14 +9,19 @@ __all__ = ("from_torch",)
 
 @high_level_function()
 def from_torch(array):
-    """
+    """Converts a PyTorch Tensor into an Awkward Array.
+
+    The data is not copied: a CPU tensor shares its buffer with the Awkward
+    Array, and a CUDA tensor's buffer is shared through DLPack.
+
+    If `array` contains any other data types the function raises an error.
+
     Args:
         array: (PyTorch Tensor):
             Tensor to convert into an Awkward Array.
 
-    Converts a PyTorch Tensor into an Awkward Array.
-
-    If `array` contains any other data types the function raises an error.
+    Returns:
+        An #ak.Array built from the given PyTorch tensor.
     """
 
     # Dispatch

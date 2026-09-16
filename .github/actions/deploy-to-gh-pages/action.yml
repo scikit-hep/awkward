@@ -1,0 +1,99 @@
+name: Deploy to gh-pages
+description: Publish a file or directory to a path on the `gh-pages` branch.
+
+inputs:
+  source:
+    description: File or directory to publish. Leave empty to delete the target.
+    required: false
+    default: ""
+  target:
+    description: Path on the `gh-pages` branch to publish to.
+    required: true
+  message:
+    description: Commit message.
+    required: true
+  token:
+    description: Token used to push to the `gh-pages` branch.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Publish to gh-pages
+      shell: bash
+      env:
+        SOURCE: ${{ inputs.source }}
+        TARGET: ${{ inputs.target }}
+        MESSAGE: ${{ inputs.message }}
+        GH_TOKEN: ${{ inputs.token }}
+        REPOSITORY: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+
+        # The target is deleted and rewritten, so refuse anything that could
+        # reach outside of it: an absolute or empty path, a `.` or `..`
+        # segment, or the directory holding the branch itself
+        case "/${TARGET}/" in
+          *//* | */../* | */./* | */.git/*)
+            echo "::error::Refusing to publish to \`${TARGET}\`"
+            exit 1
+            ;;
+        esac
+
+        # `FETCH_HEAD` is per-worktree, so resolve it here and pass the commit
+        # to the linked worktree that holds the branch.
+        fetch_tip() {
+          git fetch --quiet --depth=1 origin gh-pages
+          git rev-parse FETCH_HEAD
+        }
+
+        stage() {
+          rm -rf "${worktree:?}/${TARGET:?}"
+          if [ -n "${SOURCE:-}" ]; then
+            mkdir -p "$(dirname "${worktree}/${TARGET}")"
+            cp -r "${SOURCE}" "${worktree}/${TARGET}"
+          fi
+          # GitHub Pages builds the site with Jekyll, which drops the
+          # `_static`, `_images`, ... directories that Sphinx generates.
+          touch "${worktree}/.nojekyll"
+          # The worktree is a clean checkout, so this only ever stages the
+          # target (which may not exist, e.g. when deleting an absent preview)
+          git -C "${worktree}" add --all
+        }
+
+        worktree="$(mktemp -d)"
+        git worktree add --quiet --detach "${worktree}" "$(fetch_tip)"
+
+        # Several workflows publish to `gh-pages`, so a push can lose a race
+        # with a concurrent one. Re-apply the change on the new tip and retry.
+        for attempt in 1 2 3; do
+          if [ "${attempt}" -gt 1 ]; then
+            echo "Push rejected, retrying (attempt ${attempt})"
+            git -C "${worktree}" reset --hard --quiet "$(fetch_tip)"
+          fi
+
+          stage
+
+          if git -C "${worktree}" diff --cached --quiet; then
+            echo "Nothing to publish to ${TARGET}"
+            break
+          fi
+
+          git -C "${worktree}" \
+            -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit --quiet -m "${MESSAGE}"
+
+          if git -C "${worktree}" push \
+              "https://x-access-token:${GH_TOKEN}@github.com/${REPOSITORY}" \
+              HEAD:refs/heads/gh-pages; then
+            break
+          fi
+
+          if [ "${attempt}" -eq 3 ]; then
+            echo "::error::Failed to push ${TARGET} to the gh-pages branch"
+            exit 1
+          fi
+        done
+
+        git worktree remove --force "${worktree}"

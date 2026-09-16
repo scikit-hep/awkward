@@ -109,7 +109,6 @@ Clone this repository _recursively_ to get the header-only C++ dependencies, the
 git clone --recursive https://github.com/scikit-hep/awkward.git
 cd awkward
 
-nox -s prepare
 python -m pip install -v ./awkward-cpp
 python -m pip install -e .
 ```
@@ -144,7 +143,7 @@ To cite Awkward Array in a paper, see the "Cite this repository" drop-down menu 
 
 ```bibtex
 @software{Pivarski_Awkward_Array_2018,
-author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi and Fackeldey, Peter and Krommydas, Iason},
+author = {Pivarski, Jim and Osborne, Ianna and Ifrim, Ioana and Schreiner, Henry and Hollands, Angus and Biswas, Anish and Das, Pratyush and Roy Choudhury, Santam and Smith, Nicholas and Goyal, Manasvi and Fackeldey, Peter and Krommydas, Iason and Rios-Tascon, Andres and Sakuma, Tai},
 doi = {10.5281/zenodo.4341376},
 month = {10},
 title = {{Awkward Array}},
@@ -254,6 +253,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/X0708a"><img src="https://avatars.githubusercontent.com/u/148707922?v=4?s=100" width="100px;" alt="aashirvad"/><br /><sub><b>aashirvad</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=X0708a" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/albert-physics"><img src="https://avatars.githubusercontent.com/u/166818822?v=4?s=100" width="100px;" alt="albert-physics"/><br /><sub><b>albert-physics</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=albert-physics" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/5U5H4NTH006"><img src="https://avatars.githubusercontent.com/u/85297765?v=4?s=100" width="100px;" alt="Sushanth Mantrala"/><br /><sub><b>Sushanth Mantrala</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=5U5H4NTH006" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/kmohrman"><img src="https://avatars.githubusercontent.com/u/36145025?v=4?s=100" width="100px;" alt="kmohrman"/><br /><sub><b>kmohrman</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=kmohrman" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
