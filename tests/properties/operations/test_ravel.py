@@ -92,7 +92,7 @@ def test_properties(data: st.DataObject) -> None:
     a = data.draw(st_ak.constructors.arrays(), label="a")
     kwargs = data.draw(st_kwargs(a), label="kwargs")
 
-    assume(_should_not_raise(a.layout.form, kwargs))
+    assume(_should_not_raise(a, kwargs))
 
     assume(not _would_raise_from_known_issue(a, kwargs))
 
@@ -101,17 +101,19 @@ def test_properties(data: st.DataObject) -> None:
     # TODO: assert properties
 
 
-def _should_not_raise(form: ak.forms.Form, kwargs: Kwargs) -> bool:
+def _should_not_raise(a: ak.Array, kwargs: Kwargs) -> bool:
     """Return `True` if the operation should be successful.
 
     Conservative: `False` makes no statement — the call may still
     succeed; a rule shown too permissive by a failure is narrowed
-    toward `False`. `ak.ravel` has no rule to state: it accepts every
-    array — its deliberate rejections (a scalar primitive, an
-    `ak.Record`) are not arrays — and no option affects whether it
-    raises, so every draw is expected to succeed.
+    toward `False`. `ak.ravel` accepts every array — its deliberate
+    rejections (a scalar primitive, an `ak.Record`) are not arrays —
+    and no option affects whether it raises, so only the values it
+    merges decide: a temporal value that the merged unit cannot
+    represent is refused (see
+    `util.merges_out_of_range_temporal_value`).
     """
-    return True
+    return not util.merges_out_of_range_temporal_value(a)
 
 
 def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
@@ -124,8 +126,6 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
     if known_issues.has_issue_4261(a):
         return True
     if known_issues.has_issue_4278(a):
-        return True
-    if known_issues.has_issue_4280(a):
         return True
     if known_issues.has_issue_4283(a):
         return True

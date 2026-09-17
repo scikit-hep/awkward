@@ -20,9 +20,8 @@ predicate (`_should_not_raise`) of each affected operation.
 
 import re
 
-import numpy as np
-
 import awkward as ak
+from tests.properties.operations.util import ATTOSECONDS_PER_TIME_UNIT
 
 
 def has_issue_4260(a: ak.Array) -> bool:
@@ -230,71 +229,6 @@ def has_issue_4278(a: ak.Array) -> bool:
     return _contains_record_or_union(form) and _overflowing_unit_span(form)
 
 
-def has_issue_4280(a: ak.Array) -> bool:
-    """Return `True` if a temporal value is too large for its family's finest unit.
-
-    Merging temporal leaves of one family converts every value to
-    the finest unit present (`ak.flatten(axis=None)`, `ak.ravel`,
-    and `axis=None` reductions reach the merge); a value of
-    magnitude above `(2**63 - 1) // f`, with `f` the conversion
-    factor from the value's unit to the finest one, overflows int64,
-    and the merge raises `OverflowError` ("Overflow when converting
-    between datetime64 units") instead of building a union or
-    raising a documented error. The bound is symmetric in sign, and
-    `NaT` converts safely. The dtype pair alone stays under
-    `has_issue_4278`'s factor bound, so the stored values decide.
-    Every value in each temporal leaf's buffer counts, reachable or
-    not — an over-match, which is harmless. A datetime calendar unit
-    is not counted: NumPy converts calendar values without an
-    overflow check, so an out-of-range value wraps silently and no
-    exception reports it. NumPy 2.5.0 added the linear-unit value
-    check; on earlier versions that cast also wraps silently and the
-    operation succeeds, so the skip is an over-match there. Reported:
-    https://github.com/scikit-hep/awkward/issues/4280
-    """
-    form = a.layout.form
-    if not _contains_record_or_union(form):
-        return False
-    leaves: dict[str, list[tuple[int, np.ndarray]]] = {
-        "datetime64": [],
-        "timedelta64": [],
-    }
-    stack = [a.layout]
-    while stack:
-        node = stack.pop()
-        if node.parameter("__array__") in ("string", "bytestring"):
-            continue
-        if node.is_record or node.is_union:
-            stack.extend(node.contents)
-        elif node.is_numpy:
-            matched = re.fullmatch(
-                r"(datetime64|timedelta64)\[(\d*)([a-zA-Z]+)\]", str(node.dtype)
-            )
-            if matched is None:
-                continue
-            kind, multiplier, unit = matched.groups()
-            attos = _ATTOSECONDS_PER_UNIT.get(unit)
-            if attos is not None:
-                data = np.asarray(node.data).ravel().view(np.int64)
-                leaves[kind].append((int(multiplier or "1") * attos, data))
-        elif not node.is_unknown:
-            stack.append(node.content)
-    nat = np.iinfo(np.int64).min
-    for family in leaves.values():
-        if len(family) < 2:
-            continue
-        finest = min(attos for attos, _ in family)
-        for attos, data in family:
-            factor = attos // finest
-            if factor == 1:
-                continue
-            limit = (2**63 - 1) // factor
-            values = data[data != nat]
-            if values.size and np.abs(values).max() > limit:
-                return True
-    return False
-
-
 def has_issue_4283(a: ak.Array) -> bool:
     """Return `True` if a record sits directly under an option node.
 
@@ -403,23 +337,6 @@ def _leaf_families(form: ak.forms.Form) -> set[str]:
     return families
 
 
-# The linear datetime units, as exact attosecond multiples; the
-# calendar units month and year are separate, because only datetimes
-# convert with them.
-_ATTOSECONDS_PER_UNIT = {
-    "as": 1,
-    "fs": 10**3,
-    "ps": 10**6,
-    "ns": 10**9,
-    "us": 10**12,
-    "ms": 10**15,
-    "s": 10**18,
-    "m": 60 * 10**18,
-    "h": 3600 * 10**18,
-    "D": 86400 * 10**18,
-    "W": 604800 * 10**18,
-}
-
 # A datetime — not a timedelta — converts with the calendar units
 # month and year; their average Gregorian lengths, as exact
 # attosecond multiples, reproduce NumPy's accept/reject boundary at
@@ -468,7 +385,7 @@ def _overflowing_unit_span(form: ak.forms.Form) -> bool:
             if matched is None:
                 continue
             kind, unit = matched.groups()
-            attos = _ATTOSECONDS_PER_UNIT.get(unit)
+            attos = ATTOSECONDS_PER_TIME_UNIT.get(unit)
             if attos is None and kind == "datetime64":
                 attos = _DATETIME_CALENDAR_ATTOSECONDS.get(unit)
             if attos is not None:
