@@ -59,6 +59,9 @@ class Attrs(Mapping):
     def __len__(self):
         return len(self._data)
 
+    def __contains__(self, key):
+        return key in self._data
+
     def __repr__(self):
         return f"Attrs({self._data!r})"
 
