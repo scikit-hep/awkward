@@ -26,12 +26,13 @@ runs:
           -c rapidsai
           python=3.13
           pandas>=0.24
-          cccl-python>=1.0.2,<=1.1.1
+          cccl-python>=1.2.0  # minimum cuda-cccl version that uses numba-cuda-mlir
           cudf>=25.02
           cupy>=14
           cuda-version=${{ inputs.cuda-version }}
           cxx-compiler
           numba-cuda
+          numba-cuda-mlir>=0.5.2,<0.6
           numpy<2.5
 
     - name: Generate build files
