@@ -1,0 +1,12 @@
+ak.errors.ExperimentalWarning
+=============================
+
+Defined in `awkward.errors <https://github.com/scikit-hep/awkward/blob/3b6dde6cf65ff4d5ff891a6b9be5c3d26036c992/src/awkward/errors.py>`__ on `line 9 <https://github.com/scikit-hep/awkward/blob/3b6dde6cf65ff4d5ff891a6b9be5c3d26036c992/src/awkward/errors.py#L9>`__.
+
+.. py:exception:: ak.errors.ExperimentalWarning
+
+
+
+   Issued on first use of an API that may change or be removed in any
+   release, without a deprecation period.
+

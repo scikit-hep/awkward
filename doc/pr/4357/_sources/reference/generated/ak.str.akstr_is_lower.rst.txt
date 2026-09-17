@@ -1,0 +1,14 @@
+ak.str.akstr_is_lower
+=====================
+
+.. py:module:: awkward.operations.str.akstr_is_lower
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_lower.is_lower
+
+
