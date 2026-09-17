@@ -1,9 +1,10 @@
 ak.where
 ========
 
-Defined in `awkward.operations.ak_where <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_where.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_where.py#L19>`__.
+Defined in `awkward.operations.ak_where <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_where.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_where.py#L19>`__.
 
 .. py:function:: ak.where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs=None)
+
 
    Selects elements from ``x`` or ``y`` by a condition, or finds where it is True.
 

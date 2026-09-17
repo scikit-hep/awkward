@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>How to flatten arrays, especially for plotting &#8212; Awkward Array 2.13.0 documentation</title>
+    <title>How to flatten arrays, especially for plotting &#8212; Awkward Array 2.14.0 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../_static/documentation_options.js?v=f5edd4dd"></script>
+    <script src="../_static/documentation_options.js?v=7bb62513"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -54,7 +54,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.13';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.14';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -67,7 +67,7 @@
     <link rel="prev" title="How to restructure arrays by adding fields" href="how-to-restructure-add-fields.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.13" />
+  <meta name="docsearch:version" content="2.14" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -139,8 +139,8 @@
       
     
     
-    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.13.0 documentation - Home"/>
-    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.13.0 documentation - Home"/>
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.14.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -645,7 +645,7 @@ backend: cpu
 nbytes: 136 B
 type: 9 * ?float64</pre></div></div>
 </div>
-<p>Unlike <code class="docutils literal notranslate"><span class="pre">ak.flatten(...,</span> <span class="pre">axis=None)</span></code>, <a class="reference internal" href="../reference/generated/ak.ravel.html#ak.ravel" title="ak.ravel"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.ravel()</span></code></a> preserves <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> values at the leaves, meaning that functions which expect a simple array of numbers will usually raise an exception.</p>
+<p>Unlike <code class="docutils literal notranslate"><span class="pre">ak.flatten(...,</span> <span class="pre">axis=None)</span></code>, <a class="reference internal" href="../reference/generated/ak.ravel.html#ak.ravel" title="ak.ravel"><code class="xref py py-func docutils literal notranslate"><span class="pre">ak.ravel()</span></code></a> preserves <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> values at the leaves, meaning that functions which expect a simple array of numbers will usually raise an exception.</p>
 <p>However, there are a few questions you should be asking yourself:</p>
 <ul class="simple">
 <li><p>Did the nested lists have special meaning? What does the plot represent if I just concatenate them all?</p></li>
@@ -717,7 +717,7 @@ backend: cpu
 nbytes: 64 B
 type: 8 * float64</pre></div></div>
 </div>
-<p>In addition to the concerns raised above, it is also important to consider whether the <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> values in your array are meaningful. For example, consider an array of x-axis and y-axis values. If only the y-axis contains <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> values, <code class="docutils literal notranslate"><span class="pre">ak.flatten(y_values,</span> <span class="pre">axis=None)</span></code> would produce an array that does not align with the flattened x-axis values.</p>
+<p>In addition to the concerns raised above, it is also important to consider whether the <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> values in your array are meaningful. For example, consider an array of x-axis and y-axis values. If only the y-axis contains <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> values, <code class="docutils literal notranslate"><span class="pre">ak.flatten(y_values,</span> <span class="pre">axis=None)</span></code> would produce an array that does not align with the flattened x-axis values.</p>
 <div class="cell tag_raises-exception docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]])</span>
@@ -865,8 +865,8 @@ type: 8 * float64</pre></div></div>
 <span class="g g-Whitespace">   </span><span class="mi">1117</span><span class="sd">     &quot;&quot;&quot;</span>
 <span class="ne">-&gt; </span><span class="mi">1118</span>     <span class="k">with</span> <span class="n">ak</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">SlicingErrorContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="p">):</span>
 <span class="g g-Whitespace">   </span><span class="mi">1119</span>         <span class="c1"># Handle named axis</span>
-<span class="g g-Whitespace">   </span><span class="mi">1120</span>         <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">minmax_depth</span>
-<span class="g g-Whitespace">   </span><span class="mi">1121</span>         <span class="n">named_axis</span> <span class="o">=</span> <span class="n">_get_named_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1120</span>         <span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span>
+<span class="g g-Whitespace">   </span><span class="mi">1121</span>         <span class="n">stored_named_axis</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">NAMED_AXIS_KEY</span><span class="p">)</span>
 
 <span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:79,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
 <span class="g g-Whitespace">     </span><span class="mi">77</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -876,28 +876,28 @@ type: 8 * float64</pre></div></div>
 <span class="g g-Whitespace">     </span><span class="mi">81</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
 <span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1126,</span> in <span class="ni">Array.__getitem__</span><span class="nt">(self, where)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1122</span> <span class="n">where</span> <span class="o">=</span> <span class="n">_normalize_named_slice</span><span class="p">(</span><span class="n">named_axis</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1124</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">named_axis</span>
-<span class="ne">-&gt; </span><span class="mi">1126</span> <span class="n">indexed_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">_getitem</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">NamedAxis</span><span class="p">))</span>
-<span class="g g-Whitespace">   </span><span class="mi">1128</span> <span class="k">if</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1129</span>     <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">ak_with_named_axis</span><span class="o">.</span><span class="n">_impl</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1130</span>         <span class="n">indexed_layout</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1131</span>         <span class="n">named_axis</span><span class="o">=</span><span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">,</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="mi">1134</span>         <span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1135</span>     <span class="p">)</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1131,</span> in <span class="ni">Array.__getitem__</span><span class="nt">(self, where)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1127</span>     <span class="n">where</span> <span class="o">=</span> <span class="n">_normalize_named_slice</span><span class="p">(</span><span class="n">named_axis</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1129</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">named_axis</span>
+<span class="ne">-&gt; </span><span class="mi">1131</span> <span class="n">indexed_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">_getitem</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">NamedAxis</span><span class="p">))</span>
+<span class="g g-Whitespace">   </span><span class="mi">1133</span> <span class="k">if</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1134</span>     <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">ak_with_named_axis</span><span class="o">.</span><span class="n">_impl</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1135</span>         <span class="n">indexed_layout</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1136</span>         <span class="n">named_axis</span><span class="o">=</span><span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="mi">1139</span>         <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1140</span>     <span class="p">)</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:651,</span> in <span class="ni">Content._getitem</span><span class="nt">(self, where, named_axis)</span>
-<span class="g g-Whitespace">    </span><span class="mi">642</span> <span class="n">named_axis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">_named_axis</span>
-<span class="g g-Whitespace">    </span><span class="mi">644</span> <span class="nb">next</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">RegularArray</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">645</span>     <span class="n">this</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">646</span>     <span class="n">this</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">647</span>     <span class="mi">1</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">648</span>     <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">649</span> <span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">651</span> <span class="n">out</span> <span class="o">=</span> <span class="nb">next</span><span class="o">.</span><span class="n">_getitem_next</span><span class="p">(</span><span class="n">nextwhere</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nextwhere</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="kc">None</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">653</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">unknown_length</span> <span class="ow">and</span> <span class="n">out</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">654</span>     <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">_getitem_nothing</span><span class="p">()</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:653,</span> in <span class="ni">Content._getitem</span><span class="nt">(self, where, named_axis)</span>
+<span class="g g-Whitespace">    </span><span class="mi">644</span> <span class="n">named_axis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">_named_axis</span>
+<span class="g g-Whitespace">    </span><span class="mi">646</span> <span class="nb">next</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">RegularArray</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">647</span>     <span class="n">this</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">648</span>     <span class="n">this</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">649</span>     <span class="mi">1</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">650</span>     <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">651</span> <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">653</span> <span class="n">out</span> <span class="o">=</span> <span class="nb">next</span><span class="o">.</span><span class="n">_getitem_next</span><span class="p">(</span><span class="n">nextwhere</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nextwhere</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="kc">None</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">655</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">unknown_length</span> <span class="ow">and</span> <span class="n">out</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">656</span>     <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">_getitem_nothing</span><span class="p">()</span>
 
 <span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/regulararray.py:625,</span> in <span class="ni">RegularArray._getitem_next</span><span class="nt">(self, head, tail, advanced)</span>
 <span class="g g-Whitespace">    </span><span class="mi">617</span>         <span class="k">return</span> <span class="n">RegularArray</span><span class="p">(</span>
@@ -1312,8 +1312,8 @@ type: 5 * var * int64</pre></div></div>
 <span class="g g-Whitespace">   </span><span class="mi">1117</span><span class="sd">     &quot;&quot;&quot;</span>
 <span class="ne">-&gt; </span><span class="mi">1118</span>     <span class="k">with</span> <span class="n">ak</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">SlicingErrorContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="p">):</span>
 <span class="g g-Whitespace">   </span><span class="mi">1119</span>         <span class="c1"># Handle named axis</span>
-<span class="g g-Whitespace">   </span><span class="mi">1120</span>         <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">minmax_depth</span>
-<span class="g g-Whitespace">   </span><span class="mi">1121</span>         <span class="n">named_axis</span> <span class="o">=</span> <span class="n">_get_named_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1120</span>         <span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span>
+<span class="g g-Whitespace">   </span><span class="mi">1121</span>         <span class="n">stored_named_axis</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">NAMED_AXIS_KEY</span><span class="p">)</span>
 
 <span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:79,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
 <span class="g g-Whitespace">     </span><span class="mi">77</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -1323,28 +1323,28 @@ type: 5 * var * int64</pre></div></div>
 <span class="g g-Whitespace">     </span><span class="mi">81</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
 <span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1126,</span> in <span class="ni">Array.__getitem__</span><span class="nt">(self, where)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1122</span> <span class="n">where</span> <span class="o">=</span> <span class="n">_normalize_named_slice</span><span class="p">(</span><span class="n">named_axis</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1124</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">named_axis</span>
-<span class="ne">-&gt; </span><span class="mi">1126</span> <span class="n">indexed_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">_getitem</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">NamedAxis</span><span class="p">))</span>
-<span class="g g-Whitespace">   </span><span class="mi">1128</span> <span class="k">if</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1129</span>     <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">ak_with_named_axis</span><span class="o">.</span><span class="n">_impl</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1130</span>         <span class="n">indexed_layout</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1131</span>         <span class="n">named_axis</span><span class="o">=</span><span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">,</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="mi">1134</span>         <span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1135</span>     <span class="p">)</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1131,</span> in <span class="ni">Array.__getitem__</span><span class="nt">(self, where)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1127</span>     <span class="n">where</span> <span class="o">=</span> <span class="n">_normalize_named_slice</span><span class="p">(</span><span class="n">named_axis</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1129</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">named_axis</span>
+<span class="ne">-&gt; </span><span class="mi">1131</span> <span class="n">indexed_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">_getitem</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">NamedAxis</span><span class="p">))</span>
+<span class="g g-Whitespace">   </span><span class="mi">1133</span> <span class="k">if</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1134</span>     <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">ak_with_named_axis</span><span class="o">.</span><span class="n">_impl</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1135</span>         <span class="n">indexed_layout</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1136</span>         <span class="n">named_axis</span><span class="o">=</span><span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="mi">1139</span>         <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1140</span>     <span class="p">)</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:651,</span> in <span class="ni">Content._getitem</span><span class="nt">(self, where, named_axis)</span>
-<span class="g g-Whitespace">    </span><span class="mi">642</span> <span class="n">named_axis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">_named_axis</span>
-<span class="g g-Whitespace">    </span><span class="mi">644</span> <span class="nb">next</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">RegularArray</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">645</span>     <span class="n">this</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">646</span>     <span class="n">this</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">647</span>     <span class="mi">1</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">648</span>     <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">649</span> <span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">651</span> <span class="n">out</span> <span class="o">=</span> <span class="nb">next</span><span class="o">.</span><span class="n">_getitem_next</span><span class="p">(</span><span class="n">nextwhere</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nextwhere</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="kc">None</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">653</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">unknown_length</span> <span class="ow">and</span> <span class="n">out</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">654</span>     <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">_getitem_nothing</span><span class="p">()</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:653,</span> in <span class="ni">Content._getitem</span><span class="nt">(self, where, named_axis)</span>
+<span class="g g-Whitespace">    </span><span class="mi">644</span> <span class="n">named_axis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">_named_axis</span>
+<span class="g g-Whitespace">    </span><span class="mi">646</span> <span class="nb">next</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">RegularArray</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">647</span>     <span class="n">this</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">648</span>     <span class="n">this</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">649</span>     <span class="mi">1</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">650</span>     <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">651</span> <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">653</span> <span class="n">out</span> <span class="o">=</span> <span class="nb">next</span><span class="o">.</span><span class="n">_getitem_next</span><span class="p">(</span><span class="n">nextwhere</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nextwhere</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="kc">None</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">655</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">unknown_length</span> <span class="ow">and</span> <span class="n">out</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">656</span>     <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">_getitem_nothing</span><span class="p">()</span>
 
 <span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/regulararray.py:595,</span> in <span class="ni">RegularArray._getitem_next</span><span class="nt">(self, head, tail, advanced)</span>
 <span class="g g-Whitespace">    </span><span class="mi">589</span> <span class="n">nextcontent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content</span><span class="o">.</span><span class="n">_carry</span><span class="p">(</span><span class="n">nextcarry</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
@@ -1390,7 +1390,7 @@ type: 5 * var * int64</pre></div></div>
 <span class="g g-Whitespace">    </span><span class="mi">296</span>     <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="o">.</span><span class="n">format_kernel_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 <span class="ne">--&gt; </span><span class="mi">297</span>     <span class="k">raise</span> <span class="n">ak</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">index_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slicer</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
 
-<span class="ne">IndexError</span>: cannot slice ListArray (of length 5) with array(0): index out of range while attempting to get index 0 (in compiled code: https://github.com/scikit-hep/awkward/blob/awkward-cpp-56/awkward-cpp/src/cpu-kernels/awkward_ListArray_getitem_next_at.cpp#L21)
+<span class="ne">IndexError</span>: cannot slice ListArray (of length 5) with array(0): index out of range while attempting to get index 0 (in compiled code: https://github.com/scikit-hep/awkward/blob/awkward-cpp-57/awkward-cpp/src/cpu-kernels/awkward_ListArray_getitem_next_at.cpp#L21)
 
 <span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">attempting</span> <span class="n">to</span> <span class="nb">slice</span>
 
@@ -1534,8 +1534,8 @@ type: 4 * int64</pre></div></div>
 <span class="g g-Whitespace">   </span><span class="mi">1117</span><span class="sd">     &quot;&quot;&quot;</span>
 <span class="ne">-&gt; </span><span class="mi">1118</span>     <span class="k">with</span> <span class="n">ak</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">SlicingErrorContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="p">):</span>
 <span class="g g-Whitespace">   </span><span class="mi">1119</span>         <span class="c1"># Handle named axis</span>
-<span class="g g-Whitespace">   </span><span class="mi">1120</span>         <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">minmax_depth</span>
-<span class="g g-Whitespace">   </span><span class="mi">1121</span>         <span class="n">named_axis</span> <span class="o">=</span> <span class="n">_get_named_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1120</span>         <span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span>
+<span class="g g-Whitespace">   </span><span class="mi">1121</span>         <span class="n">stored_named_axis</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">attrs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">NAMED_AXIS_KEY</span><span class="p">)</span>
 
 <span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:79,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
 <span class="g g-Whitespace">     </span><span class="mi">77</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -1545,25 +1545,25 @@ type: 4 * int64</pre></div></div>
 <span class="g g-Whitespace">     </span><span class="mi">81</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
 <span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1126,</span> in <span class="ni">Array.__getitem__</span><span class="nt">(self, where)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1122</span> <span class="n">where</span> <span class="o">=</span> <span class="n">_normalize_named_slice</span><span class="p">(</span><span class="n">named_axis</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1124</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">named_axis</span>
-<span class="ne">-&gt; </span><span class="mi">1126</span> <span class="n">indexed_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">_getitem</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">NamedAxis</span><span class="p">))</span>
-<span class="g g-Whitespace">   </span><span class="mi">1128</span> <span class="k">if</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">1129</span>     <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">ak_with_named_axis</span><span class="o">.</span><span class="n">_impl</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1130</span>         <span class="n">indexed_layout</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1131</span>         <span class="n">named_axis</span><span class="o">=</span><span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">,</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="mi">1134</span>         <span class="n">attrs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span><span class="p">,</span>
-<span class="g g-Whitespace">   </span><span class="mi">1135</span>     <span class="p">)</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1131,</span> in <span class="ni">Array.__getitem__</span><span class="nt">(self, where)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1127</span>     <span class="n">where</span> <span class="o">=</span> <span class="n">_normalize_named_slice</span><span class="p">(</span><span class="n">named_axis</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1129</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span> <span class="o">=</span> <span class="n">named_axis</span>
+<span class="ne">-&gt; </span><span class="mi">1131</span> <span class="n">indexed_layout</span> <span class="o">=</span> <span class="n">prepare_layout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_layout</span><span class="o">.</span><span class="n">_getitem</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">NamedAxis</span><span class="p">))</span>
+<span class="g g-Whitespace">   </span><span class="mi">1133</span> <span class="k">if</span> <span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">:</span>
+<span class="g g-Whitespace">   </span><span class="mi">1134</span>     <span class="k">return</span> <span class="n">ak</span><span class="o">.</span><span class="n">operations</span><span class="o">.</span><span class="n">ak_with_named_axis</span><span class="o">.</span><span class="n">_impl</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1135</span>         <span class="n">indexed_layout</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1136</span>         <span class="n">named_axis</span><span class="o">=</span><span class="n">NamedAxis</span><span class="o">.</span><span class="n">mapping</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>   <span class="mi">1139</span>         <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
+<span class="g g-Whitespace">   </span><span class="mi">1140</span>     <span class="p">)</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:586,</span> in <span class="ni">Content._getitem</span><span class="nt">(self, where, named_axis)</span>
-<span class="g g-Whitespace">    </span><span class="mi">584</span> <span class="n">items</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_slicing</span><span class="o">.</span><span class="n">normalise_items</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">585</span> <span class="c1"># Prepare items for advanced indexing (e.g. via broadcasting)</span>
-<span class="ne">--&gt; </span><span class="mi">586</span> <span class="n">nextwhere</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_slicing</span><span class="o">.</span><span class="n">prepare_advanced_indexing</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">588</span> <span class="c1"># Handle named axis</span>
-<span class="g g-Whitespace">    </span><span class="mi">589</span> <span class="c1"># first expand the ellipsis to colons in nextwhere,</span>
-<span class="g g-Whitespace">    </span><span class="mi">590</span> <span class="c1"># copy nextwhere to not pollute the original</span>
-<span class="g g-Whitespace">    </span><span class="mi">591</span> <span class="n">_nextwhere</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">nextwhere</span><span class="p">)</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/contents/content.py:588,</span> in <span class="ni">Content._getitem</span><span class="nt">(self, where, named_axis)</span>
+<span class="g g-Whitespace">    </span><span class="mi">586</span> <span class="n">items</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_slicing</span><span class="o">.</span><span class="n">normalise_items</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">587</span> <span class="c1"># Prepare items for advanced indexing (e.g. via broadcasting)</span>
+<span class="ne">--&gt; </span><span class="mi">588</span> <span class="n">nextwhere</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_slicing</span><span class="o">.</span><span class="n">prepare_advanced_indexing</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">backend</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">590</span> <span class="c1"># Handle named axis</span>
+<span class="g g-Whitespace">    </span><span class="mi">591</span> <span class="c1"># first expand the ellipsis to colons in nextwhere,</span>
+<span class="g g-Whitespace">    </span><span class="mi">592</span> <span class="c1"># copy nextwhere to not pollute the original</span>
+<span class="g g-Whitespace">    </span><span class="mi">593</span> <span class="n">_nextwhere</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">nextwhere</span><span class="p">)</span>
 
 <span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_slicing.py:120,</span> in <span class="ni">prepare_advanced_indexing</span><span class="nt">(items, backend)</span>
 <span class="g g-Whitespace">    </span><span class="mi">118</span> <span class="c1"># Then broadcast the index items</span>
@@ -1572,10 +1572,10 @@ type: 4 * int64</pre></div></div>
 <span class="g g-Whitespace">    </span><span class="mi">122</span> <span class="c1"># And re-assemble the index with the broadcasted items</span>
 <span class="g g-Whitespace">    </span><span class="mi">123</span> <span class="n">prepared</span> <span class="o">=</span> <span class="p">[]</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_nplikes/array_module.py:336,</span> in <span class="ni">ArrayModuleNumpyLike.broadcast_arrays</span><span class="nt">(self, *arrays)</span>
-<span class="g g-Whitespace">    </span><span class="mi">334</span> <span class="k">def</span><span class="w"> </span><span class="nf">broadcast_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arrays</span><span class="p">:</span> <span class="n">ArrayLikeT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ArrayLikeT</span><span class="p">]:</span>
-<span class="g g-Whitespace">    </span><span class="mi">335</span>     <span class="n">arrays</span> <span class="o">=</span> <span class="n">maybe_materialize</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">336</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_module</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">)</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_nplikes/array_module.py:343,</span> in <span class="ni">ArrayModuleNumpyLike.broadcast_arrays</span><span class="nt">(self, *arrays)</span>
+<span class="g g-Whitespace">    </span><span class="mi">341</span> <span class="k">def</span><span class="w"> </span><span class="nf">broadcast_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arrays</span><span class="p">:</span> <span class="n">ArrayLikeT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ArrayLikeT</span><span class="p">]:</span>
+<span class="g g-Whitespace">    </span><span class="mi">342</span>     <span class="n">arrays</span> <span class="o">=</span> <span class="n">maybe_materialize</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">343</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_module</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">)</span>
 
 <span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/numpy/lib/_stride_tricks_impl.py:577,</span> in <span class="ni">broadcast_arrays</span><span class="nt">(subok, *args)</span>
 <span class="g g-Whitespace">    </span><span class="mi">570</span> <span class="c1"># nditer is not used here to avoid the limit of 64 arrays.</span>

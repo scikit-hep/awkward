@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ak.str.match_like &#8212; Awkward Array 2.13.0 documentation</title>
+    <title>ak.str.match_like &#8212; Awkward Array 2.14.0 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=f5edd4dd"></script>
+    <script src="../../_static/documentation_options.js?v=7bb62513"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -54,7 +54,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.13';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.14';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -67,7 +67,7 @@
     <link rel="prev" title="ak.str.is_in" href="ak.str.is_in.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.13" />
+  <meta name="docsearch:version" content="2.14" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -139,8 +139,8 @@
       
     
     
-    <img src="../../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.13.0 documentation - Home"/>
-    <img src="../../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.13.0 documentation - Home"/>
+    <img src="../../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.14.0 documentation - Home"/>
+    <img src="../../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -718,6 +718,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ak.jax.register_and_check.html">ak.jax.register_and_check</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ak.jax.register_behavior_class.html">ak.jax.register_behavior_class</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Warnings</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.errors.ExperimentalWarning.html">ak.errors.ExperimentalWarning</a></li>
+</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">High-level data types</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="ak.types.Type.html">ak.types.Type</a></li>
@@ -851,7 +855,7 @@
                   
   <section id="ak-str-match-like">
 <h1>ak.str.match_like<a class="headerlink" href="#ak-str-match-like" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/str/akstr_match_like.py">awkward.operations.str.akstr_match_like</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/str/akstr_match_like.py#L12">line 12</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/str/akstr_match_like.py">awkward.operations.str.akstr_match_like</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/str/akstr_match_like.py#L12">line 12</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.str.match_like">
 <span class="sig-prename descclassname"><span class="pre">ak.str.</span></span><span class="sig-name descname"><span class="pre">match_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">behavior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.str.match_like" title="Link to this definition">#</a></dt>
@@ -859,15 +863,15 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
-<li><p><strong>pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>) – SQL-style LIKE pattern to match against
+<li><p><strong>pattern</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.14)"><em>bytes</em></a>) – SQL-style LIKE pattern to match against
 strings in <code class="docutils literal notranslate"><span class="pre">array</span></code>.</p></li>
-<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, perform a case-insensitive match;
+<li><p><strong>ignore_case</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, perform a case-insensitive match;
 otherwise, the match is case-sensitive.</p></li>
-<li><p><strong>highlevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, return an <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>; otherwise, return
+<li><p><strong>highlevel</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, return an <a class="reference internal" href="ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.Array</span></code></a>; otherwise, return
 a low-level <a class="reference internal" href="ak.contents.Content.html#ak.contents.Content" title="ak.contents.Content"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.Content</span></code></a> subclass.</p></li>
-<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for the output array, if
+<li><p><strong>behavior</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom <a class="reference internal" href="../ak.behavior.html#ak.behavior" title="ak.behavior"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.behavior</span></code></a> for the output array, if
 high-level.</p></li>
-<li><p><strong>attrs</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom attributes for the output array, if
+<li><p><strong>attrs</strong> (<em>None</em><em> or </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – Custom attributes for the output array, if
 high-level.</p></li>
 </ul>
 </dd>

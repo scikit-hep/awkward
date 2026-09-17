@@ -1,9 +1,10 @@
 ak.merge_union_of_records
 =========================
 
-Defined in `awkward.operations.ak_merge_union_of_records <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_merge_union_of_records.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_merge_union_of_records.py#L22>`__.
+Defined in `awkward.operations.ak_merge_union_of_records <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_merge_union_of_records.py>`__ on `line 22 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_merge_union_of_records.py#L22>`__.
 
 .. py:function:: ak.merge_union_of_records(array, axis=-1, *, highlevel=True, behavior=None, attrs=None)
+
 
    Simplifies unions of records into records of options.
 

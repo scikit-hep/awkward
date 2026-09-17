@@ -1,9 +1,10 @@
 ak.types.from_datashape
 =======================
 
-Defined in `awkward.types.type <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/types/type.py>`__ on `line 312 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/types/type.py#L312>`__.
+Defined in `awkward.types.type <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/types/type.py>`__ on `line 312 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/types/type.py#L312>`__.
 
 .. py:function:: ak.types.from_datashape(datashape, highlevel=True)
+
 
    Parses ``datashape`` (str) and returns a :py:obj:`ak.types.Type` object, the inverse of
    calling ``str`` on a :py:obj:`ak.types.Type`.

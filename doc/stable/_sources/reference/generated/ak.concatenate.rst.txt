@@ -1,9 +1,10 @@
 ak.concatenate
 ==============
 
-Defined in `awkward.operations.ak_concatenate <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_concatenate.py>`__ on `line 35 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_concatenate.py#L35>`__.
+Defined in `awkward.operations.ak_concatenate <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_concatenate.py>`__ on `line 35 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_concatenate.py#L35>`__.
 
 .. py:function:: ak.concatenate(arrays, axis=0, *, mergebool=True, highlevel=True, behavior=None, attrs=None)
+
 
    Returns an array with the given arrays concatenated along an axis.
 

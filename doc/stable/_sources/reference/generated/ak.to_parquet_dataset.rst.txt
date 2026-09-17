@@ -1,9 +1,10 @@
 ak.to_parquet_dataset
 =====================
 
-Defined in `awkward.operations.ak_to_parquet_dataset <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_to_parquet_dataset.py>`__ on `line 9 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_to_parquet_dataset.py#L9>`__.
+Defined in `awkward.operations.ak_to_parquet_dataset <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_to_parquet_dataset.py>`__ on `line 9 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_to_parquet_dataset.py#L9>`__.
 
 .. py:function:: ak.to_parquet_dataset(directory, filenames=None, storage_options=None)
+
 
    Creates a ``_common_metadata`` and a ``_metadata`` in a directory of Parquet files.
 

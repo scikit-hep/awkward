@@ -1,9 +1,10 @@
 ak.from_json
 ============
 
-Defined in `awkward.operations.ak_from_json <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_json.py>`__ on `line 28 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_json.py#L28>`__.
+Defined in `awkward.operations.ak_from_json <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_from_json.py>`__ on `line 28 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_from_json.py#L28>`__.
 
 .. py:function:: ak.from_json(source, *, line_delimited=False, schema=None, nan_string=None, posinf_string=None, neginf_string=None, complex_record_fields=None, buffersize=65536, initial=1024, resize=8, highlevel=True, behavior=None, attrs=None)
+
 
    Reads JSON from a string, bytes, file, or URL into an Awkward Array.
 

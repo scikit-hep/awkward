@@ -1,7 +1,7 @@
 ak.typetracer.MaybeNone
 =======================
 
-Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/_nplikes/typetracer.py>`__ on `line 76 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/_nplikes/typetracer.py#L76>`__.
+Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/_nplikes/typetracer.py>`__ on `line 76 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/_nplikes/typetracer.py#L76>`__.
 
 .. py:class:: ak.typetracer.MaybeNone(content)
 
@@ -11,11 +11,15 @@ Defined in `awkward._nplikes.typetracer <https://github.com/scikit-hep/awkward/b
    .. py:property:: content
 
 
+
    .. py:method:: __eq__(other)
+
 
 
    .. py:method:: __repr__()
 
 
+
    .. py:method:: __str__()
+
 

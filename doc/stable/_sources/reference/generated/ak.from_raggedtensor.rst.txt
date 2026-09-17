@@ -1,14 +1,20 @@
 ak.from_raggedtensor
 ====================
 
-Defined in `awkward.operations.ak_from_raggedtensor <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_raggedtensor.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_raggedtensor.py#L13>`__.
+Defined in `awkward.operations.ak_from_raggedtensor <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_from_raggedtensor.py>`__ on `line 13 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_from_raggedtensor.py#L13>`__.
 
 .. py:function:: ak.from_raggedtensor(array)
+
+
+   Converts a TensorFlow RaggedTensor into an Awkward Array.
+
+   The underlying buffers (flat values and row splits) are shared through
+   DLPack if the RaggedTensor is on a GPU; on a CPU, they are copied.
+
+   If ``array`` contains any other data types the function raises an error.
 
    :param array: (``tensorflow.RaggedTensor``):
                  RaggedTensor to convert into an  Awkward Array.
 
-   Converts a TensorFlow RaggedTensor into an Awkward Array.
-
-   If ``array`` contains any other data types the function raises an error.
+   :returns: An :py:obj:`ak.Array` built from the given TensorFlow RaggedTensor.
 

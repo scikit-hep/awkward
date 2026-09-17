@@ -1,7 +1,7 @@
 ak.ArrayBuilder.Tuple
 =====================
 
-Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/highlevel.py>`__ on `line 3293 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/highlevel.py#L3293>`__.
+Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/highlevel.py>`__ on `line 3305 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/highlevel.py#L3305>`__.
 
 .. py:class:: ak.ArrayBuilder.Tuple(arraybuilder, numfields)
 
@@ -18,5 +18,7 @@ Defined in `awkward.highlevel <https://github.com/scikit-hep/awkward/blob/cef1a5
    .. py:method:: __enter__()
 
 
+
    .. py:method:: __exit__(type, value, traceback)
+
 

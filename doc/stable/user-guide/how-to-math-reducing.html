@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>How to reduce dimensions (sum/min/any/all) &#8212; Awkward Array 2.13.0 documentation</title>
+    <title>How to reduce dimensions (sum/min/any/all) &#8212; Awkward Array 2.14.0 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../_static/documentation_options.js?v=f5edd4dd"></script>
+    <script src="../_static/documentation_options.js?v=7bb62513"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -54,7 +54,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.13';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.14';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -67,7 +67,7 @@
     <link rel="prev" title="How Awkward broadcasting works" href="how-to-math-broadcasting.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.13" />
+  <meta name="docsearch:version" content="2.14" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -139,8 +139,8 @@
       
     
     
-    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.13.0 documentation - Home"/>
-    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.13.0 documentation - Home"/>
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.14.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -1007,7 +1007,79 @@ type: 3 * var * int64</pre></div></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>np.float64(16.5)
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">25</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]))</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:40,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">37</span> <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">38</span> <span class="k">def</span><span class="w"> </span><span class="nf">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">39</span>     <span class="c1"># NOTE: this decorator assumes that the operation is exposed under `ak.`</span>
+<span class="ne">---&gt; </span><span class="mi">40</span>     <span class="k">with</span> <span class="n">OperationErrorContext</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">41</span>         <span class="n">gen_or_result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">42</span>         <span class="k">if</span> <span class="n">isgenerator</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">):</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_errors.py:79,</span> in <span class="ni">ErrorContext.__exit__</span><span class="nt">(self, exception_type, exception_value, traceback)</span>
+<span class="g g-Whitespace">     </span><span class="mi">77</span>     <span class="bp">self</span><span class="o">.</span><span class="n">_slate</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+<span class="g g-Whitespace">     </span><span class="mi">78</span>     <span class="c1"># Handle caught exception</span>
+<span class="ne">---&gt; </span><span class="mi">79</span>     <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">decorate_exception</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception_value</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">80</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">81</span>     <span class="c1"># Step out of the way so that another ErrorContext can become primary.</span>
+<span class="g g-Whitespace">     </span><span class="mi">82</span>     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_dispatch.py:66,</span> in <span class="ni">named_high_level_function.&lt;locals&gt;.dispatch</span><span class="nt">(*args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">64</span> <span class="c1"># Failed to find a custom overload, so resume the original function</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">66</span>     <span class="nb">next</span><span class="p">(</span><span class="n">gen_or_result</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">67</span> <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">68</span>     <span class="k">return</span> <span class="n">err</span><span class="o">.</span><span class="n">value</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_sum.py:224,</span> in <span class="ni">sum</span><span class="nt">(array, axis, keepdims, mask_identity, highlevel, behavior, attrs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">221</span> <span class="k">yield</span> <span class="p">(</span><span class="n">array</span><span class="p">,)</span>
+<span class="g g-Whitespace">    </span><span class="mi">223</span> <span class="c1"># Implementation</span>
+<span class="ne">--&gt; </span><span class="mi">224</span> <span class="k">return</span> <span class="n">_impl</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="p">,</span> <span class="n">mask_identity</span><span class="p">,</span> <span class="n">highlevel</span><span class="p">,</span> <span class="n">behavior</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/operations/ak_sum.py:317,</span> in <span class="ni">_impl</span><span class="nt">(array, axis, keepdims, mask_identity, highlevel, behavior, attrs, dtype)</span>
+<span class="g g-Whitespace">    </span><span class="mi">313</span> <span class="n">axis</span> <span class="o">=</span> <span class="n">regularize_axis</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">none_allowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">315</span> <span class="n">reducer</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_reducers</span><span class="o">.</span><span class="n">Sum</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">317</span> <span class="n">out</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">_do</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">318</span>     <span class="n">layout</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">319</span>     <span class="n">reducer</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">320</span>     <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">321</span>     <span class="n">mask</span><span class="o">=</span><span class="n">mask_identity</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">322</span>     <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">323</span>     <span class="n">behavior</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">behavior</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">324</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">326</span> <span class="n">wrapped_out</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">327</span>     <span class="n">out</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">328</span>     <span class="n">highlevel</span><span class="o">=</span><span class="n">highlevel</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">329</span>     <span class="n">allow_other</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">330</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">332</span> <span class="c1"># propagate named axis to output</span>
+
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/_do.py:252,</span> in <span class="ni">reduce</span><span class="nt">(layout, reducer, axis, mask, keepdims, behavior)</span>
+<span class="g g-Whitespace">    </span><span class="mi">240</span> <span class="n">parts</span> <span class="o">=</span> <span class="n">remove_structure</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">241</span>     <span class="n">layout</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">242</span>     <span class="n">flatten_records</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+   <span class="p">(</span><span class="o">...</span><span class="p">)</span>    <span class="mi">246</span>     <span class="n">list_to_regular</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">247</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">249</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">250</span>     <span class="c1"># We know that `flatten_records` must fail, so the only other type</span>
+<span class="g g-Whitespace">    </span><span class="mi">251</span>     <span class="c1"># that can return multiple parts here is the union array</span>
+<span class="ne">--&gt; </span><span class="mi">252</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">253</span>         <span class="s2">&quot;cannot use axis=None on an array containing irreducible unions&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">254</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">255</span> <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">256</span>     <span class="n">layout</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">EmptyArray</span><span class="p">()</span>
+
+<span class="ne">ValueError</span>: cannot use axis=None on an array containing irreducible unions
+
+<span class="n">This</span> <span class="n">error</span> <span class="n">occurred</span> <span class="k">while</span> <span class="n">calling</span>
+
+    <span class="n">ak</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+        <span class="o">&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">],</span> <span class="p">[],</span> <span class="mf">4.4</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;4 * union[var * float6...&#39;</span><span class="o">&gt;</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
 </div>

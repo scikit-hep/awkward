@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>How to create arrays with ArrayBuilder (easy and general) &#8212; Awkward Array 2.13.0 documentation</title>
+    <title>How to create arrays with ArrayBuilder (easy and general) &#8212; Awkward Array 2.14.0 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../_static/documentation_options.js?v=f5edd4dd"></script>
+    <script src="../_static/documentation_options.js?v=7bb62513"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -54,7 +54,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.13';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.14';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -67,7 +67,7 @@
     <link rel="prev" title="How to create arrays by “unflattening” or “grouping”" href="how-to-create-unflatten-group.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.13" />
+  <meta name="docsearch:version" content="2.14" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -139,8 +139,8 @@
       
     
     
-    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.13.0 documentation - Home"/>
-    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.13.0 documentation - Home"/>
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.14.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -1047,13 +1047,13 @@ type: 2 * float64</pre></div></div>
 <span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">25</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
 <span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">array2</span><span class="o">.</span><span class="n">x</span>
 
-<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1312,</span> in <span class="ni">Array.__getattr__</span><span class="nt">(self, where)</span>
-<span class="g g-Whitespace">   </span><span class="mi">1307</span>         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-<span class="g g-Whitespace">   </span><span class="mi">1308</span>             <span class="sa">f</span><span class="s2">&quot;while trying to get field </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">, an exception &quot;</span>
-<span class="g g-Whitespace">   </span><span class="mi">1309</span>             <span class="sa">f</span><span class="s2">&quot;occurred:</span><span class="se">\n</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">err</span><span class="si">!s}</span><span class="s2">&quot;</span>
-<span class="g g-Whitespace">   </span><span class="mi">1310</span>         <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
-<span class="g g-Whitespace">   </span><span class="mi">1311</span> <span class="k">else</span><span class="p">:</span>
-<span class="ne">-&gt; </span><span class="mi">1312</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no field named </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nn">File ~/micromamba/envs/awkward-docs/lib/python3.11/site-packages/awkward/highlevel.py:1324,</span> in <span class="ni">Array.__getattr__</span><span class="nt">(self, where)</span>
+<span class="g g-Whitespace">   </span><span class="mi">1319</span>         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+<span class="g g-Whitespace">   </span><span class="mi">1320</span>             <span class="sa">f</span><span class="s2">&quot;while trying to get field </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">, an exception &quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1321</span>             <span class="sa">f</span><span class="s2">&quot;occurred:</span><span class="se">\n</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">err</span><span class="si">!s}</span><span class="s2">&quot;</span>
+<span class="g g-Whitespace">   </span><span class="mi">1322</span>         <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">err</span>
+<span class="g g-Whitespace">   </span><span class="mi">1323</span> <span class="k">else</span><span class="p">:</span>
+<span class="ne">-&gt; </span><span class="mi">1324</span>     <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;no field named </span><span class="si">{</span><span class="n">where</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="ne">AttributeError</span>: no field named &#39;x&#39;
 </pre></div>

@@ -1,9 +1,10 @@
 ak.array_equal
 ==============
 
-Defined in `awkward.operations.ak_array_equal <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_array_equal.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_array_equal.py#L12>`__.
+Defined in `awkward.operations.ak_array_equal <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_array_equal.py>`__ on `line 12 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_array_equal.py#L12>`__.
 
 .. py:function:: ak.array_equal(a1, a2, equal_nan: bool = False, dtype_exact: bool = True, same_content_types: bool = True, check_parameters: bool = True, check_regular: bool = True, check_named_axis: bool = True)
+
 
    Returns True if two arrays have the same shape and elements.
 

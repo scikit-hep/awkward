@@ -1,9 +1,10 @@
 ak.to_json
 ==========
 
-Defined in `awkward.operations.ak_to_json <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_to_json.py>`__ on `line 25 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_to_json.py#L25>`__.
+Defined in `awkward.operations.ak_to_json <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_to_json.py>`__ on `line 25 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_to_json.py#L25>`__.
 
 .. py:function:: ak.to_json(array, file=None, *, line_delimited=False, num_indent_spaces=None, num_readability_spaces=0, nan_string=None, posinf_string=None, neginf_string=None, complex_record_fields=None, convert_bytes=None, convert_other=None)
+
 
    Converts an Awkward Array into JSON text, as a string or to a file.
 

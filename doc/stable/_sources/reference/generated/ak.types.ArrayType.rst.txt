@@ -1,7 +1,7 @@
 ak.types.ArrayType
 ==================
 
-Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/types/arraytype.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/types/arraytype.py#L14>`__.
+Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/types/arraytype.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/types/arraytype.py#L14>`__.
 
 .. py:class:: ak.types.ArrayType(content: awkward.types.type.Type, length: awkward._nplikes.shape.ShapeItem, behavior: collections.abc.Mapping | None = None)
 
@@ -24,8 +24,10 @@ Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward/blob/
 
 
 
+
    .. py:property:: length
       :type: awkward._nplikes.shape.ShapeItem
+
 
 
 
@@ -34,19 +36,25 @@ Defined in `awkward.types.arraytype <https://github.com/scikit-hep/awkward/blob/
 
 
 
+
    .. py:method:: __str__() -> str
+
 
 
    .. py:method:: show(stream=STDOUT)
 
 
+
    .. py:method:: _str(indent: str, compact: bool) -> list[str]
+
 
 
    .. py:method:: __repr__() -> str
 
 
+
    .. py:method:: is_equal_to(other: awkward._typing.Any, *, all_parameters: bool = False) -> bool
+
 
 
    .. py:attribute:: __eq__

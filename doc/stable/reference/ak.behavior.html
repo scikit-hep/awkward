@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ak.behavior &#8212; Awkward Array 2.13.0 documentation</title>
+    <title>ak.behavior &#8212; Awkward Array 2.14.0 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../_static/documentation_options.js?v=f5edd4dd"></script>
+    <script src="../_static/documentation_options.js?v=7bb62513"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -54,7 +54,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.13';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.14';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -67,7 +67,7 @@
     <link rel="prev" title="ak.without_named_axis" href="generated/ak.without_named_axis.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.13" />
+  <meta name="docsearch:version" content="2.14" />
   
     
     <script src="../_static/searchtools.js"></script>
@@ -139,8 +139,8 @@
       
     
     
-    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.13.0 documentation - Home"/>
-    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.13.0 documentation - Home"/>
+    <img src="../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.14.0 documentation - Home"/>
+    <img src="../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -718,6 +718,10 @@
 <li class="toctree-l1"><a class="reference internal" href="generated/ak.jax.register_and_check.html">ak.jax.register_and_check</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/ak.jax.register_behavior_class.html">ak.jax.register_behavior_class</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Warnings</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generated/ak.errors.ExperimentalWarning.html">ak.errors.ExperimentalWarning</a></li>
+</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">High-level data types</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="generated/ak.types.Type.html">ak.types.Type</a></li>
@@ -1061,7 +1065,7 @@ for <code class="docutils literal notranslate"><span class="pre">distance</span>
 <p>The <a class="reference internal" href="generated/ak.Array.html#ak.Array" title="ak.Array"><code class="xref py py-class docutils literal notranslate"><span class="pre">ak.Array</span></code></a> class overrides Python’s binary operators with the
 equivalent ufuncs, so <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> actually calls <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.equal.html#numpy.equal" title="(in NumPy v2.5)"><code class="xref py py-data docutils literal notranslate"><span class="pre">numpy.equal</span></code></a>, for instance.
 This is also true of other basic functions, like <code class="docutils literal notranslate"><span class="pre">__abs__</span></code> for overriding
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#abs" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">abs()</span></code></a> with <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.absolute.html#numpy.absolute" title="(in NumPy v2.5)"><code class="xref py py-data docutils literal notranslate"><span class="pre">numpy.absolute</span></code></a>. Each ufunc is then passed down to the leaves
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#abs" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">abs()</span></code></a> with <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.absolute.html#numpy.absolute" title="(in NumPy v2.5)"><code class="xref py py-data docutils literal notranslate"><span class="pre">numpy.absolute</span></code></a>. Each ufunc is then passed down to the leaves
 (deepest sub-elements) of an Awkward data structure.</p>
 <p>For example,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">4</span><span class="p">]])</span> <span class="o">==</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
@@ -1097,7 +1101,7 @@ arguments are <code class="docutils literal notranslate"><span class="pre">&quot
 <span class="go">[[False, True, False], [], [False, True], [False], [False, True, False]]</span>
 </pre></div>
 </div>
-<p>Similarly for overriding <a class="reference external" href="https://docs.python.org/3/library/functions.html#abs" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">abs()</span></code></a></p>
+<p>Similarly for overriding <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#abs" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">abs()</span></code></a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">point_abs</span><span class="p">(</span><span class="n">point</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 <span class="gp">...</span>

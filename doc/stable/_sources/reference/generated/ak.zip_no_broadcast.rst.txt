@@ -1,9 +1,10 @@
 ak.zip_no_broadcast
 ===================
 
-Defined in `awkward.operations.ak_zip_no_broadcast <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_zip_no_broadcast.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_zip_no_broadcast.py#L19>`__.
+Defined in `awkward.operations.ak_zip_no_broadcast <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_zip_no_broadcast.py>`__ on `line 19 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_zip_no_broadcast.py#L19>`__.
 
 .. py:function:: ak.zip_no_broadcast(arrays, *, parameters=None, with_name=None, highlevel=True, behavior=None, attrs=None)
+
 
    Combines arrays into a collection of records or tuples without broadcasting.
 

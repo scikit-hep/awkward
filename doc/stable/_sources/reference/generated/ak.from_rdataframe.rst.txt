@@ -1,9 +1,23 @@
 ak.from_rdataframe
 ==================
 
-Defined in `awkward.operations.ak_from_rdataframe <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_rdataframe.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_from_rdataframe.py#L14>`__.
+Defined in `awkward.operations.ak_from_rdataframe <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_from_rdataframe.py>`__ on `line 14 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_from_rdataframe.py#L14>`__.
 
 .. py:function:: ak.from_rdataframe(rdf, columns, *, keep_order=False, offsets_type='int64', with_name=None, highlevel=True, behavior=None, attrs=None)
+
+
+   Converts ROOT RDataFrame columns into an Awkward Array.
+
+   The data is copied: the conversion runs the RDataFrame event loop and
+   writes the selected columns into newly allocated buffers.
+
+   If ``columns`` is a string, the return value represents a single RDataFrame
+   column. If ``columns`` is any other iterable, the return value is a record
+   array, in which each field corresponds to an RDataFrame column. In
+   particular, if the ``columns`` iterable contains only one string, it is still
+   a record array, which has only one field.
+
+   See also :py:obj:`ak.to_rdataframe`.
 
    :param rdf: ROOT RDataFrame to convert into an
                Awkward Array.
@@ -30,14 +44,5 @@ Defined in `awkward.operations.ak_from_rdataframe <https://github.com/scikit-hep
                  high-level.
    :type attrs: None or dict
 
-   Converts ROOT RDataFrame columns into an Awkward Array.
-
-   If ``columns`` is a string, the return value represents a single RDataFrame column.
-
-   If ``columns`` is any other iterable, the return value is a record array, in which
-   each field corresponds to an RDataFrame column. In particular, if the ``columns``
-   iterable contains only one string, it is still a record array, which has only
-   one field.
-
-   See also :py:obj:`ak.to_rdataframe`.
+   :returns: An :py:obj:`ak.Array` built from the given ROOT RDataFrame columns.
 

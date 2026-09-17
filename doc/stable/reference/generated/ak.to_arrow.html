@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ak.to_arrow &#8212; Awkward Array 2.13.0 documentation</title>
+    <title>ak.to_arrow &#8212; Awkward Array 2.14.0 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
 <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
-    <script src="../../_static/documentation_options.js?v=f5edd4dd"></script>
+    <script src="../../_static/documentation_options.js?v=7bb62513"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -54,7 +54,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.17.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://awkward-array.org/doc/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.13';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '2.14';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -67,7 +67,7 @@
     <link rel="prev" title="ak.from_arrow_schema" href="ak.from_arrow_schema.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="2.13" />
+  <meta name="docsearch:version" content="2.14" />
   
     
     <script src="../../_static/searchtools.js"></script>
@@ -139,8 +139,8 @@
       
     
     
-    <img src="../../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.13.0 documentation - Home"/>
-    <img src="../../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.13.0 documentation - Home"/>
+    <img src="../../_static/logo-300px.png" class="logo__image only-light" alt="Awkward Array 2.14.0 documentation - Home"/>
+    <img src="../../_static/logo-300px-white.png" class="logo__image only-dark pst-js-only" alt="Awkward Array 2.14.0 documentation - Home"/>
   
   
 </a></div>
@@ -718,6 +718,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ak.jax.register_and_check.html">ak.jax.register_and_check</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ak.jax.register_behavior_class.html">ak.jax.register_behavior_class</a></li>
 </ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Warnings</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="ak.errors.ExperimentalWarning.html">ak.errors.ExperimentalWarning</a></li>
+</ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">High-level data types</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="ak.types.Type.html">ak.types.Type</a></li>
@@ -851,7 +855,7 @@
                   
   <section id="ak-to-arrow">
 <h1>ak.to_arrow<a class="headerlink" href="#ak-to-arrow" title="Link to this heading">#</a></h1>
-<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_to_arrow.py">awkward.operations.ak_to_arrow</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_to_arrow.py#L14">line 14</a>.</p>
+<p>Defined in <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_to_arrow.py">awkward.operations.ak_to_arrow</a> on <a class="reference external" href="https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_to_arrow.py#L14">line 14</a>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ak.to_arrow">
 <span class="sig-prename descclassname"><span class="pre">ak.</span></span><span class="sig-name descname"><span class="pre">to_arrow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_to32</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string_to32</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bytestring_to32</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emptyarray_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical_as_dictionary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extensionarray</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count_nulls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ak.to_arrow" title="Link to this definition">#</a></dt>
@@ -871,22 +875,22 @@ option to False for plain Arrow arrays.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>array</strong> – Array-like data (anything <a class="reference internal" href="ak.to_layout.html#ak.to_layout" title="ak.to_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_layout</span></code></a> recognizes).</p></li>
-<li><p><strong>list_to32</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, convert Awkward lists into 32-bit Arrow lists
+<li><p><strong>list_to32</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, convert Awkward lists into 32-bit Arrow lists
 if they’re small enough, even if it means an extra conversion. Otherwise,
 signed 32-bit <a class="reference internal" href="ak.types.ListType.html#ak.types.ListType" title="ak.types.ListType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.ListType</span></code></a> maps to Arrow <code class="docutils literal notranslate"><span class="pre">ListType</span></code>,
 signed 64-bit <a class="reference internal" href="ak.types.ListType.html#ak.types.ListType" title="ak.types.ListType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.ListType</span></code></a> maps to Arrow <code class="docutils literal notranslate"><span class="pre">LargeListType</span></code>,
 and unsigned 32-bit <a class="reference internal" href="ak.types.ListType.html#ak.types.ListType" title="ak.types.ListType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.ListType</span></code></a> picks whichever Arrow type its
 values fit into.</p></li>
-<li><p><strong>string_to32</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Same as the above for Arrow <code class="docutils literal notranslate"><span class="pre">string</span></code> and <code class="docutils literal notranslate"><span class="pre">large_string</span></code>.</p></li>
-<li><p><strong>bytestring_to32</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Same as the above for Arrow <code class="docutils literal notranslate"><span class="pre">binary</span></code> and <code class="docutils literal notranslate"><span class="pre">large_binary</span></code>.</p></li>
+<li><p><strong>string_to32</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Same as the above for Arrow <code class="docutils literal notranslate"><span class="pre">string</span></code> and <code class="docutils literal notranslate"><span class="pre">large_string</span></code>.</p></li>
+<li><p><strong>bytestring_to32</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Same as the above for Arrow <code class="docutils literal notranslate"><span class="pre">binary</span></code> and <code class="docutils literal notranslate"><span class="pre">large_binary</span></code>.</p></li>
 <li><p><strong>emptyarray_to</strong> (<em>None</em><em> or </em><em>dtype</em>) – If None, <a class="reference internal" href="ak.types.UnknownType.html#ak.types.UnknownType" title="ak.types.UnknownType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.UnknownType</span></code></a> maps to Arrow’s
 null type; otherwise, it is converted a given numeric dtype.</p></li>
-<li><p><strong>categorical_as_dictionary</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, <a class="reference internal" href="ak.contents.IndexedArray.html#ak.contents.IndexedArray" title="ak.contents.IndexedArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.IndexedArray</span></code></a> and
+<li><p><strong>categorical_as_dictionary</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, <a class="reference internal" href="ak.contents.IndexedArray.html#ak.contents.IndexedArray" title="ak.contents.IndexedArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.IndexedArray</span></code></a> and
 <a class="reference internal" href="ak.contents.IndexedOptionArray.html#ak.contents.IndexedOptionArray" title="ak.contents.IndexedOptionArray"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.contents.IndexedOptionArray</span></code></a> labeled with <code class="docutils literal notranslate"><span class="pre">__array__</span> <span class="pre">=</span> <span class="pre">&quot;categorical&quot;</span></code>
 are mapped to Arrow <code class="docutils literal notranslate"><span class="pre">DictionaryArray</span></code>; otherwise, the projection is
 evaluated before conversion (always the case without
 <code class="docutils literal notranslate"><span class="pre">__array__</span> <span class="pre">=</span> <span class="pre">&quot;categorical&quot;</span></code>).</p></li>
-<li><p><strong>extensionarray</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, this function returns extended Arrow arrays
+<li><p><strong>extensionarray</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, this function returns extended Arrow arrays
 (at all levels of nesting), which preserve metadata so that Awkward →
 Arrow → Awkward preserves the array’s <a class="reference internal" href="ak.types.Type.html#ak.types.Type" title="ak.types.Type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.types.Type</span></code></a> (though not
 the <a class="reference internal" href="ak.forms.Form.html#ak.forms.Form" title="ak.forms.Form"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.forms.Form</span></code></a>). If False, this function returns generic Arrow arrays
@@ -894,7 +898,7 @@ that might be needed for third-party tools that don’t recognize Arrow’s
 extensions. Even with <code class="docutils literal notranslate"><span class="pre">extensionarray=False</span></code>, the values produced by
 Arrow’s <code class="docutils literal notranslate"><span class="pre">to_pylist</span></code> method are the same as the values produced by Awkward’s
 <a class="reference internal" href="ak.to_list.html#ak.to_list" title="ak.to_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ak.to_list</span></code></a>.</p></li>
-<li><p><strong>count_nulls</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, count the number of missing values at each level
+<li><p><strong>count_nulls</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, count the number of missing values at each level
 and include these in the resulting Arrow array, which makes some downstream
 applications faster. If False, skip the up-front cost of counting them.</p></li>
 </ul>

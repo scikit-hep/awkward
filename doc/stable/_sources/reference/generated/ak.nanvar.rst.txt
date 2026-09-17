@@ -1,9 +1,10 @@
 ak.nanvar
 =========
 
-Defined in `awkward.operations.ak_var <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_var.py>`__ on `line 128 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_var.py#L128>`__.
+Defined in `awkward.operations.ak_var <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_var.py>`__ on `line 128 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_var.py#L128>`__.
 
 .. py:function:: ak.nanvar(x, weight=None, ddof=0, axis=None, *, keepdims=False, mask_identity=True, highlevel=True, behavior=None, attrs=None)
+
 
    Computes the variance, treating NaN values as missing.
 

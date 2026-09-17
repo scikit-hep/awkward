@@ -1,9 +1,10 @@
 ak.ones_like
 ============
 
-Defined in `awkward.operations.ak_ones_like <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_ones_like.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/cef1a524fb52896b86ef505526f2fe4689f5e217/src/awkward/operations/ak_ones_like.py#L15>`__.
+Defined in `awkward.operations.ak_ones_like <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_ones_like.py>`__ on `line 15 <https://github.com/scikit-hep/awkward/blob/f1d81ac30a44a21dee36d37ff5c6f96dd2ad8327/src/awkward/operations/ak_ones_like.py#L15>`__.
 
 .. py:function:: ak.ones_like(array, *, dtype=None, including_unknown=False, highlevel=True, behavior=None, attrs=None)
+
 
    Returns an array with the same structure as the input, filled with ones.
 
