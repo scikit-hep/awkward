@@ -75,12 +75,13 @@ jobs:
           create-args: >-
             python=${{ env.PYTHON_VERSION }}
             pandas>=3.0.0,<3.0.4
-            cccl-python>=1.0.2,<=1.1.1
+            cccl-python>=1.2.0  # minimum cuda-cccl version that uses numba-cuda-mlir
             cupy>=14
             cuda-version=13
             cuda-toolkit
             cxx-compiler
             numba-cuda
+            numba-cuda-mlir>=0.5.2,<0.6
             root=6.36.06
             pipx
 
