@@ -17,7 +17,7 @@ from awkward._nplikes.array_like import ArrayLike, maybe_materialize
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy import Numpy
-from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
+from awkward._nplikes.numpy_like import IndexType, NumpyLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracerArray
@@ -57,6 +57,33 @@ if TYPE_CHECKING:
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
+
+
+def _check_temporal_merge_units(arrays: Sequence[ArrayLike], nplike: NumpyLike) -> None:
+    """Raise if NumPy cannot convert between one temporal family's units.
+
+    NumPy refuses a unit-conversion factor of 2**56 or more, so units as
+    far apart as `[as]` and `[s]` have no common dtype. Empty arrays
+    decide it from the dtypes alone, leaving the values to the merge.
+    """
+    kinds = {array.dtype.kind for array in arrays if array.dtype.kind in "mM"}
+    if len(kinds) != 1:
+        return
+    dtypes = [array.dtype for array in arrays]
+    if len(set(dtypes)) < 2:
+        return
+
+    try:
+        nplike.concat([nplike.empty(0, dtype=dtype) for dtype in dtypes])
+    except OverflowError as err:
+        names = ", ".join(sorted({str(d) for d in dtypes if d.kind in "mM"}))
+        raise ValueError(
+            f"cannot merge {names}: NumPy cannot convert between these units; "
+            "cast the leaves to a common unit with ak.values_astype before "
+            "merging"
+        ) from err
+    except Exception:
+        return
 
 
 @final
@@ -568,6 +595,8 @@ class NumpyArray(NumpyMeta, Content):
                     + " with "
                     + type(array).__name__
                 )
+
+        _check_temporal_merge_units(contiguous_arrays, self._backend.nplike)
 
         contiguous_arrays = self._backend.nplike.concat(contiguous_arrays)
 
