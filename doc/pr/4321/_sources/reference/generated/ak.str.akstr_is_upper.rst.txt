@@ -1,0 +1,14 @@
+ak.str.akstr_is_upper
+=====================
+
+.. py:module:: awkward.operations.str.akstr_is_upper
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   awkward.operations.str.akstr_is_upper.is_upper
+
+
