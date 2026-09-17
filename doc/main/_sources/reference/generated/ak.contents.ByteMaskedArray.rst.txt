@@ -1,7 +1,7 @@
 ak.contents.ByteMaskedArray
 ===========================
 
-Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/contents/bytemaskedarray.py>`__ on `line 59 <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/contents/bytemaskedarray.py#L59>`__.
+Defined in `awkward.contents.bytemaskedarray <https://github.com/scikit-hep/awkward/blob/c762767421be437a0f0e4c4bed9a10941114f94c/src/awkward/contents/bytemaskedarray.py>`__ on `line 59 <https://github.com/scikit-hep/awkward/blob/c762767421be437a0f0e4c4bed9a10941114f94c/src/awkward/contents/bytemaskedarray.py#L59>`__.
 
 .. py:class:: ak.contents.ByteMaskedArray(mask, content, valid_when, *, parameters=None)
 

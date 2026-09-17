@@ -1,7 +1,7 @@
 ak.fill_none
 ============
 
-Defined in `awkward.operations.ak_fill_none <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_fill_none.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/a0549eef2f8e6d165e1f7590e8a256fd61986f99/src/awkward/operations/ak_fill_none.py#L21>`__.
+Defined in `awkward.operations.ak_fill_none <https://github.com/scikit-hep/awkward/blob/c762767421be437a0f0e4c4bed9a10941114f94c/src/awkward/operations/ak_fill_none.py>`__ on `line 21 <https://github.com/scikit-hep/awkward/blob/c762767421be437a0f0e4c4bed9a10941114f94c/src/awkward/operations/ak_fill_none.py#L21>`__.
 
 .. py:function:: ak.fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=None)
 
