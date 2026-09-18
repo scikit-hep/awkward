@@ -123,13 +123,9 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
     """
     if known_issues.has_issue_4261(a):
         return True
-    if known_issues.has_issue_4262(a):
-        return True
     if known_issues.has_issue_4278(a):
         return True
     if known_issues.has_issue_4280(a):
-        return True
-    if known_issues.has_issue_4282(a):
         return True
     if known_issues.has_issue_4283(a):
         return True

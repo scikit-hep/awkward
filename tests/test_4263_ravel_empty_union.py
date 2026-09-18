@@ -44,7 +44,7 @@ CASES = [
     pytest.param(
         ak.Array([1, [2, 3]])[:0],
         [],
-        "0 * int64",
+        "0 * unknown",
         id="empty-union-with-numeric-branches",
     ),
     pytest.param(

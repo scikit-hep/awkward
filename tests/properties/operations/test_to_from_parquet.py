@@ -84,7 +84,48 @@ def parquet_writable(a: ak.Array) -> bool:
             # a valid row whose fields are all null reads back as a null
             # row (outermost struct validity is not stored)
             return False
+    if _has_issue_4305(a.layout):
+        return False
     return _nodes_writable(a.layout)
+
+
+def _has_issue_4305(layout: ak.contents.Content, nullable: bool = False) -> bool:
+    """Return `True` if an `UnmaskedArray` receives validity from an
+    enclosing option.
+
+    `to_arrow` records an `UnmaskedArray`'s class name as `mask_type` on
+    the content it wraps, noting that the node carried no mask, and parquet
+    stores each column's validity in full, so an enclosing option's nulls
+    arrive in that content's validity bitmap. `from_parquet` requires a
+    node with that metadata to read back all-ones (message-less
+    `AssertionError` in `popbuffers_finalize`, #4305).
+
+    `nullable` tracks whether Arrow validity bytes flow into this node from
+    an enclosing option: they start at option nodes, pass through records
+    and indexed nodes, and stop below lists.
+
+    The condition here is wider than the failure in three ways, each
+    chosen over a special case: an option holding no null roundtrips; an
+    array shorter than eight roundtrips, because the assertion compares
+    whole bytes (`[: len(out) // 8]`) and so compares nothing; and the one
+    root-level shape `option(record(...))` roundtrips, because
+    `to_parquet` projects the enclosing option into each field of a
+    root-level named record, replacing the `UnmaskedArray` with an
+    `IndexedOptionArray`. Every other root-level option shape fails.
+    """
+    if layout.is_record:
+        return any(_has_issue_4305(x, nullable) for x in layout.contents)
+    if layout.is_regular:
+        return _has_issue_4305(layout.content, False)
+    if layout.is_option:
+        if nullable and isinstance(layout, ak.contents.UnmaskedArray):
+            return True
+        return _has_issue_4305(layout.content, True)
+    if layout.is_indexed:
+        return _has_issue_4305(layout.content, nullable)
+    if layout.is_list:
+        return _has_issue_4305(layout.content, False)
+    return False
 
 
 def _nodes_writable(layout: ak.contents.Content, nullable: bool = False) -> bool:
