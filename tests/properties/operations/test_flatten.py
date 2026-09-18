@@ -127,7 +127,9 @@ def _should_not_raise(form: ak.forms.Form, kwargs: Kwargs) -> bool:
     The rules, written against `ak.flatten`'s deliberate error paths
     (axis beyond depth, strings, records):
 
-    - `axis=None`: always `True`.
+    - `axis=None`: `True` unless the leaves it merges include
+      temporal units with no common unit (see
+      `util.merges_unconvertible_temporal_units`).
     - Any other axis is first resolved against the depth (see
       `_normalize_axis`); an axis that stays negative is `False`.
     - A resolved `0`: always `True`.
@@ -139,7 +141,7 @@ def _should_not_raise(form: ak.forms.Form, kwargs: Kwargs) -> bool:
     """
     axis = kwargs.get("axis", DEFAULTS["axis"])
     if axis is None:
-        return True
+        return not util.merges_unconvertible_temporal_units(form)
     axis = _normalize_axis(axis, form)
     if axis == 0:
         return True
@@ -160,8 +162,6 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
     match axis:
         case None:
             if known_issues.has_issue_4261(a):
-                return True
-            if known_issues.has_issue_4278(a):
                 return True
             if known_issues.has_issue_4280(a):
                 return True

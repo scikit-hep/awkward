@@ -23,6 +23,7 @@ import re
 import numpy as np
 
 import awkward as ak
+from tests.properties.operations import util
 
 
 def has_issue_4260(a: ak.Array) -> bool:
@@ -109,10 +110,10 @@ def has_issue_4261(a: ak.Array) -> bool:
     timedeltas, which NumPy promotes but the merge rejects with
     `TypeError`, are grouped as non-promotable; that divergence is
     why `np.result_type` is not a substitute. A unit pair of one
-    family that NumPy itself cannot convert is `has_issue_4278`'s
-    trigger, not this one. Unprobed combinations may still fail the
-    tests; such a failure indicates this trigger is missing a
-    combination.
+    family that NumPy itself cannot convert is refused by design
+    (`util.merges_unconvertible_temporal_units`), not by this
+    trigger. Unprobed combinations may still fail the tests; such a
+    failure indicates this trigger is missing a combination.
     Reported: https://github.com/scikit-hep/awkward/issues/4261
     """
     form = a.layout.form
@@ -206,30 +207,6 @@ def has_issue_4264(a: ak.Array) -> bool:
     return False
 
 
-def has_issue_4278(a: ak.Array) -> bool:
-    """Return `True` if one family's temporal units need an overflowing conversion.
-
-    `ak.flatten(axis=None)`, `ak.ravel`, and `axis=None` reductions
-    merge the collected leaves with `ak._do.mergemany`; two
-    timedelta or two datetime leaves merge through NumPy's unit
-    conversion, which refuses a factor of 2**56 or more (any of the
-    factor's top eight bits set) with `OverflowError` ("Integer
-    overflow getting a common metadata divisor") — `[as]` with `[s]`
-    or coarser, `[fs]` with `[h]` or coarser, and `[ps]` with `[D]`
-    or coarser, for timedeltas and datetimes alike, and `[M]` or
-    `[Y]` datetimes with `[ps]` or finer. An intermediate unit
-    does not change the outcome, and other leaves in the array do
-    not prevent the failure (`int64` beside such a pair, a
-    promotable mix, still fails). The trigger computes the factor
-    between the extreme base units present, per family, exactly in
-    attoseconds (`_overflowing_unit_span`); merge failures across
-    families are `has_issue_4261`'s. Reported:
-    https://github.com/scikit-hep/awkward/issues/4278
-    """
-    form = a.layout.form
-    return _contains_record_or_union(form) and _overflowing_unit_span(form)
-
-
 def has_issue_4280(a: ak.Array) -> bool:
     """Return `True` if a temporal value is too large for its family's finest unit.
 
@@ -241,8 +218,9 @@ def has_issue_4280(a: ak.Array) -> bool:
     and the merge raises `OverflowError` ("Overflow when converting
     between datetime64 units") instead of building a union or
     raising a documented error. The bound is symmetric in sign, and
-    `NaT` converts safely. The dtype pair alone stays under
-    `has_issue_4278`'s factor bound, so the stored values decide.
+    `NaT` converts safely. The dtype pair alone stays under the
+    factor bound of `util.merges_unconvertible_temporal_units`, so
+    the stored values decide.
     Every value in each temporal leaf's buffer counts, reachable or
     not — an over-match, which is harmless. A datetime calendar unit
     is not counted: NumPy converts calendar values without an
@@ -273,7 +251,7 @@ def has_issue_4280(a: ak.Array) -> bool:
             if matched is None:
                 continue
             kind, multiplier, unit = matched.groups()
-            attos = _ATTOSECONDS_PER_UNIT.get(unit)
+            attos = util.ATTOSECONDS_PER_TIME_UNIT.get(unit)
             if attos is not None:
                 data = np.asarray(node.data).ravel().view(np.int64)
                 leaves[kind].append((int(multiplier or "1") * attos, data))
@@ -401,82 +379,3 @@ def _leaf_families(form: ak.forms.Form) -> set[str]:
         elif not node.is_unknown:
             stack.append(node.content)
     return families
-
-
-# The linear datetime units, as exact attosecond multiples; the
-# calendar units month and year are separate, because only datetimes
-# convert with them.
-_ATTOSECONDS_PER_UNIT = {
-    "as": 1,
-    "fs": 10**3,
-    "ps": 10**6,
-    "ns": 10**9,
-    "us": 10**12,
-    "ms": 10**15,
-    "s": 10**18,
-    "m": 60 * 10**18,
-    "h": 3600 * 10**18,
-    "D": 86400 * 10**18,
-    "W": 604800 * 10**18,
-}
-
-# A datetime — not a timedelta — converts with the calendar units
-# month and year; their average Gregorian lengths, as exact
-# attosecond multiples, reproduce NumPy's accept/reject boundary at
-# every probed unit pair.
-_DATETIME_CALENDAR_ATTOSECONDS = {
-    "M": 2629746 * 10**18,
-    "Y": 31556952 * 10**18,
-}
-
-# NumPy's `get_datetime_units_factor` treats a unit-conversion factor
-# with any of its top eight bits set as an overflow, so the bound is
-# 2**56, far below `int64`'s 2**63 - 1. The factor multiplies base
-# units only: a unit multiplier (as in `datetime64[10s]`) never
-# enters it.
-_UNIT_FACTOR_BOUND = 2**56
-
-
-def _overflowing_unit_span(form: ak.forms.Form) -> bool:
-    """Return `True` if one family's extreme temporal units would fail to convert.
-
-    Judged per family — datetimes and timedeltas separately, matching
-    the grouping in `_leaf_families` — although a form containing
-    both datetimes and timedeltas already matches the family check in
-    `has_issue_4261`, so the split never decides. The factor between
-    the extreme base units present is computed exactly in attoseconds
-    and compared against `_UNIT_FACTOR_BOUND`; a unit multiplier is
-    ignored, as NumPy's check ignores it. A timedelta calendar unit
-    (month, year) does not convert to a linear unit and is left to
-    the family grouping; a datetime calendar unit is counted at its
-    average length (`_DATETIME_CALENDAR_ATTOSECONDS`), which
-    reproduces the observed boundary. A string's character content
-    is not walked.
-    """
-    spans: dict[str, set[int]] = {"datetime64": set(), "timedelta64": set()}
-    stack = [form]
-    while stack:
-        node = stack.pop()
-        if node.parameter("__array__") in ("string", "bytestring"):
-            continue
-        if node.is_record or node.is_union:
-            stack.extend(node.contents)
-        elif node.is_numpy:
-            matched = re.fullmatch(
-                r"(datetime64|timedelta64)\[\d*([a-zA-Z]+)\]", node.primitive
-            )
-            if matched is None:
-                continue
-            kind, unit = matched.groups()
-            attos = _ATTOSECONDS_PER_UNIT.get(unit)
-            if attos is None and kind == "datetime64":
-                attos = _DATETIME_CALENDAR_ATTOSECONDS.get(unit)
-            if attos is not None:
-                spans[kind].add(attos)
-        elif not node.is_unknown:
-            stack.append(node.content)
-    return any(
-        max(units) // min(units) >= _UNIT_FACTOR_BOUND
-        for units in spans.values()
-        if units
-    )
