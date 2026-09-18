@@ -22,11 +22,12 @@ runs:
         # TODO: drop the numpy pin when a numba-cuda release supports
         # numpy 2.5 (NVIDIA/numba-cuda#907): numba-cuda 0.30.4 references
         # the removed np.row_stack at import time
+        # cccl-python>=1.2.0 is the minimum cuda-cccl version that uses numba-cuda-mlir
         create-args: >-
           -c rapidsai
           python=3.13
           pandas>=0.24
-          cccl-python>=1.2.0  # minimum cuda-cccl version that uses numba-cuda-mlir
+          cccl-python>=1.2.0
           cudf>=25.02
           cupy>=14
           cuda-version=${{ inputs.cuda-version }}
