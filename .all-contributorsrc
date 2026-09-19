@@ -642,6 +642,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Soumoditya",
+      "name": "Soumoditya Pramanik",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177980566?v=4",
+      "profile": "http://soumodityapramanik.in",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
