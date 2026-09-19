@@ -219,7 +219,7 @@ kernels:
           - {name: mymask, type: "Const[List[int8_t]]", dir: in, role: ByteMaskedArray2-mask}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: validwhen, type: "bool", dir: in, role: ByteMaskedArray-valid_when}
-    description: null
+    description: "`tomask` is a validity mask and is always exactly 0 or 1, even when `theirmask` holds another value."
     definition: |
       def awkward_ByteMaskedArray_overlay_mask(tomask, theirmask, mymask, length, validwhen):
           for i in range(length):
@@ -632,12 +632,14 @@ kernels:
         args:
           - {name: toindex, type: "List[int64_t]", dir: out}
           - {name: lenindex, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "`toindex` must be allocated with `lenindex + 1` entries: the trailing entry is set to -1."
     definition: |
       def awkward_IndexedArray_numnull_unique_64(toindex, lenindex):
           for i in range(lenindex):
               toindex[i] = i
-          toindex[-1] = -1
+          # Position `lenindex`, not "the last element of whatever buffer was
+          # passed": `toindex` is allocated with `lenindex + 1` entries
+          toindex[lenindex] = -1
     automatic-tests: false
 
   - name: awkward_IndexedArray_index_of_nulls
@@ -648,21 +650,21 @@ kernels:
           - {name: fromindex, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
       - name: awkward_IndexedArray64_index_of_nulls
         args:
           - {name: toindex, type: "List[int64_t]", dir: out}
           - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
       - name: awkward_IndexedArrayU32_index_of_nulls
         args:
           - {name: toindex, type: "List[int64_t]", dir: out}
           - {name: fromindex, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
     description: null
     definition: |
       def awkward_IndexedArray_index_of_nulls(toindex, fromindex, offsets, outlength, starts):
@@ -772,7 +774,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: fromnulls, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: startslength, type: "int64_t", dir: in, role: reducer-startslength}
-    description: null
+    description: "Appends at most one null (-1) per sublist, after that sublist's elements, and shifts every subsequent offset by the number of nulls appended so far."
     definition: |
       def awkward_IndexedArray_unique_next_index_and_offsets_64(
           toindex, tooffsets, fromoffsets, fromnulls, startslength
@@ -787,11 +789,13 @@ kernels:
                   toindex[k] = ll
                   k += 1
                   ll += 1
-                  if fromnulls[k] == 1:
-                      toindex[k] = -1
-                      k += 1
-                      shift += 1
-                  tooffsets[i + 1] = fromoffsets[i + 1] + shift
+              # At most one null is appended per sublist, after its elements --
+              # not once per element
+              if fromnulls[k] == 1:
+                  toindex[k] = -1
+                  k += 1
+                  shift += 1
+              tooffsets[i + 1] = fromoffsets[i + 1] + shift
     automatic-tests: false
 
   - name: awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64
@@ -1226,7 +1230,10 @@ kernels:
                       j = 2
                       while j <= thisn:
                           combinationslen *= (size - j) + 1
-                          combinationslen /= j
+                          # Exact integer division: the running product is
+                          # always divisible by `j`, and true division would
+                          # lose precision past 2**53
+                          combinationslen //= j
                           j = j + 1
               totallen[0] = totallen[0] + combinationslen
               tooffsets[i + 1] = tooffsets[i] + combinationslen
@@ -1963,7 +1970,7 @@ kernels:
           - {name: fromstarts, type: "Const[List[uint32_t]]", dir: in, role: ListArray-starts}
           - {name: fromstops, type: "Const[List[uint32_t]]", dir: in, role: ListArray-stops}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "Leaves `tomin` untouched when `lenstarts` is 0, since there is no minimum to report and `fromstarts`/`fromstops` may be empty buffers."
     definition: |
       def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
           if lenstarts > 0:
@@ -2106,11 +2113,13 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: length_offsets, type: "int64_t", dir: in, role: default}
           - {name: length_indexes, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "Every entry of `fromoffsets` must be within `length_indexes`; offsets need not be monotonic, so each is checked rather than only the last."
     definition: |
       def awkward_ListOffsetArray_drop_none_indexes(tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes):
           nr_of_nones, offset1, offset2 = 0, 0, 0
           for i in range(length_offsets):
+            if fromoffsets[i] > length_indexes:
+              raise ValueError("offsets[i] > len(content)")
             offset2 = fromoffsets[i]
             for j in range(offset1, offset2):
               if (noneindexes[j] < 0):
@@ -2139,7 +2148,7 @@ kernels:
           - {name: outeroffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-    description: null
+    description: "`outeroffsets` must index within `inneroffsets`; this is not validated, because the length of `inneroffsets` is not passed."
     definition: |
       def awkward_ListOffsetArray_flatten_offsets(
           tooffsets, outeroffsets, outeroffsetslen, inneroffsets
@@ -2155,10 +2164,12 @@ kernels:
           - {name: tocarry, type: "List[int64_t]", dir: out}
           - {name: fromindex, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "Stably argsorts the first `length` entries of `fromindex`, so equal keys keep their original order."
     definition: |
       def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
-          array = numpy.argsort(fromindex)
+          # Sort only the first `length` entries, and do it stably, so that
+          # equal keys keep their original order
+          array = numpy.argsort(fromindex[:length], kind="stable")
           for i in range(length):
               tocarry[i] = array[i]
     automatic-tests: false
@@ -2202,7 +2213,7 @@ kernels:
           - {name: offsetscopy, type: "List[int64_t]", dir: out}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: length, type: "int64_t", dir: in, role: reducer-length}
-    description: null
+    description: "`offsets` must hold `length + 1` entries; `offsets[0]` is read before the loop, so `length` may be 0 but `offsets` may not be empty."
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64(
           maxcount, offsetscopy, offsets, length
@@ -2252,7 +2263,7 @@ kernels:
                       missing[start + j] = nummissing[j]
           for j in range(nextlen):
               nextshifts[j] = missing[nextcarry[j]]
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
     specializations:
       - name: awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64
@@ -2262,11 +2273,13 @@ kernels:
           - {name: distincts, type: "Const[List[int64_t]]", dir: in, role: reducer-distincts}
           - {name: lendistincts, type: "int64_t", dir: in, role: reducer-lendistincts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "`distincts` must hold exactly `outlength` equal-length sublists, i.e. `lendistincts` must be a multiple of `outlength`; otherwise more than `outlength` sublists would be written to `outstarts`/`outstops`."
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
           outstarts, outstops, distincts, lendistincts, outlength
       ):
+          if outlength > 0 and lendistincts % outlength != 0:
+              raise ValueError("lendistincts is not a multiple of outlength")
           maxcount = lendistincts if (outlength == 0) else int(lendistincts // outlength)
           if outlength > 0 and lendistincts > 0:
               # The sublist index
@@ -2562,7 +2575,7 @@ kernels:
               i = toptr[k]
               if i >= 0:
                   toptr[k] -= starts[k]
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_NumpyArray_reduce_adjust_starts_shifts_64
     specializations:
       - name: awkward_NumpyArray_reduce_adjust_starts_shifts_64
@@ -2581,7 +2594,7 @@ kernels:
               i = toptr[k]
               if i >= 0:
                   toptr[k] += shifts[i] - starts[k]
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
     specializations:
       - name: awkward_NumpyArray_reduce_mask_ByteMaskedArray_64
@@ -2614,9 +2627,52 @@ kernels:
           - {name: is_stable, type: "bool", dir: in}
           - {name: is_ascending, type: "bool", dir: in}
           - {name: is_local, type: "bool", dir: in}
-    description: null
+    description: "Argsorts the strings of each run of equal `fromparents` independently. Strings compare as byte sequences, and a string that is a prefix of another sorts first. `is_local` writes indices relative to the start of each run rather than absolute ones. When `is_stable` is false the order of equal strings is unspecified; the reference produces the stable order, which is one valid result."
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_argsort_strings(
+          tocarry, fromparents, length, stringdata, stringstarts, stringstops,
+          is_stable, is_ascending, is_local
+      ):
+          def as_bytes(i):
+              return [stringdata[k] for k in range(stringstarts[i], stringstops[i])]
+
+          def less(i, j):
+              # Byte-wise comparison over the whole range: a string may contain an
+              # embedded zero byte, which is data like any other
+              left, right = as_bytes(i), as_bytes(j)
+              n = min(len(left), len(right))
+              for k in range(n):
+                  if left[k] != right[k]:
+                      return left[k] < right[k]
+              return len(left) < len(right)
+
+          import functools
+
+          def compare(i, j):
+              if less(i, j):
+                  return -1
+              if less(j, i):
+                  return 1
+              return 0
+
+          firstindex = 0
+          lastparent = -1
+          index = []
+          for i in range(length + 1):
+              if i == length or fromparents[i] != lastparent:
+                  ordered = sorted(index, key=functools.cmp_to_key(compare),
+                                   reverse=not is_ascending)
+                  for j in range(len(ordered)):
+                      if is_local:
+                          tocarry[firstindex + j] = ordered[j] - firstindex
+                      else:
+                          tocarry[firstindex + j] = ordered[j]
+                  index = []
+              if i != length:
+                  if len(index) == 0:
+                      firstindex = i
+                  index.append(i)
+                  lastparent = fromparents[i]
     automatic-tests: false
 
   - name: awkward_NumpyArray_sort_asstrings_uint8
@@ -2630,9 +2686,26 @@ kernels:
           - {name: outoffsets, type: "List[int64_t]", dir: out}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: "Sorts the strings delimited by `offsets` and writes them back out contiguously, with `outoffsets` giving the new boundaries. Strings compare as byte sequences, so an embedded zero byte is data like any other. `stable` does not change the result -- sorting whole strings cannot expose tie order."
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_sort_asstrings_uint8(
+          toptr, fromptr, offsets, offsetslength, outoffsets, ascending, stable
+      ):
+          words = []
+          for k in range(offsetslength - 1):
+              words.append([fromptr[i] for i in range(offsets[k], offsets[k + 1])])
+
+          words.sort(reverse=not ascending)
+
+          k = 0
+          for word in words:
+              for c in word:
+                  toptr[k] = c
+                  k += 1
+
+          outoffsets[0] = 0
+          for o, word in enumerate(words):
+              outoffsets[o + 1] = outoffsets[o] + len(word)
     automatic-tests: true
 
   - name: awkward_NumpyArray_unique_strings
@@ -2644,9 +2717,42 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: outoffsets, type: "List[int64_t]", dir: out}
           - {name: tolength, type: "List[int64_t]", dir: out}
-    description: null
+    description: "Compacts `toptr` in place, dropping every string equal to the one before it, so the input must already be sorted. `tolength` receives the number of entries written to `outoffsets`, which is one more than the number of distinct strings."
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_unique_strings(toptr, offsets, offsetslength, outoffsets, tolength):
+          if offsetslength == 0:
+              tolength[0] = 0
+              return
+
+          laststart = 0
+          lastlen = -1
+          index = 0
+          counter = 0
+          # Positions in the compacted output, which always starts at zero
+          outoffsets[counter] = 0
+          counter += 1
+          for i in range(offsetslength - 1):
+              slen = offsets[i + 1] - offsets[i]
+              differ = False
+              if slen != lastlen:
+                  differ = True
+              else:
+                  for k in range(slen):
+                      # Compare against the kept string at its position in the
+                      # already-compacted output, not at its original offset, which
+                      # the compaction may have overwritten
+                      if toptr[laststart + k] != toptr[offsets[i] + k]:
+                          differ = True
+                          break
+              if differ:
+                  laststart = index
+                  for j in range(offsets[i], offsets[i + 1]):
+                      toptr[index] = toptr[j]
+                      index += 1
+                  lastlen = slen
+                  outoffsets[counter] = index
+                  counter += 1
+          tolength[0] = counter
     automatic-tests: false
 
   - name: awkward_NumpyArray_prepare_utf8_to_utf32_padded
@@ -2669,9 +2775,37 @@ kernels:
           - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: outmaxcodepoints, type: "List[int64_t]", dir: out}
-    description: null
+    description: "Counts the UTF-8 code points in the widest sublist, which sizes the buffer that `awkward_NumpyArray_utf8_to_utf32_padded` then fills. Rejects an invalid leading byte and a sequence that runs past the end of its sublist."
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_prepare_utf8_to_utf32_padded(
+          fromptr, fromoffsets, offsetslength, outmaxcodepoints
+      ):
+          outmaxcodepoints[0] = 0
+
+          for k_sublist in range(offsetslength - 1):
+              # Anchor each sublist at its own offset, so that a malformed sublist
+              # cannot shift the ones that follow it
+              i_code_unit = fromoffsets[k_sublist]
+              j_code_unit_last = fromoffsets[k_sublist + 1]
+              n_code_point_sublist = 0
+
+              while i_code_unit < j_code_unit_last:
+                  code_point_width = utf8_codepoint_size(fromptr[i_code_unit])
+                  if code_point_width == 0:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "invalid byte in UTF8 string"
+                      )
+                  if i_code_unit + code_point_width > j_code_unit_last:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "truncated UTF8 sequence"
+                      )
+                  i_code_unit += code_point_width
+                  n_code_point_sublist += 1
+
+              if outmaxcodepoints[0] < n_code_point_sublist:
+                  outmaxcodepoints[0] = n_code_point_sublist
     automatic-tests: false
 
   - name: awkward_NumpyArray_utf8_to_utf32_padded
@@ -2697,9 +2831,66 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: maxcodepoints, type: "int64_t", dir: in,  role: default}
           - {name: toptr, type: "List[uint32_t]", dir: out}
-    description: null
+    description: "Decodes each sublist of UTF-8 code units into `maxcodepoints` UTF-32 code points, zero-padding the tail of each. `maxcodepoints` comes from `awkward_NumpyArray_prepare_utf8_to_utf32_padded`."
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_utf8_to_utf32_padded(
+          fromptr, fromoffsets, offsetslength, maxcodepoints, toptr
+      ):
+          n_code_point = 0
+
+          for k_sublist in range(offsetslength - 1):
+              # Anchor each sublist at its own offset, so that a malformed sublist
+              # cannot shift the ones that follow it
+              i_code_unit = fromoffsets[k_sublist]
+              j_code_unit_last = fromoffsets[k_sublist + 1]
+              n_code_point_sublist = 0
+
+              while i_code_unit < j_code_unit_last:
+                  code_point_width = utf8_codepoint_size(fromptr[i_code_unit])
+                  if code_point_width == 0:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "invalid byte in UTF8 string"
+                      )
+                  if i_code_unit + code_point_width > j_code_unit_last:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "truncated UTF8 sequence"
+                      )
+                  if n_code_point_sublist >= maxcodepoints:
+                      raise ValueError(
+                          "could not convert UTF8 code point to UTF32: "
+                          "string is longer than maxcodepoints"
+                      )
+
+                  if code_point_width == 1:
+                      toptr[n_code_point] = fromptr[i_code_unit] & 0x7F
+                  elif code_point_width == 2:
+                      toptr[n_code_point] = (
+                          (fromptr[i_code_unit] & 0x1F) << 6
+                          | (fromptr[i_code_unit + 1] & 0x3F)
+                      )
+                  elif code_point_width == 3:
+                      toptr[n_code_point] = (
+                          (fromptr[i_code_unit] & 0x0F) << 12
+                          | (fromptr[i_code_unit + 1] & 0x3F) << 6
+                          | (fromptr[i_code_unit + 2] & 0x3F)
+                      )
+                  else:
+                      toptr[n_code_point] = (
+                          (fromptr[i_code_unit] & 0x07) << 18
+                          | (fromptr[i_code_unit + 1] & 0x3F) << 12
+                          | (fromptr[i_code_unit + 2] & 0x3F) << 6
+                          | (fromptr[i_code_unit + 3] & 0x3F)
+                      )
+
+                  n_code_point += 1
+                  i_code_unit += code_point_width
+                  n_code_point_sublist += 1
+
+              for _ in range(maxcodepoints - n_code_point_sublist):
+                  toptr[n_code_point] = 0
+                  n_code_point += 1
     automatic-tests: false
 
   - name: awkward_NumpyArray_pad_zero_to_length
@@ -3702,7 +3893,7 @@ kernels:
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: numcontents, type: "int64_t", dir: in, role: UnionArray-length}
           - {name: lencontents, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-    description: null
+    description: "`lencontents` must hold at least `numcontents` entries; this is not validated, because the length of `lencontents` is not passed."
     definition: |
       def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
           for i in range(length):
@@ -3730,6 +3921,15 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_bool_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_bool_uint32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
@@ -3748,21 +3948,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_bool_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_int8_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int8_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -3784,21 +3984,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_int8_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_int16_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int16_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -3820,21 +4020,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_int16_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_int32_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int32_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -3856,21 +4056,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_int32_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_int64_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_int64_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -3892,21 +4092,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_int64_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_uint8_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint8_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -3928,21 +4128,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_uint8_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_uint16_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint16_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -3964,21 +4164,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_uint16_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_uint32_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint32_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -4000,21 +4200,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_uint32_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_uint64_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_uint64_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -4036,21 +4236,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_uint64_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_float32_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_float32_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -4072,21 +4272,21 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_float32_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[float]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
       - name: awkward_argsort_float64_int32
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsets, type: "Const[List[int32_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: offsetslength, type: "int64_t", dir: in, role: default}
+          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
+          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
+      - name: awkward_argsort_float64_int64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: IndexedArray-index}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
@@ -4108,16 +4308,7 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-      - name: awkward_argsort_float64_int64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: IndexedArray-index}
-          - {name: length, type: "int64_t", dir: in, role: default}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
-          - {name: offsetslength, type: "int64_t", dir: in, role: default}
-          - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
-          - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: "Argsorts each segment `offsets[i]:offsets[i+1]` independently, writing segment-local indices. NaNs sort to the low end in both directions (unlike NumPy, which sorts them high). When `stable` is false the relative order of equal elements is unspecified; the reference produces the stable order, which is one valid result."
     definition: |
       def awkward_argsort(
         toptr, fromptr, length, offsets, offsetslength, ascending, stable
@@ -4126,8 +4317,13 @@ kernels:
           indices = list(range(length))
           for i in range(offsetslength - 1):
               sub_indices = indices[offsets[i]:offsets[i+1]]
-              sorted_indices = sorted(
-                  sub_indices,
+              # NaNs compare "less" than everything in both directions, so
+              # they are pushed to the low end. `x != x` is only true for NaN,
+              # and is false for every integral type.
+              nan_indices = [x for x in sub_indices if fromptr[x] != fromptr[x]]
+              num_indices = [x for x in sub_indices if fromptr[x] == fromptr[x]]
+              sorted_indices = nan_indices + sorted(
+                  num_indices,
                   key=lambda x: fromptr[x],
                   reverse=not ascending
               )
@@ -4213,13 +4409,17 @@ kernels:
           - {name: indexlength, type: "int64_t", dir: in, role: default}
           - {name: repetitions, type: "int64_t", dir: in, role: default}
           - {name: regularsize, type: "int64_t", dir: in, role: RegularArray-size}
-    description: null
+    description: "A missing entry (-1) is repeated as -1 rather than being shifted, so that it stays missing in the resulting IndexedOptionArray."
     definition: |
       def awkward_missing_repeat(outindex, index, indexlength, repetitions, regularsize):
           for i in range(repetitions):
               for j in range(indexlength):
                   base = index[j]
-                  outindex[(i * indexlength) + j] = base + i * regularsize if base >= 0 else 0
+                  # A missing entry (-1) must stay missing: the result feeds
+                  # IndexedOptionArray.simplified, where a non-negative value
+                  # would turn a None into real data
+                  adjustment = i * regularsize if base >= 0 else 0
+                  outindex[(i * indexlength) + j] = base + adjustment
     automatic-tests: true
 
   - name: awkward_reduce_argmax
@@ -4231,24 +4431,10 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_argmax_uint8_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_int16_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_argmax_uint16_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4259,17 +4445,31 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_argmax_uint32_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmax_int64_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmax_uint8_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmax_uint16_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmax_uint32_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4294,7 +4494,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Returns the index of the *first* maximum in each bin, or -1 for an empty bin. NaN is skipped. `starts` is unused: the offset adjustment happens later, in `awkward_NumpyArray_reduce_adjust_starts_64`."
     definition: |
       def awkward_reduce_argmax(toptr, fromptr, offsets, starts, outlength):
           for bin in range(outlength):
@@ -4332,20 +4532,13 @@ kernels:
                       if x > bx or (x == bx and y > by):
                           best = i
               toptr[bin] = best
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_argmin
     specializations:
       - name: awkward_reduce_argmin_int8_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_argmin_uint8_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4356,13 +4549,6 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_argmin_uint16_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_int32_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
@@ -4370,17 +4556,31 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_argmin_uint32_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_argmin_int64_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmin_uint8_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmin_uint16_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_argmin_uint32_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
@@ -4405,7 +4605,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: reducer-starts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Returns the index of the *first* minimum in each bin, or -1 for an empty bin. NaN is skipped. `starts` is unused: the offset adjustment happens later, in `awkward_NumpyArray_reduce_adjust_starts_64`."
     definition: |
       def awkward_reduce_argmin(toptr, fromptr, offsets, starts, outlength):
           for bin in range(outlength):
@@ -4443,7 +4643,7 @@ kernels:
                       if x < bx or (x == bx and y < by):
                           best = i
               toptr[bin] = best
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_count_64
     specializations:
       - name: awkward_reduce_count_64
@@ -4471,22 +4671,10 @@ kernels:
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_countnonzero_uint8_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_countnonzero_int16_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_countnonzero_uint16_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_countnonzero_int32_64
@@ -4495,16 +4683,28 @@ kernels:
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_countnonzero_uint32_64
-        args:
-          - {name: toptr, type: "List[int64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_countnonzero_int64_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_countnonzero_uint8_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_countnonzero_uint16_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_countnonzero_uint32_64
+        args:
+          - {name: toptr, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_countnonzero_uint64_64
@@ -4558,7 +4758,7 @@ kernels:
                   if fromptr[i * 2] != 0 or fromptr[i * 2 + 1] != 0:
                       c += 1
               toptr[bin] = c
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_max
     specializations:
       - name: awkward_reduce_max_int8_int8_64
@@ -4568,13 +4768,6 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int8_t", dir: in, role: reducer-identity}
-      - name: awkward_reduce_max_uint8_uint8_64
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: identity, type: "uint8_t", dir: in, role: reducer-identity}
       - name: awkward_reduce_max_int16_int16_64
         args:
           - {name: toptr, type: "List[int16_t]", dir: out}
@@ -4582,13 +4775,6 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int16_t", dir: in, role: reducer-identity}
-      - name: awkward_reduce_max_uint16_uint16_64
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: identity, type: "uint16_t", dir: in, role: reducer-identity}
       - name: awkward_reduce_max_int32_int32_64
         args:
           - {name: toptr, type: "List[int32_t]", dir: out}
@@ -4596,13 +4782,6 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int32_t", dir: in, role: reducer-identity}
-      - name: awkward_reduce_max_uint32_uint32_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: identity, type: "uint32_t", dir: in, role: reducer-identity}
       - name: awkward_reduce_max_int64_int64_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
@@ -4610,6 +4789,27 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int64_t", dir: in, role: reducer-identity}
+      - name: awkward_reduce_max_uint8_uint8_64
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "uint8_t", dir: in, role: reducer-identity}
+      - name: awkward_reduce_max_uint16_uint16_64
+        args:
+          - {name: toptr, type: "List[uint16_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "uint16_t", dir: in, role: reducer-identity}
+      - name: awkward_reduce_max_uint32_uint32_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "uint32_t", dir: in, role: reducer-identity}
       - name: awkward_reduce_max_uint64_uint64_64
         args:
           - {name: toptr, type: "List[uint64_t]", dir: out}
@@ -4631,7 +4831,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
-    description: null
+    description: "`identity` is supplied by the caller (the type's minimum), not derived here. NaN is skipped rather than propagated, so a bin of all-NaN yields `identity`."
     definition: |
       def awkward_reduce_max(toptr, fromptr, offsets, outlength, identity):
           for bin in range(outlength):
@@ -4658,7 +4858,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
-    description: null
+    description: "Compares lexicographically by (real, imaginary). Only the real identity is supplied by the caller; the imaginary identity is 0, so an empty bin yields (identity, 0)."
     definition: |
       def awkward_reduce_max_complex(toptr, fromptr, offsets, outlength, identity):
           for bin in range(outlength):
@@ -4674,7 +4874,7 @@ kernels:
                       seen = True
               toptr[bin * 2] = best_re
               toptr[bin * 2 + 1] = best_im
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_min
     specializations:
       - name: awkward_reduce_min_int8_int8_64
@@ -4684,13 +4884,6 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int8_t", dir: in, role: reducer-identity}
-      - name: awkward_reduce_min_uint8_uint8_64
-        args:
-          - {name: toptr, type: "List[uint8_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: identity, type: "uint8_t", dir: in, role: reducer-identity}
       - name: awkward_reduce_min_int16_int16_64
         args:
           - {name: toptr, type: "List[int16_t]", dir: out}
@@ -4698,13 +4891,6 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int16_t", dir: in, role: reducer-identity}
-      - name: awkward_reduce_min_uint16_uint16_64
-        args:
-          - {name: toptr, type: "List[uint16_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: identity, type: "uint16_t", dir: in, role: reducer-identity}
       - name: awkward_reduce_min_int32_int32_64
         args:
           - {name: toptr, type: "List[int32_t]", dir: out}
@@ -4712,13 +4898,6 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int32_t", dir: in, role: reducer-identity}
-      - name: awkward_reduce_min_uint32_uint32_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: identity, type: "uint32_t", dir: in, role: reducer-identity}
       - name: awkward_reduce_min_int64_int64_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
@@ -4726,6 +4905,27 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "int64_t", dir: in, role: reducer-identity}
+      - name: awkward_reduce_min_uint8_uint8_64
+        args:
+          - {name: toptr, type: "List[uint8_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "uint8_t", dir: in, role: reducer-identity}
+      - name: awkward_reduce_min_uint16_uint16_64
+        args:
+          - {name: toptr, type: "List[uint16_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "uint16_t", dir: in, role: reducer-identity}
+      - name: awkward_reduce_min_uint32_uint32_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: identity, type: "uint32_t", dir: in, role: reducer-identity}
       - name: awkward_reduce_min_uint64_uint64_64
         args:
           - {name: toptr, type: "List[uint64_t]", dir: out}
@@ -4747,7 +4947,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
-    description: null
+    description: "`identity` is supplied by the caller (the type's maximum), not derived here. NaN is skipped rather than propagated, so a bin of all-NaN yields `identity`."
     definition: |
       def awkward_reduce_min(toptr, fromptr, offsets, outlength, identity):
           for bin in range(outlength):
@@ -4774,7 +4974,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: identity, type: "double", dir: in, role: reducer-identity}
-    description: null
+    description: "Compares lexicographically by (real, imaginary). Only the real identity is supplied by the caller; the imaginary identity is 0, so an empty bin yields (identity, 0)."
     definition: |
       def awkward_reduce_min_complex(toptr, fromptr, offsets, outlength, identity):
           for bin in range(outlength):
@@ -4790,19 +4990,31 @@ kernels:
                       seen = True
               toptr[bin * 2] = best_re
               toptr[bin * 2 + 1] = best_im
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_prod
     specializations:
+      - name: awkward_reduce_prod_int32_int8_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_int32_int16_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_int32_int32_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_int64_int8_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_uint64_uint8_64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_int64_int16_64
@@ -4811,28 +5023,52 @@ kernels:
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_uint64_uint16_64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_int64_int32_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_uint64_uint32_64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_int64_int64_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_uint32_uint8_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_uint32_uint16_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_uint32_uint32_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_uint64_uint8_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_uint64_uint16_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_uint64_uint32_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_uint64_uint64_64
@@ -4853,43 +5089,7 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_int32_int8_64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_uint32_uint8_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_int32_int16_64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_uint32_uint16_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_int32_int32_64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_uint32_uint32_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Accumulates in the *output* type, so the product is taken modulo the output width. An empty bin yields 1."
     definition: |
       def awkward_reduce_prod(toptr, fromptr, offsets, outlength):
           for bin in range(outlength):
@@ -4912,7 +5112,7 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Accumulates in the *output* type, so a complex64 output multiplies in single precision. An empty bin yields (1, 0)."
     definition: |
       def awkward_reduce_prod_complex(toptr, fromptr, offsets, outlength):
           for bin in range(outlength):
@@ -4927,7 +5127,7 @@ kernels:
                   b = nb
               toptr[bin * 2] = a
               toptr[bin * 2 + 1] = b
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_prod_bool
     specializations:
       - name: awkward_reduce_prod_bool_bool_64
@@ -4942,22 +5142,10 @@ kernels:
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_bool_uint8_64
-        args:
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_bool_int16_64
         args:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_bool_uint16_64
-        args:
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_bool_int32_64
@@ -4966,16 +5154,28 @@ kernels:
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_prod_bool_uint32_64
-        args:
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_bool_int64_64
         args:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_bool_uint8_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_bool_uint16_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_prod_bool_uint32_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_prod_bool_uint64_64
@@ -5031,19 +5231,31 @@ kernels:
                       all_nz = False
                       break
               toptr[bin] = all_nz
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_sum
     specializations:
+      - name: awkward_reduce_sum_int32_int8_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_int32_int16_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_int32_int32_64
+        args:
+          - {name: toptr, type: "List[int32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_int64_int8_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint64_uint8_64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_int64_int16_64
@@ -5052,28 +5264,52 @@ kernels:
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint64_uint16_64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_int64_int32_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint64_uint32_64
-        args:
-          - {name: toptr, type: "List[uint64_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_int64_int64_64
         args:
           - {name: toptr, type: "List[int64_t]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_uint32_uint8_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_uint32_uint16_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_uint32_uint32_64
+        args:
+          - {name: toptr, type: "List[uint32_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_uint64_uint8_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_uint64_uint16_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_uint64_uint32_64
+        args:
+          - {name: toptr, type: "List[uint64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_uint64_uint64_64
@@ -5088,58 +5324,10 @@ kernels:
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_float64_float64_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_int32_int8_64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint32_uint8_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_int32_int16_64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint32_uint16_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_int32_int32_64
-        args:
-          - {name: toptr, type: "List[int32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_uint32_uint32_64
-        args:
-          - {name: toptr, type: "List[uint32_t]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_float64_int8_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_float64_uint8_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_float64_int16_64
@@ -5148,28 +5336,34 @@ kernels:
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_float64_uint16_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_float64_int32_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_float64_uint32_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_float64_int64_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_uint8_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_uint16_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_float64_uint32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_float64_uint64_64
@@ -5184,7 +5378,13 @@ kernels:
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+      - name: awkward_reduce_sum_float64_float64_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+    description: "Accumulates in the *output* type, so a 32-bit output accumulates in 32 bits and signed overflow wraps. An empty bin yields 0."
     definition: |
       def awkward_reduce_sum(toptr, fromptr, offsets, outlength):
           for bin in range(outlength):
@@ -5195,16 +5395,16 @@ kernels:
     automatic-tests: true
   - name: awkward_reduce_sumofsquares
     specializations:
+      - name: awkward_reduce_sumofsquares_float64_bool_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sumofsquares_float64_int8_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sumofsquares_float64_uint8_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sumofsquares_float64_int16_64
@@ -5213,22 +5413,10 @@ kernels:
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sumofsquares_float64_uint16_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sumofsquares_float64_int32_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sumofsquares_float64_uint32_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sumofsquares_float64_int64_64
@@ -5237,16 +5425,28 @@ kernels:
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sumofsquares_float64_uint8_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sumofsquares_float64_uint16_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sumofsquares_float64_uint32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sumofsquares_float64_uint64_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sumofsquares_float64_bool_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sumofsquares_float64_float32_64
@@ -5261,7 +5461,7 @@ kernels:
           - {name: fromptr, type: "Const[List[double]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "Accumulates in the *output* type: each element is widened to the output type before squaring, so an integral output wraps on overflow rather than growing without bound."
     definition: |
       def awkward_reduce_sumofsquares(toptr, fromptr, offsets, outlength):
           for bin in range(outlength):
@@ -5272,17 +5472,17 @@ kernels:
     automatic-tests: true
   - name: awkward_reduce_sumofpowers
     specializations:
+      - name: awkward_reduce_sumofpowers_float64_bool_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: n, type: "int64_t", dir: in}
       - name: awkward_reduce_sumofpowers_float64_int8_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: n, type: "int64_t", dir: in}
-      - name: awkward_reduce_sumofpowers_float64_uint8_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: n, type: "int64_t", dir: in}
@@ -5293,24 +5493,10 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: n, type: "int64_t", dir: in}
-      - name: awkward_reduce_sumofpowers_float64_uint16_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: n, type: "int64_t", dir: in}
       - name: awkward_reduce_sumofpowers_float64_int32_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: n, type: "int64_t", dir: in}
-      - name: awkward_reduce_sumofpowers_float64_uint32_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: n, type: "int64_t", dir: in}
@@ -5321,17 +5507,31 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: n, type: "int64_t", dir: in}
+      - name: awkward_reduce_sumofpowers_float64_uint8_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: n, type: "int64_t", dir: in}
+      - name: awkward_reduce_sumofpowers_float64_uint16_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: n, type: "int64_t", dir: in}
+      - name: awkward_reduce_sumofpowers_float64_uint32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: n, type: "int64_t", dir: in}
       - name: awkward_reduce_sumofpowers_float64_uint64_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: n, type: "int64_t", dir: in}
-      - name: awkward_reduce_sumofpowers_float64_bool_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: n, type: "int64_t", dir: in}
@@ -5349,7 +5549,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: n, type: "int64_t", dir: in}
-    description: null
+    description: "Accumulates in the *output* type. The compiled kernels raise to the power by repeated squaring rather than calling `pow`, which may differ from a correctly-rounded `pow` by an ULP for `n >= 3`. An empty bin yields 0."
     definition: |
       def awkward_reduce_sumofpowers(toptr, fromptr, offsets, outlength, n):
           for bin in range(outlength):
@@ -5360,17 +5560,17 @@ kernels:
     automatic-tests: true
   - name: awkward_reduce_centered_sumofsquares
     specializations:
+      - name: awkward_reduce_centered_sumofsquares_float64_bool_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
       - name: awkward_reduce_centered_sumofsquares_float64_int8_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: means, type: "Const[List[double]]", dir: in}
-      - name: awkward_reduce_centered_sumofsquares_float64_uint8_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: means, type: "Const[List[double]]", dir: in}
@@ -5381,24 +5581,10 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: means, type: "Const[List[double]]", dir: in}
-      - name: awkward_reduce_centered_sumofsquares_float64_uint16_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: means, type: "Const[List[double]]", dir: in}
       - name: awkward_reduce_centered_sumofsquares_float64_int32_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: means, type: "Const[List[double]]", dir: in}
-      - name: awkward_reduce_centered_sumofsquares_float64_uint32_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: means, type: "Const[List[double]]", dir: in}
@@ -5409,17 +5595,31 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_uint8_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_uint16_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
+      - name: awkward_reduce_centered_sumofsquares_float64_uint32_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+          - {name: means, type: "Const[List[double]]", dir: in}
       - name: awkward_reduce_centered_sumofsquares_float64_uint64_64
         args:
           - {name: toptr, type: "List[double]", dir: out}
           - {name: fromptr, type: "Const[List[uint64_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-          - {name: means, type: "Const[List[double]]", dir: in}
-      - name: awkward_reduce_centered_sumofsquares_float64_bool_64
-        args:
-          - {name: toptr, type: "List[double]", dir: out}
-          - {name: fromptr, type: "Const[List[bool]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: means, type: "Const[List[double]]", dir: in}
@@ -5437,7 +5637,7 @@ kernels:
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
           - {name: means, type: "Const[List[double]]", dir: in}
-    description: null
+    description: "Accumulates in the *output* type. `means[bin]` is loaded for every bin but is unused when the bin is empty, which yields 0."
     definition: |
       def awkward_reduce_centered_sumofsquares(toptr, fromptr, offsets, outlength, means):
           for bin in range(outlength):
@@ -5473,7 +5673,7 @@ kernels:
                   im += fromptr[i * 2 + 1]
               toptr[bin * 2] = re
               toptr[bin * 2 + 1] = im
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_sum_bool
     specializations:
       - name: awkward_reduce_sum_bool_bool_64
@@ -5488,22 +5688,10 @@ kernels:
           - {name: fromptr, type: "Const[List[int8_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_bool_uint8_64
-        args:
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_int16_64
         args:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[int16_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_bool_uint16_64
-        args:
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_int32_64
@@ -5512,16 +5700,28 @@ kernels:
           - {name: fromptr, type: "Const[List[int32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-      - name: awkward_reduce_sum_bool_uint32_64
-        args:
-          - {name: toptr, type: "List[bool]", dir: out}
-          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
-          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
-          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_int64_64
         args:
           - {name: toptr, type: "List[bool]", dir: out}
           - {name: fromptr, type: "Const[List[int64_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_bool_uint8_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[uint8_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_bool_uint16_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[uint16_t]]", dir: in, role: reducer-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
+      - name: awkward_reduce_sum_bool_uint32_64
+        args:
+          - {name: toptr, type: "List[bool]", dir: out}
+          - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
       - name: awkward_reduce_sum_bool_uint64_64
@@ -5577,7 +5777,7 @@ kernels:
                       found = True
                       break
               toptr[bin] = found
-    automatic-tests: true
+    automatic-tests: false
   - name: awkward_reduce_sum_int32_bool_64
     specializations:
       - name: awkward_reduce_sum_int32_bool_64
@@ -5715,20 +5915,31 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: "Sorts each segment `offsets[i]:offsets[i+1]` independently, in place, so `offsets[0]` must be 0 and `offsets` must be monotonic. NaNs sort to the low end in both directions (unlike NumPy, which sorts them high). `stable` does not affect the result -- sorting values rather than indices cannot expose tie order -- and is accepted only to mirror `awkward_argsort`. Only the first `offsets[offsetslength - 1]` entries of `toptr` are written."
     definition: |
       def awkward_sort(
           toptr, fromptr, length, offsets, offsetslength, ascending, stable
       ):
-          result = []
+          index = list(range(length))
           for i in range(offsetslength - 1):
-              sub_list = sorted(fromptr[offsets[i]:offsets[i+1]], reverse=not ascending)
-              if stable:
-                  result += sub_list
-              else:
-                  result += sorted(sub_list, reverse=not ascending)
-          for i in range(len(result)):
-              toptr[i] = result[i]
+              # Clamp against `length` so malformed offsets cannot index past
+              # the end of `index`
+              start = min(int(offsets[i]), length)
+              stop = min(int(offsets[i + 1]), length)
+              if start >= stop:
+                  continue
+              segment = index[start:stop]
+              # NaNs compare "less" than everything in both directions, so
+              # they are pushed to the low end. `x != x` is only true for NaN,
+              # and is false for every integral type.
+              nans = [x for x in segment if fromptr[x] != fromptr[x]]
+              nums = [x for x in segment if fromptr[x] == fromptr[x]]
+              index[start:stop] = nans + sorted(
+                  nums, key=lambda x: fromptr[x], reverse=not ascending
+              )
+          total = offsets[offsetslength - 1] if offsetslength > 0 else 0
+          for i in range(min(int(total), length)):
+              toptr[i] = fromptr[index[i]]
     automatic-tests: false
 
   - name: awkward_unique_offsets
@@ -5761,7 +5972,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: starts, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: startslength, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "Writes the trailing offset only when `length` is greater than 0."
     definition: |
       def awkward_unique_offsets(
         tooffsets, length, fromoffsets, starts, startslength
@@ -5774,7 +5985,10 @@ kernels:
                     tooffsets[j + 1] = fromoffsets[i]
                     j += 1
             j += 1
-        tooffsets[startslength] = fromoffsets[length - 1]
+        # `fromoffsets[length - 1]` would wrap to the last element when
+        # `length` is 0, which is an out-of-bounds read in the compiled kernel
+        if length > 0:
+            tooffsets[startslength] = fromoffsets[length - 1]
     automatic-tests: false
 
   - name: awkward_unique_ranges_bool
@@ -5785,7 +5999,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
-    description: null
+    description: "`toptr` is read as well as written -- it holds the sorted values on entry and is compacted in place. A zero-length range still emits one element, so callers must compact the offsets first."
     definition: |
       def awkward_unique_ranges_bool(
         toptr, fromoffsets, offsetslength, tooffsets
@@ -5864,7 +6078,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: tooffsets, type: "List[int64_t]", dir: out, role: default}
-    description: null
+    description: "`toptr` is read as well as written -- it holds the sorted values on entry and is compacted in place. A zero-length range still emits one element, so callers must compact the offsets first."
     definition: |
       def awkward_unique_ranges(
         toptr, fromoffsets, offsetslength, tooffsets

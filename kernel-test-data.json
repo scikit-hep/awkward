@@ -1,6 +1,29 @@
 {
   "tests": {
-    "reducer": [],
+    "reducer": [
+      {
+        "reducer-fromptr": [0,1,2,3,4,5,6,7,8,9],
+        "reducer-offsets": [0,3,3,7,10],
+        "reducer-outlength": 4,
+        "reducer-length": 4,
+        "reducer-starts": [0,3,3,7],
+        "reducer-startslength": 4,
+        "reducer-parents": [0,0,0,2,2,2,2,3,3,3],
+        "reducer-index": [0,1,2,3,4,5,6,7,8,9],
+        "reducer-mask": [0,0,0,1,0,0,1,0,0,0],
+        "reducer-validwhen": false,
+        "reducer-valid_when": false,
+        "reducer-identity": 0,
+        "reducer-shifts": [0,0,0,0,0,0,0,0,0,0],
+        "reducer-nextshifts": [0,0,0,0,0,0,0,0,0,0],
+        "reducer-nextcarry": [0,1,2,3,4,5,6,7,8,9],
+        "reducer-nextlen": 10,
+        "reducer-maxcount": 3,
+        "reducer-distincts": [0,1,2,-1,-1,-1,3,4,5,6,7,-1],
+        "reducer-lendistincts": 12,
+        "reducer-outindexlength": 10
+      }
+    ],
     "ListArray": [
       {
         "ListArray-starts": [2,0,2,1,2,1,2,1,2,1,2,1],
@@ -27215,6 +27238,1069 @@
           "outputs": {
             "toptr": [8,7,6,9,5,3,0]
           }
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_sumofsquares",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4
+          },
+          "outputs": {
+            "toptr": [1,0,1,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1
+          },
+          "outputs": {
+            "toptr": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1
+          },
+          "outputs": {
+            "toptr": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2
+          },
+          "outputs": {
+            "toptr": [1,2]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_sumofpowers",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [3,0,2,1]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [1,0,1,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [1,0,1,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [1,0,1,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "n": 0
+          },
+          "outputs": {
+            "toptr": [2,3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "n": 1
+          },
+          "outputs": {
+            "toptr": [1,2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "n": 2
+          },
+          "outputs": {
+            "toptr": [1,2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [1,2]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_centered_sumofsquares",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "means": []
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "means": []
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0],
+            "outlength": 0,
+            "means": []
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "means": [0.0,0.0]
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "means": [0.5,0.5]
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [0,0,0],
+            "outlength": 2,
+            "means": [99.0,99.0]
+          },
+          "outputs": {
+            "toptr": [0,0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "means": [0.0]
+          },
+          "outputs": {
+            "toptr": [4.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "means": [0.5]
+          },
+          "outputs": {
+            "toptr": [1.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,1,1],
+            "offsets": [0,4],
+            "outlength": 1,
+            "means": [99.0]
+          },
+          "outputs": {
+            "toptr": [38416.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "means": [0.0,0.0,0.0,0.0]
+          },
+          "outputs": {
+            "toptr": [1.0,0,1.0,0.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "means": [0.5,0.5,0.5,0.5]
+          },
+          "outputs": {
+            "toptr": [0.75,0,0.5,0.25]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,0,1,0,0],
+            "offsets": [0,3,3,5,6],
+            "outlength": 4,
+            "means": [99.0,99.0,99.0,99.0]
+          },
+          "outputs": {
+            "toptr": [29206.0,0,19405.0,9801.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "means": [0.0]
+          },
+          "outputs": {
+            "toptr": [2.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "means": [0.5]
+          },
+          "outputs": {
+            "toptr": [0.75]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,1,0,1,1],
+            "offsets": [2,5],
+            "outlength": 1,
+            "means": [99.0]
+          },
+          "outputs": {
+            "toptr": [29009.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "means": [0.0]
+          },
+          "outputs": {
+            "toptr": [0.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "means": [0.5]
+          },
+          "outputs": {
+            "toptr": [0.75]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,0,0],
+            "offsets": [0,3],
+            "outlength": 1,
+            "means": [99.0]
+          },
+          "outputs": {
+            "toptr": [29403.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "means": [0.0,0.0]
+          },
+          "outputs": {
+            "toptr": [1.0,2.0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "means": [0.5,0.5]
+          },
+          "outputs": {
+            "toptr": [0.5,0.75]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,1],
+            "offsets": [0,2,5],
+            "outlength": 2,
+            "means": [99.0,99.0]
+          },
+          "outputs": {
+            "toptr": [19405.0,29009.0]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "fromoffsets": [0],
+            "offsetslength": 1
+          },
+          "outputs": {
+            "outmaxcodepoints": [0]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [97,195,169,226,130,172,240,157,132,158,97,98],
+            "fromoffsets": [0,1,3,6,10,10,12],
+            "offsetslength": 7
+          },
+          "outputs": {
+            "outmaxcodepoints": [2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [97,98,99],
+            "fromoffsets": [0,3],
+            "offsetslength": 2
+          },
+          "outputs": {
+            "outmaxcodepoints": [3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [97,98,99],
+            "fromoffsets": [1,3],
+            "offsetslength": 2
+          },
+          "outputs": {
+            "outmaxcodepoints": [2]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_NumpyArray_utf8_to_utf32_padded",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "fromoffsets": [0],
+            "offsetslength": 1,
+            "maxcodepoints": 1
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [97,195,169,226,130,172,240,157,132,158,97,98],
+            "fromoffsets": [0,1,3,6,10,10,12],
+            "offsetslength": 7,
+            "maxcodepoints": 2
+          },
+          "outputs": {
+            "toptr": [97,0,233,0,8364,0,119070,0,0,0,97,98]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [97,98,99],
+            "fromoffsets": [0,3],
+            "offsetslength": 2,
+            "maxcodepoints": 4
+          },
+          "outputs": {
+            "toptr": [97,98,99,0]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_NumpyArray_sort_asstrings_uint8",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [112,101,97,114,97,112,112,108,101,102,105,103,97,112,112,108,101],
+            "offsets": [0,4,9,12,17],
+            "offsetslength": 5,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [97,112,112,108,101,97,112,112,108,101,102,105,103,112,101,97,114],
+            "outoffsets": [0,5,10,13,17]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [112,101,97,114,97,112,112,108,101,102,105,103,97,112,112,108,101],
+            "offsets": [0,4,9,12,17],
+            "offsetslength": 5,
+            "ascending": false,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [112,101,97,114,102,105,103,97,112,112,108,101,97,112,112,108,101],
+            "outoffsets": [0,4,7,12,17]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [97,0,122,97,0,97],
+            "offsets": [0,3,6],
+            "offsetslength": 3,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [97,0,97,97,0,122],
+            "outoffsets": [0,3,6]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_NumpyArray_unique_strings",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "toptr": [97,97,98,99,100,101,98,99,100,101],
+            "offsets": [0,1,2,6,10],
+            "offsetslength": 5
+          },
+          "outputs": {
+            "toptr": [97,98,99,100,101,101,98,99,100,101],
+            "outoffsets": [0,1,5],
+            "tolength": [3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "toptr": [97,98,99],
+            "offsets": [0,1,2,3],
+            "offsetslength": 4
+          },
+          "outputs": {
+            "toptr": [97,98,99],
+            "outoffsets": [0,1,2,3],
+            "tolength": [4]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_ListOffsetArray_argsort_strings",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromparents": [0,0,0,1,1],
+            "length": 5,
+            "stringdata": [112,101,97,114,97,112,112,108,101,102,105,103,97,112,112,108,101,102,111,111],
+            "stringstarts": [0,4,9,12,16],
+            "stringstops": [4,9,12,17,19],
+            "is_stable": true,
+            "is_ascending": true,
+            "is_local": false
+          },
+          "outputs": {
+            "tocarry": [1,2,0,3,4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromparents": [0,0,0,1,1],
+            "length": 5,
+            "stringdata": [112,101,97,114,97,112,112,108,101,102,105,103,97,112,112,108,101,102,111,111],
+            "stringstarts": [0,4,9,12,16],
+            "stringstops": [4,9,12,17,19],
+            "is_stable": true,
+            "is_ascending": true,
+            "is_local": true
+          },
+          "outputs": {
+            "tocarry": [1,2,0,0,1]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromparents": [0,0,0,1,1],
+            "length": 5,
+            "stringdata": [112,101,97,114,97,112,112,108,101,102,105,103,97,112,112,108,101,102,111,111],
+            "stringstarts": [0,4,9,12,16],
+            "stringstops": [4,9,12,17,19],
+            "is_stable": true,
+            "is_ascending": false,
+            "is_local": false
+          },
+          "outputs": {
+            "tocarry": [0,2,1,4,3]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_argsort",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "length": 0,
+            "offsets": [0],
+            "offsetslength": 1,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,0,1],
+            "length": 6,
+            "offsets": [0,3,6],
+            "offsetslength": 3,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [1,0,2,0,1,2]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [1,0,1,0,0,1],
+            "length": 6,
+            "offsets": [0,3,6],
+            "offsetslength": 3,
+            "ascending": false,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [0,2,1,2,0,1]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [0,1,1,0],
+            "length": 4,
+            "offsets": [0,0,4],
+            "offsetslength": 3,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [0,3,1,2]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_ListOffsetArray_rpad_and_clip_axis1",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromoffsets": [1,3,3,6],
+            "length": 3,
+            "target": 2
+          },
+          "outputs": {
+            "toindex": [1,2,-1,-1,3,4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromoffsets": [0,2,4],
+            "length": 2,
+            "target": 2
+          },
+          "outputs": {
+            "toindex": [0,1,2,3]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromoffsets": [0],
+            "length": 0,
+            "target": 3
+          },
+          "outputs": {
+            "toindex": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromoffsets": [0,1],
+            "length": 1,
+            "target": 0
+          },
+          "outputs": {
+            "toindex": []
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_IndexedArray_unique_next_index_and_offsets_64",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromoffsets": [0,2,3],
+            "fromnulls": [0,0,1,0,0],
+            "startslength": 2
+          },
+          "outputs": {
+            "toindex": [0,1,-1,2],
+            "tooffsets": [0,3,4]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromoffsets": [0,0,1],
+            "fromnulls": [0,0,0],
+            "startslength": 2
+          },
+          "outputs": {
+            "toindex": [0],
+            "tooffsets": [0,0,1]
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromoffsets": [0,3],
+            "fromnulls": [0,0,0,0],
+            "startslength": 1
+          },
+          "outputs": {
+            "toindex": [0,1,2],
+            "tooffsets": [0,3]
+          },
+          "error": false
         }
       ]
     }
