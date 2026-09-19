@@ -564,7 +564,11 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/1388081?v=4",
       "profile": "https://github.com/TaiSakuma",
       "contributions": [
-        "code"
+        "code",
+        "test",
+        "infra",
+        "doc",
+        "maintenance"
       ]
     },
     {
