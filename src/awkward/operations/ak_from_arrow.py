@@ -25,6 +25,10 @@ def from_arrow(
     through Parquet, making Parquet a good way to save Awkward Arrays for later
     use.
 
+    Any attrs that #ak.to_arrow or #ak.to_arrow_table stored in the Arrow data
+    are restored (as are those written by pandas, in the `"PANDAS_ATTRS"`
+    schema metadata), unless overridden by the `attrs` argument.
+
     Because awkward uses numpy's dtype system, timestamp types do not have
     timezones. If encountering timestamp types with timezones in the input
     arrow data, they will be silently dropped.
@@ -43,7 +47,8 @@ def from_arrow(
         behavior (None or dict): Custom #ak.behavior for the output array, if
             high-level.
         attrs (None or dict): Custom attributes for the output array, if
-            high-level.
+            high-level. These take precedence over any attrs stored in the
+            Arrow data itself.
 
     Returns:
         An #ak.Array built from the given Apache Arrow array.
@@ -55,6 +60,11 @@ def _impl(array, generate_bitmasks, highlevel, behavior, attrs):
     import awkward._connect.pyarrow
 
     pyarrow = awkward._connect.pyarrow.pyarrow
+
+    stored_attrs = _stored_attrs(array)
+    if stored_attrs:
+        # an explicit 'attrs' argument wins over what was stored in the Arrow data
+        attrs = {**stored_attrs, **(attrs or {})}
 
     ctx = HighLevelContext(behavior=behavior, attrs=attrs).finalize()
 
@@ -85,3 +95,28 @@ def _impl(array, generate_bitmasks, highlevel, behavior, attrs):
     ak._do.recursively_apply(out, remove_revertable)
 
     return ctx.wrap(out, highlevel=highlevel)
+
+
+def _stored_attrs(array) -> dict:
+    """
+    The attrs that #ak.to_arrow or #ak.to_arrow_table wrote into `array`: a Table
+    or RecordBatch carries them in its schema metadata, whereas a bare Array or
+    ChunkedArray can only carry them in its (extension) type.
+    """
+    import awkward._connect.pyarrow
+
+    pyarrow = awkward._connect.pyarrow.pyarrow
+
+    if isinstance(array, (pyarrow.lib.Table, pyarrow.lib.RecordBatch)):
+        return awkward._connect.pyarrow.attrs_from_schema_metadata(
+            array.schema.metadata
+        )
+
+    elif isinstance(array, (pyarrow.lib.Array, pyarrow.lib.ChunkedArray)):
+        awkwardarrow_type, _ = awkward._connect.pyarrow.to_awkwardarrow_storage_types(
+            array.type
+        )
+        if awkwardarrow_type is not None and awkwardarrow_type.attrs is not None:
+            return awkwardarrow_type.attrs
+
+    return {}
