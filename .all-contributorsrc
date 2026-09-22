@@ -651,6 +651,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "aaronj0",
+      "name": "Aaron  Jomy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/75925957?v=4",
+      "profile": "https://github.com/aaronj0",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
