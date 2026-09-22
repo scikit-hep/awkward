@@ -42,7 +42,13 @@ jobs:
   docs:
     uses: ./.github/workflows/reusable-docs.yml
     permissions:
-      contents: write # Required by the reusable docs deploy job to push to `gh-pages`.
+      contents: read
+    secrets:
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
   pass:
     name: Check CI result
