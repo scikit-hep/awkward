@@ -9,10 +9,30 @@ changelog:
     - title: New features
       labels:
         - type/feat
-    - title: Bug-fixes and performance
+    - title: Bug Fixes
       labels:
         - type/fix
+    - title: Performance
+      labels:
         - type/perf
+    - title: Documentation
+      labels:
+        - type/docs
+    - title: Refactoring
+      labels:
+        - type/refactor
+        - type/style
+    - title: Testing
+      labels:
+        - type/test
+    - title: Build & CI
+      labels:
+        - type/build
+        - type/ci
+        - type/chore
+    - title: Reverted
+      labels:
+        - type/revert
     - title: Other
       labels:
         - "*"

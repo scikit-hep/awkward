@@ -14,6 +14,13 @@
    :{{ property }}:
    {% endfor %}
 
+   {% if obj.obj["is_experimental"] %}
+
+   .. warning::
+
+      This API is experimental and may change or be removed in any release.
+   {% endif %}
+
    {% if obj.docstring %}
 
    {{ obj.docstring|process_docstring(obj)|indent(3) }}

@@ -39,6 +39,10 @@ class ListOffsetForm(ListOffsetMeta[Form], Form):
             raise TypeError(
                 f"{type(self).__name__} 'offsets' must be of type str, not {offsets!r}"
             )
+        if not isinstance(content, Form):
+            raise TypeError(
+                f"{type(self).__name__} all 'contents' must be Form subclasses, not {content!r}"
+            )
 
         self._offsets = offsets
         self._content = content

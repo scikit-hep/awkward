@@ -57,7 +57,7 @@ from awkward._typing import (
 )
 from awkward._util import UNSET
 from awkward.forms.form import Form, FormKeyPathT
-from awkward.index import EmptyIndex, Index, Index64, ZeroIndex
+from awkward.index import Index, Index64
 
 if TYPE_CHECKING:
     from awkward._nplikes.numpy import NumpyLike
@@ -532,7 +532,12 @@ class Content(Meta):
         return self._getitem(where, NamedAxis)
 
     def _getitem(self, where, named_axis: Type[NamedAxis] = NamedAxis):
-        if is_integer_like(where):
+        # field access is the most common slice by far, and a `str` matches none
+        # of the other cases, so test for it first
+        if isinstance(where, str):
+            return self._getitem_field(where)
+
+        elif is_integer_like(where):
             # propagate named_axis to output
             named_axis.mapping = _remove_named_axis(
                 named_axis.mapping, 0, self.purelist_depth
@@ -548,9 +553,6 @@ class Content(Meta):
 
         elif isinstance(where, slice):
             return self._getitem((where,), named_axis)
-
-        elif isinstance(where, str):
-            return self._getitem_field(where)
 
         elif where is np.newaxis:
             return self._getitem((where,), named_axis)
@@ -796,7 +798,7 @@ class Content(Meta):
         raise NotImplementedError
 
     def _is_getitem_at_virtual(self) -> bool:
-        return NotImplementedError
+        raise NotImplementedError
 
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
@@ -893,8 +895,7 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index | ZeroIndex,
-        offsets: Index | EmptyIndex,
+        offsets: Index | None,
         outlength: int,
         mask: bool,
         keepdims: bool,
@@ -907,8 +908,7 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index | ZeroIndex,
-        offsets: Index | EmptyIndex,
+        offsets: Index | None,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -919,8 +919,7 @@ class Content(Meta):
         self,
         negaxis: int,
         starts: Index,
-        parents: Index | ZeroIndex,
-        offsets: Index | EmptyIndex,
+        offsets: Index | None,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -938,7 +937,7 @@ class Content(Meta):
         if replacement:
             size = size + (n - 1)
         thisn = n
-        if thisn is None or size is None:
+        if thisn is None or size is unknown_length:
             combinationslen = size  # not actually size, just an unknown value
         else:
             if thisn > size:
@@ -1042,8 +1041,7 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index | ZeroIndex,
-        offsets: Index | EmptyIndex,
+        offsets: Index | None,
         outlength: int,
     ) -> bool:
         raise NotImplementedError
@@ -1052,8 +1050,7 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index | ZeroIndex,
-        offsets: Index | EmptyIndex,
+        offsets: Index | None,
         outlength: int,
     ):
         raise NotImplementedError

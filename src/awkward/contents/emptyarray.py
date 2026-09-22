@@ -308,23 +308,21 @@ class EmptyArray(EmptyMeta, Content):
         else:
             return self
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         return True
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         return self
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         as_numpy = self.to_NumpyArray(np.float64)
         return as_numpy._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         return self
 
     def _combinations(self, n, replacement, recordlookup, parameters, axis, depth):
@@ -336,7 +334,6 @@ class EmptyArray(EmptyMeta, Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,
@@ -349,7 +346,6 @@ class EmptyArray(EmptyMeta, Content):
             negaxis,
             starts,
             shifts,
-            parents,
             offsets,
             outlength,
             mask,

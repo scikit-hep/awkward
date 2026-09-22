@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -23,6 +22,9 @@ def unzip(
 ):
     """Splits records or tuples into a tuple or dict of arrays, one per field.
 
+    If the `array` does not contain tuples or records, the single `array` is
+    placed in a length 1 Python tuple (or dict).
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         how (type): The type of the returned output. This can be `tuple` or `dict`.
@@ -34,11 +36,8 @@ def unzip(
             high-level.
 
     Returns:
-        If the `array` contains tuples or records, this operation splits them
-        into a Python tuple (or dict) of arrays, one for each field.
-
-        If the `array` does not contain tuples or records, the single `array`
-        is placed in a length 1 Python tuple (or dict).
+        A Python tuple (or dict) of arrays, one for each field of the tuples or
+        records in `array`.
 
     Examples:
         For example,

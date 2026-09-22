@@ -6,9 +6,9 @@
 
 template <typename T>
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex(
-  T* tocarry,
-  T* outindex,
-  const int8_t* mask,
+  T* __restrict__ tocarry,
+  T* __restrict__ outindex,
+  const int8_t* __restrict__ mask,
   int64_t length,
   bool validwhen) {
   int64_t k = 0;
@@ -25,9 +25,9 @@ ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex(
   return success();
 }
 ERROR awkward_ByteMaskedArray_getitem_nextcarry_outindex_64(
-  int64_t* tocarry,
-  int64_t* outindex,
-  const int8_t* mask,
+  int64_t* __restrict__ tocarry,
+  int64_t* __restrict__ outindex,
+  const int8_t* __restrict__ mask,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_getitem_nextcarry_outindex<int64_t>(

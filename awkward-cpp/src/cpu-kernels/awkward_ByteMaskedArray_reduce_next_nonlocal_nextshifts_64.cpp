@@ -5,8 +5,8 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64(
-  int64_t* nextshifts,
-  const int8_t* mask,
+  int64_t* __restrict__ nextshifts,
+  const int8_t* __restrict__ mask,
   int64_t length,
   bool valid_when) {
   int64_t nullsum = 0;

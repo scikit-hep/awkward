@@ -6,10 +6,10 @@
 
 template <typename T>
 ERROR awkward_unique_offsets(
-  T* tooffsets,
+  T* __restrict__ tooffsets,
   int64_t length,
-  const int64_t* fromoffsets,
-  const int64_t* starts,
+  const int64_t* __restrict__ fromoffsets,
+  const int64_t* __restrict__ starts,
   int64_t startslength) {
   int64_t j = 0;
   for (int64_t i = 0;  i < length;  i++) {
@@ -27,58 +27,12 @@ ERROR awkward_unique_offsets(
   return success();
 }
 
-ERROR awkward_unique_offsets_int8(
-  int8_t* tooffsets,
-  int64_t offsetslength,
-  const int64_t* fromoffsets,
-  const int64_t* starts,
-  int64_t startslength) {
-    return awkward_unique_offsets<int8_t>(
-      tooffsets,
-      offsetslength,
-      fromoffsets,
-      starts,
-      startslength);
-}
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(T* tooffsets, int64_t length, const int64_t* fromoffsets, const int64_t* starts, int64_t startslength) { \
+    return awkward_unique_offsets<T>(tooffsets, length, fromoffsets, starts, startslength); \
+  }
 
-ERROR awkward_unique_offsets_int16(
-  int16_t* tooffsets,
-  int64_t offsetslength,
-  const int64_t* fromoffsets,
-  const int64_t* starts,
-  int64_t startslength) {
-    return awkward_unique_offsets<int16_t>(
-      tooffsets,
-      offsetslength,
-      fromoffsets,
-      starts,
-      startslength);
-}
-
-ERROR awkward_unique_offsets_int32(
-  int32_t* tooffsets,
-  int64_t offsetslength,
-  const int64_t* fromoffsets,
-  const int64_t* starts,
-  int64_t startslength) {
-    return awkward_unique_offsets<int32_t>(
-      tooffsets,
-      offsetslength,
-      fromoffsets,
-      starts,
-      startslength);
-}
-
-ERROR awkward_unique_offsets_int64(
-  int64_t* tooffsets,
-  int64_t offsetslength,
-  const int64_t* fromoffsets,
-  const int64_t* starts,
-  int64_t startslength) {
-    return awkward_unique_offsets<int64_t>(
-      tooffsets,
-      offsetslength,
-      fromoffsets,
-      starts,
-      startslength);
-}
+WRAPPER(awkward_unique_offsets_int8, int8_t)
+WRAPPER(awkward_unique_offsets_int16, int16_t)
+WRAPPER(awkward_unique_offsets_int32, int32_t)
+WRAPPER(awkward_unique_offsets_int64, int64_t)

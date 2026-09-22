@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -15,7 +14,10 @@ np = NumpyMetadata.instance()
 @ak._connect.numpy.implements("real")
 @high_level_function()
 def real(array, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns the real components of the given array elements.
+
+    If the arrays have complex elements, the returned arrays are floats.
+
     Args:
         array : array_like
             Input array.
@@ -26,8 +28,8 @@ def real(array, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns the real components of the given array elements.
-    If the arrays have complex elements, the returned arrays are floats.
+    Returns:
+        The real components of the given array elements.
     """
     # Dispatch
     yield (array,)

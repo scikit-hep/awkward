@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <typeinfo>
 #include <map>
+#include <sstream>
 #include <vector>
 
 namespace awkward {

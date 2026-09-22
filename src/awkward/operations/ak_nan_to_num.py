@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from functools import reduce
 
@@ -28,7 +27,11 @@ def nan_to_num(
     behavior: Mapping | None = None,
     attrs: Mapping | None = None,
 ):
-    """
+    """Replaces NaN and infinite values with finite numbers in floating-point arrays.
+
+    See also #ak.nan_to_none to convert NaN to None, i.e. missing values with
+    option-type.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         copy (bool): Ignored (Awkward Arrays are immutable).
@@ -44,13 +47,14 @@ def nan_to_num(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Implements [np.nan_to_num](https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html)
-    for Awkward Arrays, which replaces NaN ("not a number") or infinity with specified values.
-
-    See also #ak.nan_to_none to convert NaN to None, i.e. missing values with option-type.
+    Returns:
+        An array with NaN ("not a number") or infinity replaced by the specified
+        finite values, following
+        [np.nan_to_num](https://numpy.org/doc/stable/reference/generated/numpy.nan_to_num.html)
+        for Awkward Arrays.
     """
     # Dispatch
-    yield (array,)
+    yield array, nan, posinf, neginf
 
     # Implementation
     return _impl(array, copy, nan, posinf, neginf, highlevel, behavior, attrs)

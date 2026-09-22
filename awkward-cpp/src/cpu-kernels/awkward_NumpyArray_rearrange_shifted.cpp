@@ -7,37 +7,45 @@
 template <typename FROM, typename TO>
 ERROR
 awkward_NumpyArray_rearrange_shifted(
-  TO* toptr,
-  const FROM* fromshifts,
+  TO* __restrict__ toptr,
+  const FROM* __restrict__ fromshifts,
   int64_t length,
-  const FROM* fromoffsets,
-  int64_t offsetslength,
-  const FROM* fromparents,
-  const FROM* fromstarts) {
+  const FROM* __restrict__ fromoffsets,
+  int64_t outlength,
+  const FROM* __restrict__ fromparents,
+  const FROM* __restrict__ fromstarts) {
+  // Phase 1: convert per-bin sorted positions into absolute positions by
+  // adding fromoffsets[bin] to each element in bin's range. Walk bin-major.
   int64_t k = 0;
-  for (int64_t i = 0; i < offsetslength - 1; i++) {
-    for (int64_t j = 0; j < fromoffsets[i + 1] - fromoffsets[i]; j++) {
-      toptr[k] = toptr[k] + fromoffsets[i];
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    FROM bin_offset = fromoffsets[bin];
+    int64_t count = (int64_t)(fromoffsets[bin + 1] - bin_offset);
+    for (int64_t j = 0; j < count; j++) {
+      toptr[k] = (TO)(toptr[k] + bin_offset);
       k++;
     }
   }
-  for (int64_t i = 0;  i < length;  i++) {
-    int64_t parent = fromparents[i];
-    int64_t start = fromstarts[parent];
-    toptr[i] = toptr[i] + fromshifts[toptr[i]] - start;
+
+  // Phase 2: apply per-shift correction. `length` is the number of shifts,
+  // which is independent of the bin count, so we still need `fromparents`
+  // to map each shift index to its outer bin.
+  for (int64_t i = 0; i < length; i++) {
+    FROM parent = fromparents[i];
+    FROM start = fromstarts[parent];
+    toptr[i] = (TO)(toptr[i] + fromshifts[toptr[i]] - start);
   }
 
   return success();
 }
 ERROR
 awkward_NumpyArray_rearrange_shifted_toint64_fromint64(
-  int64_t* toptr,
-  const int64_t* fromshifts,
+  int64_t* __restrict__ toptr,
+  const int64_t* __restrict__ fromshifts,
   int64_t length,
-  const int64_t* fromoffsets,
-  int64_t offsetslength,
-  const int64_t* fromparents,
-  const int64_t* fromstarts) {
+  const int64_t* __restrict__ fromoffsets,
+  int64_t outlength,
+  const int64_t* __restrict__ fromparents,
+  const int64_t* __restrict__ fromstarts) {
   return awkward_NumpyArray_rearrange_shifted<int64_t, int64_t>(
-      toptr, fromshifts, length, fromoffsets, offsetslength, fromparents, fromstarts);
+      toptr, fromshifts, length, fromoffsets, outlength, fromparents, fromstarts);
 }

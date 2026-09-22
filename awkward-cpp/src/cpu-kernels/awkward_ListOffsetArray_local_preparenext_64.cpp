@@ -9,8 +9,8 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_ListOffsetArray_local_preparenext_64(
-  int64_t* tocarry,
-  const int64_t* fromindex,
+  int64_t* __restrict__ tocarry,
+  const int64_t* __restrict__ fromindex,
   int64_t length) {
   std::vector<int64_t> result(length);
   std::iota(result.begin(), result.end(), 0);

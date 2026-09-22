@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import json
 
@@ -36,7 +35,7 @@ class ReadAvroFT:
                 self.pairs = self.decode_zigzag(self.pairs)
                 if self.pairs < 0:
                     pos, self.header_size = self.decode_varint(pos, self.temp_header)
-                    self.header_size = self.decode_zigzag(self.pairs)
+                    self.header_size = self.decode_zigzag(self.header_size)
                     self.pairs = abs(self.pairs)
                 pos = self.cont_spec(pos)
                 break

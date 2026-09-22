@@ -5,11 +5,11 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_Content_getitem_next_missing_jagged_getmaskstartstop(
-  int64_t* index_in,
-  int64_t* offsets_in,
-  int64_t* mask_out,
-  int64_t* starts_out,
-  int64_t* stops_out,
+  int64_t* __restrict__ index_in,
+  int64_t* __restrict__ offsets_in,
+  int64_t* __restrict__ mask_out,
+  int64_t* __restrict__ starts_out,
+  int64_t* __restrict__ stops_out,
   int64_t length) {
   int64_t k = 0;
   for (int64_t i = 0; i < length; ++i) {

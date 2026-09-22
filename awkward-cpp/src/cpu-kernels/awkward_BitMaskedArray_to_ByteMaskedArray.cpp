@@ -5,8 +5,8 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_BitMaskedArray_to_ByteMaskedArray(
-  int8_t* tobytemask,
-  const uint8_t* frombitmask,
+  int8_t* __restrict__ tobytemask,
+  const uint8_t* __restrict__ frombitmask,
   int64_t bitmasklength,
   bool validwhen,
   bool lsb_order) {

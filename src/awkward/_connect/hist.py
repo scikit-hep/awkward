@@ -26,7 +26,7 @@ def broadcast_and_flatten(args: Sequence[Any]) -> tuple[np.ndarray]:
     try:
         arrays = [ak.Array(x, backend=numpy) for x in args]
     except TypeError:
-        return NotImplementedError
+        return NotImplemented
 
     if any(x.fields for x in arrays):
         raise ValueError("cannot broadcast-and-flatten array with structure (fields)")

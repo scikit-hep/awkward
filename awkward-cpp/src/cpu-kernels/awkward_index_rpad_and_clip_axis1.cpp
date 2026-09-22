@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_index_rpad_and_clip_axis1(
-  T* tostarts,
-  T* tostops,
+  T* __restrict__ tostarts,
+  T* __restrict__ tostops,
   int64_t target,
   int64_t length) {
   int64_t offset = 0;
@@ -19,8 +19,8 @@ ERROR awkward_index_rpad_and_clip_axis1(
   return success();
 }
 ERROR awkward_index_rpad_and_clip_axis1_64(
-  int64_t* tostarts,
-  int64_t* tostops,
+  int64_t* __restrict__ tostarts,
+  int64_t* __restrict__ tostops,
   int64_t target,
   int64_t length) {
   return awkward_index_rpad_and_clip_axis1<int64_t>(

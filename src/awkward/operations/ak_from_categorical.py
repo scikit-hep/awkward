@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -11,7 +10,14 @@ __all__ = ("from_categorical",)
 
 @high_level_function()
 def from_categorical(array, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Replaces categorical data with equivalent non-categorical data.
+
+    This is a metadata-only operation; the running time does not scale with the
+    size of the dataset. (Conversion to categorical is expensive; conversion
+    from categorical is cheap.)
+
+    See also #ak.is_categorical, #ak.categories, #ak.str.to_categorical.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -21,14 +27,9 @@ def from_categorical(array, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    This function replaces categorical data with non-categorical data (by
-    removing the label that declares it as such).
-
-    This is a metadata-only operation; the running time does not scale with the
-    size of the dataset. (Conversion to categorical is expensive; conversion
-    from categorical is cheap.)
-
-    See also #ak.is_categorical, #ak.categories, #ak.str.to_categorical.
+    Returns:
+        An array with categorical data replaced by the equivalent non-categorical
+        data (by removing the label that declares it as such).
     """
     # Dispatch
     yield (array,)

@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numbers
+import operator
 import os
 from collections.abc import Iterable, Sequence, Sized
 
@@ -24,7 +24,12 @@ def is_sized_iterable(obj) -> bool:
 
 
 def is_integer(x) -> bool:
-    return isinstance(x, numbers.Integral) and not isinstance(x, bool)
+    # `numbers.Integral` is an ABC, so check the common cases without it
+    return (
+        type(x) is int
+        or isinstance(x, np.integer)
+        or (isinstance(x, numbers.Integral) and not isinstance(x, bool))
+    )
 
 
 def is_array_like(x) -> bool:
@@ -32,15 +37,17 @@ def is_array_like(x) -> bool:
 
 
 def is_integer_like(x) -> bool:
+    if type(x) is int:
+        return True
     # Integral types
     if isinstance(x, numbers.Integral):
         return not isinstance(x, bool)
     # Scalar arrays
     elif is_array_like(x):
         return np.issubdtype(x.dtype, np.integer) and x.ndim == 0
-    # Other things that support integers
+    # Other things that support lossless integer conversion (__index__ protocol)
     else:
-        return hasattr(x, "__int__")
+        return hasattr(x, "__index__")
 
 
 def is_non_string_like_iterable(obj) -> bool:
@@ -56,7 +63,10 @@ def regularize_axis(axis: Any, none_allowed: bool = True) -> int | None:
     This function's main purpose is to convert [np,cp,...].array(0) to 0.
     """
     if is_integer_like(axis):
-        regularized_axis = int(axis)
+        if is_array_like(axis):
+            regularized_axis = int(axis)
+        else:
+            regularized_axis = operator.index(axis)
     else:
         regularized_axis = axis
     cond = is_integer(regularized_axis)

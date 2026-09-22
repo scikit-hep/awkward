@@ -5,8 +5,8 @@
 #include "awkward/kernel-utils.h"
 
 void awkward_regularize_rangeslice(
-  int64_t* start,
-  int64_t* stop,
+  int64_t* __restrict__ start,
+  int64_t* __restrict__ stop,
   bool posstep,
   bool hasstart,
   bool hasstop,
@@ -40,9 +40,9 @@ void awkward_regularize_rangeslice(
 
 template <typename T>
 void awkward_ListArray_combinations_step(
-  T** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
+  T** __restrict__ tocarry,
+  int64_t* __restrict__ toindex,
+  int64_t* __restrict__ fromindex,
   int64_t j,
   int64_t stop,
   int64_t n,
@@ -79,9 +79,9 @@ void awkward_ListArray_combinations_step(
 }
 
 void awkward_ListArray_combinations_step_64(
-  int64_t** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
+  int64_t** __restrict__ tocarry,
+  int64_t* __restrict__ toindex,
+  int64_t* __restrict__ fromindex,
   int64_t j,
   int64_t stop,
   int64_t n,

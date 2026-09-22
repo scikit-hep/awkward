@@ -6,7 +6,7 @@
 
 template <typename TO>
 ERROR awkward_UnionArray_filltags_const(
-  TO* totags,
+  TO* __restrict__ totags,
   int64_t totagsoffset,
   int64_t length,
   int64_t base) {
@@ -16,7 +16,7 @@ ERROR awkward_UnionArray_filltags_const(
   return success();
 }
 ERROR awkward_UnionArray_filltags_to8_const(
-  int8_t* totags,
+  int8_t* __restrict__ totags,
   int64_t totagsoffset,
   int64_t length,
   int64_t base) {

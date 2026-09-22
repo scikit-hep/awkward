@@ -179,7 +179,8 @@ def valuestr_horiz(
 
                     custom = custom_str(current)
                     if custom is not None:
-                        strs = custom
+                        strs = [custom]
+                        cols_taken = len(custom)
 
                     if limit_cols - (for_comma + cols_taken) >= 0:
                         if which != 0:
@@ -196,7 +197,8 @@ def valuestr_horiz(
 
                     custom = custom_str(current)
                     if custom is not None:
-                        strs = custom
+                        strs = [custom]
+                        cols_taken = len(custom)
 
                     if limit_cols - (2 + cols_taken) >= 0:
                         back[:0] = strs

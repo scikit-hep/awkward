@@ -11,7 +11,7 @@ project(
 include(GNUInstallDirs)
 
 # Build tests?
-option(BUILD_TESTS OFF)
+option(BUILD_TESTS "Build the header-only tests" OFF)
 
 # Add aliases for `add_subdirectory`
 set(NAMESPACE "awkward::")
@@ -41,6 +41,7 @@ target_link_libraries(layout-builder INTERFACE growable-buffer builder-options)
 
 # Build test suite?
 if(BUILD_TESTS)
+  enable_testing()
   add_subdirectory(tests)
 endif(BUILD_TESTS)
 

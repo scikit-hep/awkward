@@ -115,10 +115,14 @@ class UnionArray(UnionMeta[Content], Content):
                 f"{type(self).__name__} 'tags' must be an Index with dtype=int8, not {tags!r}"
             )
 
-        if not isinstance(index, Index) and index.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not (
+            isinstance(index, Index)
+            and index.dtype
+            in (
+                np.dtype(np.int32),
+                np.dtype(np.uint32),
+                np.dtype(np.int64),
+            )
         ):
             raise TypeError(
                 f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
@@ -451,7 +455,7 @@ class UnionArray(UnionMeta[Content], Content):
 
                 if isinstance(backend.nplike, Jax):
                     # function-composition of this part of the UnionArray.index with the IndexedArray.index
-                    index._data = content.index.data.at[selection].set(
+                    index._data = index.data.at[selection].set(
                         content.index.data[index.data[selection]]
                     )
                     # now we don't have an IndexedArray anymore, but we want to preserve its parameters
@@ -585,8 +589,8 @@ class UnionArray(UnionMeta[Content], Content):
         return self._getitem_range(0, 0)
 
     def _is_getitem_at_placeholder(self) -> bool:
-        if isinstance(self._tags, PlaceholderArray) or isinstance(
-            self._index, PlaceholderArray
+        if isinstance(self._tags.data, PlaceholderArray) or isinstance(
+            self._index.data, PlaceholderArray
         ):
             return True
         for content in self._contents:
@@ -1381,7 +1385,7 @@ class UnionArray(UnionMeta[Content], Content):
             parameters=self._parameters,
         )
 
-    def _is_unique(self, negaxis, starts, parents, offsets, outlength):
+    def _is_unique(self, negaxis, starts, offsets, outlength):
         simplified = type(self).simplified(
             self._tags,
             self._index,
@@ -1392,9 +1396,9 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(simplified, ak.contents.UnionArray):
             raise ValueError("cannot check if an irreducible UnionArray is unique")
 
-        return simplified._is_unique(negaxis, starts, parents, offsets, outlength)
+        return simplified._is_unique(negaxis, starts, offsets, outlength)
 
-    def _unique(self, negaxis, starts, parents, offsets, outlength):
+    def _unique(self, negaxis, starts, offsets, outlength):
         simplified = type(self).simplified(
             self._tags,
             self._index,
@@ -1405,10 +1409,10 @@ class UnionArray(UnionMeta[Content], Content):
         if isinstance(simplified, ak.contents.UnionArray):
             raise ValueError("cannot make a unique irreducible UnionArray")
 
-        return simplified._unique(negaxis, starts, parents, offsets, outlength)
+        return simplified._unique(negaxis, starts, offsets, outlength)
 
     def _argsort_next(
-        self, negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+        self, negaxis, starts, shifts, offsets, outlength, ascending, stable
     ):
         simplified = type(self).simplified(
             self._tags,
@@ -1428,12 +1432,10 @@ class UnionArray(UnionMeta[Content], Content):
             raise ValueError("cannot argsort an irreducible UnionArray")
 
         return simplified._argsort_next(
-            negaxis, starts, shifts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, shifts, offsets, outlength, ascending, stable
         )
 
-    def _sort_next(
-        self, negaxis, starts, parents, offsets, outlength, ascending, stable
-    ):
+    def _sort_next(self, negaxis, starts, offsets, outlength, ascending, stable):
         if self.length is not unknown_length and self.length == 0:
             return self
 
@@ -1451,7 +1453,7 @@ class UnionArray(UnionMeta[Content], Content):
             raise ValueError("cannot sort an irreducible UnionArray")
 
         return simplified._sort_next(
-            negaxis, starts, parents, offsets, outlength, ascending, stable
+            negaxis, starts, offsets, outlength, ascending, stable
         )
 
     def _reduce_next(
@@ -1460,7 +1462,6 @@ class UnionArray(UnionMeta[Content], Content):
         negaxis,
         starts,
         shifts,
-        parents,
         offsets,
         outlength,
         mask,

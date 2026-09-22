@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -15,7 +14,8 @@ np = NumpyMetadata.instance()
 @ak._connect.numpy.implements("angle")
 @high_level_function()
 def angle(val, deg=False, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns the counterclockwise angle of each complex element in radians or degrees.
+
     Args:
         val : array_like
             Input array.
@@ -28,8 +28,9 @@ def angle(val, deg=False, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns the counterclockwise angle from the positive real axis on the complex
-    plane in the range ``(-pi, pi]``, with dtype as a float.
+    Returns:
+        The counterclockwise angle from the positive real axis on the complex
+        plane in the range ``(-pi, pi]``, with dtype as a float.
     """
     # Dispatch
     yield (val,)

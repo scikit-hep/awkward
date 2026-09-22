@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import builtins
 import copy
@@ -377,11 +376,22 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __dask_tokenize__(self):
         return id(self)
 
-    def _update_class(self):
+    def _update_class(self, restore=None):
         self._numbaview = None
+        # invalidate the cached cppyy type, generator, and lookup: they hold raw
+        # pointers into the old buffers, which are stale after the layout changes
+        self._cpp_type = self._generator = self._lookup = None
+        previous_class = self.__class__
         self.__class__ = get_array_class(self._layout, self._behavior)
         if hasattr(self, "__awkward_validation__"):
-            self.__awkward_validation__()
+            try:
+                self.__awkward_validation__()
+            except Exception:
+                # a rejected assignment must not be left applied
+                if restore is not None:
+                    self.__dict__.update(restore)
+                    self.__class__ = previous_class
+                raise
 
     @property
     def attrs(self) -> Attrs:
@@ -450,8 +460,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @layout.setter
     def layout(self, layout):
         if isinstance(layout, ak.contents.Content):
+            restore = {"_layout": self._layout}
             self._layout = layout
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("layout must be a subclass of ak.contents.Content")
 
@@ -477,8 +488,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
+            restore = {"_behavior": self._behavior}
             self._behavior = behavior
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -1105,9 +1117,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.SlicingErrorContext(self, where):
             # Handle named axis
-            (_, ndim) = self._layout.minmax_depth
-            named_axis = _get_named_axis(self)
-            where = _normalize_named_slice(named_axis, where, ndim)
+            attrs = self._attrs
+            stored_named_axis = None if attrs is None else attrs.get(NAMED_AXIS_KEY)
+            named_axis = {} if stored_named_axis is None else dict(stored_named_axis)
+            if isinstance(where, dict):
+                # `minmax_depth` walks the whole layout, so only pay for it when
+                # `where` can actually name an axis.
+                (_, ndim) = self._layout.minmax_depth
+                where = _normalize_named_slice(named_axis, where, ndim)
 
             NamedAxis.mapping = named_axis
 
@@ -1119,14 +1136,21 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     named_axis=NamedAxis.mapping,
                     highlevel=True,
                     behavior=self._behavior,
-                    attrs=self._attrs,
+                    attrs=attrs,
+                )
+            elif stored_named_axis is None:
+                return wrap_layout(
+                    indexed_layout,
+                    behavior=self._behavior,
+                    attrs=attrs,
+                    allow_other=True,
                 )
             else:
                 return ak.operations.ak_without_named_axis._impl(
                     indexed_layout,
                     highlevel=True,
                     behavior=self._behavior,
-                    attrs=self._attrs,
+                    attrs=attrs,
                 )
 
     def __bytes__(self) -> bytes:
@@ -1850,7 +1874,8 @@ class Record(NDArrayOperatorsMixin):
 
         elif isinstance(data, Record):
             layout = data._layout
-            attrs = data.attrs
+            behavior = behavior_of(data, behavior=behavior)
+            attrs = attrs_of(data, attrs=attrs)
 
         elif isinstance(data, str):
             layout = ak.operations.from_json(data, highlevel=False)
@@ -1920,11 +1945,19 @@ class Record(NDArrayOperatorsMixin):
 
         ak.jax.register_behavior_class(cls)
 
-    def _update_class(self):
+    def _update_class(self, restore=None):
         self._numbaview = None
+        previous_class = self.__class__
         self.__class__ = get_record_class(self._layout, self._behavior)
         if hasattr(self, "__awkward_validation__"):
-            self.__awkward_validation__()
+            try:
+                self.__awkward_validation__()
+            except Exception:
+                # a rejected assignment must not be left applied
+                if restore is not None:
+                    self.__dict__.update(restore)
+                    self.__class__ = previous_class
+                raise
 
     @property
     def attrs(self) -> Attrs:
@@ -1987,8 +2020,9 @@ class Record(NDArrayOperatorsMixin):
     @layout.setter
     def layout(self, layout):
         if isinstance(layout, ak.record.Record):
+            restore = {"_layout": self._layout}
             self._layout = layout
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("layout must be a subclass of ak.record.Record")
 
@@ -2014,8 +2048,9 @@ class Record(NDArrayOperatorsMixin):
     @behavior.setter
     def behavior(self, behavior):
         if behavior is None or isinstance(behavior, Mapping):
+            restore = {"_behavior": self._behavior}
             self._behavior = behavior
-            self._update_class()
+            self._update_class(restore)
         else:
             raise TypeError("behavior must be None or a dict")
 
@@ -2167,7 +2202,7 @@ class Record(NDArrayOperatorsMixin):
 
             # make the property setting explicit (it triggers self._update_class(), which in turn triggers validation)
             layout = self.layout
-            layout._array = ak.operations.ak_with_field._impl(
+            new_array = ak.operations.ak_with_field._impl(
                 layout._array,
                 what,
                 where,
@@ -2175,7 +2210,9 @@ class Record(NDArrayOperatorsMixin):
                 behavior=self._behavior,
                 attrs=self._attrs,
             )
-            self.layout = layout
+            # rebind to a fresh record rather than mutating the shared layout
+            # in place (Records constructed from another Record share _layout)
+            self.layout = ak.record.Record(new_array, layout._at)
 
     def __delitem__(self, where):
         """
@@ -3311,10 +3348,12 @@ class ArrayBuilder(Sized):
 
         def __init__(self, arraybuilder, name):
             super().__init__(arraybuilder)
-            self._name = name
+            # stored separately so it does not shadow the class-level ``_name``
+            # display label used by ``_Nested.__repr__``
+            self._record_name = name
 
         def __enter__(self):
-            self._arraybuilder.begin_record(name=self._name)
+            self._arraybuilder.begin_record(name=self._record_name)
 
         def __exit__(self, type, value, traceback):
             self._arraybuilder.end_record()

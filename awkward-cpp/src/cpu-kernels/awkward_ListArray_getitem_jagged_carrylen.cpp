@@ -6,9 +6,9 @@
 
 template <typename T>
 ERROR awkward_ListArray_getitem_jagged_carrylen(
-  int64_t* carrylen,
-  const T* slicestarts,
-  const T* slicestops,
+  int64_t* __restrict__ carrylen,
+  const T* __restrict__ slicestarts,
+  const T* __restrict__ slicestops,
   int64_t sliceouterlen) {
   *carrylen = 0;
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
@@ -17,9 +17,9 @@ ERROR awkward_ListArray_getitem_jagged_carrylen(
   return success();
 }
 ERROR awkward_ListArray_getitem_jagged_carrylen_64(
-  int64_t* carrylen,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
+  int64_t* __restrict__ carrylen,
+  const int64_t* __restrict__ slicestarts,
+  const int64_t* __restrict__ slicestops,
   int64_t sliceouterlen) {
   return awkward_ListArray_getitem_jagged_carrylen<int64_t>(
     carrylen,

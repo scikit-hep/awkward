@@ -6,11 +6,11 @@
 
 template <typename T, typename I>
 ERROR awkward_UnionArray_validity(
-  const T* tags,
-  const I* index,
+  const T* __restrict__ tags,
+  const I* __restrict__ index,
   int64_t length,
   int64_t numcontents,
-  const int64_t* lencontents) {
+  const int64_t* __restrict__ lencontents) {
   for (int64_t i = 0;  i < length;  i++) {
     T tag = tags[i];
     I idx = index[i];
@@ -30,42 +30,12 @@ ERROR awkward_UnionArray_validity(
   }
   return success();
 }
-ERROR awkward_UnionArray8_32_validity(
-  const int8_t* tags,
-  const int32_t* index,
-  int64_t length,
-  int64_t numcontents,
-  const int64_t* lencontents) {
-  return awkward_UnionArray_validity<int8_t, int32_t>(
-    tags,
-    index,
-    length,
-    numcontents,
-    lencontents);
-}
-ERROR awkward_UnionArray8_U32_validity(
-  const int8_t* tags,
-  const uint32_t* index,
-  int64_t length,
-  int64_t numcontents,
-  const int64_t* lencontents) {
-  return awkward_UnionArray_validity<int8_t, uint32_t>(
-    tags,
-    index,
-    length,
-    numcontents,
-    lencontents);
-}
-ERROR awkward_UnionArray8_64_validity(
-  const int8_t* tags,
-  const int64_t* index,
-  int64_t length,
-  int64_t numcontents,
-  const int64_t* lencontents) {
-  return awkward_UnionArray_validity<int8_t, int64_t>(
-    tags,
-    index,
-    length,
-    numcontents,
-    lencontents);
-}
+
+#define WRAPPER(FUNC, T, I) \
+  ERROR FUNC(const T* tags, const I* index, int64_t length, int64_t numcontents, const int64_t* lencontents) { \
+    return awkward_UnionArray_validity<T, I>(tags, index, length, numcontents, lencontents); \
+  }
+
+WRAPPER(awkward_UnionArray8_32_validity, int8_t, int32_t)
+WRAPPER(awkward_UnionArray8_U32_validity, int8_t, uint32_t)
+WRAPPER(awkward_UnionArray8_64_validity, int8_t, int64_t)
