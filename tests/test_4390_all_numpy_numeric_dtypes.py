@@ -40,6 +40,16 @@ CONTEXTS = [
 
 
 @pytest.mark.parametrize("primitive", PRIMITIVES)
+@pytest.mark.parametrize("suffix", ["x", "_1", "9"])
+@pytest.mark.parametrize("fields", [["x"], None])
+def test_record_name_starting_with_primitive(primitive, suffix, fields):
+    expected = RecordType(
+        [NumpyType("int64")], fields, parameters={"__record__": primitive + suffix}
+    )
+    assert ak.types.from_datashape(str(expected), highlevel=False) == expected
+
+
+@pytest.mark.parametrize("primitive", PRIMITIVES)
 @pytest.mark.parametrize(("template", "build"), CONTEXTS)
 def test_type_string_roundtrip(primitive, template, build):
     datashape = template.format(primitive)
