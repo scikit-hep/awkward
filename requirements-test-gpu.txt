@@ -5,9 +5,9 @@
 # cuda.compute.unary_transform that the CUDA reducer path relies on (PR #4056).
 # cudf-cu12
 # cupy-cuda12x>=14
-# cuda-cccl[cu12]>=1.0.2
+# cuda-cccl[cu12]>=1.0.2,<=1.1.1
 fsspec>=2022.11.0
-hypothesis-awkward==0.20.0
+hypothesis-awkward==0.20.2
 numba>=0.60
 numba-cuda>=0.25.0
 # numpy<2.5 until a numba-cuda release supports numpy 2.5
