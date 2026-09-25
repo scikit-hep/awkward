@@ -87,3 +87,21 @@ def test_platform_dependent_primitive_is_lexed(primitive):
     else:
         with pytest.raises(TypeError, match="unrecognized primitive"):
             ak.types.from_datashape(f"var * {primitive}", highlevel=False)
+
+
+@pytest.mark.parametrize(
+    ("dtype", "key", "text"),
+    [
+        (np.float16, "float", "1.2"),
+        (np.float32, "float", "1.2"),
+        (np.float64, "float", "1.2"),
+        (np.longdouble, "longfloat", "1.2"),
+        (np.complex64, "complexfloat", "1.2+0j"),
+        (np.complex128, "complexfloat", "1.2+0j"),
+        (np.clongdouble, "longcomplexfloat", "1.2+0j"),
+    ],
+)
+def test_show_formats_floating(dtype, key, text):
+    array = ak.Array(np.array([1.23456], dtype=dtype))
+    assert array.show(precision=2, stream=None) == f"[{text}]"
+    assert array.show(formatter={key: lambda x: "F"}, stream=None) == "[F]"
