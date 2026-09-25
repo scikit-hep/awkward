@@ -10,6 +10,7 @@ from awkward._namedaxis import (
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward._typing import Any, Mapping
 from awkward.errors import AxisError
 
 __all__ = ("drop_none",)
@@ -18,9 +19,15 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None):
-    """Removes missing values (None) from a given array.
-
+def drop_none(
+    array: Any,
+    axis: int | str | None = None,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
+    """
     Args:
         array: Data in which to remove Nones.
         axis (None or int or str): If None, the operation drops Nones at all levels

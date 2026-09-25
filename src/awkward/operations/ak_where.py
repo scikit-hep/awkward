@@ -8,6 +8,7 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._typing import Any, Mapping
 
 __all__ = ("where",)
 
@@ -16,23 +17,15 @@ np = NumpyMetadata.instance()
 
 @ak._connect.numpy.implements("where")
 @high_level_function()
-def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs=None):
-    """Selects elements from `x` or `y` by a condition, or finds where it is True.
-
-    This function has a one-argument form, `condition` without `x` or `y`, and
-    a three-argument form, `condition`, `x`, and `y`. In the one-argument form,
-    it is completely equivalent to NumPy's
-    [nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html)
-    function.
-
-    In the three-argument form, it acts as a vectorized ternary operator:
-    `condition`, `x`, and `y` must all have the same length and::
-
-        output[i] = x[i] if condition[i] else y[i]
-
-    for all `i`. The structure of `x` and `y` do not need to be the same; if
-    they are incompatible types, the output will have #ak.type.UnionType.
-
+def where(
+    condition: Any,
+    *args: Any,
+    mergebool: bool = True,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
+    """
     Args:
         condition: Array-like data (anything #ak.to_layout recognizes) of booleans.
         x: Optional array-like data (anything #ak.to_layout recognizes) with the same
