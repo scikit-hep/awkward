@@ -313,24 +313,20 @@ class Formatter:
                 return self._formatters["int"]
             except KeyError:
                 return self._formatters.get("int_kind", str)
-        elif issubclass(cls, (np.float64, np.float32)):
+        elif issubclass(cls, np.floating):
+            key = "longfloat" if issubclass(cls, np.longdouble) else "float"
             try:
-                return self._formatters["float"]
+                return self._formatters[key]
             except KeyError:
                 return self._formatters.get("float_kind", self._format_real)
-        elif hasattr(np, "float128") and issubclass(cls, np.float128):
+        elif issubclass(cls, np.complexfloating):
+            key = (
+                "longcomplexfloat"
+                if issubclass(cls, np.clongdouble)
+                else "complexfloat"
+            )
             try:
-                return self._formatters["longfloat"]
-            except KeyError:
-                return self._formatters.get("float_kind", self._format_real)
-        elif issubclass(cls, (np.complex64, np.complex128)):
-            try:
-                return self._formatters["complexfloat"]
-            except KeyError:
-                return self._formatters.get("complex_kind", self._format_complex)
-        elif hasattr(np, "complex256") and issubclass(cls, np.complex256):
-            try:
-                return self._formatters["longcomplexfloat"]
+                return self._formatters[key]
             except KeyError:
                 return self._formatters.get("complex_kind", self._format_complex)
         elif issubclass(cls, np.datetime64):

@@ -66,6 +66,8 @@ class NumpyMetadata(PublicSingleton):
     unsignedinteger = numpy.unsignedinteger
     floating = numpy.floating
     complexfloating = numpy.complexfloating
+    longdouble = numpy.longdouble
+    clongdouble = numpy.clongdouble
     number = numpy.number
     object_ = numpy.object_
     generic = numpy.generic
