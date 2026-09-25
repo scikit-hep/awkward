@@ -54,7 +54,7 @@ GRAMMAR_PRIMITIVES = PRIMITIVES + sorted({"float128", "complex256"} - set(PRIMIT
     ],
     ids=["record-name", "tuple-name", "named-record-field"],
 )
-def test_record_name_starting_with_primitive(primitive, suffix, build):
+def test_record_and_field_names_with_primitive_prefix(primitive, suffix, build):
     expected = build(primitive + suffix)
     assert ak.types.from_datashape(str(expected), highlevel=False) == expected
 
