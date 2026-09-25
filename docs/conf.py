@@ -49,6 +49,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "autoapi.extension",
     "myst_nb",
+    "sphinx_llm.txt",
     # Preserve old links
     # "jupyterlite_sphinx",
     "IPython.sphinxext.ipython_console_highlighting",
@@ -268,6 +269,20 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "_templates", "_autoapi_templates", "Thumbs.db", "jupyter_execute", ".*"]
 
+# -- Options for LLM-friendly output -----------------------------------------
+
+# The default would be the awkward package metadata summary
+llms_txt_description = (
+    "Documentation of Awkward Array, a library for nested, variable-sized data"
+    " (arbitrary-length lists, records, mixed types, and missing data) using"
+    " NumPy-like idioms."
+)
+
+# Run the Markdown sub-build after the HTML build so that it can reuse the
+# doctrees; autoapi writes generated files into the source tree, so the two
+# builds must not run at the same time.
+llms_txt_build_parallel = False
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -336,7 +351,14 @@ html_js_files = ["js/awkward.js"]
 myst_enable_extensions = ["colon_fence", "deflist"]
 
 nb_execution_mode = "cache"
+# Share the cache with the Markdown sub-build, which has its own output directory
+nb_execution_cache_path = str(pathlib.Path(__file__).parent / "_build" / "jupyter_cache")
 nb_execution_raise_on_error = True
+# Text outputs for the Markdown sub-build (lower is preferred)
+nb_mime_priority_overrides = [
+    ("llms-markdown", "text/markdown", 10),
+    ("llms-markdown", "text/plain", 20),
+]
 # unpkg is currently _very_ slow
 nb_ipywidgets_js = {
     # Load RequireJS, used by the IPywidgets for dependency management
@@ -444,7 +466,8 @@ def _add_awkward_inventory_aliases(app, exception):
     ``import awkward as ak``) need ``awkward.*`` entries in objects.inv.
     See https://github.com/scikit-hep/awkward/issues/3950.
     """
-    if exception:
+    # The sphinx-llm Markdown sub-build has no objects.inv
+    if exception or app.builder.format != "html":
         return
     import zlib
 
