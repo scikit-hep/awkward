@@ -35,10 +35,13 @@ DTYPE.2: "bool"
        | "uint32"
        | "int64"
        | "uint64"
+       | "float16"
        | "float32"
        | "float64"
+       | "float128"
        | "complex64"
        | "complex128"
+       | "complex256"
 
 DATETIME64:  /datetime64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?/
 TIMEDELTA64: /timedelta64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?/
