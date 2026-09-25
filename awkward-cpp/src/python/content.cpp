@@ -122,6 +122,21 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endtuple();
   }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("void"))) {
+    py::object names = obj.attr("dtype").attr("names");
+    if (names.is_none()) {
+      self.bytestring(obj.attr("tolist")().cast<std::string>());
+    }
+    else {
+      self.beginrecord();
+      for (auto name : names) {
+        std::string key = name.cast<std::string>();
+        self.field_check(key.c_str());
+        builder_fromiter(self, obj[name]);
+      }
+      self.endrecord();
+    }
+  }
   else if (py::isinstance<py::dict>(obj)) {
     py::dict dict = obj.cast<py::dict>();
     self.beginrecord();
@@ -172,11 +187,28 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
     self.real(obj.cast<double>());
   }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("complexfloating"))) {
+    self.complex(obj.cast<std::complex<double>>());
+  }
+  // tolist() of a 0-d array drops the datetime/timedelta unit and structured field names.
+  else if (py::type::of(obj).is(py::module::import("numpy").attr("ndarray"))
+           && obj.attr("ndim").cast<int64_t>() == 0) {
+    builder_fromiter(self, obj[py::tuple()]);
+  }
   else if (py::hasattr(obj, "to_list")) {
     builder_fromiter(self, obj.attr("to_list")());
   }
   else if (py::hasattr(obj, "tolist")) {
-    builder_fromiter(self, obj.attr("tolist")());
+    py::object list = obj.attr("tolist")();
+    if (py::type::of(list).is(py::type::of(obj))) {
+      throw py::type_error(
+        std::string("cannot convert ")
+        + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
+        + obj.attr("__class__").attr("__name__").cast<std::string>()
+        + std::string(") to an array element: its tolist() returns the same type")
+        + FILENAME(__LINE__));
+    }
+    builder_fromiter(self, list);
   }
   else {
 
