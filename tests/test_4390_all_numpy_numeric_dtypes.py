@@ -39,13 +39,23 @@ CONTEXTS = [
 ]
 
 
-@pytest.mark.parametrize("primitive", PRIMITIVES)
-@pytest.mark.parametrize("suffix", ["x", "_1", "9"])
-@pytest.mark.parametrize("fields", [["x"], None])
-def test_record_name_starting_with_primitive(primitive, suffix, fields):
-    expected = RecordType(
-        [NumpyType("int64")], fields, parameters={"__record__": primitive + suffix}
-    )
+# the grammar knows every platform's dtype names, not just this platform's
+GRAMMAR_PRIMITIVES = PRIMITIVES + sorted({"float128", "complex256"} - set(PRIMITIVES))
+
+
+@pytest.mark.parametrize("primitive", GRAMMAR_PRIMITIVES)
+@pytest.mark.parametrize("suffix", ["", "x", "_1", "9"])
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda n: RecordType([NumpyType("int64")], ["x"], parameters={"__record__": n}),
+        lambda n: RecordType([NumpyType("int64")], None, parameters={"__record__": n}),
+        lambda n: RecordType([NumpyType("int64")], [n], parameters={"__record__": "R"}),
+    ],
+    ids=["record-name", "tuple-name", "named-record-field"],
+)
+def test_record_name_starting_with_primitive(primitive, suffix, build):
+    expected = build(primitive + suffix)
     assert ak.types.from_datashape(str(expected), highlevel=False) == expected
 
 

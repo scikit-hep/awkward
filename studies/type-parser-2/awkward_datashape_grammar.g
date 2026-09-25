@@ -71,6 +71,9 @@ named_pairs: named_pair ("," (named_pairs | "parameters" "=" json_object))?
 named_pair:  named_key ":" type
 named_key:   ESCAPED_STRING -> string
            | CNAME          -> identifier
+           | DTYPE          -> identifier
+           | DATETIME64     -> identifier
+           | TIMEDELTA64    -> identifier
 
 union: "union" "[" named_types? "]"
 
