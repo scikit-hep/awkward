@@ -354,6 +354,11 @@ nb_execution_mode = "cache"
 # Share the cache with the Markdown sub-build, which has its own output directory
 nb_execution_cache_path = str(pathlib.Path(__file__).parent / "_build" / "jupyter_cache")
 nb_execution_raise_on_error = True
+# Text outputs for the Markdown sub-build (lower is preferred)
+nb_mime_priority_overrides = [
+    ("llms-markdown", "text/markdown", 10),
+    ("llms-markdown", "text/plain", 20),
+]
 # unpkg is currently _very_ slow
 nb_ipywidgets_js = {
     # Load RequireJS, used by the IPywidgets for dependency management
@@ -461,7 +466,8 @@ def _add_awkward_inventory_aliases(app, exception):
     ``import awkward as ak``) need ``awkward.*`` entries in objects.inv.
     See https://github.com/scikit-hep/awkward/issues/3950.
     """
-    if exception:
+    # The sphinx-llm Markdown sub-build has no objects.inv
+    if exception or app.builder.format != "html":
         return
     import zlib
 
