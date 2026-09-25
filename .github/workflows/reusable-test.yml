@@ -442,7 +442,7 @@ jobs:
               export PATH="/root/.local/bin:$PATH" &&
               source .venv/bin/activate &&
               cd /awkward &&
-              uv pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
+              uv pip install -v --no-sources . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
             '
           docker commit build_container the_container
           docker rm build_container

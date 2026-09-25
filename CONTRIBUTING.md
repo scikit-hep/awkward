@@ -83,6 +83,14 @@ Awkward Array is shipped as two packages: `awkward` and `awkward-cpp`. The `awkw
 
 Building `awkward-cpp` requires generated code and datafiles (kernel specification, header-only includes, kernel tests). These are generated automatically when `awkward-cpp` is built from the repository — CMake runs the generation scripts at configure time — so no separate preparation step is needed to build the packages.
 
+The repository is a [uv](https://docs.astral.sh/uv/) workspace. If you use uv, one command sets up everything: it compiles `awkward-cpp`, installs both packages as editable installations, and installs the test dependencies from the `dev` dependency group:
+
+```bash
+uv sync
+```
+
+Any `uv run` command (for example `uv run pytest tests`) performs the same setup on demand, and `awkward-cpp` is rebuilt when its C++ sources or the kernel specification change. The sections below describe the manual, `pip`-based procedure.
+
 <details>
 
 The generated files can also be created without building anything, using the `prepare` [nox](https://nox.thea.codes/) session:
