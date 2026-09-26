@@ -195,13 +195,13 @@ class _ArgumentRepr(reprlib.Repr):
         if not x:
             return "{}"
         if level <= 0:
-            return "{" + self.fillvalue + "}"
+            return "{...}"
         pieces = [
             f"{self.repr1(k, level - 1)}: {self.repr1(v, level - 1)}"
             for k, v in islice(x.items(), self.maxdict)
         ]
         if len(x) > self.maxdict:
-            pieces.append(self.fillvalue)
+            pieces.append("...")
         return "{" + ", ".join(pieces) + "}"
 
 

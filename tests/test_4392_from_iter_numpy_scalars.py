@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import subprocess
 import sys
 
@@ -142,9 +143,23 @@ def test_bounded_recursion():
         [[1, [2, [3]]]],
         ["x" * 100],
         list(range(100)),
+        functools.reduce(lambda x, _: {"a": x}, range(100), 1),
     ],
 )
 def test_argument_text_matches_repr(value):
     text = repr(value)
     expected = text if len(text) <= 72 else text[:69] + "..."
     assert ak._errors.ErrorContext().format_argument(72, value) == expected
+
+
+def test_argument_whose_repr_raises():
+    class Items(dict):
+        def items(self):
+            raise ValueError
+
+    # reprlib picks its formatter by the type's name (and, in newer Pythons, its module)
+    Items.__name__, Items.__module__ = "dict", "builtins"
+    assert (
+        ak._errors.ErrorContext().format_argument(72, Items(a=1))
+        == "repr-raised-ValueError"
+    )
