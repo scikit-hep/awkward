@@ -90,8 +90,29 @@ builder_timedelta(ak::ArrayBuilder& self, const py::handle& obj) {
   }
 }
 
+// Nesting, and tolist()/to_list() that never bottom out, recurse until the stack overflows.
+// Bounded by the Python recursion limit, not Py_EnterRecursiveCall, whose C-level limit
+// on Python 3.13 admits more of these frames than the stack holds.
+static thread_local int builder_fromiter_depth = 0;
+
+struct builder_fromiter_depth_guard {
+  builder_fromiter_depth_guard() {
+    if (builder_fromiter_depth >= Py_GetRecursionLimit()) {
+      PyErr_SetString(PyExc_RecursionError, (
+        std::string("maximum recursion depth exceeded in ak.from_iter")
+        + FILENAME(__LINE__)).c_str());
+      throw py::error_already_set();
+    }
+    builder_fromiter_depth++;
+  }
+  ~builder_fromiter_depth_guard() {
+    builder_fromiter_depth--;
+  }
+};
+
 void
 builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
+  builder_fromiter_depth_guard guard;
   if (obj.is(py::none())) {
     self.null();
   }
@@ -122,21 +143,6 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endtuple();
   }
-  else if (py::isinstance(obj, py::module::import("numpy").attr("void"))) {
-    py::object names = obj.attr("dtype").attr("names");
-    if (names.is_none()) {
-      self.bytestring(obj.attr("tolist")().cast<std::string>());
-    }
-    else {
-      self.beginrecord();
-      for (auto name : names) {
-        std::string key = name.cast<std::string>();
-        self.field_check(key.c_str());
-        builder_fromiter(self, obj[name]);
-      }
-      self.endrecord();
-    }
-  }
   else if (py::isinstance<py::dict>(obj)) {
     py::dict dict = obj.cast<py::dict>();
     self.beginrecord();
@@ -151,6 +157,23 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
       builder_fromiter(self, pair.second);
     }
     self.endrecord();
+  }
+  // np.void is iterable, so it goes before the iterable branch; lists skip the numpy lookup.
+  else if (!PyList_Check(obj.ptr())
+           && py::isinstance(obj, py::module::import("numpy").attr("void"))) {
+    py::object names = obj.attr("dtype").attr("names");
+    if (names.is_none()) {
+      self.bytestring(obj.attr("tolist")().cast<std::string>());
+    }
+    else {
+      self.beginrecord();
+      for (auto name : names) {
+        std::string key = name.cast<std::string>();
+        self.field_check(key.c_str());
+        builder_fromiter(self, obj[name]);
+      }
+      self.endrecord();
+    }
   }
   else if (py::isinstance<py::iterable>(obj)) {
     py::iterable seq = obj.cast<py::iterable>();
@@ -199,16 +222,7 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     builder_fromiter(self, obj.attr("to_list")());
   }
   else if (py::hasattr(obj, "tolist")) {
-    py::object list = obj.attr("tolist")();
-    if (py::type::of(list).is(py::type::of(obj))) {
-      throw py::type_error(
-        std::string("cannot convert ")
-        + obj.attr("__repr__")().cast<std::string>() + std::string(" (type ")
-        + obj.attr("__class__").attr("__name__").cast<std::string>()
-        + std::string(") to an array element: its tolist() returns the same type")
-        + FILENAME(__LINE__));
-    }
-    builder_fromiter(self, list);
+    builder_fromiter(self, obj.attr("tolist")());
   }
   else {
 

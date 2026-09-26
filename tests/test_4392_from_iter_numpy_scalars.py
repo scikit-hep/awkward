@@ -40,8 +40,13 @@ def test_unstructured_void(zero_d):
     assert result.to_list() == [b"ab"]
 
 
+# A stack overflow kills the interpreter, so it must fail the test rather than pytest.
+needs_subprocess = pytest.mark.skipif(
+    sys.platform.startswith("emscripten"), reason="no subprocess on emscripten"
+)
+
+
 def run(code):
-    # A stack overflow kills the interpreter, so it must fail this test rather than pytest.
     return subprocess.run(
         [sys.executable, "-c", f"import numpy as np, awkward as ak\n{code}"],
         capture_output=True,
@@ -50,6 +55,7 @@ def run(code):
     )
 
 
+@needs_subprocess
 @pytest.mark.parametrize(
     ("expr", "expected"),
     [
@@ -67,15 +73,58 @@ def test_clongdouble(expr, expected):
     assert out.stdout.strip() == expected
 
 
-def test_tolist_returning_same_type():
+class Countdown:
+    def __init__(self, n):
+        self.n = n
+
+    def tolist(self):
+        return Countdown(self.n - 1) if self.n else self.n
+
+
+CYCLES = """
+class S:
+    def tolist(self):
+        return S()
+class A:
+    def tolist(self):
+        return B()
+class B:
+    def tolist(self):
+        return A()
+class T:
+    def to_list(self):
+        return T()
+"""
+
+
+@needs_subprocess
+@pytest.mark.parametrize(
+    "make_x",
+    [
+        "x = S()",
+        "x = A()",
+        "x = T()",
+        "x = np.empty((), dtype=object)\nx[()] = x",
+        "x = 1\nfor _ in range(200_000):\n    x = [x]",
+        "x = 1\nfor _ in range(200_000):\n    x = (x,)",
+        "x = 1\nfor _ in range(200_000):\n    x = {'a': x}",
+    ],
+)
+def test_unbounded_recursion(make_x):
     out = run(
-        "class S:\n"
-        "    def tolist(self):\n"
-        "        return S()\n"
+        f"{CYCLES}{make_x}\n"
         "try:\n"
-        "    ak.from_iter([S()])\n"
-        "except TypeError as err:\n"
-        "    print('tolist() returns the same type' in str(err))"
+        "    ak.from_iter([x])\n"
+        "except RecursionError:\n"
+        "    print('RecursionError')"
     )
-    assert out.returncode == 0, out.stderr
-    assert out.stdout.strip() == "True"
+    assert out.returncode == 0, out.stderr[-2000:]
+    assert out.stdout.strip() == "RecursionError"
+
+
+def test_bounded_recursion():
+    assert ak.from_iter([Countdown(50)]).to_list() == [0]
+    x = 1
+    for _ in range(200):
+        x = [x]
+    assert str(ak.from_iter(x).type) == "1 * " + "var * " * 199 + "int64"
