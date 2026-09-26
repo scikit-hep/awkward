@@ -7,7 +7,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "56"
+version = "57"
 dependencies = [
     "numpy>=1.21.3"
 ]
@@ -101,6 +101,7 @@ pytest -p no:cacheprovider \
 """]
 skip = [
     "cp310-win_arm64",  # No numpy wheels
+    "cp315t-win32",  # AwkwardForth output buffers read back wrong, see #4359
 ]
 test-skip = [
     "*musllinux*",
