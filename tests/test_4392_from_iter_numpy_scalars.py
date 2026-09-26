@@ -110,6 +110,7 @@ class T:
         "x = 1\nfor _ in range(200_000):\n    x = {'a': x}",
         "import sys\nsys.setrecursionlimit(100_000)\nx = S()",
         "import sys\nsys.setrecursionlimit(100_000)\nx = 1\nfor _ in range(200_000):\n    x = (x,)",
+        "import sys\nsys.setrecursionlimit(100_000)\nx = 1\nfor _ in range(200_000):\n    x = {'a': x}",
     ],
 )
 def test_unbounded_recursion(make_x):
@@ -130,3 +131,20 @@ def test_bounded_recursion():
     for _ in range(200):
         x = [x]
     assert str(ak.from_iter(x).type) == "1 * " + "var * " * 199 + "int64"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        [1, 2, 3],
+        (1,),
+        {"b": 1, "a": [2, (3,)]},
+        [[1, [2, [3]]]],
+        ["x" * 100],
+        list(range(100)),
+    ],
+)
+def test_argument_text_matches_repr(value):
+    text = repr(value)
+    expected = text if len(text) <= 72 else text[:69] + "..."
+    assert ak._errors.ErrorContext().format_argument(72, value) == expected
