@@ -249,3 +249,40 @@ def test_float128_categorical_is_valid():
     arr = _categorical_float(np.float128)
     assert ak.is_valid(arr)
     assert ak.validity_error(arr) == ""
+
+
+@pytest.mark.parametrize(
+    "dtype",
+    [
+        np.float16,
+        pytest.param(
+            getattr(np, "float128", None),
+            marks=pytest.mark.skipif(
+                not hasattr(np, "float128"), reason="no float128 on this platform"
+            ),
+        ),
+    ],
+)
+def test_unique_per_list_casts_back_through_list_nodes(dtype):
+    # With an axis (negaxis is not None), _unique returns a ListOffsetArray
+    # wrapping the unique values rather than a bare NumpyArray. The cast-back
+    # walk in NumpyArray._unique must leave the list node untouched and only
+    # restore the dtype of the NumpyArray leaf.
+    layout = ak.contents.ListOffsetArray(
+        ak.index.Index64(np.array([0, 3, 3, 6], dtype=np.int64)),
+        ak.contents.NumpyArray(
+            np.array([2.0, 1.0, 2.0, 3.0, 3.0, 0.5], dtype=dtype)
+        ),
+    )
+    out = ak._do.unique(layout, axis=-1)
+    assert isinstance(out, ak.contents.ListOffsetArray)
+    assert out.content.dtype == np.dtype(dtype)
+    assert ak.to_list(out) == [[1.0, 2.0], [], [0.5, 3.0]]
+
++
++def test_unique_flat_float16_keeps_dtype():
++    layout = ak.contents.NumpyArray(np.array([3.0, 1.0, 3.0, 2.0], dtype=np.float16))
++    out = ak._do.unique(layout, axis=None)
++    assert isinstance(out, ak.contents.NumpyArray)
++    assert out.dtype == np.dtype(np.float16)
++    assert ak.to_list(out) == [1.0, 2.0, 3.0]
