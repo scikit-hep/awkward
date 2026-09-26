@@ -90,7 +90,7 @@ MERGEABLE = [
         id="record-datetime-ns-s",
     ),
     pytest.param(
-        record(x=np.array([1, 2], "m8[as]"), y=np.array([3, 4], "m8[1000000ms]")),
+        record(x=np.array([1, 2], "m8[as]"), y=np.array([3, 4], "m8[100ms]")),
         "4 * timedelta64[as]",
         id="record-unit-multiplier-under-bound",
     ),
