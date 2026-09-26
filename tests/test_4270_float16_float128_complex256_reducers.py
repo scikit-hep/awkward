@@ -279,10 +279,10 @@ def test_unique_per_list_casts_back_through_list_nodes(dtype):
     assert out.content.dtype == np.dtype(dtype)
     assert ak.to_list(out) == [[1.0, 2.0], [], [0.5, 3.0]]
 
-+
-+def test_unique_flat_float16_keeps_dtype():
-+    layout = ak.contents.NumpyArray(np.array([3.0, 1.0, 3.0, 2.0], dtype=np.float16))
-+    out = ak._do.unique(layout, axis=None)
-+    assert isinstance(out, ak.contents.NumpyArray)
-+    assert out.dtype == np.dtype(np.float16)
-+    assert ak.to_list(out) == [1.0, 2.0, 3.0]
+
+def test_unique_flat_float16_keeps_dtype():
+    layout = ak.contents.NumpyArray(np.array([3.0, 1.0, 3.0, 2.0], dtype=np.float16))
+    out = ak._do.unique(layout, axis=None)
+    assert isinstance(out, ak.contents.NumpyArray)
+    assert out.dtype == np.dtype(np.float16)
+    assert ak.to_list(out) == [1.0, 2.0, 3.0]
