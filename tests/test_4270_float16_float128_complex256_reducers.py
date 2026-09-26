@@ -270,9 +270,7 @@ def test_unique_per_list_casts_back_through_list_nodes(dtype):
     # restore the dtype of the NumpyArray leaf.
     layout = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 3, 6], dtype=np.int64)),
-        ak.contents.NumpyArray(
-            np.array([2.0, 1.0, 2.0, 3.0, 3.0, 0.5], dtype=dtype)
-        ),
+        ak.contents.NumpyArray(np.array([2.0, 1.0, 2.0, 3.0, 3.0, 0.5], dtype=dtype)),
     )
     out = ak._do.unique(layout, axis=-1)
     assert isinstance(out, ak.contents.ListOffsetArray)
