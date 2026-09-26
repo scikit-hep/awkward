@@ -774,9 +774,6 @@ class NumpyArray(NumpyMeta, Content):
         if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self
 
-        elif len(self.shape) == 0:
-            return self
-
         elif (cast := _kernel_unsupported_cast(self._data.dtype)) is not None:
             # No sort/unique kernel for float16/float128/complex256 (reached e.g.
             # by ak.validity_error on categorical float16 content). Compute the
