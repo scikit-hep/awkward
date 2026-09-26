@@ -91,13 +91,15 @@ builder_timedelta(ak::ArrayBuilder& self, const py::handle& obj) {
 }
 
 // Nesting, and tolist()/to_list() that never bottom out, recurse until the stack overflows.
-// Bounded by the Python recursion limit, not Py_EnterRecursiveCall, whose C-level limit
-// on Python 3.13 admits more of these frames than the stack holds.
+// Neither Py_EnterRecursiveCall's C-level limit nor a raised sys.getrecursionlimit() stays
+// below the stack's capacity for these frames, so the depth is also capped at CPython's
+// default recursion limit.
 static thread_local int builder_fromiter_depth = 0;
+static const int builder_fromiter_max_depth = 1000;
 
 struct builder_fromiter_depth_guard {
   builder_fromiter_depth_guard() {
-    if (builder_fromiter_depth >= Py_GetRecursionLimit()) {
+    if (builder_fromiter_depth >= std::min(Py_GetRecursionLimit(), builder_fromiter_max_depth)) {
       PyErr_SetString(PyExc_RecursionError, (
         std::string("maximum recursion depth exceeded in ak.from_iter")
         + FILENAME(__LINE__)).c_str());

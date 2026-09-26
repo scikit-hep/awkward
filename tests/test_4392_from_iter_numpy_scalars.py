@@ -108,6 +108,8 @@ class T:
         "x = 1\nfor _ in range(200_000):\n    x = [x]",
         "x = 1\nfor _ in range(200_000):\n    x = (x,)",
         "x = 1\nfor _ in range(200_000):\n    x = {'a': x}",
+        "import sys\nsys.setrecursionlimit(100_000)\nx = S()",
+        "import sys\nsys.setrecursionlimit(100_000)\nx = 1\nfor _ in range(200_000):\n    x = (x,)",
     ],
 )
 def test_unbounded_recursion(make_x):
