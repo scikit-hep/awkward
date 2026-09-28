@@ -11,6 +11,7 @@ from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
 from awkward._typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
@@ -32,11 +33,23 @@ def normalize_slice(slice_: slice, *, nplike: NumpyLike) -> slice:
 
     Return a slice of (start, stop, step) for which the slice items have been
     normalized into index types.
+
+    Raises a ValueError for a zero step, as NumPy does.
     """
 
     start = slice_.start
     stop = slice_.stop
     step = slice_.step
+
+    # a zero step would loop forever in the kernels, which advance with `j += step`
+    if step is not None and step is not unknown_length and not is_unknown_scalar(step):
+        try:
+            step_as_index = operator.index(step)
+        except TypeError:
+            pass
+        else:
+            if step_as_index == 0:
+                raise ValueError("slice step cannot be zero")
 
     if nplike.known_data:
         return slice_
