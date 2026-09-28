@@ -20,7 +20,18 @@ jobs:
     runs-on: ubuntu-22.04
     name: Push version switcher
     permissions:
-      contents: write # Required to push the version selector to the `gh-pages` branch.
+      contents: read
+    env:
+      S3_BUCKET: "awkward-array-org"
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      # R2 is a single global bucket, but the CLI still wants a region
+      AWS_DEFAULT_REGION: auto
+      R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+      # R2 rejects the additional checksums that recent versions of the AWS CLI
+      # send by default
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
     environment:
       name: docs
     steps:
@@ -29,9 +40,11 @@ jobs:
           persist-credentials: false
       # Pushes to main trigger latest
       - name: Push version selector
-        uses: ./.github/actions/deploy-to-gh-pages
+        run: |
+          aws s3 cp --endpoint-url "${R2_ENDPOINT}" \
+            docs/switcher.json "s3://${S3_BUCKET}/doc/switcher.json"
+      - name: Purge the Cloudflare cache
+        uses: ./.github/actions/purge-cloudflare-cache
         with:
-          source: docs/switcher.json
-          target: doc/switcher.json
-          message: "Deploy version selector"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}

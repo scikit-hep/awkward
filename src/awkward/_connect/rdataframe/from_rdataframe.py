@@ -228,10 +228,12 @@ def from_rdataframe(
 
             buffers = {}
             for item in names_nbytes:
-                buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
+                # to_char_buffers clears the map that item.first points into
+                name = str(item.first)
+                buffers[name] = numpy.empty(item.second, dtype=np.uint8)
                 cpp_buffers_self.append(
-                    item.first,
-                    buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
+                    name,
+                    buffers[name].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
                 )
 
             length = cpp_buffers_self.to_char_buffers[builder_type](builder)
