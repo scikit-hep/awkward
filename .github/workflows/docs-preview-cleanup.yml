@@ -1,5 +1,5 @@
 name: Docs Preview Cleanup
-on: # zizmor: ignore[dangerous-triggers] This privileged workflow runs from the base branch and only removes a preview directory.
+on: # zizmor: ignore[dangerous-triggers] This privileged workflow only removes a preview directory.
   pull_request_target:
     types: [closed]
 
@@ -15,14 +15,26 @@ jobs:
     runs-on: ubuntu-24.04
     name: Remove Branch Preview
     permissions:
-      contents: write # Required to push the removal to the `gh-pages` branch.
+      contents: read
+    env:
+      S3_BUCKET: "preview-awkward-array-org"
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      # R2 is a single global bucket, but the CLI still wants a region
+      AWS_DEFAULT_REGION: auto
+      R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+      # R2 rejects the additional checksums that recent versions of the AWS CLI
+      # send by default
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+    environment:
+      name: docs
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
+    # Previews are never overwritten by a later pull request, so they would
+    # otherwise accumulate in the bucket for as long as the project lives
     - name: Remove artifacts
-      uses: ./.github/actions/deploy-to-gh-pages
-      with:
-        target: doc/pr/${{ github.event.number }}
-        message: "Remove preview for PR #${{ github.event.number }}"
-        token: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        PR_NUMBER: ${{ github.event.number }}
+      run: |
+        aws s3 rm --endpoint-url "${R2_ENDPOINT}" --recursive \
+          "s3://${S3_BUCKET}/PR${PR_NUMBER}/"
