@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 
 import awkward._nplikes.cupy as ak_cupy
+from awkward._nplikes.array_module import _nplike_repeat_has_array_repeats
 from awkward._nplikes.cupy import Cupy
 
 nplike = Cupy.instance()
@@ -32,3 +33,25 @@ def test_repeat_with_array_repeats(counts, fallback, monkeypatch):
     x = np.arange(len(counts), dtype=np.int64) * 10
     out = nplike.repeat(cp.asarray(x), cp.asarray(np.array(counts, dtype=np.int64)))
     assert cp.asnumpy(out).tolist() == np.repeat(x, counts).tolist()
+
+
+class FakeModule:
+    int64 = np.int64
+    zeros = staticmethod(np.zeros)
+    ones = staticmethod(np.ones)
+
+    def __init__(self, error):
+        self._error = error
+
+    def repeat(self, x, repeats):
+        raise self._error("repeats must be an integer")
+
+
+def test_probe_detects_array_repeats():
+    assert _nplike_repeat_has_array_repeats(np)
+
+
+@pytest.mark.parametrize("error", [TypeError, ValueError])
+def test_probe_detects_missing_array_repeats(error):
+    # a fresh module per case, so the cached result of another case is not reused
+    assert not _nplike_repeat_has_array_repeats(FakeModule(error))
