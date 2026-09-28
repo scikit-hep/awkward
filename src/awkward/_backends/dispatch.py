@@ -21,13 +21,15 @@ BackendLookup: TypeAlias = "Callable[[T], Backend]"
 BackendLookupFactory: TypeAlias = "Callable[[type[T]], BackendLookup[T]]"
 
 
-_type_to_backend_lookup: dict[type, BackendLookup] = {}
+_type_to_backend_lookup: dict[type, "BackendLookup | None"] = {}
 _backend_lookup_factories: list[BackendLookupFactory] = []
 _name_to_backend_cls: dict[str, type[Backend]] = {}
 
 
 def register_backend_lookup_factory(factory: BackendLookupFactory):
     _backend_lookup_factories.append(factory)
+    # a new factory may recognise types previously cached as unrecognised
+    _type_to_backend_lookup.clear()
 
 
 def register_backend(primary_nplike_cls: type[NumpyLike]):
@@ -75,19 +77,20 @@ def backend_of_obj(obj, default: D | Sentinel = UNSET) -> Backend | D:
     cls = type(obj)
     try:
         lookup = _type_to_backend_lookup[cls]
-        return lookup(obj)
     except KeyError:
+        lookup = None
         for factory in _backend_lookup_factories:
-            maybe_lookup = factory(cls)
-            if maybe_lookup is not None:
+            lookup = factory(cls)
+            if lookup is not None:
                 break
+        _type_to_backend_lookup[cls] = lookup
+
+    if lookup is None:
+        if default is UNSET:
+            raise TypeError(f"cannot find backend for {cls.__name__}")
         else:
-            if default is UNSET:
-                raise TypeError(f"cannot find backend for {cls.__name__}")
-            else:
-                return cast(D, default)
-        _type_to_backend_lookup[cls] = maybe_lookup
-        return maybe_lookup(obj)
+            return cast(D, default)
+    return lookup(obj)
 
 
 def backend_of(
