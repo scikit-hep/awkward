@@ -50,7 +50,7 @@ from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
 from awkward.index import Index
-from awkward.types.numpytype import primitive_to_dtype
+from awkward.types.numpytype import dtype_to_primitive, primitive_to_dtype
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -119,12 +119,14 @@ class NumpyArray(NumpyMeta, Content):
         if backend is None:
             backend = backend_of_obj(data, default=NumpyBackend.instance())
 
-        self._data = backend.nplike.asarray(data)
+        nplike = backend.nplike
+        self._data = nplike.asarray(data)
 
-        if not isinstance(backend.nplike, Jax):
-            ak.types.numpytype.dtype_to_primitive(self._data.dtype)
+        if not isinstance(nplike, Jax):
+            dtype_to_primitive(self._data.dtype)
 
-        if len(ak._util.maybe_shape_of(self._data)) == 0:
+        # `ndim` rather than the shape: a virtual array's shape may be unknown
+        if self._data.ndim == 0:
             raise TypeError(
                 f"{type(self).__name__} 'data' must be an array, not a scalar: {data!r}"
             )
