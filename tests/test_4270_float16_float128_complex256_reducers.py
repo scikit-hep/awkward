@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import itertools
+
 import numpy as np
 import pytest
 
@@ -160,23 +162,102 @@ def test_float128_sort_preserves_exact_values():
 
     out = ak.sort(ak.Array(np.array([a, one], dtype=np.float128)))
     vals = np.asarray(out.layout.data)
-    # `a` and `one` are equal after the float64 cast, so the stable sort keeps
-    # their input order; the point is that `a` survives *exactly* (a cast-back
-    # sort would return [1.0, 1.0], dropping the sub-float64 difference).
-    assert vals[0] == a
-    assert vals[1] == one
-    assert vals[0] != one  # the extended-precision value was not rounded away
+    # Sorted in float128, not by the float64 keys (which are equal).
+    assert vals[0] == one
+    assert vals[1] == a
+    assert vals[1] != one  # the extended-precision value was not rounded away
     assert "float128" in str(out.type)
 
 
 @pytest.mark.skipif(not hasattr(np, "float128"), reason="no float128 on this platform")
-def test_float128_argsort_ties_by_position():
-    # Two values equal after the float64 cast but distinct at float128: argsort is
-    # stable-by-position, so the earlier index comes first regardless of true order.
+def test_float128_argsort_orders_by_float128():
+    # Two values equal after the float64 cast but distinct at float128.
     one = np.float128(1)
     a = one + np.float128(2) ** -60  # a > one, but == one in float64
     arr = ak.Array(np.array([a, one], dtype=np.float128))
-    assert ak.to_list(ak.argsort(arr)) == [0, 1]
+    assert ak.to_list(ak.argsort(arr)) == [1, 0]
+    assert ak.to_list(ak.argsort(arr, ascending=False)) == [0, 1]
+
+
+@pytest.mark.skipif(not hasattr(np, "float128"), reason="no float128 on this platform")
+@pytest.mark.parametrize("ascending", [True, False])
+@pytest.mark.parametrize("stable", [True, False])
+def test_float128_sort_collisions_overflow_underflow(ascending, stable):
+    # Values that collide in float64: sub-ulp differences, overflow to inf,
+    # underflow to 0; plus NaN and signed zero, which keep the kernel semantics.
+    one = np.float128(1)
+    e = np.float128(2) ** -60
+    data = np.array(
+        [one + 2 * e, np.nan, one, -np.float128(0), one + e,
+         np.float128("1e500"), np.float128("1e400"), np.float128("1e-400"), 0, one + e],
+        dtype=np.float128,
+    )  # fmt: skip
+    arr = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0, 4, 10])), ak.contents.NumpyArray(data)
+        )
+    )
+    out = ak.sort(arr, axis=1, ascending=ascending, stable=stable)
+    index = ak.argsort(arr, axis=1, ascending=ascending, stable=stable)
+    assert ak.to_list(out) == ak.to_list(arr[index]) or np.isnan(out[0, 0])
+    for row in ak.to_list(out):
+        finite = [x for x in row if not np.isnan(x)]
+        pairs = itertools.pairwise(finite)
+        assert all((x <= y) if ascending else (x >= y) for x, y in pairs)
+    expected = [4, 3, 0, 5, 2, 1] if ascending else [1, 2, 0, 5, 3, 4]
+    assert ak.to_list(index[1]) == expected
+
+
+@pytest.mark.skipif(not hasattr(np, "float128"), reason="no float128 on this platform")
+def test_float128_reducers_exact():
+    one = np.float128(1)
+    a = one + np.float128(2) ** -60
+    tiny = np.float128("1e-4000")
+    data = np.array(
+        [one, a, np.float128("1e400"), np.float128("1e500"), tiny, tiny, 1e16, 1, 1],
+        dtype=np.float128,
+    )
+    arr = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0, 2, 4, 6, 9])), ak.contents.NumpyArray(data)
+        )
+    )
+    assert ak.max(arr, axis=1)[0] == a
+    assert ak.argmax(arr, axis=1)[0] == 1
+    assert ak.argmin(ak.Array(np.array([a, one], dtype=np.float128))) == 1
+    assert ak.max(ak.Array(np.array([one, a], dtype=np.float128))) == a
+    assert ak.max(arr, axis=1)[1] == np.float128("1e500")
+    assert ak.sum(arr, axis=1)[1] == np.float128("1e400") + np.float128("1e500")
+    assert ak.sum(arr, axis=1)[3] - np.float128(1e16) == 2
+    assert ak.min(arr, axis=1)[2] == tiny
+    assert ak.to_list(ak.count_nonzero(arr, axis=1)) == [2, 2, 2, 3]
+    assert ak.to_list(ak.any(arr, axis=1)) == [True, True, True, True]
+    assert ak.min(arr[:1], axis=1, initial=1.0)[0] == one
+    assert ak.max(arr[:1], axis=1, initial=1.0)[0] == a
+
+
+@pytest.mark.skipif(not hasattr(np, "float128"), reason="no float128 on this platform")
+def test_float128_unique_keeps_distinct_values():
+    one = np.float128(1)
+    a = one + np.float128(2) ** -60
+    arr = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0, 3, 3, 5])),
+            ak.contents.NumpyArray(np.array([a, one, a, one, one], dtype=np.float128)),
+        )
+    )
+    out = ak._do.unique(arr.layout, axis=-1)
+    assert ak.to_list(out) == [[one, a], [], [one]]
+    assert ak._do.unique(arr.layout.content, axis=None).length == 2
+
+
+def test_float16_sort_record_field_longer_than_record():
+    # A record's field may be longer than the record: positions past offsets[-1]
+    # stay in place, as in the float32 path.
+    for dtype in (np.float16, np.float32):
+        content = ak.contents.NumpyArray(np.array([3.0, 1.0, 2.0], dtype))
+        rec = ak.Array(ak.contents.RecordArray([content], ["x"], length=2))
+        assert ak.to_list(ak.sort(rec, axis=0)) == [{"x": 1.0}, {"x": 3.0}]
 
 
 @pytest.mark.skipif(
