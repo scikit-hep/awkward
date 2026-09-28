@@ -11,7 +11,7 @@ from awkward._nplikes.cupy import Cupy
 
 nplike = Cupy.instance()
 
-COUNTS = [[2, 1, 0], [2, 1, 0, 0], [1, 0, 2], [0, 2, 0], [0, 0, 0], [3], [0]]
+COUNTS = [[2, 1, 0], [2, 1, 0, 0], [1, 0, 2], [0, 2, 0], [0, 0, 0], [3], [0], []]
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -76,25 +76,13 @@ class Cupy(ArrayModuleNumpyLike):
         if isinstance(
             repeats, self._module.ndarray
         ) and not _nplike_repeat_has_array_repeats(self._module):
-            all_stops = self._module.cumsum(repeats)
-            total = int(all_stops[-1].item()) if all_stops.size else 0
-            parents = self._module.zeros(total, dtype=int)
-            if total > 0:
-                stops, stop_counts = self._module.unique(
-                    all_stops[:-1], return_counts=True
-                )
-                # trailing zero-repeats make `all_stops[:-1]` contain boundary
-                # values equal to `total`, which is one past the end of
-                # `parents` -- drop those or the assignment below writes out
-                # of bounds (silently corrupts the GPU memory pool on CUDA
-                # instead of raising, since the write lands in still-mapped
-                # pool memory)
-                in_bounds = stops < total
-                stops = stops[in_bounds]
-                stop_counts = stop_counts[in_bounds]
-                parents[stops] = stop_counts
-                self._module.cumsum(parents, out=parents)
-            return x[parents]
+            stops = self._module.cumsum(repeats)
+            total = int(stops[-1].item()) if stops.size else 0
+            # mark where each element's run ends; the extra slot absorbs the
+            # boundaries that trailing zero repeats leave at `total`
+            marks = self._module.zeros(total + 1, dtype=np.intp)
+            self._module.add.at(marks, stops[:-1], 1)
+            return x[self._module.cumsum(marks[:-1])]
         else:
             return self._module.repeat(x, repeats=repeats)
 
