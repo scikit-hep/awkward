@@ -11,6 +11,9 @@ on:
         required: false
         default: false
         type: string # The workflow freezes if this is set to boolean for some reason
+    secrets:
+      CODECOV_TOKEN:
+        required: false
 
   workflow_dispatch:
     inputs:
@@ -132,11 +135,6 @@ jobs:
           files: |
             awkward-cpp/dist/*.whl
 
-      - name: Add workaround for 3.13 + cramjam
-        if: matrix.python-version == '3.13'
-        run: echo 'PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1' >> $GITHUB_ENV
-        shell: bash
-
       - name: Install awkward, awkward-cpp, and dependencies
         run: >-
           python -m pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
@@ -184,6 +182,8 @@ jobs:
 
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+      # Coverage of the CUDA code paths is measured on one job only
+      COV_ARGS: ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-append --cov-report=xml' || '' }}
 
     # Required for miniconda to activate conda
     defaults:
@@ -227,11 +227,19 @@ jobs:
 
       - name: Test CUDA non-kernel (Python)
         run: >-
-          python -m pytest -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py
+          python -m pytest -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py ${COV_ARGS}
 
       - name: Test CUDA virtual arrays
         run: >-
-          python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py
+          python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py ${COV_ARGS}
+
+      # Scheduled runs test a commit that CI already reported coverage for
+      - name: Upload coverage to Codecov
+        if: matrix.cuda-version == 13 && github.event_name != 'schedule'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
 
   Linux-ROOT:
     name: Linux ROOT
@@ -291,8 +299,28 @@ jobs:
       - name: Print versions
         run: python -m pip list
 
+      # This job measures the coverage of the non-CUDA code paths: it is the
+      # one with the most optional dependencies (ROOT included)
       - name: Test
-        run: python -m pytest -vv -rs tests
+        run: >-
+          python -m pytest -vv -rs tests --cov=awkward --cov-report=xml
+          --junitxml=junit.xml -o junit_family=legacy
+
+      # Scheduled runs test a commit that CI already reported coverage for
+      - name: Upload coverage to Codecov
+        if: github.event_name != 'schedule'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() && github.event_name != 'schedule' }}
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          files: junit.xml
 
   Linux-cppyy:
     name: Linux cppyy
@@ -310,7 +338,7 @@ jobs:
           submodules: true
           persist-credentials: false
 
-      - name: 'Python ${{ matrix.python-version }}'
+      - name: Python 3.11
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.11'
