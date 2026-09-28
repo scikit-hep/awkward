@@ -152,27 +152,21 @@ jobs:
         if: (matrix.python-version == '3.12') && (matrix.runs-on == 'ubuntu-latest')
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
-      - name: Test specification
-        run: python -m pytest -vv -rs awkward-cpp/tests-spec
-
-      - name: Test specification with explicitly defined values
-        run: python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
-
-      - name: Test CPU kernels
-        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
-
-      - name: Test CPU kernels with explicitly defined values
-        run: python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels-explicit
+      - name: Test specification and CPU kernels
+        run: >-
+          python -m pytest -n auto -vv -rs
+          awkward-cpp/tests-spec awkward-cpp/tests-spec-explicit
+          awkward-cpp/tests-cpu-kernels awkward-cpp/tests-cpu-kernels-explicit
 
       - name: Test non-kernels (Python)
         run: >-
-          python -m pytest -vv -rs tests
+          python -m pytest -n auto -vv -rs tests
 
       - name: Test non-kernels (Python) in multiple threads
         if: matrix.python-version == '3.14t'
         run: |
           python -m pip install 'pytest-run-parallel>=0.8.2'
-          python -m pytest -vv -rs tests --parallel-threads 4 --ignore=tests/test_3364_virtualarray.py --ignore=tests/test_3451_virtualarray_with_jax.py --ignore=tests/test_3475_virtualarray_unknown_length.py
+          python -m pytest -n auto -vv -rs tests --parallel-threads 4 --ignore=tests/test_3364_virtualarray.py --ignore=tests/test_3451_virtualarray_with_jax.py --ignore=tests/test_3475_virtualarray_unknown_length.py
 
   run-gpu-tests:
     name: Run GPU Tests
@@ -182,6 +176,8 @@ jobs:
 
     env:
       PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+      # The workers share one GPU, so keep their number small
+      XDIST_ARGS: -n 4
       # Coverage of the CUDA code paths is measured on one job only
       COV_ARGS: ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-append --cov-report=xml' || '' }}
 
@@ -215,23 +211,19 @@ jobs:
 
       - name: Test CUDA kernels
         if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
-        run: python -m pytest -vv -rs tests-cuda-kernels
-
-      - name: Test CUDA kernels with explicitly defined values
-        if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
-        run: python -m pytest -vv -rs tests-cuda-kernels-explicit
+        run: python -m pytest ${XDIST_ARGS} -vv -rs tests-cuda-kernels tests-cuda-kernels-explicit
 
       - name: Test kernel property-based tests
         if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
-        run: python -m pytest -vv -rs tests/properties -m cuda
+        run: python -m pytest ${XDIST_ARGS} -vv -rs tests/properties -m cuda
 
       - name: Test CUDA non-kernel (Python)
         run: >-
-          python -m pytest -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py ${COV_ARGS}
+          python -m pytest ${XDIST_ARGS} -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py ${COV_ARGS}
 
       - name: Test CUDA virtual arrays
         run: >-
-          python -m pytest -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py ${COV_ARGS}
+          python -m pytest ${XDIST_ARGS} -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py ${COV_ARGS}
 
       # Scheduled runs test a commit that CI already reported coverage for
       - name: Upload coverage to Codecov
@@ -303,7 +295,7 @@ jobs:
       # one with the most optional dependencies (ROOT included)
       - name: Test
         run: >-
-          python -m pytest -vv -rs tests --cov=awkward --cov-report=xml
+          python -m pytest -n auto -vv -rs tests --cov=awkward --cov-report=xml
           --junitxml=junit.xml -o junit_family=legacy
 
       # Scheduled runs test a commit that CI already reported coverage for
@@ -488,40 +480,15 @@ jobs:
               uv pip list
             '
 
-      - name: Test specification
+      - name: Test specification and CPU kernels
         run: |
           docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
-              python -m pytest -vv -rs awkward-cpp/tests-spec
-            '
-
-      - name: Test specification with explicitly defined values
-        run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
-            -v $(pwd):/awkward the_container \
-            /bin/bash -c '
-              source .venv/bin/activate && cd /awkward &&
-              python -m pytest -vv -rs awkward-cpp/tests-spec-explicit
-            '
-
-      - name: Test CPU kernels
-        run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
-            -v $(pwd):/awkward the_container \
-            /bin/bash -c '
-              source .venv/bin/activate && cd /awkward &&
-              python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels
-            '
-
-      - name: Test CPU kernels with explicitly defined values
-        run: |
-          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
-            -v $(pwd):/awkward the_container \
-            /bin/bash -c '
-              source .venv/bin/activate && cd /awkward &&
-              python -m pytest -vv -rs awkward-cpp/tests-cpu-kernels-explicit
+              python -m pytest -n auto -vv -rs \
+                awkward-cpp/tests-spec awkward-cpp/tests-spec-explicit \
+                awkward-cpp/tests-cpu-kernels awkward-cpp/tests-cpu-kernels-explicit
             '
 
       - name: Test non-kernels (Python)
@@ -530,5 +497,5 @@ jobs:
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
-              python -m pytest -vv -rs tests
+              python -m pytest -n auto -vv -rs tests
             '

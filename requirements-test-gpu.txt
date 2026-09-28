@@ -17,5 +17,6 @@ numpy<2.5
 pyarrow
 pytest>=6
 pytest-cov
+pytest-xdist
 PyYAML
 uproot>=5
