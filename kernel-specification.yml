@@ -186,11 +186,16 @@ kernels:
           tooffsets[0] = 0
           for i in range(length):
               start = fromoffsets[i]
-              for j in range(start, fromoffsets[i + 1]):
+              stop = fromoffsets[i + 1]
+              if stop < start:
+                  raise ValueError("offsets must be monotonically increasing")
+              for j in range(start, stop):
                   if k < carrylength:
                       tocarry[k] = j - start
                   k = k + (1 if mask[j] != 0 else 0)
               tooffsets[i + 1] = k
+          if k != carrylength:
+              raise ValueError("carrylength must be the number of selected elements")
     automatic-tests: true
 
   - name: awkward_ByteMaskedArray_getitem_nextcarry_outindex

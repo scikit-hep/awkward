@@ -1365,10 +1365,11 @@ def awkward_ListOffsetArray_getitem_boolmask(
     tooffsets, tocarry, mask, fromoffsets, length, carrylength
 ):
     tooffsets[0] = 0
-    if length == 0:
-        return
-
     offsets = fromoffsets[: length + 1].astype(cp.int64, copy=False)
+    if cp.any(offsets[1:] < offsets[:-1]):
+        raise ValueError(
+            "offsets must be monotonically increasing in compiled CUDA code (awkward_ListOffsetArray_getitem_boolmask)"
+        )
     begin, end = int(offsets[0]), int(offsets[length])
     selected_mask = mask[begin:end] != 0
 
@@ -1379,13 +1380,17 @@ def awkward_ListOffsetArray_getitem_boolmask(
     cp.cumsum(selected_mask, out=cumsum[1:])
     tooffsets[: length + 1] = cumsum[offsets - begin]
 
+    positions = cp.nonzero(selected_mask)[0]
+    if positions.size != carrylength:
+        raise ValueError(
+            "carrylength must be the number of selected elements in compiled CUDA code (awkward_ListOffsetArray_getitem_boolmask)"
+        )
     if carrylength == 0:
         return
 
     # each selected element's position minus the start of the list it belongs to
-    positions = cp.nonzero(selected_mask)[0]
     starts = cp.repeat(offsets[:length] - begin, cp.diff(tooffsets[: length + 1]))
-    tocarry[:carrylength] = (positions - starts)[:carrylength]
+    tocarry[:carrylength] = positions - starts
 
 
 # Counts null (invalid) entries: positions where (mask[i] != 0) != validwhen.
