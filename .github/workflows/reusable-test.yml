@@ -152,9 +152,10 @@ jobs:
         if: (matrix.python-version == '3.12') && (matrix.runs-on == 'ubuntu-latest')
         run: pipx run nox -s diagnostics -- --check-spec-sorted
 
+      # Not with xdist: these tests are too short for it to pay off
       - name: Test specification and CPU kernels
         run: >-
-          python -m pytest -n auto -vv -rs
+          python -m pytest -vv -rs
           awkward-cpp/tests-spec awkward-cpp/tests-spec-explicit
           awkward-cpp/tests-cpu-kernels awkward-cpp/tests-cpu-kernels-explicit
 
@@ -480,13 +481,15 @@ jobs:
               uv pip list
             '
 
+      # Not with xdist: under emulation, starting the workers costs more than
+      # running the tests in parallel saves
       - name: Test specification and CPU kernels
         run: |
           docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
-              python -m pytest -n auto -vv -rs \
+              python -m pytest -vv -rs \
                 awkward-cpp/tests-spec awkward-cpp/tests-spec-explicit \
                 awkward-cpp/tests-cpu-kernels awkward-cpp/tests-cpu-kernels-explicit
             '
@@ -497,5 +500,5 @@ jobs:
             -v $(pwd):/awkward the_container \
             /bin/bash -c '
               source .venv/bin/activate && cd /awkward &&
-              python -m pytest -n auto -vv -rs tests
+              python -m pytest -vv -rs tests
             '
