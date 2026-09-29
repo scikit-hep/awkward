@@ -867,9 +867,18 @@ class NumpyArray(NumpyMeta, Content):
             # its own dtype below so that no distinct values are merged.
             nplike = self._backend.nplike
             if negaxis is None:
-                # unique_values sorts by itself and supports every NumPy dtype.
+                # Widen float16 exactly to avoid native half-precision unique
+                # failures on 32-bit Windows. Keep extended precision intact
+                # so that narrowing cannot merge distinct values.
+                data = self.to_contiguous()._data
+                is_float16 = data.dtype == np.dtype(np.float16)
+                if is_float16:
+                    data = nplike.astype(data, np.dtype(np.float32))
+                out = nplike.unique_values(data)
+                if is_float16:
+                    out = nplike.astype(out, self._data.dtype)
                 return NumpyArray(
-                    nplike.unique_values(self.to_contiguous()._data),
+                    out,
                     parameters=None,
                     backend=self._backend,
                 )
