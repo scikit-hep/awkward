@@ -128,6 +128,8 @@ class RecordType(Type):
                         "categorical",
                     )
                     or name in ak.types.numpytype._primitive_to_dtype_dict
+                    # the grammar reserves these on every platform
+                    or name in ("float128", "complex256")
                 ):
                     if params is None:
                         params = 'parameters={"__record__": ' + json.dumps(name) + "}"
