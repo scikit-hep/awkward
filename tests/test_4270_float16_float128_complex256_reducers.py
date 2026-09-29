@@ -10,12 +10,11 @@ import pytest
 import awkward as ak
 
 # float16, float128 and complex256 have no compiled reducer/sort kernels. They
-# are now reduced through the nearest supported dtype (float16 -> float32,
-# float128 -> float64, complex256 -> complex128) with the value-preserving result
-# cast back; sort/argsort instead gather the original values through the cast-down
-# permutation, so exact precision is kept. Every reducer and ak.sort/ak.argsort
-# work instead of raising KeyError. Complex arrays (any width) give a clear
-# TypeError from sort/argsort, which awkward does not support.
+# use float32 intermediates for float16 reductions and original-precision NumPy
+# operations or exact rank keys for extended-precision reductions. Sort gathers
+# original values through an argsort permutation, correcting float128 collisions
+# in float64 keys. Complex arrays (any width) give a clear TypeError from
+# sort/argsort, which awkward does not support.
 #
 # float128/complex256 are platform-dependent (e.g. macOS arm64 has neither); the
 # tests for them skip where NumPy doesn't provide them.
@@ -77,8 +76,8 @@ def test_float16_sort_argsort():
 
 
 def test_float16_mean_std_var():
-    # These build on the float64-accumulator sum (awkward_reduce_sum_float64_*),
-    # reached via the float16 -> float32 cast.
+    # Check derived statistics as well as the primitive reducers, using a
+    # float64 NumPy reference and tolerances appropriate for float16 results.
     arr = _jagged(np.float16)
     flat = np.array([x for r in ROWS for x in r], dtype=np.float64)
     assert ak.mean(arr, axis=None) == pytest.approx(np.mean(flat), rel=1e-2)
@@ -286,7 +285,7 @@ def test_complex256_reducers_axis1(op, npop):
     not hasattr(np, "complex256"), reason="no complex256 on this platform"
 )
 def test_complex256_all_any():
-    # all/any go through the complex256 -> complex128 cast and return bool.
+    # all/any test the original complex256 values against zero and return bool.
     arr = ak.values_astype(
         ak.Array([[1 + 0j, 2 + 0j], [0 + 0j, 0 + 0j]]), np.complex256
     )
@@ -326,7 +325,7 @@ def test_float16_categorical_is_valid():
 
 @pytest.mark.skipif(not hasattr(np, "float128"), reason="no float128 on this platform")
 def test_float128_categorical_is_valid():
-    # float128 content reaches _unique through the float64 cast (see _unique).
+    # Categorical validation checks uniqueness in the original float128 dtype.
     arr = _categorical_float(np.float128)
     assert ak.is_valid(arr)
     assert ak.validity_error(arr) == ""
@@ -346,9 +345,9 @@ def test_float128_categorical_is_valid():
 )
 def test_unique_per_list_casts_back_through_list_nodes(dtype):
     # With an axis (negaxis is not None), _unique returns a ListOffsetArray
-    # wrapping the unique values rather than a bare NumpyArray. The cast-back
-    # walk in NumpyArray._unique must leave the list node untouched and only
-    # restore the dtype of the NumpyArray leaf.
+    # wrapping the unique values rather than a bare NumpyArray. For float16 the
+    # cast-back walk restores only the leaf dtype; float128 computes unique
+    # values directly in its original precision. Both preserve the list node.
     layout = ak.contents.ListOffsetArray(
         ak.index.Index64(np.array([0, 3, 3, 6], dtype=np.int64)),
         ak.contents.NumpyArray(np.array([2.0, 1.0, 2.0, 3.0, 3.0, 0.5], dtype=dtype)),

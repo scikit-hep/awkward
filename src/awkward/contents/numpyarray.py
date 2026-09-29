@@ -65,7 +65,8 @@ def _kernel_unsupported_cast(dtype):
 
     ``float16`` -> ``float32`` (lossless); extended ``float128``/``longdouble``
     -> ``float64`` and ``complex256``/``clongdouble`` -> ``complex128`` (these
-    lose precision -- there is no native kernel for them). Detected by kind and
+    lose precision, so callers use original values for extended-precision
+    reductions and uniqueness, and correct sort-key collisions). Detected by kind and
     itemsize so it is platform-independent (on systems where ``longdouble`` is
     ``float64`` there is nothing wider than 8 bytes, so nothing is remapped).
     """
@@ -863,8 +864,8 @@ class NumpyArray(NumpyMeta, Content):
             # No sort/unique kernel for float16/float128/complex256 (reached e.g.
             # by ak.validity_error on categorical float16 content). Compute the
             # unique values through the nearest supported dtype, then cast the
-            # result back (float16 <-> float32 is exact); float128 is handled in
-            # its own dtype below so that no distinct values are merged.
+            # result back for float16 (float16 <-> float32 is exact). Extended
+            # precision stays in its own dtype so distinct values are not merged.
             nplike = self._backend.nplike
             if negaxis is None:
                 # Widen float16 exactly to avoid native half-precision unique
@@ -1242,7 +1243,7 @@ class NumpyArray(NumpyMeta, Content):
                     f"cannot sort {self._data.dtype!r}: sorting complex numbers "
                     "is not supported"
                 )
-            # No sort kernel for float16/float128/complex256. We must not sort the
+            # No sort kernel for float16/float128. We must not sort the
             # cast-down values and cast them back: that would round every element
             # to the lower precision (e.g. float128 -> float64) and relabel it,
             # changing the multiset the sort returns. Instead argsort the cast-down
@@ -1354,9 +1355,9 @@ class NumpyArray(NumpyMeta, Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        # Dtypes with no compiled reducer kernel (float16, float128, complex256)
-        # are reduced through the nearest supported dtype and the value-preserving
-        # result is cast back, so `ak.sum`/`prod`/`min`/`max`/... work on them.
+        # Widen float16 to float32 for compiled reducers and restore value-result
+        # dtypes. For known NumPy data, handle extended precision first through
+        # _reduce_extended; typetracer uses the cast path to infer result forms.
         cast = _kernel_unsupported_cast(self._data.dtype)
         out = None
         if (
