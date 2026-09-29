@@ -11,7 +11,9 @@ import awkward as ak
 @pytest.mark.parametrize("dtype", [np.float16, np.float32])
 @pytest.mark.parametrize("ascending", [True, False])
 @pytest.mark.parametrize("stable", [True, False])
-def test_sort_record_option_field_longer_than_record(dtype, ascending, stable, monkeypatch):
+def test_sort_record_option_field_longer_than_record(
+    dtype, ascending, stable, monkeypatch
+):
     # Make unwritten carry entries fail deterministically rather than depend on
     # whichever values the allocator left in the buffer.
     original_empty = ak.index.Index64.empty
