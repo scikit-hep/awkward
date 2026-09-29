@@ -10,7 +10,8 @@ import awkward as ak
 def test_unique_flat_float16_extreme_values():
     # Widening must preserve subnormals and extremes, while unique_values
     # retains repeated NaNs (equal_nan=False).
-    tiny = np.finfo(np.float16).smallest_subnormal
+    # IEEE float16's smallest subnormal; older NumPy lacks smallest_subnormal.
+    tiny = np.float16(2.0**-24)
     largest = np.finfo(np.float16).max
     data = np.array(
         [largest, tiny, -tiny, -largest, np.inf, -np.inf, 0, tiny, largest,
