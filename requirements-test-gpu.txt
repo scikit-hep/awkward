@@ -16,5 +16,7 @@ numba-cuda>=0.25.0
 numpy<2.5
 pyarrow
 pytest>=6
+pytest-cov
+pytest-xdist
 PyYAML
 uproot>=5
