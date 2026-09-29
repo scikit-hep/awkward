@@ -11,7 +11,17 @@ import awkward as ak
 @pytest.mark.parametrize("dtype", [np.float16, np.float32])
 @pytest.mark.parametrize("ascending", [True, False])
 @pytest.mark.parametrize("stable", [True, False])
-def test_sort_record_option_field_longer_than_record(dtype, ascending, stable):
+def test_sort_record_option_field_longer_than_record(dtype, ascending, stable, monkeypatch):
+    # Make unwritten carry entries fail deterministically rather than depend on
+    # whichever values the allocator left in the buffer.
+    original_empty = ak.index.Index64.empty
+
+    def poisoned_empty(cls, length, nplike):
+        index = original_empty(length, nplike)
+        index.data[:] = 2**60
+        return index
+
+    monkeypatch.setattr(ak.index.Index64, "empty", classmethod(poisoned_empty))
     content = ak.contents.NumpyArray(np.array([3.0, 1.0, 2.0, 4.0], dtype=dtype))
     field = ak.contents.IndexedOptionArray(
         ak.index.Index64(np.array([0, -1, 1, 2, 3], dtype=np.int64)), content
@@ -25,7 +35,4 @@ def test_sort_record_option_field_longer_than_record(dtype, ascending, stable):
     out_field = out.layout.content("x")
     assert isinstance(out_field, ak.contents.IndexedOptionArray)
     assert out_field.content.dtype == np.dtype(dtype)
-    # Only two nonmissing values are sorted, but the option field still has
-    # four nonmissing entries. Truncating the carry to the covered positions
-    # must not truncate the content that its parent retains.
-    assert out_field.content.length == content.length
+    assert ak.is_valid(out)
