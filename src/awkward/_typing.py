@@ -79,3 +79,18 @@ JSONSerializable: TypeAlias = (
 JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
 
 DType: TypeAlias = numpy.dtype
+
+
+class NominalMeta(type(Protocol)):
+    """Metaclass restoring the interpreter's ``isinstance`` fast path.
+
+    Concrete classes that descend from a ``Protocol`` inherit
+    ``typing._ProtocolMeta``, whose Python-level ``__instancecheck__`` costs
+    roughly four times a plain class check even though, for a non-protocol
+    subclass, it only performs the ordinary nominal test. Classes using this
+    metaclass are checked nominally and cannot be given virtual subclasses
+    through ``abc``'s ``register()``.
+    """
+
+    __instancecheck__ = type.__instancecheck__
+    __subclasscheck__ = type.__subclasscheck__
