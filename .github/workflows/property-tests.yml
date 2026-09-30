@@ -75,7 +75,7 @@ jobs:
         run: python -m pip list
 
       - name: Run property-based tests
-        run: python -m pytest -vv -rs tests/properties --hypothesis-show-statistics
+        run: python -m pytest -n auto -vv -rs tests/properties --hypothesis-show-statistics
         env:
           HYPOTHESIS_PROFILE: nightly
 
@@ -83,6 +83,6 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           python -m pip install 'pytest-run-parallel>=0.8.2'
-          python -m pytest -vv -rs tests/properties --parallel-threads 4
+          python -m pytest -n auto -vv -rs tests/properties --parallel-threads 4
         env:
           HYPOTHESIS_PROFILE: default
