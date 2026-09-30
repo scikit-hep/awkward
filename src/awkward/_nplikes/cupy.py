@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import awkward as ak
 from awkward._nplikes.array_like import maybe_materialize
-from awkward._nplikes.array_module import ArrayModuleNumpyLike
+from awkward._nplikes.array_module import (
+    ArrayModuleNumpyLike,
+    _nplike_repeat_has_array_repeats,
+)
 from awkward._nplikes.dispatch import register_nplike
 from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
@@ -69,27 +72,17 @@ class Cupy(ArrayModuleNumpyLike):
         x, repeats = maybe_materialize(x, repeats)
         if axis is not None:
             raise NotImplementedError(f"repeat for CuPy with axis={axis!r}")
-        # https://github.com/cupy/cupy/issues/3849
-        if isinstance(repeats, self._module.ndarray):
-            all_stops = self._module.cumsum(repeats)
-            total = int(all_stops[-1].item()) if all_stops.size else 0
-            parents = self._module.zeros(total, dtype=int)
-            if total > 0:
-                stops, stop_counts = self._module.unique(
-                    all_stops[:-1], return_counts=True
-                )
-                # trailing zero-repeats make `all_stops[:-1]` contain boundary
-                # values equal to `total`, which is one past the end of
-                # `parents` -- drop those or the assignment below writes out
-                # of bounds (silently corrupts the GPU memory pool on CUDA
-                # instead of raising, since the write lands in still-mapped
-                # pool memory)
-                in_bounds = stops < total
-                stops = stops[in_bounds]
-                stop_counts = stop_counts[in_bounds]
-                parents[stops] = stop_counts
-                self._module.cumsum(parents, out=parents)
-            return x[parents]
+        # https://github.com/cupy/cupy/issues/3849, implemented in CuPy 14.1
+        if isinstance(
+            repeats, self._module.ndarray
+        ) and not _nplike_repeat_has_array_repeats(self._module):
+            stops = self._module.cumsum(repeats)
+            total = int(stops[-1].item()) if stops.size else 0
+            # mark where each element's run ends; the extra slot absorbs the
+            # boundaries that trailing zero repeats leave at `total`
+            marks = self._module.zeros(total + 1, dtype=np.intp)
+            self._module.add.at(marks, stops[:-1], 1)
+            return x[self._module.cumsum(marks[:-1])]
         else:
             return self._module.repeat(x, repeats=repeats)
 

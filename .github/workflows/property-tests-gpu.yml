@@ -58,6 +58,7 @@ jobs:
           cuda-version: ${{ matrix.cuda-version }}
 
       - name: Run property-based kernel tests on GPU
-        run: python -m pytest -vv -rs tests/properties -m cuda --hypothesis-show-statistics
+        # The workers share one GPU, so keep their number small
+        run: python -m pytest -n 4 -vv -rs tests/properties -m cuda --hypothesis-show-statistics
         env:
           HYPOTHESIS_PROFILE: nightly

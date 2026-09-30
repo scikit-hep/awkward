@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   remove-branch-preview:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     name: Remove Branch Preview
     permissions:
       contents: read
