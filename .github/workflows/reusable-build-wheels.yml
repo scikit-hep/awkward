@@ -20,7 +20,7 @@ jobs:
   determine-source-date-epoch:
     name: "Determine SOURCE_DATE_EPOCH"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
@@ -41,7 +41,7 @@ jobs:
   make_sdist:
     name: "Build awkward-cpp sdist"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -100,9 +100,9 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
 
-    - uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
+    - uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
       env:
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
@@ -132,13 +132,13 @@ jobs:
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
 
     # The pyodide cross-build cannot generate the kernel tests (no host numpy)
     - name: Generate kernel tests for the wheel test suite
       run: pipx run nox -s prepare -- --tests
 
-    - uses: pypa/cibuildwheel@1828c10ab37f080699c7b81cea34097c684a7074 # v4.2.0
+    - uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
       env:
         CIBW_PLATFORM: pyodide
       with:
@@ -156,7 +156,7 @@ jobs:
   build_awkward_wheel:
     name: "Build awkward sdist and wheel"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -167,7 +167,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
 
     - name: Prepare build files
       run: pipx run nox -s prepare
