@@ -34,7 +34,7 @@ np = NumpyMetadata.instance()
 @high_level_function()
 def concatenate(
     arrays: Any,
-    axis: int | str | None = 0,
+    axis: int | str = 0,
     *,
     mergebool: bool = True,
     highlevel: bool = True,

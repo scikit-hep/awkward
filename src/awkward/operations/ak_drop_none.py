@@ -22,7 +22,6 @@ np = NumpyMetadata.instance()
 def drop_none(
     array: Any,
     axis: int | str | None = None,
-    *,
     highlevel: bool = True,
     behavior: Mapping | None = None,
     attrs: Mapping | None = None,

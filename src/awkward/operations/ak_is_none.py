@@ -22,7 +22,7 @@ np = NumpyMetadata.instance()
 @high_level_function()
 def is_none(
     array: Any,
-    axis: int | str | None = 0,
+    axis: int | str = 0,
     *,
     highlevel: bool = True,
     behavior: Mapping | None = None,
