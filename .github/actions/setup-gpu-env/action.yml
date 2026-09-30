@@ -23,6 +23,7 @@ runs:
         # numpy 2.5 (NVIDIA/numba-cuda#907): numba-cuda 0.30.4 references
         # the removed np.row_stack at import time
         # cccl-python>=1.2.0 is the minimum cuda-cccl version that uses numba-cuda-mlir
+        # numba-cuda-mlir 0.5.3 is broken (cuda-cccl itself excludes it)
         create-args: >-
           -c rapidsai
           python=3.13
@@ -33,7 +34,7 @@ runs:
           cuda-version=${{ inputs.cuda-version }}
           cxx-compiler
           numba-cuda
-          numba-cuda-mlir>=0.5.2,<0.6
+          numba-cuda-mlir>=0.5.2,!=0.5.3,<0.6
           numpy<2.5
 
     - name: Generate build files

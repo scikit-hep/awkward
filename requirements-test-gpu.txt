@@ -12,7 +12,7 @@ fsspec>=2022.11.0
 hypothesis-awkward==0.20.2
 numba>=0.60
 numba-cuda>=0.25.0  # backs the public `ak.numba.cuda` extension
-numba-cuda-mlir>=0.5.2,<0.6  # required by the CUDA backend
+numba-cuda-mlir>=0.5.2,!=0.5.3,<0.6  # required by the CUDA backend; 0.5.3 is broken, see cuda-cccl's own pin
 # numpy<2.5 until a numba-cuda release supports numpy 2.5
 # (NVIDIA/numba-cuda#907): numba-cuda 0.30.4 references the removed
 # np.row_stack at import time
