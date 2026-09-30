@@ -114,25 +114,49 @@ def _impl(
                     return np.issubdtype(right, family)
         return left == right
 
+    def eager_carry(layout, carry):
+        # Carry eagerly so that same_content_types sees the packed classes. A lazy
+        # carry wraps a RecordArray in an IndexedArray and an UnmaskedArray above
+        # it then becomes an IndexedOptionArray
+        return layout._carry(ak.index.Index64(carry, nplike=backend.nplike), False)
+
+    def project_union(layout, tag):
+        tags = layout.tags.data
+        return eager_carry(
+            layout.contents[tag], layout.index.data[: tags.shape[0]][tags == tag]
+        )
+
+    def project_option(layout):
+        layout = layout.to_IndexedOptionArray64()
+        index = layout.index.data
+        return eager_carry(layout.content, index[index >= 0])
+
+    def to_list_offset_array(layout):
+        if not isinstance(layout, ak.contents.ListArray):
+            return layout.to_ListOffsetArray64(False)
+        offsets = layout._compact_offsets64(True)
+        carry = backend.nplike.arange(offsets[-1]) + backend.nplike.repeat(
+            layout.starts.data - offsets.data[:-1],
+            offsets.data[1:] - offsets.data[:-1],
+        )
+        return ak.contents.ListOffsetArray(
+            offsets, eager_carry(layout.content, carry), parameters=layout.parameters
+        )
+
     def packed_list_content(layout):
-        layout = layout.to_ListOffsetArray64(False)
+        layout = to_list_offset_array(layout)
         return layout.content[layout.offsets[0] : layout.offsets[-1]]
 
     def packed_node(layout):
-        # This comparison is defined on the packed forms of its two arguments, but
-        # the nodes that this traversal derives are built with lazy carries: a
-        # `RecordArray` becomes an `IndexedArray`, and a `ListOffsetArray` becomes
-        # a `ListArray`, whenever a projection has to reorder its content. Packing
-        # leaves behind neither class, so restore the packed class here; otherwise
-        # `same_content_types` would reject two equal arrays purely because one
-        # side's index happened to be contiguous.
+        # Packed layouts have no ListArray and no IndexedArray (except categorical)
+        # but carrying can create them so convert them back
         if (
             isinstance(layout, ak.contents.IndexedArray)
             and layout.parameter("__array__") != "categorical"
         ):
             layout = layout.project()
         if isinstance(layout, ak.contents.ListArray):
-            layout = layout.to_ListOffsetArray64(False)
+            layout = to_list_offset_array(layout)
         return layout
 
     def visitor(left, right) -> bool:
@@ -277,7 +301,7 @@ def _impl(
         elif left.is_option and right.is_option:
             return backend.nplike.array_equal(
                 left.mask_as_bool(True), right.mask_as_bool(True)
-            ) and visitor(left.project(), right.project())
+            ) and visitor(project_option(left), project_option(right))
         elif left.is_union and right.is_union:
             # After simplification, both unions should have the same number of contents
             if len(left.contents) != len(right.contents):
@@ -314,7 +338,7 @@ def _impl(
 
             # Now project out the contents, and check for equality
             for i, j in zip(left_tag_order, right_tag_order, strict=True):
-                if not visitor(left.project(i), right.project(j)):
+                if not visitor(project_union(left, i), project_union(right, j)):
                     return False
             return True
 

@@ -59,6 +59,71 @@ def test_reordered_index_hand_built_union():
     assert ak.almost_equal(left, right)
 
 
+def _unmasked_records_union(index, offsets):
+    return ak.Array(
+        ak.contents.UnionArray(
+            ak.index.Index8(np.array([1, 1, 0], dtype=np.int8)),
+            ak.index.Index64(np.array(index, dtype=np.int64)),
+            [
+                ak.contents.NumpyArray(np.array([2], dtype=np.int64)),
+                ak.contents.ListOffsetArray(
+                    ak.index.Index64(np.array(offsets, dtype=np.int64)),
+                    ak.contents.UnmaskedArray(
+                        ak.contents.RecordArray(
+                            [ak.contents.NumpyArray(np.array([1], dtype=np.int64))],
+                            ["x"],
+                        )
+                    ),
+                ),
+            ],
+        )
+    )
+
+
+def test_reordered_index_unmasked_records():
+    """A list child of nullable records, which is how pyarrow makes a struct.
+
+    Compacting the reordered side's lists carries the records, and a lazy
+    carry would turn the `UnmaskedArray` over them into an
+    `IndexedOptionArray` on that side only.
+    """
+    left = _unmasked_records_union([0, 1, 0], [0, 1, 1])
+    right = _unmasked_records_union([1, 0, 0], [0, 0, 1])
+
+    assert left.layout.form == right.layout.form
+    assert left.tolist() == [[{"x": 1}], [], 2]
+    assert right.tolist() == [[{"x": 1}], [], 2]
+    assert ak.array_equal(left, right)
+    assert ak.array_equal(right, left)
+    assert ak.array_equal(left, right, same_content_types=False)
+    assert ak.almost_equal(left, right)
+
+
+def test_reordered_index_unmasked_records_from_arrow():
+    """The same layout, as `ak.from_arrow` builds it from a dense union."""
+    pa = pytest.importorskip("pyarrow")
+
+    def dense(offsets, lists):
+        return ak.from_arrow(
+            pa.UnionArray.from_dense(
+                pa.array([1, 1, 0], pa.int8()),
+                pa.array(offsets, pa.int32()),
+                [
+                    pa.array([2], pa.int64()),
+                    pa.array(lists, pa.list_(pa.struct([("x", pa.int64())]))),
+                ],
+            )
+        )
+
+    left = dense([0, 1, 0], [[{"x": 1}], []])
+    right = dense([1, 0, 0], [[], [{"x": 1}]])
+
+    assert left.tolist() == right.tolist()
+    assert ak.array_equal(left, right)
+    assert ak.array_equal(right, left)
+    assert ak.almost_equal(left, right)
+
+
 @pytest.mark.parametrize(
     "data",
     [
@@ -152,3 +217,80 @@ def test_categorical_content_class_still_compared():
     assert not ak.array_equal(plain, categorical)
     assert ak.array_equal(categorical, plain, same_content_types=False)
     assert ak.array_equal(categorical, categorical)
+
+
+@pytest.mark.parametrize("check_parameters", [True, False])
+def test_categorical_union_child_class_still_compared(check_parameters):
+    """A categorical union child compares as it does outside a union.
+
+    The lazy carry of the plain records used to be an `IndexedArray` too, so
+    `ak.array_equal` returned True here, although it returns False for the
+    same two contents outside a union.
+    """
+    categorical = ak.contents.IndexedArray(
+        ak.index.Index64(np.array([1, 0], dtype=np.int64)),
+        ak.contents.RecordArray(
+            [ak.contents.NumpyArray(np.array([5, 6], dtype=np.int64))], ["y"]
+        ),
+        parameters={"__array__": "categorical"},
+    )
+    plain = ak.contents.RecordArray(
+        [ak.contents.NumpyArray(np.array([6, 5], dtype=np.int64))], ["y"]
+    )
+    left = _union_of(categorical)
+    right = _union_of(plain)
+
+    assert left.tolist() == right.tolist()
+    assert not ak.array_equal(categorical, plain, check_parameters=check_parameters)
+    assert not ak.array_equal(left, right, check_parameters=check_parameters)
+    assert not ak.array_equal(right, left, check_parameters=check_parameters)
+    assert ak.array_equal(
+        left, right, check_parameters=check_parameters, same_content_types=False
+    )
+    assert ak.almost_equal(left, right, check_parameters=check_parameters)
+
+
+def _regular_of_optional_records():
+    records = ak.contents.RecordArray(
+        [ak.contents.NumpyArray(np.array([1, 3], dtype=np.int64))], ["x"]
+    )
+    unmasked = ak.contents.UnmaskedArray(records)
+    indexed = ak.contents.IndexedOptionArray(
+        ak.index.Index64(np.array([0, 1], dtype=np.int64)), records
+    )
+    return (
+        ak.contents.RegularArray(unmasked, 1),
+        ak.contents.RegularArray(indexed, 1),
+    )
+
+
+def test_union_child_option_classes_still_compared():
+    """Projecting a union child must keep an `UnmaskedArray` below it.
+
+    A lazy carry turns it into an `IndexedOptionArray` on both sides, which
+    would make it pass the class check against a real one.
+    """
+    unmasked, indexed = _regular_of_optional_records()
+    left = _union_of(unmasked)
+    right = _union_of(indexed)
+
+    assert left.tolist() == right.tolist()
+    assert not ak.array_equal(unmasked, indexed)
+    assert not ak.array_equal(left, right)
+    assert not ak.array_equal(right, left)
+    assert ak.array_equal(left, right, same_content_types=False)
+    assert ak.almost_equal(left, right)
+
+
+def test_option_content_classes_still_compared():
+    """Projecting an option's content must keep an `UnmaskedArray` below it."""
+    unmasked, indexed = _regular_of_optional_records()
+    mask = ak.index.Index8(np.array([1, 0], dtype=np.int8))
+    left = ak.contents.ByteMaskedArray(mask, unmasked, valid_when=True)
+    right = ak.contents.ByteMaskedArray(mask, indexed, valid_when=True)
+
+    assert left.to_packed().form != right.to_packed().form
+    assert not ak.array_equal(left, right)
+    assert not ak.array_equal(right, left)
+    assert ak.array_equal(left, right, same_content_types=False)
+    assert ak.almost_equal(left, right)
