@@ -1,7 +1,5 @@
 """CPU reduction/sort benchmark targeting the parents->offsets kernel migration."""
 
-from __future__ import annotations
-
 import gc
 import json
 import sys

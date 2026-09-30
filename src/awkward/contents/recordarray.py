@@ -1119,22 +1119,13 @@ class RecordArray(RecordMeta[Content], Content):
             contents = []
             for content in self._contents:
                 contents.append(content._pad_none(target, axis, depth, clip))
-            if len(contents) == 0:
-                return ak.contents.RecordArray(
-                    contents,
-                    self._fields,
-                    self.length,
-                    parameters=self._parameters,
-                    backend=self._backend,
-                )
-            else:
-                return ak.contents.RecordArray(
-                    contents,
-                    self._fields,
-                    self.length,
-                    parameters=self._parameters,
-                    backend=self._backend,
-                )
+            return ak.contents.RecordArray(
+                contents,
+                self._fields,
+                self.length,
+                parameters=self._parameters,
+                backend=self._backend,
+            )
 
     def _to_arrow(
         self,
@@ -1184,25 +1175,28 @@ class RecordArray(RecordMeta[Content], Content):
         )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
+        import pylibcudf as plc
+        from cudf.core.column.column import ColumnBase
+
         children = tuple(
             c._to_cudf(cudf, mask=None, length=length) for c in self.contents
         )
         dt = cudf.core.dtypes.StructDtype(
             {field: c.dtype for field, c in zip(self.fields, children, strict=True)}
         )
-        m = mask._to_cudf(cudf, None, length) if mask else None
-        return cudf.core.column.struct.StructColumn(
-            data=None,
-            children=children,
-            dtype=dt,
-            mask=m,
+
+        plc_col = plc.Column(
+            data_type=plc.DataType(plc.TypeId.STRUCT),
             size=length,
+            data=None,
+            mask=None,
+            null_count=0,
             offset=0,
+            children=[c.to_pylibcudf() for c in children],
         )
+        return ColumnBase.create(plc_col, dt)
 
     def _to_backend_array(self, allow_missing, backend):
-        if self.fields is None:
-            return backend.nplike.empty(self.length, dtype=[])
         contents = [x._to_backend_array(allow_missing, backend) for x in self._contents]
         if any(len(x.shape) != 1 for x in contents):
             raise ValueError(f"cannot convert {self} into np.ndarray")

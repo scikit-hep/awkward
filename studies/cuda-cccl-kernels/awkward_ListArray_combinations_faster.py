@@ -30,7 +30,6 @@ Pipeline:
   Returns views out0[:total], out1[:total]
 """
 
-from __future__ import annotations
 
 from functools import lru_cache
 from typing import List, Tuple

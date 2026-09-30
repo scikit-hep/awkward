@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -16,7 +15,10 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def from_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Converts one or all regular axes into irregular ones.
+
+    See also #ak.to_regular.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or None): The dimension at which this operation is applied.
@@ -31,8 +33,10 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a regular axis into an irregular one.
+    Returns:
+        An array with one or all regular axes converted to irregular (var) axes.
 
+    Examples:
         >>> regular = ak.Array(np.arange(2*3*5).reshape(2, 3, 5))
         >>> regular.type.show()
         2 * 3 * 5 * int64
@@ -42,8 +46,6 @@ def from_regular(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
         2 * 3 * var * int64
         >>> ak.from_regular(regular, axis=-1).type.show()
         2 * 3 * var * int64
-
-    See also #ak.to_regular.
     """
     # Dispatch
     yield (array,)

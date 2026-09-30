@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -91,9 +90,6 @@ def test_sort_cuda_deeply_nested():
 
 
 def test_sort_cuda_unsupported_axis():
-    """Test that sorting at unsupported axes fails with clear error."""
-    # Sorting at axis=-2 requires CuPy kernels that don't exist
-    # This should fail with an AssertionError indicating missing kernels
     data = ak.Array([[[7, 2, 3], [4, 5, 6]]])
     gpu_data = ak.to_backend(data, "cuda")
 
@@ -102,12 +98,14 @@ def test_sort_cuda_unsupported_axis():
     result = ak.to_backend(sorted_axis_minus1, "cpu")
     assert to_list(result) == [[[2, 3, 7], [4, 5, 6]]]
 
-    # axis=-2 should fail (requires CuPy kernels not available)
-    with pytest.raises(
-        AssertionError,
-        match=r"(CuPyKernel not found|Operation .* is not supported)",
-    ):
-        ak.sort(gpu_data, axis=-2)
+    # axis=-2 should also work
+    expected = ak.to_backend(
+        ak.Array([[[4, 2, 3], [7, 5, 6]]]),
+        "cuda",
+    )
+
+    result = ak.sort(gpu_data, axis=-2)
+    assert ak.all(result == expected)
 
 
 def test_sort_cuda_no_compute():

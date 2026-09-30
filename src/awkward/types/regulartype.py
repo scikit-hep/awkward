@@ -109,6 +109,10 @@ class RegularType(Type):
         return (
             isinstance(other, type(self))
             and compare_parameters(self._parameters, other._parameters)
-            and (self._size == other._size)
+            and (
+                self._size is unknown_length
+                or other._size is unknown_length
+                or self._size == other._size
+            )
             and self._content._is_equal_to(other._content, all_parameters)
         )

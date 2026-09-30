@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward.operations.str
 from awkward.operations.ak_all import *
@@ -18,6 +17,7 @@ from awkward.operations.ak_broadcast_arrays import *
 from awkward.operations.ak_broadcast_fields import *
 from awkward.operations.ak_cartesian import *
 from awkward.operations.ak_categories import *
+from awkward.operations.ak_centered_sumofsquares import *
 from awkward.operations.ak_combinations import *
 from awkward.operations.ak_concatenate import *
 from awkward.operations.ak_copy import *
@@ -36,6 +36,7 @@ from awkward.operations.ak_from_arrow_schema import *
 from awkward.operations.ak_from_avro_file import *
 from awkward.operations.ak_from_buffers import *
 from awkward.operations.ak_from_categorical import *
+from awkward.operations.ak_from_cudf import *
 from awkward.operations.ak_from_cupy import *
 from awkward.operations.ak_from_dlpack import *
 from awkward.operations.ak_from_feather import *
@@ -86,6 +87,8 @@ from awkward.operations.ak_sort import *
 from awkward.operations.ak_std import *
 from awkward.operations.ak_strings_astype import *
 from awkward.operations.ak_sum import *
+from awkward.operations.ak_sumofpowers import *
+from awkward.operations.ak_sumofsquares import *
 from awkward.operations.ak_to_arrow import *
 from awkward.operations.ak_to_arrow_table import *
 from awkward.operations.ak_to_backend import *

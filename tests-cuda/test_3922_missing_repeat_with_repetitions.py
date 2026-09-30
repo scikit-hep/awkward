@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import cupy
 import cupy.testing as cpt
 import pytest

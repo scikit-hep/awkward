@@ -85,13 +85,13 @@ namespace awkward {
       case dtype::uint16:
         return "H";
       case dtype::uint32:
-#if defined _MSC_VER || defined INTPTR_MAX == INT32_MAX
+#if defined _MSC_VER || INTPTR_MAX == INT32_MAX
         return "L";
 #else
         return "I";
 #endif
       case dtype::uint64:
-#if defined _MSC_VER || defined INTPTR_MAX == INT32_MAX
+#if defined _MSC_VER || INTPTR_MAX == INT32_MAX
         return "Q";
 #else
         return "L";

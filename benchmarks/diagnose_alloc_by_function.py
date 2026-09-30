@@ -12,8 +12,6 @@ module attributes is picked up).
 Run on the GPU box:  python benchmarks/diagnose_alloc_by_function.py
 """
 
-from __future__ import annotations
-
 import collections
 import functools
 

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
@@ -24,7 +23,15 @@ def zeros_like(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns an array with the same structure as the input, filled with zeros.
+
+    This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
+
+    (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
+    are immutable.)
+
+    See #ak.full_like for details, and see also #ak.ones_like.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         dtype (None or NumPy dtype): Overrides the data type of the result.
@@ -38,12 +45,9 @@ def zeros_like(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    This is the equivalent of NumPy's `np.zeros_like` for Awkward Arrays.
-
-    See #ak.full_like for details, and see also #ak.ones_like.
-
-    (There is no equivalent of NumPy's `np.empty_like` because Awkward Arrays
-    are immutable.)
+    Returns:
+        An array with the same structure as `array`, with every value replaced
+        by zero.
     """
     # Dispatch
     yield (array,)

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from awkward.types.arraytype import ArrayType  # noqa: F401
 from awkward.types.listtype import ListType  # noqa: F401

@@ -49,8 +49,6 @@ extensions = [
     "sphinx.ext.napoleon",
     "autoapi.extension",
     "myst_nb",
-    # Preserve old links
-    # "jupyterlite_sphinx",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
 ]
@@ -129,11 +127,36 @@ def _ak_output_filename(self):
 
 
 from autoapi._objects import PythonObject, TopLevelPythonObject  # noqa: E402
+from autoapi._parser import Parser  # noqa: E402
 
 PythonObject.output_dir = _flat_output_dir
 PythonObject.output_filename = _ak_output_filename
 TopLevelPythonObject.output_dir = _flat_output_dir
 TopLevelPythonObject.output_filename = _ak_output_filename
+
+
+_parse_functiondef = Parser.parse_functiondef
+
+
+def _is_experimental_decorator(decorator):
+    """Return whether an astroid decorator node applies ``@experimental``."""
+    if decorator.as_string() == "experimental":
+        return True
+    return decorator.as_string() == "experimental()"
+
+
+def _parse_functiondef_with_experimental(self, node):
+    """Preserve the experimental marker for the AutoAPI templates."""
+    parsed = _parse_functiondef(self, node)
+    if node.decorators and any(
+        _is_experimental_decorator(decorator) for decorator in node.decorators.nodes
+    ):
+        for item in parsed:
+            item["is_experimental"] = True
+    return parsed
+
+
+Parser.parse_functiondef = _parse_functiondef_with_experimental
 
 autoapi_template_dir = "_autoapi_templates"
 
@@ -271,11 +294,6 @@ html_theme_options = {
             "url": "https://pypi.org/project/awkward",
             "icon": "fa-brands fa-python",
         },
-        {
-            "name": "Gitter",
-            "url": "https://gitter.im/Scikit-HEP/awkward-array",
-            "icon": "fa-brands fa-gitter",
-        },
     ],
     "use_edit_page_button": True,
     "external_links": [
@@ -357,16 +375,8 @@ intersphinx_mapping = {
 }
 
 
-# JupyterLite configuration
-jupyterlite_dir = "./lite"
-# Don't override ipynb format
-jupyterlite_bind_ipynb_suffix = False
-# We've disabled localstorage, so we must provide the contents explicitly
-jupyterlite_contents = ["getting-started/demo/*"]
-
 linkcheck_ignore = [
     r"^https?:\/\/github\.com\/.*$",
-    r"^getting-started\/try-awkward-array\.html$",  # Relative link won't resolve
     r"^https?:\/\/$",  # Bare https:// allowed
 ]
 # Eventually we need to revisit these
@@ -377,14 +387,6 @@ if (datetime.date.today() - datetime.date(2022, 12, 13)) < datetime.timedelta(da
             r"^https:\/\/doi.org\/10\.1051\/epjconf\/202125103002$",
         ]
     )
-
-
-# Sphinx doesn't usually want content to fit the screen, so we hack the styles for this page
-def install_jupyterlite_styles(app, pagename, templatename, context, event_arg) -> None:
-    if pagename != "getting-started/try-awkward-array":
-        return
-
-    app.add_css_file("css/try-awkward-array.css")
 
 
 def _skip_member(app, what, name, obj, skip, options):
@@ -449,6 +451,5 @@ def _add_awkward_inventory_aliases(app, exception):
 
 
 def setup(app):
-    app.connect("html-page-context", install_jupyterlite_styles)
     app.connect("autoapi-skip-member", _skip_member)
     app.connect("build-finished", _add_awkward_inventory_aliases)

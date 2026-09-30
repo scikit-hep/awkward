@@ -30,7 +30,7 @@ jobs:
       run-header-only-tests: ${{ steps.header-changes.outputs.run-header-only-tests || false }}
       run-gpu-kernel-tests: ${{ steps.gpu-changes.outputs.run-gpu-kernel-tests || false }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -40,6 +40,7 @@ jobs:
         with:
           format: "json"
           filter: |
+            .github/actions/setup-gpu-env/**
             .github/workflows/ci.yml
             .github/workflows/reusable-test.yml
             awkward-cpp/include/**
@@ -51,6 +52,7 @@ jobs:
             header-only/**
             src/awkward/**
             tests/**
+            tests-cuda/**
             .gitmodules
             codecov.yml
             kernel-specification.yml
@@ -107,6 +109,7 @@ jobs:
         with:
           format: "json"
           filter: |
+            .github/actions/setup-gpu-env/**
             .github/workflows/ci.yml
             .github/workflows/reusable-test.yml
             dev/**

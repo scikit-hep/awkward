@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._backends.backend import Backend, KernelKeyType
@@ -64,6 +63,9 @@ class CupyBackend(Backend):
         return kernel_name in (
             # core reducers
             "awkward_reduce_sum",
+            "awkward_reduce_sumofsquares",
+            "awkward_reduce_centered_sumofsquares",
+            "awkward_reduce_sumofpowers",
             "awkward_reduce_sum_bool",
             "awkward_reduce_sum_bool_complex",
             "awkward_reduce_sum_bool_complex64_64",  # alias → _bool_complex
@@ -112,6 +114,7 @@ class CupyBackend(Backend):
             "awkward_index_rpad_and_clip_axis1",
             # sort
             "awkward_sort",
+            "awkward_argsort",
             # other kernels
             "awkward_RegularArray_getitem_carry",
             "awkward_NumpyArray_subrange_equal",
@@ -123,6 +126,7 @@ class CupyBackend(Backend):
             "awkward_ListOffsetArray_rpad_length_axis1",
             "awkward_ListOffsetArray_rpad_and_clip_axis1",
             "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
+            "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64",
             "awkward_ListOffsetArray_local_preparenext_64",
             "awkward_ListArray_rpad_and_clip_length_axis1",
             "awkward_ListArray_min_range",
@@ -182,7 +186,11 @@ class CupyBackend(Backend):
 
         return {
             "awkward_sort": cuda_compute.segmented_sort,
+            "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
+            "awkward_reduce_sumofsquares": cuda_compute.awkward_reduce_sumofsquares,
+            "awkward_reduce_centered_sumofsquares": cuda_compute.awkward_reduce_centered_sumofsquares,
+            "awkward_reduce_sumofpowers": cuda_compute.awkward_reduce_sumofpowers,
             "awkward_reduce_sum_bool": cuda_compute.awkward_reduce_sum_bool,
             "awkward_reduce_sum_int32_bool_64": cuda_compute.awkward_reduce_sum_int32_bool_64,
             "awkward_reduce_sum_int64_bool_64": cuda_compute.awkward_reduce_sum_int64_bool_64,
@@ -239,6 +247,7 @@ class CupyBackend(Backend):
             "awkward_ListOffsetArray_rpad_length_axis1": cuda_compute.awkward_ListOffsetArray_rpad_length_axis1,
             "awkward_ListOffsetArray_rpad_and_clip_axis1": cuda_compute.awkward_ListOffsetArray_rpad_and_clip_axis1,
             "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64,
+            "awkward_ListOffsetArray_reduce_nonlocal_preparenext_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_preparenext_64,
             "awkward_ListOffsetArray_local_preparenext_64": cuda_compute.awkward_ListOffsetArray_local_preparenext_64,
             "awkward_ListArray_rpad_and_clip_length_axis1": cuda_compute.awkward_ListArray_rpad_and_clip_length_axis1,
             "awkward_ListArray_min_range": cuda_compute.awkward_ListArray_min_range,

@@ -125,10 +125,14 @@ class ListArray(ListMeta[Content], Content):
     """
 
     def __init__(self, starts, stops, content, *, parameters=None):
-        if not isinstance(starts, Index) and starts.dtype in (
-            np.dtype(np.int32),
-            np.dtype(np.uint32),
-            np.dtype(np.int64),
+        if not (
+            isinstance(starts, Index)
+            and starts.dtype
+            in (
+                np.dtype(np.int32),
+                np.dtype(np.uint32),
+                np.dtype(np.int64),
+            )
         ):
             raise TypeError(
                 f"{type(self).__name__} 'starts' must be an Index with dtype in (int32, uint32, int64), "
@@ -1531,7 +1535,30 @@ class ListArray(ListMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        return self.to_ListOffsetArray64(False)._to_arrow(
+        layout = self
+        if validbytes is not None:
+            # ArrowNotImplementedError: Lists with non-zero length null components
+            # are not supported. Empty the null'ed lists *before* to_ListOffsetArray64
+            # compacts the content, so that masked-out (and possibly large) list
+            # contents are never copied. ListOffsetArray._to_arrow applies the
+            # equivalent fixup, but it can only do so after compaction.
+            #
+            # `validbytes` covers only the first `length` entries, which is fewer
+            # than `self.length` when e.g. a ByteMaskedArray's content is longer
+            # than its mask.
+            nplike = self._backend.nplike
+            starts = self._starts.data[:length]
+            stops = self._stops.data[:length]
+            maskedbytes = validbytes == 0
+            if nplike.any(maskedbytes & (starts != stops)):
+                zeros = nplike.zeros_like(starts)
+                layout = ListArray(
+                    ak.index.Index(nplike.where(maskedbytes, zeros, starts)),
+                    ak.index.Index(nplike.where(maskedbytes, zeros, stops)),
+                    self._content,
+                    parameters=self._parameters,
+                )
+        return layout.to_ListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
 
@@ -1568,11 +1595,7 @@ class ListArray(ListMeta[Content], Content):
         lateral_context: Mapping[str, Any] | None,
         options: ApplyActionOptions,
     ) -> Content | None:
-        if (
-            self._backend.nplike.known_data
-            and self._backend.nplike.known_data
-            and self._starts.length != 0
-        ):
+        if self._backend.nplike.known_data and self._starts.length != 0:
             startsmin = self._backend.nplike.min(self._starts.data)
             starts = ak.index.Index(
                 self._starts.data - startsmin, nplike=self._backend.nplike

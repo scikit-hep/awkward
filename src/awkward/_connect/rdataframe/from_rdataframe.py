@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import ctypes
 import os
@@ -63,7 +62,14 @@ cppyy.include("rdataframe/jagged_builders.h")
 
 
 def from_rdataframe(
-    data_frame, columns, highlevel, behavior, with_name, offsets_type, keep_order
+    data_frame,
+    columns,
+    highlevel,
+    behavior,
+    attrs,
+    with_name,
+    offsets_type,
+    keep_order,
 ):
     if hasattr(data_frame, "proxied_node"):
         raise NotImplementedError("Distributed RDataFrame is not yet supported")
@@ -222,10 +228,12 @@ def from_rdataframe(
 
             buffers = {}
             for item in names_nbytes:
-                buffers[item.first] = numpy.empty(item.second, dtype=np.uint8)
+                # to_char_buffers clears the map that item.first points into
+                name = str(item.first)
+                buffers[name] = numpy.empty(item.second, dtype=np.uint8)
                 cpp_buffers_self.append(
-                    item.first,
-                    buffers[item.first].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
+                    name,
+                    buffers[name].ctypes.data_as(ctypes.POINTER(ctypes.c_ubyte)),
                 )
 
             length = cpp_buffers_self.to_char_buffers[builder_type](builder)
@@ -269,6 +277,7 @@ def from_rdataframe(
         depth_limit=1,
         highlevel=True,
         behavior=behavior,
+        attrs=attrs,
         with_name=with_name,
     )
 
@@ -278,6 +287,7 @@ def from_rdataframe(
             ak.contents.IndexedArray(sorted, out.layout),
             highlevel=True,
             behavior=behavior,
+            attrs=attrs,
         )
 
     return wrap_layout(out.layout, highlevel=highlevel, behavior=behavior)
