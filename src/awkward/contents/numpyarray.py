@@ -132,11 +132,13 @@ def _reduce_extended(reducer, array, offsets, starts, shifts, outlength):
         nonzero = NumpyArray(data != 0, backend=backend)
         return reducer.apply(nonzero, offsets, starts, shifts, outlength)
 
-    counts = offsets.data[1:] - offsets.data[:-1]
-    parents = _numpy.repeat(_numpy.arange(outlength, dtype=np.int64), counts)
-    values = data[offsets.data[0] : offsets.data[-1]]
-
     if name in ("sum", "prod") and type(reducer) in (_reducers.Sum, _reducers.Prod):
+        counts = offsets.data[1:] - offsets.data[:-1]
+        # NumPy repeat requires native-width counts on 32-bit platforms.
+        parents = _numpy.repeat(
+            _numpy.arange(outlength, dtype=np.int64), counts.astype(_numpy.intp)
+        )
+        values = data[offsets.data[0] : offsets.data[-1]]
         if name == "sum":
             result = _numpy.zeros(outlength, dtype=data.dtype)
             _numpy.add.at(result, parents, values)
