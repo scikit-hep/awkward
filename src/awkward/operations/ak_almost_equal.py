@@ -135,10 +135,10 @@ def _impl(
         if not isinstance(layout, ak.contents.ListArray):
             return layout.to_ListOffsetArray64(False)
         offsets = layout._compact_offsets64(True)
-        carry = backend.nplike.arange(offsets[-1]) + backend.nplike.repeat(
-            layout.starts.data - offsets.data[:-1],
-            offsets.data[1:] - offsets.data[:-1],
-        )
+        # repeat needs counts it can cast to intp which is 32-bit on 32-bit platforms
+        counts = backend.nplike.astype(offsets.data[1:] - offsets.data[:-1], np.intp)
+        shifts = backend.nplike.repeat(layout.starts.data - offsets.data[:-1], counts)
+        carry = backend.nplike.arange(offsets[-1], dtype=np.int64) + shifts
         return ak.contents.ListOffsetArray(
             offsets, eager_carry(layout.content, carry), parameters=layout.parameters
         )
