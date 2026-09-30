@@ -110,9 +110,9 @@ def _reduce_extended(reducer, array, offsets, starts, shifts, outlength):
     """Reduce float128/complex256 data (NumPy, known data) in its own precision.
 
     Returns ``None`` for reducers handled by the float64/complex128 cast.
-    Order-based reducers run the existing kernels on dense ranks (exact,
-    order-preserving float64 keys; NaN stays NaN), so the kernels' NaN,
-    tie and position semantics carry over unchanged.
+    Order-based reducers run the existing kernels on dense ranks. Complex keys
+    rank each component separately, retaining component-wise NaNs so the complex
+    kernels' comparison, tie and position semantics carry over unchanged.
     """
     import numpy as _numpy  # noqa: TID251 (unique/ufunc.at are not in the nplike API)
 
@@ -146,6 +146,37 @@ def _reduce_extended(reducer, array, offsets, starts, shifts, outlength):
         return NumpyArray(result, backend=backend)
 
     if name in ("argmin", "argmax", "min", "max"):
+        if data.dtype.kind == "c":
+            # A single real rank cannot represent complex comparisons with NaN:
+            # a NaN imaginary part still permits comparison of the real parts.
+            keys = _numpy.empty(data.shape, dtype=np.complex128)
+            for component, target in ((data.real, keys.real), (data.imag, keys.imag)):
+                _, inverse = _numpy.unique(component, return_inverse=True)
+                target[:] = inverse.reshape(-1)
+                target[_numpy.isnan(component)] = _numpy.nan
+            ranked = NumpyArray(keys, backend=backend)
+            if name in ("argmin", "argmax"):
+                return reducer.apply(ranked, offsets, starts, shifts, outlength)
+
+            # Complex min/max select the first value, then use exactly the
+            # argmin/argmax comparison. Zero starts and no shifts give absolute
+            # positions, allowing us to gather without narrowing the values.
+            positional = _reducers.ArgMin() if name == "min" else _reducers.ArgMax()
+            positions = positional.apply(
+                ranked,
+                offsets,
+                ak.index.Index64.zeros(outlength, backend.nplike),
+                None,
+                outlength,
+            ).data
+            identity = reducer.initial
+            if identity is None:
+                identity = _numpy.inf if name == "min" else -_numpy.inf
+            result = _numpy.full(outlength, identity, dtype=data.dtype)
+            found = positions >= 0
+            result[found] = data[positions[found]]
+            return NumpyArray(result, backend=backend)
+
         uniq, inverse = _numpy.unique(data, return_inverse=True)
         keys = inverse.reshape(-1).astype(np.float64)
         keys[_numpy.isnan(data)] = _numpy.nan
