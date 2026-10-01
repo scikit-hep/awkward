@@ -53,38 +53,6 @@ def has_issue_4260(a: ak.Array) -> bool:
     return False
 
 
-def has_issue_4259(a: ak.Array) -> bool:
-    """Return `True` if a `float16`, `float128`, or `complex256` leaf is in the array.
-
-    `ak.sort`, `ak.argsort`, and every reducer except `ak.count`
-    raise `KeyError` from the kernel-table lookup when a `float16`
-    leaf reaches a kernel (`ak.sum`, `ak.min`, and `ak.max` reach one
-    only in a partial reduction; a whole-array reduction takes a
-    NumPy path): awkward-cpp has no `float16` kernels, and the dtype
-    is neither mapped onto an existing kernel
-    (`KernelReducer._dtype_for_kernel` does this for datetimes and
-    complex numbers) nor refused with a documented error. `float128`
-    and `complex256` fail the same lookup (as `numpy.longdouble` and
-    `numpy.clongdouble` in the kernel key) on the platforms where
-    NumPy provides them — continuous integration on Linux found both;
-    macOS NumPy has neither. Which leaves reach a kernel depends on
-    the operation and the layout, so every matching leaf counts here,
-    although one that never reaches a kernel works. Reported:
-    https://github.com/scikit-hep/awkward/issues/4259
-    """
-    stack = [a.layout.form]
-    while stack:
-        node = stack.pop()
-        if node.is_numpy:
-            if node.primitive in ("float16", "float128", "complex256"):
-                return True
-        elif node.is_record or node.is_union:
-            stack.extend(node.contents)
-        elif not node.is_unknown:
-            stack.append(node.content)
-    return False
-
-
 def has_issue_4261(a: ak.Array) -> bool:
     """Return `True` if flattening all levels would merge non-promotable leaves.
 
