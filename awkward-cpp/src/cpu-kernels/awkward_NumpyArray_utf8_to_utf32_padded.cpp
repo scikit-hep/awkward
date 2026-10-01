@@ -5,7 +5,6 @@
 #include "awkward/kernels.h"
 #include "awkward/unicode.h"
 
-
 template <typename T>
 ERROR awkward_NumpyArray_utf8_to_utf32_padded(
   const uint8_t* __restrict__ fromptr,
@@ -14,19 +13,26 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
   int64_t maxcodepoints,
   uint32_t* __restrict__ toptr) {
 
-  int64_t i_code_unit = fromoffsets[0];
-  int64_t code_point_width;
   int64_t n_code_point = 0;
 
   // For each sublist of code units
-  for (auto k_sublist = 0; k_sublist < offsetslength - 1; k_sublist++) {
-    auto n_code_units = fromoffsets[k_sublist + 1] - fromoffsets[k_sublist];
+  for (int64_t k_sublist = 0;  k_sublist < offsetslength - 1;  k_sublist++) {
+    int64_t i_code_unit = (int64_t)fromoffsets[k_sublist];
+    int64_t j_code_unit_last = (int64_t)fromoffsets[k_sublist + 1];
     int64_t n_code_point_sublist = 0;
 
     // Repeat until we exhaust the code units within this sublist
-    for (auto j_code_unit_last = i_code_unit + n_code_units; i_code_unit < j_code_unit_last;) {
+    while (i_code_unit < j_code_unit_last) {
       // Parse a single codepoint
-      code_point_width = utf8_codepoint_size(fromptr[i_code_unit]);
+      int64_t code_point_width = (int64_t)utf8_codepoint_size(fromptr[i_code_unit]);
+
+      if (code_point_width != 0  &&  i_code_unit + code_point_width > j_code_unit_last) {
+        return failure("could not convert UTF8 code point to UTF32: truncated UTF8 sequence", kSliceNone, fromptr[i_code_unit], FILENAME(__LINE__));
+      }
+      if (n_code_point_sublist >= maxcodepoints) {
+        return failure("could not convert UTF8 code point to UTF32: string is longer than maxcodepoints", kSliceNone, n_code_point_sublist, FILENAME(__LINE__));
+      }
+
       switch (code_point_width) {
       case 1:
         toptr[n_code_point] = ((uint32_t) fromptr[i_code_unit] & ~UTF8_ONE_BYTE_MASK);
@@ -65,7 +71,7 @@ ERROR awkward_NumpyArray_utf8_to_utf32_padded(
 
     // Zero pad the remaining characters
     int64_t n_pad_code_points = maxcodepoints - n_code_point_sublist;
-    for (auto j = 0; j < n_pad_code_points; j++) {
+    for (int64_t j = 0;  j < n_pad_code_points;  j++) {
       toptr[n_code_point++] = 0;
     }
   }
