@@ -81,6 +81,16 @@ def test_record_tuple():
     assert record_type != tuple_type
 
 
+def test_tuple_record_types_with_different_arity_are_not_equal():
+    one_item = ak.types.RecordType([ak.types.NumpyType("int64")], None)
+    two_items = ak.types.RecordType(
+        [ak.types.NumpyType("int64"), ak.types.NumpyType("float64")], None
+    )
+
+    assert not one_item.is_equal_to(two_items)
+    assert not two_items.is_equal_to(one_item)
+
+
 def test_record_permuted():
     record = ak.types.from_datashape("10 * var * {x: int64, y: int32}")
     permutation = ak.types.from_datashape("10 * var * {y: int64, x: int32}")
