@@ -40,6 +40,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         record_is_scalar,
         is_nonnullable_nulltype=False,
         option_type=False,
+        attrs=None,
     ):
         self._mask_type = mask_type
         self._node_type = node_type
@@ -49,6 +50,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         self._record_is_scalar = record_is_scalar
         self._is_nonnullable_nulltype = is_nonnullable_nulltype
         self._option_type = option_type
+        self._attrs = attrs
         super().__init__(storage_type, "awkward")
 
     def __str__(self):
@@ -81,6 +83,22 @@ class AwkwardArrowType(pyarrow.ExtensionType):
     def record_is_scalar(self):
         return self._record_is_scalar
 
+    @property
+    def attrs(self):
+        """
+        The `attrs` of the high-level array this type was built from, or None.
+        Only the outermost type of an array carries them.
+        """
+        return self._attrs
+
+    def with_attrs(self, attrs):
+        """
+        Returns a copy of this type carrying `attrs` (a JSON-compatible mapping).
+        """
+        metadata = self._metadata_as_dict()
+        metadata["attrs"] = attrs
+        return type(self)._from_metadata_object(self.storage_type, metadata)
+
     def __arrow_ext_class__(self):
         return AwkwardArrowArray
 
@@ -88,7 +106,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         return json.dumps(self._metadata_as_dict()).encode(errors="surrogatescape")
 
     def _metadata_as_dict(self):
-        return {
+        out = {
             "mask_type": self._mask_type,
             "node_type": self._node_type,
             "mask_parameters": self._mask_parameters,
@@ -98,6 +116,11 @@ class AwkwardArrowType(pyarrow.ExtensionType):
             "is_nonnullable_nulltype": self._is_nonnullable_nulltype,
             "option_type": self._option_type,
         }
+        # only the outermost type of an array can have attrs; leaving the key out
+        # entirely keeps the serialized metadata identical to older versions'
+        if self._attrs is not None:
+            out["attrs"] = self._attrs
+        return out
 
     @classmethod
     def __arrow_ext_deserialize__(cls, storage_type, serialized):
@@ -117,6 +140,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
             metadata["record_is_scalar"],
             is_nonnullable_nulltype=metadata.get("is_nonnullable_nulltype", False),
             option_type=metadata.get("option_type", False),
+            attrs=metadata.get("attrs"),
         )
 
     @property
