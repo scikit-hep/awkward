@@ -510,36 +510,25 @@ def enforce_concatenated_form(layout, form):
         # This won't hold true if any (and not all) of the contents are an option
         # Or if there were mergeable (but non-equal type) pairs in the original
         # concatenation that formed this union
-        union_has_exact_type = False
+        matches = [
+            _form_has_type(content_form, type_) for content_form in form.contents
+        ]
+        if not any(matches):
+            matches = [
+                mergeable(content_form, layout_to_merge)
+                for content_form in form.contents
+            ]
+
         contents = []
-        for content_form in form.contents:
-            if _form_has_type(content_form, type_):
+        for content_form, matches_layout in zip(form.contents, matches, strict=True):
+            if matches_layout:
                 contents.insert(
                     0, enforce_concatenated_form(layout_to_merge, content_form)
                 )
-                union_has_exact_type = True
             else:
                 contents.append(
                     content_form.length_zero_array().to_backend(layout.backend)
                 )
-
-        # Otherwise, find anything we can merge with
-        if not union_has_exact_type:
-            contents.clear()
-
-            for content_form in form.contents:
-                # TODO check forms mergeable
-                content_layout = content_form.length_zero_array().to_backend(
-                    layout.backend
-                )
-                if mergeable(content_layout, layout_to_merge):
-                    contents.insert(
-                        0, enforce_concatenated_form(layout_to_merge, content_form)
-                    )
-                else:
-                    contents.append(
-                        content_form.length_zero_array().to_backend(layout.backend)
-                    )
 
         return ak.contents.UnionArray(
             ak.index.Index8(layout.backend.nplike.zeros(layout.length, dtype=np.int8)),
@@ -558,13 +547,10 @@ def enforce_concatenated_form(layout, form):
             raise AssertionError(
                 "merge result should only grow or preserve a union's cardinality"
             )
-        form_contents = [
-            f.length_zero_array().to_backend(layout.backend) for f in form.contents
-        ]
-        form_indices = range(len(form_contents))
+        form_indices = range(len(form.contents))
         for form_projection_indices in permutations(form_indices, len(layout.contents)):
             if all(
-                mergeable(c, form_contents[i])
+                mergeable(c, form.contents[i])
                 for c, i in zip(layout.contents, form_projection_indices, strict=True)
             ):
                 break
@@ -579,7 +565,7 @@ def enforce_concatenated_form(layout, form):
         ]
         next_contents.extend(
             [
-                form_contents[i]
+                form.contents[i].length_zero_array().to_backend(layout.backend)
                 for i in (set(form_indices) - set(form_projection_indices))
             ]
         )
