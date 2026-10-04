@@ -2,40 +2,51 @@
 
 from __future__ import annotations
 
-from awkward import forms
+from awkward._meta.bitmaskedmeta import BitMaskedMeta
+from awkward._meta.bytemaskedmeta import ByteMaskedMeta
+from awkward._meta.emptymeta import EmptyMeta
+from awkward._meta.indexedmeta import IndexedMeta
+from awkward._meta.indexedoptionmeta import IndexedOptionMeta
+from awkward._meta.listmeta import ListMeta
+from awkward._meta.listoffsetmeta import ListOffsetMeta
+from awkward._meta.meta import Meta
+from awkward._meta.numpymeta import NumpyMeta
+from awkward._meta.recordmeta import RecordMeta
+from awkward._meta.regularmeta import RegularMeta
+from awkward._meta.unionmeta import UnionMeta
+from awkward._meta.unmaskedmeta import UnmaskedMeta
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import type_parameters_equal
 from awkward._typing import Literal
-from awkward.types.numpytype import primitive_to_dtype
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
 def mergeable(
-    one: forms.Form,
-    two: forms.Form,
+    one: Meta,
+    two: Meta,
     mergebool: bool,
     mergecastable: Literal["same_kind", "equiv", "family"],
 ) -> bool:
-    """The Content mergeability rules, evaluated without constructing buffers.
+    """Shared Form/Content mergeability rules, evaluated without constructing buffers.
 
     This is compatibility for merging, not form equality: unions can always
     absorb another form, and regular lists of different sizes can become jagged.
-    Keep this predicate in agreement with Content._mergeable_next.
+    Data-dependent merging is implemented separately by Content.
     """
-    if isinstance(one, (forms.EmptyForm, forms.UnionForm)):
+    if isinstance(one, (EmptyMeta, UnionMeta)):
         return True
     if two.is_identity_like or two.is_union:
         return True
 
     wrappers = (
-        forms.IndexedForm,
-        forms.IndexedOptionForm,
-        forms.ByteMaskedForm,
-        forms.BitMaskedForm,
-        forms.UnmaskedForm,
+        IndexedMeta,
+        IndexedOptionMeta,
+        ByteMaskedMeta,
+        BitMaskedMeta,
+        UnmaskedMeta,
     )
     if isinstance(one, wrappers):
         return mergeable(
@@ -49,13 +60,13 @@ def mergeable(
     if not type_parameters_equal(one._parameters, two._parameters):
         return False
 
-    if isinstance(one, forms.NumpyForm):
-        if one.inner_shape:
-            return mergeable(one.to_RegularForm(), two, mergebool, mergecastable)
-        if not isinstance(two, forms.NumpyForm) or two.inner_shape:
+    if isinstance(one, NumpyMeta):
+        if one._mergeable_ndim > 1:
+            return mergeable(one._mergeable_regular(), two, mergebool, mergecastable)
+        if not isinstance(two, NumpyMeta) or two._mergeable_ndim > 1:
             return False
-        left = primitive_to_dtype(one.primitive)
-        right = primitive_to_dtype(two.primitive)
+        left = one.dtype
+        right = two.dtype
         if left == right:
             return True
         if (np.issubdtype(left, np.bool_) and np.issubdtype(right, np.number)) or (
@@ -79,19 +90,19 @@ def mergeable(
             )
         raise TypeError(f"unrecognized mergecastable option: {mergecastable}")
 
-    lists = (forms.RegularForm, forms.ListForm, forms.ListOffsetForm)
+    lists = (RegularMeta, ListMeta, ListOffsetMeta)
     if isinstance(one, lists):
         if isinstance(two, lists):
             return mergeable(one.content, two.content, mergebool, mergecastable)
-        if isinstance(two, forms.NumpyForm) and two.inner_shape:
-            return mergeable(one, two.to_RegularForm(), mergebool, mergecastable)
+        if isinstance(two, NumpyMeta) and two._mergeable_ndim > 1:
+            return mergeable(one, two._mergeable_regular(), mergebool, mergecastable)
         return False
 
-    if isinstance(one, forms.RecordForm) and isinstance(two, forms.RecordForm):
+    if isinstance(one, RecordMeta) and isinstance(two, RecordMeta):
         if one.is_tuple != two.is_tuple or set(one.fields) != set(two.fields):
             return False
         return all(
-            mergeable(one.content(field), two.content(field), mergebool, mergecastable)
-            for field in one.fields
+            mergeable(content, two.content(field), mergebool, mergecastable)
+            for field, content in zip(one.fields, one.contents, strict=True)
         )
     return False

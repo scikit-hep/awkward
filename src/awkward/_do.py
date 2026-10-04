@@ -216,18 +216,9 @@ def mergeable(
 ) -> bool:
     """Whether two layouts or forms can merge, under the requested casting policy.
 
-    If either input is a form, compare metadata only. This does not construct
-    layouts or read buffers, including when the other input is a virtual layout.
+    Compare metadata only, including for virtual layouts. This does not construct
+    layouts or read buffers; data-dependent merging remains in Content.
     """
-    if isinstance(one, form.Form) or isinstance(two, form.Form):
-        from awkward.forms._mergeable import mergeable as forms_mergeable
-
-        return forms_mergeable(
-            one.form if isinstance(one, Content) else one,
-            two.form if isinstance(two, Content) else two,
-            mergebool,
-            mergecastable,
-        )
     return one._mergeable_next(two, mergebool=mergebool, mergecastable=mergecastable)
 
 
