@@ -49,8 +49,6 @@ extensions = [
     "sphinx.ext.napoleon",
     "autoapi.extension",
     "myst_nb",
-    # Preserve old links
-    # "jupyterlite_sphinx",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
 ]
@@ -377,16 +375,8 @@ intersphinx_mapping = {
 }
 
 
-# JupyterLite configuration
-jupyterlite_dir = "./lite"
-# Don't override ipynb format
-jupyterlite_bind_ipynb_suffix = False
-# We've disabled localstorage, so we must provide the contents explicitly
-jupyterlite_contents = ["getting-started/demo/*"]
-
 linkcheck_ignore = [
     r"^https?:\/\/github\.com\/.*$",
-    r"^getting-started\/try-awkward-array\.html$",  # Relative link won't resolve
     r"^https?:\/\/$",  # Bare https:// allowed
 ]
 # Eventually we need to revisit these
@@ -397,14 +387,6 @@ if (datetime.date.today() - datetime.date(2022, 12, 13)) < datetime.timedelta(da
             r"^https:\/\/doi.org\/10\.1051\/epjconf\/202125103002$",
         ]
     )
-
-
-# Sphinx doesn't usually want content to fit the screen, so we hack the styles for this page
-def install_jupyterlite_styles(app, pagename, templatename, context, event_arg) -> None:
-    if pagename != "getting-started/try-awkward-array":
-        return
-
-    app.add_css_file("css/try-awkward-array.css")
 
 
 def _skip_member(app, what, name, obj, skip, options):
@@ -469,6 +451,5 @@ def _add_awkward_inventory_aliases(app, exception):
 
 
 def setup(app):
-    app.connect("html-page-context", install_jupyterlite_styles)
     app.connect("autoapi-skip-member", _skip_member)
     app.connect("build-finished", _add_awkward_inventory_aliases)
