@@ -23,6 +23,8 @@ jobs:
     uses: ./.github/workflows/reusable-test.yml
     with:
      run-gpu-kernel-tests: ${{ needs.change-detection.outputs.run-gpu-kernel-tests }}
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   packaging-tests:
     needs: change-detection
@@ -34,15 +36,16 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-header-only-tests)
     uses: ./.github/workflows/reusable-header-only-test.yml
 
-  coverage:
-    uses: ./.github/workflows/reusable-coverage.yml
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
   docs:
     uses: ./.github/workflows/reusable-docs.yml
     permissions:
-      contents: write # Required by the reusable docs deploy job to push to `gh-pages`.
+      contents: read
+    secrets:
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
   pass:
     name: Check CI result
@@ -52,9 +55,8 @@ jobs:
       - tests
       - packaging-tests
       - header-only-tests
-      - coverage
       - docs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     steps:
       - name: Decide whether the needed jobs succeeded or failed

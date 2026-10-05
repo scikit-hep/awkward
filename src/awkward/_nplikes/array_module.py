@@ -49,6 +49,17 @@ def _nplike_reshape_has_copy(module: Any) -> bool:
 
 
 @lru_cache
+def _nplike_repeat_has_array_repeats(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.repeat(x, module.ones(2, dtype=module.int64))
+    except (TypeError, ValueError):
+        return False
+    else:
+        return True
+
+
+@lru_cache
 def _nplike_unique_has_equal_nan(module: Any) -> bool:
     return "equal_nan" in inspect.signature(module.unique).parameters
 
@@ -78,6 +89,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
     ) -> ArrayLikeT | PlaceholderArray | VirtualNDArray:
+        # already the exact array type this nplike owns, and nothing to do
+        if (
+            not copy
+            and type(obj) is self._module.ndarray
+            and (dtype is None or obj.dtype == dtype)
+        ):
+            return obj
         if isinstance(obj, PlaceholderArray):
             assert obj.dtype == dtype or dtype is None
             return obj
@@ -88,7 +106,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                 # if we are not copying and the dtype is _exactly_ the dtype of the existing array
                 # or dtype is None, we can return the VirtualNDArray directly
                 # this avoids unnecessary VirtualNDArray creation and method-chaining
-                if not copy and (obj.dtype == dtype or dtype is None):
+                if not copy and (dtype is None or obj.dtype == dtype):
                     return obj
                 return VirtualNDArray(
                     obj._nplike,

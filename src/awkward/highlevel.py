@@ -1117,9 +1117,14 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         """
         with ak._errors.SlicingErrorContext(self, where):
             # Handle named axis
-            (_, ndim) = self._layout.minmax_depth
-            named_axis = _get_named_axis(self)
-            where = _normalize_named_slice(named_axis, where, ndim)
+            attrs = self._attrs
+            stored_named_axis = None if attrs is None else attrs.get(NAMED_AXIS_KEY)
+            named_axis = {} if stored_named_axis is None else dict(stored_named_axis)
+            if isinstance(where, dict):
+                # `minmax_depth` walks the whole layout, so only pay for it when
+                # `where` can actually name an axis.
+                (_, ndim) = self._layout.minmax_depth
+                where = _normalize_named_slice(named_axis, where, ndim)
 
             NamedAxis.mapping = named_axis
 
@@ -1131,14 +1136,21 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                     named_axis=NamedAxis.mapping,
                     highlevel=True,
                     behavior=self._behavior,
-                    attrs=self._attrs,
+                    attrs=attrs,
+                )
+            elif stored_named_axis is None:
+                return wrap_layout(
+                    indexed_layout,
+                    behavior=self._behavior,
+                    attrs=attrs,
+                    allow_other=True,
                 )
             else:
                 return ak.operations.ak_without_named_axis._impl(
                     indexed_layout,
                     highlevel=True,
                     behavior=self._behavior,
-                    attrs=self._attrs,
+                    attrs=attrs,
                 )
 
     def __bytes__(self) -> bytes:

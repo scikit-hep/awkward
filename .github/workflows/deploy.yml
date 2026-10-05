@@ -20,7 +20,7 @@ concurrency:
 jobs:
   determine-source-date-epoch:
     name: "Determine SOURCE_DATE_EPOCH"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
@@ -40,7 +40,7 @@ jobs:
 
   check-requirements:
     name: "Check awkward requirements"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -53,7 +53,7 @@ jobs:
 
   check-cpp-on-pypi:
     name: "Check awkward-cpp dependency on PyPI"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -107,7 +107,7 @@ jobs:
 
   bundle-headers:
     name: "Bundle header-only libraries"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
@@ -153,7 +153,7 @@ jobs:
 
   publish-headers:
     name: "Publish header-only libraries alongside release"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [bundle-headers]
     if: github.event_name == 'release' && github.event.action == 'published'
     permissions:
