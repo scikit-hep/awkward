@@ -315,16 +315,14 @@ def test_compile_and_execute_matches_optimize_then_execute(arr):
     assert a == b == ak.to_list((arr * 2 + 1) * 3)
 
 
+@pytest.mark.thread_unsafe(
+    reason="concurrent lru_cache misses may return distinct compiled callables"
+)
 def test_fused_op_is_cache_stable():
-    # Plan's hard constraint: a stable program compiles its fused op ONCE and
-    # reuses it -- no per-call recompile (the 1.8 s/call regression).
-    #
-    # The cache is unbounded (functools.cache, never evicted/cleared here), so
-    # the robust invariant is: the same generated source always maps to the
-    # SAME compiled callable -- every call site, including each compute(),
-    # reuses it. Asserted via object identity, which (unlike the global
-    # hit/miss counters) is immune to parallel / free-threaded test execution
-    # where other tests share this process-global cache.
+    # Sequential calls for the same source reuse the compiled callable while
+    # it remains in the bounded LRU cache, avoiding per-call compilation.
+    # Concurrent cold misses may compile more than once, so object identity
+    # is only asserted here for sequential reuse.
     from awkward._connect.cpu import _fusion_codegen as cfc
 
     a = ak.Array([[1.0, 2, 3], [4, 5], [6, 7]])
@@ -335,8 +333,8 @@ def test_fused_op_is_cache_stable():
     op_obj = cfc._compile_op(src)
     assert cfc._compile_op(src) is op_obj  # recompiling the source is a no-op
 
-    # Running the program (fresh graphs, new node ids) never replaces the op:
-    # each compute reuses the one interned callable rather than recompiling.
+    # Fresh graphs with new node ids still reuse the cached callable for
+    # this source; these calls do not fill the cache or evict the entry.
     for _ in range(5):
         (cpu.lazy(a) * 2 + 1).compute(fuse=True)
     assert cfc._compile_op(src) is op_obj
