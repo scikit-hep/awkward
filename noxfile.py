@@ -50,6 +50,13 @@ def tests(session):
 
 
 @nox.session(reuse_venv=True)
+def versioning(session):
+    """Check release tags, development versions, and sdist-to-wheel versioning."""
+    session.install(*PYPROJECT["build-system"]["requires"], "build", "pytest", "tomli")
+    session.run("pytest", "tests/test_3007_vcs_versioning.py", *session.posargs)
+
+
+@nox.session(reuse_venv=True)
 def lint(session):
     """
     Run the linter.

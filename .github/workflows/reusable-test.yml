@@ -102,6 +102,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           submodules: true
           persist-credentials: false
 
@@ -202,6 +203,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           submodules: true
           persist-credentials: false
 
@@ -252,6 +254,7 @@ jobs:
     steps:
       - uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
         with:
+          fetch-depth: 0
           submodules: true
           persist-credentials: false
 
@@ -328,6 +331,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           submodules: true
           persist-credentials: false
 
@@ -386,6 +390,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           submodules: true
           persist-credentials: false
 
@@ -463,6 +468,8 @@ jobs:
               export PATH="/root/.local/bin:$PATH" &&
               source .venv/bin/activate &&
               cd /awkward &&
+              # The source bind mount is owned by the host runner.
+              git config --global --add safe.directory /awkward &&
               uv pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
             '
           docker commit build_container the_container

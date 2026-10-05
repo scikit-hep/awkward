@@ -295,7 +295,7 @@ The `main` branch is also never far from the latest released version. We usually
 
 Committing directly to `main` is not allowed except for
 
-   * updating the `pyproject.toml` file to increase the version number, which should be independent of pull requests
+   * updating the `awkward-cpp/pyproject.toml` version and its dependency pin in `pyproject.toml`, which should be independent of pull requests
    * updating documentation or non-code files
    * unprecedented emergencies
 
@@ -324,21 +324,25 @@ To make an `awkward-cpp` release:
 
 #### `awkward` releases
 To make an `awkward` release:
-1. A commit to `main` should increase the version number in `pyproject.toml`
-2. A new GitHub release must be published. "Generate release notes" produces categorized notes automatically: a workflow labels each PR `type/<type>` from its conventional-commit title, and `.github/release.yml` groups those labels into sections.
+1. Choose the release commit on `main` and create a tag `vX.Y.Z` (or `vX.Y.ZrcN` for a release candidate). The `awkward` version is derived from this tag; do not add a static version to `pyproject.toml`.
+2. Publish a GitHub release for that tag. "Generate release notes" produces categorized notes automatically: a workflow labels each PR `type/<type>` from its conventional-commit title, and `.github/release.yml` groups those labels into sections.
 3. A `docs/switcher.json` entry must be added for new minor/major versions.
+
+Source checkouts need Git history and release tags to calculate development versions. Shallow checkouts are rejected rather than assigned a misleading version. For a shallow clone, run `git fetch --unshallow --tags` before building. CI jobs that build or install `awkward` from source use `fetch-depth: 0`. The independent `awkward-cpp-*` tags are excluded from Python version discovery.
+
+A published source distribution carries its version in package metadata and can be built without Git. A GitHub source archive is not a published sdist and does not contain the same version metadata; use a Git checkout or the PyPI sdist. Editable installs refresh `awkward.__version__` when reinstalled. Run `nox -s versioning` to test version discovery and sdist-to-wheel builds.
 
 Pushes that modify `docs/switcher.json` on `main` will automatically be synchronised with AWS.
 
 #### Nightly wheels
 
 Nightly wheels of `awkward-cpp` and `awkward` are built and published to the [Scientific Python Nightly Wheels Anaconda Cloud organization](https://anaconda.org/scientific-python-nightly-wheels).
-As the `awkward-cpp` and `awkward` nightly wheels do not include version control system information, they will have the same version numbers as the last released versions on the public PyPI. To avoid resolution conflicts when installing the nightly wheels, it is recommended to first install `awkward-cpp` and `awkward` from PyPI to get all of their dependencies, then uninstall `awkward-cpp` and `awkward` and install the nightly wheels from the Scientific Python nightly index.
+The `awkward` nightly wheels include a development version derived from Git when built after a release tag. The `awkward-cpp` nightly wheels still use their static package version and may have the same version as a release on public PyPI. To avoid resolution conflicts when installing the nightly wheels, it is recommended to first install `awkward-cpp` and `awkward` from PyPI to get all of their dependencies, then uninstall `awkward-cpp` and `awkward` and install the nightly wheels from the Scientific Python nightly index.
 
 ```
 python -m pip install --upgrade awkward
 python -m pip uninstall --yes awkward awkward-cpp
-python -m pip install --upgrade --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple awkward
+python -m pip install --upgrade --pre --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple awkward
 ```
 
 ### Guidelines for Dependency and Version Changes

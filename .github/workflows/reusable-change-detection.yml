@@ -75,6 +75,10 @@ jobs:
           filter: |
             .github/workflows/ci.yml
             .github/workflows/reusable-build-wheels.yml
+            .github/workflows/reusable-packaging-test.yml
+            pyproject.toml
+            noxfile.py
+            tests/test_3007_vcs_versioning.py
             awkward-cpp/include/**
             awkward-cpp/rapidjson/**
             awkward-cpp/src/**
