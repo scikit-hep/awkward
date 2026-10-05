@@ -124,14 +124,14 @@ def test_merging_still_materializes_and_preserves_values():
 
     def generate():
         calls.append(True)
-        return np.arange(6).reshape(2, 3)
+        return np.arange(6, dtype=np.int64).reshape(2, 3)
 
     left = ak.contents.NumpyArray(
         VirtualNDArray(
             Numpy.instance(), shape=(2, 3), dtype=np.dtype("int64"), generator=generate
         )
     )
-    right = ak.contents.NumpyArray(np.arange(6, 12).reshape(2, 3))
+    right = ak.contents.NumpyArray(np.arange(6, 12, dtype=np.int64).reshape(2, 3))
     assert ak._do.mergeable(left, right)
     assert not calls
     result = ak.concatenate([left, right])
