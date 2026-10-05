@@ -227,9 +227,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def arange(
         self,
-        start: float | int,
-        stop: float | int | None = None,
-        step: float | int = 1,
+        start: float,
+        stop: float | None = None,
+        step: float = 1,
         *,
         dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
@@ -286,9 +286,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         else:
             return self._apply_ufunc_legacy(ufunc, method, args, kwargs)
 
-    def _get_nep_50_dtype(
-        self, obj: Any
-    ) -> DType | type[int] | type[complex] | type[float]:
+    def _get_nep_50_dtype(self, obj: Any) -> type[int | complex | float] | DType:
         if hasattr(obj, "dtype"):
             return obj.dtype
         elif isinstance(obj, bool):
@@ -700,9 +698,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         x: ArrayLikeT,
         *,
         copy: bool = True,
-        nan: int | float | None = 0.0,
-        posinf: int | float | None = None,
-        neginf: int | float | None = None,
+        nan: float | None = 0.0,
+        posinf: float | None = None,
+        neginf: float | None = None,
     ) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
         return self._module.nan_to_num(

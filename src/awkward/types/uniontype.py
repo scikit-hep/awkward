@@ -20,7 +20,7 @@ class UnionType(Type):
         self,
         *,
         contents: list[Type] | Sentinel = UNSET,
-        parameters: JSONMapping | None | Sentinel = UNSET,
+        parameters: JSONMapping | Sentinel | None = UNSET,
     ) -> Self:
         return UnionType(
             self._contents if contents is UNSET else contents,  # type: ignore[arg-type]

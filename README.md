@@ -29,11 +29,13 @@ Given an array of lists of objects with `x`, `y` fields (with nested lists in th
 ```python
 import awkward as ak
 
-array = ak.Array([
-    [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
-    [],
-    [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}]
-])
+array = ak.Array(
+    [
+        [{"x": 1.1, "y": [1]}, {"x": 2.2, "y": [1, 2]}, {"x": 3.3, "y": [1, 2, 3]}],
+        [],
+        [{"x": 4.4, "y": [1, 2, 3, 4]}, {"x": 5.5, "y": [1, 2, 3, 4, 5]}],
+    ]
+)
 ```
 
 the following slices out the `y` values, drops the first element from each inner list, and runs NumPy's `np.square` function on everything that is left:
@@ -45,11 +47,7 @@ output = np.square(array["y", ..., 1:])
 The result is
 
 ```python
-[
-    [[], [4], [4, 9]],
-    [],
-    [[4, 9, 16], [4, 9, 16, 25]]
-]
+[[[], [4], [4, 9]], [], [[4, 9, 16], [4, 9, 16, 25]]]
 ```
 
 The equivalent using only Python is

@@ -5,7 +5,7 @@
 
 import sys
 import typing
-from typing import *  # noqa: F403
+from typing import *
 
 import numpy
 
@@ -31,7 +31,7 @@ __all__ = list(
 )
 
 
-AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)  # noqa: F405
+AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
 
 if sys.version_info < (3, 11):
     from typing import (
