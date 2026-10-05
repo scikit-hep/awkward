@@ -58,7 +58,7 @@ jobs:
         include:
           - python-version: '3.14'
             python-architecture: arm64
-            runs-on: macos-14
+            runs-on: macos-15
             dependencies-kind: full
           - python-version: '3.14'
             python-architecture: x64
@@ -78,7 +78,7 @@ jobs:
             dependencies-kind: minimal
           - python-version: '3.11'
             python-architecture: arm64
-            runs-on: macos-14
+            runs-on: macos-15
             dependencies-kind: ml
           - python-version: '3.14t'
             python-architecture: x64
@@ -86,7 +86,7 @@ jobs:
             dependencies-kind: nogil
           - python-version: '3.14t'
             python-architecture: arm64
-            runs-on: macos-14
+            runs-on: macos-15
             dependencies-kind: nogil
           - python-version: '3.14t'
             python-architecture: x64
