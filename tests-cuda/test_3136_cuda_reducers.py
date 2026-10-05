@@ -1,3 +1,5 @@
+import math
+
 import cupy as cp
 import cupy.testing as cpt
 import numpy as np
@@ -9,79 +11,56 @@ import awkward as ak
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
-    cp.cuda.Stream.null.synchronize()
+    # Surface asynchronous failures without discarding reusable pool allocations.
+    cp.cuda.Device().synchronize()
 
 
-def assert_gpu_equal_with_dtype(result, expected):
-    cp.testing.assert_allclose(result, expected)
-    assert result.dtype == expected.dtype
-
-
-@pytest.fixture(scope="module")
-def depth(request):
-    dtype = request.param
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=dtype)
-
-    content = ak.contents.NumpyArray(array.reshape(-1))
-    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth = ak.contents.ListOffsetArray(offsets, content)
-
-    return depth
-
-
-@pytest.fixture(scope="module")
-def depth_gpu(request):
-    dtype = request.param
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=dtype)
-
-    content = ak.contents.NumpyArray(array.reshape(-1))
-    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth = ak.contents.ListOffsetArray(offsets, content)
-
-    return ak.to_backend(depth, "cuda")
-
-
-@pytest.mark.parametrize(
-    "depth,depth_gpu,dtype",
-    [
-        (None, None, np.int8),
-        (None, None, np.uint8),
-        (None, None, np.int16),
-        (None, None, np.uint16),
-        (None, None, np.int32),
-        (None, None, np.uint32),
-        (None, None, np.int64),
-        (None, None, np.uint64),
+@pytest.fixture(
+    scope="module",
+    params=[
+        np.bool_,
+        np.int8,
+        np.uint8,
+        np.int16,
+        np.uint16,
+        np.int32,
+        np.uint32,
+        np.int64,
+        np.uint64,
     ],
-    indirect=["depth", "depth_gpu"],
+    ids=lambda dtype: np.dtype(dtype).name,
 )
-def test_sumprod_gpu(dtype, depth, depth_gpu):
-    sum_gpu = ak.sum(depth_gpu, axis=-1, highlevel=False)
-    prod_gpu = ak.prod(depth_gpu, axis=-1, highlevel=False)
-
-    sum_expected = cp.asarray(ak.sum(depth, axis=-1, highlevel=False))
-    prod_expected = cp.asarray(ak.prod(depth, axis=-1, highlevel=False))
-
-    assert_gpu_equal_with_dtype(sum_gpu, sum_expected)
-    assert_gpu_equal_with_dtype(prod_gpu, prod_expected)
-
-
-def test_0115_generic_reducer_operation_sumprod_types():
-    array = np.array([[True, False, False], [True, False, False]])
+def reducer_inputs(request):
+    dtype = request.param
+    values = (
+        [[True, False, False], [True, False, False]]
+        if dtype is np.bool_
+        else [[0, 1, 2], [3, 4, 5]]
+    )
+    array = np.array(values, dtype=dtype)
     content = ak.contents.NumpyArray(array.reshape(-1))
     offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
     depth = ak.contents.ListOffsetArray(offsets, content)
+    return array, ak.to_backend(depth, "cuda")
 
-    depth_gpu = ak.to_backend(depth, "cuda")
 
-    sum_gpu = ak.sum(depth_gpu, axis=-1, highlevel=False)
-    prod_gpu = ak.prod(depth_gpu, axis=-1, highlevel=False)
+def test_0115_generic_reducer_operation_sumprod_types(reducer_inputs):
+    array, depth = reducer_inputs
+    sum_result = ak.to_cupy(ak.sum(depth, axis=-1, highlevel=False))
+    prod_result = ak.to_cupy(ak.prod(depth, axis=-1, highlevel=False))
 
-    sum_expected = cp.asarray(ak.sum(depth, axis=-1, highlevel=False))
-    prod_expected = cp.asarray(ak.prod(depth, axis=-1, highlevel=False))
+    assert sum_result.dtype == np.sum(array, axis=-1).dtype
+    assert prod_result.dtype == np.prod(array, axis=-1).dtype
+    assert sum(ak.to_list(np.sum(array, axis=-1))) == sum(sum_result.tolist())
+    assert math.prod(ak.to_list(np.prod(array, axis=-1))) == math.prod(
+        prod_result.tolist()
+    )
 
-    assert_gpu_equal_with_dtype(sum_gpu, sum_expected)
-    assert_gpu_equal_with_dtype(prod_gpu, prod_expected)
+    # Check each ragged segment, including the empty-list identities, against NumPy.
+    flat = array.reshape(-1)
+    segments = [flat[:3], flat[3:3], flat[3:5], flat[5:6]]
+    cpt.assert_array_equal(sum_result, cp.asarray([np.sum(x) for x in segments]))
+    cpt.assert_array_equal(prod_result, cp.asarray([np.prod(x) for x in segments]))
 
 
 @pytest.fixture(scope="module")
@@ -93,58 +72,171 @@ def cuda_array():
 
 
 @pytest.fixture(scope="module")
-def expected_scalars():
-    return {
-        "sum": 63.0,
-        "prod": 0.0,
-        "prod_slice": 4838400.0,
-        "min": 0.0,
-        "max": 10.0,
-        "count": 12,
-        "count_nonzero": 11,
-        "std": 3.139134700306227,
-    }
-
-
-@pytest.fixture(scope="module")
 def mask_templates():
     return {
-        "true": ak.Array([[True]], backend="cuda"),
-        "false": ak.Array([[False]], backend="cuda"),
+        True: ak.Array([[True]], backend="cuda"),
+        False: ak.Array([[False]], backend="cuda"),
     }
 
 
-def test_reduce_axis_none_all(cuda_array, expected_scalars, mask_templates):
-    arr = cuda_array
-
-    # --- SUM ---
-    cpt.assert_allclose(ak.sum(arr, axis=None), expected_scalars["sum"])
-
-    out = ak.sum(arr, axis=None, keepdims=True)
-    expected = ak.full_like(out, expected_scalars["sum"])
-    assert ak.almost_equal(out, expected)
-
-    mask = ak.full_like(out, True, dtype=bool)
-    masked = ak.mask(out, mask)
-
+def test_2020_reduce_axis_none_sum(cuda_array, mask_templates):
+    array = cuda_array
+    cpt.assert_allclose(ak.sum(array, axis=None), 63.0)
     assert ak.almost_equal(
-        ak.sum(arr, axis=None, keepdims=True, mask_identity=True),
-        masked,
+        ak.sum(array, axis=None, keepdims=True),
+        ak.to_regular(ak.Array([[63.0]], backend="cuda")),
     )
 
-    assert ak.sum(arr[2], axis=None, mask_identity=True) is None
+    arr = ak.Array([[63.0]], backend="cuda")
+    assert ak.almost_equal(
+        ak.sum(array, axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[True]]),
+    )
+    assert ak.sum(array[2], axis=None, mask_identity=True) is None
 
-    # --- PROD ---
-    cpt.assert_allclose(ak.prod(arr[1:], axis=None), expected_scalars["prod_slice"])
-    assert ak.prod(arr, axis=None) == expected_scalars["prod"]
 
-    # --- MIN / MAX ---
-    cpt.assert_allclose(ak.min(arr, axis=None), expected_scalars["min"])
-    cpt.assert_allclose(ak.max(arr, axis=None), expected_scalars["max"])
+def test_2020_reduce_axis_none_prod(cuda_array, mask_templates):
+    array = cuda_array
+    cpt.assert_allclose(ak.prod(array[1:], axis=None), 4838400.0)
+    assert ak.prod(array, axis=None) == 0
+    assert ak.almost_equal(
+        ak.prod(array, axis=None, keepdims=True),
+        ak.to_regular(ak.Array([[0.0]], backend="cuda")),
+    )
+    assert ak.almost_equal(
+        ak.prod(array[1:], axis=None, keepdims=True),
+        ak.to_regular(ak.Array([[4838400.0]], backend="cuda")),
+    )
 
-    # --- COUNT ---
-    assert ak.count(arr, axis=None) == expected_scalars["count"]
-    assert ak.count_nonzero(arr, axis=None) == expected_scalars["count_nonzero"]
+    arr = ak.Array([[4838400.0]], backend="cuda")
+    assert ak.almost_equal(
+        ak.prod(array[1:], axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[True]]),
+    )
+    assert ak.prod(array[2], axis=None, mask_identity=True) is None
 
-    # --- STD ---
-    cpt.assert_allclose(ak.std(arr, axis=None), expected_scalars["std"])
+
+def test_2020_reduce_axis_none_min(cuda_array, mask_templates):
+    array = cuda_array
+    cpt.assert_allclose(ak.min(array, axis=None), 0.0)
+    assert ak.almost_equal(
+        ak.min(array, axis=None, keepdims=True, mask_identity=False),
+        ak.to_regular(ak.Array([[0.0]], backend="cuda")),
+    )
+    assert ak.almost_equal(
+        ak.min(array, axis=None, keepdims=True, initial=-100.0, mask_identity=False),
+        ak.to_regular(ak.Array([[-100.0]], backend="cuda")),
+    )
+
+    arr = ak.Array([[0.0]], backend="cuda")
+    assert ak.almost_equal(
+        ak.min(array, axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[True]]),
+    )
+
+    arr = ak.Array(ak.Array([[np.inf]], backend="cuda"))
+    assert ak.almost_equal(
+        ak.min(array[-1:], axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[False]]),
+    )
+    assert ak.min(array[2], axis=None, mask_identity=True) is None
+
+
+def test_2020_reduce_axis_none_max(cuda_array, mask_templates):
+    array = cuda_array
+    cpt.assert_allclose(ak.max(array, axis=None), 10.0)
+    assert ak.almost_equal(
+        ak.max(array, axis=None, keepdims=True, mask_identity=False),
+        ak.to_regular(ak.Array([[10.0]], backend="cuda")),
+    )
+    assert ak.almost_equal(
+        ak.max(array, axis=None, keepdims=True, initial=100.0, mask_identity=False),
+        ak.to_regular(ak.Array([[100.0]], backend="cuda")),
+    )
+
+    arr = ak.Array([[10.0]], backend="cuda")
+    assert ak.almost_equal(
+        ak.max(array, axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[True]]),
+    )
+
+    arr = ak.Array(ak.Array([[np.inf]], backend="cuda"))
+    assert ak.almost_equal(
+        ak.max(array[-1:], axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[False]]),
+    )
+    assert ak.max(array[2], axis=None, mask_identity=True) is None
+
+
+def test_2020_reduce_axis_none_count(cuda_array, mask_templates):
+    array = cuda_array
+    assert ak.count(array, axis=None) == 12
+    assert ak.almost_equal(
+        ak.count(array, axis=None, keepdims=True, mask_identity=False),
+        ak.to_regular(ak.Array([[12]], backend="cuda")),
+    )
+
+    arr = ak.Array([[12]], backend="cuda")
+    assert ak.almost_equal(
+        ak.count(array, axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[True]]),
+    )
+
+    arr = ak.Array([[0]], backend="cuda")
+    assert ak.almost_equal(
+        ak.count(array[-1:], axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[False]]),
+    )
+    assert ak.count(array[2], axis=None, mask_identity=True) is None
+    assert ak.count(array[2], axis=None, mask_identity=False) == 0
+
+
+def test_2020_reduce_axis_none_count_nonzero(cuda_array, mask_templates):
+    array = cuda_array
+    assert ak.count_nonzero(array, axis=None) == 11
+    assert ak.almost_equal(
+        ak.count_nonzero(array, axis=None, keepdims=True, mask_identity=False),
+        ak.to_regular(ak.Array([[11]], backend="cuda")),
+    )
+
+    arr = ak.Array([[11]], backend="cuda")
+    assert ak.almost_equal(
+        ak.count_nonzero(array, axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[True]]),
+    )
+
+    arr = ak.Array([[0]], backend="cuda")
+    assert ak.almost_equal(
+        ak.count_nonzero(array[-1:], axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[False]]),
+    )
+    assert ak.count_nonzero(array[2], axis=None, mask_identity=True) is None
+    assert ak.count_nonzero(array[2], axis=None, mask_identity=False) == 0
+
+
+def test_2020_reduce_axis_none_std_no_mask_axis_none(cuda_array, mask_templates):
+    array = cuda_array
+    out1 = ak.std(array[-1:], axis=None, keepdims=True, mask_identity=True)
+
+    arr = ak.Array([[0.0]], backend="cuda")
+    out2 = ak.to_regular(arr.mask[mask_templates[False]])
+    assert ak.almost_equal(out1, out2)
+
+    out3 = ak.std(array[2], axis=None, mask_identity=True)
+    assert out3 is None
+
+
+def test_2020_reduce_axis_none_std(cuda_array, mask_templates):
+    array = cuda_array
+    cpt.assert_allclose(ak.std(array, axis=None), 3.139134700306227)
+    assert ak.almost_equal(
+        ak.std(array, axis=None, keepdims=True, mask_identity=False),
+        ak.to_regular(ak.Array([[3.139134700306227]], backend="cuda")),
+    )
+
+    arr = ak.Array([[3.139134700306227]], backend="cuda")
+    assert ak.almost_equal(
+        ak.std(array, axis=None, keepdims=True, mask_identity=True),
+        ak.to_regular(arr.mask[mask_templates[True]]),
+    )
+    assert np.isnan(ak.std(array[2], axis=None, mask_identity=False))
