@@ -104,8 +104,6 @@ def has_issues(a: ak.Array) -> bool:
     """
     if _has_issue_4221(a.layout):
         return True
-    if _has_issue_4222(a.layout):
-        return True
     if _has_issue_4229(a.layout):
         return True
     if _has_issue_4274(a.layout):
@@ -123,47 +121,6 @@ def _has_issue_4221(layout: ak.contents.Content) -> bool:
     ):
         return True
     return any(_has_issue_4221(x) for x in _children(layout))
-
-
-def _has_issue_4222(
-    layout: ak.contents.Content,
-    nullable: bool = False,
-    sliced: bool = False,
-) -> bool:
-    """A nullable var-length list whose offsets do not start at zero is
-    compacted against unshifted content in `ListOffsetArray._to_arrow`,
-    shifting every list by `offsets[0]` (data corruption, #4222).
-
-    `nullable` tracks whether Arrow validity bytes flow into this node
-    from an enclosing option: they start at option nodes, pass through
-    records and indexed nodes, and stop below lists.
-
-    `sliced` tracks whether `to_arrow` reaches this node through a
-    transformation that can move list offsets away from zero even if
-    they were constructed zero-based: a list trims its content to
-    `offsets[0]:offsets[length]`, an indexed node projects its content,
-    and a `ListArray` may be compacted from anywhere; such nodes can
-    present any list below an option with nonzero offsets.
-    """
-    if layout.is_record:
-        return any(_has_issue_4222(x, nullable, sliced) for x in layout.contents)
-    if layout.is_regular:
-        return _has_issue_4222(layout.content, False, sliced)
-    if layout.is_option:
-        if isinstance(layout, ak.contents.IndexedOptionArray):
-            return _has_issue_4222(layout.content, True, True)
-        return _has_issue_4222(layout.content, True, sliced)
-    if layout.is_indexed:
-        return _has_issue_4222(layout.content, nullable, True)
-    if layout.is_list:
-        if nullable and layout.length > 0 and (sliced or layout.starts[0] != 0):
-            return True
-        if isinstance(layout, ak.contents.ListOffsetArray):
-            child_sliced = sliced or bool(layout.offsets[0] != 0)
-        else:
-            child_sliced = True
-        return _has_issue_4222(layout.content, False, child_sliced)
-    return False
 
 
 def _has_issue_4229(layout: ak.contents.Content) -> bool:
@@ -299,7 +256,7 @@ def test_roundtrip_stable(feather_dir, a: ak.Array) -> None:
     option reads back null. After one full roundtrip these normalizations
     have happened: converting the reconstruction again writes an identical
     Arrow table. Layouts that the conversion crashes on or corrupts
-    (#4221, #4222) are still excluded: this test does not vouch for them.
+    (#4221) are still excluded: this test does not vouch for them.
     """
     path = feather_path(feather_dir)
     ak.to_feather(a, path)
