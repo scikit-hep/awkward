@@ -332,4 +332,4 @@ mccabe.max-complexity = 100
 
 [tool.uv]
 exclude-newer = "7 days"
-exclude-newer-package = { awkward_cpp = false }
+exclude-newer-package = { awkward_cpp = false, hypothesis_awkward = false }
