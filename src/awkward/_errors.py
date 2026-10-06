@@ -1,10 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+import reprlib
+import sys
 import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import wraps
+from itertools import islice
 from weakref import ref as weak_ref
 
 import numpy
@@ -155,7 +158,10 @@ class ErrorContext:
                 valuestr = valuestr[: width - 3] + "..."
 
         elif isinstance(value, (Collection, Mapping)) and len(value) < 10000:
-            valuestr = repr(value)
+            try:
+                valuestr = _ArgumentRepr(width).repr(value)
+            except Exception as err:
+                valuestr = f"repr-raised-{type(err).__name__}"
             if len(valuestr) > width:
                 valuestr = valuestr[: width - 3] + "..."
 
@@ -170,6 +176,33 @@ class ErrorContext:
     @property
     def note(self) -> str:
         raise NotImplementedError
+
+
+class _ArgumentRepr(reprlib.Repr):
+    """
+    repr() bounded in depth and length, so formatting an argument cannot overflow
+    the C stack; it gives the same text as repr() for anything that fits in `width`.
+    """
+
+    def __init__(self, width):
+        super().__init__()
+        self.maxlevel = self.maxlist = self.maxtuple = self.maxdict = width
+        self.maxset = self.maxfrozenset = self.maxdeque = self.maxarray = width
+        self.maxstring = self.maxother = self.maxlong = sys.maxsize
+
+    def repr_dict(self, x, level):
+        # reprlib sorts keys; repr() keeps insertion order.
+        if not x:
+            return "{}"
+        if level <= 0:
+            return "{...}"
+        pieces = [
+            f"{self.repr1(k, level - 1)}: {self.repr1(v, level - 1)}"
+            for k, v in islice(x.items(), self.maxdict)
+        ]
+        if len(x) > self.maxdict:
+            pieces.append("...")
+        return "{" + ", ".join(pieces) + "}"
 
 
 class OperationErrorContext(ErrorContext):
