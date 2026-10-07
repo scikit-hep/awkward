@@ -1,6 +1,20 @@
 import os
 
+import pytest
+
 collect_ignore_glob = []
+
+
+# Hypothesis adds its statistics to junit.xml only without pytest-xdist.
+# user_properties reach junit.xml from xdist workers too.
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+    stats = getattr(item, "hypothesis_statistics", None)
+    if stats is not None and report.when == "teardown":
+        report.user_properties.append(("hypothesis-statistics", stats))
+
 
 try:
     import hypothesis_awkward  # noqa: F401
