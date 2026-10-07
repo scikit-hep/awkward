@@ -21,6 +21,23 @@ np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
 
+def _validate_json_strings(value):
+    """Reject strings that JSON cannot represent as Unicode scalar values."""
+    if isinstance(value, str):
+        if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
+            raise ValueError(
+                "cannot convert a string containing an unpaired UTF-16 surrogate "
+                "to JSON"
+            )
+    elif isinstance(value, list):
+        for item in value:
+            _validate_json_strings(item)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            _validate_json_strings(key)
+            _validate_json_strings(item)
+
+
 @high_level_function()
 def to_json(
     array,
@@ -190,6 +207,7 @@ def _impl(
         convert_bytes=convert_bytes,
         behavior=behavior_of(array),
     )
+    _validate_json_strings(jsondata)
 
     if line_delimited and not isinstance(line_delimited, str):
         line_delimited = "\n"

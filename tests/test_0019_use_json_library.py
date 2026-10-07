@@ -92,6 +92,21 @@ def test_chararray():
     assert ak.operations.to_json(array) == '"hellothere"'
 
 
+def test_chararray_rejects_unpaired_surrogates():
+    array = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index64(np.array([0, 1])),
+            ak.contents.NumpyArray(
+                np.array([0x80], np.uint8), parameters={"__array__": "char"}
+            ),
+            parameters={"__array__": "string"},
+        )
+    )
+
+    with pytest.raises(ValueError, match="unpaired UTF-16 surrogate"):
+        ak.operations.to_json(array)
+
+
 def test_string_array():
     array = ak.contents.ListOffsetArray(
         ak.index.Index64([0, 5, 10]),
