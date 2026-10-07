@@ -281,6 +281,9 @@ llms_txt_description = (
 # builds must not run at the same time.
 llms_txt_build_parallel = False
 
+# Write only page.html.md, not also page.md
+llms_txt_suffix_mode = "append"
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
