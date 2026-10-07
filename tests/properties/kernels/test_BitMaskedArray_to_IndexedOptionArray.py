@@ -1,12 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-"""Property-based test for the ``awkward_BitMaskedArray_to_ByteMaskedArray`` kernel.
-
-Prototype for replacing the frozen samples in ``kernel-test-data.json`` with
-Hypothesis-generated inputs. The property is::
-
-    backend_kernel(inputs) == reference_definition(inputs)   for all valid inputs
-"""
+"""Property-based test for the ``awkward_BitMaskedArray_to_IndexedOptionArray`` kernel."""
 
 import numpy as np
 import pytest
@@ -15,7 +9,11 @@ from hypothesis import strategies as st
 
 from tests.properties.kernels import harness, strategies
 
-KERNEL = "awkward_BitMaskedArray_to_ByteMaskedArray"
+KERNEL = "awkward_BitMaskedArray_to_IndexedOptionArray"
+
+# The kernel writes -1 or an index >= 0, never this value: an element left
+# unwritten by a backend keeps it and fails the comparison.
+SENTINEL = int(np.iinfo(np.int64).min)
 
 reference = harness.load_reference(KERNEL)
 
@@ -32,19 +30,16 @@ def test_matches_reference(
     """Each backend kernel must agree with the spec's reference implementation."""
     bitmasklength = len(frombitmask)
 
-    # Reference implementation: pure-Python, mutating a plain list in place.
-    expected: list = [0] * (bitmasklength * 8)
+    expected = [SENTINEL] * (bitmasklength * 8)
     reference(expected, frombitmask, bitmasklength, validwhen, lsb_order)
 
-    tobytemask, *_ = run(
+    toindex, *_ = run(
         KERNEL,
-        np.zeros(bitmasklength * 8, dtype=np.int8),
+        np.full(bitmasklength * 8, SENTINEL, dtype=np.int64),
         np.array(frombitmask, dtype=np.uint8),
         bitmasklength,
         validwhen,
         lsb_order,
     )
 
-    # Reference yields numpy.bool_, the kernels write int8 0/1 — normalise both.
-    got = [int(bool(x)) for x in tobytemask]
-    assert got == [int(bool(x)) for x in expected]
+    assert toindex.tolist() == expected
