@@ -1,3 +1,5 @@
+import math
+
 import cupy as cp
 import cupy.testing as cpt
 import numpy as np
@@ -5,264 +7,80 @@ import pytest
 
 import awkward as ak
 
-to_list = ak.operations.to_list
-
 
 @pytest.fixture(scope="function", autouse=True)
 def cleanup_cuda():
     yield
-    try:
-        cp.cuda.Device().synchronize()  # wait for all kernels
-    except cp.cuda.runtime.CUDARuntimeError as e:
-        print("GPU error during sync:", e)
-    cp._default_memory_pool.free_all_blocks()
+    # Surface asynchronous failures without discarding reusable pool allocations.
+    cp.cuda.Device().synchronize()
 
 
-def prod(xs):
-    out = 1
-    for x in xs:
-        out *= x
-    return out
-
-
-def test_0115_generic_reducer_operation_sumprod_types():
-    array = np.array([[True, False, False], [True, False, False]])
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
+@pytest.fixture(
+    scope="module",
+    params=[
+        np.bool_,
+        np.int8,
+        np.uint8,
+        np.int16,
+        np.uint16,
+        np.int32,
+        np.uint32,
+        np.int64,
+        np.uint64,
+    ],
+    ids=lambda dtype: np.dtype(dtype).name,
+)
+def reducer_inputs(request):
+    dtype = request.param
+    values = (
+        [[True, False, False], [True, False, False]]
+        if dtype is np.bool_
+        else [[0, 1, 2], [3, 4, 5]]
     )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
-    )
-    del depth1
+    array = np.array(values, dtype=dtype)
+    content = ak.contents.NumpyArray(array.reshape(-1))
+    offsets = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
+    depth = ak.contents.ListOffsetArray(offsets, content)
+    return array, ak.to_backend(depth, "cuda")
 
 
-def test_0115_generic_reducer_operation_sumprod_types_1():
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int8)
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
+def test_0115_generic_reducer_operation_sumprod_types(reducer_inputs):
+    array, depth = reducer_inputs
+    sum_result = ak.to_cupy(ak.sum(depth, axis=-1, highlevel=False))
+    prod_result = ak.to_cupy(ak.prod(depth, axis=-1, highlevel=False))
 
-    depth1 = ak.to_backend(depth1, "cuda")
+    assert sum_result.dtype == np.sum(array, axis=-1).dtype
+    assert prod_result.dtype == np.prod(array, axis=-1).dtype
+    assert sum(ak.to_list(np.sum(array, axis=-1))) == sum(sum_result.tolist())
+    assert math.prod(ak.to_list(np.prod(array, axis=-1))) == math.prod(
+        prod_result.tolist()
+    )
 
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
-    )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
-    )
-    del depth1
+    # Check each ragged segment, including the empty-list identities, against NumPy.
+    flat = array.reshape(-1)
+    segments = [flat[:3], flat[3:3], flat[3:5], flat[5:6]]
+    cpt.assert_array_equal(sum_result, cp.asarray([np.sum(x) for x in segments]))
+    cpt.assert_array_equal(prod_result, cp.asarray([np.prod(x) for x in segments]))
 
 
-def test_0115_generic_reducer_operation_sumprod_types_2():
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint8)
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
-    )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
-    )
-    del depth1
-
-
-def test_0115_generic_reducer_operation_sumprod_types_3():
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int16)
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
-    )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
-    )
-    del depth1
-
-
-def test_0115_generic_reducer_operation_sumprod_types_4():
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint16)
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
-    )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
+@pytest.fixture(scope="module")
+def cuda_array():
+    return ak.Array(
+        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []],
+        backend="cuda",
     )
 
 
-def test_0115_generic_reducer_operation_sumprod_types_5():
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int32)
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
-    )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
-    )
-    del depth1
+@pytest.fixture(scope="module")
+def mask_templates():
+    return {
+        True: ak.Array([[True]], backend="cuda"),
+        False: ak.Array([[False]], backend="cuda"),
+    }
 
 
-def test_0115_generic_reducer_operation_sumprod_types_6():
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint32)
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
-    )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
-    )
-    del depth1
-
-
-def test_0115_generic_reducer_operation_sumprod_types_7():
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.int64)
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
-    )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
-    )
-    del depth1
-
-
-def test_0115_generic_reducer_operation_sumprod_types_8():
-    array = np.array([[0, 1, 2], [3, 4, 5]], dtype=np.uint64)
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert sum(to_list(np.sum(array, axis=-1))) == sum(
-        to_list(ak.sum(depth1, axis=-1, highlevel=False))
-    )
-    assert prod(to_list(np.prod(array, axis=-1))) == prod(
-        to_list(ak.prod(depth1, axis=-1, highlevel=False))
-    )
-    del depth1
-
-
-def test_0115_generic_reducer_operation_sumprod_types_FIXME():
-    array = np.array([[True, False, False], [True, False, False]])
-    content2 = ak.contents.NumpyArray(array.reshape(-1))
-    offsets3 = ak.index.Index64(np.array([0, 3, 3, 5, 6], dtype=np.int64))
-    depth1 = ak.contents.ListOffsetArray(offsets3, content2)
-    depth1 = ak.to_backend(depth1, "cuda")
-
-    assert (
-        np.sum(array, axis=-1).dtype
-        == ak.to_numpy(ak.sum(depth1, axis=-1, highlevel=False)).dtype
-    )
-    assert (
-        np.prod(array, axis=-1).dtype
-        == ak.to_numpy(ak.prod(depth1, axis=-1, highlevel=False)).dtype
-    )
-    del depth1
-
-
-def test_2020_reduce_axis_none_sum():
-    array = ak.Array(
-        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
-    )
+def test_2020_reduce_axis_none_sum(cuda_array, mask_templates):
+    array = cuda_array
     cpt.assert_allclose(ak.sum(array, axis=None), 63.0)
     assert ak.almost_equal(
         ak.sum(array, axis=None, keepdims=True),
@@ -272,16 +90,13 @@ def test_2020_reduce_axis_none_sum():
     arr = ak.Array([[63.0]], backend="cuda")
     assert ak.almost_equal(
         ak.sum(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[True]]),
     )
     assert ak.sum(array[2], axis=None, mask_identity=True) is None
-    del array
 
 
-def test_2020_reduce_axis_none_prod():
-    array = ak.Array(
-        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
-    )
+def test_2020_reduce_axis_none_prod(cuda_array, mask_templates):
+    array = cuda_array
     cpt.assert_allclose(ak.prod(array[1:], axis=None), 4838400.0)
     assert ak.prod(array, axis=None) == 0
     assert ak.almost_equal(
@@ -296,16 +111,13 @@ def test_2020_reduce_axis_none_prod():
     arr = ak.Array([[4838400.0]], backend="cuda")
     assert ak.almost_equal(
         ak.prod(array[1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[True]]),
     )
     assert ak.prod(array[2], axis=None, mask_identity=True) is None
-    del array
 
 
-def test_2020_reduce_axis_none_min():
-    array = ak.Array(
-        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
-    )
+def test_2020_reduce_axis_none_min(cuda_array, mask_templates):
+    array = cuda_array
     cpt.assert_allclose(ak.min(array, axis=None), 0.0)
     assert ak.almost_equal(
         ak.min(array, axis=None, keepdims=True, mask_identity=False),
@@ -319,22 +131,19 @@ def test_2020_reduce_axis_none_min():
     arr = ak.Array([[0.0]], backend="cuda")
     assert ak.almost_equal(
         ak.min(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[True]]),
     )
 
     arr = ak.Array(ak.Array([[np.inf]], backend="cuda"))
     assert ak.almost_equal(
         ak.min(array[-1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[False]]),
     )
     assert ak.min(array[2], axis=None, mask_identity=True) is None
-    del array
 
 
-def test_2020_reduce_axis_none_max():
-    array = ak.Array(
-        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
-    )
+def test_2020_reduce_axis_none_max(cuda_array, mask_templates):
+    array = cuda_array
     cpt.assert_allclose(ak.max(array, axis=None), 10.0)
     assert ak.almost_equal(
         ak.max(array, axis=None, keepdims=True, mask_identity=False),
@@ -348,22 +157,19 @@ def test_2020_reduce_axis_none_max():
     arr = ak.Array([[10.0]], backend="cuda")
     assert ak.almost_equal(
         ak.max(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[True]]),
     )
 
     arr = ak.Array(ak.Array([[np.inf]], backend="cuda"))
     assert ak.almost_equal(
         ak.max(array[-1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[False]]),
     )
     assert ak.max(array[2], axis=None, mask_identity=True) is None
-    del array
 
 
-def test_2020_reduce_axis_none_count():
-    array = ak.Array(
-        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
-    )
+def test_2020_reduce_axis_none_count(cuda_array, mask_templates):
+    array = cuda_array
     assert ak.count(array, axis=None) == 12
     assert ak.almost_equal(
         ak.count(array, axis=None, keepdims=True, mask_identity=False),
@@ -373,23 +179,20 @@ def test_2020_reduce_axis_none_count():
     arr = ak.Array([[12]], backend="cuda")
     assert ak.almost_equal(
         ak.count(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[True]]),
     )
 
     arr = ak.Array([[0]], backend="cuda")
     assert ak.almost_equal(
         ak.count(array[-1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[False]]),
     )
     assert ak.count(array[2], axis=None, mask_identity=True) is None
     assert ak.count(array[2], axis=None, mask_identity=False) == 0
-    del array
 
 
-def test_2020_reduce_axis_none_count_nonzero():
-    array = ak.Array(
-        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
-    )
+def test_2020_reduce_axis_none_count_nonzero(cuda_array, mask_templates):
+    array = cuda_array
     assert ak.count_nonzero(array, axis=None) == 11
     assert ak.almost_equal(
         ak.count_nonzero(array, axis=None, keepdims=True, mask_identity=False),
@@ -399,49 +202,41 @@ def test_2020_reduce_axis_none_count_nonzero():
     arr = ak.Array([[11]], backend="cuda")
     assert ak.almost_equal(
         ak.count_nonzero(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[True]]),
     )
 
     arr = ak.Array([[0]], backend="cuda")
     assert ak.almost_equal(
         ak.count_nonzero(array[-1:], axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[False]]),
     )
     assert ak.count_nonzero(array[2], axis=None, mask_identity=True) is None
     assert ak.count_nonzero(array[2], axis=None, mask_identity=False) == 0
-    del array
 
 
-def test_2020_reduce_axis_none_std_no_mask_axis_none():
-    array = ak.Array(
-        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
-    )
+def test_2020_reduce_axis_none_std_no_mask_axis_none(cuda_array, mask_templates):
+    array = cuda_array
     out1 = ak.std(array[-1:], axis=None, keepdims=True, mask_identity=True)
 
     arr = ak.Array([[0.0]], backend="cuda")
-    out2 = ak.to_regular(arr.mask[ak.Array([[False]], backend="cuda")])
+    out2 = ak.to_regular(arr.mask[mask_templates[False]])
     assert ak.almost_equal(out1, out2)
 
     out3 = ak.std(array[2], axis=None, mask_identity=True)
     assert out3 is None
-    del array
-    del out1, out2, out3
 
 
-def test_2020_reduce_axis_none_std():
-    array = ak.Array(
-        [[0, 2, 3.0], [4, 5, 6, 7, 8], [], [9, 8, None], [10, 1], []], backend="cuda"
-    )
+def test_2020_reduce_axis_none_std(cuda_array, mask_templates):
+    array = cuda_array
     cpt.assert_allclose(ak.std(array, axis=None), 3.139134700306227)
-    cpt.assert_allclose(
+    assert ak.almost_equal(
         ak.std(array, axis=None, keepdims=True, mask_identity=False),
-        ak.to_regular([[3.139134700306227]]),
+        ak.to_regular(ak.Array([[3.139134700306227]], backend="cuda")),
     )
 
     arr = ak.Array([[3.139134700306227]], backend="cuda")
-    cpt.assert_allclose(
+    assert ak.almost_equal(
         ak.std(array, axis=None, keepdims=True, mask_identity=True),
-        ak.to_regular(arr.mask[ak.Array([[True]], backend="cuda")]),
+        ak.to_regular(arr.mask[mask_templates[True]]),
     )
     assert np.isnan(ak.std(array[2], axis=None, mask_identity=False))
-    del array
