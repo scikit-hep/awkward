@@ -31,8 +31,8 @@ def test_to_from_data_frame_large():
             3,
             shape[-1] // 3,
         )
-        col_view = arr[:, col]
-        col_view.shape = shape
+        # A 1-d strided array always reshapes to a view, so writes reach arr
+        col_view = arr[:, col].reshape(shape)
         col_view[:] = source
 
     ak_array_in = ak.from_numpy(arr, regulararray=True)
