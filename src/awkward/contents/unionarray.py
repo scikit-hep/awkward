@@ -28,7 +28,6 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
-    Literal,
     Self,
     SupportsIndex,
     final,
@@ -1097,14 +1096,6 @@ class UnionArray(UnionMeta[Content], Content):
                         parameters=self._parameters,
                     ),
                 )
-
-    def _mergeable_next(
-        self,
-        other: Content,
-        mergebool: bool,
-        mergecastable: Literal["same_kind", "equiv", "family"],
-    ) -> bool:
-        return True
 
     def _merging_strategy(self, others):
         if len(others) == 0:

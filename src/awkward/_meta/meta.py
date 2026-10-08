@@ -6,6 +6,7 @@ from awkward._typing import (
     ClassVar,
     JSONMapping,
     JSONSerializable,
+    Literal,
     Self,
 )
 from awkward._util import UNSET, Sentinel
@@ -24,6 +25,17 @@ class Meta:
     is_unmasked: ClassVar[bool] = False
 
     _parameters: JSONMapping | None
+
+    def _mergeable_next(
+        self,
+        other: Meta,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
+        """Compare metadata without reading, allocating, or merging data buffers."""
+        from awkward._meta.mergeable import mergeable
+
+        return mergeable(self, other, mergebool, mergecastable)
 
     @property
     def parameters(self) -> JSONMapping:
