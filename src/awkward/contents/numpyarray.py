@@ -24,7 +24,6 @@ from awkward._nplikes.typetracer import TypeTracerArray
 from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
-    type_parameters_equal,
 )
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
@@ -33,7 +32,6 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
-    Literal,
     Self,
     SupportsIndex,
     final,
@@ -327,6 +325,11 @@ class NumpyArray(NumpyMeta, Content):
         return inner_shape
 
     @property
+    def _mergeable_ndim(self) -> int:
+        # ndim is known even when a virtual buffer's shape needs materialization.
+        return self._data.ndim
+
+    @property
     def strides(self) -> tuple[ShapeItem, ...]:
         return self._backend.nplike.strides(self._data)
 
@@ -609,78 +612,6 @@ class NumpyArray(NumpyMeta, Content):
 
         else:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
-
-    def _mergeable_next(
-        self,
-        other: Content,
-        mergebool: bool,
-        mergecastable: Literal["same_kind", "equiv", "family"],
-    ) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # Is the other array indexed or optional?
-        elif other.is_indexed or other.is_option:
-            return self._mergeable_next(other.content, mergebool, mergecastable)
-        # Otherwise, do the parameters match? If not, we can't merge.
-        elif not type_parameters_equal(self._parameters, other._parameters):
-            return False
-        # Simplify *this* branch to be 1D self
-        elif len(self.shape) > 1:
-            return self._to_regular_primitive()._mergeable_next(
-                other, mergebool, mergecastable
-            )
-
-        elif isinstance(other, ak.contents.NumpyArray):
-            if self._data.ndim != other._data.ndim:
-                return False
-
-            # Obvious fast-path
-            if self.dtype == other.dtype:
-                return True
-
-            # Special-case booleans i.e. {bool, number}
-            elif (
-                np.issubdtype(self.dtype, np.bool_)
-                and np.issubdtype(other.dtype, np.number)
-            ) or (
-                np.issubdtype(self.dtype, np.number)
-                and np.issubdtype(other.dtype, np.bool_)
-            ):
-                return mergebool
-
-            # Currently we're less permissive than NumPy on merging datetimes / timedeltas
-            elif (
-                np.issubdtype(self.dtype, np.datetime64)
-                or np.issubdtype(self.dtype, np.timedelta64)
-                or np.issubdtype(other.dtype, np.datetime64)
-                or np.issubdtype(other.dtype, np.timedelta64)
-            ):
-                return False
-
-            # Only equivalent dtypes merge (only byte order changes allowed)
-            elif mergecastable == "equiv":
-                return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype, "equiv"
-                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "equiv")
-
-            # Only same family of dtypes merge (integers, floats, complex)
-            elif mergecastable == "family":
-                for family in np.integer, np.floating, np.complexfloating:
-                    if np.issubdtype(self.dtype, family):
-                        return np.issubdtype(other.dtype, family)
-
-            # Default merging (can we cast one to the other)
-            elif mergecastable == "same_kind":
-                return self.backend.nplike.can_cast(
-                    self.dtype, other.dtype, "same_kind"
-                ) or self.backend.nplike.can_cast(other.dtype, self.dtype, "same_kind")
-
-            else:
-                raise TypeError(f"unrecognized mergecastable option: {mergecastable}")
-
-        else:
-            return False
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
@@ -1767,13 +1698,3 @@ class NumpyArray(NumpyMeta, Content):
                 )
             )
         )
-
-    def _to_regular_primitive(self) -> ak.contents.RegularArray:
-        # A length-1 slice in each dimension
-        index = tuple([slice(None, 1)] * len(self.shape))
-        # Broadcast this trivial slice to the true dimensions (zero-copy)
-        new_data = self.backend.nplike.broadcast_to(self._data[index], self.shape)
-        # Convert contiguous array to `RegularArray`
-        return NumpyArray(
-            new_data, backend=self.backend, parameters=self.parameters
-        ).to_RegularArray()
