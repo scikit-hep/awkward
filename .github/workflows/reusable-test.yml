@@ -398,7 +398,8 @@ jobs:
         id: container-cache
         with:
           path: ~/docker_s390x
-          key: container-${{ runner.os }}-s390x-${{ hashFiles('requirements-test-basic.txt', 'awkward-cpp/pyproject.toml') }}
+          # Only the files installed into the container belong in the key.
+          key: container-${{ runner.os }}-s390x-${{ hashFiles('requirements-test-basic.txt') }}
 
       - name: Create container
         if: steps.container-cache.outputs.cache-hit != 'true'

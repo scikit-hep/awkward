@@ -1,0 +1,29 @@
+name: Cache cleanup
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  cleanup:
+    name: Delete caches of the closed PR
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      actions: write # to delete caches
+    steps:
+      - name: Delete caches
+        run: |
+          gh cache list --repo "$REPO" --ref "$REF" --limit 100 --json id --jq '.[].id' |
+            xargs -r -n1 gh cache delete --repo "$REPO"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          REF: refs/pull/${{ github.event.pull_request.number }}/merge
