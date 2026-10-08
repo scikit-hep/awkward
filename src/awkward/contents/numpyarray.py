@@ -931,8 +931,10 @@ class NumpyArray(NumpyMeta, Content):
                     negaxis, starts, offsets, outlength, True, False
                 )._data
                 counts = offsets.data[1:] - offsets.data[:-1]
+                # NumPy repeat requires native-width counts on 32-bit platforms.
                 parents = _numpy.repeat(
-                    _numpy.arange(outlength, dtype=np.int64), counts
+                    _numpy.arange(outlength, dtype=np.int64),
+                    counts.astype(_numpy.intp),
                 )
                 covered = parents.shape[0]
                 values = sorted_[:covered]
