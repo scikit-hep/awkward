@@ -24,19 +24,20 @@ jobs:
     env:
       S3_BUCKET: "preview-awkward-array-org"
       DEPLOY_URL: "https://preview.awkward-array.org"
-      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      # R2 is a single global bucket, but the CLI still wants a region
-      AWS_DEFAULT_REGION: auto
-      R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
-      # R2 rejects the additional checksums that recent versions of the AWS CLI
-      # send by default
-      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
-      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+      RCLONE_CONFIG_R2_TYPE: s3
+      RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_R2_REGION: auto
+      RCLONE_CONFIG_R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+      # The token may only read and write objects, so never try to create the bucket
+      RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
     environment:
       name: docs
       url: "${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}/"
     steps:
+    - name: Install rclone
+      run: sudo apt-get update --quiet && sudo apt-get install --yes --quiet rclone
     - name: Download rendered docs
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
@@ -95,9 +96,9 @@ jobs:
       # to, so let the edge revalidate it rather than purging the zone for
       # every push
       run: |
-        aws s3 sync --endpoint-url "${R2_ENDPOINT}" --delete \
-          --cache-control "public, max-age=0, must-revalidate" \
-          "${RUNNER_TEMP}/artifacts/" "s3://${S3_BUCKET}/PR${STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER}/"
+        rclone sync --checksum --transfers 16 \
+          --header-upload "Cache-Control: public, max-age=0, must-revalidate" \
+          "${RUNNER_TEMP}/artifacts/" "r2:${S3_BUCKET}/PR${STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER}/"
       env:
         STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER: ${{ steps.pr_number.outputs.pr_number }}
     - name: Try to find previous bot comment

@@ -18,23 +18,30 @@ jobs:
       contents: read
     env:
       S3_BUCKET: "preview-awkward-array-org"
-      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      # R2 is a single global bucket, but the CLI still wants a region
-      AWS_DEFAULT_REGION: auto
-      R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
-      # R2 rejects the additional checksums that recent versions of the AWS CLI
-      # send by default
-      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
-      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+      RCLONE_CONFIG_R2_TYPE: s3
+      RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_R2_REGION: auto
+      RCLONE_CONFIG_R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+      # The token may only read and write objects, so never try to create the bucket
+      RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
     environment:
       name: docs
     steps:
+    - name: Install rclone
+      run: sudo apt-get update --quiet && sudo apt-get install --yes --quiet rclone
     # Previews are never overwritten by a later pull request, so they would
     # otherwise accumulate in the bucket for as long as the project lives
     - name: Remove artifacts
       env:
         PR_NUMBER: ${{ github.event.number }}
+      # There is no preview to remove if the docs never built for this pull
+      # request, and rclone fails to purge a directory that does not exist.
+      # The listing is captured first so that a failed listing fails the step
+      # rather than looking like a missing preview
       run: |
-        aws s3 rm --endpoint-url "${R2_ENDPOINT}" --recursive \
-          "s3://${S3_BUCKET}/PR${PR_NUMBER}/"
+        previews="$(rclone lsf --dirs-only "r2:${S3_BUCKET}/")"
+        if grep --quiet --line-regexp "PR${PR_NUMBER}/" <<< "${previews}"; then
+          rclone purge "r2:${S3_BUCKET}/PR${PR_NUMBER}/"
+        fi

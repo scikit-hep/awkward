@@ -290,15 +290,18 @@ jobs:
     env:
       S3_BUCKET: "awkward-array-org"
       PRODUCTION_URL: "https://awkward-array.org"
-      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      # R2 is a single global bucket, but the CLI still wants a region
-      AWS_DEFAULT_REGION: auto
-      R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
-      # R2 rejects the additional checksums that recent versions of the AWS CLI
-      # send by default
-      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
-      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+      # `aws s3 sync --delete` cannot be used here: it pairs local files with
+      # the bucket listing by assuming both arrive in the same order, which R2
+      # does not guarantee across pages, so it deleted files it had just
+      # uploaded. rclone matches files by name instead
+      RCLONE_CONFIG_R2_TYPE: s3
+      RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_R2_REGION: auto
+      RCLONE_CONFIG_R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+      # The token may only read and write objects, so never try to create the bucket
+      RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
     environment:
       name: docs
       url: ${{ env.PRODUCTION_URL }}${{ steps.sync-main.outputs.path || steps.sync-stable.outputs.path }}
@@ -306,6 +309,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Install rclone
+        run: sudo apt-get update --quiet && sudo apt-get install --yes --quiet rclone
       - name: Download rendered docs
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -316,8 +321,8 @@ jobs:
         if: github.event_name == 'push'
         id: sync-main
         run: |
-          aws s3 sync --endpoint-url "${R2_ENDPOINT}" --delete \
-            built-docs/ "s3://${S3_BUCKET}/doc/main/"
+          rclone sync --checksum --transfers 16 \
+            built-docs/ "r2:${S3_BUCKET}/doc/main/"
           echo "path=/doc/main/" >> $GITHUB_OUTPUT
       # Releases trigger versions
       - name: Sync `stable`
@@ -331,12 +336,12 @@ jobs:
             echo "::error::Could not read a version from ${GITHUB_REF_NAME}"
             exit 1
           fi
-          aws s3 cp --endpoint-url "${R2_ENDPOINT}" \
-            docs/switcher.json "s3://${S3_BUCKET}/doc/"
-          aws s3 sync --endpoint-url "${R2_ENDPOINT}" --delete \
-            built-docs/ "s3://${S3_BUCKET}/doc/$version/"
-          aws s3 sync --endpoint-url "${R2_ENDPOINT}" --delete \
-            built-docs/ "s3://${S3_BUCKET}/doc/stable/"
+          rclone copyto --checksum \
+            docs/switcher.json "r2:${S3_BUCKET}/doc/switcher.json"
+          rclone sync --checksum --transfers 16 \
+            built-docs/ "r2:${S3_BUCKET}/doc/$version/"
+          rclone sync --checksum --transfers 16 \
+            built-docs/ "r2:${S3_BUCKET}/doc/stable/"
           echo "path=/doc/stable/" >> $GITHUB_OUTPUT
       - name: Purge the Cloudflare cache
         uses: ./.github/actions/purge-cloudflare-cache
