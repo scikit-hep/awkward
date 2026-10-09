@@ -4,7 +4,7 @@
 import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
-from functools import wraps
+from functools import cached_property, wraps
 
 import numpy
 
@@ -28,22 +28,21 @@ class ErrorContext:
     def primary(cls):
         return cls._slate.__dict__.get("__primary_context__")
 
-    def _format_if_delayed(self) -> None:
-        """Format the note's argument strings now if a delayed backend is involved.
+    @classmethod
+    def frozen_primary(cls):
+        """The primary context, frozen so that it can outlive the call."""
+        context = cls.primary()
+        if context is not None:
+            context.freeze()
+        return context
 
-        Only the primary context ever decorates an exception, and exceptions are
-        rare, so subclasses format their arguments lazily, when the note is read.
-        A delayed backend (CUDA) is the exception: its errors surface later, at
-        synchronization, from a context that is kept alive until then and must
-        not pin its (potentially large) arguments. This runs from ``__enter__``,
-        only for the context that becomes primary.
-        """
+    def freeze(self) -> None:
+        """Format the note now and drop the references to the raw arguments."""
 
     def __enter__(self):
         # Make it strictly non-reenterant. Only one ErrorContext (per thread) is primary.
         slate = self._slate.__dict__
         if slate.get("__primary_context__") is None:
-            self._format_if_delayed()
             slate["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
@@ -144,9 +143,6 @@ class ErrorContext:
         else:
             return valuestr
 
-    def format_exception(self, exception: Exception) -> str:
-        raise NotImplementedError
-
     @property
     def note(self) -> str:
         raise NotImplementedError
@@ -155,47 +151,14 @@ class ErrorContext:
 class OperationErrorContext(ErrorContext):
     _width = 80 - 8
 
-    def any_backend_is_delayed(
-        self, iterable: Iterable, *, depth: int = 1, depth_limit: int = 2
-    ) -> bool:
-        from awkward._backends.dispatch import backend_of_obj
-
-        for obj in iterable:
-            backend = backend_of_obj(obj, default=None)
-            # Do we not recognise this as an object with a backend?
-            if backend is None:
-                # Only recurse into list/tuple (e.g. the arrays passed to
-                # ak.concatenate/ak.zip), never arbitrary containers: a Mapping
-                # yields only keys, and a user container (e.g. from_buffers'
-                # `container`) may not be iterable or may trigger data reads.
-                if isinstance(obj, (list, tuple)) and depth != depth_limit:
-                    if self.any_backend_is_delayed(
-                        obj, depth=depth + 1, depth_limit=depth_limit
-                    ):
-                        return True
-                # Assume not delayed! Continue checking remaining args.
-            # Eager backends aren't delayed!
-            elif backend.nplike.is_eager:
-                continue
-            else:
-                return True
-        return False
-
     def __init__(self, name, args: Iterable[Any], kwargs: Mapping[str, Any]):
         self._name = name
-        # Formatted lazily, when the note is read (or by _format_if_delayed).
         self._raw_args = args
         self._raw_kwargs = kwargs
-        self._args: list[str] | None = None
-        self._kwargs: dict[str, str] | None = None
 
-    def _format_if_delayed(self) -> None:
-        if self.any_backend_is_delayed(self._raw_args) or self.any_backend_is_delayed(
-            self._raw_kwargs.values()
-        ):
-            self._args = self._format_args(self._raw_args)
-            self._kwargs = self._format_kwargs(self._raw_kwargs)
-            del self._raw_args, self._raw_kwargs
+    def freeze(self) -> None:
+        _ = self.note
+        self._raw_args, self._raw_kwargs = (), {}
 
     def _format_args(self, arguments: Iterable) -> list[str]:
         string_arguments = []
@@ -218,20 +181,13 @@ class OperationErrorContext(ErrorContext):
     def name(self):
         return self._name
 
-    @property
+    @cached_property
     def args(self) -> list[str]:
-        if self._args is None:
-            self._args = self._format_args(self._raw_args)
-        return self._args
+        return self._format_args(self._raw_args)
 
-    @property
+    @cached_property
     def kwargs(self) -> dict[str, str]:
-        if self._kwargs is None:
-            self._kwargs = self._format_kwargs(self._raw_kwargs)
-        return self._kwargs
-
-    def format_exception(self, exception: Exception) -> str:
-        return f"{exception}\n{self.note}"
+        return self._format_kwargs(self._raw_kwargs)
 
     @property
     def note(self) -> str:
@@ -256,40 +212,20 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        # Formatted lazily, when the note is read (or by _format_if_delayed).
         self._raw_array = array
         self._raw_where = where
-        self._array: str | None = None
-        self._where: str | None = None
 
-    def _format_if_delayed(self) -> None:
-        from awkward._backends.dispatch import backend_of_obj
+    def freeze(self) -> None:
+        _ = self.note
+        self._raw_array = self._raw_where = None
 
-        backends = [
-            backend_of_obj(x, default=None) for x in (self._raw_array, self._raw_where)
-        ]
-        # an object with no backend at all cannot be delayed
-        if any(
-            backend is not None and not backend.nplike.is_eager for backend in backends
-        ):
-            self._array = self.format_argument(self._width, self._raw_array)
-            self._where = self.format_slice(self._raw_where)
-            del self._raw_array, self._raw_where
-
-    @property
+    @cached_property
     def array(self) -> str:
-        if self._array is None:
-            self._array = self.format_argument(self._width, self._raw_array)
-        return self._array
+        return self.format_argument(self._width, self._raw_array)
 
-    @property
+    @cached_property
     def where(self) -> str:
-        if self._where is None:
-            self._where = self.format_slice(self._raw_where)
-        return self._where
-
-    def format_exception(self, exception):
-        return f"{exception}\n{self.note}"
+        return self.format_slice(self._raw_where)
 
     @property
     def note(self) -> str:

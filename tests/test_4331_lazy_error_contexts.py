@@ -8,8 +8,7 @@ import weakref
 import pytest
 
 import awkward as ak
-from awkward._errors import OperationErrorContext, SlicingErrorContext
-from awkward._nplikes.numpy import Numpy
+from awkward._errors import ErrorContext, OperationErrorContext, SlicingErrorContext
 from awkward.errors import AxisError
 
 
@@ -53,45 +52,40 @@ def test_lazy_path_does_not_format_when_nothing_is_raised(monkeypatch):
     assert len(calls) == 1
 
 
-@pytest.fixture
-def delayed_cpu(monkeypatch):
-    # Only a delayed nplike (CUDA) takes the eager path; `is_eager` is read
-    # nowhere but `_errors`, so pretending the CPU nplike is delayed exercises
-    # that path without a GPU.
-    monkeypatch.setattr(Numpy, "is_eager", False)
-
-
-def test_operation_context_formats_eagerly_for_delayed_backend(delayed_cpu):
+def test_frozen_operation_context_drops_raw_arguments():
     array = ak.Array([[1, 2, 3], [], [4, 5]])
     array_ref = weakref.ref(array)
     context = OperationErrorContext("ak.num", (array,), {"axis": 1})
     with context:
-        pass
+        assert ErrorContext.frozen_primary() is context
+        assert ErrorContext.frozen_primary() is context
 
-    assert context._args == ["<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>"]
-    assert context._kwargs == {"axis": "1"}
-    # the raw references must not be pinned by the (long-lived) context
-    assert not hasattr(context, "_raw_args")
-    assert not hasattr(context, "_raw_kwargs")
+    assert context._raw_args == ()
+    assert context._raw_kwargs == {}
     del array
     gc.collect()
     assert array_ref() is None
-    assert "ak.num(" in context.note
+    assert "<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>" in context.note
+    assert "axis = 1" in context.note
 
 
-def test_slicing_context_formats_eagerly_for_delayed_backend(delayed_cpu):
+def test_frozen_slicing_context_drops_raw_arguments():
     array = ak.Array([[1, 2, 3], [], [4, 5]])
     context = SlicingErrorContext(array, slice(1, None))
     with context:
-        pass
+        assert ErrorContext.frozen_primary() is context
 
-    assert context._array == "<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>"
-    assert context._where == "1:"
-    assert not hasattr(context, "_raw_array")
-    assert not hasattr(context, "_raw_where")
+    assert context._raw_array is None
+    assert context._raw_where is None
+    assert "<Array [[1, 2, 3], [], [4, 5]] type='3 * var * int64'>" in context.note
+    assert "1:" in context.note
 
 
-def test_eager_backend_contexts_stay_lazy():
+def test_frozen_primary_without_context():
+    assert ErrorContext.frozen_primary() is None
+
+
+def test_unfrozen_contexts_stay_lazy():
     array = ak.Array([[1, 2, 3], [], [4, 5]])
 
     operation = OperationErrorContext("ak.num", (array,), {"axis": 1})
@@ -101,10 +95,10 @@ def test_eager_backend_contexts_stay_lazy():
     with slicing:
         pass
 
-    assert operation._args is None
-    assert operation._kwargs is None
-    assert slicing._array is None
-    assert slicing._where is None
+    assert "args" not in vars(operation)
+    assert "kwargs" not in vars(operation)
+    assert "array" not in vars(slicing)
+    assert "where" not in vars(slicing)
 
     # ... but reading the note still formats them on demand
     assert "axis = 1" in operation.note
