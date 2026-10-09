@@ -258,8 +258,8 @@ jobs:
       - name: Setup Python via Conda
         uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
         with:
-          # Cache invalidates daily by default
-          cache-environment: true
+          # Only save caches from main; PR runs would create per-PR entries
+          cache-environment: ${{ github.event_name != 'pull_request' }}
           environment-name: awkward
           create-args: >-
             python=3.14
@@ -393,12 +393,13 @@ jobs:
         run: |
           docker run --rm --privileged tonistiigi/binfmt:qemu-v9.2.2-52 --install s390x
 
-      - name: Cache docker container
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - name: Restore docker container
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: container-cache
         with:
           path: ~/docker_s390x
-          key: container-${{ runner.os }}-s390x-${{ hashFiles('requirements-test-basic.txt', 'awkward-cpp/pyproject.toml') }}
+          # Only the files installed into the container belong in the key.
+          key: container-${{ runner.os }}-s390x-${{ hashFiles('requirements-test-basic.txt') }}
 
       - name: Create container
         if: steps.container-cache.outputs.cache-hit != 'true'
@@ -422,6 +423,13 @@ jobs:
       - name: Load container from cache
         if: steps.container-cache.outputs.cache-hit == 'true'
         run: docker load -i ~/docker_s390x/the_container.tar
+
+      - name: Save docker container
+        if: steps.container-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/docker_s390x
+          key: ${{ steps.container-cache.outputs.cache-primary-key }}
 
       - name: Generate build files
         run: pipx run nox -s prepare -- --headers --signatures --tests
