@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 np = NumpyMetadata.instance()
 
 
-SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
+SliceItem: TypeAlias = "int | slice | str | Ellipsis | ArrayLike | Content | None"
 
 
 def normalize_slice(slice_: slice, *, nplike: NumpyLike) -> slice:

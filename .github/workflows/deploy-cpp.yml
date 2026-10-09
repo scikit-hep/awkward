@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build-wheels:
-    uses: ./.github/workflows/reusable-build-wheels.yml
+    uses: $/.github/workflows/reusable-build-wheels.yml
 
   upload-awkward-cpp:
     name: Upload awkward-cpp

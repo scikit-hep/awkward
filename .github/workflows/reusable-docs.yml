@@ -344,7 +344,7 @@ jobs:
             built-docs/ "r2:${S3_BUCKET}/doc/stable/"
           echo "path=/doc/stable/" >> $GITHUB_OUTPUT
       - name: Purge the Cloudflare cache
-        uses: ./.github/actions/purge-cloudflare-cache
+        uses: $/.github/actions/purge-cloudflare-cache
         with:
           zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
           api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
