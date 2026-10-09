@@ -878,11 +878,47 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
         else:
             return reversed._mergemany(tail[1:])
 
+    def _fill_none_numeric(self, value: Content) -> Content | None:
+        # Mergeable leaves would be concatenated into a single buffer that the union
+        # index then gathers from; gather and fill directly instead. The content must
+        # be non-empty because missing entries gather at position 0.
+        nplike = self._backend.nplike
+        content = self._content
+        if not (
+            nplike.known_data
+            and content.is_numpy
+            and value.is_numpy
+            and value.backend is self._backend
+            and content.length > 0
+            and content.data.ndim == 1
+            and value.data.ndim == 1
+            and nplike.is_own_array(content.data)
+            and nplike.is_own_array(value.data)
+            and ak._do.mergeable(content, value)
+        ):
+            return None
+
+        index = self._index.data
+        is_none = index < 0
+        gathered = content.data[nplike.where(is_none, 0, index)]
+        return ak.contents.NumpyArray(
+            nplike.where(is_none, value.data, gathered),
+            parameters=parameters_union(
+                parameters_intersect(content._parameters, value._parameters),
+                self._parameters,
+            ),
+            backend=self._backend,
+        )
+
     def _fill_none(self, value: Content) -> Content:
         if value.backend.nplike.known_data and value.length != 1:
             raise ValueError(
                 f"fill_none value length ({value.length}) is not equal to 1"
             )
+
+        filled = self._fill_none_numeric(value)
+        if filled is not None:
+            return filled
 
         contents = [self._content, value]
         tags = ak.index.Index8(self.mask_as_bool(valid_when=False))
