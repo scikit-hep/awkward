@@ -37,8 +37,11 @@ jobs:
       env:
         PR_NUMBER: ${{ github.event.number }}
       # There is no preview to remove if the docs never built for this pull
-      # request, and rclone fails to purge a directory that does not exist
+      # request, and rclone fails to purge a directory that does not exist.
+      # The listing is captured first so that a failed listing fails the step
+      # rather than looking like a missing preview
       run: |
-        if rclone lsf --dirs-only "r2:${S3_BUCKET}/" | grep --quiet --line-regexp "PR${PR_NUMBER}/"; then
+        previews="$(rclone lsf --dirs-only "r2:${S3_BUCKET}/")"
+        if grep --quiet --line-regexp "PR${PR_NUMBER}/" <<< "${previews}"; then
           rclone purge "r2:${S3_BUCKET}/PR${PR_NUMBER}/"
         fi
