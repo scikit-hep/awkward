@@ -19,5 +19,7 @@ The remaining files are associated with Python/CMake configuration, and are not 
     ```python
     from demo import create_demo_array
 
-    print(create_demo_array())
+    print(
+        create_demo_array()
+    )
     ```

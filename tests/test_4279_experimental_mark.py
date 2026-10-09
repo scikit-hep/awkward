@@ -149,7 +149,7 @@ def test_warn_once_state_is_per_function():
 def test_wraps_metadata():
     def raw():
         """Docstring survives the wrapper."""
-        return
+        return None
 
     wrapped = experimental(raw)
     assert wrapped is not raw

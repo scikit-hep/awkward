@@ -53,7 +53,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up GPU test environment
-        uses: ./.github/actions/setup-gpu-env
+        uses: $/.github/actions/setup-gpu-env
         with:
           cuda-version: ${{ matrix.cuda-version }}
 

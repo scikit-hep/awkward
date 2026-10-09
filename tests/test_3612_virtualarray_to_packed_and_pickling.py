@@ -363,7 +363,11 @@ def test_union_array_to_packed(recursive):
         assert layout.is_any_materialized
         assert packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
-            if _key == "node0-tags" or _key == "node0-index" or _key == "node1-data":
+            if _key == "node0-tags":
+                assert isinstance(buffer, np.ndarray)
+            elif _key == "node0-index":
+                assert isinstance(buffer, np.ndarray)
+            elif _key == "node1-data":
                 assert isinstance(buffer, np.ndarray)
             elif _key == "node3-data":
                 assert isinstance(buffer, VirtualNDArray)
@@ -421,7 +425,9 @@ def test_record_array_to_packed(recursive):
         assert not layout.is_any_materialized
         assert not packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
-            if _key == "node1-data" or _key == "node2-data":
+            if _key == "node1-data":
+                assert isinstance(buffer, VirtualNDArray)
+            elif _key == "node2-data":
                 assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
@@ -521,7 +527,9 @@ def test_bit_masked_array_to_packed(recursive):
         assert not layout.is_any_materialized
         assert not packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
-            if _key == "node0-mask" or _key == "node1-data":
+            if _key == "node0-mask":
+                assert isinstance(buffer, VirtualNDArray)
+            elif _key == "node1-data":
                 assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")
@@ -576,7 +584,9 @@ def test_byte_masked_array_to_packed(recursive):
         assert not layout.is_any_materialized
         assert not packed.is_any_materialized
         for _key, buffer in ak.to_buffers(packed)[2].items():
-            if _key == "node0-mask" or _key == "node1-data":
+            if _key == "node0-mask":
+                assert isinstance(buffer, VirtualNDArray)
+            elif _key == "node1-data":
                 assert isinstance(buffer, VirtualNDArray)
             else:
                 raise ValueError(f"Unexpected key in buffers: {_key}")

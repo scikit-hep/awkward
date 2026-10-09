@@ -5,7 +5,7 @@
 
 import sys
 import typing
-from typing import *
+from typing import *  # noqa: F403
 
 import numpy
 
@@ -31,7 +31,7 @@ __all__ = list(
 )
 
 
-AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)
+AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)  # noqa: F405
 
 if sys.version_info < (3, 11):
     from typing import (
@@ -74,7 +74,7 @@ else:
 
 
 JSONSerializable: TypeAlias = (
-    "str | int | float | bool | None | list | tuple | JSONMapping"
+    "str | int | float | bool | list | tuple | JSONMapping | None"
 )
 JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
 

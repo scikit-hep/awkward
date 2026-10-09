@@ -18,10 +18,9 @@ np = NumpyMetadata.instance()
 
 
 def is_primitive(primitive):
-    if (
-        _primitive_to_dtype_datetime.match(primitive) is not None
-        or _primitive_to_dtype_timedelta.match(primitive) is not None
-    ):
+    if _primitive_to_dtype_datetime.match(primitive) is not None:
+        return True
+    elif _primitive_to_dtype_timedelta.match(primitive) is not None:
         return True
     else:
         return primitive in _primitive_to_dtype_dict
@@ -29,10 +28,9 @@ def is_primitive(primitive):
 
 @lru_cache
 def primitive_to_dtype(primitive):
-    if (
-        _primitive_to_dtype_datetime.match(primitive) is not None
-        or _primitive_to_dtype_timedelta.match(primitive) is not None
-    ):
+    if _primitive_to_dtype_datetime.match(primitive) is not None:
+        return np.dtype(primitive)
+    elif _primitive_to_dtype_timedelta.match(primitive) is not None:
         return np.dtype(primitive)
     else:
         out = _primitive_to_dtype_dict.get(primitive)

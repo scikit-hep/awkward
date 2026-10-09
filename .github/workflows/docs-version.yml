@@ -44,7 +44,7 @@ jobs:
           aws s3 cp --endpoint-url "${R2_ENDPOINT}" \
             docs/switcher.json "s3://${S3_BUCKET}/doc/switcher.json"
       - name: Purge the Cloudflare cache
-        uses: ./.github/actions/purge-cloudflare-cache
+        uses: $/.github/actions/purge-cloudflare-cache
         with:
           zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
           api-token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
