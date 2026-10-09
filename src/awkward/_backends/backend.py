@@ -24,12 +24,25 @@ KernelType: TypeAlias = "Callable[..., KernelError | None]"
 class Backend(PublicSingleton, ABC):
     name: str
 
+    def __init__(self):
+        self._kernels: dict[KernelKeyType, KernelType] = {}
+
     @property
     @abstractmethod
     def nplike(self) -> NumpyLike:
         raise NotImplementedError
 
     def __getitem__(self, key: KernelKeyType) -> KernelType:
+        # a kernel is immutable, and this lookup is on every operation's hot path
+        kernels = self._kernels
+        try:
+            return kernels[key]
+        except KeyError:
+            kernel = kernels[key] = self._new_kernel(key)
+            return kernel
+
+    @abstractmethod
+    def _new_kernel(self, index: KernelKeyType) -> KernelType:
         raise NotImplementedError
 
     def prepare_reducer(self, reducer: ak._reducers.Reducer) -> ak._reducers.Reducer:

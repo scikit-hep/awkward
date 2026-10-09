@@ -110,13 +110,18 @@ def test_sort_cuda_unsupported_axis():
 
 def test_sort_cuda_no_compute():
     """Test that helpful error is raised when cuda.compute is not available."""
+    from awkward._backends.cupy import CupyBackend
     from awkward._connect.cuda import _compute as cuda_compute
 
+    backend = CupyBackend.instance()
     original_available = cuda_compute._cuda_compute_available
 
     try:
-        # Temporarily make cuda.compute unavailable
+        # Temporarily make cuda.compute unavailable. The backend caches the
+        # kernels it has already built, so drop the ones looked up while
+        # cuda.compute was still available.
         cuda_compute._cuda_compute_available = False
+        backend._kernels.clear()
 
         data = ak.Array([[7, 5, 7], [], [2], [8, 2]])
         gpu_data = ak.to_backend(data, "cuda")
@@ -127,3 +132,4 @@ def test_sort_cuda_no_compute():
     finally:
         # Restore original state
         cuda_compute._cuda_compute_available = original_available
+        backend._kernels.clear()
