@@ -25,6 +25,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 CUDA_COMPUTE_KERNELS = {
     "awkward_ListArray_compact_offsets",
     "awkward_ListArray_broadcast_tooffsets",
+    "awkward_ListOffsetArray_getitem_boolmask",
     "awkward_RegularArray_getitem_next_at",
     "awkward_IndexedArray_validity",
     "awkward_IndexedArray_getitem_nextcarry_outindex",
@@ -890,6 +891,7 @@ cuda_kernels_tests = [
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_ListArray_compact_offsets",
     "awkward_ListOffsetArray_flatten_offsets",
+    "awkward_ListOffsetArray_getitem_boolmask",
     "awkward_IndexedArray_overlay_mask",
     "awkward_ByteMaskedArray_numnull",
     "awkward_IndexedArray_numnull",
