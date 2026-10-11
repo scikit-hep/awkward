@@ -99,6 +99,8 @@ def _nodes_writable(layout: ak.contents.Content, nullable: bool = False) -> bool
     offsets from anywhere in their content, so they are excluded outright
     when nullable.
     """
+
+
 def _has_issue_4305(layout: ak.contents.Content, nullable: bool = False) -> bool:
     """Return `True` if an `UnmaskedArray` receives validity from an
     enclosing option.
