@@ -61,3 +61,25 @@ def test_union_skipped_index_under_option_4228():
 )
 def test_sliced_union_with_option_children_4228(akarray):
     assert ak.to_arrow(akarray).to_pylist() == to_list(akarray)
+
+
+@pytest.mark.parametrize("index", [0, 2])
+@pytest.mark.parametrize("extensionarray", [False, True])
+def test_repeated_union_index_under_option_4228(index, extensionarray):
+    # Copying two occurrences must set the child length to two, rather than
+    # index + 1 (one or three), while keeping their different validity bits.
+    union = ak.contents.UnionArray(
+        ak.index.Index8(np.array([0, 0, 1], dtype=np.int8)),
+        ak.index.Index64(np.array([index, index, 0], dtype=np.int64)),
+        [ak.to_layout([[10], [20], [30]]), ak.to_layout(["x"])],
+    )
+    array = ak.Array(
+        ak.contents.ByteMaskedArray(
+            ak.index.Index8(np.array([1, 0, 1], dtype=np.int8)),
+            ak.contents.RecordArray([union], ["x"]),
+            valid_when=True,
+        )
+    )
+    expected = [{"x": [[10], [20], [30]][index]}, None, {"x": "x"}]
+    assert array.to_list() == expected
+    assert ak.to_arrow(array, extensionarray=extensionarray).to_pylist() == expected
