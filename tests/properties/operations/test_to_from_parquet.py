@@ -128,45 +128,29 @@ def _has_issue_4305(layout: ak.contents.Content, nullable: bool = False) -> bool
     return False
 
 
-def _nodes_writable(layout: ak.contents.Content, nullable: bool = False) -> bool:
-    """Exclude layouts that `to_arrow` currently mishandles.
-
-    `nullable` tracks whether Arrow validity bytes flow into this node from
-    an enclosing option: they start at option nodes, pass through records
-    and indexed nodes, and stop below lists. A var-length list receiving
-    validity bytes whose offsets do not start at zero is compacted against
-    unshifted content in `ListOffsetArray._to_arrow`, shifting every list
-    by `offsets[0]` (data corruption, #4222); indexed nodes can recreate such
-    offsets from anywhere in their content, so they are excluded outright
-    when nullable.
-    """
+def _nodes_writable(layout: ak.contents.Content) -> bool:
+    """Exclude layouts that `to_arrow` currently mishandles."""
     if layout.is_record:
         if len(layout.fields) == 0:
             # named records lose their length; tuples cannot be written
             # (pyarrow: "Cannot write struct type '' with no child field")
             return False
-        return all(_nodes_writable(x, nullable) for x in layout.contents)
+        return all(_nodes_writable(x) for x in layout.contents)
     if layout.is_regular:
         # `to_arrow` drops the length of a size-0 `RegularArray`
         # (pyarrow: "Expected all lists to be of size=0")
-        return layout.size > 0 and _nodes_writable(layout.content, False)
+        return layout.size > 0 and _nodes_writable(layout.content)
     if layout.is_option:
         if isinstance(layout, ak.contents.IndexedOptionArray):
             if layout.length > 0 and layout.content.length == 0:
                 # `to_arrow` crashes projecting nulls over a zero-length
                 # content (IndexError in `ListOffsetArray._to_arrow`, #4221)
                 return False
-            if nullable and layout.content.is_list:
-                return False
-        return _nodes_writable(layout.content, True)
+        return _nodes_writable(layout.content)
     if layout.is_indexed:
-        if nullable and layout.content.is_list:
-            return False
-        return _nodes_writable(layout.content, nullable)
+        return _nodes_writable(layout.content)
     if layout.is_list:
-        if nullable and layout.length > 0 and layout.starts[0] != 0:
-            return False
-        return _nodes_writable(layout.content, False)
+        return _nodes_writable(layout.content)
     return True
 
 
