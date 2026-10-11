@@ -1697,7 +1697,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 next = ak.contents.ListArray(
                     ak.index.Index(new_starts),
                     ak.index.Index(new_stops),
-                    self._content,
+                    akcontent,
                     parameters=self._parameters,
                 )
                 return next.to_ListOffsetArray64(True)._to_arrow(

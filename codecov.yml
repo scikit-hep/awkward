@@ -1,8 +1,13 @@
 codecov:
   require_ci_to_pass: true
+  notify:
+    # Coverage is uploaded by two jobs (CPU and CUDA); wait for both before
+    # reporting, so that a partial report is never posted
+    after_n_builds: 2
 
 comment:
   layout: "files"
+  after_n_builds: 2
 
 coverage:
   status:
