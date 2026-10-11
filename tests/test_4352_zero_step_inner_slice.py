@@ -118,3 +118,34 @@ def test_unknown_typetracer_step_is_not_rejected():
     assert layout[:, ::unknown_length].purelist_depth == 2
     unknown_step = TypeTracerArray._new(np.dtype(np.int64), ())
     assert layout[:, ::unknown_step].purelist_depth == 2
+
+
+@pytest.mark.parametrize("step", [0.0, 1.5, "0"])
+@pytest.mark.parametrize("typetracer", [False, True])
+def test_non_index_step_is_left_for_downstream_validation(step, typetracer):
+    from awkward._slicing import normalize_slice
+
+    layout = ak.Array([[1, 2, 3]]).layout
+    if typetracer:
+        layout = layout.to_typetracer(forget_length=True)
+    where = slice(1, 3, step)
+    normalized = normalize_slice(where, nplike=layout.backend.nplike)
+
+    # A value that cannot be an integer index must not be coerced into zero
+    # or have its conversion error mistaken for a known zero step.
+    assert normalized.start == 1
+    assert normalized.stop == 3
+    assert normalized.step is step
+
+
+@pytest.mark.parametrize("typetracer", [False, True])
+def test_zero_step_from_index_protocol(typetracer):
+    class ZeroIndex:
+        def __index__(self):
+            return 0
+
+    layout = ak.Array([[1, 2, 3]]).layout
+    if typetracer:
+        layout = layout.to_typetracer(forget_length=True)
+    with pytest.raises(ValueError, match="slice step cannot be zero"):
+        layout[:, :: ZeroIndex()]
