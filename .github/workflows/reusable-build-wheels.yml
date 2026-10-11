@@ -20,7 +20,7 @@ jobs:
   determine-source-date-epoch:
     name: "Determine SOURCE_DATE_EPOCH"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
@@ -41,7 +41,7 @@ jobs:
   make_sdist:
     name: "Build awkward-cpp sdist"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -100,7 +100,7 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
 
     - uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
       env:
@@ -132,7 +132,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
 
     # The pyodide cross-build cannot generate the kernel tests (no host numpy)
     - name: Generate kernel tests for the wheel test suite
@@ -156,7 +156,7 @@ jobs:
   build_awkward_wheel:
     name: "Build awkward sdist and wheel"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -167,7 +167,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
 
     - name: Prepare build files
       run: pipx run nox -s prepare
