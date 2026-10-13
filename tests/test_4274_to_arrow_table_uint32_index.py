@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+from tempfile import mkdtemp
+
 import numpy as np
 import pytest
 
@@ -19,12 +22,12 @@ def roundtrip(request, tmp_path):
             table = ak.to_arrow_table(array, extensionarray=extensionarray)
             restored = ak.from_arrow(table)
         elif request.param == "feather":
-            path = tmp_path / "array.feather"
+            path = Path(mkdtemp(dir=tmp_path)) / "array.feather"
             ak.to_feather(array, path, extensionarray=extensionarray)
             table = pyarrow.feather.read_table(path)
             restored = ak.from_feather(path)
         else:
-            path = tmp_path / "array.parquet"
+            path = Path(mkdtemp(dir=tmp_path)) / "array.parquet"
             ak.to_parquet(array, path, extensionarray=extensionarray)
             table = pyarrow.parquet.read_table(path)
             restored = ak.from_parquet(path)
