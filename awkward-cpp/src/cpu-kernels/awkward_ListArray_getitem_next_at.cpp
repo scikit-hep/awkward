@@ -12,7 +12,7 @@ ERROR awkward_ListArray_getitem_next_at(
   int64_t lenstarts,
   int64_t at) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t length = fromstops[i] - fromstarts[i];
+    int64_t length = (int64_t)fromstops[i] - (int64_t)fromstarts[i];
     int64_t regular_at = at;
     if (regular_at < 0) {
       regular_at += length;
