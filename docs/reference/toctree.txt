@@ -214,6 +214,7 @@
     :caption: String transforms
 
     generated/ak.str.capitalize
+    generated/ak.str.distinct_counts
     generated/ak.str.length
     generated/ak.str.lower
     generated/ak.str.repeat
@@ -223,6 +224,7 @@
     generated/ak.str.reverse
     generated/ak.str.swapcase
     generated/ak.str.title
+    generated/ak.str.uniques
     generated/ak.str.upper
 
 .. toctree::
