@@ -275,7 +275,11 @@ extend-exclude = [
     "src/awkward/_connect/cuda/_kernel_signatures.py",
 ]
 
+[tool.ruff.format]
+exclude = ["*.md"]
+
 [tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]  # Pre-0.16 defaults
 extend-select = [
     "B",           # flake8-bugbear
     "I",           # isort
