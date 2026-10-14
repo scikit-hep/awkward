@@ -10,7 +10,7 @@ from awkward._kernels import KernelError
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._singleton import PublicSingleton
-from awkward._typing import Callable, TypeAlias, TypeVar
+from awkward._typing import Callable, NominalMeta, TypeAlias, TypeVar
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
@@ -21,7 +21,7 @@ KernelKeyType: TypeAlias = tuple[Any, ...]
 KernelType: TypeAlias = "Callable[..., KernelError | None]"
 
 
-class Backend(PublicSingleton, ABC):
+class Backend(PublicSingleton, ABC, metaclass=NominalMeta):
     name: str
 
     @property
