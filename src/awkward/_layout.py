@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Literal
 
+import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import (
     common_backend,
@@ -45,8 +46,6 @@ V = TypeVar("V")
 
 def _has_integral_leaf(layout) -> bool:
     """True if any NumpyArray leaf of ``layout`` is bool/integer (dtype kind b, i, u)."""
-    import awkward as ak
-
     found = False
 
     def action(node, **kwargs):
@@ -68,8 +67,6 @@ def promote_integral_to_float64(array):
     common (already-floating) case. The cast is performed by the array's own
     backend, so on GPU it stays on device -- no host transfer.
     """
-    import awkward as ak
-
     if _has_integral_leaf(array.layout):
         return ak.operations.ak_values_astype._impl(
             array,
@@ -258,9 +255,8 @@ def wrap_layout(
     allow_other: bool = False,
     attrs: Mapping | None = None,
 ) -> T | Array | HighLevelRecord:
-    import awkward.highlevel
-    from awkward.contents import Content
-    from awkward.record import Record
+    Content = ak.contents.Content
+    Record = ak.record.Record
 
     assert isinstance(content, (Content, Record)) or allow_other
     assert behavior is None or isinstance(behavior, Mapping)
@@ -270,9 +266,9 @@ def wrap_layout(
             behavior = behavior_of(like)
 
         if isinstance(content, Content):
-            return awkward.highlevel.Array(content, behavior=behavior, attrs=attrs)
+            return ak.highlevel.Array(content, behavior=behavior, attrs=attrs)
         elif isinstance(content, Record):
-            return awkward.highlevel.Record(content, behavior=behavior, attrs=attrs)
+            return ak.highlevel.Record(content, behavior=behavior, attrs=attrs)
         elif allow_other:
             return content
         else:
