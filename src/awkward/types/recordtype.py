@@ -196,6 +196,8 @@ class RecordType(Type):
 
         # Both tuples
         if self.is_tuple and other.is_tuple:
+            if len(self._contents) != len(other._contents):
+                return False
             return all(
                 this._is_equal_to(that, all_parameters)
                 for this, that in zip(self._contents, other._contents, strict=True)
