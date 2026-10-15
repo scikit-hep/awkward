@@ -4,8 +4,7 @@
 import threading
 import warnings
 from collections.abc import Callable, Collection, Iterable, Mapping
-from functools import wraps
-from weakref import ref as weak_ref
+from functools import cached_property, wraps
 
 import numpy
 
@@ -21,33 +20,6 @@ S = TypeVar("S")
 P = ParamSpec("P")
 
 
-class WeakMethodProxy:
-    """A proxy for a method of a weakly referenced object"""
-
-    def __init__(self, method):
-        self._this = weak_ref(method.__self__)
-        self._impl = method.__func__
-
-    def __call__(self, *args, **kwargs):
-        this = self._this()
-        method = self._impl.__get__(this, type(this))
-        return method(*args, **kwargs)
-
-
-class PartialFunction:
-    """Analogue of `functools.partial`, but as a distinct type"""
-
-    __slots__ = ("args", "func", "kwargs")
-
-    def __init__(self, func, *args, **kwargs):
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
-
-    def __call__(self):
-        return self.func(*self.args, **self.kwargs)
-
-
 class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
@@ -56,15 +28,22 @@ class ErrorContext:
     def primary(cls):
         return cls._slate.__dict__.get("__primary_context__")
 
-    def __init__(self, **kwargs):
-        self._kwargs = kwargs
+    @classmethod
+    def frozen_primary(cls):
+        """The primary context, frozen so that it can outlive the call."""
+        context = cls.primary()
+        if context is not None:
+            context.freeze()
+        return context
+
+    def freeze(self) -> None:
+        """Format the note now and drop the references to the raw arguments."""
 
     def __enter__(self):
         # Make it strictly non-reenterant. Only one ErrorContext (per thread) is primary.
-        if self.primary() is None:
-            self._slate.__dict__.clear()
-            self._slate.__dict__.update(self._kwargs)
-            self._slate.__dict__["__primary_context__"] = self
+        slate = self._slate.__dict__
+        if slate.get("__primary_context__") is None:
+            slate["__primary_context__"] = self
 
     def __exit__(self, exception_type, exception_value, traceback):
         if (
@@ -164,9 +143,6 @@ class ErrorContext:
         else:
             return valuestr
 
-    def format_exception(self, exception: Exception) -> str:
-        raise NotImplementedError
-
     @property
     def note(self) -> str:
         raise NotImplementedError
@@ -175,55 +151,14 @@ class ErrorContext:
 class OperationErrorContext(ErrorContext):
     _width = 80 - 8
 
-    def any_backend_is_delayed(
-        self, iterable: Iterable, *, depth: int = 1, depth_limit: int = 2
-    ) -> bool:
-        from awkward._backends.dispatch import backend_of_obj
-
-        for obj in iterable:
-            backend = backend_of_obj(obj, default=None)
-            # Do we not recognise this as an object with a backend?
-            if backend is None:
-                # Only recurse into list/tuple (e.g. the arrays passed to
-                # ak.concatenate/ak.zip), never arbitrary containers: a Mapping
-                # yields only keys, and a user container (e.g. from_buffers'
-                # `container`) may not be iterable or may trigger data reads.
-                if isinstance(obj, (list, tuple)) and depth != depth_limit:
-                    if self.any_backend_is_delayed(
-                        obj, depth=depth + 1, depth_limit=depth_limit
-                    ):
-                        return True
-                # Assume not delayed! Continue checking remaining args.
-            # Eager backends aren't delayed!
-            elif backend.nplike.is_eager:
-                continue
-            else:
-                return True
-        return False
-
     def __init__(self, name, args: Iterable[Any], kwargs: Mapping[str, Any]):
-        string_args: list[str] | PartialFunction
-        string_kwargs: dict[str, str] | PartialFunction
-        if self.primary() is None and (
-            self.any_backend_is_delayed(args)
-            or self.any_backend_is_delayed(kwargs.values())
-        ):
-            string_args = self._format_args(args)
-            string_kwargs = self._format_kwargs(kwargs)
-        else:
-            # if primary is not None: we won't be setting an ErrorContext
-            # if all nplikes are eager: no accumulation of large arrays
-            # --> in either case, delay string generation
-            string_args = PartialFunction(WeakMethodProxy(self._format_args), args)
-            string_kwargs = PartialFunction(
-                WeakMethodProxy(self._format_kwargs), kwargs
-            )
+        self._name = name
+        self._raw_args = args
+        self._raw_kwargs = kwargs
 
-        super().__init__(
-            name=name,
-            args=string_args,
-            kwargs=string_kwargs,
-        )
+    def freeze(self) -> None:
+        _ = self.note
+        self._raw_args, self._raw_kwargs = (), {}
 
     def _format_args(self, arguments: Iterable) -> list[str]:
         string_arguments = []
@@ -244,24 +179,15 @@ class OperationErrorContext(ErrorContext):
 
     @property
     def name(self):
-        return self._kwargs["name"]
+        return self._name
 
-    @property
-    def args(self) -> list:
-        out = self._kwargs["args"]
-        if isinstance(out, PartialFunction):
-            out = self._kwargs["args"] = out()
-        return out
+    @cached_property
+    def args(self) -> list[str]:
+        return self._format_args(self._raw_args)
 
-    @property
-    def kwargs(self) -> dict:
-        out = self._kwargs["kwargs"]
-        if isinstance(out, PartialFunction):
-            out = self._kwargs["kwargs"] = out()
-        return out
-
-    def format_exception(self, exception: Exception) -> str:
-        return f"{exception}\n{self.note}"
+    @cached_property
+    def kwargs(self) -> dict[str, str]:
+        return self._format_kwargs(self._raw_kwargs)
 
     @property
     def note(self) -> str:
@@ -286,46 +212,20 @@ class SlicingErrorContext(ErrorContext):
     _width = 80 - 4
 
     def __init__(self, array, where):
-        from awkward._backends.dispatch import backend_of_obj
-        from awkward._backends.numpy import NumpyBackend
+        self._raw_array = array
+        self._raw_where = where
 
-        numpy_backend = NumpyBackend.instance()
-        if self.primary() is not None or all(
-            backend_of_obj(x, default=numpy_backend).nplike.is_eager
-            for x in (array, where)
-        ):
-            # if primary is not None: we won't be setting an ErrorContext
-            # if all nplikes are eager: no accumulation of large arrays
-            # --> in either case, delay string generation
-            formatted_array = PartialFunction(
-                WeakMethodProxy(self.format_argument), self._width, array
-            )
-            formatted_slice = PartialFunction(self.format_slice, where)
-        else:
-            formatted_array = self.format_argument(self._width, array)
-            formatted_slice = self.format_slice(where)
+    def freeze(self) -> None:
+        _ = self.note
+        self._raw_array = self._raw_where = None
 
-        super().__init__(
-            array=formatted_array,
-            where=formatted_slice,
-        )
+    @cached_property
+    def array(self) -> str:
+        return self.format_argument(self._width, self._raw_array)
 
-    @property
-    def array(self):
-        out = self._kwargs["array"]
-        if isinstance(out, PartialFunction):
-            out = self._kwargs["array"] = out()
-        return out
-
-    @property
-    def where(self):
-        out = self._kwargs["where"]
-        if isinstance(out, PartialFunction):
-            out = self._kwargs["where"] = out()
-        return out
-
-    def format_exception(self, exception):
-        return f"{exception}\n{self.note}"
+    @cached_property
+    def where(self) -> str:
+        return self.format_slice(self._raw_where)
 
     @property
     def note(self) -> str:
