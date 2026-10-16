@@ -112,7 +112,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             )
         ):
             raise TypeError(
-                f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                f"{type(self).__name__} 'index' must be an Index with dtype in (int32, int64), "
                 f"not {index!r}"
             )
         if not isinstance(content, Content):
