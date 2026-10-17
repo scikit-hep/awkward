@@ -6,7 +6,7 @@
 
 template <typename T>
 ERROR awkward_RegularArray_getitem_next_range(
-  T* tocarry,
+  T* __restrict__ tocarry,
   int64_t regular_start,
   int64_t step,
   int64_t length,
@@ -20,7 +20,7 @@ ERROR awkward_RegularArray_getitem_next_range(
   return success();
 }
 ERROR awkward_RegularArray_getitem_next_range_64(
-  int64_t* tocarry,
+  int64_t* __restrict__ tocarry,
   int64_t regular_start,
   int64_t step,
   int64_t length,

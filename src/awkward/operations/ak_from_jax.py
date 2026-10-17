@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from awkward import jax
 from awkward._dispatch import high_level_function
@@ -19,9 +18,20 @@ def from_jax(
     attrs=None,
     primitive_policy="error",
 ):
-    """
+    """Converts a JAX Array into an Awkward Array.
+
+    The data is not copied: the Awkward Array shares the JAX array's buffer.
+
+    The resulting layout may involve the following #ak.contents.Content types
+    (only):
+
+    * #ak.contents.NumpyArray
+    * #ak.contents.RegularArray if `regulararray=True`.
+
+    See also #ak.to_jax, #ak.from_numpy and #ak.from_jax.
+
     Args:
-        array (jax.numpy.DeviceArray): The JAX DeviceArray to convert into an Awkward Array.
+        array (jax.Array): The JAX Array to convert into an Awkward Array.
         regulararray (bool): If True and the array is multidimensional,
             the dimensions are represented by nested #ak.contents.RegularArray
             nodes; if False and the array is multidimensional, the dimensions
@@ -34,15 +44,8 @@ def from_jax(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Converts a JAX DeviceArray array into an Awkward Array.
-
-    The resulting layout may involve the following #ak.contents.Content types
-    (only):
-
-    * #ak.contents.NumpyArray
-    * #ak.contents.RegularArray if `regulararray=True`.
-
-    See also #ak.to_jax, #ak.from_numpy and #ak.from_jax.
+    Returns:
+        An #ak.Array built from the given JAX array.
     """
     jax.assert_registered()
     return wrap_layout(

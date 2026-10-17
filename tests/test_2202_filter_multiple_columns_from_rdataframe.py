@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np  # noqa: F401
 import pytest
@@ -8,8 +7,6 @@ import pytest
 import awkward as ak
 
 ROOT = pytest.importorskip("ROOT")
-
-ROOT.ROOT.EnableImplicitMT(1)
 
 compiler = ROOT.gInterpreter.Declare
 

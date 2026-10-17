@@ -13,28 +13,17 @@
 #include <stdint.h>
 #include <typeinfo>
 #include <map>
+#include <sstream>
 #include <vector>
 
 namespace awkward {
-
-  // FIXME:
-  // The following helper variable templates are part of C++17,
-  // define it ourselves until we switch to it
-  template< class T >
-  constexpr bool is_integral_v = std::is_integral<T>::value;
-
-  template< class T >
-  constexpr bool is_signed_v = std::is_signed<T>::value;
-
-  template< class T, class U >
-  constexpr bool is_same_v = std::is_same<T, U>::value;
 
   /// @brief Returns the name of a primitive type as a string.
   template <typename T>
   inline const std::string
   type_to_name() {
-    if (is_integral_v<T>) {
-      if (is_signed_v<T>) {
+    if (std::is_integral_v<T>) {
+      if (std::is_signed_v<T>) {
         if (sizeof(T) == 1) {
           return "int8";
         }
@@ -63,16 +52,16 @@ namespace awkward {
         }
       }
     }
-    else if (is_same_v<T, float>) {
+    else if (std::is_same_v<T, float>) {
       return "float32";
     }
-    else if (is_same_v<T, double>) {
+    else if (std::is_same_v<T, double>) {
       return "float64";
     }
-    else if (is_same_v<T, std::complex<float>>) {
+    else if (std::is_same_v<T, std::complex<float>>) {
       return "complex64";
     }
-    else if (is_same_v<T, std::complex<double>>) {
+    else if (std::is_same_v<T, std::complex<double>>) {
       return "complex128";
     }
 
@@ -149,20 +138,10 @@ namespace awkward {
   template <typename, typename = void>
   constexpr bool is_iterable{};
 
-  // FIXME:
-  // std::void_t is part of C++17, define it ourselves until we switch to it
-  template <typename...>
-  struct voider {
-    using type = void;
-  };
-
-  template <typename... T>
-  using void_t = typename voider<T...>::type;
-
   template <typename T>
   constexpr bool is_iterable<T,
-                             void_t<decltype(std::declval<T>().begin()),
-                                    decltype(std::declval<T>().end())>> = true;
+                             std::void_t<decltype(std::declval<T>().begin()),
+                                         decltype(std::declval<T>().end())>> = true;
 
   template <typename Test, template <typename...> class Ref>
   struct is_specialization : std::false_type {};
@@ -185,7 +164,7 @@ namespace awkward {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    if (std::is_arithmetic<T>::value) {
+    if constexpr (std::is_arithmetic<T>::value) {
       std::string parameters(type_to_name<T>() + "\", ");
       if (std::is_same<T, char>::value) {
         parameters = std::string(
@@ -193,27 +172,27 @@ namespace awkward {
       }
       return "{\"class\": \"NumpyArray\", \"primitive\": \"" + parameters +
              "\"form_key\": \"" + form_key.str() + "\"}";
-    } else if (is_specialization<T, std::complex>::value) {
+    } else if constexpr (is_specialization<T, std::complex>::value) {
       return "{\"class\": \"NumpyArray\", \"primitive\": \"" +
              type_to_name<T>() + "\", \"form_key\": \"" + form_key.str() +
              "\"}";
-    }
+    } else {
+      typedef typename T::value_type value_type;
 
-    typedef typename T::value_type value_type;
-
-    if (is_iterable<T>) {
-      std::string parameters("");
-      if (std::is_same<value_type, char>::value) {
-        parameters =
-            std::string(" \"parameters\": { \"__array__\": \"string\" }, ");
+      if (is_iterable<T>) {
+        std::string parameters("");
+        if (std::is_same<value_type, char>::value) {
+          parameters =
+              std::string(" \"parameters\": { \"__array__\": \"string\" }, ");
+        }
+        return "{\"class\": \"ListOffsetArray\", \"offsets\": \"" +
+              type_to_numpy_like<OFFSETS>() + "\", "
+              "\"content\":" +
+              type_to_form<value_type, OFFSETS>(form_key_id) + ", " + parameters +
+              "\"form_key\": \"" + form_key.str() + "\"}";
       }
-      return "{\"class\": \"ListOffsetArray\", \"offsets\": \"" +
-             type_to_numpy_like<OFFSETS>() + "\", "
-             "\"content\":" +
-             type_to_form<value_type, OFFSETS>(form_key_id) + ", " + parameters +
-             "\"form_key\": \"" + form_key.str() + "\"}";
+      return "unsupported type";
     }
-    return "unsupported type";
   }
 
   /// @brief Check if an RDataFrame column is an Awkward Array.

@@ -16,11 +16,7 @@ using namespace pybind11::literals;
 ////////// ArrayBuilder
 bool
 builder_fromiter_iscomplex(const py::handle& obj) {
-#if PY_MAJOR_VERSION < 3
-  return py::isinstance(obj, py::module::import("__builtin__").attr("complex"));
-#else
-  return py::isinstance(obj, py::module::import("builtins").attr("complex"));
-#endif
+  return PyComplex_Check(obj.ptr());
 }
 
 void
@@ -52,9 +48,9 @@ builder_datetime(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance(obj, py::module::import("datetime").attr("time"))) {
     auto datetime = py::module::import("datetime");
     auto time_since_midnight = datetime.attr("timedelta")(
-        "hours"_s=obj.attr("hour"),
-        "minutes"_s=obj.attr("minute"),
-        "seconds"_s=obj.attr("second")
+        "hours"_a=obj.attr("hour"),
+        "minutes"_a=obj.attr("minute"),
+        "seconds"_a=obj.attr("second")
     );
     auto resolution_microseconds = datetime.attr("timedelta")("microseconds"_a=1);
     auto time_since_midnight_us = time_since_midnight.attr("__floordiv__")(resolution_microseconds).cast<int64_t>();
@@ -83,7 +79,7 @@ builder_timedelta(ak::ArrayBuilder& self, const py::handle& obj) {
   }
   else if (py::isinstance(obj, py::module::import("datetime").attr("timedelta"))) {
     auto interval_us = obj.cast<std::chrono::microseconds>();
-    self.datetime(interval_us.count(), "timedelta64[us]");
+    self.timedelta(interval_us.count(), "timedelta64[us]");
   }
   else {
     throw std::invalid_argument(

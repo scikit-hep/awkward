@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import numpy
-
 import awkward as ak
 from awkward._nplikes.array_like import maybe_materialize
-from awkward._nplikes.array_module import ArrayModuleNumpyLike
+from awkward._nplikes.array_module import (
+    ArrayModuleNumpyLike,
+    _nplike_repeat_has_array_repeats,
+)
 from awkward._nplikes.dispatch import register_nplike
-from awkward._nplikes.numpy_like import ArrayLike
+from awkward._nplikes.numpy_like import ArrayLike, NumpyMetadata
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem
 from awkward._nplikes.virtual import VirtualNDArray
@@ -16,6 +17,8 @@ from awkward._typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
+
+np = NumpyMetadata.instance()
 
 
 @register_nplike
@@ -52,8 +55,7 @@ class Cupy(ArrayModuleNumpyLike):
     ) -> ArrayLike:
         assert not isinstance(buffer, (PlaceholderArray, VirtualNDArray))
         assert not isinstance(count, (PlaceholderArray, VirtualNDArray))
-        np_array = numpy.frombuffer(buffer, dtype=dtype, count=count)
-        return self._module.asarray(np_array)
+        return self._module.frombuffer(buffer, dtype=dtype, count=count)
 
     def array_equal(
         self, x1: ArrayLike, x2: ArrayLike, *, equal_nan: bool = False
@@ -70,14 +72,17 @@ class Cupy(ArrayModuleNumpyLike):
         x, repeats = maybe_materialize(x, repeats)
         if axis is not None:
             raise NotImplementedError(f"repeat for CuPy with axis={axis!r}")
-        # https://github.com/cupy/cupy/issues/3849
-        if isinstance(repeats, self._module.ndarray):
-            all_stops = self._module.cumsum(repeats)
-            parents = self._module.zeros(all_stops[-1].item(), dtype=int)
-            stops, stop_counts = self._module.unique(all_stops[:-1], return_counts=True)
-            parents[stops] = stop_counts
-            self._module.cumsum(parents, out=parents)
-            return x[parents]
+        # https://github.com/cupy/cupy/issues/3849, implemented in CuPy 14.1
+        if isinstance(
+            repeats, self._module.ndarray
+        ) and not _nplike_repeat_has_array_repeats(self._module):
+            stops = self._module.cumsum(repeats)
+            total = int(stops[-1].item()) if stops.size else 0
+            # mark where each element's run ends; the extra slot absorbs the
+            # boundaries that trailing zero repeats leave at `total`
+            marks = self._module.zeros(total + 1, dtype=np.intp)
+            self._module.add.at(marks, stops[:-1], 1)
+            return x[self._module.cumsum(marks[:-1])]
         else:
             return self._module.repeat(x, repeats=repeats)
 
@@ -92,8 +97,11 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.all(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.all(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        # https://github.com/cupy/cupy/issues/3819 - cupy returns a 0d array for
+        # full reductions; coerce to a scalar to match NumPy (but not when
+        # `keepdims` requested a 1x...x1 array).
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -107,8 +115,8 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.any(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.any(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -133,8 +141,8 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.min(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.min(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -146,10 +154,13 @@ class Cupy(ArrayModuleNumpyLike):
         axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLike | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.sum(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.sum(
+            x, axis=axis, keepdims=keepdims, out=maybe_out, dtype=dtype
+        )
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -163,8 +174,8 @@ class Cupy(ArrayModuleNumpyLike):
         maybe_out: ArrayLike | None = None,
     ) -> ArrayLike:
         (x,) = maybe_materialize(x)
-        out = self._module.max(x, axis=axis, out=maybe_out)
-        if axis is None and isinstance(out, self._module.ndarray):
+        out = self._module.max(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        if axis is None and not keepdims and isinstance(out, self._module.ndarray):
             return out.item()
         else:
             return out
@@ -187,6 +198,48 @@ class Cupy(ArrayModuleNumpyLike):
         else:
             (x,) = maybe_materialize(x)
             return x.flags["C_CONTIGUOUS"]  # type: ignore[attr-defined]
+
+    def byteswap(self, x: ArrayLike) -> ArrayLike:
+        if isinstance(x, VirtualNDArray):
+            if x.is_materialized:
+                return self.byteswap(x.materialize())
+            else:
+                return VirtualNDArray(
+                    x._nplike,
+                    x._shape,
+                    x._dtype,
+                    lambda: self.byteswap(x.materialize()),
+                    lambda: x.shape,
+                    x._buffer_key,
+                    __enable_caching__=x.__enable_caching__,
+                )
+        else:
+            dtype = x.dtype
+            original_shape = x.shape
+            # Handle complex types by swapping real and imaginary parts independently
+            if np.issubdtype(dtype, np.complexfloating):
+                component_dtype = np.finfo(dtype).dtype
+                float_view = self._module.ascontiguousarray(x).view(component_dtype)
+                swapped = self.byteswap(float_view)
+                return (
+                    self._module.ascontiguousarray(swapped)
+                    .view(dtype)
+                    .reshape(original_shape)
+                )
+
+            itemsize = dtype.itemsize
+
+            if itemsize == 1:
+                return self._module.copy(x)
+
+            bytes_arr = self._module.ascontiguousarray(x).view(np.uint8)
+            bytes_arr = bytes_arr.reshape(-1, itemsize)
+            bytes_arr = bytes_arr[..., ::-1]
+            return (
+                self._module.ascontiguousarray(bytes_arr.reshape(-1))
+                .view(dtype)
+                .reshape(original_shape)
+            )
 
     def memory_ptr(self, x: ArrayLike) -> int:
         (x,) = maybe_materialize(x)

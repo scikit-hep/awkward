@@ -1,0 +1,512 @@
+name: Tests
+
+on:
+  schedule:
+    - cron: 0 12 1 * *
+
+  workflow_call:
+    inputs:
+      run-gpu-kernel-tests:
+        description: Run the gpu kernel tests
+        required: false
+        default: false
+        type: string # The workflow freezes if this is set to boolean for some reason
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+
+  workflow_dispatch:
+    inputs:
+      run-gpu-kernel-tests:
+        description: Run the gpu kernel tests
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 'test-${{ github.head_ref || github.run_id }}'
+  cancel-in-progress: true
+
+env:
+  # Leverage reproducible builds by setting a constant SOURCE_DATE_EPOCH
+  # This will ensure that the hash of the awkward-cpp directory remains
+  # constant for unchanged files, meaning that it can be used for caching
+  SOURCE_DATE_EPOCH: "1668811211"
+
+jobs:
+  run-tests:
+    name: Run Tests
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on:
+          - windows-latest
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+          - macos-latest
+        python-version:
+          - '3.15'
+          - '3.10'
+        python-architecture:
+          - '' # use default arch
+        dependencies-kind:
+          - full
+        include:
+          - python-version: '3.15'
+            python-architecture: arm64
+            runs-on: macos-15
+            dependencies-kind: full
+          - python-version: '3.15'
+            python-architecture: x64
+            runs-on: macos-15-intel
+            dependencies-kind: basic
+          - python-version: '3.10'
+            python-architecture: x86
+            runs-on: windows-latest
+            dependencies-kind: full
+          - python-version: '3.10'
+            python-architecture: x86
+            runs-on: windows-latest
+            dependencies-kind: numpy1
+          - python-version: '3.10'
+            python-architecture: x64
+            runs-on: ubuntu-latest
+            dependencies-kind: minimal
+          - python-version: '3.11'
+            python-architecture: arm64
+            runs-on: macos-15
+            dependencies-kind: ml
+          - python-version: '3.14t'
+            python-architecture: x64
+            runs-on: ubuntu-latest
+            dependencies-kind: nogil
+          - python-version: '3.14t'
+            python-architecture: arm64
+            runs-on: macos-15
+            dependencies-kind: nogil
+          - python-version: '3.14t'
+            python-architecture: x64
+            runs-on: windows-latest
+            dependencies-kind: nogil
+
+    runs-on: ${{ matrix.runs-on }}
+
+    env:
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+      MACOSX_DEPLOYMENT_TARGET: ${{ startsWith(matrix.runs-on, 'macos') && '11.0' || '' }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: 'Python ${{ matrix.python-version }}'
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '${{ matrix.python-version }}'
+          architecture: '${{ matrix.python-architecture }}'
+          allow-prereleases: true
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: awkward-cpp/dist
+          key: ${{ github.job }}-${{ matrix.runs-on }}-${{ matrix.python-version }}-${{ matrix.python-architecture }}${{ runner.os == 'macOS' && format('-macosx{0}', env.MACOSX_DEPLOYMENT_TARGET) || '' }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w awkward-cpp
+
+      - name: Find built wheel
+        uses: tj-actions/glob@2deae40528141fc53131606d56b4e4ce2a486b29 # v22.0.2
+        id: find-wheel
+        with:
+          files: |
+            awkward-cpp/dist/*.whl
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
+          -r "requirements-test-${MATRIX_DEPENDENCIES_KIND}.txt"
+        shell: bash
+        env:
+          STEPS_FIND_WHEEL_OUTPUTS_PATHS: ${{ steps.find-wheel.outputs.paths }}
+          MATRIX_DEPENDENCIES_KIND: ${{ matrix.dependencies-kind }}
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Check if kernel specification is sorted
+        # We don't need to run this all the time
+        if: (matrix.python-version == '3.12') && (matrix.runs-on == 'ubuntu-latest')
+        run: pipx run nox -s diagnostics -- --check-spec-sorted
+
+      # Not with xdist: these tests are too short for it to pay off
+      - name: Test specification and CPU kernels
+        run: >-
+          python -m pytest -vv -rs
+          awkward-cpp/tests-spec awkward-cpp/tests-spec-explicit
+          awkward-cpp/tests-cpu-kernels awkward-cpp/tests-cpu-kernels-explicit
+
+      - name: Test non-kernels (Python)
+        run: >-
+          python -m pytest -n auto -vv -rs tests
+
+      - name: Test non-kernels (Python) in multiple threads
+        if: matrix.python-version == '3.14t'
+        run: |
+          python -m pip install 'pytest-run-parallel>=0.8.2'
+          python -m pytest -n auto -vv -rs tests --parallel-threads 4 --ignore=tests/test_3364_virtualarray.py --ignore=tests/test_3451_virtualarray_with_jax.py --ignore=tests/test_3475_virtualarray_unknown_length.py
+
+  run-gpu-tests:
+    name: Run GPU Tests
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
+
+    runs-on: self-hosted
+
+    env:
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+      # The workers share one GPU, so keep their number small
+      XDIST_ARGS: -n 4
+      # Coverage of the CUDA code paths is measured on one job only
+      COV_ARGS: ${{ matrix.cuda-version == 13 && '--cov=awkward --cov-append --cov-report=xml' || '' }}
+
+    # Required for miniconda to activate conda
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        cuda-version:
+          - 12
+          - 13
+
+    steps:
+      - name: Clean the workspace and mamba
+        run: |
+          rm -rf * .[!.]* || echo "Nothing to clean"
+          rm -rf ~/micromamba* || echo "Nothing to clean"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Set up GPU test environment
+        uses: $/.github/actions/setup-gpu-env
+        with:
+          cuda-version: ${{ matrix.cuda-version }}
+
+      - name: Test CUDA kernels
+        if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
+        run: python -m pytest ${XDIST_ARGS} -vv -rs tests-cuda-kernels tests-cuda-kernels-explicit
+
+      - name: Test kernel property-based tests
+        if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
+        run: python -m pytest ${XDIST_ARGS} -vv -rs tests/properties -m cuda
+
+      - name: Test CUDA non-kernel (Python)
+        run: >-
+          python -m pytest ${XDIST_ARGS} -vv -rs tests-cuda --ignore=tests-cuda/test_3459_virtualarray_with_cuda.py ${COV_ARGS}
+
+      - name: Test CUDA virtual arrays
+        run: >-
+          python -m pytest ${XDIST_ARGS} -vv -rs tests-cuda/test_3459_virtualarray_with_cuda.py ${COV_ARGS}
+
+      # Scheduled runs test a commit that CI already reported coverage for
+      - name: Upload coverage to Codecov
+        if: matrix.cuda-version == 13 && github.event_name != 'schedule'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+
+  Linux-ROOT:
+    name: Linux ROOT
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
+    runs-on: ubuntu-latest
+
+    env:
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+
+    timeout-minutes: 30
+
+    # Required for miniconda to activate conda
+    defaults:
+      run:
+        shell: "bash -l {0}"
+
+    steps:
+      - uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Setup Python via Conda
+        uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
+        with:
+          # Only save caches from main; PR runs would create per-PR entries
+          cache-environment: ${{ github.event_name != 'pull_request' }}
+          environment-name: awkward
+          create-args: >-
+            python=3.14
+            numpy
+            root=6.36.06
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}-py3.14
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python3 -m pip install build
+          python3 -m build -w ./awkward-cpp
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install --only-binary "numpy,pandas,pyarrow,numexpr"
+          -v . ./awkward-cpp/dist/*.whl
+          pytest-github-actions-annotate-failures
+          -r requirements-test-full.txt
+
+      - name: Print versions
+        run: python -m pip list
+
+      # This job measures the coverage of the non-CUDA code paths: it is the
+      # one with the most optional dependencies (ROOT included)
+      - name: Test
+        run: >-
+          python -m pytest -n auto -vv -rs tests --cov=awkward --cov-report=xml
+          --junitxml=junit.xml -o junit_family=legacy
+
+      # Scheduled runs test a commit that CI already reported coverage for
+      - name: Upload coverage to Codecov
+        if: github.event_name != 'schedule'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() && github.event_name != 'schedule' }}
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          files: junit.xml
+
+  Linux-cppyy:
+    name: Linux cppyy
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
+    # TODO: remove this part of the workflow
+    # cppyy is not yet released. Let's load some pre-built wheels via docker (as a binary store)
+    runs-on: ubuntu-22.04
+
+    env:
+      PIP_ONLY_BINARY: numpy,pandas,pyarrow,numexpr,numexpr
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Python 3.11
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./awkward-cpp/dist
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install build
+          python -m build -w ./awkward-cpp
+
+      - name: Extract pre-built manylinux cppyy wheels
+        uses: shrink/actions-docker-extract@f1ef61065b78731fe3310b4e84e511f6a927a77e # v4.0.0
+        with:
+          image: "docker.io/agoose77/cppyy-wheels:cp311"
+          path: "/wheels/."
+          destination: "/tmp/wheelhouse"
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: >-
+          python -m pip install -v --only-binary "numpy,pandas,pyarrow,numexpr"
+          ./ ./awkward-cpp/dist/*.whl /tmp/wheelhouse/* pytest-github-actions-annotate-failures
+
+      - name: Print versions
+        run: python -m pip list
+
+      - name: Test
+        run: python -m pytest -vv -rs tests -k cppyy
+
+
+  run-s390x-tests:
+    # Only workflow_dispatch is enabled on forks.
+    if: github.repository_owner == 'scikit-hep' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    env:
+      DOCKER_CONTAINER: s390x/ubuntu:24.04
+      ARCH: s390x
+      TERM: xterm-256color
+
+    name: "Run s390x Tests"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - name: Initialize binfmt_misc for qemu-user-static
+        run: |
+          docker run --rm --privileged tonistiigi/binfmt:qemu-v9.2.2-52 --install s390x
+
+      - name: Restore docker container
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: container-cache
+        with:
+          path: ~/docker_s390x
+          # Only the files installed into the container belong in the key.
+          key: container-${{ runner.os }}-s390x-${{ hashFiles('requirements-test-basic.txt') }}
+
+      - name: Create container
+        if: steps.container-cache.outputs.cache-hit != 'true'
+        run: |
+          docker run --platform=linux/${ARCH} --name the_container --interactive \
+            -v $(pwd):/awkward ${DOCKER_CONTAINER} /bin/bash -c "
+            apt update &&
+            apt install -y cmake build-essential gfortran git curl ca-certificates \
+                           libopenblas-dev liblapack-dev pkg-config &&
+            curl -LsSf https://astral.sh/uv/install.sh | sh &&
+            export PATH=\"/root/.local/bin:\$PATH\" &&
+            uv venv --seed --python 3.13 .venv &&
+            source .venv/bin/activate &&
+            uv pip install -v numpy &&
+            uv pip install -r /awkward/requirements-test-basic.txt
+          "
+          docker commit the_container the_container
+          mkdir -p ~/docker_s390x
+          docker save -o ~/docker_s390x/the_container.tar the_container
+
+      - name: Load container from cache
+        if: steps.container-cache.outputs.cache-hit == 'true'
+        run: docker load -i ~/docker_s390x/the_container.tar
+
+      - name: Save docker container
+        if: steps.container-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/docker_s390x
+          key: ${{ steps.container-cache.outputs.cache-primary-key }}
+
+      - name: Generate build files
+        run: pipx run nox -s prepare -- --headers --signatures --tests
+
+      - name: Cache awkward-cpp wheel
+        id: cache-awkward-cpp-wheel
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: awkward-cpp/dist
+          key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}
+
+      - name: Build awkward-cpp wheel
+        if: steps.cache-awkward-cpp-wheel.outputs.cache-hit != 'true'
+        run: |
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              export PATH="/root/.local/bin:$PATH" &&
+              source .venv/bin/activate &&
+              cd /awkward &&
+              uv pip install build &&
+              python -m build -w awkward-cpp
+            '
+
+      - name: Find built wheel
+        uses: tj-actions/glob@2deae40528141fc53131606d56b4e4ce2a486b29 # v22.0.2
+        id: find-wheel
+        with:
+          files: |
+            awkward-cpp/dist/*.whl
+
+      - name: Install awkward, awkward-cpp, and dependencies
+        run: |
+          docker run --platform=linux/${ARCH} -e "TERM=${TERM}" \
+            -e STEPS_FIND_WHEEL_OUTPUTS_PATHS \
+            --name build_container \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              export PATH="/root/.local/bin:$PATH" &&
+              source .venv/bin/activate &&
+              cd /awkward &&
+              uv pip install -v . ${STEPS_FIND_WHEEL_OUTPUTS_PATHS} pytest-github-actions-annotate-failures
+            '
+          docker commit build_container the_container
+          docker rm build_container
+        env:
+          STEPS_FIND_WHEEL_OUTPUTS_PATHS: ${{ steps.find-wheel.outputs.paths }}
+
+      - name: Print versions
+        run: |
+          docker run --rm --platform=linux/${ARCH} \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              export PATH="/root/.local/bin:$PATH" &&
+              source .venv/bin/activate &&
+              python -c "import sys; print(sys.byteorder)" &&
+              uv pip list
+            '
+
+      # Not with xdist: under emulation, starting the workers costs more than
+      # running the tests in parallel saves
+      - name: Test specification and CPU kernels
+        run: |
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source .venv/bin/activate && cd /awkward &&
+              python -m pytest -vv -rs \
+                awkward-cpp/tests-spec awkward-cpp/tests-spec-explicit \
+                awkward-cpp/tests-cpu-kernels awkward-cpp/tests-cpu-kernels-explicit
+            '
+
+      - name: Test non-kernels (Python)
+        run: |
+          docker run --rm --platform=linux/${ARCH} -e "TERM=${TERM}" \
+            -v $(pwd):/awkward the_container \
+            /bin/bash -c '
+              source .venv/bin/activate && cd /awkward &&
+              python -m pytest -vv -rs tests
+            '

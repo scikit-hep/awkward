@@ -12,8 +12,6 @@ body:
         The following links might help:
 
            * [awkward-array.org](https://awkward-array.org/)
-           * [StackOverflow: [awkward-array] tag](https://stackoverflow.com/questions/tagged/awkward-array)
-           * [Gitter: Scikit-HEP/awkward-array room](https://gitter.im/Scikit-HEP/awkward-array)
 
   - type: textarea
     id: feature

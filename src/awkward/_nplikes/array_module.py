@@ -37,6 +37,33 @@ def _nplike_concatenate_has_casting(module: Any) -> bool:
         return True
 
 
+@lru_cache
+def _nplike_reshape_has_copy(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.reshape(x, (2,), copy=False)
+    except TypeError:
+        return False
+    else:
+        return True
+
+
+@lru_cache
+def _nplike_repeat_has_array_repeats(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.repeat(x, module.ones(2, dtype=module.int64))
+    except (TypeError, ValueError):
+        return False
+    else:
+        return True
+
+
+@lru_cache
+def _nplike_unique_has_equal_nan(module: Any) -> bool:
+    return "equal_nan" in inspect.signature(module.unique).parameters
+
+
 ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
 
 
@@ -62,6 +89,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
     ) -> ArrayLikeT | PlaceholderArray | VirtualNDArray:
+        # already the exact array type this nplike owns, and nothing to do
+        if (
+            not copy
+            and type(obj) is self._module.ndarray
+            and (dtype is None or obj.dtype == dtype)
+        ):
+            return obj
         if isinstance(obj, PlaceholderArray):
             assert obj.dtype == dtype or dtype is None
             return obj
@@ -72,7 +106,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                 # if we are not copying and the dtype is _exactly_ the dtype of the existing array
                 # or dtype is None, we can return the VirtualNDArray directly
                 # this avoids unnecessary VirtualNDArray creation and method-chaining
-                if not copy and (obj.dtype == dtype or dtype is None):
+                if not copy and (dtype is None or obj.dtype == dtype):
                     return obj
                 return VirtualNDArray(
                     obj._nplike,
@@ -279,7 +313,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         # Interpret the arguments under these dtypes, converting scalars to length-1 arrays
         resolved_args = [
             cast("ArrayLikeT", self.asarray(arg, dtype=dtype))
-            for arg, dtype in zip(args, resolved_dtypes)
+            for arg, dtype in zip(args, resolved_dtypes[: len(args)], strict=True)
         ]
         # Broadcast to ensure all-scalar or all-nd-array
         broadcasted_args = self.broadcast_arrays(*resolved_args)
@@ -307,7 +341,8 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         broadcasted_args = self.broadcast_arrays(*resolved_args)
         # Choose the broadcasted argument if it wasn't a Python scalar
         non_generic_value_promoted_args = [
-            y if hasattr(x, "ndim") else x for x, y in zip(args, broadcasted_args)
+            y if hasattr(x, "ndim") else x
+            for x, y in zip(args, broadcasted_args, strict=True)
         ]
         # Allow other nplikes to replace implementation
         impl = self.prepare_ufunc(ufunc)
@@ -370,10 +405,14 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
             return self._module.reshape(self._module.copy(x, order="C"), shape)
         else:
             result = self._module.asarray(x)
+            if _nplike_reshape_has_copy(self._module):
+                return self._module.reshape(result, shape, copy=False)
             try:
                 result.shape = shape
             except AttributeError:
-                raise ValueError("cannot reshape array without copying") from None
+                raise ValueError(
+                    "Unable to avoid creating a copy while reshaping."
+                ) from None
             return result
 
     def shape_item_as_index(self, x1: ShapeItem) -> int:
@@ -451,9 +490,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
 
     def unique_values(self, x: ArrayLikeT) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
-        np_unique_accepts_equal_nan = (
-            "equal_nan" in inspect.signature(self._module.unique).parameters
-        )
+        np_unique_accepts_equal_nan = _nplike_unique_has_equal_nan(self._module)
 
         if np_unique_accepts_equal_nan:
             return self._module.unique(
@@ -503,7 +540,42 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         arrays: list[ArrayLikeT] | tuple[ArrayLikeT, ...],
         *,
         axis: int | None = 0,
-    ) -> ArrayLikeT:
+    ) -> ArrayLikeT | VirtualNDArray:
+        if any(isinstance(x, VirtualNDArray) and not x.is_materialized for x in arrays):
+            # TODO: switch to np.result_type when we pin numpy >= 1.23
+            dtype = self._module.concatenate(
+                [self._module.empty(0, x.dtype) for x in arrays]
+            ).dtype
+
+            if axis is None:
+                shape = (sum((x.size for x in arrays), 0),)
+            else:
+                ref = arrays[0]
+                if axis < 0:
+                    axis += ref.ndim
+                for i, x in enumerate(arrays[1:], start=1):
+                    for dim, (ref_d, x_d) in enumerate(
+                        zip(ref.shape, x.shape, strict=True)
+                    ):
+                        if dim != axis and ref_d != x_d:
+                            raise ValueError(
+                                "all the input array dimensions except for the concatenation axis "
+                                f"must match exactly, but along dimension {dim}, the array at index 0 "
+                                f"has size {ref_d} and the array at index {i} has size {x_d}"
+                            )
+                shape = (  # type: ignore[assignment]
+                    *ref.shape[:axis],
+                    sum((x.shape[axis] for x in arrays), 0),
+                    *ref.shape[axis + 1 :],
+                )
+
+            return VirtualNDArray(
+                self,
+                shape,
+                dtype,
+                lambda: self.concat(maybe_materialize(*arrays), axis=axis),
+            )
+
         arrays = maybe_materialize(*arrays)
         if _nplike_concatenate_has_casting(self._module):
             return self._module.concatenate(arrays, axis=axis, casting="same_kind")
@@ -566,6 +638,9 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         (x,) = maybe_materialize(x)
         return x.strides
 
+    def byteswap(self, x: ArrayLikeT) -> ArrayLikeT:
+        raise NotImplementedError
+
     ############################ ufuncs
 
     def add(
@@ -605,6 +680,18 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
     ) -> ArrayLikeT:
         x1, x2 = maybe_materialize(x1, x2)
         return self._module.divide(x1, x2, out=maybe_out)
+
+    def minimum(
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.minimum(x1, x2, out=maybe_out)
+
+    def maximum(
+        self, x1: ArrayLikeT, x2: ArrayLikeT, maybe_out: ArrayLikeT | None = None
+    ) -> ArrayLikeT:
+        x1, x2 = maybe_materialize(x1, x2)
+        return self._module.maximum(x1, x2, out=maybe_out)
 
     ############################ almost-ufuncs
 
@@ -678,9 +765,12 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
-        return self._module.sum(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        return self._module.sum(
+            x, axis=axis, keepdims=keepdims, out=maybe_out, dtype=dtype
+        )
 
     def max(
         self,
@@ -757,9 +847,12 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         return x.astype(dtype, copy=copy)  # type: ignore[attr-defined]
 
     def can_cast(
-        self, from_: DTypeLike | ArrayLikeT, to: DTypeLike | ArrayLikeT
+        self,
+        from_: DTypeLike | ArrayLikeT,
+        to: DTypeLike | ArrayLikeT,
+        casting: Literal["no", "equiv", "safe", "same_kind", "unsafe"] = "same_kind",
     ) -> bool:
-        return self._module.can_cast(from_, to, casting="same_kind")
+        return self._module.can_cast(from_, to, casting=casting)
 
     @classmethod
     def is_own_array(cls, obj) -> bool:
@@ -775,4 +868,4 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         return cls.is_own_array_type(type(obj))
 
     def memory_ptr(self, x: ArrayLikeT) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError

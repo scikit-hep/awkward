@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(
-  T* toindex,
-  const int8_t* frommask,
+  T* __restrict__ toindex,
+  const int8_t* __restrict__ frommask,
   int64_t length) {
   int64_t count = 0;
   for (int64_t i = 0; i < length; i++) {
@@ -22,8 +22,8 @@ ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1(
   return success();
 }
 ERROR awkward_IndexedOptionArray_rpad_and_clip_mask_axis1_64(
-  int64_t* toindex,
-  const int8_t* frommask,
+  int64_t* __restrict__ toindex,
+  const int8_t* __restrict__ frommask,
   int64_t length) {
   return awkward_IndexedOptionArray_rpad_and_clip_mask_axis1<int64_t>(
     toindex,

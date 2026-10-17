@@ -6,15 +6,15 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_jagged_apply(
-  T* tooffsets,
-  T* tocarry,
-  const T* slicestarts,
-  const T* slicestops,
+  T* __restrict__ tooffsets,
+  T* __restrict__ tocarry,
+  const T* __restrict__ slicestarts,
+  const T* __restrict__ slicestops,
   int64_t sliceouterlen,
-  const T* sliceindex,
+  const T* __restrict__ sliceindex,
   int64_t sliceinnerlen,
-  const C* fromstarts,
-  const C* fromstops,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t contentlen) {
   int64_t k = 0;
   for (int64_t i = 0;  i < sliceouterlen;  i++) {
@@ -53,72 +53,12 @@ ERROR awkward_ListArray_getitem_jagged_apply(
   tooffsets[sliceouterlen] = (T)k;
   return success();
 }
-ERROR awkward_ListArray32_getitem_jagged_apply_64(
-  int64_t* tooffsets,
-  int64_t* tocarry,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
-  int64_t sliceouterlen,
-  const int64_t* sliceindex,
-  int64_t sliceinnerlen,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t contentlen) {
-  return awkward_ListArray_getitem_jagged_apply<int32_t, int64_t>(
-    tooffsets,
-    tocarry,
-    slicestarts,
-    slicestops,
-    sliceouterlen,
-    sliceindex,
-    sliceinnerlen,
-    fromstarts,
-    fromstops,
-    contentlen);
-}
-ERROR awkward_ListArrayU32_getitem_jagged_apply_64(
-  int64_t* tooffsets,
-  int64_t* tocarry,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
-  int64_t sliceouterlen,
-  const int64_t* sliceindex,
-  int64_t sliceinnerlen,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t contentlen) {
-  return awkward_ListArray_getitem_jagged_apply<uint32_t, int64_t>(
-    tooffsets,
-    tocarry,
-    slicestarts,
-    slicestops,
-    sliceouterlen,
-    sliceindex,
-    sliceinnerlen,
-    fromstarts,
-    fromstops,
-    contentlen);
-}
-ERROR awkward_ListArray64_getitem_jagged_apply_64(
-  int64_t* tooffsets,
-  int64_t* tocarry,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
-  int64_t sliceouterlen,
-  const int64_t* sliceindex,
-  int64_t sliceinnerlen,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t contentlen) {
-  return awkward_ListArray_getitem_jagged_apply<int64_t, int64_t>(
-    tooffsets,
-    tocarry,
-    slicestarts,
-    slicestops,
-    sliceouterlen,
-    sliceindex,
-    sliceinnerlen,
-    fromstarts,
-    fromstops,
-    contentlen);
-}
+
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tooffsets, T* tocarry, const T* slicestarts, const T* slicestops, int64_t sliceouterlen, const T* sliceindex, int64_t sliceinnerlen, const C* fromstarts, const C* fromstops, int64_t contentlen) { \
+    return awkward_ListArray_getitem_jagged_apply<C, T>(tooffsets, tocarry, slicestarts, slicestops, sliceouterlen, sliceindex, sliceinnerlen, fromstarts, fromstops, contentlen); \
+  }
+
+WRAPPER(awkward_ListArray32_getitem_jagged_apply_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_getitem_jagged_apply_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_getitem_jagged_apply_64, int64_t, int64_t)

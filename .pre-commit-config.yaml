@@ -6,7 +6,7 @@ ci:
 exclude: ^(docs|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v6.0.0
+  rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
   hooks:
   - id: check-added-large-files
   - id: check-case-conflict
@@ -20,22 +20,23 @@ repos:
   - id: trailing-whitespace
   - id: name-tests-test
     args: ["--pytest-test-first"]
+    exclude: ^tests/properties/
 
 - repo: https://github.com/cheshirekow/cmake-format-precommit
-  rev: v0.6.13
+  rev: e2c2116d86a80e72e7146a06e68b7c228afc6319  # frozen: v0.6.13
   hooks:
   - id: cmake-format
     additional_dependencies: [pyyaml]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.14.7
+  rev: f12be1ebaa5351c1fc76472de98db2c3446c8253  # frozen: v0.16.10
   hooks:
   - id: ruff-check
     args: ["--fix", "--show-fixes"]
   - id: ruff-format
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
+  rev: 57b21406f092110c18776e39b0bda50d37c945c8  # frozen: v2.4.3
   hooks:
   - id: codespell
     args: ["-L", "ue,subjet,parms,fo,numer,thre,nin,nout"]
@@ -49,7 +50,7 @@ repos:
     exclude: .pre-commit-config.yaml
 
 - repo: https://github.com/shellcheck-py/shellcheck-py
-  rev: "v0.11.0.1"
+  rev: "a6564f5d57444e123433a5c9af733e3975c77229"  # frozen: v0.11.0.1-1
   hooks:
   - id: shellcheck
 
@@ -63,13 +64,13 @@ repos:
     files: ^tests/
 
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.35.0
+  rev: 4f85d46a92dc17713078e5de73f8a13190edf6fc  # frozen: 0.38.2
   hooks:
     - id: check-github-workflows
       args: ["--verbose"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.19.0
+  rev: 2834ec6639549dd6796205c8f011dedcd587288b  # frozen: v2.4.0
   hooks:
     - id: mypy
       files: src
@@ -77,6 +78,12 @@ repos:
         - numpy>=1.24
 
 - repo: https://github.com/abravalheri/validate-pyproject
-  rev: v0.24.1
+  rev: 17e12779811926f000bdfa1795f9e3735dd71ac3  # frozen: 0.26
   hooks:
     - id: validate-pyproject
+
+- repo: https://github.com/zizmorcore/zizmor-pre-commit
+  rev: fa412071e4f5d44d44f9e365f4676f9df92456a2  # frozen: v1.30.1
+  hooks:
+    - id: zizmor
+      args: [--persona=pedantic]

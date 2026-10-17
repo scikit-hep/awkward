@@ -6,9 +6,9 @@
 
 template <typename T>
 ERROR awkward_RegularArray_getitem_next_array(
-  T* tocarry,
-  T* toadvanced,
-  const T* fromarray,
+  T* __restrict__ tocarry,
+  T* __restrict__ toadvanced,
+  const T* __restrict__ fromarray,
   int64_t length,
   int64_t lenarray,
   int64_t size) {
@@ -21,9 +21,9 @@ ERROR awkward_RegularArray_getitem_next_array(
   return success();
 }
 ERROR awkward_RegularArray_getitem_next_array_64(
-  int64_t* tocarry,
-  int64_t* toadvanced,
-  const int64_t* fromarray,
+  int64_t* __restrict__ tocarry,
+  int64_t* __restrict__ toadvanced,
+  const int64_t* __restrict__ fromarray,
   int64_t length,
   int64_t lenarray,
   int64_t size) {

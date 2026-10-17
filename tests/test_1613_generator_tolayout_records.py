@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -11,10 +10,15 @@ import awkward._lookup
 
 ROOT = pytest.importorskip("ROOT")
 
-ROOT.ROOT.EnableImplicitMT(1)
-
 compiler = ROOT.gInterpreter.Declare
 cpp17 = hasattr(ROOT.std, "optional")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def manage_imt():
+    ROOT.ROOT.EnableImplicitMT(1)
+    yield
+    ROOT.ROOT.DisableImplicitMT()
 
 
 @pytest.mark.parametrize("flatlist_as_rvec", [False, True])

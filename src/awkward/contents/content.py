@@ -204,7 +204,7 @@ class Content(Meta):
         return self.form_with_key(None)
 
     def form_with_key(
-        self, form_key: str | None | Callable = "node{id}", id_start: int = 0
+        self, form_key: str | Callable | None = "node{id}", id_start: int = 0
     ) -> Form:
         hold_id = [id_start]
 
@@ -532,7 +532,12 @@ class Content(Meta):
         return self._getitem(where, NamedAxis)
 
     def _getitem(self, where, named_axis: Type[NamedAxis] = NamedAxis):
-        if is_integer_like(where):
+        # field access is the most common slice by far, and a `str` matches none
+        # of the other cases, so test for it first
+        if isinstance(where, str):
+            return self._getitem_field(where)
+
+        elif is_integer_like(where):
             # propagate named_axis to output
             named_axis.mapping = _remove_named_axis(
                 named_axis.mapping, 0, self.purelist_depth
@@ -548,9 +553,6 @@ class Content(Meta):
 
         elif isinstance(where, slice):
             return self._getitem((where,), named_axis)
-
-        elif isinstance(where, str):
-            return self._getitem_field(where)
 
         elif where is np.newaxis:
             return self._getitem((where,), named_axis)
@@ -796,7 +798,7 @@ class Content(Meta):
         raise NotImplementedError
 
     def _is_getitem_at_virtual(self) -> bool:
-        return NotImplementedError
+        raise NotImplementedError
 
     def _getitem_at(self, where: IndexType):
         raise NotImplementedError
@@ -846,7 +848,12 @@ class Content(Meta):
             localindex.data, parameters=None, backend=self._backend
         )
 
-    def _mergeable_next(self, other: Content, mergebool: bool) -> bool:
+    def _mergeable_next(
+        self,
+        other: Content,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
         raise NotImplementedError
 
     def _mergemany(self, others: Sequence[Content]) -> Content:
@@ -888,7 +895,7 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
         mask: bool,
         keepdims: bool,
@@ -901,7 +908,7 @@ class Content(Meta):
         negaxis: int,
         starts: Index,
         shifts: Index | None,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -912,7 +919,7 @@ class Content(Meta):
         self,
         negaxis: int,
         starts: Index,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
         ascending: bool,
         stable: bool,
@@ -930,7 +937,7 @@ class Content(Meta):
         if replacement:
             size = size + (n - 1)
         thisn = n
-        if thisn is None or size is None:
+        if thisn is None or size is unknown_length:
             combinationslen = size  # not actually size, just an unknown value
         else:
             if thisn > size:
@@ -1034,7 +1041,7 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
     ) -> bool:
         raise NotImplementedError
@@ -1043,7 +1050,7 @@ class Content(Meta):
         self,
         negaxis: AxisMaybeNone,
         starts: Index,
-        parents: Index,
+        offsets: Index | None,
         outlength: int,
     ):
         raise NotImplementedError
@@ -1295,7 +1302,7 @@ class Content(Meta):
                             outimag[i] = f2(f1(f0(x)))
 
                 if outimag is not None:
-                    for i, (real, imag) in enumerate(zip(out, outimag)):
+                    for i, (real, imag) in enumerate(zip(out, outimag, strict=True)):
                         out[i] = {complex_real_string: real, complex_imag_string: imag}
 
             return out

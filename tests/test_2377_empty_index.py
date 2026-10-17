@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 from collections.abc import Iterable
 from datetime import datetime
@@ -32,7 +30,7 @@ def _add_necessary_unit(dtype_name: str) -> str:
     return dtype_name
 
 
-# (dtype('bool'), dtype('int8'), dtype('<M8[15us]'), ...) Supported dtypes
+# (dtype('bool'), dtype('int8'), dtype('M8[15us]'), ...) Supported dtypes
 DTYPES = tuple(
     primitive_to_dtype(_add_necessary_unit(k)) for k in _primitive_to_dtype_dict.keys()
 )

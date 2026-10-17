@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -47,8 +46,6 @@ def test_add_column():
 
     rdf = add_column(rdf, arr_val, "values")
 
-    ROOT.ROOT.DisableImplicitMT()
-
     rdf.Display().Print()
 
 
@@ -85,7 +82,5 @@ def test_add_numpy():
     arr_val = np.array([10, 20, 30])
 
     rdf = add_numpy_column(rdf, arr_val, "values")
-
-    ROOT.ROOT.DisableImplicitMT()
 
     rdf.Display().Print()

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections import Counter
 from functools import cached_property
@@ -27,8 +26,10 @@ class UnionMeta(Meta, Generic[T]):
             for content in self._contents[1:]:
                 tmp = content.purelist_parameter(key)
                 if out != tmp:
-                    return None
-            return out
+                    out = None
+                    break
+            if out is not None:
+                return out
 
         return None
 

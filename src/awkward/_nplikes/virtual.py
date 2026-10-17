@@ -73,6 +73,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         "_nplike",
         "_shape",
         "_shape_generator",
+        "_shape_is_known",
     )
 
     def __init__(
@@ -91,14 +92,23 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
             raise TypeError(
                 f"The nplike {type(nplike)} does not support virtual arrays"
             )
-        if not all(is_integer(dim) or dim is unknown_length for dim in shape):
-            raise TypeError(
-                f"Only shapes of integer dimensions or unknown_length are supported for {type(self).__name__}. Received shape {shape}"
-            )
+        normalised: list[ShapeItem] = []
+        shape_is_known = True
+        for dim in shape:
+            if dim is unknown_length:
+                shape_is_known = False
+                normalised.append(dim)
+            elif is_integer(dim):
+                normalised.append(int(dim))
+            else:
+                raise TypeError(
+                    f"Only shapes of integer dimensions or unknown_length are supported for {type(self).__name__}. Received shape {shape}"
+                )
 
         # array metadata
         self._nplike = nplike
-        self._shape = tuple(dim if dim is unknown_length else int(dim) for dim in shape)
+        self._shape = tuple(normalised)
+        self._shape_is_known = shape_is_known
         self._dtype = np.dtype(dtype)
         self._array: Sentinel | ArrayLike = UNMATERIALIZED
 
@@ -124,7 +134,8 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
     @property
     def shape(self) -> tuple[ShapeItem, ...]:
-        self.get_shape()
+        if not self._shape_is_known:
+            self.get_shape()
         return self._shape
 
     @property
@@ -156,7 +167,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return self.materialize().strides  # type: ignore[attr-defined]
 
     def get_shape(self) -> None:
-        if any(dim is unknown_length for dim in self._shape):
+        if not self._shape_is_known:
             if self._shape_generator is not None:
                 shape = self._shape_generator()
             else:
@@ -165,7 +176,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
                 )
-            for expected_dim, actual_dim in zip(self._shape, shape):
+            for expected_dim, actual_dim in zip(self._shape, shape, strict=True):
                 if expected_dim is not unknown_length and expected_dim != actual_dim:
                     raise ValueError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {shape}"
@@ -175,6 +186,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                     f"Only shapes of integer dimensions are supported for materialized shapes. Received shape {shape}"
                 )
             self._shape = tuple(map(int, shape))
+            self._shape_is_known = True
             self._shape_generator = assert_never
 
     def materialize(self) -> ArrayLike:
@@ -184,7 +196,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                 raise ValueError(
                     f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
                 )
-            for expected_dim, actual_dim in zip(self._shape, array.shape):
+            for expected_dim, actual_dim in zip(self._shape, array.shape, strict=True):
                 if expected_dim is not unknown_length and expected_dim != actual_dim:
                     raise ValueError(
                         f"{type(self).__name__} had shape {self._shape} before materialization while the materialized array has shape {array.shape}"
@@ -194,6 +206,7 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
                     f"{type(self).__name__} had dtype {self._dtype} before materialization while the materialized array has dtype {array.dtype}"
                 )
             self._shape = array.shape
+            self._shape_is_known = True
             if self.__enable_caching__:
                 self._array = array
                 self._shape_generator = assert_never
@@ -273,20 +286,6 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
     def tolist(self) -> list:
         return self.materialize().tolist()  # type: ignore[attr-defined]
 
-    def byteswap(self, inplace=False):
-        if self._array is not UNMATERIALIZED:
-            return self._array.byteswap(inplace=inplace)
-
-        return type(self)(
-            self._nplike,
-            self._shape,
-            self._dtype,
-            lambda: self.materialize().byteswap(inplace=inplace),
-            lambda: self.shape,
-            self._buffer_key,
-            __enable_caching__=self.__enable_caching__,
-        )
-
     def tobytes(self, order="C") -> bytes:
         return self.materialize().tobytes(order)  # type: ignore[attr-defined]
 
@@ -322,55 +321,52 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         return new_virtual
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        return self.nplike.apply_ufunc(ufunc, method, inputs, kwargs)
+        return self._nplike.apply_ufunc(ufunc, method, inputs, kwargs)
 
     def __repr__(self):
         dtype = repr(self._dtype)
-        if self._shape is None:
-            shape = ""
-        else:
-            shape = f", shape={self._shape!r}"
+        shape = f", shape={self._shape!r}"
         return f"VirtualNDArray(array={self._array}, {dtype}{shape})"
 
     def __str__(self):
         return repr(self) if self._shape else "??"
 
     def __getitem__(self, index):
-        (index,) = maybe_materialize(index)
+        # a slice is never materializable, so it can skip `maybe_materialize`
+        if not isinstance(index, slice):
+            (index,) = maybe_materialize(index)
+            return self.materialize().__getitem__(index)
+
         if self._array is not UNMATERIALIZED:
             return self._array.__getitem__(index)
 
-        if isinstance(index, slice):
-            if (
-                index.start is unknown_length
-                or index.stop is unknown_length
-                or index.step is unknown_length
-            ):
-                raise TypeError(
-                    f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided"
-                )
-            else:
-                length = self.shape[0]
-                start, stop, step = index.indices(length)
-                # if the slice is _exactly_ slicing the whole array, we can return self directly
-                # this avoids unnecessary VirtualNDArray creation and method-chaining
-                if start == 0 and step == 1 and stop == length:
-                    return self
-                new_length = max(
-                    0, (stop - start + (step - (1 if step > 0 else -1))) // step
-                )
-
-            return type(self)(
-                self._nplike,
-                (new_length, *self.shape[1:]),
-                self._dtype,
-                lambda: self.materialize()[index],
-                None,
-                self._buffer_key,
-                __enable_caching__=self.__enable_caching__,
+        if (
+            index.start is unknown_length
+            or index.stop is unknown_length
+            or index.step is unknown_length
+        ):
+            raise TypeError(
+                f"{type(self).__name__} does not support slicing with unknown_length while slice {index} was provided"
             )
-        else:
-            return self.materialize().__getitem__(index)
+
+        shape = self.shape
+        length = shape[0]
+        start, stop, step = index.indices(length)
+        # if the slice is _exactly_ slicing the whole array, we can return self directly
+        # this avoids unnecessary VirtualNDArray creation and method-chaining
+        if start == 0 and step == 1 and stop == length:
+            return self
+        new_length = max(0, (stop - start + (step - (1 if step > 0 else -1))) // step)
+
+        return type(self)(
+            self._nplike,
+            (new_length, *shape[1:]),
+            self._dtype,
+            lambda: self.materialize()[index],
+            None,
+            self._buffer_key,
+            __enable_caching__=self.__enable_caching__,
+        )
 
     def __setitem__(self, key, value):
         array = self.materialize()
@@ -405,6 +401,27 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
         array = self.materialize()
         return iter(array)
 
+    def __array__(
+        self, dtype: DTypeLike | None = None, copy: bool | None = None
+    ) -> ArrayLike:
+        return ak._nplikes.numpy.Numpy.instance().asarray(
+            self.materialize(), dtype=dtype, copy=copy
+        )
+
+    def __cupy_get_ndarray__(self) -> ArrayLike:
+        return ak._nplikes.cupy.Cupy.instance().asarray(self.materialize())
+
+    def __jax_array__(self) -> ArrayLike:
+        return ak._nplikes.jax.Jax.instance().asarray(self.materialize())
+
+    @property
+    def __array_interface__(self) -> dict[str, Any]:
+        return self.materialize().__array_interface__  # type: ignore[attr-defined]
+
+    @property
+    def __cuda_array_interface__(self) -> dict[str, Any]:
+        return self.materialize().__cuda_array_interface__  # type: ignore[attr-defined]
+
     def __dlpack_device__(self) -> tuple[int, int]:
         return self.materialize().__dlpack_device__()  # type: ignore[attr-defined]
 
@@ -413,17 +430,3 @@ class VirtualNDArray(NDArrayOperatorsMixin, MaterializableArray):
 
     def __reduce__(self):
         return self.materialize().__reduce__()
-
-
-# backward compatibility
-class VirtualArray(VirtualNDArray):
-    def __init__(self, *args, **kwargs):
-        import warnings
-
-        warnings.warn(
-            "The `VirtualArray` class is deprecated and will be removed in a future release of Awkward Array. "
-            "Please plan to migrate your code to use the `VirtualNDArray` class instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)

@@ -6,6 +6,7 @@ awkward_ListOffsetArray_reduce_local_nextparents_64(
     T* nextparents,
     const C* offsets,
     int64_t length,
+    int64_t nextparents_length,
     uint64_t invocation_index,
     uint64_t* err_code) {
   if (err_code[0] == NO_ERROR) {
@@ -15,7 +16,7 @@ awkward_ListOffsetArray_reduce_local_nextparents_64(
       int64_t initialoffset = (int64_t)(offsets[0]);
       int64_t start = (int64_t)(offsets[thread_id]) - initialoffset;
       int64_t stop = (int64_t)offsets[thread_id + 1] - initialoffset;
-      for (int64_t j = start + threadIdx.y; j < stop; j += blockDim.y) {
+      for (int64_t j = start + threadIdx.y; j < stop && j < nextparents_length; j += blockDim.y) {
         nextparents[j] = thread_id;
       }
     }

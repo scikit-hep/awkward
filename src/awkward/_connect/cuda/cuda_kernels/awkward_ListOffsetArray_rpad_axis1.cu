@@ -3,7 +3,7 @@
 // BEGIN PYTHON
 // def f(grid, block, args):
 //     (toindex, fromoffsets, fromlength, target, invocation_index, err_code) = args
-//     scan_in_array = cupy.zeros(fromlength, dtype=cupy.int64)
+//     scan_in_array = cupy.zeros(fromlength + 1, dtype=cupy.int64)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_rpad_axis1_a", toindex.dtype, fromoffsets.dtype]))(grid, block, (toindex, fromoffsets, fromlength, target, scan_in_array, invocation_index, err_code))
 //     scan_in_array = cupy.cumsum(scan_in_array)
 //     cuda_kernel_templates.get_function(fetch_specialization(["awkward_ListOffsetArray_rpad_axis1_b", toindex.dtype, fromoffsets.dtype]))(grid, block, (toindex, fromoffsets, fromlength, target, scan_in_array, invocation_index, err_code))

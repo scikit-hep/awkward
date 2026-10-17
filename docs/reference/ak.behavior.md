@@ -53,6 +53,10 @@ but behavior dicts can also be loaded into {class}`ak.Array`,
 constructor argument. See
 {attr}`ak.Array.behavior`.
 
+Warning: the global {data}`ak.behavior` dict is not thread-safe as it is
+shared among all threads. Be careful if you run multi-threaded code that modifies
+this global dict.
+
 The general flow is
 
 - **parameters** link data objects to names;

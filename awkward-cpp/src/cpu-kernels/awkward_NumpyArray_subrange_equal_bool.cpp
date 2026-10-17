@@ -5,11 +5,11 @@
 #include "awkward/kernels.h"
 
 ERROR awkward_NumpyArray_subrange_equal_bool(
-  bool* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
+  bool* __restrict__ tmpptr,
+  const int64_t* __restrict__ fromstarts,
+  const int64_t* __restrict__ fromstops,
   int64_t length,
-  bool* toequal) {
+  bool* __restrict__ toequal) {
 
   bool differ = true;
   int64_t leftlen;

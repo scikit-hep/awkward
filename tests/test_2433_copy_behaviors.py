@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy
 import pytest
@@ -9,6 +8,8 @@ import awkward as ak
 
 
 def test():
+    behavior = {}
+
     class SuperVector:
         def add(self, other):
             """Add two vectors together elementwise using `x` and `y` components"""
@@ -19,7 +20,7 @@ def test():
             )
 
     # first sub-class
-    @ak.mixin_class(ak.behavior)
+    @ak.mixin_class(behavior)
     class VectorTwoD(SuperVector):
         def __eq__(self, other):
             return ak.all(self.x == other.x) and ak.all(self.y == other.y)
@@ -36,7 +37,7 @@ def test():
             ],
         ],
         with_name="VectorTwoD",
-        behavior=ak.behavior,
+        behavior=behavior,
     )
     v_added = ak.Array(
         [
@@ -50,7 +51,7 @@ def test():
             ],
         ],
         with_name="VectorTwoD",
-        behavior=ak.behavior,
+        behavior=behavior,
     )
 
     # add method works but the binary operator does not
@@ -59,17 +60,15 @@ def test():
         v + v
 
     # registering the operator makes everything work
-    ak.behavior[numpy.add, "VectorTwoD", "VectorTwoD"] = lambda v1, v2: v1.add(v2)
+    behavior[numpy.add, "VectorTwoD", "VectorTwoD"] = lambda v1, v2: v1.add(v2)
     assert v + v == v_added
 
     # instead of registering every operator again, just copy the behaviors of
     # another class to this class
-    ak.behavior.update(
-        ak._util.copy_behaviors("VectorTwoD", "VectorTwoDAgain", ak.behavior)
-    )
+    behavior.update(ak._util.copy_behaviors("VectorTwoD", "VectorTwoDAgain", behavior))
 
     # second sub-class
-    @ak.mixin_class(ak.behavior)
+    @ak.mixin_class(behavior)
     class VectorTwoDAgain(VectorTwoD):
         pass
 
@@ -85,19 +84,19 @@ def test():
             ],
         ],
         with_name="VectorTwoDAgain",
-        behavior=ak.behavior,
+        behavior=behavior,
     )
     assert v.add(v) == v_added
     assert v + v == v_added
 
     # instead of registering every operator again, just copy the behaviors of
     # another class to this class
-    ak.behavior.update(
-        ak._util.copy_behaviors("VectorTwoDAgain", "VectorTwoDAgainAgain", ak.behavior)
+    behavior.update(
+        ak._util.copy_behaviors("VectorTwoDAgain", "VectorTwoDAgainAgain", behavior)
     )
 
     # third sub-class
-    @ak.mixin_class(ak.behavior)
+    @ak.mixin_class(behavior)
     class VectorTwoDAgainAgain(VectorTwoDAgain):
         pass
 
@@ -113,7 +112,7 @@ def test():
             ],
         ],
         with_name="VectorTwoDAgainAgain",
-        behavior=ak.behavior,
+        behavior=behavior,
     )
     assert v.add(v) == v_added
     assert v + v == v_added

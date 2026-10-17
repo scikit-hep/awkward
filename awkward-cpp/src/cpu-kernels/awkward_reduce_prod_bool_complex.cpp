@@ -6,42 +6,24 @@
 
 template <typename IN>
 ERROR awkward_reduce_prod_bool_complex(
-  bool* toptr,
-  const IN* fromptr,
-  const int64_t* parents,
-  int64_t lenparents,
+  bool* __restrict__ toptr,
+  const IN* __restrict__ fromptr,
+  const int64_t* __restrict__ offsets,
   int64_t outlength) {
-  for (int64_t i = 0;  i < outlength;  i++) {
-    toptr[i] = true;
-  }
-  for (int64_t i = 0;  i < lenparents;  i++) {
-    toptr[parents[i]] &= (fromptr[i * 2] != 0  ||  fromptr[i * 2 + 1] != 0);
+  for (int64_t bin = 0; bin < outlength; bin++) {
+    bool all_nonzero = true;
+    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+      if (fromptr[i * 2] == 0 && fromptr[i * 2 + 1] == 0) { all_nonzero = false; break; }
+    }
+    toptr[bin] = all_nonzero;
   }
   return success();
 }
-ERROR awkward_reduce_prod_bool_complex64_64(
-  bool* toptr,
-  const float* fromptr,
-  const int64_t* parents,
-  int64_t lenparents,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool_complex<float>(
-    toptr,
-    fromptr,
-    parents,
-    lenparents,
-    outlength);
-}
-ERROR awkward_reduce_prod_bool_complex128_64(
-  bool* toptr,
-  const double* fromptr,
-  const int64_t* parents,
-  int64_t lenparents,
-  int64_t outlength) {
-  return awkward_reduce_prod_bool_complex<double>(
-    toptr,
-    fromptr,
-    parents,
-    lenparents,
-    outlength);
-}
+
+#define WRAPPER(FUNC, IN) \
+  ERROR FUNC(bool* toptr, const IN* fromptr, const int64_t* offsets, int64_t outlength) { \
+    return awkward_reduce_prod_bool_complex<IN>(toptr, fromptr, offsets, outlength); \
+  }
+
+WRAPPER(awkward_reduce_prod_bool_complex64_64, float)
+WRAPPER(awkward_reduce_prod_bool_complex128_64, double)

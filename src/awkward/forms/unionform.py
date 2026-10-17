@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Callable, Iterable
 from itertools import permutations
@@ -135,7 +134,7 @@ class UnionForm(UnionMeta[Form], Form):
         )
 
     def _columns(self, path, output, list_indicator):
-        for content, field in zip(self._contents, self.fields):
+        for content, field in zip(self._contents, self.fields, strict=True):
             content._columns((*path, field), output, list_indicator)
 
     def _prune_columns(self, is_inside_record_or_union: bool) -> Form | None:
@@ -202,7 +201,7 @@ class UnionForm(UnionMeta[Form], Form):
             and any(
                 all(
                     x._is_equal_to(y, all_parameters, form_key)
-                    for x, y in zip(self._contents, c)
+                    for x, y in zip(self._contents, c, strict=True)
                 )
                 for c in permutations(other.contents)
             )

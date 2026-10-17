@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -8,7 +7,6 @@ import pytest
 import awkward as ak
 
 jax = pytest.importorskip("jax")
-jax.config.update("jax_platform_name", "cpu")
 
 ak.jax.register_and_check()
 

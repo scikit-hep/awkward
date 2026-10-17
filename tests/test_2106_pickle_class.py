@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import contextlib
 import pickle
@@ -15,7 +14,7 @@ import awkward as ak
 
 @contextlib.contextmanager
 def temporary_module():
-    name = str(uuid.uuid1()).replace("-", "_")
+    name = "_" + uuid.uuid4().hex
     module = types.ModuleType(name)
     sys.modules[name] = module
     yield module

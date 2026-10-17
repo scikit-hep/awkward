@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -28,7 +27,7 @@ class HashableDict:
 
 class HashableList:
     def __init__(self, obj):
-        self.values = tuple(obj)
+        self.values = tuple(as_hashable(x) for x in obj)
         self.hash = hash((HashableList, *self.values))
 
     def __hash__(self):

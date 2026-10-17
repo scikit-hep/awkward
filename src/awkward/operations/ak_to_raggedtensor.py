@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -13,16 +12,17 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_raggedtensor(array):
-    """
+    """Converts an Awkward Array into a TensorFlow RaggedTensor, if possible.
+
+    If `array` contains any other data types (RecordArray for example) the
+    function raises an error.
+
     Args:
-        array: Array-like data. May be a high level #ak.Array,
-            or low-level #ak.contents.ListOffsetArray, #ak.contents.ListArray,
-            #ak.contents.RegularArray, #ak.contents.NumpyArray
+        array: Array-like data (anything #ak.to_layout recognizes).
 
-    Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
-    into a ragged tensor, if possible.
-
-    If `array` contains any other data types (RecordArray for example) the function raises an error.
+    Returns:
+        A TensorFlow RaggedTensor with the same data as `array`, if the conversion is
+        possible.
     """
 
     # Dispatch

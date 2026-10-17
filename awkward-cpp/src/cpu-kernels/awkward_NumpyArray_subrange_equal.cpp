@@ -6,11 +6,11 @@
 
 template <typename T>
 ERROR awkward_NumpyArray_subrange_equal(
-  T* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
+  T* __restrict__ tmpptr,
+  const int64_t* __restrict__ fromstarts,
+  const int64_t* __restrict__ fromstops,
   int64_t length,
-  bool* toequal) {
+  bool* __restrict__ toequal) {
 
   bool differ = true;
   int64_t leftlen;
@@ -36,133 +36,19 @@ ERROR awkward_NumpyArray_subrange_equal(
 
   return success();
 }
-ERROR awkward_NumpyArray_subrange_equal_int8(
-  int8_t* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<int8_t>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_uint8(
-  uint8_t* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<uint8_t>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_int16(
-  int16_t* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<int16_t>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_uint16(
-  uint16_t* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<uint16_t>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_int32(
-  int32_t* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<int32_t>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_uint32(
-  uint32_t* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<uint32_t>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_int64(
-  int64_t* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<int64_t>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_uint64(
-  uint64_t* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<uint64_t>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_float32(
-  float* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<float>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
-ERROR awkward_NumpyArray_subrange_equal_float64(
-  double* tmpptr,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length,
-  bool* toequal) {
-    return awkward_NumpyArray_subrange_equal<double>(
-      tmpptr,
-      fromstarts,
-      fromstops,
-      length,
-      toequal);
-}
+
+#define WRAPPER(FUNC, T) \
+  ERROR FUNC(T* tmpptr, const int64_t* fromstarts, const int64_t* fromstops, int64_t length, bool* toequal) { \
+    return awkward_NumpyArray_subrange_equal<T>(tmpptr, fromstarts, fromstops, length, toequal); \
+  }
+
+WRAPPER(awkward_NumpyArray_subrange_equal_int8, int8_t)
+WRAPPER(awkward_NumpyArray_subrange_equal_uint8, uint8_t)
+WRAPPER(awkward_NumpyArray_subrange_equal_int16, int16_t)
+WRAPPER(awkward_NumpyArray_subrange_equal_uint16, uint16_t)
+WRAPPER(awkward_NumpyArray_subrange_equal_int32, int32_t)
+WRAPPER(awkward_NumpyArray_subrange_equal_uint32, uint32_t)
+WRAPPER(awkward_NumpyArray_subrange_equal_int64, int64_t)
+WRAPPER(awkward_NumpyArray_subrange_equal_uint64, uint64_t)
+WRAPPER(awkward_NumpyArray_subrange_equal_float32, float)
+WRAPPER(awkward_NumpyArray_subrange_equal_float64, double)

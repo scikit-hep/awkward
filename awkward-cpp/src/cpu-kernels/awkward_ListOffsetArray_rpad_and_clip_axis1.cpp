@@ -6,8 +6,8 @@
 
 template <typename T, typename C>
 ERROR awkward_ListOffsetArray_rpad_and_clip_axis1(
-  T* toindex,
-  const C* fromoffsets,
+  T* __restrict__ toindex,
+  const C* __restrict__ fromoffsets,
   int64_t length,
   int64_t target) {
   for (int64_t i = 0; i < length; i++) {
@@ -22,36 +22,12 @@ ERROR awkward_ListOffsetArray_rpad_and_clip_axis1(
   }
   return success();
 }
-ERROR awkward_ListOffsetArray32_rpad_and_clip_axis1_64(
-  int64_t* toindex,
-  const int32_t* fromoffsets,
-  int64_t length,
-  int64_t target) {
-  return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, int32_t>(
-    toindex,
-    fromoffsets,
-    length,
-    target);
-}
-ERROR awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64(
-  int64_t* toindex,
-  const uint32_t* fromoffsets,
-  int64_t length,
-  int64_t target) {
-  return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, uint32_t>(
-    toindex,
-    fromoffsets,
-    length,
-    target);
-}
-ERROR awkward_ListOffsetArray64_rpad_and_clip_axis1_64(
-  int64_t* toindex,
-  const int64_t* fromoffsets,
-  int64_t length,
-  int64_t target) {
-  return awkward_ListOffsetArray_rpad_and_clip_axis1<int64_t, int64_t>(
-    toindex,
-    fromoffsets,
-    length,
-    target);
-}
+
+#define WRAPPER(FUNC, T, C) \
+  ERROR FUNC(T* toindex, const C* fromoffsets, int64_t length, int64_t target) { \
+    return awkward_ListOffsetArray_rpad_and_clip_axis1<T, C>(toindex, fromoffsets, length, target); \
+  }
+
+WRAPPER(awkward_ListOffsetArray32_rpad_and_clip_axis1_64, int64_t, int32_t)
+WRAPPER(awkward_ListOffsetArrayU32_rpad_and_clip_axis1_64, int64_t, uint32_t)
+WRAPPER(awkward_ListOffsetArray64_rpad_and_clip_axis1_64, int64_t, int64_t)

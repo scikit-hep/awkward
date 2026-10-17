@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np  # noqa: F401
 import pytest
@@ -11,9 +10,14 @@ import awkward._lookup
 
 ROOT = pytest.importorskip("ROOT")
 
-ROOT.ROOT.EnableImplicitMT(1)
-
 compiler = ROOT.gInterpreter.Declare
+
+
+@pytest.fixture(scope="module", autouse=True)
+def manage_imt():
+    ROOT.ROOT.EnableImplicitMT(1)
+    yield
+    ROOT.ROOT.DisableImplicitMT()
 
 
 def test_unknown_column_type():

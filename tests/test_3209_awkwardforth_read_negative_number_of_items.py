@@ -1,10 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
+
+import sys
 
 import numpy as np
+import pytest
 
 import awkward as ak
+
+pytestmark = pytest.mark.skipif(
+    sys.byteorder == "big",
+    reason="AwkwardForth not yet supported on big-endian systems",
+)
 
 
 def test_read_negative_number_of_items():

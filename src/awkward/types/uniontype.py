@@ -20,7 +20,7 @@ class UnionType(Type):
         self,
         *,
         contents: list[Type] | Sentinel = UNSET,
-        parameters: JSONMapping | None | Sentinel = UNSET,
+        parameters: JSONMapping | Sentinel | None = UNSET,
     ) -> Self:
         return UnionType(
             self._contents if contents is UNSET else contents,  # type: ignore[arg-type]
@@ -107,7 +107,7 @@ class UnionType(Type):
             and any(
                 all(
                     this._is_equal_to(that, all_parameters)
-                    for this, that in zip(self._contents, contents)
+                    for this, that in zip(self._contents, contents, strict=True)
                 )
                 for contents in permutations(other._contents)
             )

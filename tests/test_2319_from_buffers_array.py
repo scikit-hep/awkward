@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -74,7 +73,9 @@ def test_2d_1d_fortran_ordered():
         }
     """
 
-    with pytest.raises(ValueError, match="cannot reshape array without copying"):
+    with pytest.raises(
+        ValueError, match="Unable to avoid creating a copy while reshaping"
+    ):
         ak.from_buffers(form, array.size, container, highlevel=False)
 
 
@@ -91,7 +92,9 @@ def test_2d_2d_fortran_ordered():
         }
     """
 
-    with pytest.raises(ValueError, match="cannot reshape array without copying"):
+    with pytest.raises(
+        ValueError, match="Unable to avoid creating a copy while reshaping"
+    ):
         ak.from_buffers(form, array.size, container, highlevel=False)
 
 

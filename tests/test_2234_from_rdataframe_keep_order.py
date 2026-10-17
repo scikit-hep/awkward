@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import pytest
 
@@ -13,8 +12,6 @@ compiler = ROOT.gInterpreter.Declare
 
 
 def test_data_frame_filter():
-    ROOT.ROOT.EnableImplicitMT()
-
     array_x = ak.Array(
         [
             {"x": [1.1, 1.2, 1.3]},

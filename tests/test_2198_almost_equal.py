@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -23,17 +22,17 @@ def test_dtype():
     assert not ak.almost_equal([1, 2, 3], ["1", "2", "3"], dtype_exact=True)
     assert not ak.almost_equal(
         np.array([1, 2, 3], dtype=np.int64),
-        np.array([1, 2, 3], dtype=np.timedelta64),
+        np.array([1, 2, 3], dtype=np.dtype("timedelta64[s]")),
         dtype_exact=True,
     )
     assert not ak.almost_equal(
-        np.array([1, 2, 3], dtype=np.dtype("<M8[D]")),
-        np.array([1, 2, 3], dtype=np.dtype("<m8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("M8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("m8[D]")),
         dtype_exact=True,
     )
     assert not ak.almost_equal(
-        np.array([1, 2, 3], dtype=np.dtype("<M8[D]")),
-        np.array([1, 2, 3], dtype=np.dtype("<m8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("M8[D]")),
+        np.array([1, 2, 3], dtype=np.dtype("m8[D]")),
         dtype_exact=False,
     )
 

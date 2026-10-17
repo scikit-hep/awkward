@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from functools import reduce
@@ -26,47 +25,65 @@ def zip_no_broadcast(
     behavior: dict | None = None,
     attrs: dict | None = None,
 ):
-    """
-    Combine `arrays` into a single structure as the fields of a collection
-    of records or the slots of a collection of tuples **without broadcasting**.
+    """Combines arrays into a collection of records or tuples without broadcasting.
 
-    This function is similar to :func:`ak.zip` but does *not* attempt to
-    broadcast inputs together. It therefore requires that the provided
-    arrays already share compatible layouts and lengths.
+    Caution: unlike #ak.zip this function will _not_ broadcast the arrays
+    together. During typetracing, it assumes that the given arrays have already
+    the same layouts and lengths.
 
-    Parameters
-    ----------
-    arrays
-        Mapping or sequence of array-like objects that ``ak.to_layout``
-        recognizes.
-        If a mapping is provided, its keys are used as field names in
-        the resulting record array.
-        If a sequence is provided, a tuple-like record (no field names)
-        is produced.
-    parameters
-        Optional parameters for the resulting RecordArray node.
-    with_name
-        If given, sets the ``__record__`` parameter on the result.
-    highlevel
-        If True, return an :class:`ak.Array`; otherwise return a low-level
-        :class:`ak.contents.Content` subclass.
-    behavior
-        Optional behavior for the output array when ``highlevel`` is True.
-    attrs
-        Optional attributes for the output array when ``highlevel`` is True.
+    This operation may be thought of as the opposite of projection in
+    #ak.Array.__getitem__, which extracts fields one at a time, or #ak.unzip,
+    which extracts them all in one call.
 
-    Notes
-    -----
-    Only two kinds of layouts are supported:
-    :class:`ak.contents.NumpyArray` and
-    :class:`ak.contents.ListOffsetArray` (whose contents must be
-    ``NumpyArray``). All inputs must have the same length. When
-    ListOffsetArray inputs are provided, their offsets must be identical.
+    See also #ak.zip and #ak.unzip.
+
+    Args:
+        arrays (mapping or sequence of arrays): Each value in this mapping or
+            sequence can be any array-like data that #ak.to_layout recognizes.
+        parameters (None or dict): Parameters for the new
+            #ak.contents.RecordArray node that is created by this operation.
+        with_name (None or str): Assigns a `"__record__"` name to the new
+            #ak.contents.RecordArray node that is created by this operation
+            (overriding `parameters`, if necessary).
+        highlevel (bool): If True, return an #ak.Array; otherwise, return
+            a low-level #ak.contents.Content subclass.
+        behavior (None or dict): Custom #ak.behavior for the output array, if
+            high-level.
+        attrs (None or dict): Custom attributes for the output array, if
+            high-level.
+
+    Returns:
+        An array of records (or tuples) whose fields (or slots) are the
+        `arrays`, combined into a single structure.
+
+    Examples:
+        Consider the following arrays, `one` and `two`.
+
+        >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
+        >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
+
+        Zipping them together using a dict creates a collection of records with
+        the same nesting structure as `one` and `two`.
+
+        >>> ak.zip_no_broadcast({"x": one, "y": two}).show()
+        [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
+         [],
+         [{x: 4.4, y: 'd'}],
+         []]
+
+        Doing so with a list creates tuples, whose fields are not named.
+
+        >>> ak.zip_no_broadcast([one, two]).show()
+        [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
+         [],
+         [(4.4, 'd')],
+         []]
     """
     # Dispatch: provide the underlying arrays to the dispatcher
     if isinstance(arrays, Mapping):
         yield arrays.values()
     else:
+        arrays = list(arrays)
         yield arrays
 
     return _impl(arrays, parameters, with_name, highlevel, behavior, attrs)

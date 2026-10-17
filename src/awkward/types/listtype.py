@@ -84,5 +84,5 @@ class ListType(Type):
         return (
             isinstance(other, type(self))
             and compare_parameters(self._parameters, other._parameters)
-            and self._content == other._content
+            and self._content._is_equal_to(other._content, all_parameters)
         )

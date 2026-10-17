@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
@@ -15,7 +14,11 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def ravel(array, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Returns an array with all levels of nesting removed.
+
+    Missing values are not eliminated by flattening. See #ak.flatten with
+    `axis=None` for an equivalent function that eliminates the option type.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
@@ -25,12 +28,14 @@ def ravel(array, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array with all level of nesting removed by erasing the
-    boundaries between consecutive lists.
+    Returns:
+        An array with all level of nesting removed by erasing the
+        boundaries between consecutive lists.
 
-    This is the equivalent of NumPy's `np.ravel` for Awkward Arrays.
+        This is the equivalent of NumPy's `np.ravel` for Awkward Arrays.
 
-    Consider the following:
+    Examples:
+        Consider the following:
 
         >>> array = ak.Array([[[1.1, 2.2, 3.3],
         ...                    [],
@@ -41,7 +46,7 @@ def ravel(array, *, highlevel=True, behavior=None, attrs=None):
         ...                    [8.8, 9.9]
         ...                   ]])
 
-    Ravelling the array produces a flat array
+        Ravelling the array produces a flat array
 
         >>> ak.ravel(array).show()
         [1.1,
@@ -53,9 +58,6 @@ def ravel(array, *, highlevel=True, behavior=None, attrs=None):
          7.7,
          8.8,
          9.9]
-
-    Missing values are not eliminated by flattening. See #ak.flatten with
-    `axis=None` for an equivalent function that eliminates the option type.
     """
     # Dispatch
     yield (array,)
@@ -73,7 +75,11 @@ def _impl(array, highlevel, behavior, attrs):
         isinstance(x, ak.contents.Content) for x in out
     )
 
-    result = ak._do.mergemany(out)
+    if len(out) == 0:
+        # A zero-field record or a union that no values reach
+        result = ak.contents.EmptyArray(backend=layout.backend)
+    else:
+        result = ak._do.mergemany(out)
 
     wrapped_out = ctx.wrap(result, highlevel=highlevel)
 

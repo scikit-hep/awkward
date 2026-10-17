@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -13,12 +12,12 @@ to_list = ak.operations.to_list
 def test_mixing_lists_and_none():
     def add(a, b):
         outer = []
-        for ai, bi in zip(a, b):
+        for ai, bi in zip(a, b, strict=True):
             if ai is None or bi is None:
                 outer.append(None)
             else:
                 inner = []
-                for aj, bj in zip(ai, bi):
+                for aj, bj in zip(ai, bi, strict=True):
                     if aj is None or bj is None:
                         inner.append(None)
                     else:

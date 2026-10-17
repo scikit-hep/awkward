@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -11,6 +10,7 @@ from awkward._namedaxis import (
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward._typing import Any, Mapping
 from awkward.errors import AxisError
 
 __all__ = ("drop_none",)
@@ -19,16 +19,28 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None):
-    """
+def drop_none(
+    array: Any,
+    axis: int | str | None = None,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
+    """Removes missing values (None) from a given array.
+
     Args:
         array: Data in which to remove Nones.
-        axis (None or int): If None, the operation drops Nones at all levels of
-            nesting, returning an array of the same dimension, but without Nones.
-            Otherwise, it drops Nones at a specified depth.
-            The outermost dimension is `0`, followed by `1`, etc.,
-            and negative values count backward from the innermost: `-1` is the
-            innermost dimension, `-2` is the next level up, etc.
+        axis (None or int or str): If None, the operation drops Nones at all levels
+            of nesting, returning an array of the same dimension, but without Nones.
+            If an int, the depth at which to drop Nones.
+            The outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps to
+            an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -36,18 +48,20 @@ def drop_none(array, axis=None, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Removes missing values (None) from a given array.
+    Returns:
+        An array with missing values (None) removed.
 
-    For example, in the following `array`,
+    Examples:
+        For example, in the following `array`,
 
         >>> array = ak.Array([[[0]], [[None]], [[1], None], [[2, None]]])
 
-    The None value will be removed, resulting in
+        The None value will be removed, resulting in
 
         >>> ak.drop_none(array)
         <Array [[[0]], [[]], [[1]], [[2]]] type='4 * var * var * int64'>
 
-    The default axis is None, however an axis can be specified:
+        The default axis is None, however an axis can be specified:
 
         >>> ak.drop_none(array, axis=1)
         <Array [[[0]], [[None]], [[1]], [[2, None]]] type='4 * var * var * ?int64'>

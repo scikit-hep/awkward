@@ -6,9 +6,9 @@
 
 template <typename FROM, typename TO>
 ERROR awkward_UnionArray_filltags(
-  TO* totags,
+  TO* __restrict__ totags,
   int64_t totagsoffset,
-  const FROM* fromtags,
+  const FROM* __restrict__ fromtags,
   int64_t length,
   int64_t base) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -17,9 +17,9 @@ ERROR awkward_UnionArray_filltags(
   return success();
 }
 ERROR awkward_UnionArray_filltags_to8_from8(
-  int8_t* totags,
+  int8_t* __restrict__ totags,
   int64_t totagsoffset,
-  const int8_t* fromtags,
+  const int8_t* __restrict__ fromtags,
   int64_t length,
   int64_t base) {
   return awkward_UnionArray_filltags<int8_t, int8_t>(

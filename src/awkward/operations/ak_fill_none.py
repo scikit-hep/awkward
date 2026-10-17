@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -20,16 +19,22 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=None):
-    """
+    """Replaces missing values (None) with a given value.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         value: Data with which to replace None.
-        axis (None or int): If None, replace all None values in the array
-            with the given value; if an int, The dimension at which this
-            operation is applied. The outermost dimension is `0`, followed
-            by `1`, etc., and negative values count backward from the
-            innermost: `-1` is the innermost  dimension, `-2` is the next
-            level up, etc.
+        axis (None or int or str): If None, replace all None values in the
+            array with the given value.
+            If an int, the dimension at which this operation is applied.
+            The outermost dimension is `0`, followed by `1`, etc., and negative
+            values count backward from the innermost: `-1` is the innermost
+            dimension, `-2` is the next level up, etc.
+            If a str, it is interpreted as the name of the axis which maps to
+            an int if named axes are present.
+            Named axes are attached to an array using #ak.with_named_axis and
+            removed with #ak.without_named_axis; also see the
+            [Named axes user guide](../../user-guide/how-to-array-properties-named-axis.html).
         highlevel (bool): If True, return an #ak.Array; otherwise, return
             a low-level #ak.contents.Content subclass.
         behavior (None or dict): Custom #ak.behavior for the output array, if
@@ -37,25 +42,27 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Replaces missing values (None) with a given `value`.
+    Returns:
+        An array with each missing value (None) replaced by `value`.
 
-    For example, in the following
+    Examples:
+        For example, in the following
 
         >>> array = ak.Array([[1.1, None, 2.2], [], [None, 3.3, 4.4]])
 
-    The None values could be replaced with `0` by
+        The None values could be replaced with `0` by
 
         >>> ak.fill_none(array, 0)
         <Array [[1.1, 0, 2.2], [], [0, 3.3, 4.4]] type='3 * var * float64'>
 
-    The replacement value doesn't strictly need the same type as the
-    surrounding data. For example, the None values could also be replaced
-    by a string.
+        The replacement value doesn't strictly need the same type as the
+        surrounding data. For example, the None values could also be replaced
+        by a string.
 
         >>> ak.fill_none(array, "hi")
         <Array [[1.1, 'hi', 2.2], [], ['hi', ...]] type='3 * var * union[float64, s...'>
 
-    The list content now has a union type:
+        The list content now has a union type:
 
         >>> ak.fill_none(array, "hi").type.show()
         3 * var * union[
@@ -63,7 +70,7 @@ def fill_none(array, value, axis=-1, *, highlevel=True, behavior=None, attrs=Non
             string
         ]
 
-    The values could be floating-point numbers or strings.
+        The values could be floating-point numbers or strings.
     """
     # Dispatch
     yield array, value

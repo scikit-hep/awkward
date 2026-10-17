@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import json
 
@@ -117,7 +116,7 @@ def test_basic():
         [1, 2, 3, 4, 5],
     ]
 
-    pairs = list(zip(recordarray.fields, recordarray.contents))
+    pairs = list(zip(recordarray.fields, recordarray.contents, strict=True))
     assert pairs[0][0] == "one"
     assert pairs[1][0] == "two"
     assert pairs[2][0] == "2"

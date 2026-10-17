@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import copy
 from collections.abc import Iterable
@@ -42,7 +41,7 @@ class Record:
         if not isinstance(array, ak.contents.RecordArray):
             raise TypeError(f"Record 'array' must be a RecordArray, not {array!r}")
         if not is_integer(at):
-            raise TypeError(f"Record 'at' must be an integer, not {array!r}")
+            raise TypeError(f"Record 'at' must be an integer, not {at!r}")
         if not (array.length is unknown_length or 0 <= at < array.length):
             raise ValueError(
                 f"Record 'at' must be >= 0 and < len(array) == {array.length}, not {at}"
@@ -229,7 +228,7 @@ class Record:
         if self.is_tuple and json_conversions is None:
             return tuple(contents)
         else:
-            return dict(zip(self._array.fields, contents))
+            return dict(zip(self._array.fields, contents, strict=True))
 
     def to_backend(self, backend: Backend | str | None = None) -> Self:
         if backend is None:

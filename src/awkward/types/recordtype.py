@@ -128,6 +128,8 @@ class RecordType(Type):
                         "categorical",
                     )
                     or name in ak.types.numpytype._primitive_to_dtype_dict
+                    # the grammar reserves these on every platform
+                    or name in ("float128", "complex256")
                 ):
                     if params is None:
                         params = 'parameters={"__record__": ' + json.dumps(name) + "}"
@@ -142,7 +144,7 @@ class RecordType(Type):
 
             if not self.is_tuple:
                 pairs = []
-                for k, v in zip(self._fields, children):
+                for k, v in zip(self._fields, children, strict=True):
                     if ak.prettyprint.is_identifier.match(k) is None:
                         key_str = json.dumps(k)
                     else:
@@ -198,16 +200,20 @@ class RecordType(Type):
         if self.is_tuple and other.is_tuple:
             return all(
                 this._is_equal_to(that, all_parameters)
-                for this, that in zip(self._contents, other._contents)
+                for this, that in zip(self._contents, other._contents, strict=True)
             )
         # Both records
         elif not (self.is_tuple or other.is_tuple):
             if set(self._fields) != set(other._fields):
                 return False
 
+            # Build a field->content dict for other to avoid O(n²) list.index lookups
+            other_field_to_content = dict(
+                zip(other._fields, other._contents, strict=True)
+            )
             return all(
-                content._is_equal_to(other.content(field), all_parameters)
-                for field, content in zip(self._fields, self._contents)
+                content._is_equal_to(other_field_to_content[field], all_parameters)
+                for field, content in zip(self._fields, self._contents, strict=True)
             )
 
         # Mixed
