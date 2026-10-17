@@ -14,25 +14,39 @@ permissions:
 
 jobs:
   branch-preview:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     name: Deploy Branch Preview
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request' }}
     permissions:
-      id-token: write # Required to assume the AWS deployment role through OIDC.
       contents: read
+      actions: read # Required to download the artifacts of the CI run.
       pull-requests: write # Required to comment with the preview URL.
     env:
-      S3_BUCKET: "preview.awkward-array.org"
-      DEPLOY_URL: "http://preview.awkward-array.org.s3-website.us-east-1.amazonaws.com"
+      S3_BUCKET: "preview-awkward-array-org"
+      DEPLOY_URL: "https://preview.awkward-array.org"
+      RCLONE_CONFIG_R2_TYPE: s3
+      RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_R2_REGION: auto
+      RCLONE_CONFIG_R2_ENDPOINT: "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+      # The token may only read and write objects, so never try to create the bucket
+      RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
     environment:
       name: docs
-      url: "${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}"
+      url: "${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}/"
     steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
-      with:
-        aws-region: eu-west-2
-        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_DEPLOY_ROLE }}
+    - name: Install rclone
+      # The rclone packaged by Ubuntu (1.60) sends the version ID that R2 returns
+      # for an upload back with the HEAD that checks it, which R2 rejects
+      env:
+        VERSION: v1.75.1
+        SHA256: 09c9f7606ed9e31eecc1eec26a89992cf2931a8d2d1a5f0ae2bb1c11630ffb15
+      run: |
+        curl --silent --show-error --fail --location --output "${RUNNER_TEMP}/rclone.deb" \
+          "https://github.com/rclone/rclone/releases/download/${VERSION}/rclone-${VERSION}-linux-amd64.deb"
+        echo "${SHA256}  ${RUNNER_TEMP}/rclone.deb" | sha256sum --check --strict
+        sudo dpkg --install "${RUNNER_TEMP}/rclone.deb"
     - name: Download rendered docs
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:
@@ -75,13 +89,25 @@ jobs:
     - name: Read PR number
       id: pr_number
       run: |
-        echo "pr_number=$(cat "${RUNNER_TEMP}/artifacts/pr_number.txt")" >> "${GITHUB_OUTPUT}"
+        pr_number=$(cat "${RUNNER_TEMP}/artifacts/pr_number.txt")
+        # The number is written by an unprivileged workflow, and is used below
+        # as a path in the preview bucket
+        if ! [[ "${pr_number}" =~ ^[1-9][0-9]*$ ]]; then
+          echo "::error::Invalid PR number"
+          exit 1
+        fi
+        echo "pr_number=${pr_number}" >> "${GITHUB_OUTPUT}"
         rm "${RUNNER_TEMP}/artifacts/pr_number.txt"
         rm "${RUNNER_TEMP}/artifacts/docs.zip"
         rm "${RUNNER_TEMP}/artifacts/pr_number.zip"
     - name: Sync artifacts
+      # A preview is replaced in place every time its pull request is pushed
+      # to, so let the edge revalidate it rather than purging the zone for
+      # every push
       run: |
-        aws s3 sync "${RUNNER_TEMP}/artifacts/" "s3://${S3_BUCKET}/PR${STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER}"
+        rclone sync --checksum --transfers 16 \
+          --header-upload "Cache-Control: public, max-age=0, must-revalidate" \
+          "${RUNNER_TEMP}/artifacts/" "r2:${S3_BUCKET}/PR${STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER}/"
       env:
         STEPS_PR_NUMBER_OUTPUTS_PR_NUMBER: ${{ steps.pr_number.outputs.pr_number }}
     - name: Try to find previous bot comment
@@ -97,5 +123,5 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO: ${{ github.repository }}
         PR_NUMBER: ${{ steps.pr_number.outputs.pr_number }}
-        PREVIEW_URL: ${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}
+        PREVIEW_URL: ${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}/
       run: gh pr comment "${PR_NUMBER}" --repo "${REPO}" --body "The documentation preview is ready to be viewed at <${PREVIEW_URL}>"

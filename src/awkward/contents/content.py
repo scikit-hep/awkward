@@ -204,7 +204,7 @@ class Content(Meta):
         return self.form_with_key(None)
 
     def form_with_key(
-        self, form_key: str | None | Callable = "node{id}", id_start: int = 0
+        self, form_key: str | Callable | None = "node{id}", id_start: int = 0
     ) -> Form:
         hold_id = [id_start]
 
@@ -532,7 +532,12 @@ class Content(Meta):
         return self._getitem(where, NamedAxis)
 
     def _getitem(self, where, named_axis: Type[NamedAxis] = NamedAxis):
-        if is_integer_like(where):
+        # field access is the most common slice by far, and a `str` matches none
+        # of the other cases, so test for it first
+        if isinstance(where, str):
+            return self._getitem_field(where)
+
+        elif is_integer_like(where):
             # propagate named_axis to output
             named_axis.mapping = _remove_named_axis(
                 named_axis.mapping, 0, self.purelist_depth
@@ -548,9 +553,6 @@ class Content(Meta):
 
         elif isinstance(where, slice):
             return self._getitem((where,), named_axis)
-
-        elif isinstance(where, str):
-            return self._getitem_field(where)
 
         elif where is np.newaxis:
             return self._getitem((where,), named_axis)

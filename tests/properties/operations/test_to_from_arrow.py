@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import itertools
 
@@ -100,8 +99,6 @@ def has_issues(a: ak.Array) -> bool:
     """
     if _has_issue_4221(a.layout):
         return True
-    if _has_issue_4222(a.layout):
-        return True
     if _has_issue_4228(a.layout):
         return True
     if _has_issue_4229(a.layout):
@@ -125,71 +122,78 @@ def _has_issue_4221(layout: ak.contents.Content) -> bool:
     return any(_has_issue_4221(x) for x in _children(layout))
 
 
-def _has_issue_4222(
+def _has_issue_4228(
     layout: ak.contents.Content,
     nullable: bool = False,
     sliced: bool = False,
 ) -> bool:
-    """A nullable var-length list whose offsets do not start at zero is
-    compacted against unshifted content in `ListOffsetArray._to_arrow`,
-    shifting every list by `offsets[0]` (data corruption, #4222).
+    """`UnionArray._to_arrow` converts each child whole but sizes it by
+    the tag's highest index plus one, so an option-type child holding
+    more nulls than that length fails in `pyarrow.Array.from_buffers`
+    (`ArrowInvalid`, "Null count exceeds array length"), a masked child
+    longer than that length fails in `ListOffsetArray._to_arrow` when a
+    list or string lies below the option (`IndexError` or `ValueError`,
+    with or without nulls; an `UnmaskedArray` passes no validity bytes
+    and is exempt), and it scatters incoming validity bytes with a
+    per-child index that it misapplies when the index skips values
+    (`IndexError`, #4228). Any operation that drops union elements
+    without trimming the children creates the first two conditions from
+    a valid union.
 
-    `nullable` tracks whether Arrow validity bytes flow into this node
-    from an enclosing option: they start at option nodes, pass through
-    records and indexed nodes, and stop below lists.
+    `nullable` tracks whether enclosing option validity reaches this node.
 
     `sliced` tracks whether `to_arrow` reaches this node through a
-    transformation that can move list offsets away from zero even if
-    they were constructed zero-based: a list trims its content to
-    `offsets[0]:offsets[length]`, an indexed node projects its content,
-    a `ListArray` may be compacted from anywhere, and a union selects
-    each child through its index; such nodes can present any list below
-    an option with nonzero offsets.
-    """
-    if layout.is_union:
-        return any(_has_issue_4222(x, False, True) for x in layout.contents)
-    if layout.is_record:
-        return any(_has_issue_4222(x, nullable, sliced) for x in layout.contents)
-    if layout.is_regular:
-        return _has_issue_4222(layout.content, False, sliced)
-    if layout.is_option:
-        if isinstance(layout, ak.contents.IndexedOptionArray):
-            return _has_issue_4222(layout.content, True, True)
-        return _has_issue_4222(layout.content, True, sliced)
-    if layout.is_indexed:
-        return _has_issue_4222(layout.content, nullable, True)
-    if layout.is_list:
-        if nullable and layout.length > 0 and (sliced or layout.starts[0] != 0):
-            return True
-        if isinstance(layout, ak.contents.ListOffsetArray):
-            child_sliced = sliced or bool(layout.offsets[0] != 0)
-        else:
-            child_sliced = True
-        return _has_issue_4222(layout.content, False, child_sliced)
-    return False
-
-
-def _has_issue_4228(layout: ak.contents.Content, nullable: bool = False) -> bool:
-    """`UnionArray._to_arrow` scatters incoming validity bytes with a
-    per-child index that it misapplies when the index skips values
-    (IndexError, #4228).
-
-    `nullable` tracks validity bytes as in `_has_issue_4222`.
+    transformation that can drop union elements. A list or regular node
+    counts only when it does not span its whole content, and a record
+    field only when it is longer than the record. Under such a node any null in a masked child of a union, or
+    any masked child with a list below, triggers; at an unsliced union
+    the counts and lengths are compared.
     """
     if layout.is_union:
         if nullable:
             return True
-        return any(_has_issue_4228(x, False) for x in layout.contents)
+        tags = layout.tags.data
+        index = layout.index.data[: len(tags)]
+        for tag, x in enumerate(layout.contents):
+            if not x.is_option or isinstance(x, ak.contents.UnmaskedArray):
+                continue
+            masked_list = _contains_list(x.content)
+            if _null_count(x) == 0 and not masked_list:
+                continue
+            if sliced:
+                return True
+            used = index[tags == tag]
+            length = int(used.max()) + 1 if len(used) else 0
+            if _null_count(x) > length or (masked_list and x.length > length):
+                return True
+        return any(_has_issue_4228(x, False, True) for x in layout.contents)
     if layout.is_record:
-        return any(_has_issue_4228(x, nullable) for x in layout.contents)
+        return any(
+            _has_issue_4228(x, nullable, sliced or x.length > layout.length)
+            for x in layout.contents
+        )
     if layout.is_regular:
-        return _has_issue_4228(layout.content, False)
+        return _has_issue_4228(
+            layout.content,
+            False,
+            sliced or layout.length * layout.size != layout.content.length,
+        )
     if layout.is_option:
-        return _has_issue_4228(layout.content, True)
+        return _has_issue_4228(
+            layout.content,
+            True,
+            sliced or isinstance(layout, ak.contents.IndexedOptionArray),
+        )
     if layout.is_indexed:
-        return _has_issue_4228(layout.content, nullable)
+        return _has_issue_4228(layout.content, nullable, True)
     if layout.is_list:
-        return _has_issue_4228(layout.content, False)
+        if isinstance(layout, ak.contents.ListOffsetArray):
+            child_sliced = sliced or bool(
+                layout.offsets[0] != 0 or layout.offsets[-1] != layout.content.length
+            )
+        else:
+            child_sliced = True
+        return _has_issue_4228(layout.content, False, child_sliced)
     return False
 
 
@@ -207,7 +211,7 @@ def _has_issue_4255(layout: ak.contents.Content, nullable: bool = False) -> bool
     revertable stamp, so `from_arrow` cannot strip the option the field
     metadata says it must (AttributeError in `remove_optiontype`, #4255).
 
-    `nullable` tracks validity bytes as in `_has_issue_4222`.
+    `nullable` tracks whether enclosing option validity reaches this node.
     """
     if layout.is_union:
         return any(_has_issue_4255(x, False) for x in layout.contents)
@@ -241,6 +245,28 @@ def _has_issue_4274(layout: ak.contents.Content) -> bool:
     )
 
 
+def _has_issue_4316(layout: ak.contents.Content) -> bool:
+    """`ak.array_equal`, the roundtrip's oracle, returns `False` for two
+    equal unions when one side's index into a list child is a permutation
+    of the other's and the list's content is a record or a list: the
+    visitor in `ak_almost_equal` carries the used child lazily, the list
+    branch then compacts the permuted side with another lazy carry, which
+    wraps a record in an `IndexedArray` and turns a list into a
+    `ListArray`, and the `same_content_types` class check fails before
+    the projection that would undo it (#4316). The roundtrip pairs such
+    sides whenever `to_packed` renumbers the original's index (an
+    over-long child, or a union that was sliced) while the reconstruction
+    keeps the drawn permutation. A regular list child compares equal
+    through the roundtrip but not in general (`1 * var * {}`), so it is
+    excluded too.
+    """
+    if layout.is_union and any(
+        x.is_list and _carried_lazily(x.content) for x in layout.contents
+    ):
+        return True
+    return any(_has_issue_4316(x) for x in _children(layout))
+
+
 def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
     """The direct child layouts of a node."""
     if layout.is_record or layout.is_union:
@@ -248,6 +274,28 @@ def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
     if layout.is_option or layout.is_indexed or layout.is_list:
         return [layout.content]
     return []
+
+
+def _carried_lazily(layout: ak.contents.Content) -> bool:
+    """Whether a lazy carry changes the node's class: a record becomes an
+    `IndexedArray` and a list a `ListArray`. Indexed and option wrappers
+    are looked through because `to_packed` projects them."""
+    while layout.is_indexed or layout.is_option:
+        layout = layout.content
+    return layout.is_list or layout.is_record
+
+
+def _null_count(layout: ak.contents.Content) -> int:
+    """The number of missing values in an option node."""
+    return int(np.count_nonzero(layout.mask_as_bool(valid_when=False)))
+
+
+def _contains_list(layout: ak.contents.Content) -> bool:
+    """Whether a list node (a string or regular list included) is the
+    node or lies below it."""
+    if layout.is_list:
+        return True
+    return any(_contains_list(x) for x in _children(layout))
 
 
 def _strip_options(
@@ -270,7 +318,14 @@ def _strip_options(
         allow_byte_masked=False,
         allow_bit_masked=False,
         allow_unmasked=False,
-    ).filter(lambda a: arrow_compatible(a) and not has_issues(a))
+    ).filter(
+        # `ak.array_equal`, not the conversion, misjudges a union whose
+        # index into a list-of-records (or list-of-lists) child the
+        # packing renumbers on one side only (#4316)
+        lambda a: (
+            arrow_compatible(a) and not has_issues(a) and not _has_issue_4316(a.layout)
+        )
+    )
 )
 def test_roundtrip(a: ak.Array) -> None:
     """`to_arrow` followed by `from_arrow` reconstructs the array."""

@@ -1535,7 +1535,30 @@ class ListArray(ListMeta[Content], Content):
         length: int,
         options: ToArrowOptions,
     ):
-        return self.to_ListOffsetArray64(False)._to_arrow(
+        layout = self
+        if validbytes is not None:
+            # ArrowNotImplementedError: Lists with non-zero length null components
+            # are not supported. Empty the null'ed lists *before* to_ListOffsetArray64
+            # compacts the content, so that masked-out (and possibly large) list
+            # contents are never copied. ListOffsetArray._to_arrow applies the
+            # equivalent fixup, but it can only do so after compaction.
+            #
+            # `validbytes` covers only the first `length` entries, which is fewer
+            # than `self.length` when e.g. a ByteMaskedArray's content is longer
+            # than its mask.
+            nplike = self._backend.nplike
+            starts = self._starts.data[:length]
+            stops = self._stops.data[:length]
+            maskedbytes = validbytes == 0
+            if nplike.any(maskedbytes & (starts != stops)):
+                zeros = nplike.zeros_like(starts)
+                layout = ListArray(
+                    ak.index.Index(nplike.where(maskedbytes, zeros, starts)),
+                    ak.index.Index(nplike.where(maskedbytes, zeros, stops)),
+                    self._content,
+                    parameters=self._parameters,
+                )
+        return layout.to_ListOffsetArray64(False)._to_arrow(
             pyarrow, mask_node, validbytes, length, options
         )
 

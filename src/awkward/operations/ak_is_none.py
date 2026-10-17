@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -12,6 +11,7 @@ from awkward._namedaxis import (
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward._typing import Any, Mapping
 from awkward.errors import AxisError
 
 __all__ = ("is_none",)
@@ -20,8 +20,16 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
-    """
+def is_none(
+    array: Any,
+    axis: int | str = 0,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
+    """Returns an array with True where an element is None at a given axis depth, False otherwise.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (int or str): The dimension at which this operation is applied. The
@@ -40,8 +48,9 @@ def is_none(array, axis=0, *, highlevel=True, behavior=None, attrs=None):
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns an array whose value is True where an element of `array` is None;
-    False otherwise (at a given `axis` depth).
+    Returns:
+        An array whose value is True where an element of `array` is None;
+        False otherwise (at a given `axis` depth).
     """
     # Dispatch
     yield (array,)

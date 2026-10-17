@@ -2,7 +2,6 @@
 
 # pylint: disable=wildcard-import, unused-wildcard-import
 # ruff: noqa: PLE0604
-from __future__ import annotations
 
 import sys
 import typing
@@ -75,7 +74,7 @@ else:
 
 
 JSONSerializable: TypeAlias = (
-    "str | int | float | bool | None | list | tuple | JSONMapping"
+    "str | int | float | bool | list | tuple | JSONMapping | None"
 )
 JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
 

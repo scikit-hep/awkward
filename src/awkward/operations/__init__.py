@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward.operations.str
 from awkward.operations.ak_all import *
@@ -37,6 +36,7 @@ from awkward.operations.ak_from_arrow_schema import *
 from awkward.operations.ak_from_avro_file import *
 from awkward.operations.ak_from_buffers import *
 from awkward.operations.ak_from_categorical import *
+from awkward.operations.ak_from_cudf import *
 from awkward.operations.ak_from_cupy import *
 from awkward.operations.ak_from_dlpack import *
 from awkward.operations.ak_from_feather import *

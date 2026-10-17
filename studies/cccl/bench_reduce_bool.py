@@ -43,7 +43,6 @@ Usage
     python bench_reduce_bool.py --scales small medium   # subset of scales
 """
 
-from __future__ import annotations
 
 import argparse
 import importlib.util

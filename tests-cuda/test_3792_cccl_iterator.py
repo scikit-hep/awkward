@@ -7,8 +7,6 @@ to a private entry point so cuda.compute code stops hand-extracting buffers
 from ``ak.to_buffers``.  See the follow-up plan, Phase 3.
 """
 
-from __future__ import annotations
-
 import numpy as np
 import pytest
 

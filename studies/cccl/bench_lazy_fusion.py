@@ -24,7 +24,6 @@ Usage::
     python studies/cccl/bench_lazy_fusion.py --out bench.json # + save JSON
 """
 
-from __future__ import annotations
 
 import argparse
 import json
