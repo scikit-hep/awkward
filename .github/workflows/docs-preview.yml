@@ -37,7 +37,16 @@ jobs:
       url: "${{ env.DEPLOY_URL }}/PR${{ steps.pr_number.outputs.pr_number }}/"
     steps:
     - name: Install rclone
-      run: sudo apt-get update --quiet && sudo apt-get install --yes --quiet rclone
+      # The rclone packaged by Ubuntu (1.60) sends the version ID that R2 returns
+      # for an upload back with the HEAD that checks it, which R2 rejects
+      env:
+        VERSION: v1.75.1
+        SHA256: 09c9f7606ed9e31eecc1eec26a89992cf2931a8d2d1a5f0ae2bb1c11630ffb15
+      run: |
+        curl --silent --show-error --fail --location --output "${RUNNER_TEMP}/rclone.deb" \
+          "https://github.com/rclone/rclone/releases/download/${VERSION}/rclone-${VERSION}-linux-amd64.deb"
+        echo "${SHA256}  ${RUNNER_TEMP}/rclone.deb" | sha256sum --check --strict
+        sudo dpkg --install "${RUNNER_TEMP}/rclone.deb"
     - name: Download rendered docs
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       with:

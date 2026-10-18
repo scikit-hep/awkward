@@ -1366,6 +1366,24 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                         nextcarry.data,
                     )
                 )
+                if shifts is not None:
+                    # Carry missing-list shifts relative to each original group.
+                    nextrows = (
+                        nplike.searchsorted(
+                            self._offsets.data, nextcarry.data, side="right"
+                        )
+                        - 1
+                    )
+                    nextparents = (
+                        nplike.searchsorted(offsets.data, nextrows, side="right") - 1
+                    )
+                    nextshifts = Index64(
+                        nextshifts.data
+                        + shifts.data[nextrows]
+                        + offsets.data[nextparents]
+                        - starts.data[nextparents],
+                        nplike=nplike,
+                    )
             else:
                 nextshifts = None
 
@@ -1697,7 +1715,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 next = ak.contents.ListArray(
                     ak.index.Index(new_starts),
                     ak.index.Index(new_stops),
-                    self._content,
+                    akcontent,
                     parameters=self._parameters,
                 )
                 return next.to_ListOffsetArray64(True)._to_arrow(
