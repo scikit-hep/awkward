@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import pytest  # noqa: F401
+import pytest
 
 import awkward as ak
 from awkward._attrs import Attrs
@@ -49,3 +49,14 @@ def test_named_axis_lookup_survives_getitem():
     assert NAMED_AXIS_KEY in sliced.attrs
     assert sliced.named_axis == {"x": 0, "y": 1}
     assert sliced.attrs["foo"] == "bar"
+
+
+def test_contains_consistent_after_delitem():
+    attrs = Attrs({"foo": "bar", "baz": 456})
+
+    del attrs["baz"]
+
+    assert "baz" not in attrs
+    assert len(attrs) == 1
+    with pytest.raises(KeyError):
+        del attrs["baz"]
