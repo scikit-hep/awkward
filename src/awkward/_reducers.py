@@ -396,7 +396,7 @@ class Sum(KernelReducer):
             # bool sums can't overflow; if a float accumulator was requested,
             # cast the small (outlength) result.
             if self._dtype is not None:
-                result = result.astype(self._dtype)
+                result = array.backend.nplike.astype(result, self._dtype)
             return ak.contents.NumpyArray(result, backend=array.backend)
         else:
             is_complex = array.dtype.type in (np.complex128, np.complex64)

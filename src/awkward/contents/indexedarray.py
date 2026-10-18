@@ -1026,7 +1026,11 @@ class IndexedArray(IndexedMeta[Content], Content):
             return out
 
         (index,) = maybe_materialize(self._index.raw(numpy))
-        nextcontent = self._content._carry(ak.index.Index(index), False)
+        # The index above is a host array, so the content has to be on the
+        # host too before it can be carried through it (a categorical
+        # IndexedArray survives to_packed, so this can be a GPU content).
+        content = ak.to_backend(self._content, "cpu", highlevel=False)
+        nextcontent = content._carry(ak.index.Index(index), False)
         return nextcontent._to_list(behavior, json_conversions)
 
     def _to_backend(self, backend: Backend) -> Self:
