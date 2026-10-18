@@ -43,7 +43,7 @@ def without_transient_attrs(attrs: dict[str, Any]) -> JSONMapping:
     return {k: v for k, v in attrs.items() if not k.startswith("@")}
 
 
-class Attrs(Mapping):
+class Attrs(MutableMapping):
     def __init__(self, data: Mapping[str, Any]):
         self._data = {_enforce_str_key(k): v for k, v in data.items()}
 
