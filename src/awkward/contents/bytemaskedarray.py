@@ -1079,10 +1079,13 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
         )
         if m.nbytes % 64:
             m = cp.resize(m, ((m.nbytes // 64) + 1) * 64)
-        m = cudf.core.buffer.as_buffer(m)
+
         inner = self._content._to_cudf(cudf, mask=None, length=length)
-        inner = inner.set_mask(m)
-        return inner
+
+        null_count = int(
+            length - int(cp.unpackbits(m, bitorder="little")[:length].sum())
+        )
+        return inner.set_mask(cudf.core.buffer.as_buffer(m), null_count)
 
     def _to_backend_array(self, allow_missing, backend):
         return self.to_IndexedOptionArray64()._to_backend_array(allow_missing, backend)

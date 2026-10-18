@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.13.0"
+version = "2.14.0"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -32,6 +32,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Free Threading",
     "Programming Language :: Python :: Free Threading :: 3 - Stable",
     "Topic :: Scientific/Engineering",
@@ -42,7 +43,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==56",
+    "awkward_cpp==57",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.21.3",
     "packaging",
@@ -275,7 +276,11 @@ extend-exclude = [
     "src/awkward/_connect/cuda/_kernel_signatures.py",
 ]
 
+[tool.ruff.format]
+exclude = ["*.md"]
+
 [tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]  # Pre-0.16 defaults
 extend-select = [
     "B",           # flake8-bugbear
     "I",           # isort
@@ -333,4 +338,4 @@ mccabe.max-complexity = 100
 
 [tool.uv]
 exclude-newer = "7 days"
-exclude-newer-package = { awkward_cpp = false }
+exclude-newer-package = { awkward_cpp = false, hypothesis_awkward = false }

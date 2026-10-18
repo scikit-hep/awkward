@@ -58,6 +58,17 @@ def _nplike_reshape_has_copy(module: Any) -> bool:
 
 
 @lru_cache
+def _nplike_repeat_has_array_repeats(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.repeat(x, module.ones(2, dtype=module.int64))
+    except (TypeError, ValueError):
+        return False
+    else:
+        return True
+
+
+@lru_cache
 def _nplike_unique_has_equal_nan(module: Any) -> bool:
     return "equal_nan" in inspect.signature(module.unique).parameters
 

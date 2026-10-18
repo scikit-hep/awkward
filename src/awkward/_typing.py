@@ -74,7 +74,7 @@ else:
 
 
 JSONSerializable: TypeAlias = (
-    "str | int | float | bool | None | list | tuple | JSONMapping"
+    "str | int | float | bool | list | tuple | JSONMapping | None"
 )
 JSONMapping: TypeAlias = "dict[str, JSONSerializable]"
 
