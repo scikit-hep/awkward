@@ -1,11 +1,11 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-from collections.abc import Mapping
+from collections.abc import MutableMapping
 
 from awkward._typing import Any, JSONMapping
 
 
-def attrs_of_obj(obj, attrs: Mapping | None = None) -> Mapping | None:
+def attrs_of_obj(obj, attrs: MutableMapping | None = None) -> MutableMapping | None:
     from awkward.highlevel import Array, ArrayBuilder, Record
 
     if attrs is not None:
@@ -16,7 +16,7 @@ def attrs_of_obj(obj, attrs: Mapping | None = None) -> Mapping | None:
         return None
 
 
-def attrs_of(*arrays, attrs: Mapping | None = None) -> Mapping:
+def attrs_of(*arrays, attrs: MutableMapping | None = None) -> MutableMapping:
     # An explicit 'attrs' always wins.
     if attrs is not None:
         return attrs
@@ -44,7 +44,7 @@ def without_transient_attrs(attrs: dict[str, Any]) -> JSONMapping:
 
 
 class Attrs(MutableMapping):
-    def __init__(self, data: Mapping[str, Any]):
+    def __init__(self, data: MutableMapping[str, Any]):
         self._data = {_enforce_str_key(k): v for k, v in data.items()}
 
     def __getitem__(self, key: str):
