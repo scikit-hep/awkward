@@ -97,7 +97,7 @@ def _impl1(condition, mergebool, highlevel, behavior, attrs):
 
 
 def _numeric_leaf(obj, backend):
-    """The buffer and leaf layout of ``obj`` if it is a bare numeric leaf, else None."""
+    """The leaf layout of ``obj`` if it is a bare numeric leaf, else None."""
     if isinstance(obj, ak.contents.NumpyArray):
         leaf, data = obj, obj.data
     elif isinstance(obj, ak.contents.Content):
@@ -113,7 +113,7 @@ def _numeric_leaf(obj, backend):
             data if data.ndim == 1 else backend.nplike.reshape(data, (1,)),
             backend=backend,
         )
-    return data, leaf
+    return leaf
 
 
 def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
@@ -137,13 +137,13 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
             if (
                 x_leaf is not None
                 and y_leaf is not None
-                and ak._do.mergeable(x_leaf[1], y_leaf[1], mergebool=mergebool)
+                and ak._do.mergeable(x_leaf, y_leaf, mergebool=mergebool)
             ):
                 return (
                     ak.contents.NumpyArray(
-                        backend.nplike.where(npcondition, x_leaf[0], y_leaf[0]),
+                        backend.nplike.where(npcondition, x_leaf.data, y_leaf.data),
                         parameters=parameters_intersect(
-                            x_leaf[1]._parameters, y_leaf[1]._parameters
+                            x_leaf._parameters, y_leaf._parameters
                         ),
                         backend=backend,
                     ),
