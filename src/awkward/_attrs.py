@@ -53,6 +53,9 @@ class Attrs(MutableMapping):
     def __setitem__(self, key: str, value: Any):
         self._data[_enforce_str_key(key)] = value
 
+    def __delitem__(self, key: str):
+        del self._data[key]
+
     def __iter__(self):
         return iter(self._data)
 
