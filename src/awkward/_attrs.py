@@ -62,7 +62,7 @@ class Attrs(MutableMapping):
     def __len__(self):
         return len(self._data)
 
-    def __contains__(self, key):
+    def __contains__(self, key: str) -> bool:
         return key in self._data
 
     def __repr__(self):
