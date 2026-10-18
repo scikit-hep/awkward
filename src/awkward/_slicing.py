@@ -11,6 +11,7 @@ from awkward._nplikes.dispatch import nplike_of_obj
 from awkward._nplikes.jax import Jax
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
+from awkward._nplikes.typetracer import is_unknown_scalar
 from awkward._regularize import is_array_like, is_integer_like, is_sized_iterable
 from awkward._typing import TYPE_CHECKING, Sequence, TypeAlias, TypeVar
 
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 np = NumpyMetadata.instance()
 
 
-SliceItem: TypeAlias = "int | slice | str | None | Ellipsis | ArrayLike | Content"
+SliceItem: TypeAlias = "int | slice | str | Ellipsis | ArrayLike | Content | None"
 
 
 def normalize_slice(slice_: slice, *, nplike: NumpyLike) -> slice:
@@ -32,11 +33,23 @@ def normalize_slice(slice_: slice, *, nplike: NumpyLike) -> slice:
 
     Return a slice of (start, stop, step) for which the slice items have been
     normalized into index types.
+
+    Raises a ValueError for a zero step, as NumPy does.
     """
 
     start = slice_.start
     stop = slice_.stop
     step = slice_.step
+
+    # a zero step would loop forever in the kernels, which advance with `j += step`
+    if step is not None and step is not unknown_length and not is_unknown_scalar(step):
+        try:
+            step_as_index = operator.index(step)
+        except TypeError:
+            pass
+        else:
+            if step_as_index == 0:
+                raise ValueError("slice step cannot be zero")
 
     if nplike.known_data:
         return slice_
@@ -494,33 +507,33 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
         and np.issubdtype(item.content.dtype, np.bool_)
     ):
         if item_backend.nplike.known_data:
+            nplike = item_backend.nplike
             item = item.to_ListOffsetArray64(True)
-            localindex = ak._do.local_index(item, axis=1)
-
-            flat_index = ak._do.flatten(localindex, axis=1)
             flat_mask = ak._do.flatten(item, axis=1)
+            assert flat_mask.is_numpy
+            mask_data = flat_mask.data
 
-            assert flat_index.is_numpy and flat_mask.is_numpy
-            nextcontent = flat_index.data[flat_mask.data]
-
-            cumsum = item_backend.nplike.empty(
-                flat_mask.data.shape[0] + 1, dtype=np.int64
-            )
-            if isinstance(item_backend.nplike, Jax):
+            cumsum = nplike.empty(mask_data.shape[0] + 1, dtype=np.int64)
+            if isinstance(nplike, Jax):
                 cumsum = cumsum.at[0].set(0)
-                cumsum = cumsum.at[1:].set(
-                    item_backend.nplike.asarray(
-                        item_backend.nplike.cumsum(flat_mask.data)
-                    )
-                )
+                cumsum = cumsum.at[1:].set(nplike.asarray(nplike.cumsum(mask_data)))
             else:
                 cumsum[0] = 0
-                cumsum[1:] = item_backend.nplike.asarray(
-                    item_backend.nplike.cumsum(flat_mask.data)
-                )
+                nplike.cumsum(mask_data, maybe_out=cumsum[1:])
 
-            item_offsets = item_backend.nplike.asarray(item.offsets.data)
-            nextoffsets = ak.index.Index(cumsum[item_offsets])
+            item_offsets = nplike.asarray(item.offsets.data)
+            nextoffsets_data = cumsum[item_offsets]
+            nextoffsets = ak.index.Index(nextoffsets_data)
+
+            # position of each selected element within its own list: its flat
+            # position minus the start of the list it belongs to
+            (selected,) = nplike.nonzero(mask_data)
+            # `repeat` needs counts it can cast to an index, which is 32-bit on
+            # 32-bit platforms
+            counts = nplike.astype(
+                nextoffsets_data[1:] - nextoffsets_data[:-1], dtype=np.intp, copy=False
+            )
+            nextcontent = selected - nplike.repeat(item_offsets[:-1], counts)
 
         else:
             item._touch_data(recursive=False)
@@ -575,7 +588,7 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 cumsum = cumsum.at[1:].set(item_backend.nplike.cumsum(expanded))
             else:
                 cumsum[0] = 0
-                cumsum[1:] = item_backend.nplike.cumsum(expanded)
+                item_backend.nplike.cumsum(expanded, maybe_out=cumsum[1:])
             item_offsets = item_backend.nplike.asarray(item.offsets.data)
             nextoffsets = ak.index.Index(cumsum[item_offsets])
 
