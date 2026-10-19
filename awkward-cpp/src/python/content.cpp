@@ -90,8 +90,31 @@ builder_timedelta(ak::ArrayBuilder& self, const py::handle& obj) {
   }
 }
 
+// Nesting, and tolist()/to_list() that never bottom out, recurse until the stack overflows.
+// Neither Py_EnterRecursiveCall's C-level limit nor a raised sys.getrecursionlimit() stays
+// below the stack's capacity for these frames, so the depth is also capped at CPython's
+// default recursion limit.
+static thread_local int builder_fromiter_depth = 0;
+static const int builder_fromiter_max_depth = 1000;
+
+struct builder_fromiter_depth_guard {
+  builder_fromiter_depth_guard() {
+    if (builder_fromiter_depth >= std::min(Py_GetRecursionLimit(), builder_fromiter_max_depth)) {
+      PyErr_SetString(PyExc_RecursionError, (
+        std::string("maximum recursion depth exceeded in ak.from_iter")
+        + FILENAME(__LINE__)).c_str());
+      throw py::error_already_set();
+    }
+    builder_fromiter_depth++;
+  }
+  ~builder_fromiter_depth_guard() {
+    builder_fromiter_depth--;
+  }
+};
+
 void
 builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
+  builder_fromiter_depth_guard guard;
   if (obj.is(py::none())) {
     self.null();
   }
@@ -137,6 +160,23 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endrecord();
   }
+  // np.void is iterable, so it goes before the iterable branch; lists skip the numpy lookup.
+  else if (!PyList_Check(obj.ptr())
+           && py::isinstance(obj, py::module::import("numpy").attr("void"))) {
+    py::object names = obj.attr("dtype").attr("names");
+    if (names.is_none()) {
+      self.bytestring(obj.attr("tolist")().cast<std::string>());
+    }
+    else {
+      self.beginrecord();
+      for (auto name : names) {
+        std::string key = name.cast<std::string>();
+        self.field_check(key.c_str());
+        builder_fromiter(self, obj[name]);
+      }
+      self.endrecord();
+    }
+  }
   else if (py::isinstance<py::iterable>(obj)) {
     py::iterable seq = obj.cast<py::iterable>();
     self.beginlist();
@@ -171,6 +211,14 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   }
   else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
     self.real(obj.cast<double>());
+  }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("complexfloating"))) {
+    self.complex(obj.cast<std::complex<double>>());
+  }
+  // tolist() of a 0-d array drops the datetime/timedelta unit and structured field names.
+  else if (py::type::of(obj).is(py::module::import("numpy").attr("ndarray"))
+           && obj.attr("ndim").cast<int64_t>() == 0) {
+    builder_fromiter(self, obj[py::tuple()]);
   }
   else if (py::hasattr(obj, "to_list")) {
     builder_fromiter(self, obj.attr("to_list")());
