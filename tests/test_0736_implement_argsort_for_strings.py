@@ -89,3 +89,18 @@ def test_sort():
         [],
         [["six"], ["eight", "seven"]],
     ]
+
+
+@pytest.mark.parametrize("ascending", [True, False])
+@pytest.mark.parametrize("kwargs", [{}, {"stable": True}])
+@pytest.mark.parametrize("nested", [False, True])
+@pytest.mark.parametrize("keys", [["a", "a"], ["b", "a", "aa", "b", "", "a", "aa", ""]])
+def test_argsort_strings_stable(keys, nested, kwargs, ascending):
+    expected = sorted(range(len(keys)), key=keys.__getitem__, reverse=not ascending)
+    if nested:
+        array = ak.Array([keys, [], keys])
+        expected = [expected, [], expected]
+    else:
+        array = ak.Array(keys)
+
+    assert ak.argsort(array, ascending=ascending, **kwargs).to_list() == expected
