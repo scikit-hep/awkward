@@ -512,11 +512,11 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
             item = item.to_ListOffsetArray64(True)
             flat_mask = ak._do.flatten(item, axis=1)
             assert flat_mask.is_numpy
-
+            # on a GPU, array operations beat a kernel that has to size its output
+            # on the host first
             if isinstance(nplike, Cupy):
-                # on a GPU, array operations beat a kernel that has to size its
-                # output on the host first
                 mask_data = flat_mask.data
+
                 cumsum = nplike.empty(mask_data.shape[0] + 1, dtype=np.int64)
                 cumsum[0] = 0
                 nplike.cumsum(mask_data, maybe_out=cumsum[1:])
@@ -525,8 +525,16 @@ def _normalise_item_bool_to_int(item: Content, backend: Backend) -> Content:
                 nextoffsets_data = cumsum[item_offsets]
                 nextoffsets = ak.index.Index(nextoffsets_data)
 
+                # position of each selected element within its own list: its flat
+                # position minus the start of the list it belongs to
                 (selected,) = nplike.nonzero(mask_data)
-                counts = nextoffsets_data[1:] - nextoffsets_data[:-1]
+                # `repeat` needs counts it can cast to an index, which is 32-bit on
+                # 32-bit platforms
+                counts = nplike.astype(
+                    nextoffsets_data[1:] - nextoffsets_data[:-1],
+                    dtype=np.intp,
+                    copy=False,
+                )
                 nextcontent = selected - nplike.repeat(item_offsets[:-1], counts)
 
             else:
