@@ -214,7 +214,6 @@
     :caption: String transforms
 
     generated/ak.str.capitalize
-    generated/ak.str.distinct_counts
     generated/ak.str.length
     generated/ak.str.lower
     generated/ak.str.repeat
@@ -224,7 +223,6 @@
     generated/ak.str.reverse
     generated/ak.str.swapcase
     generated/ak.str.title
-    generated/ak.str.uniques
     generated/ak.str.upper
 
 .. toctree::
@@ -269,6 +267,12 @@
     generated/ak.str.match_substring
     generated/ak.str.match_substring_regex
     generated/ak.str.starts_with
+
+.. toctree::
+    :caption: Unique strings and counts
+
+    generated/ak.str.uniques
+    generated/ak.str.distinct_counts
 
 .. toctree::
     :caption: Value and type conversions

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 import awkward as ak
@@ -14,13 +15,11 @@ def test_uniques():
         "foo",
         "bar",
         "fee",
-        None,
     ]
     assert ak.str.uniques([b"foo", b"bar", b"bar", b"fee", None, b"foo"]).tolist() == [
         b"foo",
         b"bar",
         b"fee",
-        None,
     ]
 
     assert (
@@ -44,7 +43,6 @@ def test_distinct_counts():
         {"values": "foo", "counts": 2},
         {"values": "bar", "counts": 2},
         {"values": "fee", "counts": 1},
-        {"values": None, "counts": 1},
     ]
     assert ak.str.distinct_counts(
         [b"foo", b"bar", b"bar", b"fee", None, b"foo"]
@@ -52,7 +50,6 @@ def test_distinct_counts():
         {"values": b"foo", "counts": 2},
         {"values": b"bar", "counts": 2},
         {"values": b"fee", "counts": 1},
-        {"values": None, "counts": 1},
     ]
 
     assert (
@@ -126,3 +123,134 @@ def test_nested_attrs():
 
     assert ak.str.uniques(array).attrs == {"note": "keep"}
     assert ak.str.distinct_counts(array).attrs == {"note": "keep"}
+
+
+def test_nulls_skipped_at_every_depth():
+    assert ak.str.uniques(["a", None, "a"]).tolist() == ["a"]
+    assert ak.str.uniques([["a", None, "a"]]).tolist() == [["a"]]
+    assert ak.str.distinct_counts(["a", None, "a"]).tolist() == [
+        {"values": "a", "counts": 2}
+    ]
+    assert ak.str.distinct_counts([["a", None, "a"]]).tolist() == [
+        [{"values": "a", "counts": 2}]
+    ]
+
+
+@pytest.mark.parametrize("func", [ak.str.uniques, ak.str.distinct_counts])
+@pytest.mark.parametrize(
+    "array",
+    [
+        ["a", None, "a"],
+        ak.Array(["a", None, None])[1:],
+        [["a", None, "a"], None, []],
+    ],
+)
+def test_optional_typetracer_forms(func, array):
+    array = ak.Array(array)
+
+    assert (
+        func(array).layout.form == func(ak.to_backend(array, "typetracer")).layout.form
+    )
+
+
+def test_regular_lists():
+    array = ak.to_regular(ak.Array([["a", "a"], ["b", "c"]]))
+
+    assert ak.str.uniques(array).tolist() == [["a"], ["b", "c"]]
+    assert ak.str.distinct_counts(array).tolist() == [
+        [{"values": "a", "counts": 2}],
+        [{"values": "b", "counts": 1}, {"values": "c", "counts": 1}],
+    ]
+
+    typetracer = ak.to_backend(array, "typetracer")
+    assert ak.str.uniques(array).layout.form == ak.str.uniques(typetracer).layout.form
+    assert (
+        ak.str.distinct_counts(array).layout.form
+        == ak.str.distinct_counts(typetracer).layout.form
+    )
+
+
+@pytest.mark.parametrize("func", [ak.str.uniques, ak.str.distinct_counts])
+@pytest.mark.parametrize(
+    "array",
+    [
+        ["a", 1, "a", 2, "b"],
+        [{"x": "a", "y": "c"}, {"x": "a", "y": "c"}],
+        [[{"x": "a"}, {"x": "a"}]],
+        [["a", 1, "a"]],
+    ],
+)
+def test_strings_in_records_or_unions_raise(func, array):
+    with pytest.raises(TypeError, match="record or union"):
+        func(array)
+
+
+def test_lists_of_strings_in_records_and_unions():
+    record = ak.Array([{"x": ["a", "a", "b"], "y": 1}, {"x": [], "y": 2}])
+    out = ak.str.uniques(record)
+    assert ak.validity_error(out) == ""
+    assert out.tolist() == [{"x": ["a", "b"], "y": 1}, {"x": [], "y": 2}]
+
+    union = ak.Array([["a", "a"], 1, ["b", None, "b"]])
+    out = ak.str.distinct_counts(union)
+    assert ak.validity_error(out) == ""
+    assert out.tolist() == [
+        [{"values": "a", "counts": 2}],
+        1,
+        [{"values": "b", "counts": 2}],
+    ]
+
+
+@pytest.mark.parametrize("func", [ak.str.uniques, ak.str.distinct_counts])
+def test_record_raises(func):
+    with pytest.raises(TypeError, match="Record objects are not allowed"):
+        func(ak.Record({"x": ["a", "a"]}))
+
+
+@pytest.mark.parametrize("func", [ak.str.uniques, ak.str.distinct_counts])
+@pytest.mark.parametrize(
+    "array",
+    [
+        ak.str.to_categorical(["a", "b", "a", None]),
+        ak.str.to_categorical([["a", "b", "a"], ["b", None]]),
+    ],
+)
+def test_categorical(func, array):
+    plain = ak.Array(array.to_list())
+
+    assert func(array).tolist() == func(plain).tolist()
+    assert func(array).layout.form == func(plain).layout.form
+    assert (
+        func(array).layout.form == func(ak.to_backend(array, "typetracer")).layout.form
+    )
+
+
+def test_parameters_are_kept():
+    strings = ak.with_parameter(ak.Array(["a", "a", "b"]), "foo", "bar")
+    array = ak.with_parameter(ak.unflatten(strings, [3]), "__list__", "Foo")
+
+    out = ak.str.uniques(array)
+    assert out.layout.parameter("__list__") == "Foo"
+    assert out.layout.content.parameter("foo") == "bar"
+    assert ak.str.uniques(strings).layout.parameter("foo") == "bar"
+
+    out = ak.str.distinct_counts(array)
+    assert out.layout.parameter("__list__") == "Foo"
+    assert out.layout.content.content("values").parameter("foo") == "bar"
+    out = ak.str.distinct_counts(strings)
+    assert out.layout.content("values").parameter("foo") == "bar"
+
+
+@pytest.mark.parametrize("func", [ak.str.uniques, ak.str.distinct_counts])
+def test_typetracer_keeps_list_length(func):
+    array = ak.to_backend(ak.Array([["a", "a"], ["b"], []]), "typetracer")
+
+    assert func(array).layout.length == 3
+
+
+@pytest.mark.parametrize("func", [ak.str.uniques, ak.str.distinct_counts])
+def test_no_strings_unchanged(func):
+    array = ak.Array(np.arange(4).reshape(2, 2))
+
+    assert func(array).layout.form == array.layout.form
+    assert func(array).tolist() == [[0, 1], [2, 3]]
