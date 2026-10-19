@@ -96,6 +96,9 @@ def _impl(array, separator, highlevel, behavior, attrs):
                 # This kernel requires non-large string/bytestrings
                 string_to32=True,
                 bytestring_to32=True,
+                # A missing string makes the joined result missing
+                expect_option_type=layout.content.is_option,
+                generate_bitmasks=layout.content.is_option,
             )
 
         out = ak._do.recursively_apply(layout, apply_unary)
@@ -114,6 +117,7 @@ def _impl(array, separator, highlevel, behavior, attrs):
                     f"`separator` must be a list of (possibly missing) strings, not {ak.type(layouts[1])}"
                 )
 
+            expect_option = layouts[0].content.is_option or layouts[1].is_option
             return (
                 _apply_through_arrow(
                     pc.binary_join,
@@ -125,6 +129,9 @@ def _impl(array, separator, highlevel, behavior, attrs):
                     # This kernel requires non-large string/bytestrings
                     string_to32=True,
                     bytestring_to32=True,
+                    # A missing string or separator makes the result missing
+                    expect_option_type=expect_option,
+                    generate_bitmasks=expect_option,
                 ),
             )
 
