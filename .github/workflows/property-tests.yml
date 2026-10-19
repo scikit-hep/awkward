@@ -75,9 +75,20 @@ jobs:
         run: python -m pip list
 
       - name: Run property-based tests
-        run: python -m pytest -n auto -vv -rs tests/properties --hypothesis-show-statistics
+        run: python -m pytest -n auto -vv -rs tests/properties --junitxml=junit.xml
         env:
           HYPOTHESIS_PROFILE: nightly
+
+      - name: Show Hypothesis statistics
+        if: ${{ !cancelled() && hashFiles('junit.xml') != '' }}
+        shell: python {0}
+        run: |
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse("junit.xml").getroot()
+          for p in root.iter("property"):
+              if p.get("name") == "hypothesis-statistics":
+                  print(p.get("value"), end="\n\n")
 
       - name: Run property-based tests in multiple threads
         if: ${{ !cancelled() }}

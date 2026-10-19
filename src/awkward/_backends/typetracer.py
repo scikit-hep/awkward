@@ -19,7 +19,8 @@ class TypeTracerBackend(Backend):
         return self._typetracer
 
     def __init__(self):
+        super().__init__()
         self._typetracer = TypeTracer.instance()
 
-    def __getitem__(self, index: KernelKeyType) -> TypeTracerKernel:
+    def _new_kernel(self, index: KernelKeyType) -> TypeTracerKernel:
         return TypeTracerKernel(index)
