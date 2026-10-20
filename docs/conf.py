@@ -353,7 +353,7 @@ myst_enable_extensions = ["colon_fence", "deflist"]
 
 nb_execution_mode = "cache"
 # Share the cache with the Markdown sub-build, which has its own output directory
-nb_execution_cache_path = str(pathlib.Path(__file__).parent / "_build" / "jupyter_cache")
+nb_execution_cache_path = str(pathlib.Path(__file__).parent / "_build" / ".jupyter_cache")
 nb_execution_raise_on_error = True
 # Text outputs for the Markdown sub-build (lower is preferred)
 nb_mime_priority_overrides = [
