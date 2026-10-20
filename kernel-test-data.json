@@ -308,8 +308,8 @@
           "error": false,
           "message": "",
           "inputs": {
-            "fromparents": [0,0,0,2,2,2],
-            "length": 6,
+            "offsets": [0,3,3,6],
+            "outlength": 3,
             "stringdata": [97,0,99,97,0,98,97,0,0,122,0,97],
             "stringstarts": [0,3,6,8,8,10],
             "stringstops": [3,6,8,8,10,12],
@@ -325,8 +325,8 @@
           "error": false,
           "message": "",
           "inputs": {
-            "fromparents": [0,0,0,2,2,2],
-            "length": 6,
+            "offsets": [0,3,3,6],
+            "outlength": 3,
             "stringdata": [97,0,99,97,0,98,97,0,0,122,0,97],
             "stringstarts": [0,3,6,8,8,10],
             "stringstops": [3,6,8,8,10,12],
@@ -342,8 +342,8 @@
           "error": false,
           "message": "",
           "inputs": {
-            "fromparents": [0,0,0,2,2,2],
-            "length": 6,
+            "offsets": [0,3,3,6],
+            "outlength": 3,
             "stringdata": [97,0,99,97,0,98,97,0,0,122,0,97],
             "stringstarts": [0,3,6,8,8,10],
             "stringstops": [3,6,8,8,10,12],
@@ -359,8 +359,8 @@
           "error": false,
           "message": "",
           "inputs": {
-            "fromparents": [0,0,0,2,2,2],
-            "length": 6,
+            "offsets": [0,3,3,6],
+            "outlength": 3,
             "stringdata": [97,0,99,97,0,98,97,0,0,122,0,97],
             "stringstarts": [0,3,6,8,8,10],
             "stringstops": [3,6,8,8,10,12],
@@ -376,8 +376,8 @@
           "error": false,
           "message": "",
           "inputs": {
-            "fromparents": [0,0,0,2,2,2],
-            "length": 6,
+            "offsets": [0,3,3,6],
+            "outlength": 3,
             "stringdata": [97,0,99,97,0,98,97,0,0,122,0,97],
             "stringstarts": [0,3,6,8,8,10],
             "stringstops": [3,6,8,8,10,12],
@@ -393,8 +393,8 @@
           "error": false,
           "message": "",
           "inputs": {
-            "fromparents": [0,0,0,2,2,2],
-            "length": 6,
+            "offsets": [0,3,3,6],
+            "outlength": 3,
             "stringdata": [97,0,99,97,0,98,97,0,0,122,0,97],
             "stringstarts": [0,3,6,8,8,10],
             "stringstops": [3,6,8,8,10,12],
@@ -410,8 +410,8 @@
           "error": false,
           "message": "",
           "inputs": {
-            "fromparents": [0,0,0,2,2,2],
-            "length": 6,
+            "offsets": [0,3,3,6],
+            "outlength": 3,
             "stringdata": [97,0,99,97,0,98,97,0,0,122,0,97],
             "stringstarts": [0,3,6,8,8,10],
             "stringstops": [3,6,8,8,10,12],
@@ -427,8 +427,8 @@
           "error": false,
           "message": "",
           "inputs": {
-            "fromparents": [0,0,0,2,2,2],
-            "length": 6,
+            "offsets": [0,3,3,6],
+            "outlength": 3,
             "stringdata": [97,0,99,97,0,98,97,0,0,122,0,97],
             "stringstarts": [0,3,6,8,8,10],
             "stringstops": [3,6,8,8,10,12],
@@ -438,6 +438,40 @@
           },
           "outputs": {
             "tocarry": [0,1,2,4,5,3]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "offsets": [0],
+            "outlength": 0,
+            "stringdata": [],
+            "stringstarts": [],
+            "stringstops": [],
+            "is_stable": true,
+            "is_ascending": true,
+            "is_local": true
+          },
+          "outputs": {
+            "tocarry": []
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "offsets": [0,0,0,0],
+            "outlength": 3,
+            "stringdata": [],
+            "stringstarts": [],
+            "stringstops": [],
+            "is_stable": true,
+            "is_ascending": true,
+            "is_local": true
+          },
+          "outputs": {
+            "tocarry": []
           }
         }
       ]
