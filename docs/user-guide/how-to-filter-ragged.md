@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to filter with ragged (variable-length) arrays."
 ---
 
 How to filter with ragged arrays
