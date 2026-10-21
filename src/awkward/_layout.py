@@ -387,10 +387,10 @@ def from_arraylib(
             else:
 
                 def attach(x):
-                    if isinstance(x, NumpyArray):
-                        return UnmaskedArray(x)
-                    else:
+                    if isinstance(x, RegularArray):
                         return RegularArray(attach(x.content), x.size, len(x))
+                    else:
+                        return UnmaskedArray(x)
 
                 return attach(data.to_RegularArray())
 
