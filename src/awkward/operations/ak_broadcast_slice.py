@@ -87,7 +87,6 @@ def _impl(array, indices, axis, highlevel, behavior, attrs):
             raise TypeError(
                 "indices must contain integers, not booleans or other types"
             )
-        return None
 
     ak._do.recursively_apply(index, validate, return_array=False)
 
