@@ -1,17 +1,43 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+from __future__ import annotations
+
 from functools import cached_property
 
 from awkward._meta.meta import Meta
 from awkward._nplikes.shape import ShapeItem
-from awkward._typing import JSONSerializable
+from awkward._typing import TYPE_CHECKING, DType, JSONSerializable
+
+if TYPE_CHECKING:
+    from awkward.forms.numpyform import NumpyForm
+    from awkward.forms.regularform import RegularForm
 
 
 class NumpyMeta(Meta):
     is_numpy = True
     is_leaf = True
     inner_shape: tuple[ShapeItem, ...]
+
+    @property
+    def dtype(self) -> DType:
+        raise NotImplementedError
+
+    @property
+    def _mergeable_ndim(self) -> int:
+        return len(self.inner_shape) + 1
+
+    def _mergeable_regular(self) -> RegularForm | NumpyForm:
+        # Mergeability ignores regular-list sizes. Use unit dimensions so that
+        # even an unknown virtual shape never needs to be resolved.
+        from awkward.forms.numpyform import NumpyForm
+        from awkward.types.numpytype import dtype_to_primitive
+
+        return NumpyForm(
+            dtype_to_primitive(self.dtype),
+            (1,) * (self._mergeable_ndim - 1),
+            parameters=self._parameters,
+        ).to_RegularForm()
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
