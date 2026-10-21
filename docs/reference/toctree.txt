@@ -184,6 +184,7 @@
 .. toctree::
     :caption: Broadcasting
 
+    generated/ak.broadcast_slice
     generated/ak.broadcast_arrays
     generated/ak.broadcast_fields
 
