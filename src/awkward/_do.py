@@ -210,7 +210,7 @@ def num(layout, axis):
 
 def mergeable(
     one: Content,
-    two: Content,
+    two: form.Form | Content,
     mergebool: bool = True,
     mergecastable: Literal["same_kind", "equiv", "family"] = "same_kind",
 ) -> bool:
