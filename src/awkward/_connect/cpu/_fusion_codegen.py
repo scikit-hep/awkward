@@ -26,6 +26,7 @@ eager evaluation.
 """
 
 import functools
+import threading
 
 import numpy as np
 
@@ -58,7 +59,29 @@ def _classify_leaf(value):
     raise FusionUnsupported(f"unsupported fused leaf of type {type(value).__name__}")
 
 
-@functools.lru_cache(maxsize=128)
+def _serialized_cache(compile_op):
+    # lru_cache alone permits concurrent compilation of the same cold key.
+    # The lock must enclose the cache lookup as well as compilation.
+    cached = functools.lru_cache(maxsize=128)(compile_op)
+    lock = threading.Lock()
+
+    @functools.wraps(compile_op)
+    def lookup(source):
+        with lock:
+            return cached(source)
+
+    lookup.cache_info = cached.cache_info
+    lookup.cache_parameters = cached.cache_parameters
+
+    def cache_clear():
+        with lock:
+            cached.cache_clear()
+
+    lookup.cache_clear = cache_clear
+    return lookup
+
+
+@_serialized_cache
 def _compile_op(source: str):
     """Compile (and intern) the fused expression over the column tuple ``c``.
 
