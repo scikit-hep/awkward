@@ -4,6 +4,7 @@
 import argparse
 import copy
 import os
+import re
 from collections import OrderedDict
 
 import yaml
@@ -157,35 +158,36 @@ def check_cpu_implementation(kerneldict):
             count += 1
 
 
+CUDA_KERNELS_DIR = os.path.join(
+    CURRENT_DIR, "..", "src", "awkward", "_connect", "cuda", "cuda_kernels"
+)
+
+CUPY_BACKEND = os.path.join(CURRENT_DIR, "..", "src", "awkward", "_backends", "cupy.py")
+
+
+def cuda_compute_kernels():
+    """Kernel names the CuPy backend dispatches to `cuda.compute` rather than
+    to a compiled `.cu` file."""
+    with open(CUPY_BACKEND) as f:
+        return set(re.findall(r'"(awkward_\w+)":\s*cuda_compute\.', f.read()))
+
+
 def check_cuda_implementation(kerneldict):
     count = 0
+    dispatched = cuda_compute_kernels()
     for kernelname in kerneldict.keys():
-        if not (
-            os.path.isfile(
-                os.path.join(
-                    CURRENT_DIR,
-                    "..",
-                    "awkward-cpp",
-                    "src",
-                    "cuda-kernels",
-                    kernelname + ".cu",
-                )
-            )
+        if (
+            os.path.isfile(os.path.join(CUDA_KERNELS_DIR, kernelname + ".cu"))
             or os.path.isfile(
-                os.path.join(
-                    CURRENT_DIR,
-                    "..",
-                    "awkward-cpp",
-                    "src",
-                    "cuda-kernels",
-                    "manual_" + kernelname + ".cu",
-                )
+                os.path.join(CUDA_KERNELS_DIR, "manual_" + kernelname + ".cu")
             )
+            or kernelname in dispatched
         ):
-            if count == 0:
-                print("\nKernels not implemented as a CUDA kernel - ")
-            print(kernelname)
-            count += 1
+            continue
+        if count == 0:
+            print("\nKernels not implemented as a CUDA kernel - ")
+        print(kernelname)
+        count += 1
 
 
 def check_implementations(kerneldict):

@@ -9,7 +9,7 @@ template <typename T>
 ERROR awkward_localindex(
   T* __restrict__ toindex,
   int64_t length) {
-  std::iota(toindex, toindex + length, 0);
+  std::iota(toindex, toindex + length, int64_t{0});
   return success();
 }
 ERROR awkward_localindex_64(

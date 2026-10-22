@@ -19,7 +19,7 @@ ERROR awkward_IndexedArray_flatten_none2empty(
       outoffsets[k] = outoffsets[k - 1];
       k++;
     }
-    else if (idx + 1 >= offsetslength) {
+    else if ((int64_t)idx + 1 >= offsetslength) {
       return failure("flattening offset out of range", i, kSliceNone, FILENAME(__LINE__));
     }
     else {

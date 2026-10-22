@@ -14,6 +14,9 @@ awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
     const int64_t* __restrict__ distincts,
     int64_t lendistincts,
     int64_t outlength) {
+  if (outlength > 0 && lendistincts % outlength != 0) {
+    return failure("lendistincts is not a multiple of outlength", kSliceNone, lendistincts, FILENAME(__LINE__));
+  }
   if (outlength > 0 && lendistincts > 0) {
     int64_t maxcount = lendistincts / outlength;
 
