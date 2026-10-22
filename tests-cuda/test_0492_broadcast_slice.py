@@ -33,5 +33,15 @@ def test_bounds(first, index):
     indices = ak.to_backend([[[index]], [[0]]], "cuda")
     # CUDA kernels record errors asynchronously; use the existing error checker.
     with pytest.raises((IndexError, ValueError), match="index out of range"):
-        ak.broadcast_slice(source, indices)
-        ak._connect.cuda.synchronize_cuda()
+        try:
+            ak.broadcast_slice(source, indices)
+        finally:
+            ak._connect.cuda.synchronize_cuda()
+
+    # The expected failure must not poison later work on the same CUDA stream.
+    valid = ak.broadcast_slice(
+        ak.to_backend([[10, 20], [30]], "cuda"),
+        ak.to_backend([[[1, 0]], [[0]]], "cuda"),
+    )
+    assert ak.to_list(valid) == [[[20, 10]], [[30]]]
+    ak._connect.cuda.synchronize_cuda()
