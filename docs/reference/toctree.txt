@@ -180,6 +180,8 @@
 
     generated/ak.from_regular
     generated/ak.to_regular
+    generated/ak.stack
+    generated/ak.unstack
 
 .. toctree::
     :caption: Broadcasting
