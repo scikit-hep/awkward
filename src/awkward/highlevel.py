@@ -221,10 +221,9 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
     See also #ak.Array.__array_ufunc__.
 
-    Some NumPy functions other than ufuncs are also handled properly in
-    NumPy >= 1.17 (see
+    Some NumPy functions other than ufuncs are also handled properly (see
     [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html))
-    and if an Awkward override exists. That is,::
+    if an Awkward override exists. That is,::
 
         np.concatenate
 
@@ -1554,7 +1553,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         This function is also called by the
         [np.asarray](https://docs.scipy.org/doc/numpy/reference/generated/numpy.asarray.html)
-        family of functions, which have `copy=False` by default.
+        family of functions, which have `copy=None` by default.
 
             >>> np.asarray(ak.Array([[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]]))
             array([[1.1, 2.2, 3.3],
@@ -1595,9 +1594,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         This method conforms to NumPy's
         [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html)
-        for overriding ufuncs, which has been
-        [available since NumPy 1.13](https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added)
-        (and thus NumPy 1.13 is the minimum allowed version).
+        for overriding ufuncs.
 
         When any ufunc is applied to an Awkward Array, it applies to the
         innermost level of structure and preserves the structure through the
@@ -1663,10 +1660,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
 
         This method conforms to NumPy's
         [NEP 18](https://numpy.org/neps/nep-0018-array-function-protocol.html)
-        for overriding functions, which has been
-        [available since NumPy 1.17](https://numpy.org/devdocs/release/1.17.0-notes.html#numpy-functions-now-always-support-overrides-with-array-function)
-        (and
-        [NumPy 1.16 with an experimental flag set](https://numpy.org/devdocs/release/1.16.0-notes.html#numpy-functions-now-support-overrides-with-array-function)).
+        for overriding functions.
 
         See also #__array_ufunc__.
         """
@@ -2518,9 +2512,7 @@ class Record(NDArrayOperatorsMixin):
 
         This method conforms to NumPy's
         [NEP 13](https://numpy.org/neps/nep-0013-ufunc-overrides.html)
-        for overriding ufuncs, which has been
-        [available since NumPy 1.13](https://numpy.org/devdocs/release/1.13.0-notes.html#array-ufunc-added)
-        (and thus NumPy 1.13 is the minimum allowed version).
+        for overriding ufuncs.
 
         See #ak.Array.__array_ufunc__ for a more complete description.
         """

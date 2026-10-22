@@ -1301,7 +1301,7 @@ class TypeTracer(NumpyLike[TypeTracerArray], metaclass=NominalMeta):
             try_touch_data(x)
 
         inner_shape = None
-        # TODO: switch to np.result_type when we pin numpy >= 1.23
+        # not np.result_type, which promotes datetime64 with timedelta64 where concatenate raises
         emptyarrays = []
         for x in arrays:
             assert isinstance(x, TypeTracerArray)
