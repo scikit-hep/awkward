@@ -33,6 +33,7 @@ def write_if_changed(path):
 
 
 cuda_kernels_impl = [
+    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
     # "awkward_Index_nones_as_index",
     # "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
