@@ -2635,17 +2635,39 @@ kernels:
       - name: awkward_ListOffsetArray_argsort_strings
         args:
           - {name: tocarry, type: "List[int64_t]", dir: out}
-          - {name: fromparents, type: "Const[List[int64_t]]", dir: in}
-          - {name: length, type: "int64_t", dir: in}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in}
+          - {name: outlength, type: "int64_t", dir: in}
           - {name: stringdata, type: "Const[List[uint8_t]]", dir: in}
           - {name: stringstarts, type: "Const[List[int64_t]]", dir: in}
           - {name: stringstops, type: "Const[List[int64_t]]", dir: in}
           - {name: is_stable, type: "bool", dir: in}
           - {name: is_ascending, type: "bool", dir: in}
           - {name: is_local, type: "bool", dir: in}
-    description: null
+    description: |
+      Sort each group of string indices in [offsets[i], offsets[i + 1])
+      lexicographically by unsigned string bytes, including embedded NULs.
+      The outer group offsets have outlength + 1 entries and start at zero;
+      repeated offsets represent empty groups. They are distinct from the
+      stringstarts/stringstops byte boundaries. Equal prefixes are ordered by
+      length. Stable sorting preserves input order for identical byte sequences;
+      unstable sorting may return any ordering of ties. Local indices are relative
+      to the group's starting offset; otherwise indices refer to the full string
+      array. No output is written for empty groups or when outlength is zero.
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_argsort_strings(
+          tocarry, offsets, outlength, stringdata, stringstarts, stringstops,
+          is_stable, is_ascending, is_local
+      ):
+          for i in range(outlength):
+              start = offsets[i]
+              stop = offsets[i + 1]
+              indices = sorted(
+                  range(start, stop),
+                  key=lambda j: bytes(stringdata[stringstarts[j]:stringstops[j]]),
+                  reverse=not is_ascending,
+              )
+              for j, index in enumerate(indices):
+                  tocarry[start + j] = index - start if is_local else index
     automatic-tests: false
 
   - name: awkward_NumpyArray_sort_asstrings_uint8
