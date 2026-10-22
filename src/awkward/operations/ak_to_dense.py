@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+from functools import partial
+
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
@@ -134,6 +136,13 @@ def _impl(array, fill_value, clip, dtype):
     if any(r != rank and not empty for r, empty in zip(ranks, unknown, strict=True)):
         raise ValueError("ak.to_dense record fields must have the same list dimensions")
 
+    def collect_regular_sizes(content, depth, *, axis, sizes, **kwargs):
+        if depth == axis:
+            if content.is_regular:
+                sizes.append(content.size)
+            elif content.is_numpy and len(content.shape) > 1:
+                sizes.append(content.shape[1])
+
     sizes = []
     for axis in range(1, rank):
         observed = []
@@ -146,15 +155,11 @@ def _impl(array, fill_value, clip, dtype):
             if size is not None:
                 observed.append(int(size))
 
-            def inspect(content, depth, *, axis=axis, regular=regular, **kwargs):
-                if depth == axis:
-                    if content.is_regular:
-                        regular.append(content.size)
-                    elif content.is_numpy and len(content.shape) > 1:
-                        regular.append(content.shape[1])
-
             ak._do.recursively_apply(
-                column, inspect, numpy_to_regular=True, return_array=False
+                column,
+                partial(collect_regular_sizes, axis=axis, sizes=regular),
+                numpy_to_regular=True,
+                return_array=False,
             )
         candidates = observed or regular
         sizes.append((min if clip else max)(candidates) if candidates else 0)
@@ -171,8 +176,8 @@ def _impl(array, fill_value, clip, dtype):
         )
     filled = []
     shape = (layout.length, *sizes)
-    for array, column_rank in zip(arrays, ranks, strict=True):
-        values = numpy.ma.asarray(array, dtype=dtype).filled(fill_value)
+    for numpy_array, column_rank in zip(arrays, ranks, strict=True):
+        values = numpy.ma.asarray(numpy_array, dtype=dtype).filled(fill_value)
         if column_rank < rank:
             values = numpy.broadcast_to(
                 values.reshape((*values.shape, *((1,) * (rank - column_rank)))), shape
