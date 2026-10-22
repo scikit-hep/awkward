@@ -104,8 +104,8 @@ content-type = "text/markdown"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 text = """
-<a href="https://github.com/scikit-hep/awkward-1.0">
-    <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/logo/logo-300px.png">
+<a href="https://github.com/scikit-hep/awkward">
+    <img src="https://github.com/scikit-hep/awkward/raw/main/docs-img/logo/logo-300px.png">
 </a>
 """
 
