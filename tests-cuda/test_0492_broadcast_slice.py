@@ -27,8 +27,11 @@ def test_cuda(source, indices):
     assert result.layout.form == expected.layout.form
 
 
-def test_bounds():
-    source = ak.to_backend([[1], [2, 3, 4]], "cuda")
-    indices = ak.to_backend([[[1]], [[0]]], "cuda")
-    with pytest.raises(IndexError):
-        ak.to_list(ak.broadcast_slice(source, indices))
+@pytest.mark.parametrize(("first", "index"), [([1], 1), ([], 0), ([1], -2)])
+def test_bounds(first, index):
+    source = ak.to_backend([first, [2, 3, 4]], "cuda")
+    indices = ak.to_backend([[[index]], [[0]]], "cuda")
+    # CUDA kernels record errors asynchronously; use the existing error checker.
+    with pytest.raises((IndexError, ValueError), match="index out of range"):
+        ak.broadcast_slice(source, indices)
+        ak._connect.cuda.synchronize_cuda()

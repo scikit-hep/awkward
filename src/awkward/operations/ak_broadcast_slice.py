@@ -36,7 +36,8 @@ def broadcast_slice(
     This explicitly broadcasts each collection over the extra nesting in the
     indices. It does not change ordinary #ak.Array.__getitem__ slicing rules.
     Negative indices count from the end of their own collection. An out-of-bounds
-    index raises IndexError, even if another collection contains that index.
+    index raises an error, even if another collection contains that index.
+    CUDA kernel errors are reported through the usual deferred error checking.
     Boolean masks are not accepted; use integer indices instead.
 
     For example, each event has a collection of clusters, and each muon has a
