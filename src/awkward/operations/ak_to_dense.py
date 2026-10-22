@@ -116,7 +116,6 @@ def _impl(array, fill_value, clip, dtype):
             nonlocal found
             if content.is_numpy:
                 found = True
-            return None
 
         ak._do.recursively_apply(node, inspect, return_array=False)
         return found
@@ -153,7 +152,6 @@ def _impl(array, fill_value, clip, dtype):
                         regular.append(content.size)
                     elif content.is_numpy and len(content.shape) > 1:
                         regular.append(content.shape[1])
-                return None
 
             ak._do.recursively_apply(
                 column, inspect, numpy_to_regular=True, return_array=False
