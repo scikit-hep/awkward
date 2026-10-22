@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "An introduction to Awkward Arrays: tree-like data structures, like JSON, that are contiguous in memory and use NumPy-like idioms."
 ---
 
 # What is an "Awkward" Array?

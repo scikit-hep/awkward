@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to list the fields (columns, keys) of an array of records."
 ---
 
 How to list an array's fields/columns/keys

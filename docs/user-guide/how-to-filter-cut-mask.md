@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to filter arrays by cutting (removing items) or masking (replacing items with missing values)."
 ---
 
 How to filter arrays: cutting vs. masking
