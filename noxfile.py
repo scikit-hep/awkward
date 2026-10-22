@@ -24,7 +24,6 @@ requirements_dev = [
     "packaging",
     "PyYAML",
     "requests",
-    "tomli",
 ]
 
 PYPROJECT = nox.project.load_toml("pyproject.toml")

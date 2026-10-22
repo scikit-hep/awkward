@@ -3,9 +3,24 @@
 # pylint: disable=wildcard-import, unused-wildcard-import
 # ruff: noqa: PLE0604
 
-import sys
 import typing
+from types import EllipsisType
 from typing import *  # noqa: F403
+from typing import (
+    ClassVar,
+    Final,
+    Literal,
+    ParamSpec,
+    Protocol,
+    Self,
+    SupportsIndex,
+    TypeAlias,
+    TypedDict,
+    TypeGuard,
+    Unpack,
+    final,
+    runtime_checkable,
+)
 
 import numpy
 
@@ -32,45 +47,6 @@ __all__ = list(
 
 
 AxisMaybeNone = TypeVar("AxisMaybeNone", int, None)  # noqa: F405
-
-if sys.version_info < (3, 11):
-    from typing import (
-        ClassVar,
-        Final,
-        Literal,
-        SupportsIndex,
-        TypeAlias,
-        TypeGuard,
-        final,
-        runtime_checkable,
-    )
-
-    from typing_extensions import (
-        ParamSpec,
-        Protocol,
-        Self,
-        TypedDict,
-        Unpack,
-    )
-
-    EllipsisType = type(...)
-else:
-    from types import EllipsisType
-    from typing import (
-        ClassVar,
-        Final,
-        Literal,
-        ParamSpec,
-        Protocol,
-        Self,
-        SupportsIndex,
-        TypeAlias,
-        TypedDict,
-        TypeGuard,
-        Unpack,
-        final,
-        runtime_checkable,
-    )
 
 
 JSONSerializable: TypeAlias = (
