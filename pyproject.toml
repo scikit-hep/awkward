@@ -43,7 +43,7 @@ classifiers = [
 ]
 dependencies = [
     "awkward_cpp==59",
-    "numpy>=1.23.2",
+    "numpy>=2.0.0",
     "packaging",
     "fsspec>=2022.11.0"
 ]
