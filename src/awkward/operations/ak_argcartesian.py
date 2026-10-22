@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Mapping
 
@@ -26,6 +25,9 @@ def argcartesian(
     attrs=None,
 ):
     """Computes the Cartesian product of arrays, returning integer indexes.
+
+    All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
+    so see the #ak.cartesian documentation for a more complete description.
 
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
@@ -97,9 +99,6 @@ def argcartesian(
         <Array [1.1, 1.1, 2.2, 2.2, 3.3, 3.3] type='6 * float64'>
         >>> two[two_index]
         <Array ['a', 'b', 'a', 'b', 'a', 'b'] type='6 * string'>
-
-        All of the parameters for #ak.cartesian apply equally to #ak.argcartesian,
-        so see the #ak.cartesian documentation for a more complete description.
     """
     # Dispatch
     if isinstance(arrays, Mapping):

@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -13,6 +12,7 @@ from awkward._namedaxis import (
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward._typing import Any, Mapping
 
 __all__ = ("flatten",)
 
@@ -20,7 +20,14 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
+def flatten(
+    array: Any,
+    axis: int | str | None = 1,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
     """Returns an array with one or all levels of nesting removed.
 
     Args:
@@ -212,7 +219,11 @@ def _impl(array, axis, highlevel, behavior, attrs):
             isinstance(x, ak.contents.Content) for x in out
         )
 
-        out = ak._do.mergemany(out)
+        if len(out) == 0:
+            # A zero-field record or a union that no values reach
+            out = ak.contents.EmptyArray(backend=layout.backend)
+        else:
+            out = ak._do.mergemany(out)
 
     elif axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
 

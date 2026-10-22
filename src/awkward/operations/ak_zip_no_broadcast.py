@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Mapping
 from functools import reduce
@@ -35,6 +34,8 @@ def zip_no_broadcast(
     This operation may be thought of as the opposite of projection in
     #ak.Array.__getitem__, which extracts fields one at a time, or #ak.unzip,
     which extracts them all in one call.
+
+    See also #ak.zip and #ak.unzip.
 
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
@@ -77,8 +78,6 @@ def zip_no_broadcast(
          [],
          [(4.4, 'd')],
          []]
-
-        See also #ak.zip and #ak.unzip.
     """
     # Dispatch
     if isinstance(arrays, Mapping):

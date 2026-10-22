@@ -347,13 +347,18 @@ class Sum(JAXReducer):
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    def __init__(self, dtype=None):
+        # Forced accumulator dtype (mirrors awkward._reducers.Sum); honoured so
+        # ak.mean/ak.var's float64 accumulation isn't silently dropped on jax.
+        self._dtype = None if dtype is None else np.dtype(dtype)
+
     @classmethod
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
         assert isinstance(reducer, _reducers.Sum)
-        return cls()
+        return cls(reducer._dtype)
 
     def axis_none_reducer(self) -> AxisNoneSum:
-        return AxisNoneSum()
+        return AxisNoneSum(self._dtype)
 
     def apply(
         self,
@@ -367,7 +372,9 @@ class Sum(JAXReducer):
         if array.dtype.kind == "M":
             raise TypeError(f"cannot compute the sum (ak.sum) of {array.dtype!r}")
 
-        if array.dtype.kind == "b":
+        if self._dtype is not None and array.dtype.kind not in "cmM":
+            input_array = array.data.astype(self._dtype)
+        elif array.dtype.kind == "b":
             input_array = array.data.astype(np.int64)
         else:
             input_array = array.data
@@ -386,16 +393,89 @@ class Sum(JAXReducer):
             return ak.contents.NumpyArray(result, backend=array.backend)
 
 
+@overloads(_reducers.SumOfSquares)
+class SumOfSquares(JAXReducer):
+    name: Final = "sumofsquares"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.SumOfSquares)
+        return cls()
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        offsets: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "c":
+            raise TypeError(
+                f"cannot compute the sum-of-squares (ak.var/ak.std) of {array.dtype!r}"
+            )
+        # Square in float64, then segment_sum (differentiable, no x*x overflow).
+        data = array.data.astype(np.float64)
+        squared = data * data
+        parents_data = _parents_from_offsets(offsets.data, outlength)
+        result = jax.ops.segment_sum(
+            *maybe_materialize(squared, parents_data), outlength
+        )
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
+@overloads(_reducers.SumOfPowers)
+class SumOfPowers(JAXReducer):
+    name: Final = "sumofpowers"
+    preferred_dtype: Final = np.float64
+    needs_position: Final = False
+
+    def __init__(self, n=2):
+        self._n = int(n)
+
+    @classmethod
+    def from_kernel_reducer(cls, reducer: Reducer) -> Self:
+        assert isinstance(reducer, _reducers.SumOfPowers)
+        return cls(reducer._n)
+
+    def apply(
+        self,
+        array: ak.contents.NumpyArray,
+        offsets: ak.index.Index,
+        starts: ak.index.Index,
+        shifts: ak.index.Index | None,
+        outlength: ShapeItem,
+    ) -> ak.contents.NumpyArray:
+        assert isinstance(array, ak.contents.NumpyArray)
+        if array.dtype.kind == "c":
+            raise TypeError(
+                f"cannot compute the sum-of-powers (ak.moment) of {array.dtype!r}"
+            )
+        # x**n in float64, then segment_sum (differentiable, no x**n overflow).
+        powered = array.data.astype(np.float64) ** self._n
+        parents_data = _parents_from_offsets(offsets.data, outlength)
+        result = jax.ops.segment_sum(
+            *maybe_materialize(powered, parents_data), outlength
+        )
+        return ak.contents.NumpyArray(result, backend=array.backend)
+
+
 @overloads(_reducers.AxisNoneSum)
 class AxisNoneSum(JAXReducer):
     name: Final = "sum"
     preferred_dtype: Final = np.float64
     needs_position: Final = False
 
+    def __init__(self, dtype=None):
+        self._dtype = None if dtype is None else np.dtype(dtype)
+
     @classmethod
     def from_kernel_reducer(cls, reducer: Reducer) -> Self:
         assert isinstance(reducer, _reducers.AxisNoneSum)
-        return cls()
+        return cls(reducer._dtype)
 
     def apply(
         self,
@@ -411,7 +491,9 @@ class AxisNoneSum(JAXReducer):
 
         data = maybe_materialize(array.data)[0]
 
-        if array.dtype.kind == "b":
+        if self._dtype is not None and array.dtype.kind not in "cmM":
+            data = data.astype(self._dtype)
+        elif array.dtype.kind == "b":
             data = data.astype(np.int64)
 
         result_scalar = jax.numpy.sum(data)

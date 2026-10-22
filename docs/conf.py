@@ -21,7 +21,7 @@ import pathlib
 # -- Project information -----------------------------------------------------
 
 project = "Awkward Array"
-copyright = f"{datetime.datetime.now().year}, Awkward Array development team"
+copyright = f"2019-{datetime.datetime.now().year}, the Awkward Array developers"
 author = "Jim Pivarski"
 
 parts = awkward.__version__.split(".")
@@ -49,8 +49,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "autoapi.extension",
     "myst_nb",
-    # Preserve old links
-    # "jupyterlite_sphinx",
+    "sphinx_llm.txt",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
 ]
@@ -129,11 +128,36 @@ def _ak_output_filename(self):
 
 
 from autoapi._objects import PythonObject, TopLevelPythonObject  # noqa: E402
+from autoapi._parser import Parser  # noqa: E402
 
 PythonObject.output_dir = _flat_output_dir
 PythonObject.output_filename = _ak_output_filename
 TopLevelPythonObject.output_dir = _flat_output_dir
 TopLevelPythonObject.output_filename = _ak_output_filename
+
+
+_parse_functiondef = Parser.parse_functiondef
+
+
+def _is_experimental_decorator(decorator):
+    """Return whether an astroid decorator node applies ``@experimental``."""
+    if decorator.as_string() == "experimental":
+        return True
+    return decorator.as_string() == "experimental()"
+
+
+def _parse_functiondef_with_experimental(self, node):
+    """Preserve the experimental marker for the AutoAPI templates."""
+    parsed = _parse_functiondef(self, node)
+    if node.decorators and any(
+        _is_experimental_decorator(decorator) for decorator in node.decorators.nodes
+    ):
+        for item in parsed:
+            item["is_experimental"] = True
+    return parsed
+
+
+Parser.parse_functiondef = _parse_functiondef_with_experimental
 
 autoapi_template_dir = "_autoapi_templates"
 
@@ -243,6 +267,23 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "_templates", "_autoapi_templates", "Thumbs.db", "jupyter_execute", ".*"]
 
+# -- Options for LLM-friendly output -----------------------------------------
+
+# The default would be the awkward package metadata summary
+llms_txt_description = (
+    "Documentation of Awkward Array, a library for nested, variable-sized data"
+    " (arbitrary-length lists, records, mixed types, and missing data) using"
+    " NumPy-like idioms."
+)
+
+# Run the Markdown sub-build after the HTML build so that it can reuse the
+# doctrees; autoapi writes generated files into the source tree, so the two
+# builds must not run at the same time.
+llms_txt_build_parallel = False
+
+# Write only page.html.md, not also page.md
+llms_txt_suffix_mode = "append"
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -270,11 +311,6 @@ html_theme_options = {
             "name": "PyPI",
             "url": "https://pypi.org/project/awkward",
             "icon": "fa-brands fa-python",
-        },
-        {
-            "name": "Gitter",
-            "url": "https://gitter.im/Scikit-HEP/awkward-array",
-            "icon": "fa-brands fa-gitter",
         },
     ],
     "use_edit_page_button": True,
@@ -316,7 +352,14 @@ html_js_files = ["js/awkward.js"]
 myst_enable_extensions = ["colon_fence", "deflist"]
 
 nb_execution_mode = "cache"
+# Share the cache with the Markdown sub-build, which has its own output directory
+nb_execution_cache_path = str(pathlib.Path(__file__).parent / "_build" / ".jupyter_cache")
 nb_execution_raise_on_error = True
+# Text outputs for the Markdown sub-build (lower is preferred)
+nb_mime_priority_overrides = [
+    ("llms-markdown", "text/markdown", 10),
+    ("llms-markdown", "text/plain", 20),
+]
 # unpkg is currently _very_ slow
 nb_ipywidgets_js = {
     # Load RequireJS, used by the IPywidgets for dependency management
@@ -357,16 +400,8 @@ intersphinx_mapping = {
 }
 
 
-# JupyterLite configuration
-jupyterlite_dir = "./lite"
-# Don't override ipynb format
-jupyterlite_bind_ipynb_suffix = False
-# We've disabled localstorage, so we must provide the contents explicitly
-jupyterlite_contents = ["getting-started/demo/*"]
-
 linkcheck_ignore = [
     r"^https?:\/\/github\.com\/.*$",
-    r"^getting-started\/try-awkward-array\.html$",  # Relative link won't resolve
     r"^https?:\/\/$",  # Bare https:// allowed
 ]
 # Eventually we need to revisit these
@@ -377,14 +412,6 @@ if (datetime.date.today() - datetime.date(2022, 12, 13)) < datetime.timedelta(da
             r"^https:\/\/doi.org\/10\.1051\/epjconf\/202125103002$",
         ]
     )
-
-
-# Sphinx doesn't usually want content to fit the screen, so we hack the styles for this page
-def install_jupyterlite_styles(app, pagename, templatename, context, event_arg) -> None:
-    if pagename != "getting-started/try-awkward-array":
-        return
-
-    app.add_css_file("css/try-awkward-array.css")
 
 
 def _skip_member(app, what, name, obj, skip, options):
@@ -424,7 +451,8 @@ def _add_awkward_inventory_aliases(app, exception):
     ``import awkward as ak``) need ``awkward.*`` entries in objects.inv.
     See https://github.com/scikit-hep/awkward/issues/3950.
     """
-    if exception:
+    # The sphinx-llm Markdown sub-build has no objects.inv
+    if exception or app.builder.format != "html":
         return
     import zlib
 
@@ -449,6 +477,5 @@ def _add_awkward_inventory_aliases(app, exception):
 
 
 def setup(app):
-    app.connect("html-page-context", install_jupyterlite_styles)
     app.connect("autoapi-skip-member", _skip_member)
     app.connect("build-finished", _add_awkward_inventory_aliases)

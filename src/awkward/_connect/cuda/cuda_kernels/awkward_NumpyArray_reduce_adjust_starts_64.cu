@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 // In the offsets-pipeline migration, `parents[toptr[k]] == k` by construction
 // of argmin/argmax (the result for output bin k is by definition an element

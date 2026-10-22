@@ -6,8 +6,6 @@ These operate through ``layout._backend.nplike`` so they work for both the
 CPU (NumPy) and CUDA (CuPy) backends.
 """
 
-from __future__ import annotations
-
 import numpy as np
 
 import awkward as ak

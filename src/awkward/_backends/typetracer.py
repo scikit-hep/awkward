@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from awkward._backends.backend import Backend, KernelKeyType
 from awkward._backends.dispatch import register_backend
@@ -20,7 +19,8 @@ class TypeTracerBackend(Backend):
         return self._typetracer
 
     def __init__(self):
+        super().__init__()
         self._typetracer = TypeTracer.instance()
 
-    def __getitem__(self, index: KernelKeyType) -> TypeTracerKernel:
+    def _new_kernel(self, index: KernelKeyType) -> TypeTracerKernel:
         return TypeTracerKernel(index)

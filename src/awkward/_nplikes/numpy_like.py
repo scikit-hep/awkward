@@ -66,6 +66,8 @@ class NumpyMetadata(PublicSingleton):
     unsignedinteger = numpy.unsignedinteger
     floating = numpy.floating
     complexfloating = numpy.complexfloating
+    longdouble = numpy.longdouble
+    clongdouble = numpy.clongdouble
     number = numpy.number
     object_ = numpy.object_
     generic = numpy.generic
@@ -485,6 +487,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLikeT: ...
 
     @abstractmethod

@@ -10,8 +10,6 @@ GPU-free surface (op-source generation, leaf classification).  The actual
 ``cuda.compute`` kernel emission needs a GPU and is covered in tests-cuda.
 """
 
-from __future__ import annotations
-
 import numpy as np
 import pytest
 

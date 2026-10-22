@@ -10,8 +10,6 @@ and fixes the original leak; this is kept as a regression check.)
     python benchmarks/check_unary_transform_leak.py --iters 500
 """
 
-from __future__ import annotations
-
 import argparse
 
 

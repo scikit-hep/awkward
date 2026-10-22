@@ -29,8 +29,6 @@ Usage:
     python bench_lazy_ir.py [--lists N] [--repeats R] [out.json]
 """
 
-from __future__ import annotations
-
 import argparse
 import gc
 import json

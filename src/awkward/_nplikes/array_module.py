@@ -18,7 +18,16 @@ from awkward._nplikes.numpy_like import (
 from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.virtual import VirtualNDArray
-from awkward._typing import TYPE_CHECKING, Any, DType, Final, Literal, TypeVar, cast
+from awkward._typing import (
+    TYPE_CHECKING,
+    Any,
+    DType,
+    Final,
+    Literal,
+    NominalMeta,
+    TypeVar,
+    cast,
+)
 
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
@@ -49,6 +58,17 @@ def _nplike_reshape_has_copy(module: Any) -> bool:
 
 
 @lru_cache
+def _nplike_repeat_has_array_repeats(module: Any) -> bool:
+    x = module.zeros(2)
+    try:
+        module.repeat(x, module.ones(2, dtype=module.int64))
+    except (TypeError, ValueError):
+        return False
+    else:
+        return True
+
+
+@lru_cache
 def _nplike_unique_has_equal_nan(module: Any) -> bool:
     return "equal_nan" in inspect.signature(module.unique).parameters
 
@@ -56,7 +76,7 @@ def _nplike_unique_has_equal_nan(module: Any) -> bool:
 ArrayLikeT = TypeVar("ArrayLikeT", bound=ArrayLike)
 
 
-class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
+class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT], metaclass=NominalMeta):
     """
     Some methods maintain virtualness while others are required to materialize the array.
     The `maybe_materialize` function is used for that purpose.
@@ -78,6 +98,13 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         dtype: DTypeLike | None = None,
         copy: bool | None = None,
     ) -> ArrayLikeT | PlaceholderArray | VirtualNDArray:
+        # already the exact array type this nplike owns, and nothing to do
+        if (
+            not copy
+            and type(obj) is self._module.ndarray
+            and (dtype is None or obj.dtype == dtype)
+        ):
+            return obj
         if isinstance(obj, PlaceholderArray):
             assert obj.dtype == dtype or dtype is None
             return obj
@@ -88,7 +115,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
                 # if we are not copying and the dtype is _exactly_ the dtype of the existing array
                 # or dtype is None, we can return the VirtualNDArray directly
                 # this avoids unnecessary VirtualNDArray creation and method-chaining
-                if not copy and (obj.dtype == dtype or dtype is None):
+                if not copy and (dtype is None or obj.dtype == dtype):
                     return obj
                 return VirtualNDArray(
                     obj._nplike,
@@ -747,9 +774,12 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT]):
         axis: ShapeItem | tuple[ShapeItem, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLikeT:
         (x,) = maybe_materialize(x)
-        return self._module.sum(x, axis=axis, keepdims=keepdims, out=maybe_out)
+        return self._module.sum(
+            x, axis=axis, keepdims=keepdims, out=maybe_out, dtype=dtype
+        )
 
     def max(
         self,

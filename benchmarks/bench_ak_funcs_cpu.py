@@ -16,8 +16,6 @@ Usage:
     # (internal) python bench_ak_funcs_cpu.py --mem-child <scale> <op> <dtype>
 """
 
-from __future__ import annotations
-
 import gc
 import resource
 import subprocess

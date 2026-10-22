@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import numbers
 import operator
@@ -25,7 +24,12 @@ def is_sized_iterable(obj) -> bool:
 
 
 def is_integer(x) -> bool:
-    return isinstance(x, numbers.Integral) and not isinstance(x, bool)
+    # `numbers.Integral` is an ABC, so check the common cases without it
+    return (
+        type(x) is int
+        or isinstance(x, np.integer)
+        or (isinstance(x, numbers.Integral) and not isinstance(x, bool))
+    )
 
 
 def is_array_like(x) -> bool:
@@ -33,6 +37,8 @@ def is_array_like(x) -> bool:
 
 
 def is_integer_like(x) -> bool:
+    if type(x) is int:
+        return True
     # Integral types
     if isinstance(x, numbers.Integral):
         return not isinstance(x, bool)

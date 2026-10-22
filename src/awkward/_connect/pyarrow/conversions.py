@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import json
 from collections.abc import Iterable, Sized
@@ -129,9 +128,8 @@ def popbuffers_finalize(
 
     if isinstance(awkwardarrow_type, AwkwardArrowType):
         if awkwardarrow_type.mask_type == "UnmaskedArray":
-            assert validbits is None or numpy.all(
-                numpy.frombuffer(validbits, dtype=np.uint8)[: len(out) // 8] == 0xFF
-            )
+            # Nulls from an enclosing option may appear in validbits.
+            # They are masked above, so validbits is ignored here.
             return revertable(
                 ak.contents.UnmaskedArray.simplified(
                     out, parameters=awkwardarrow_type.mask_parameters
@@ -221,6 +219,14 @@ def form_popbuffers_finalize(out, awkwardarrow_type):
             ),
             out,
         )
+
+
+def frombuffer_or_empty(buffer, dtype):
+    # Arrow allows a zero-length array to omit its buffers, and the IPC reader
+    # (Feather) returns them as None, e.g. for an empty union inside a list.
+    if buffer is None:
+        return numpy.empty(0, dtype=dtype)
+    return numpy.frombuffer(buffer, dtype=dtype)
 
 
 def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitmasks):
@@ -445,13 +451,13 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         if isinstance(storage_type, pyarrow.lib.SparseUnionType):
             assert storage_type.num_buffers == 2
             validbits = buffers.pop(0)
-            nptags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
+            nptags = frombuffer_or_empty(buffers.pop(0), dtype=np.int8)
             npindex = numpy.arange(len(nptags), dtype=np.int32)
         else:
             assert storage_type.num_buffers == 3
             validbits = buffers.pop(0)
-            nptags = numpy.frombuffer(buffers.pop(0), dtype=np.int8)
-            npindex = numpy.frombuffer(buffers.pop(0), dtype=np.int32)
+            nptags = frombuffer_or_empty(buffers.pop(0), dtype=np.int8)
+            npindex = frombuffer_or_empty(buffers.pop(0), dtype=np.int32)
 
         akcontents = []
         for i in range(storage_type.num_fields):

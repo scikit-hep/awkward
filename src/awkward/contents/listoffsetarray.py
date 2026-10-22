@@ -1366,6 +1366,24 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                         nextcarry.data,
                     )
                 )
+                if shifts is not None:
+                    # Carry missing-list shifts relative to each original group.
+                    nextrows = (
+                        nplike.searchsorted(
+                            self._offsets.data, nextcarry.data, side="right"
+                        )
+                        - 1
+                    )
+                    nextparents = (
+                        nplike.searchsorted(offsets.data, nextrows, side="right") - 1
+                    )
+                    nextshifts = Index64(
+                        nextshifts.data
+                        + shifts.data[nextrows]
+                        + offsets.data[nextparents]
+                        - starts.data[nextparents],
+                        nplike=nplike,
+                    )
             else:
                 nextshifts = None
 
@@ -1416,10 +1434,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 behavior,
             )
 
-            # outoffsets used to come from
-            # `awkward_ListOffsetArray_reduce_local_outoffsets_64(parents, ...)`,
-            # which produced the offsets-rep of `parents`. With offsets already
-            # in hand, we just use them.
+            # In the offsets representation the output offsets are the offsets we
+            # already hold (the old parents->offsets conversion is unnecessary).
             outoffsets = offsets
 
             # Same "is the reduction immediately below us?" handling as before.
@@ -1514,8 +1530,8 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
         if maxnextparents is not unknown_length:
             nextoffsets = nextoffsets[: maxnextparents + 2]
 
-        # In the offsets representation, nextstarts is just nextoffsets[:-1];
-        # the awkward_ListOffsetArray_reduce_nonlocal_nextstarts_64 call disappears.
+        # In the offsets representation, nextstarts is just nextoffsets[:-1]
+        # (no parents->nextstarts derivation needed).
         nextstarts = nextoffsets[:-1]
 
         return (
@@ -1699,7 +1715,7 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                 next = ak.contents.ListArray(
                     ak.index.Index(new_starts),
                     ak.index.Index(new_stops),
-                    self._content,
+                    akcontent,
                     parameters=self._parameters,
                 )
                 return next.to_ListOffsetArray64(True)._to_arrow(
@@ -1780,56 +1796,78 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             )
 
     def _to_cudf(self, cudf: Any, mask: Content | None, length: int):
-        from packaging.version import parse as parse_version
-
         cupy = Cupy.instance()
         index = maybe_materialize(self._offsets.raw(cupy))[0].astype("int32")
-        buf = cudf.core.buffer.as_buffer(index)
 
-        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
-            ind_buf = cudf.core.column.numerical.NumericalColumn(
-                data=buf, dtype=index.dtype, mask=None, size=len(index)
-            )
-        else:
-            ind_buf = cudf.core.column.numerical.NumericalColumn(
-                buf, index.dtype, None, size=len(index)
-            )
-        cont = self._content._to_cudf(cudf, None, len(self._content))
+        import pylibcudf as plc
+        from cudf.core.buffer import as_buffer
+        from cudf.core.column.column import ColumnBase, as_column
+
+        offsets_col = as_column(index)
+        # Build the packed bitmask as a CuPy array (LSB order, 64-byte aligned)
         if mask is not None:
-            m = cupy._module.packbits(mask, bitorder="little")
-            if m.nbytes % 64:
-                m = cupy.resize(m, ((m.nbytes // 64) + 1) * 64)
-            m = cudf.core.buffer.as_buffer(cupy.asarray(m))
+            m_arr = cupy._module.packbits(cupy.asarray(mask), bitorder="little")
+            if m_arr.nbytes % 64:
+                m_arr = cupy._module.resize(m_arr, ((m_arr.nbytes // 64) + 1) * 64)
+            null_count = int(len(self) - mask.sum())
         else:
-            m = None
+            m_arr = None
+            null_count = 0
+
         if self.parameters.get("__array__") == "string":
-            from cudf.core.column.string import StringColumn
-            from cudf.utils.dtypes import CUDF_STRING_DTYPE
+            # String columns: chars in the data buffer, offsets as child[0].
+            # Wrap via pylibcudf so that cudf can own/validate the buffers.
+            from pylibcudf.gpumemoryview import gpumemoryview
 
-            data = cudf.core.buffer.as_buffer(cupy.asarray(self._content.data))
-            return StringColumn(
-                data=data,
-                size=len(ind_buf) - 1,
-                dtype=CUDF_STRING_DTYPE,
-                mask=m,
-                children=(ind_buf,),
+            chars_cp = cupy.asarray(self._content.data)
+            chars_gmv = gpumemoryview(chars_cp)
+            offsets_gmv = gpumemoryview(index)
+
+            n = length
+            offsets_plc = plc.Column(
+                data_type=plc.DataType(plc.TypeId.INT32),
+                size=n + 1,
+                data=offsets_gmv,
+                mask=None,
+                null_count=0,
+                offset=0,
+                children=[],
             )
 
-        if parse_version(cudf.__version__) >= parse_version("24.10.00"):
-            return cudf.core.column.lists.ListColumn(
-                size=length,
-                data=None,
-                mask=m,
-                children=(ind_buf, cont),
-                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
+            string_plc = plc.Column(
+                data_type=plc.DataType(plc.TypeId.STRING),
+                size=n,
+                data=chars_gmv,
+                mask=None,
+                null_count=0,
+                offset=0,
+                children=[offsets_plc],
             )
-        else:
-            return cudf.core.column.lists.ListColumn(
-                length,
-                mask=m,
-                children=(ind_buf, cont),
-                dtype=cudf.core.dtypes.ListDtype(cont.dtype),
-            )
+            string_col = ColumnBase.from_pylibcudf(string_plc)
+            if m_arr is not None:
+                # Attach the validity bitmap through cudf, exactly as the
+                # ByteMaskedArray/BitMaskedArray paths do. Handing the mask to
+                # the pylibcudf constructor instead yields a string column that
+                # cudf cannot convert back to Arrow (its character buffer comes
+                # out with size 0).
+                return string_col.set_mask(as_buffer(m_arr), null_count)
+            return string_col
+
+        cont = self._content._to_cudf(cudf, None, len(self._content))
+        plc_col = plc.Column(
+            data_type=plc.DataType(plc.TypeId.LIST),
+            size=length,
+            data=None,
+            mask=None,
+            null_count=0,
+            offset=0,
+            children=[offsets_col.to_pylibcudf(), cont.to_pylibcudf()],
+        )
+        list_dt = cudf.ListDtype(cont.dtype)
+        list_col = ColumnBase.create(plc_col, list_dt)
+        if m_arr is not None:
+            return list_col.set_mask(as_buffer(m_arr), null_count)
+        return list_col
 
     def _to_backend_array(self, allow_missing, backend):
         array_param = self.parameter("__array__")

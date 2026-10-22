@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -13,14 +12,17 @@ np = NumpyMetadata.instance()
 
 @high_level_function()
 def to_tensorflow(array):
-    """
+    """Converts an Awkward Array into a TensorFlow Tensor, if possible.
+
+    If `array` contains any other data types (RecordArray for example) the
+    function raises a TypeError.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
-    Converts `array` (only ListOffsetArray, ListArray, RegularArray and NumpyArray data types supported)
-    into a TensorFlow Tensor, if possible.
-
-    If `array` contains any other data types (RecordArray for example) the function raises a TypeError.
+    Returns:
+        A TensorFlow Tensor with the same data as `array`, if the conversion is
+        possible.
     """
 
     # Dispatch

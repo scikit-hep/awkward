@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.10.0"
+version = "2.14.0"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -32,6 +32,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Free Threading",
     "Programming Language :: Python :: Free Threading :: 3 - Stable",
     "Topic :: Scientific/Engineering",
@@ -42,7 +43,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==54",
+    "awkward_cpp==57",
     "importlib_metadata>=4.13.0;python_version < \"3.12\"",
     "numpy>=1.21.3",
     "packaging",
@@ -57,13 +58,12 @@ dynamic = [
 init = "awkward.numba:_register"
 
 [project.urls]
-"Bug Tracker" = "https://github.com/scikit-hep/awkward-1.0/issues"
-"Chat" = "https://gitter.im/Scikit-HEP/awkward-array"
-"Discussions" = "https://github.com/scikit-hep/awkward-1.0/discussions"
+"Bug Tracker" = "https://github.com/scikit-hep/awkward/issues"
+"Discussions" = "https://github.com/scikit-hep/awkward/discussions"
 "Documentation" = "https://awkward-array.org"
-"Homepage" = "https://github.com/scikit-hep/awkward-1.0"
-"Releases" = "https://github.com/scikit-hep/awkward-1.0/releases"
-"Source Code" = "https://github.com/scikit-hep/awkward-1.0"
+"Homepage" = "https://github.com/scikit-hep/awkward"
+"Releases" = "https://github.com/scikit-hep/awkward/releases"
+"Source Code" = "https://github.com/scikit-hep/awkward"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/awkward"]
@@ -104,8 +104,8 @@ content-type = "text/markdown"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 text = """
-<a href="https://github.com/scikit-hep/awkward-1.0">
-    <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/logo/logo-300px.png">
+<a href="https://github.com/scikit-hep/awkward">
+    <img src="https://github.com/scikit-hep/awkward/raw/main/docs-img/logo/logo-300px.png">
 </a>
 """
 
@@ -132,6 +132,9 @@ addopts = [
 xfail_strict = true
 markers = [
     "cuda: marks tests that require a CUDA-capable GPU",
+    # Registered here so that --strict-markers accepts it on the jobs that do
+    # not install pytest-run-parallel, which is the plugin that acts on it.
+    "thread_unsafe: marks tests that must not run under --parallel-threads",
 ]
 filterwarnings = [
     "error",
@@ -141,6 +144,7 @@ filterwarnings = [
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
     "ignore:Jitify is performing a one-time only warm-up",
     "ignore:The JAX backend is deprecated:DeprecationWarning",
+    'ignore:.* is experimental\.:UserWarning',
 ]
 log_level = "INFO"
 testpaths = ["tests", "tests-cuda", "tests-cuda-kernels", "tests-cuda-kernels-explicit"]
@@ -179,6 +183,7 @@ disable = [
     "import-outside-toplevel",
     "inconsistent-return-statements",
     "invalid-class-object",
+    "invalid-metaclass",
     "invalid-name",
     "invalid-unary-operand-type",
     "keyword-arg-before-vararg",
@@ -271,7 +276,11 @@ extend-exclude = [
     "src/awkward/_connect/cuda/_kernel_signatures.py",
 ]
 
+[tool.ruff.format]
+exclude = ["*.md"]
+
 [tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]  # Pre-0.16 defaults
 extend-select = [
     "B",           # flake8-bugbear
     "I",           # isort
@@ -305,7 +314,6 @@ ignore = [
 typing-modules = ["awkward._typing"]
 external = []
 mccabe.max-complexity = 100
-isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]
@@ -328,6 +336,25 @@ isort.required-imports = ["from __future__ import annotations"]
 "jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
 
+[dependency-groups]
+dev = [
+    "hypothesis-awkward",
+    "numba; sys_platform != 'win32'",
+    "numexpr",
+    "pandas; sys_platform != 'win32'",
+    "pyarrow; sys_platform != 'win32'",
+    "pytest>=6",
+    "pytest-cov",
+    "pytest-xdist",
+    "PyYAML",
+]
+
 [tool.uv]
 exclude-newer = "7 days"
-exclude-newer-package = { awkward_cpp = false }
+exclude-newer-package = { awkward_cpp = false, hypothesis_awkward = false }
+
+[tool.uv.workspace]
+members = ["awkward-cpp"]
+
+[tool.uv.sources]
+awkward_cpp = { workspace = true }

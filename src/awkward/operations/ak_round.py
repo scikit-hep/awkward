@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
@@ -24,7 +23,11 @@ def round(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Rounds each array element to the given number of decimals.
+
+    Implements [np.round](https://numpy.org/doc/stable/reference/generated/numpy.round.html)
+    for Awkward Arrays.
+
     Args:
         array : array_like
             Input array.
@@ -40,9 +43,8 @@ def round(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Rounds the given array elements to the given number of `decimals`.
-    Implements [np.round](https://numpy.org/doc/stable/reference/generated/numpy.round.html)
-    for Awkward Arrays.
+    Returns:
+        An array with each element rounded to the given number of `decimals`.
     """
     # Dispatch
     yield (array,)

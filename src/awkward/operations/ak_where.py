@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from functools import reduce
 
@@ -9,6 +8,8 @@ from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext, ensure_same_backend
 from awkward._namedaxis import NAMED_AXIS_KEY, NamedAxesWithDims, _unify_named_axis
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._parameters import parameters_intersect
+from awkward._typing import Any, Mapping
 
 __all__ = ("where",)
 
@@ -17,8 +18,30 @@ np = NumpyMetadata.instance()
 
 @ak._connect.numpy.implements("where")
 @high_level_function()
-def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs=None):
-    """
+def where(
+    condition: Any,
+    *args: Any,
+    mergebool: bool = True,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
+    """Selects elements from `x` or `y` by a condition, or finds where it is True.
+
+    This function has a one-argument form, `condition` without `x` or `y`, and
+    a three-argument form, `condition`, `x`, and `y`. In the one-argument form,
+    it is completely equivalent to NumPy's
+    [nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html)
+    function.
+
+    In the three-argument form, it acts as a vectorized ternary operator:
+    `condition`, `x`, and `y` must all have the same length and::
+
+        output[i] = x[i] if condition[i] else y[i]
+
+    for all `i`. The structure of `x` and `y` do not need to be the same; if
+    they are incompatible types, the output will have #ak.type.UnionType.
+
     Args:
         condition: Array-like data (anything #ak.to_layout recognizes) of booleans.
         x: Optional array-like data (anything #ak.to_layout recognizes) with the same
@@ -36,19 +59,10 @@ def where(condition, *args, mergebool=True, highlevel=True, behavior=None, attrs
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    This function has a one-argument form, `condition` without `x` or `y`, and
-    a three-argument form, `condition`, `x`, and `y`. In the one-argument form,
-    it is completely equivalent to NumPy's
-    [nonzero](https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html)
-    function.
-
-    In the three-argument form, it acts as a vectorized ternary operator:
-    `condition`, `x`, and `y` must all have the same length and::
-
-        output[i] = x[i] if condition[i] else y[i]
-
-    for all `i`. The structure of `x` and `y` do not need to be the same; if
-    they are incompatible types, the output will have #ak.type.UnionType.
+    Returns:
+        An array with elements taken from `x` where `condition` is true and from `y`
+        otherwise (three-argument form), or the integer indices where `condition` is
+        true (one-argument form).
     """
     # Dispatch
     yield (*args, condition)
@@ -82,6 +96,26 @@ def _impl1(condition, mergebool, highlevel, behavior, attrs):
     )
 
 
+def _numeric_leaf(obj, backend):
+    """The leaf layout of ``obj`` if it is a bare numeric leaf, else None."""
+    if isinstance(obj, ak.contents.NumpyArray):
+        leaf, data = obj, obj.data
+    elif isinstance(obj, ak.contents.Content):
+        return None
+    else:
+        # a promoted scalar is 0-d, which `where` broadcasts
+        data = backend.nplike.asarray(obj)
+        leaf = None
+    if data.ndim > 1 or not backend.nplike.is_own_array(data):
+        return None
+    if leaf is None:
+        leaf = ak.contents.NumpyArray(
+            data if data.ndim == 1 else backend.nplike.reshape(data, (1,)),
+            backend=backend,
+        )
+    return leaf
+
+
 def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layouts = ensure_same_backend(
@@ -94,6 +128,27 @@ def _impl3(condition, x, y, mergebool, highlevel, behavior, attrs):
         x, y, condition = inputs
         if isinstance(condition, ak.contents.NumpyArray):
             npcondition = backend.nplike.asarray(condition.data)
+
+            # Two plain numeric buffers merge to a single buffer whose dtype is
+            # exactly NumPy's promotion of the two, so `where` can do the whole
+            # job without building (and immediately simplifying) a UnionArray.
+            x_leaf = _numeric_leaf(x, backend)
+            y_leaf = None if x_leaf is None else _numeric_leaf(y, backend)
+            if (
+                x_leaf is not None
+                and y_leaf is not None
+                and ak._do.mergeable(x_leaf, y_leaf, mergebool=mergebool)
+            ):
+                return (
+                    ak.contents.NumpyArray(
+                        backend.nplike.where(npcondition, x_leaf.data, y_leaf.data),
+                        parameters=parameters_intersect(
+                            x_leaf._parameters, y_leaf._parameters
+                        ),
+                        backend=backend,
+                    ),
+                )
+
             tags = ak.index.Index8((npcondition == 0).view(np.int8))
             index = ak.index.Index64(
                 backend.nplike.arange(tags.length, dtype=np.int64),
