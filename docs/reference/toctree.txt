@@ -163,6 +163,9 @@
 
     generated/ak.sort
     generated/ak.argsort
+    generated/ak.top_k
+    generated/ak.top_k_values
+    generated/ak.top_k_indices
 
 .. toctree::
     :caption: Missing value handling
