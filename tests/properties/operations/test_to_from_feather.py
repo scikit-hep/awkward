@@ -10,10 +10,17 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
+from packaging.version import parse as parse_version
 
 import awkward as ak
 
+pyarrow = pytest.importorskip("pyarrow")
 pytest.importorskip("pyarrow.feather")
+
+# pyarrow < 26 drops the buffers of a union wrapped in an extension type
+# when writing the IPC file format, so `from_feather` crashes reading the
+# invalid file that `to_feather` writes (apache/arrow#50623, #4238)
+ALLOW_UNION = parse_version(pyarrow.__version__) >= parse_version("26.0.0")
 
 # The first example pays one-time lazy initialization inside the first
 # `to_feather` call (~320 ms: pyarrow conversion setup and the zstd
@@ -92,7 +99,22 @@ def feather_compatible(a: ak.Array) -> bool:
             # a valid row whose fields are all null reads back as a null
             # row (outermost struct validity is not stored)
             return False
+    if _has_mergeable_union(a.layout):
+        # `from_arrow` builds unions with `UnionArray.simplified`, which
+        # merges mergeable contents (e.g. `union[int32, int64]` reads back
+        # as `int64`); the values are kept but not the layout
+        return False
     return True
+
+
+def _has_mergeable_union(layout: ak.contents.Content) -> bool:
+    if layout.is_union:
+        contents = layout.contents
+        for i, x in enumerate(contents):
+            for y in contents[i + 1 :]:
+                if x._mergeable_next(y, False, "same_kind"):
+                    return True
+    return any(_has_mergeable_union(x) for x in _children(layout))
 
 
 def has_issues(a: ak.Array) -> bool:
@@ -103,6 +125,8 @@ def has_issues(a: ak.Array) -> bool:
     reduce to `feather_compatible` and `feather_stable`.
     """
     if _has_issue_4221(a.layout):
+        return True
+    if _has_issue_4228(a.layout):
         return True
     if _has_issue_4229(a.layout):
         return True
@@ -121,6 +145,22 @@ def _has_issue_4221(layout: ak.contents.Content) -> bool:
     ):
         return True
     return any(_has_issue_4221(x) for x in _children(layout))
+
+
+def _has_issue_4228(layout: ak.contents.Content, in_list: bool = False) -> bool:
+    """`UnionArray._to_arrow` passes option-type data a length that
+    disagrees with its validity bytes: a union with an option-type child,
+    or an option-type node over a union inside a list, raises IndexError or
+    `ArrowInvalid: Null count exceeds array length` (#4228)."""
+    if layout.is_union and any(x.is_option for x in layout.contents):
+        return True
+    if layout.is_option and in_list and _has_union(layout.content):
+        return True
+    return any(_has_issue_4228(x, in_list or layout.is_list) for x in _children(layout))
+
+
+def _has_union(layout: ak.contents.Content) -> bool:
+    return layout.is_union or any(_has_union(x) for x in _children(layout))
 
 
 def _has_issue_4229(layout: ak.contents.Content) -> bool:
@@ -175,10 +215,7 @@ def _strip_options(
         # `form_remove_optiontype`, #4230), and one nested in a record
         # reads back as an option
         allow_empty=False,
-        # pyarrow's IPC file format drops the buffers of a union wrapped
-        # in an extension type, so `from_feather` crashes reading the
-        # invalid file that `to_feather` writes (#4238)
-        allow_union=False,
+        allow_union=ALLOW_UNION,
         allow_indexed_option=False,
         allow_byte_masked=False,
         allow_bit_masked=False,
@@ -198,7 +235,7 @@ def test_roundtrip(feather_dir, a: ak.Array) -> None:
     a=st_ak.constructors.arrays(
         dtypes=feather_dtypes(),
         allow_empty=False,
-        allow_union=False,
+        allow_union=ALLOW_UNION,
     ).filter(lambda a: feather_compatible(a) and not has_issues(a))
 )
 def test_roundtrip_masked(feather_dir, a: ak.Array) -> None:
@@ -220,6 +257,10 @@ def feather_stable(a: ak.Array) -> bool:
     table representation itself and stays even when every cited issue is
     fixed.
     """
+    if _has_mergeable_union(a.layout):
+        # merging the contents of a union can change the list offsets'
+        # width, which only settles on the second roundtrip
+        return False
     layout, _ = _strip_options(a.layout)
     if layout.is_record and layout.fields == [""]:
         inner, _ = _strip_options(layout.contents[0])
@@ -244,7 +285,7 @@ def feather_stable(a: ak.Array) -> bool:
         allow_nan=False,
         # `?{x: unknown}` crashes on the first read at the #4230 site
         allow_empty=False,
-        allow_union=False,
+        allow_union=ALLOW_UNION,
     ).filter(lambda a: feather_stable(a) and not has_issues(a))
 )
 def test_roundtrip_stable(feather_dir, a: ak.Array) -> None:
