@@ -149,7 +149,7 @@ class LazyAwkwardArray:
         )
 
     def __neg__(self):
-        # 0 - x follows the same value-based promotion as eager -x.
+        # 0 is a weak Python scalar (NEP 50), so 0 - x keeps x's dtype like eager -x.
         return LazyAwkwardArray(
             BinaryOpNode(OpType.SUB, ConstantNode(0), self.ir_node), self.executor
         )
