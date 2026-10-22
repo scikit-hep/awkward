@@ -21,7 +21,7 @@ import pathlib
 # -- Project information -----------------------------------------------------
 
 project = "Awkward Array"
-copyright = f"2019‒{datetime.datetime.now().year}, the Awkward Array developers"
+copyright = f"2019-{datetime.datetime.now().year}, the Awkward Array developers"
 author = "Jim Pivarski"
 
 parts = awkward.__version__.split(".")
