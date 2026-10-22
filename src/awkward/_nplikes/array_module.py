@@ -551,7 +551,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT], metaclass=NominalMeta):
         axis: int | None = 0,
     ) -> ArrayLikeT | VirtualNDArray:
         if any(isinstance(x, VirtualNDArray) and not x.is_materialized for x in arrays):
-            # TODO: switch to np.result_type when we pin numpy >= 1.23
+            # not np.result_type, which promotes datetime64 with timedelta64 where concatenate raises
             dtype = self._module.concatenate(
                 [self._module.empty(0, x.dtype) for x in arrays]
             ).dtype

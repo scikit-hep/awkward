@@ -69,10 +69,6 @@ jobs:
             runs-on: windows-latest
             dependencies-kind: full
           - python-version: '3.10'
-            python-architecture: x86
-            runs-on: windows-latest
-            dependencies-kind: numpy1
-          - python-version: '3.10'
             python-architecture: x64
             runs-on: ubuntu-latest
             dependencies-kind: minimal

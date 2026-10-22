@@ -186,13 +186,9 @@ def _impl(array, fill_value, highlevel, behavior, dtype, including_unknown, attr
                 )
 
             else:
-                # NumPy 2.x converts "0" and b"0" (ASCII codec 48) to True (because it's not codec 0)
-                # NumPy 1.x converts them to False because it parses bytestrings and strings
-                # both versions of NumPy parse bytestrings and strings when converting to anything other than booleans
-                numpy2_behavior = nplike.astype(nplike.asarray(["0"]), dtype=np.bool_)[
-                    0
-                ]
-                if dtype == np.dtype(np.bool_) and numpy2_behavior:
+                # NumPy converts "0" and b"0" (ASCII codec 48) to True (because it's not codec 0),
+                # but it parses bytestrings and strings when converting to anything other than booleans
+                if dtype == np.dtype(np.bool_):
                     asbytes = b"\1" if fill_value else b"\0"
                 elif isinstance(fill_value, bytes):
                     asbytes = fill_value
