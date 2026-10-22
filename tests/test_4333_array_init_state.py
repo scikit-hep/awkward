@@ -78,13 +78,49 @@ def test_record_init_state():
     assert dict(from_record.attrs) == attrs
 
 
-@pytest.mark.parametrize("cls", [ak.Array, ak.Record])
-def test_numbaview_class_default(cls):
-    # the default lives on the class, so instances need not define it
-    assert vars(cls)["_numbaview"] is None
-    uninitialised = cls.__new__(cls)
-    assert "_numbaview" not in uninitialised.__dict__
-    assert uninitialised._numbaview is None
+def test_caches_default_without_init():
+    array = ak.Array.__new__(ak.Array)
+    assert array._numbaview is None
+    assert array._cpp_type is None
+    assert array._generator is None
+    assert array._lookup is None
+    assert ak.Record.__new__(ak.Record)._numbaview is None
+
+
+def _make(wrapper, cls):
+    layout = ak.with_name([{"x": 1}], "custom", highlevel=False)
+    if wrapper is ak.Array:
+        return cls(layout, behavior={("*", "custom"): cls})
+    return cls(layout[0], behavior={"custom": cls})
+
+
+@pytest.mark.parametrize("wrapper", [ak.Array, ak.Record])
+def test_setattr_override_sees_init(wrapper):
+    class Logged(wrapper):
+        def __setattr__(self, name, value):
+            self.__dict__.setdefault("_seen", []).append(name)
+            super().__setattr__(name, value)
+
+    thing = _make(wrapper, Logged)
+    assert type(thing) is Logged
+    assert {"_layout", "_behavior", "_attrs", "_numbaview"} <= set(thing._seen)
+
+
+@pytest.mark.parametrize("wrapper", [ak.Array, ak.Record])
+def test_setattr_of_later_mixin_is_called(wrapper):
+    class Mixin:
+        def __setattr__(self, name, value):
+            self.__dict__.setdefault("_seen", []).append(name)
+            object.__setattr__(self, name, value)
+
+    class Mixed(wrapper, Mixin): ...
+
+    thing = _make(wrapper, Mixed)
+    assert type(thing) is Mixed
+    assert "_layout" in thing._seen
+    thing._foo = 1
+    assert thing._seen[-1] == "_foo"
+    assert thing._foo == 1
 
 
 def test_numbaview_reset_on_new_layout():
