@@ -58,12 +58,12 @@ dynamic = [
 init = "awkward.numba:_register"
 
 [project.urls]
-"Bug Tracker" = "https://github.com/scikit-hep/awkward-1.0/issues"
-"Discussions" = "https://github.com/scikit-hep/awkward-1.0/discussions"
+"Bug Tracker" = "https://github.com/scikit-hep/awkward/issues"
+"Discussions" = "https://github.com/scikit-hep/awkward/discussions"
 "Documentation" = "https://awkward-array.org"
-"Homepage" = "https://github.com/scikit-hep/awkward-1.0"
-"Releases" = "https://github.com/scikit-hep/awkward-1.0/releases"
-"Source Code" = "https://github.com/scikit-hep/awkward-1.0"
+"Homepage" = "https://github.com/scikit-hep/awkward"
+"Releases" = "https://github.com/scikit-hep/awkward/releases"
+"Source Code" = "https://github.com/scikit-hep/awkward"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/awkward"]
