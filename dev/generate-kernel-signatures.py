@@ -150,16 +150,8 @@ cuda_kernels_impl = [
 
 
 def reproducible_datetime():
-    import sys
-
     timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-
-    if sys.version_info >= (3, 11):
-        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
-    else:
-        build_date = datetime.datetime.utcfromtimestamp(
-            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-        )
+    build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 

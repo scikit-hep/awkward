@@ -165,7 +165,7 @@ def offset_source_rank(list_content: ak.contents.Content) -> int:
 NO_PARAMETERS = Sentinel("NO_PARAMETERS", __name__)
 
 
-class BroadcastParameterRule(str, enum.Enum):
+class BroadcastParameterRule(enum.StrEnum):
     """Behaviour for parameter coalescence during broadcasting."""
 
     INTERSECT = "intersect"
