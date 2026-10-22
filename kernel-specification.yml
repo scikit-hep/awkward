@@ -2643,9 +2643,30 @@ kernels:
           - {name: is_stable, type: "bool", dir: in}
           - {name: is_ascending, type: "bool", dir: in}
           - {name: is_local, type: "bool", dir: in}
-    description: null
+    description: |
+      Sort contiguous runs of equal parents lexicographically by unsigned string
+      bytes, including embedded NULs. Equal prefixes are ordered by length.
+      Stable sorting preserves input order for identical byte sequences; unstable
+      sorting may return any ordering of ties. Local indices are relative to the
+      start of each parent run; otherwise indices refer to the full string array.
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_argsort_strings(
+          tocarry, fromparents, length, stringdata, stringstarts, stringstops,
+          is_stable, is_ascending, is_local
+      ):
+          first = 0
+          while first < length:
+              stop = first + 1
+              while stop < length and fromparents[stop] == fromparents[first]:
+                  stop += 1
+              indices = sorted(
+                  range(first, stop),
+                  key=lambda i: bytes(stringdata[stringstarts[i]:stringstops[i]]),
+                  reverse=not is_ascending,
+              )
+              for j, index in enumerate(indices):
+                  tocarry[first + j] = index - first if is_local else index
+              first = stop
     automatic-tests: false
 
   - name: awkward_NumpyArray_sort_asstrings_uint8
