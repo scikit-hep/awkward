@@ -64,12 +64,14 @@ class DataSourceGenerator:
 
         k = 0
 
-        array_data_source = self.class_type()
-
+        # The generated class and its cache key depend on every column's schema.
         for key in layouts:
             self.generators[key] = ak._connect.cling.togenerator(
                 layouts[key].form, flatlist_as_rvec=self.flatlist_as_rvec
             )
+        array_data_source = self.class_type()
+
+        for key in layouts:
             self.lookups[key] = ak._lookup.Lookup(layouts[key], self.generators[key])
             self.generators[key].generate(ROOT.gInterpreter.Declare)
 
