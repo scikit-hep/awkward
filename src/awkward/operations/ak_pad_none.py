@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -22,6 +21,18 @@ def pad_none(
     array, target, axis=1, *, clip=False, highlevel=True, behavior=None, attrs=None
 ):
     """Increases the lengths of lists to a target length by adding None values.
+
+    Note that the `clip` parameter not only determines whether the lengths are
+    at least `target` or exactly `target`, it also determines the type of the
+    output:
+
+    * `clip=True` returns regular lists (#ak.types.RegularType), and
+    * `clip=False` returns in-principle variable lengths
+      (#ak.types.ListType).
+
+    The in-principle variable-length lists might, in fact, all have the same
+    length, but the type difference is significant, for instance in
+    broadcasting rules (see #ak.broadcast_arrays).
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -49,7 +60,7 @@ def pad_none(
             high-level.
 
     Returns:
-        Increase the lengths of lists to a target length by adding None values.
+        An array whose lists are padded with None to at least the target `length`.
 
     Examples:
         Consider the following
@@ -86,18 +97,6 @@ def pad_none(
         [[[1.1, 2.2, 3.3], [None, None], [4.4, 5.5], [6.6, None]],
          [],
          [[7.7, None], [8.8, 9.9]]]
-
-        Note that the `clip` parameter not only determines whether the lengths are
-        at least `target` or exactly `target`, it also determines the type of the
-        output:
-
-        * `clip=True` returns regular lists (#ak.types.RegularType), and
-        * `clip=False` returns in-principle variable lengths
-          (#ak.types.ListType).
-
-        The in-principle variable-length lists might, in fact, all have the same
-        length, but the type difference is significant, for instance in
-        broadcasting rules (see #ak.broadcast_arrays).
 
         The difference between
 

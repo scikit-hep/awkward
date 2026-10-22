@@ -10,13 +10,13 @@ template <typename FROMTAGS,
           typename TOINDEX,
           typename T>
 ERROR awkward_UnionArray_flatten_combine(
-  TOTAGS* totags,
-  TOINDEX* toindex,
-  T* tooffsets,
-  const FROMTAGS* fromtags,
-  const FROMINDEX* fromindex,
+  TOTAGS* __restrict__ totags,
+  TOINDEX* __restrict__ toindex,
+  T* __restrict__ tooffsets,
+  const FROMTAGS* __restrict__ fromtags,
+  const FROMINDEX* __restrict__ fromindex,
   int64_t length,
-  T** offsetsraws) {
+  T** __restrict__ offsetsraws) {
   tooffsets[0] = 0;
   int64_t k = 0;
   for (int64_t i = 0;  i < length;  i++) {
@@ -33,54 +33,12 @@ ERROR awkward_UnionArray_flatten_combine(
   }
   return success();
 }
-ERROR awkward_UnionArray32_flatten_combine_64(
-  int8_t* totags,
-  int64_t* toindex,
-  int64_t* tooffsets,
-  const int8_t* fromtags,
-  const int32_t* fromindex,
-  int64_t length,
-  int64_t** offsetsraws) {
-  return awkward_UnionArray_flatten_combine<int8_t, int32_t, int8_t, int64_t, int64_t>(
-    totags,
-    toindex,
-    tooffsets,
-    fromtags,
-    fromindex,
-    length,
-    offsetsraws);
-}
-ERROR awkward_UnionArrayU32_flatten_combine_64(
-  int8_t* totags,
-  int64_t* toindex,
-  int64_t* tooffsets,
-  const int8_t* fromtags,
-  const uint32_t* fromindex,
-  int64_t length,
-  int64_t** offsetsraws) {
-  return awkward_UnionArray_flatten_combine<int8_t, uint32_t, int8_t, int64_t, int64_t>(
-    totags,
-    toindex,
-    tooffsets,
-    fromtags,
-    fromindex,
-    length,
-    offsetsraws);
-}
-ERROR awkward_UnionArray64_flatten_combine_64(
-  int8_t* totags,
-  int64_t* toindex,
-  int64_t* tooffsets,
-  const int8_t* fromtags,
-  const int64_t* fromindex,
-  int64_t length,
-  int64_t** offsetsraws) {
-  return awkward_UnionArray_flatten_combine<int8_t, int64_t, int8_t, int64_t, int64_t>(
-    totags,
-    toindex,
-    tooffsets,
-    fromtags,
-    fromindex,
-    length,
-    offsetsraws);
-}
+
+#define WRAPPER(FUNC, FROMTAGS, FROMINDEX, TOTAGS, TOINDEX, T) \
+  ERROR FUNC(TOTAGS* totags, TOINDEX* toindex, T* tooffsets, const FROMTAGS* fromtags, const FROMINDEX* fromindex, int64_t length, T** offsetsraws) { \
+    return awkward_UnionArray_flatten_combine<FROMTAGS, FROMINDEX, TOTAGS, TOINDEX, T>(totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws); \
+  }
+
+WRAPPER(awkward_UnionArray32_flatten_combine_64, int8_t, int32_t, int8_t, int64_t, int64_t)
+WRAPPER(awkward_UnionArrayU32_flatten_combine_64, int8_t, uint32_t, int8_t, int64_t, int64_t)
+WRAPPER(awkward_UnionArray64_flatten_combine_64, int8_t, int64_t, int8_t, int64_t, int64_t)

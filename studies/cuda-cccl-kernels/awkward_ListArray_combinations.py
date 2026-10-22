@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 """
 awkward_ListArray_combinations — faithful port of the PR reference implementation.
 
@@ -13,7 +13,6 @@ Pipeline (all cuda.compute, no RawKernel):
      unary_transform(ZipIterator(g, b, nn, out_base)[seg], ZipIterator(out0,out1), _unrank_k2)
 """
 
-from __future__ import annotations
 
 from functools import lru_cache
 from typing import List, Tuple

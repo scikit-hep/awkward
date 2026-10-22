@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._connect.numpy import UNSUPPORTED
@@ -31,7 +30,19 @@ def all(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Returns whether all elements are True over one or all levels of nesting.
+
+    Many types are supported, including all Awkward Arrays and Records. Thus,
+    it represents reduction over the "logical and" operation, whose identity
+    is True (i.e. asking if all the values are True in an empty list results
+    in True). This operation is the same as NumPy's
+    [all](https://docs.scipy.org/doc/numpy/reference/generated/numpy.all.html)
+    if all lists at a given dimension have the same length and no None values,
+    but it generalizes to cases where they do not.
+
+    See #ak.sum for a more complete description of nested list and missing
+    value (None) handling in reducers.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         axis (None or int or str): If None, combine all values from the array into
@@ -57,17 +68,9 @@ def all(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Returns True in each group of elements from `array` (many types supported,
-    including all Awkward Arrays and Records) if all values are True; False
-    otherwise. Thus, it represents reduction over the "logical and" operation,
-    whose identity is True (i.e. asking if all the values are True in an
-    empty list results in True). This operation is the same as NumPy's
-    [all](https://docs.scipy.org/doc/numpy/reference/generated/numpy.all.html)
-    if all lists at a given dimension have the same length and no None values,
-    but it generalizes to cases where they do not.
-
-    See #ak.sum for a more complete description of nested list and missing
-    value (None) handling in reducers.
+    Returns:
+        True in each group of elements from `array` if all values are True;
+        False otherwise.
     """
     # Dispatch
     yield (array,)

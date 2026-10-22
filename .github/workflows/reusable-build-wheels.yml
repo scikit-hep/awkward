@@ -20,12 +20,12 @@ jobs:
   determine-source-date-epoch:
     name: "Determine SOURCE_DATE_EPOCH"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
           fetch-depth: 0
@@ -41,19 +41,16 @@ jobs:
   make_sdist:
     name: "Build awkward-cpp sdist"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
 
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         submodules: true
         persist-credentials: false
-
-    - name: Prepare build files
-      run: pipx run nox -s prepare
 
     - name: Build awkward-cpp sdist
       run: pipx run build --sdist awkward-cpp
@@ -61,7 +58,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check awkward-cpp/dist/*
 
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: awkward-cpp-sdist
         path: awkward-cpp/dist/*.tar.gz
@@ -92,23 +89,20 @@ jobs:
           arch: auto64
 
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         submodules: true
         persist-credentials: false
 
     - name: Python 3.12
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
 
-    - name: Prepare build files
-      run: pipx run nox -s prepare
-
-    - uses: pypa/cibuildwheel@8d2b08b68458a16aeb24b64e68a09ab1c8e82084 # v3.4.1
+    - uses: pypa/cibuildwheel@b3395e271a35f73dad77f21802abe9b986dfe299 # v4.3.1
       env:
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
@@ -118,26 +112,62 @@ jobs:
       run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: awkward-cpp-wheels-${{ matrix.os }}-${{ matrix.arch }}
         path: wheelhouse/*.whl
 
-  build_awkward_wheel:
-    name: "Build awkward sdist and wheel"
+  build_pyodide_wheels:
+    needs: [determine-source-date-epoch]
+    name: "Wheel awkward-cpp: pyodide"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
     runs-on: ubuntu-latest
-    needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
+
     steps:
-    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         submodules: true
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+
+    # The pyodide cross-build cannot generate the kernel tests (no host numpy)
+    - name: Generate kernel tests for the wheel test suite
+      run: pipx run nox -s prepare -- --tests
+
+    - uses: pypa/cibuildwheel@b3395e271a35f73dad77f21802abe9b986dfe299 # v4.3.1
+      env:
+        CIBW_PLATFORM: pyodide
+      with:
+        package-dir: awkward-cpp
+
+    - name: Check metadata
+      run: pipx run twine check wheelhouse/*.whl
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: awkward-cpp-wheels-pyodide
+        path: wheelhouse/*.whl
+
+  build_awkward_wheel:
+    name: "Build awkward sdist and wheel"
+    if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
+    runs-on: ubuntu-slim
+    needs: [determine-source-date-epoch]
+    env:
+      SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        submodules: true
+        persist-credentials: false
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -148,7 +178,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: awkward-wheel
         path: dist/*

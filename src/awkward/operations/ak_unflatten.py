@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
@@ -25,6 +24,14 @@ numpy_backend = NumpyBackend.instance()
 @high_level_function()
 def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=None):
     """Returns an array with an additional level of nesting.
+
+    An inner dimension can be unflattened by setting the `axis` parameter, but
+    operations like this constrain the `counts` more tightly.
+
+    Also note that new lists created by this function cannot cross partitions
+    (which is only possible at `axis=0`, anyway).
+
+    See also #ak.num and #ak.flatten.
 
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
@@ -65,9 +72,6 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
         >>> ak.unflatten(array, counts)
         <Array [[0, 1, 2], [], [3, ...], [5], [6, 7, 8, 9]] type='5 * var * int64'>
 
-        An inner dimension can be unflattened by setting the `axis` parameter, but
-        operations like this constrain the `counts` more tightly.
-
         For example, we can subdivide an already divided list:
 
         >>> original = ak.Array([[1, 2, 3, 4], [], [5, 6, 7], [8, 9]])
@@ -90,14 +94,9 @@ def unflatten(array, counts, axis=0, *, highlevel=True, behavior=None, attrs=Non
                 behavior = None
             )
         Error details: structure imposed by 'counts' does not fit in the array or partition at axis=1
-
-        Also note that new lists created by this function cannot cross partitions
-        (which is only possible at `axis=0`, anyway).
-
-        See also #ak.num and #ak.flatten.
     """
     # Dispatch
-    yield (array,)
+    yield array, counts
 
     # Implementation
     return _impl(array, counts, axis, highlevel, behavior, attrs)

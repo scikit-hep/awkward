@@ -1,8 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
-import importlib
+import importlib.metadata
 import sys
 import warnings
 from functools import reduce
@@ -44,9 +43,9 @@ or
                     RuntimeWarning,
                     stacklevel=1,
                 )
-            _has_checked_version = True
             if parse_version(_numexpr_version) >= parse_version("2.11.0"):
                 _numexpr_version_ge_2_11_0 = True
+            _has_checked_version = True
         return numexpr
 
 

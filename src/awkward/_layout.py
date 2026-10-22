@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Literal
 
+import awkward as ak
 from awkward._backends.backend import Backend
 from awkward._backends.dispatch import (
     common_backend,
@@ -41,6 +42,41 @@ class HighLevelMetadata(NamedTuple):
 
 K = TypeVar("K")
 V = TypeVar("V")
+
+
+def _has_integral_leaf(layout) -> bool:
+    """True if any NumpyArray leaf of ``layout`` is bool/integer (dtype kind b, i, u)."""
+    found = False
+
+    def action(node, **kwargs):
+        nonlocal found
+        if node.is_numpy and node.dtype.kind in "biu":
+            found = True
+            return node  # stop descending this branch; one integral leaf is enough
+        return None
+
+    ak._do.recursively_apply(layout, action, return_array=False)
+    return found
+
+
+def promote_integral_to_float64(array):
+    """Promote bool/integer data to ``float64`` to avoid integer overflow in
+    summations, matching NumPy's reduction dtype for ``mean``/``var``/``std``.
+
+    Floating and complex data is returned unchanged, so there is no copy for the
+    common (already-floating) case. The cast is performed by the array's own
+    backend, so on GPU it stays on device -- no host transfer.
+    """
+    if _has_integral_leaf(array.layout):
+        return ak.operations.ak_values_astype._impl(
+            array,
+            np.float64,
+            including_unknown=False,
+            highlevel=True,
+            behavior=None,
+            attrs=None,
+        )
+    return array
 
 
 def merge_mappings(
@@ -219,9 +255,8 @@ def wrap_layout(
     allow_other: bool = False,
     attrs: Mapping | None = None,
 ) -> T | Array | HighLevelRecord:
-    import awkward.highlevel
-    from awkward.contents import Content
-    from awkward.record import Record
+    Content = ak.contents.Content
+    Record = ak.record.Record
 
     assert isinstance(content, (Content, Record)) or allow_other
     assert behavior is None or isinstance(behavior, Mapping)
@@ -231,9 +266,9 @@ def wrap_layout(
             behavior = behavior_of(like)
 
         if isinstance(content, Content):
-            return awkward.highlevel.Array(content, behavior=behavior, attrs=attrs)
+            return ak.highlevel.Array(content, behavior=behavior, attrs=attrs)
         elif isinstance(content, Record):
-            return awkward.highlevel.Record(content, behavior=behavior, attrs=attrs)
+            return ak.highlevel.Record(content, behavior=behavior, attrs=attrs)
         elif allow_other:
             return content
         else:
@@ -291,7 +326,7 @@ def from_arraylib(
 
     def recurse(array, mask=None):
         if regulararray and len(array.shape) > 1:
-            new_shape = (-1, *array.shape[2:])
+            new_shape = (array.shape[0] * array.shape[1], *array.shape[2:])
             return RegularArray(
                 recurse(nplike.reshape(array, new_shape), mask),
                 array.shape[1],

@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_BitMaskedArray_to_IndexedOptionArray(
-  T* toindex,
-  const uint8_t* frombitmask,
+  T* __restrict__ toindex,
+  const uint8_t* __restrict__ frombitmask,
   int64_t bitmasklength,
   bool validwhen,
   bool lsb_order) {
@@ -134,8 +134,8 @@ ERROR awkward_BitMaskedArray_to_IndexedOptionArray(
   return success();
 }
 ERROR awkward_BitMaskedArray_to_IndexedOptionArray64(
-  int64_t* toindex,
-  const uint8_t* frombitmask,
+  int64_t* __restrict__ toindex,
+  const uint8_t* __restrict__ frombitmask,
   int64_t bitmasklength,
   bool validwhen,
   bool lsb_order) {

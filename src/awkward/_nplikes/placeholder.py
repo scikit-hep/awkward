@@ -95,10 +95,7 @@ class PlaceholderArray(MaterializableArray):
 
     def __repr__(self):
         dtype = repr(self._dtype)
-        if self.shape is None:
-            shape = ""
-        else:
-            shape = f", shape={self._shape!r}"
+        shape = f", shape={self._shape!r}"
         return f"PlaceholderArray({dtype}{shape})"
 
     def __getitem__(self, index):
@@ -147,7 +144,7 @@ class PlaceholderArray(MaterializableArray):
         del key
         maybe_materialize(self, value)
 
-    def __bool__(self):  # pylint: disable=E0304
+    def __bool__(self):  # pylint: disable=E0304  # noqa: PLE0304
         self.materialize()
 
     def __int__(self):

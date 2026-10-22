@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_missing_repeat(
-  T* outindex,
-  const T* index,
+  T* __restrict__ outindex,
+  const T* __restrict__ index,
   int64_t indexlength,
   int64_t repetitions,
   int64_t regularsize) {
@@ -24,8 +24,8 @@ ERROR awkward_missing_repeat(
   return success();
 }
 ERROR awkward_missing_repeat_64(
-  int64_t* outindex,
-  const int64_t* index,
+  int64_t* __restrict__ outindex,
+  const int64_t* __restrict__ index,
   int64_t indexlength,
   int64_t repetitions,
   int64_t regularsize) {

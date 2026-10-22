@@ -6,7 +6,7 @@
 
 template <typename T>
 ERROR awkward_RegularArray_getitem_next_at(
-  T* tocarry,
+  T* __restrict__ tocarry,
   int64_t at,
   int64_t length,
   int64_t size) {
@@ -23,7 +23,7 @@ ERROR awkward_RegularArray_getitem_next_at(
   return success();
 }
 ERROR awkward_RegularArray_getitem_next_at_64(
-  int64_t* tocarry,
+  int64_t* __restrict__ tocarry,
   int64_t at,
   int64_t length,
   int64_t size) {

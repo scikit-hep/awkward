@@ -6,9 +6,9 @@
 #include "awkward/kernel-utils.h"
 
 ERROR awkward_RegularArray_combinations_64(
-  int64_t** tocarry,
-  int64_t* toindex,
-  int64_t* fromindex,
+  int64_t** __restrict__ tocarry,
+  int64_t* __restrict__ toindex,
+  int64_t* __restrict__ fromindex,
   int64_t n,
   bool replacement,
   int64_t size,

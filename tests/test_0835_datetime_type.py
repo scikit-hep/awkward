@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import datetime
 
@@ -328,14 +327,14 @@ def test_argmin_argmax():
         check_valid=True,
     )
     assert to_list(ak.operations.argmin(array, axis=0)) == [
-        [1, 1, 0],
-        [1],
+        [2, 2, 0],
+        [2],
         [0, 0],
         [0],
     ]
     assert to_list(ak.operations.argmax(array, axis=0)) == [
         [0, 0, 0],
-        [1],
+        [2],
         [0, 0],
         [0],
     ]

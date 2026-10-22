@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 import awkward as ak
 from awkward._dispatch import high_level_function
@@ -10,12 +9,16 @@ __all__ = ("is_tuple",)
 
 @high_level_function()
 def is_tuple(array):
-    """
+    """Returns True if a record, or the outermost record of an array, is a tuple.
+
+    If `array` is a record, this returns True if the record is a tuple. If
+    `array` is an array, this returns True if the outermost record is a tuple.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
 
-    If `array` is a record, this returns True if the record is a tuple.
-    If `array` is an array, this returns True if the outermost record is a tuple.
+    Returns:
+        True if `array` (or its outermost record) is a tuple, False otherwise.
     """
     # Dispatch
     yield (array,)

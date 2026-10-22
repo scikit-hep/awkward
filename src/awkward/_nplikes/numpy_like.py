@@ -49,6 +49,7 @@ class NumpyMetadata(PublicSingleton):
     uint32 = numpy.uint32
     uint64 = numpy.uint64
     longlong = numpy.longlong
+    float16 = numpy.float16
     float32 = numpy.float32
     float64 = numpy.float64
     complex64 = numpy.complex64
@@ -65,6 +66,8 @@ class NumpyMetadata(PublicSingleton):
     unsignedinteger = numpy.unsignedinteger
     floating = numpy.floating
     complexfloating = numpy.complexfloating
+    longdouble = numpy.longdouble
+    clongdouble = numpy.clongdouble
     number = numpy.number
     object_ = numpy.object_
     generic = numpy.generic
@@ -86,9 +89,6 @@ class NumpyMetadata(PublicSingleton):
 
     AxisError = AxisError
 
-
-if hasattr(numpy, "float16"):
-    NumpyMetadata.float16 = numpy.float16  # type: ignore[attr-defined]
 
 if hasattr(numpy, "float128"):
     NumpyMetadata.float128 = numpy.float128  # type: ignore[attr-defined]
@@ -487,6 +487,7 @@ class NumpyLike(PublicSingleton, Protocol[ArrayLikeT]):
         axis: int | tuple[int, ...] | None = None,
         keepdims: bool = False,
         maybe_out: ArrayLikeT | None = None,
+        dtype: DTypeLike | None = None,
     ) -> ArrayLikeT: ...
 
     @abstractmethod

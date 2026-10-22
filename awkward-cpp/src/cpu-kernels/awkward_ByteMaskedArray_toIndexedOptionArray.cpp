@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_ByteMaskedArray_toIndexedOptionArray(
-  T* toindex,
-  const int8_t* mask,
+  T* __restrict__ toindex,
+  const int8_t* __restrict__ mask,
   int64_t length,
   bool validwhen) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -17,8 +17,8 @@ ERROR awkward_ByteMaskedArray_toIndexedOptionArray(
   return success();
 }
 ERROR awkward_ByteMaskedArray_toIndexedOptionArray64(
-  int64_t* toindex,
-  const int8_t* mask,
+  int64_t* __restrict__ toindex,
+  const int8_t* __restrict__ mask,
   int64_t length,
   bool validwhen) {
   return awkward_ByteMaskedArray_toIndexedOptionArray<int64_t>(

@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #include <stack>
+#include <memory>
 
 #include "awkward/common.h"
 #include "awkward/util.h"
@@ -503,7 +504,7 @@ namespace awkward {
     std::int64_t output_initial_size_;
     double output_resize_factor_;
 
-    T* stack_buffer_;
+    std::unique_ptr<T[]> stack_buffer_;
     std::int64_t stack_depth_;
     std::int64_t stack_max_depth_;
 
@@ -521,22 +522,22 @@ namespace awkward {
     std::vector<std::int64_t> bytecodes_offsets_;
     std::vector<I> bytecodes_;
 
-    char* string_buffer_;
+    std::unique_ptr<char[]> string_buffer_;
     std::int64_t string_buffer_size_;
 
     std::vector<std::shared_ptr<ForthInputBuffer>> current_inputs_;
     std::vector<std::shared_ptr<ForthOutputBuffer>> current_outputs_;
     bool is_ready_;
 
-    std::int64_t* current_which_;
-    std::int64_t* current_where_;
+    std::unique_ptr<std::int64_t[]> current_which_;
+    std::unique_ptr<std::int64_t[]> current_where_;
     std::int64_t recursion_current_depth_;
     std::stack<std::int64_t> recursion_target_depth_;
     std::int64_t recursion_max_depth_;
 
-    std::int64_t* do_recursion_depth_;
-    std::int64_t* do_stop_;
-    std::int64_t* do_i_;
+    std::unique_ptr<std::int64_t[]> do_recursion_depth_;
+    std::unique_ptr<std::int64_t[]> do_stop_;
+    std::unique_ptr<std::int64_t[]> do_i_;
     std::int64_t do_current_depth_;
 
     util::ForthError current_error_;

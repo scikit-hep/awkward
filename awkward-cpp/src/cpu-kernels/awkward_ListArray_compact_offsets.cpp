@@ -6,9 +6,9 @@
 
 template <typename C, typename T>
 ERROR awkward_ListArray_compact_offsets(
-  T* tooffsets,
-  const C* fromstarts,
-  const C* fromstops,
+  T* __restrict__ tooffsets,
+  const C* __restrict__ fromstarts,
+  const C* __restrict__ fromstops,
   int64_t length) {
   tooffsets[0] = 0;
   for (int64_t i = 0;  i < length;  i++) {
@@ -21,36 +21,12 @@ ERROR awkward_ListArray_compact_offsets(
   }
   return success();
 }
-ERROR awkward_ListArray32_compact_offsets_64(
-  int64_t* tooffsets,
-  const int32_t* fromstarts,
-  const int32_t* fromstops,
-  int64_t length) {
-  return awkward_ListArray_compact_offsets<int32_t, int64_t>(
-    tooffsets,
-    fromstarts,
-    fromstops,
-    length);
-}
-ERROR awkward_ListArrayU32_compact_offsets_64(
-  int64_t* tooffsets,
-  const uint32_t* fromstarts,
-  const uint32_t* fromstops,
-  int64_t length) {
-  return awkward_ListArray_compact_offsets<uint32_t, int64_t>(
-    tooffsets,
-    fromstarts,
-    fromstops,
-    length);
-}
-ERROR awkward_ListArray64_compact_offsets_64(
-  int64_t* tooffsets,
-  const int64_t* fromstarts,
-  const int64_t* fromstops,
-  int64_t length) {
-  return awkward_ListArray_compact_offsets<int64_t, int64_t>(
-    tooffsets,
-    fromstarts,
-    fromstops,
-    length);
-}
+
+#define WRAPPER(FUNC, C, T) \
+  ERROR FUNC(T* tooffsets, const C* fromstarts, const C* fromstops, int64_t length) { \
+    return awkward_ListArray_compact_offsets<C, T>(tooffsets, fromstarts, fromstops, length); \
+  }
+
+WRAPPER(awkward_ListArray32_compact_offsets_64, int32_t, int64_t)
+WRAPPER(awkward_ListArrayU32_compact_offsets_64, uint32_t, int64_t)
+WRAPPER(awkward_ListArray64_compact_offsets_64, int64_t, int64_t)

@@ -6,7 +6,7 @@
 
 template <typename TO>
 ERROR awkward_IndexedArray_fill_count(
-  TO* toindex,
+  TO* __restrict__ toindex,
   int64_t toindexoffset,
   int64_t length,
   int64_t base) {
@@ -16,7 +16,7 @@ ERROR awkward_IndexedArray_fill_count(
   return success();
 }
 ERROR awkward_IndexedArray_fill_to64_count(
-  int64_t* toindex,
+  int64_t* __restrict__ toindex,
   int64_t toindexoffset,
   int64_t length,
   int64_t base) {

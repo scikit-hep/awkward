@@ -6,8 +6,8 @@
 
 template <typename T>
 ERROR awkward_RegularArray_getitem_next_range_spreadadvanced(
-  T* toadvanced,
-  const T* fromadvanced,
+  T* __restrict__ toadvanced,
+  const T* __restrict__ fromadvanced,
   int64_t length,
   int64_t nextsize) {
   for (int64_t i = 0;  i < length;  i++) {
@@ -18,8 +18,8 @@ ERROR awkward_RegularArray_getitem_next_range_spreadadvanced(
   return success();
 }
 ERROR awkward_RegularArray_getitem_next_range_spreadadvanced_64(
-  int64_t* toadvanced,
-  const int64_t* fromadvanced,
+  int64_t* __restrict__ toadvanced,
+  const int64_t* __restrict__ fromadvanced,
   int64_t length,
   int64_t nextsize) {
   return awkward_RegularArray_getitem_next_range_spreadadvanced<int64_t>(

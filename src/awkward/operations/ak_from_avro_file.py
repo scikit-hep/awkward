@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from os import PathLike, fsdecode
 
@@ -23,7 +22,12 @@ def from_avro_file(
     behavior=None,
     attrs=None,
 ):
-    """
+    """Reads an Avro file as an Awkward Array.
+
+    Internally this function uses AwkwardForth DSL. The function recursively
+    parses the Avro schema, generates Awkward form and Forth code for that
+    specific Avro file and then reads it.
+
     Args:
         file (path-like or file-like object): Avro file to be read as Awkward Array.
         limit_entries (int): The number of rows of the Avro file to be read into the Awkward Array.
@@ -35,10 +39,8 @@ def from_avro_file(
         attrs (None or dict): Custom attributes for the output array, if
             high-level.
 
-    Reads Avro files as Awkward Arrays.
-
-    Internally this function uses AwkwardForth DSL. The function recursively parses the Avro schema, generates
-    Awkward form and Forth code for that specific Avro file and then reads it.
+    Returns:
+        An #ak.Array read from the given Avro file.
     """
     import awkward._connect.avro
 

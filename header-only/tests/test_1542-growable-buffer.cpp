@@ -301,6 +301,51 @@ void test_copy_complex_as() {
   assert(to_buffer.length() == 0);
 }
 
+void test_append_multi_panel_growth() {
+  // Geometric growth: with resize > 1 each new panel is larger than the last.
+  // Append enough elements to span many panels and verify all values survive.
+  constexpr size_t data_size = 1000;
+  awkward::BuilderOptions options { 4, 2 };
+
+  auto buffer = awkward::GrowableBuffer<int64_t>::empty(options);
+  for (size_t i = 0; i < data_size; i++) {
+    buffer.append((int64_t)i);
+  }
+  assert(buffer.length() == data_size);
+  assert(buffer.last() == (int64_t)(data_size - 1));
+
+  std::unique_ptr<int64_t[]> ptr(new int64_t[buffer.length()]);
+  buffer.concatenate(ptr.get());
+  assert(buffer.length() == data_size);
+
+  for (size_t i = 0; i < data_size; i++) {
+    assert(ptr.get()[i] == (int64_t)i);
+  }
+
+  buffer.clear();
+  assert(buffer.length() == 0);
+}
+
+void test_move_assignment() {
+  // Dropping the `const` on options_ restores move assignment.
+  awkward::BuilderOptions options { 8, 2 };
+
+  auto buffer = awkward::GrowableBuffer<int64_t>::empty(options);
+  for (int64_t i = 0; i < 50; i++) {
+    buffer.append(i);
+  }
+
+  auto other = awkward::GrowableBuffer<int64_t>::empty(options);
+  other = std::move(buffer);
+  assert(other.length() == 50);
+
+  std::unique_ptr<int64_t[]> ptr(new int64_t[other.length()]);
+  other.concatenate(ptr.get());
+  for (int64_t i = 0; i < 50; i++) {
+    assert(ptr.get()[i] == i);
+  }
+}
+
 int main(int /* argc */, const char ** /* argv */) {
   test_full();
   test_arange();
@@ -311,6 +356,7 @@ int main(int /* argc */, const char ** /* argv */) {
   test_double();
   test_complex();
   test_extend();
+  test_append_multi_panel_growth();
   test_append_and_get_ref();
   test_copy_complex_as_complex<double, double>();
   test_copy_complex_as_complex<double, long double>();

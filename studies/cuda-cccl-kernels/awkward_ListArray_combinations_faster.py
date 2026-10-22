@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 """
 awkward_ListArray_combinations — block-parallel RawKernel design.
 
@@ -30,7 +30,6 @@ Pipeline:
   Returns views out0[:total], out1[:total]
 """
 
-from __future__ import annotations
 
 from functools import lru_cache
 from typing import List, Tuple

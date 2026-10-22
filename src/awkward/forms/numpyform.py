@@ -239,6 +239,12 @@ class NumpyForm(NumpyMeta, Form):
         yield (getkey(self, "data"), primitive_to_dtype(self.primitive))
 
     def _is_equal_to(self, other: Any, all_parameters: bool, form_key: bool) -> bool:
-        return self._is_equal_to_generic(other, all_parameters, form_key) and (
-            self._primitive == other._primitive
+        return (
+            self._is_equal_to_generic(other, all_parameters, form_key)
+            and (self._primitive == other._primitive)
+            and len(self._inner_shape) == len(other._inner_shape)
+            and all(
+                x is unknown_length or y is unknown_length or x == y
+                for x, y in zip(self._inner_shape, other._inner_shape, strict=True)
+            )
         )

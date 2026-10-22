@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-from __future__ import annotations
 
 from collections.abc import Mapping
 from functools import reduce
@@ -28,6 +27,16 @@ def zip_no_broadcast(
 ):
     """Combines arrays into a collection of records or tuples without broadcasting.
 
+    Caution: unlike #ak.zip this function will _not_ broadcast the arrays
+    together. During typetracing, it assumes that the given arrays have already
+    the same layouts and lengths.
+
+    This operation may be thought of as the opposite of projection in
+    #ak.Array.__getitem__, which extracts fields one at a time, or #ak.unzip,
+    which extracts them all in one call.
+
+    See also #ak.zip and #ak.unzip.
+
     Args:
         arrays (mapping or sequence of arrays): Each value in this mapping or
             sequence can be any array-like data that #ak.to_layout recognizes.
@@ -44,15 +53,8 @@ def zip_no_broadcast(
             high-level.
 
     Returns:
-        Combines `arrays` into a single structure as the fields of a collection
-        of records or the slots of a collection of tuples.
-
-        Caution: unlike #ak.zip this function will _not_ broadcast the arrays together.
-        During typetracing, it assumes that the given arrays have already the same layouts and lengths.
-
-        This operation may be thought of as the opposite of projection in
-        #ak.Array.__getitem__, which extracts fields one at a time, or
-        #ak.unzip, which extracts them all in one call.
+        An array of records (or tuples) whose fields (or slots) are the
+        `arrays`, combined into a single structure.
 
     Examples:
         Consider the following arrays, `one` and `two`.
@@ -76,8 +78,6 @@ def zip_no_broadcast(
          [],
          [(4.4, 'd')],
          []]
-
-        See also #ak.zip and #ak.unzip.
     """
     # Dispatch
     if isinstance(arrays, Mapping):

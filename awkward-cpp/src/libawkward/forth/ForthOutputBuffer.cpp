@@ -718,7 +718,13 @@ namespace awkward {
     if (next > reserved_) {
       std::int64_t reservation = reserved_;
       while (next > reservation) {
-        reservation = (std::int64_t)std::ceil((double)reservation * (double)resize_);
+        std::int64_t grown = (std::int64_t)std::ceil((double)reservation * (double)resize_);
+        // Guarantee strict growth: when reservation is 0 or resize_ <= 1.0 the
+        // geometric step can fail to increase reservation, looping forever.
+        if (grown <= reservation) {
+          grown = reservation + 1;
+        }
+        reservation = grown;
       }
       std::shared_ptr<OUT> new_buffer = std::shared_ptr<OUT>(new OUT[(std::size_t)reservation],
                                                              util::array_deleter<OUT>());

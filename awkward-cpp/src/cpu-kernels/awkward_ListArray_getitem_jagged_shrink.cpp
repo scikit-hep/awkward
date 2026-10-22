@@ -6,13 +6,13 @@
 
 template <typename T>
 ERROR awkward_ListArray_getitem_jagged_shrink(
-  T* tocarry,
-  T* tosmalloffsets,
-  T* tolargeoffsets,
-  const T* slicestarts,
-  const T* slicestops,
+  T* __restrict__ tocarry,
+  T* __restrict__ tosmalloffsets,
+  T* __restrict__ tolargeoffsets,
+  const T* __restrict__ slicestarts,
+  const T* __restrict__ slicestops,
   int64_t length,
-  const T* missing) {
+  const T* __restrict__ missing) {
   int64_t k = 0;
   if (length == 0) {
     tosmalloffsets[0] = 0;
@@ -44,13 +44,13 @@ ERROR awkward_ListArray_getitem_jagged_shrink(
   return success();
 }
 ERROR awkward_ListArray_getitem_jagged_shrink_64(
-  int64_t* tocarry,
-  int64_t* tosmalloffsets,
-  int64_t* tolargeoffsets,
-  const int64_t* slicestarts,
-  const int64_t* slicestops,
+  int64_t* __restrict__ tocarry,
+  int64_t* __restrict__ tosmalloffsets,
+  int64_t* __restrict__ tolargeoffsets,
+  const int64_t* __restrict__ slicestarts,
+  const int64_t* __restrict__ slicestops,
   int64_t length,
-  const int64_t* missing) {
+  const int64_t* __restrict__ missing) {
   return awkward_ListArray_getitem_jagged_shrink<int64_t>(
     tocarry,
     tosmalloffsets,

@@ -6,10 +6,10 @@
 
 template <typename T, typename C>
 ERROR awkward_IndexedArray_flatten_none2empty(
-  T* outoffsets,
-  const C* outindex,
+  T* __restrict__ outoffsets,
+  const C* __restrict__ outindex,
   int64_t outindexlength,
-  const T* offsets,
+  const T* __restrict__ offsets,
   int64_t offsetslength) {
   outoffsets[0] = offsets[0];
   int64_t k = 1;
@@ -31,42 +31,12 @@ ERROR awkward_IndexedArray_flatten_none2empty(
   }
   return success();
 }
-ERROR awkward_IndexedArray32_flatten_none2empty_64(
-  int64_t* outoffsets,
-  const int32_t* outindex,
-  int64_t outindexlength,
-  const int64_t* offsets,
-  int64_t offsetslength) {
-  return awkward_IndexedArray_flatten_none2empty<int64_t, int32_t>(
-    outoffsets,
-    outindex,
-    outindexlength,
-    offsets,
-    offsetslength);
-}
-ERROR awkward_IndexedArrayU32_flatten_none2empty_64(
-  int64_t* outoffsets,
-  const uint32_t* outindex,
-  int64_t outindexlength,
-  const int64_t* offsets,
-  int64_t offsetslength) {
-  return awkward_IndexedArray_flatten_none2empty<int64_t, uint32_t>(
-    outoffsets,
-    outindex,
-    outindexlength,
-    offsets,
-    offsetslength);
-}
-ERROR awkward_IndexedArray64_flatten_none2empty_64(
-  int64_t* outoffsets,
-  const int64_t* outindex,
-  int64_t outindexlength,
-  const int64_t* offsets,
-  int64_t offsetslength) {
-  return awkward_IndexedArray_flatten_none2empty<int64_t, int64_t>(
-    outoffsets,
-    outindex,
-    outindexlength,
-    offsets,
-    offsetslength);
-}
+
+#define WRAPPER(FUNC, T, C) \
+  ERROR FUNC(T* outoffsets, const C* outindex, int64_t outindexlength, const T* offsets, int64_t offsetslength) { \
+    return awkward_IndexedArray_flatten_none2empty<T, C>(outoffsets, outindex, outindexlength, offsets, offsetslength); \
+  }
+
+WRAPPER(awkward_IndexedArray32_flatten_none2empty_64, int64_t, int32_t)
+WRAPPER(awkward_IndexedArrayU32_flatten_none2empty_64, int64_t, uint32_t)
+WRAPPER(awkward_IndexedArray64_flatten_none2empty_64, int64_t, int64_t)

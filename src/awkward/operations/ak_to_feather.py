@@ -1,10 +1,13 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
-from __future__ import annotations
 
 import os
+import warnings
+
+from packaging.version import parse as parse_version
 
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._experimental import _find_stack_level
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("to_feather",)
@@ -29,7 +32,18 @@ def to_feather(
     chunksize=None,
     feather_version=2,
 ):
-    """
+    """Writes an Awkward Array to a Feather file (through pyarrow).
+
+    If the `array` does not contain records at top-level, the Arrow table will
+    consist of one field whose name is `""` iff. `extensionarray` is False.
+
+    If `extensionarray` is True`, use a custom Arrow extension to store this array.
+    Otherwise, generic Arrow arrays are used, and if the `array` does not
+    contain records at top-level, the Arrow table will consist of one field whose
+    name is `""`. See #ak.to_arrow_table for more details.
+
+    See also #ak.from_feather.
+
     Args:
         array: Array-like data (anything #ak.to_layout recognizes).
         destination (str): Local destination path, passed to
@@ -72,20 +86,13 @@ def to_feather(
             Version 2 is the current. Version 1 is the more limited legacy format. If not
             provided, version 2 is used.
 
-    Writes an Awkward Array to a Feather file (through pyarrow).
+    Returns:
+        None. The contents of `array` are written to the given Feather file
+        (through pyarrow).
 
+    Examples:
         >>> array = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5]])
         >>> ak.to_feather(array, "filename.feather")
-
-    If the `array` does not contain records at top-level, the Arrow table will
-    consist of one field whose name is `""` iff. `extensionarray` is False.
-
-    If `extensionarray` is True`, use a custom Arrow extension to store this array.
-    Otherwise, generic Arrow arrays are used, and if the `array` does not
-    contain records at top-level, the Arrow table will consist of one field whose
-    name is `""`. See #ak.to_arrow_table for more details.
-
-    See also #ak.from_feather.
     """
 
     # Dispatch
@@ -136,6 +143,21 @@ def _impl(
         string_policy="as-characters",
     )
 
+    if (
+        extensionarray
+        and parse_version(pyarrow.__version__) < parse_version("26.0.0")
+        and _contains_union(
+            (layout.array if isinstance(layout, ak.record.Record) else layout).form
+        )
+    ):
+        warnings.warn(
+            "pyarrow < 26 writes unions wrapped in Arrow extension types as invalid "
+            "Feather files that cannot be read back (apache/arrow#50623); upgrade "
+            "to pyarrow 26 or later, or pass extensionarray=False",
+            UserWarning,
+            stacklevel=_find_stack_level(),
+        )
+
     table = ak.operations.ak_to_arrow_table._impl(
         layout,
         list_to32,
@@ -159,6 +181,27 @@ def _impl(
             f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
 
-    pyarrow.feather.write_feather(
-        table, destination, compression, compression_level, chunksize, feather_version
-    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="pyarrow.feather.write_feather is deprecated.*",
+            category=FutureWarning,
+        )
+        pyarrow.feather.write_feather(
+            table,
+            destination,
+            compression,
+            compression_level,
+            chunksize,
+            feather_version,
+        )
+
+
+def _contains_union(form):
+    if form.is_union:
+        return True
+    if form.is_record:
+        return any(_contains_union(x) for x in form.contents)
+    if form.is_list or form.is_option or form.is_indexed:
+        return _contains_union(form.content)
+    return False
