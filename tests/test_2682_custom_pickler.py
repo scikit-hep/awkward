@@ -1,14 +1,10 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+import importlib.metadata
 import os
 import pickle
 import sys
-
-if sys.version_info < (3, 12):
-    import importlib_metadata
-else:
-    import importlib.metadata as importlib_metadata
 
 import pytest
 
@@ -16,7 +12,7 @@ import awkward as ak
 
 
 def has_entry_point():
-    return bool(importlib_metadata.entry_points(group="awkward.pickle.reduce").names)
+    return bool(importlib.metadata.entry_points(group="awkward.pickle.reduce").names)
 
 
 if sys.platform.startswith("emscripten"):

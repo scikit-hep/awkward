@@ -1,6 +1,5 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
 
-import packaging.version
 import pytest
 
 import awkward as ak
@@ -199,9 +198,7 @@ def test_string_operations_unary_with_arg(func, arg):
 
 
 def test_string_operations_unary_with_arg_slice():
-    pyarrow = pytest.importorskip("pyarrow")
-    if packaging.version.Version(pyarrow.__version__) < packaging.version.Version("13"):
-        pytest.xfail("pyarrow<13 fails to perform this slice")
+    pytest.importorskip("pyarrow")
     # Default no attrs
     assert (
         ak.str.slice(

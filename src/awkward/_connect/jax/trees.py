@@ -139,11 +139,6 @@ def jax_unflatten(aux_data: AuxData, children: tuple) -> T | None:
     return aux_data.unflatten(children)
 
 
-HighLevelType = TypeVar(
-    "HighLevelType", bound="type[highlevel.Array | highlevel.Record]"
-)
-
-
 def register_pytree_class(cls: T) -> T:
     """
     Args:

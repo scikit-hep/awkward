@@ -75,25 +75,19 @@ class ErrorContext:
             # Step out of the way so that another ErrorContext can become primary.
             # Is this necessary to do here? (We're about to raise an exception anyway)
             self._slate.__dict__.clear()
-            # Handle caught exception
-            raise self.decorate_exception(exception_type, exception_value)
+            # Add the note in place; the original exception propagates with its own traceback
+            self.decorate_exception(exception_type, exception_value)
         else:
             # Step out of the way so that another ErrorContext can become primary.
             if self.primary() is self:
                 self._slate.__dict__.clear()
 
-    def decorate_exception(self, cls: type[E], exception: E) -> Exception:
-        def _add_note(exception: E, note: str) -> E:
-            if hasattr(exception, "add_note"):
-                exception.add_note(note)
-            else:
-                exception.__notes__ = [note]
-            return exception
-
+    def decorate_exception(self, cls: type[E], exception: E) -> E:
         note = self.note
         if issubclass(cls, (NotImplementedError, AssertionError)):
             note = "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
-        return _add_note(exception, note)
+        exception.add_note(note)
+        return exception
 
     def format_argument(self, width, value):
         from awkward import contents, highlevel, record
@@ -163,9 +157,6 @@ class ErrorContext:
             return f"{type(value).__name__}-instance"
         else:
             return valuestr
-
-    def format_exception(self, exception: Exception) -> str:
-        raise NotImplementedError
 
     @property
     def note(self) -> str:
@@ -260,9 +251,6 @@ class OperationErrorContext(ErrorContext):
             out = self._kwargs["kwargs"] = out()
         return out
 
-    def format_exception(self, exception: Exception) -> str:
-        return f"{exception}\n{self.note}"
-
     @property
     def note(self) -> str:
         arguments = []
@@ -323,9 +311,6 @@ class SlicingErrorContext(ErrorContext):
         if isinstance(out, PartialFunction):
             out = self._kwargs["where"] = out()
         return out
-
-    def format_exception(self, exception):
-        return f"{exception}\n{self.note}"
 
     @property
     def note(self) -> str:

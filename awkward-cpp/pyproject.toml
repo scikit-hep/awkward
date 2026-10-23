@@ -9,7 +9,7 @@ build-backend = "scikit_build_core.build"
 name = "awkward_cpp"
 version = "57"
 dependencies = [
-    "numpy>=1.21.3"
+    "numpy>=1.23.2"
 ]
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
@@ -99,9 +99,6 @@ pytest -p no:cacheprovider \
        {package}/tests-spec \
        {package}/tests-spec-explicit
 """]
-skip = [
-    "cp311-win_arm64",  # No numpy wheels
-]
 test-skip = [
     "*musllinux*",
 ]
