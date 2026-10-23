@@ -113,7 +113,7 @@ jobs:
           allow-prereleases: true
 
       - name: Generate build files
-        run: pipx run --python python3.11 nox -s prepare -- --headers --signatures --tests
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
@@ -267,7 +267,7 @@ jobs:
             root=6.36.06
 
       - name: Generate build files
-        run: pipx run --python python3.11 nox -s prepare -- --headers --signatures --tests
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
@@ -432,7 +432,7 @@ jobs:
           key: ${{ steps.container-cache.outputs.cache-primary-key }}
 
       - name: Generate build files
-        run: pipx run --python python3.11 nox -s prepare -- --headers --signatures --tests
+        run: pipx run nox -s prepare -- --headers --signatures --tests
 
       - name: Cache awkward-cpp wheel
         id: cache-awkward-cpp-wheel
