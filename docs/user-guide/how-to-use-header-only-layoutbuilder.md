@@ -9,6 +9,9 @@ kernelspec:
   display_name: ROOT C++
   language: c++
   name: root
+myst:
+  html_meta:
+    description: "How to use the header-only LayoutBuilder to build Awkward Arrays in C++."
 ---
 
 How to use the header-only LayoutBuilder in C++

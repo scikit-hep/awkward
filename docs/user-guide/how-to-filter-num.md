@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to filter arrays by the number of items in each list."
 ---
 
 How to filter arrays by number of items
