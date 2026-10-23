@@ -51,10 +51,10 @@ def _classify_leaf(value):
     """
     if isinstance(value, ak.Array):
         return "column", value
-    if isinstance(value, (int, float)):
+    if isinstance(value, (int, float, complex, np.generic)):
         return "scalar", value
     if hasattr(value, "ndim") and getattr(value, "ndim", None) == 0:
-        return "scalar", value.item()
+        return "scalar", value[()]
     raise FusionUnsupported(f"unsupported fused leaf of type {type(value).__name__}")
 
 
@@ -74,7 +74,11 @@ def _compile_op(source: str):
     Returns a callable ``_fused(c)`` evaluating the expression.
     """
     ns: dict = {}
-    exec(f"def _fused(c):\n    return {source}\n", {"np": np}, ns)
+    exec(
+        f"def _fused(c):\n    return {source}\n",
+        {"np": np, "inf": float("inf"), "nan": float("nan")},
+        ns,
+    )
     return ns["_fused"]
 
 
