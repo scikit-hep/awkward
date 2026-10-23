@@ -158,7 +158,12 @@ def _align(layout, axis):
             widths[depth] = unknown_length
         # Missing lists have no coordinates. Turn them into empty lists before
         # padding, so gaps become missing numeric slots rather than missing rows.
-        layout = ak.fill_none(layout, [], axis=depth - 1, highlevel=False)
+        layout = ak.fill_none(
+            layout,
+            ak.contents.EmptyArray(backend=layout.backend),
+            axis=depth - 1,
+            highlevel=False,
+        )
         layout = ak.pad_none(
             layout, widths[depth], axis=depth, clip=True, highlevel=False
         )
@@ -171,7 +176,12 @@ def _trim_alignment(layout, counts, widths, axis):
         # The count template has the searched axis reduced away. Pad the
         # remaining inner dimensions, then reinsert a singleton search axis.
         for inner in range(axis + 1, depth):
-            sizes = ak.fill_none(sizes, [], axis=inner - 2, highlevel=False)
+            sizes = ak.fill_none(
+                sizes,
+                ak.contents.EmptyArray(backend=sizes.backend),
+                axis=inner - 2,
+                highlevel=False,
+            )
             sizes = ak.pad_none(
                 sizes, widths[inner], axis=inner - 1, clip=True, highlevel=False
             )

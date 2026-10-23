@@ -93,3 +93,17 @@ def test_nonlocal_nextshifts_matches_cpu(counts, outer_offsets, maxcount, prefix
     ak._connect.cuda.synchronize_cuda()
     for expected, actual in zip(arrays[:3], gpu_args[:3], strict=True):
         np.testing.assert_array_equal(cp.asnumpy(actual), expected)
+
+
+@pytest.mark.parametrize("axis", [0, 1])
+def test_deep_alignment_keeps_cuda_backend(axis):
+    # Exercise both alignment and trimming with more than one inner dimension.
+    cpu = ak.Array([[[[3], [1, 5]], None], [[[2, 4]], [[6], []]]])
+    gpu = ak.to_backend(cpu, "cuda")
+    expected = ak.top_k(cpu, 2, axis=axis, highlevel=False)
+    result = ak.top_k(gpu, 2, axis=axis, highlevel=False)
+    for actual, reference in zip(result, expected, strict=True):
+        assert actual.backend is gpu.layout.backend
+        assert actual.form == reference.form
+        assert ak.to_list(actual) == ak.to_list(reference)
+    ak._connect.cuda.synchronize_cuda()

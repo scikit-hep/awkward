@@ -46,7 +46,7 @@ def test_ragged_innermost(k, mode):
 @pytest.mark.parametrize("k", [0, 1, 2, 8])
 def test_rectangular(axis, mode, k):
     array = np.array([[[3, 1, 5], [2, 4, 0]], [[9, 8, 7], [6, 2, 1]]])
-    order = np.argsort(-array if mode == "largest" else array, axis=axis, stable=True)
+    order = np.argsort(-array if mode == "largest" else array, axis=axis, kind="stable")
     selection = (slice(None),) * (axis % array.ndim) + (slice(None, k),)
     indices = order[selection]
     values = np.take_along_axis(array, indices, axis=axis)
