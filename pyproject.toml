@@ -58,12 +58,12 @@ dynamic = [
 init = "awkward.numba:_register"
 
 [project.urls]
-"Bug Tracker" = "https://github.com/scikit-hep/awkward-1.0/issues"
-"Discussions" = "https://github.com/scikit-hep/awkward-1.0/discussions"
+"Bug Tracker" = "https://github.com/scikit-hep/awkward/issues"
+"Discussions" = "https://github.com/scikit-hep/awkward/discussions"
 "Documentation" = "https://awkward-array.org"
-"Homepage" = "https://github.com/scikit-hep/awkward-1.0"
-"Releases" = "https://github.com/scikit-hep/awkward-1.0/releases"
-"Source Code" = "https://github.com/scikit-hep/awkward-1.0"
+"Homepage" = "https://github.com/scikit-hep/awkward"
+"Releases" = "https://github.com/scikit-hep/awkward/releases"
+"Source Code" = "https://github.com/scikit-hep/awkward"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/awkward"]
@@ -104,8 +104,8 @@ content-type = "text/markdown"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 text = """
-<a href="https://github.com/scikit-hep/awkward-1.0">
-    <img src="https://github.com/scikit-hep/awkward-1.0/raw/main/docs-img/logo/logo-300px.png">
+<a href="https://github.com/scikit-hep/awkward">
+    <img src="https://github.com/scikit-hep/awkward/raw/main/docs-img/logo/logo-300px.png">
 </a>
 """
 
@@ -336,6 +336,25 @@ mccabe.max-complexity = 100
 "jax".msg = "Use `jax = ak._nplikes.Jax.instance()` instead"
 "cupy".msg = "Use `cupy = ak._nplikes.Cupy.instance()` instead"
 
+[dependency-groups]
+dev = [
+    "hypothesis-awkward",
+    "numba; sys_platform != 'win32'",
+    "numexpr",
+    "pandas; sys_platform != 'win32'",
+    "pyarrow; sys_platform != 'win32'",
+    "pytest>=6",
+    "pytest-cov",
+    "pytest-xdist",
+    "PyYAML",
+]
+
 [tool.uv]
 exclude-newer = "7 days"
 exclude-newer-package = { awkward_cpp = false, hypothesis_awkward = false }
+
+[tool.uv.workspace]
+members = ["awkward-cpp"]
+
+[tool.uv.sources]
+awkward_cpp = { workspace = true }
