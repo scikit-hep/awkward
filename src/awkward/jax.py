@@ -9,13 +9,9 @@ import weakref
 import awkward as ak
 from awkward import highlevel
 from awkward._nplikes.numpy import Numpy
-from awkward._typing import TypeVar
+from awkward._typing import TypeVar, assert_never
 
 numpy = Numpy.instance()
-
-
-def assert_never(arg) -> None:
-    raise AssertionError(f"this should never be run: {arg}")
 
 
 class _RegistrationState(enum.Enum):

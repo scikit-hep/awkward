@@ -188,13 +188,6 @@ def _fields_of_strg_type(typ: pyarrow.Type) -> list[pyarrow.Field]:
         ]  # Wrap in a field for consistency
     elif typ.num_fields == 0:
         return []
-    elif not hasattr(typ, "field"):
-        # Old versions of pyarrow have this quirk.
-        if hasattr(typ, "value_field"):
-            return [typ.value_field]
-        elif hasattr(typ, "__iter__"):
-            return list(typ)
-        raise TypeError(f"Cannot handle arrow type {typ}")
     else:
         return [typ.field(i) for i in range(typ.num_fields)]
 
@@ -263,15 +256,6 @@ def array_with_replacement_type(
     ]
     own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
     if isinstance(native_type, pyarrow.lib.DictionaryType):
-        # The following works with newer pyarrow versions, but not 7.0:
-        # native_dict = pyarrow.DictionaryArray.from_buffers(
-        #     type=native_type,
-        #     length=len(orig_array),
-        #     buffers=own_buffers,
-        #     dictionary=children_new[0],
-        #     null_count=orig_array.null_count,
-        #     offset=orig_array.offset,
-        # )
         if isinstance(orig_array, AwkwardArrowArray):
             native_orig = orig_array.storage
         else:
