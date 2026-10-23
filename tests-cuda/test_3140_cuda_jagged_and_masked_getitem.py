@@ -121,8 +121,13 @@ def test_0111_jagged_and_masked_getitem_emptyarray():
         == cuda_listoffsetarray[cuda_array4].form
     )
 
-    with pytest.raises(IndexError):
-        cuda_listoffsetarray[cuda_array5]
+    # Drain deferred kernel errors even when slicing first raises in Python.
+    # Otherwise the stream error flag causes later tests to skip their kernels.
+    with pytest.raises((IndexError, ValueError)):
+        try:
+            cuda_listoffsetarray[cuda_array5]
+        finally:
+            ak._connect.cuda.synchronize_cuda()
 
     del cuda_listoffsetarray
 
@@ -398,8 +403,11 @@ def test_0111_jagged_and_masked_getitem_indexedarray3():
         [5.5],
     ]
     assert cuda_array.to_typetracer()[cuda_array5].form == cuda_array[cuda_array5].form
-    with pytest.raises(IndexError):
-        cuda_array[cuda_array6]
+    with pytest.raises((IndexError, ValueError)):
+        try:
+            cuda_array[cuda_array6]
+        finally:
+            ak._connect.cuda.synchronize_cuda()
 
     del cuda_array
     del cuda_array2
