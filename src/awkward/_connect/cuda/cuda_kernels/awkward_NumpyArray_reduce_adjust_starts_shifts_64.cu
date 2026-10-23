@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 // See `awkward_NumpyArray_reduce_adjust_starts_64.cu` for the rationale:
 // `parents[toptr[k]] == k` by construction, so we use the thread/bin index

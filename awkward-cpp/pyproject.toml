@@ -49,12 +49,12 @@ license-files = ["LICENSE", "rapidjson/license.txt"]
 requires-python = ">=3.10"
 
 [project.urls]
-Homepage = "https://github.com/scikit-hep/awkward-1.0"
+Homepage = "https://github.com/scikit-hep/awkward"
 Documentation = "https://awkward-array.org"
-"Source Code" = "https://github.com/scikit-hep/awkward-1.0"
-"Bug Tracker" = "https://github.com/scikit-hep/awkward-1.0/issues"
-Discussions = "https://github.com/scikit-hep/awkward-1.0/discussions"
-Releases = "https://github.com/scikit-hep/awkward-1.0/releases"
+"Source Code" = "https://github.com/scikit-hep/awkward"
+"Bug Tracker" = "https://github.com/scikit-hep/awkward/issues"
+Discussions = "https://github.com/scikit-hep/awkward/discussions"
+Releases = "https://github.com/scikit-hep/awkward/releases"
 
 
 [tool.scikit-build]

@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 enum class UNIONARRAY_VALIDITY_ERRORS {
   TAGS_LT_0,    // message: "tags[i] < 0"
