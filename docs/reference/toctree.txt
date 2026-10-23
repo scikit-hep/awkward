@@ -16,6 +16,7 @@
     :caption: Converting rectangular arrays
 
     generated/ak.from_numpy
+    generated/ak.to_dense
     generated/ak.to_numpy
     generated/ak.from_cupy
     generated/ak.to_cupy
