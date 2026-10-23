@@ -35,6 +35,12 @@ def zip_no_broadcast(
     #ak.Array.__getitem__, which extracts fields one at a time, or #ak.unzip,
     which extracts them all in one call.
 
+    Only #ak.contents.NumpyArray layouts and #ak.contents.ListOffsetArray
+    layouts with NumpyArray contents are supported. List contents such as
+    strings, records, options, or further nested lists raise NotImplementedError;
+    use #ak.zip
+    for those layouts.
+
     See also #ak.zip and #ak.unzip.
 
     Args:
@@ -60,24 +66,24 @@ def zip_no_broadcast(
         Consider the following arrays, `one` and `two`.
 
         >>> one = ak.Array([[1.1, 2.2, 3.3], [], [4.4, 5.5], [6.6]])
-        >>> two = ak.Array([["a", "b", "c"], [], ["d", "e"], ["f"]])
+        >>> two = ak.Array([[1, 2, 3], [], [4, 5], [6]])
 
         Zipping them together using a dict creates a collection of records with
         the same nesting structure as `one` and `two`.
 
         >>> ak.zip_no_broadcast({"x": one, "y": two}).show()
-        [[{x: 1.1, y: 'a'}, {x: 2.2, y: 'b'}, {x: 3.3, y: 'c'}],
+        [[{x: 1.1, y: 1}, {x: 2.2, y: 2}, {x: 3.3, y: 3}],
          [],
-         [{x: 4.4, y: 'd'}],
-         []]
+         [{x: 4.4, y: 4}, {x: 5.5, y: 5}],
+         [{x: 6.6, y: 6}]]
 
         Doing so with a list creates tuples, whose fields are not named.
 
         >>> ak.zip_no_broadcast([one, two]).show()
-        [[(1.1, 'a'), (2.2, 'b'), (3.3, 'c')],
+        [[(1.1, 1), (2.2, 2), (3.3, 3)],
          [],
-         [(4.4, 'd')],
-         []]
+         [(4.4, 4), (5.5, 5)],
+         [(6.6, 6)]]
     """
     # Dispatch: provide the underlying arrays to the dispatcher
     if isinstance(arrays, Mapping):
@@ -140,13 +146,12 @@ def _impl(
     if not layouts:
         raise ValueError("zip_no_broadcast requires at least one array")
 
-    backend = layouts[0].backend
-
     if with_name is not None:
         parameters = dict(parameters) if parameters is not None else {}
         parameters["__record__"] = with_name
 
     if all(isinstance(layout, ak.contents.NumpyArray) for layout in layouts):
+        backend = layouts[0].backend
         length = _check_equal_lengths(layouts)
         out = ak.contents.RecordArray(
             layouts,
@@ -157,6 +162,7 @@ def _impl(
         )
 
     elif all(isinstance(layout, ak.contents.ListOffsetArray) for layout in layouts):
+        backend = layouts[0].backend
         contents: list[ak.contents.Content] = []
         for layout in layouts:
             if not isinstance(layout.content, ak.contents.NumpyArray):
@@ -173,13 +179,14 @@ def _impl(
             comparable_offsets = [
                 layout.offsets
                 for layout in layouts
-                if not isinstance(layout.offsets, PlaceholderArray)
+                if not isinstance(layout.offsets.data, PlaceholderArray)
             ]
 
             if comparable_offsets:
                 first = comparable_offsets[0]
                 if not all(
-                    first.nplike.all(other.data == first.data)
+                    other.length == first.length
+                    and first.nplike.all(other.data == first.data)
                     for other in comparable_offsets
                 ):
                     raise ValueError("all ListOffsetArrays must have the same offsets")
