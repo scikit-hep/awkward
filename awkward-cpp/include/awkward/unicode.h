@@ -18,6 +18,6 @@
 #define UTF8_CONTINUATION_BITS 0x80
 
 
-size_t utf8_codepoint_size(const uint8_t byte);
+std::size_t utf8_codepoint_size(const std::uint8_t byte);
 
 #endif // AWKWARD_UNICODE_H_
