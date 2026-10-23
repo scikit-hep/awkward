@@ -26,7 +26,7 @@ from awkward._parameters import (
     parameters_are_equal,
     parameters_intersect,
 )
-from awkward._typing import Any, JSONMapping, List, TypedDict
+from awkward._typing import Any, JSONMapping, TypedDict
 from awkward._util import UNSET, Sentinel
 from awkward.contents.bitmaskedarray import BitMaskedArray
 from awkward.contents.bytemaskedarray import ByteMaskedArray
@@ -191,7 +191,7 @@ def parameters_of(obj: Any, default: Any = NO_PARAMETERS) -> JSONMapping | None:
 
 def all_or_nothing_parameters_factory(
     parameters: Sequence[JSONMapping | None], n_outputs: int
-) -> List[JSONMapping | None]:
+) -> list[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
@@ -225,7 +225,7 @@ def all_or_nothing_parameters_factory(
 def intersection_parameters_factory(
     parameters: Sequence[JSONMapping | None],
     n_outputs: int,
-) -> List[JSONMapping | None]:
+) -> list[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
@@ -268,7 +268,7 @@ def intersection_parameters_factory(
 def one_to_one_parameters_factory(
     parameters: Sequence[JSONMapping | None],
     n_outputs: int,
-) -> List[JSONMapping | None]:
+) -> list[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
@@ -293,7 +293,7 @@ def one_to_one_parameters_factory(
 def none_parameters_factory(
     parameters: Sequence[JSONMapping | None],
     n_outputs: int,
-) -> List[JSONMapping | None]:
+) -> list[JSONMapping | None]:
     """
     Args:
         parameters: sequence of #ak.contents.Content or other objects
@@ -852,7 +852,7 @@ def apply_step(
         inputs (their roles are distinct), special handling is required for option-types.
         """
         unmasked = []  # Contents of inputs-as-ByteMaskedArrays or non-Content-type
-        masks: List[Index8] = []
+        masks: list[Index8] = []
         # Here we choose the convention that elements are masked when mask==1
         # And byte masks (not bits) so we can pass them as (x,y) to ak_where's action()
         for xyc in inputs:  # from ak_where, inputs are (x, y, condition)

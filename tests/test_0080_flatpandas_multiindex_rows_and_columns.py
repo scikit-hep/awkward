@@ -4,7 +4,6 @@
 import json
 
 import numpy as np  # noqa: F401
-import packaging.version
 import pytest
 
 import awkward as ak
@@ -12,10 +11,6 @@ import awkward as ak
 pandas = pytest.importorskip("pandas")
 
 
-@pytest.mark.skipif(
-    packaging.version.Version(pandas.__version__) < packaging.version.Version("1.0"),
-    reason="Test Pandas in 1.0+ because they had to fix their JSON format.",
-)
 def test():
     def key(n):
         if n in ("values", "x", "y"):

@@ -17,12 +17,10 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
 from awkward._typing import Protocol, TypeAlias
 
-# Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
-KernelKeyType: TypeAlias = tuple
-
-
 numpy = Numpy.instance()
 metadata = NumpyMetadata.instance()
+
+KernelKeyType: TypeAlias = tuple[str, *tuple[metadata.dtype, ...]]
 
 
 class KernelError(Protocol):

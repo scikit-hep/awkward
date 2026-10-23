@@ -4,7 +4,7 @@
 
 [![PyPI version](https://badge.fury.io/py/awkward.svg)](https://pypi.org/project/awkward)
 [![Conda-Forge](https://img.shields.io/conda/vn/conda-forge/awkward)](https://github.com/conda-forge/awkward-feedstock)
-[![Python 3.11‒3.14](https://img.shields.io/badge/python-3.11%E2%80%923.14-blue)](https://www.python.org)
+[![Python 3.11‒3.15](https://img.shields.io/badge/python-3.11%E2%80%923.15-blue)](https://www.python.org)
 [![BSD-3 Clause License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Build Test](https://github.com/scikit-hep/awkward/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/ci.yml)
 [![Property Tests](https://github.com/scikit-hep/awkward/actions/workflows/property-tests.yml/badge.svg?branch=main)](https://github.com/scikit-hep/awkward/actions/workflows/property-tests.yml)
