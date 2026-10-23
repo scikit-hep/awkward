@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 enum class REGULARARRAY_GETITEM_NEXT_ARRAY_REGULARIZE_ERRORS {
   IND_OUT_OF_RANGE  // message: "index out of range"
