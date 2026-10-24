@@ -188,3 +188,21 @@ def test_metadata_helpers_without_pyarrow(monkeypatch):
     for name in ("table_with_attrs", "attrs_from_schema_metadata"):
         with pytest.raises(NotImplementedError, match="requires pyarrow"):
             namespace[name]()
+
+
+@pytest.mark.parametrize("iterative", [False, True])
+@pytest.mark.parametrize("persistent", [False, True])
+def test_parquet_shared_attrs_helpers(tmp_path, iterative, persistent):
+    attrs = {"@transient": object()}
+    if persistent:
+        attrs["nested"] = {"values": [1]}
+    first = ak.Array([1, 2], attrs=attrs)
+    path = tmp_path / "attrs.parquet"
+    if iterative:
+        second = ak.Array([3], attrs={"nested": {"values": [99]}})
+        ak.to_parquet_row_groups(iter([first, second]), path)
+    else:
+        ak.to_parquet(first, path)
+    restored = ak.from_parquet(path)
+    assert restored.to_list() == ([1, 2, 3] if iterative else [1, 2])
+    assert restored.attrs == ({"nested": {"values": [1]}} if persistent else {})
