@@ -84,12 +84,21 @@ jobs:
         run: python -m pip install "scikit-build-core>=1.0" "pybind11>=3" "cmake>=3.29" ninja numpy pyyaml pytest
 
       - name: Build and install awkward-cpp in C++23 mode
-        run: >-
-          python -m pip install -v --no-build-isolation ./awkward-cpp
-          -Ccmake.define.CMAKE_CXX_STANDARD=23
-          -Ccmake.define.CMAKE_CXX_STANDARD_REQUIRED=ON
-          -Ccmake.define.CMAKE_CXX_EXTENSIONS=OFF
-          "-Ccmake.define.CMAKE_PROJECT_INCLUDE=${{ github.workspace }}/dev/cmake/cxx23-evaluation.cmake"
+        shell: python {0}
+        run: |
+          import os
+          import pathlib
+          import subprocess
+          import sys
+
+          hook = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "dev/cmake/cxx23-evaluation.cmake"
+          subprocess.run([
+              sys.executable, "-m", "pip", "install", "-v", "--no-build-isolation", "./awkward-cpp",
+              "-Ccmake.define.CMAKE_CXX_STANDARD=23",
+              "-Ccmake.define.CMAKE_CXX_STANDARD_REQUIRED=ON",
+              "-Ccmake.define.CMAKE_CXX_EXTENSIONS=OFF",
+              f"-Ccmake.define.CMAKE_PROJECT_INCLUDE={hook}",
+          ], check=True)
 
       - name: Install the matching Python package
         run: python -m pip install .
@@ -104,12 +113,20 @@ jobs:
           tests/test_4359_forth_output_strides.py
 
       - name: Configure header-only tests in C++23 mode
-        run: >-
-          cmake -S header-only -B build-cxx23-headers
-          -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
-          -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_STANDARD_REQUIRED=ON
-          -DCMAKE_CXX_EXTENSIONS=OFF
-          "-DCMAKE_PROJECT_INCLUDE=${{ github.workspace }}/dev/cmake/cxx23-evaluation.cmake"
+        shell: python {0}
+        run: |
+          import os
+          import pathlib
+          import subprocess
+
+          hook = pathlib.Path(os.environ["GITHUB_WORKSPACE"]) / "dev/cmake/cxx23-evaluation.cmake"
+          subprocess.run([
+              "cmake", "-S", "header-only", "-B", "build-cxx23-headers",
+              "-DBUILD_TESTS=ON", "-DCMAKE_BUILD_TYPE=Debug",
+              "-DCMAKE_CXX_STANDARD=23", "-DCMAKE_CXX_STANDARD_REQUIRED=ON",
+              "-DCMAKE_CXX_EXTENSIONS=OFF",
+              f"-DCMAKE_PROJECT_INCLUDE={hook}",
+          ], check=True)
 
       - name: Build header-only tests
         run: cmake --build build-cxx23-headers --config Debug
