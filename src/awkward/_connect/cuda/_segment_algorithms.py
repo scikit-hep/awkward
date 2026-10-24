@@ -233,11 +233,11 @@ def segmented_select(
         >>> print(total)  # 2
         >>> print(d_out_segments.get())  # [0, 1, 2, 2]
     """
-    import numba.cuda
+    from numba_cuda_mlir import cuda as numba_cuda
 
     num_segments = len(d_in_segments) - 1
 
-    cond = numba.cuda.jit(cond)
+    cond = numba_cuda.jit(cond, device=True)
 
     # Step 1: Apply select to get the data and indices where condition is true
 
