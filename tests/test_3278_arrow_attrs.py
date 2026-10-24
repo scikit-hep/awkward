@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import os
+import runpy
+import sys
 
 import pytest
 
@@ -123,3 +125,66 @@ def test_arrow_table_attrs_are_readable_by_parquet(array, tmp_path):
     pyarrow_parquet.write_table(ak.to_arrow_table(array), filename)
 
     assert ak.from_parquet(filename).attrs == array.attrs
+
+
+def _ipc_roundtrip(array):
+    sink = pyarrow.BufferOutputStream()
+    schema = pyarrow.schema([("data", array.type)])
+    with pyarrow.ipc.new_stream(sink, schema) as writer:
+        writer.write_batch(pyarrow.record_batch([array], schema=schema))
+    return pyarrow.ipc.open_stream(sink.getvalue()).read_all().column("data")
+
+
+def test_nested_attrs_are_snapshots():
+    source = ak.Array([1, 2], attrs={"nested": {"values": [1]}, "tuple": (2, 3)})
+    arrow = ak.to_arrow(source)
+    expected = {"nested": {"values": [1]}, "tuple": [2, 3]}
+    source.attrs["nested"]["values"].append(99)
+    assert ak.from_arrow(arrow).attrs == expected
+    assert ak.from_arrow(_ipc_roundtrip(arrow)).attrs == expected
+
+    restored = ak.from_arrow(arrow)
+    restored.attrs["nested"]["values"].append(42)
+    assert ak.from_arrow(arrow).attrs == expected
+    assert ak.from_arrow(_ipc_roundtrip(arrow)).attrs == expected
+    arrow.type.attrs["nested"]["values"].append(17)
+    assert ak.from_arrow(arrow).attrs == expected
+
+
+@pytest.mark.parametrize("container", [list, tuple])
+@pytest.mark.parametrize("empty_first", [False, True])
+def test_batch_sequence_attrs(container, empty_first):
+    array = ak.Array([1, 2, 3], attrs={"nested": {"value": [1]}, "source": "first"})
+    table = ak.to_arrow_table(array)
+    batches = table.to_batches(max_chunksize=1)
+    if empty_first:
+        batches.insert(0, batches[0].slice(0, 0))
+    batches = container(batches)
+    restored = ak.from_arrow(batches, attrs={"source": "override", "extra": True})
+    assert restored.to_list() == array.to_list()
+    assert restored.attrs == {
+        "nested": {"value": [1]},
+        "source": "override",
+        "extra": True,
+    }
+    restored.attrs["nested"]["value"].append(99)
+    assert ak.from_arrow(batches).attrs == array.attrs
+
+
+def test_batch_sequence_first_batch_wins():
+    first = ak.to_arrow_table(ak.Array([1], attrs={"source": "first"})).to_batches()[0]
+    second = ak.to_arrow_table(ak.Array([2], attrs={"source": "second"})).to_batches()[
+        0
+    ]
+    assert ak.from_arrow([first, second]).attrs == {"source": "first"}
+    assert ak.from_arrow([]).attrs == {}
+
+
+def test_metadata_helpers_without_pyarrow(monkeypatch):
+    import awkward._connect.pyarrow
+
+    monkeypatch.setitem(sys.modules, "pyarrow", None)
+    namespace = runpy.run_path(awkward._connect.pyarrow.__file__)
+    for name in ("table_with_attrs", "attrs_from_schema_metadata"):
+        with pytest.raises(NotImplementedError, match="requires pyarrow"):
+            namespace[name]()

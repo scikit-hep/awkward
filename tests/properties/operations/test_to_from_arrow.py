@@ -99,8 +99,6 @@ def has_issues(a: ak.Array) -> bool:
     """
     if _has_issue_4221(a.layout):
         return True
-    if _has_issue_4222(a.layout):
-        return True
     if _has_issue_4228(a.layout):
         return True
     if _has_issue_4229(a.layout):
@@ -124,50 +122,6 @@ def _has_issue_4221(layout: ak.contents.Content) -> bool:
     return any(_has_issue_4221(x) for x in _children(layout))
 
 
-def _has_issue_4222(
-    layout: ak.contents.Content,
-    nullable: bool = False,
-    sliced: bool = False,
-) -> bool:
-    """A nullable var-length list whose offsets do not start at zero is
-    compacted against unshifted content in `ListOffsetArray._to_arrow`,
-    shifting every list by `offsets[0]` (data corruption, #4222).
-
-    `nullable` tracks whether Arrow validity bytes flow into this node
-    from an enclosing option: they start at option nodes, pass through
-    records and indexed nodes, and stop below lists.
-
-    `sliced` tracks whether `to_arrow` reaches this node through a
-    transformation that can move list offsets away from zero even if
-    they were constructed zero-based: a list trims its content to
-    `offsets[0]:offsets[length]`, an indexed node projects its content,
-    a `ListArray` may be compacted from anywhere, and a union selects
-    each child through its index; such nodes can present any list below
-    an option with nonzero offsets.
-    """
-    if layout.is_union:
-        return any(_has_issue_4222(x, False, True) for x in layout.contents)
-    if layout.is_record:
-        return any(_has_issue_4222(x, nullable, sliced) for x in layout.contents)
-    if layout.is_regular:
-        return _has_issue_4222(layout.content, False, sliced)
-    if layout.is_option:
-        if isinstance(layout, ak.contents.IndexedOptionArray):
-            return _has_issue_4222(layout.content, True, True)
-        return _has_issue_4222(layout.content, True, sliced)
-    if layout.is_indexed:
-        return _has_issue_4222(layout.content, nullable, True)
-    if layout.is_list:
-        if nullable and layout.length > 0 and (sliced or layout.starts[0] != 0):
-            return True
-        if isinstance(layout, ak.contents.ListOffsetArray):
-            child_sliced = sliced or bool(layout.offsets[0] != 0)
-        else:
-            child_sliced = True
-        return _has_issue_4222(layout.content, False, child_sliced)
-    return False
-
-
 def _has_issue_4228(
     layout: ak.contents.Content,
     nullable: bool = False,
@@ -186,13 +140,12 @@ def _has_issue_4228(
     without trimming the children creates the first two conditions from
     a valid union.
 
-    `nullable` tracks validity bytes as in `_has_issue_4222`.
+    `nullable` tracks whether enclosing option validity reaches this node.
 
     `sliced` tracks whether `to_arrow` reaches this node through a
-    transformation that can drop union elements, as in `_has_issue_4222`
-    except that a list or regular node counts only when it does not span
-    its whole content and a record field only when it is longer than the
-    record. Under such a node any null in a masked child of a union, or
+    transformation that can drop union elements. A list or regular node
+    counts only when it does not span its whole content, and a record
+    field only when it is longer than the record. Under such a node any null in a masked child of a union, or
     any masked child with a list below, triggers; at an unsliced union
     the counts and lengths are compared.
     """
@@ -258,7 +211,7 @@ def _has_issue_4255(layout: ak.contents.Content, nullable: bool = False) -> bool
     revertable stamp, so `from_arrow` cannot strip the option the field
     metadata says it must (AttributeError in `remove_optiontype`, #4255).
 
-    `nullable` tracks validity bytes as in `_has_issue_4222`.
+    `nullable` tracks whether enclosing option validity reaches this node.
     """
     if layout.is_union:
         return any(_has_issue_4255(x, False) for x in layout.contents)

@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+from collections.abc import Iterable, Sized
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
@@ -28,6 +30,7 @@ def from_arrow(
     Any attrs that #ak.to_arrow or #ak.to_arrow_table stored in the Arrow data
     are restored (as are those written by pandas, in the `"PANDAS_ATTRS"`
     schema metadata), unless overridden by the `attrs` argument.
+    For a sequence of RecordBatches, attrs come from the first batch.
 
     Because awkward uses numpy's dtype system, timestamp types do not have
     timezones. If encountering timestamp types with timezones in the input
@@ -36,7 +39,7 @@ def from_arrow(
     See also #ak.to_arrow, #ak.to_arrow_table, #ak.from_parquet, #ak.from_arrow_schema.
 
     Args:
-        array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`, or `pyarrow.Table`):
+        array (`pyarrow.Array`, `pyarrow.ChunkedArray`, `pyarrow.RecordBatch`, `pyarrow.Table`, or sequence of RecordBatches):
             Apache Arrow array to convert into an  Awkward Array.
         generate_bitmasks (bool): If enabled and Arrow/Parquet does not have Awkward
             metadata, `generate_bitmasks=True` creates empty bitmasks for nullable
@@ -101,7 +104,8 @@ def _stored_attrs(array) -> dict:
     """
     The attrs that #ak.to_arrow or #ak.to_arrow_table wrote into `array`: a Table
     or RecordBatch carries them in its schema metadata, whereas a bare Array or
-    ChunkedArray can only carry them in its (extension) type.
+    ChunkedArray can only carry them in its (extension) type. A record-batch
+    sequence uses its first schema, matching iterative Parquet serialization.
     """
     import awkward._connect.pyarrow
 
@@ -116,7 +120,19 @@ def _stored_attrs(array) -> dict:
         awkwardarrow_type, _ = awkward._connect.pyarrow.to_awkwardarrow_storage_types(
             array.type
         )
-        if awkwardarrow_type is not None and awkwardarrow_type.attrs is not None:
-            return awkwardarrow_type.attrs
+        if awkwardarrow_type is not None:
+            return awkwardarrow_type.attrs or {}
+
+    elif (
+        isinstance(array, Iterable)
+        and isinstance(array, Sized)
+        and len(array) > 0
+        and all(isinstance(batch, pyarrow.lib.RecordBatch) for batch in array)
+    ):
+        # Match the existing record-batch sequence conversion path. As with
+        # iterative Parquet writes, array-level attrs come from the first batch.
+        return awkward._connect.pyarrow.attrs_from_schema_metadata(
+            next(iter(array)).schema.metadata
+        )
 
     return {}

@@ -5,6 +5,7 @@ Pyarrow extension classes: AwkwardArrowArray and AwkwardArrowType
 See: https://arrow.apache.org/docs/python/extending_types.html
 """
 
+import copy
 import json
 
 import pyarrow
@@ -50,7 +51,8 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         self._record_is_scalar = record_is_scalar
         self._is_nonnullable_nulltype = is_nonnullable_nulltype
         self._option_type = option_type
-        self._attrs = attrs
+        # Snapshot and normalize exactly as schema/IPC JSON metadata does.
+        self._attrs = None if attrs is None else json.loads(json.dumps(attrs))
         super().__init__(storage_type, "awkward")
 
     def __str__(self):
@@ -89,7 +91,7 @@ class AwkwardArrowType(pyarrow.ExtensionType):
         The `attrs` of the high-level array this type was built from, or None.
         Only the outermost type of an array carries them.
         """
-        return self._attrs
+        return copy.deepcopy(self._attrs)
 
     def with_attrs(self, attrs):
         """

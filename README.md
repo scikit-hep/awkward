@@ -103,17 +103,23 @@ Because of the two packages (`awkward-cpp` may be updated in GitHub but not on P
 
 # Installation for developers
 
-Clone this repository _recursively_ to get the header-only C++ dependencies, then generate sources with [nox](https://nox.thea.codes/), compile and install `awkward-cpp`, and finally install `awkward` as an editable installation:
+Clone this repository _recursively_ to get the header-only C++ dependencies. The repository is a [uv](https://docs.astral.sh/uv/) workspace, so `uv sync` (or any `uv run` command) compiles `awkward-cpp` and installs both packages as editable installations:
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward.git
 cd awkward
 
+uv sync
+```
+
+Without uv, compile and install `awkward-cpp`, then install `awkward` as an editable installation:
+
+```bash
 python -m pip install -v ./awkward-cpp
 python -m pip install -e .
 ```
 
-Tests can be run in parallel with [pytest](https://docs.pytest.org/):
+Tests can be run in parallel with [pytest](https://docs.pytest.org/) (prefix with `uv run` if you use uv):
 
 ```bash
 python -m pytest -n auto tests
@@ -158,6 +164,8 @@ Support for this work was provided by NSF cooperative agreement [OAC-1836650](ht
 ``Awkward Array`` is a [NumFOCUS Affiliated Project](<https://numfocus.org/sponsored-projects/affiliated-projects>).
 
 We also thank [Erez Shinan](https://github.com/erezsh) and the developers of the [Lark standalone parser](https://github.com/lark-parser/lark), which is used to parse type strings as type objects.
+
+“The Awkward Array developers” refers collectively to the project’s contributors, acknowledged in the table below and in [`.all-contributorsrc`](.all-contributorsrc). The [Git history](https://github.com/scikit-hep/awkward/commits/main/) records individual contributions.
 
 Thanks especially to the gracious help of Awkward Array contributors (including the [original repository](https://github.com/scikit-hep/awkward-0.x)).
 
@@ -243,7 +251,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/NJManganelli"><img src="https://avatars.githubusercontent.com/u/38217274?v=4?s=100" width="100px;" alt="Nick"/><br /><sub><b>Nick</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=NJManganelli" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://apn-pucky.github.io/"><img src="https://avatars.githubusercontent.com/u/4533248?v=4?s=100" width="100px;" alt="Alexander Puck Neuwirth"/><br /><sub><b>Alexander Puck Neuwirth</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=APN-Pucky" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/nileshpatra"><img src="https://avatars.githubusercontent.com/u/37436956?v=4?s=100" width="100px;" alt="Nilesh Patra"/><br /><sub><b>Nilesh Patra</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=nileshpatra" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/TaiSakuma"><img src="https://avatars.githubusercontent.com/u/1388081?v=4?s=100" width="100px;" alt="Tai Sakuma"/><br /><sub><b>Tai Sakuma</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=TaiSakuma" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/TaiSakuma"><img src="https://avatars.githubusercontent.com/u/1388081?v=4?s=100" width="100px;" alt="Tai Sakuma"/><br /><sub><b>Tai Sakuma</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=TaiSakuma" title="Code">💻</a> <a href="https://github.com/scikit-hep/awkward/commits?author=TaiSakuma" title="Tests">⚠️</a> <a href="#infra-TaiSakuma" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/scikit-hep/awkward/commits?author=TaiSakuma" title="Documentation">📖</a> <a href="#maintenance-TaiSakuma" title="Maintenance">🚧</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://dylanmodesitt.com/"><img src="https://avatars.githubusercontent.com/u/8339189?v=4?s=100" width="100px;" alt="Dylan Modesitt"/><br /><sub><b>Dylan Modesitt</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=DylanModesitt" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.brofos.org"><img src="https://avatars.githubusercontent.com/u/3391741?v=4?s=100" width="100px;" alt="James Brofos"/><br /><sub><b>James Brofos</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=JamesBrofos" title="Code">💻</a></td>
     </tr>
@@ -254,6 +262,13 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/albert-physics"><img src="https://avatars.githubusercontent.com/u/166818822?v=4?s=100" width="100px;" alt="albert-physics"/><br /><sub><b>albert-physics</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=albert-physics" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/5U5H4NTH006"><img src="https://avatars.githubusercontent.com/u/85297765?v=4?s=100" width="100px;" alt="Sushanth Mantrala"/><br /><sub><b>Sushanth Mantrala</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=5U5H4NTH006" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/kmohrman"><img src="https://avatars.githubusercontent.com/u/36145025?v=4?s=100" width="100px;" alt="kmohrman"/><br /><sub><b>kmohrman</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=kmohrman" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://soumodityapramanik.in"><img src="https://avatars.githubusercontent.com/u/177980566?v=4?s=100" width="100px;" alt="Soumoditya Pramanik"/><br /><sub><b>Soumoditya Pramanik</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Soumoditya" title="Documentation">📖</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/aaronj0"><img src="https://avatars.githubusercontent.com/u/75925957?v=4?s=100" width="100px;" alt="Aaron  Jomy"/><br /><sub><b>Aaron  Jomy</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=aaronj0" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://aes-smoky.vercel.app/"><img src="https://avatars.githubusercontent.com/u/155875516?v=4?s=100" width="100px;" alt="Paramveer singh"/><br /><sub><b>Paramveer singh</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Paramveersingh-S" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/renta0426"><img src="https://avatars.githubusercontent.com/u/71638068?v=4?s=100" width="100px;" alt="renta0426"/><br /><sub><b>renta0426</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=renta0426" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/vepadulano"><img src="https://avatars.githubusercontent.com/u/15638895?v=4?s=100" width="100px;" alt="Vincenzo Eduardo Padulano"/><br /><sub><b>Vincenzo Eduardo Padulano</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=vepadulano" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
