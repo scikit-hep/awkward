@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to concatenate and interleave arrays."
 ---
 
 How to concatenate and interleave arrays
