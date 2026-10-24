@@ -79,9 +79,12 @@ template <typename T> void check(const std::vector<T> &values) {
 int main() {
 #ifdef AWKWARD_HAVE_FLOAT16
   assert(awkward::type_to_name<awkward::float16>() == "float16");
-  check<awkward::float16>({-0.0f,
-                           static_cast<awkward::float16>(std::ldexp(1.0f, -24)),
-                           1.5f, 65504.0f, INFINITY, NAN});
+  std::vector<awkward::float16> half_values;
+  for (float value :
+       {-0.0f, std::ldexp(1.0f, -24), 1.5f, 65504.0f, INFINITY, NAN}) {
+    half_values.push_back(static_cast<awkward::float16>(value));
+  }
+  check(half_values);
 #endif
   using Complex = std::complex<long double>;
   const auto name = awkward::type_to_name<Complex>();

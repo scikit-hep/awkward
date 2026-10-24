@@ -66,3 +66,5 @@ REDUCE_ARGMIN(awkward_reduce_argmin_int64_64, int64_t)
 REDUCE_ARGMIN(awkward_reduce_argmin_uint64_64, uint64_t)
 REDUCE_ARGMIN(awkward_reduce_argmin_float32_64, float)
 REDUCE_ARGMIN(awkward_reduce_argmin_float64_64, double)
+
+REDUCE_ARGMIN(awkward_reduce_argmin_float128_64, long double)

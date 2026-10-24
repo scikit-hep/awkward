@@ -172,3 +172,8 @@ ARGSORT_OFF(awkward_argsort_float64_int32, double, int32_t)
 ARGSORT_OFF(awkward_argsort_float64_uint32, double, uint32_t)
 ARGSORT_OFF(awkward_argsort_float64_uint64, double, uint64_t)
 ARGSORT_OFF(awkward_argsort_float64_int64, double, int64_t)
+
+ARGSORT_OFF(awkward_argsort_float128_int32, long double, int32_t)
+ARGSORT_OFF(awkward_argsort_float128_uint32, long double, uint32_t)
+ARGSORT_OFF(awkward_argsort_float128_uint64, long double, uint64_t)
+ARGSORT_OFF(awkward_argsort_float128_int64, long double, int64_t)

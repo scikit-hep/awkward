@@ -240,6 +240,7 @@ type_to_dtype = {
     "uint64": "uint64",
     "float": "float32",
     "double": "float64",
+    "long double": "longdouble",
 }
 
 
@@ -254,7 +255,7 @@ def type_to_pytype(typename, special):
         typename = typename[:-2]
     if count != 0:
         special.append(type_to_dtype[typename])
-    return ("POINTER(" * count) + ("c_" + typename) + (")" * count)
+    return ("POINTER(" * count) + ("c_" + typename.replace(" ", "")) + (")" * count)
 
 
 def kernel_signatures_py(specification):
@@ -296,6 +297,7 @@ from ctypes import (
     c_uint64,
     c_float,
     c_double,
+    c_longdouble,
     c_char_p,
 )
 
@@ -313,6 +315,7 @@ from numpy import (
     uint64,
     float32,
     float64,
+    longdouble,
 )
 
 class ERROR(Structure):
@@ -399,6 +402,7 @@ from numpy import (
     uint64,
     float32,
     float64,
+    longdouble,
 )
 
 from awkward._connect.cuda import fetch_specialization
@@ -437,6 +441,10 @@ def by_signature(cuda_kernel_templates):
 
         for spec in specification["kernels"]:
             for childfunc in spec["specializations"]:
+                # CUDA has no extended-precision floating type. Do not register
+                # a long-double signature that would silently run as double.
+                if any("long double" in arg["type"] for arg in childfunc["args"]):
+                    continue
                 special = [repr(spec["name"])]
                 [type_to_pytype(x["type"], special) for x in childfunc["args"]]
                 dirlist = [repr(x["dir"]) for x in childfunc["args"]]

@@ -42,3 +42,5 @@ REDUCE_MAX(awkward_reduce_max_int64_int64_64, int64_t)
 REDUCE_MAX(awkward_reduce_max_uint64_uint64_64, uint64_t)
 REDUCE_MAX(awkward_reduce_max_float32_float32_64, float)
 REDUCE_MAX(awkward_reduce_max_float64_float64_64, double)
+
+REDUCE_MAX(awkward_reduce_max_float128_float128_64, long double)

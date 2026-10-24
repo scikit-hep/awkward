@@ -555,10 +555,18 @@ def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkb
     return castint(context, builder, atval.type, numba.intp, atval)
 
 
+def numba_type_of_primitive(primitive):
+    if primitive in ("float128", "complex256"):
+        raise TypeError(
+            f"Numba does not support {primitive}; convert with ak.values_astype first"
+        )
+    return numba.from_dtype(ak.types.numpytype.primitive_to_dtype(primitive))
+
+
 class NumpyArrayType(ContentType, ak._lookup.NumpyLookup):
     @classmethod
     def from_form(cls, form):
-        t = numba.from_dtype(ak.types.numpytype.primitive_to_dtype(form.primitive))
+        t = numba_type_of_primitive(form.primitive)
         arraytype = numba.types.Array(t, 1, "C")
         return NumpyArrayType(arraytype, form.parameters)
 
@@ -573,6 +581,11 @@ class NumpyArrayType(ContentType, ak._lookup.NumpyLookup):
         return False
 
     def getitem_at(self, viewtype):
+        if self.arraytype.dtype == numba.types.float16:
+            raise TypeError(
+                "Numba cannot read float16 values; convert with "
+                "ak.values_astype(array, 'float32') first"
+            )
         return self.arraytype.dtype
 
     def lower_getitem_at(
@@ -1708,7 +1721,7 @@ def inner_dtype_of_form(form):
         return None
 
     elif isinstance(form, ak.forms.NumpyForm):
-        return numba.from_dtype(ak.types.numpytype.primitive_to_dtype(form.primitive))
+        return numba_type_of_primitive(form.primitive)
 
     elif isinstance(form, ak.forms.EmptyForm):
         return numba.types.float64

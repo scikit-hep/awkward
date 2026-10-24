@@ -124,8 +124,9 @@ def _impl(
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
-    # sum-of-squares is float64-only, so complex falls back to the sum(x**n) path.
-    is_complex = "complex" in str(ak.type(x))
+    # Float64-only fused kernels cannot preserve complex or extended real inputs.
+    type_string = str(ak.type(x))
+    general_path = "complex" in type_string or "float128" in type_string
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
@@ -138,9 +139,8 @@ def _impl(
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            if is_complex:
-                # The sum-of-squares/powers reducers are float64-only, so complex
-                # input uses sum(x**n) (matching NumPy's complex moment).
+            if general_path:
+                # Compute powers in the input precision before reducing them.
                 sumwxn = ak.operations.ak_sum._impl(
                     x**n,
                     axis,

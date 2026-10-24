@@ -66,3 +66,53 @@ checks dtype and values, and verifies typetracer forms. The Linux CI configurati
 `complex256`; macOS arm64 and MSVC exercise the `complex128` long-double alias.
 Local validation: all seven C++ header-only tests and 25 related Python tests
 passed; 27 extended-precision Python cases skipped on macOS arm64.
+
+
+## Extended-precision operations
+
+The kernel specification now includes 25 native long-double specializations
+across sorting, equality, uniqueness, and real/complex reductions. The
+signature and test generators support the C `long double` spelling, including
+ctypes scalar arguments without a binary64 round trip. Complex dispatch uses
+dtype kind so NumPy's platform-dependent aliases follow the complex path.
+Half precision continues to accumulate through float32 and restores value
+result dtypes; subrange equality also uses that exact widening.
+
+Wide real statistics preserve their accumulator precision. Variance and
+moments use the general expression path where the optimized float64 kernels
+would discard digits or overflow. No changes are made to the algorithms or
+results of existing float32/float64 kernel specializations.
+
+NumPy complex scalars are handled explicitly by ArrayBuilder and from_iter,
+avoiding recursive scalar conversion. These builders retain their existing
+binary64/complex128 storage policy. JSON also writes binary64 values and
+applies NaN/infinity substitutions after conversion. Array layouts and buffer
+round trips retain their original dtypes.
+
+C++ interpreter/RDataFrame mappings include long double and its complex type.
+Unsupported interpreter half precision, Numba extended types/half reads, and
+Arrow exports produce descriptive TypeError messages. Complex sorting and
+axis-specific complex/date-time uniqueness remain unsupported and raise
+TypeError; axis-free uniqueness uses the backend array library.
+
+CUDA does not implement an extended-precision floating representation. The
+canonical long-double signatures therefore produce CPU registrations and
+reference/CPU tests, and are excluded from CUDA registrations and generated
+CUDA tests. Existing representable CUDA specializations are unchanged. GPU
+execution and ROOT integration require their corresponding test environments.
+
+All package versions are unchanged. This work was prepared with AI assistance.
+
+Validation for the extended-precision operations change (macOS arm64):
+
+- Generated reference/CPU kernel suites: 22,663 passed, 722 skipped.
+- Full Python suite: 6,666 passed, 129 skipped.
+- Header-only Debug tests: all seven passed.
+- Ruff, Pylint, actionlint, test naming, and whitespace checks passed.
+- All 554 existing CUDA dispatch keys are unchanged.
+
+True extended-range/precision cases and ROOT tests skip where unavailable;
+the compiler workflow runs the extended cases on Linux. The repository's
+kernel-order diagnostic also reports pre-existing ordering of the separate
+sum-of-squares specializations; the modified kernel groups are ordered using
+that diagnostic's sorting rule.

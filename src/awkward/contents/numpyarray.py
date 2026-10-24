@@ -60,142 +60,9 @@ numpy = Numpy.instance()
 
 
 def _kernel_unsupported_cast(dtype):
-    """Map a dtype that has no compiled kernel onto the nearest supported one, or
-    return ``None`` if the dtype is already supported.
-
-    ``float16`` -> ``float32`` (lossless); extended ``float128``/``longdouble``
-    -> ``float64`` and ``complex256``/``clongdouble`` -> ``complex128`` (these
-    lose precision, so callers use original values for extended-precision
-    reductions and uniqueness, and correct sort-key collisions). Detected by kind and
-    itemsize so it is platform-independent (on systems where ``longdouble`` is
-    ``float64`` there is nothing wider than 8 bytes, so nothing is remapped).
-    """
-    if dtype.kind == "f":
-        if dtype.itemsize == 2:  # float16
-            return np.dtype(np.float32)
-        if dtype.itemsize > 8:  # float128 / longdouble
-            return np.dtype(np.float64)
-    elif dtype.kind == "c":
-        if dtype.itemsize > 16:  # complex256 / clongdouble
-            return np.dtype(np.complex128)
-    return None
-
-
-def _resolve_cast_ties(original, casted, local, offsets, parents, ascending):
-    """Reorder runs of equal cast-down keys by their original values.
-
-    Rounding to a narrower float dtype is monotonic (x < y implies
-    cast(x) <= cast(y)), so after argsorting the cast-down keys every element
-    is already in its true position except inside a run of equal keys within
-    one list. Re-sorting just those runs by the original values gives the
-    order in the original dtype. ``local`` holds the per-list indices from
-    ``awkward_argsort`` for the ``parents.shape[0]`` positions the lists cover;
-    ``parents[p]`` is the list of position ``p``. NumPy only.
-    """
-    import numpy as _numpy  # noqa: TID251 (lexsort is not in the nplike API)
-
-    starts = offsets[:-1][parents]
-    index = local + starts
-    key = casted[index]
-    value = original[index]
-    tie = (key[1:] == key[:-1]) & (parents[1:] == parents[:-1])
-    if not (tie & (value[1:] != value[:-1])).any():
-        return local  # no collision hides distinct values
-    run = _numpy.cumsum(_numpy.concatenate([[True], ~tie])) - 1
-    order = _numpy.lexsort((value if ascending else -value, run))
-    return index[order] - starts
-
-
-def _reduce_extended(reducer, array, offsets, starts, shifts, outlength):
-    """Reduce float128/complex256 data (NumPy, known data) in its own precision.
-
-    Returns ``None`` for reducers handled by the float64/complex128 cast.
-    Order-based reducers run the existing kernels on dense ranks. Complex keys
-    rank each component separately, retaining component-wise NaNs so the complex
-    kernels' comparison, tie and position semantics carry over unchanged.
-    """
-    import numpy as _numpy  # noqa: TID251 (unique/ufunc.at are not in the nplike API)
-
-    from awkward import _reducers
-
-    backend = array.backend
-    data = array.data
-    name = reducer.name
-
-    if isinstance(
-        reducer, (_reducers.AxisNoneSum, _reducers.AxisNoneMin, _reducers.AxisNoneMax)
-    ):
-        return reducer.apply(array, offsets, starts, shifts, outlength)
-
-    if name in ("any", "all", "count_nonzero"):
-        # x != 0 is exact; a cast can underflow tiny values to 0.
-        nonzero = NumpyArray(data != 0, backend=backend)
-        return reducer.apply(nonzero, offsets, starts, shifts, outlength)
-
-    if name in ("sum", "prod") and type(reducer) in (_reducers.Sum, _reducers.Prod):
-        counts = offsets.data[1:] - offsets.data[:-1]
-        # NumPy repeat requires native-width counts on 32-bit platforms.
-        parents = _numpy.repeat(
-            _numpy.arange(outlength, dtype=np.int64), counts.astype(_numpy.intp)
-        )
-        values = data[offsets.data[0] : offsets.data[-1]]
-        if name == "sum":
-            result = _numpy.zeros(outlength, dtype=data.dtype)
-            _numpy.add.at(result, parents, values)
-        else:
-            result = _numpy.ones(outlength, dtype=data.dtype)
-            _numpy.multiply.at(result, parents, values)
-        return NumpyArray(result, backend=backend)
-
-    if name in ("argmin", "argmax", "min", "max"):
-        if data.dtype.kind == "c":
-            # A single real rank cannot represent complex comparisons with NaN:
-            # a NaN imaginary part still permits comparison of the real parts.
-            keys = _numpy.empty(data.shape, dtype=np.complex128)
-            for component, target in ((data.real, keys.real), (data.imag, keys.imag)):
-                _, inverse = _numpy.unique(component, return_inverse=True)
-                target[:] = inverse.reshape(-1)
-                target[_numpy.isnan(component)] = _numpy.nan
-            ranked = NumpyArray(keys, backend=backend)
-            if name in ("argmin", "argmax"):
-                return reducer.apply(ranked, offsets, starts, shifts, outlength)
-
-            # Complex min/max select the first value, then use exactly the
-            # argmin/argmax comparison. Zero starts and no shifts give absolute
-            # positions, allowing us to gather without narrowing the values.
-            positional = _reducers.ArgMin() if name == "min" else _reducers.ArgMax()
-            positions = positional.apply(
-                ranked,
-                offsets,
-                ak.index.Index64.zeros(outlength, backend.nplike),
-                None,
-                outlength,
-            ).data
-            identity = reducer.initial
-            if identity is None:
-                identity = _numpy.inf if name == "min" else -_numpy.inf
-            result = _numpy.full(outlength, identity, dtype=data.dtype)
-            found = positions >= 0
-            result[found] = data[positions[found]]
-            return NumpyArray(result, backend=backend)
-
-        uniq, inverse = _numpy.unique(data, return_inverse=True)
-        keys = inverse.reshape(-1).astype(np.float64)
-        keys[_numpy.isnan(data)] = _numpy.nan
-        ranked = NumpyArray(keys, backend=backend)
-        if name in ("argmin", "argmax"):
-            return reducer.apply(ranked, offsets, starts, shifts, outlength)
-        plain = type(reducer)(None)  # identity for empty lists; initial applied below
-        rank = plain.apply(ranked, offsets, starts, shifts, outlength).data
-        found = _numpy.isfinite(rank)
-        identity = _numpy.inf if name == "min" else -_numpy.inf
-        result = _numpy.full(outlength, identity, dtype=data.dtype)
-        result[found] = uniq[rank[found].astype(np.int64)]
-        if reducer.initial is not None:
-            combine = _numpy.minimum if name == "min" else _numpy.maximum
-            result = combine(result, _numpy.asarray(reducer.initial, dtype=data.dtype))
-        return NumpyArray(result, backend=backend)
-
+    """Half precision uses exact float32 intermediates for compiled kernels."""
+    if dtype.kind == "f" and dtype.itemsize == 2:
+        return np.dtype(np.float32)
     return None
 
 
@@ -756,6 +623,12 @@ class NumpyArray(NumpyMeta, Content):
         if not self.is_contiguous:
             return self.to_contiguous()._subranges_equal(starts, stops, length, sorted)
 
+        cast = _kernel_unsupported_cast(self.dtype)
+        if cast is not None:
+            return self._numbers_to_type("float32", False)._subranges_equal(
+                starts, stops, length, sorted
+            )
+
         is_equal = self._backend.nplike.zeros(1, dtype=np.bool_)
 
         assert (
@@ -895,17 +768,22 @@ class NumpyArray(NumpyMeta, Content):
         if self.shape[0] is not unknown_length and self.shape[0] == 0:
             return self
 
+        elif self.dtype.kind in "cMm":
+            if negaxis is not None:
+                raise TypeError(
+                    f"unique along an axis is not supported for {self.dtype}"
+                )
+            return NumpyArray(
+                self._backend.nplike.unique_values(self.to_contiguous().data),
+                backend=self._backend,
+            )
+
         elif (cast := _kernel_unsupported_cast(self._data.dtype)) is not None:
-            # No sort/unique kernel for float16/float128/complex256 (reached e.g.
-            # by ak.validity_error on categorical float16 content). Compute the
-            # unique values through the nearest supported dtype, then cast the
-            # result back for float16 (float16 <-> float32 is exact). Extended
-            # precision stays in its own dtype so distinct values are not merged.
+            # Half precision uses float32 keys without changing stored values.
             nplike = self._backend.nplike
             if negaxis is None:
                 # Widen float16 exactly to avoid native half-precision unique
-                # failures on 32-bit Windows. Keep extended precision intact
-                # so that narrowing cannot merge distinct values.
+                # failures on 32-bit Windows.
                 data = self.to_contiguous()._data
                 is_float16 = data.dtype == np.dtype(np.float16)
                 if is_float16:
@@ -917,38 +795,6 @@ class NumpyArray(NumpyMeta, Content):
                     out,
                     parameters=None,
                     backend=self._backend,
-                )
-            if (
-                nplike.known_data
-                and isinstance(nplike, Numpy)
-                and len(self.shape) == 1
-                and self._data.dtype.itemsize > cast.itemsize
-            ):
-                # Lossy cast (float128 -> float64): merging values after the cast
-                # would drop values that are distinct in the original dtype. Sort
-                # in the original dtype and compare neighbours there instead.
-                import numpy as _numpy  # noqa: TID251 (NumPy-only branch)
-
-                sorted_ = self._sort_next(
-                    negaxis, starts, offsets, outlength, True, False
-                )._data
-                counts = offsets.data[1:] - offsets.data[:-1]
-                parents = _numpy.repeat(
-                    _numpy.arange(outlength, dtype=np.int64), counts.astype(np.intp)
-                )
-                covered = parents.shape[0]
-                values = sorted_[:covered]
-                keep = _numpy.ones(covered, dtype=np.bool_)
-                keep[1:] = (values[1:] != values[:-1]) | (parents[1:] != parents[:-1])
-                outoffsets = _numpy.zeros(outlength + 1, dtype=np.int64)
-                _numpy.cumsum(
-                    _numpy.bincount(parents[keep], minlength=outlength),
-                    out=outoffsets[1:],
-                )
-                return ak.contents.ListOffsetArray(
-                    ak.index.Index64(outoffsets, nplike=nplike),
-                    NumpyArray(values[keep], backend=self._backend),
-                    parameters=self._parameters,
                 )
             original = self._data.dtype
             casted = NumpyArray(
@@ -1123,12 +969,8 @@ class NumpyArray(NumpyMeta, Content):
         wrote them) and ``parents`` covers the ``offsets[-1]`` positions that
         the lists span.
         """
-        import numpy as _numpy  # noqa: TID251 (NumPy-only branch)
-
         nplike = self._backend.nplike
-        # Overflow to inf is expected here; the run correction below resolves it.
-        with _numpy.errstate(over="ignore"):
-            casted_data = nplike.astype(self._data, cast)
+        casted_data = nplike.astype(self._data, cast)
         casted = NumpyArray(casted_data, parameters=None, backend=self._backend)
         local = casted._argsort_next(
             None, None, None, offsets, outlength, ascending, stable
@@ -1138,24 +980,6 @@ class NumpyArray(NumpyMeta, Content):
             nplike.arange(nplike.shape_item_as_index(outlength), dtype=np.int64),
             nplike.astype(counts, np.intp),
         )
-        # float16 -> float32 is exact, so only the lossy casts can hide ties;
-        # there is nothing to compare without data (typetracer).
-        if (
-            nplike.known_data
-            and self._data.dtype.itemsize > cast.itemsize
-            and isinstance(nplike, Numpy)
-        ):
-            covered = parents.shape[0]
-            fixed = _resolve_cast_ties(
-                self._data,
-                casted_data,
-                local[:covered],
-                offsets.data,
-                parents,
-                ascending,
-            )
-            if fixed is not local[:covered]:
-                local = nplike.concat([fixed, local[covered:]])
         return local, parents
 
     def _argsort_next(
@@ -1175,9 +999,7 @@ class NumpyArray(NumpyMeta, Content):
                     f"cannot argsort {self._data.dtype!r}: sorting complex numbers "
                     "is not supported"
                 )
-            # No argsort kernel for float16/float128: argsort through the nearest
-            # supported dtype, then re-sort runs that the cast collapsed so the
-            # order is the order in the original dtype (_cast_argsort_local).
+            # Half precision argsorts through exact float32 keys.
             cast = _kernel_unsupported_cast(self._data.dtype)
             if cast is not None:
                 local, _ = self._cast_argsort_local(
@@ -1278,14 +1100,7 @@ class NumpyArray(NumpyMeta, Content):
                     f"cannot sort {self._data.dtype!r}: sorting complex numbers "
                     "is not supported"
                 )
-            # No sort kernel for float16/float128. We must not sort the
-            # cast-down values and cast them back: that would round every element
-            # to the lower precision (e.g. float128 -> float64) and relabel it,
-            # changing the multiset the sort returns. Instead argsort the cast-down
-            # values to get the permutation, then gather the ORIGINAL values
-            # through it, so the exact input precision is preserved.
-            # _cast_argsort_local resolves values that are distinct in the
-            # original dtype but equal after the cast.
+            # Sort float16 through exact float32 keys and gather original values.
             cast = _kernel_unsupported_cast(self._data.dtype)
             if cast is not None:
                 nplike = self._backend.nplike
@@ -1390,22 +1205,17 @@ class NumpyArray(NumpyMeta, Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        # Widen float16 to float32 for compiled reducers and restore value-result
-        # dtypes. For known NumPy data, handle extended precision first through
-        # _reduce_extended; typetracer uses the cast path to infer result forms.
+        # Half precision accumulates in float32. The specialized statistical
+        # reducers explicitly promise float64 accumulation for real inputs.
         cast = _kernel_unsupported_cast(self._data.dtype)
-        out = None
         if (
-            cast is not None
-            and self._data.dtype.itemsize > cast.itemsize
-            and self._backend.nplike.known_data
-            and isinstance(self._backend.nplike, Numpy)
+            self.dtype.kind == "f"
+            and self.dtype.itemsize > 8
+            and reducer.name in ("sumofsquares", "sumofpowers")
         ):
-            # float128/complex256: a float64/complex128 cast would round,
-            # overflow or underflow the values (and merge ties), so reduce in
-            # the original precision where possible.
-            out = _reduce_extended(reducer, self, offsets, starts, shifts, outlength)
-        if out is None and cast is not None:
+            cast = np.dtype(np.float64)
+        out = None
+        if cast is not None:
             original = self._data.dtype
             casted = NumpyArray(
                 self._backend.nplike.astype(self._data, cast),
@@ -1517,7 +1327,13 @@ class NumpyArray(NumpyMeta, Content):
             nparray = nparray.astype("timedelta64[D]").astype(np.int32)
             storage_type = pyarrow.date32()
         else:
-            storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
+            try:
+                storage_type = pyarrow.from_numpy_dtype(nparray.dtype)
+            except pyarrow.ArrowNotImplementedError:
+                raise TypeError(
+                    f"Arrow has no type for {nparray.dtype.name}; convert values "
+                    "with ak.values_astype before exporting"
+                ) from None
 
         if issubclass(nparray.dtype.type, (bool, np.bool_)):
             nparray = numpy.packbits(nparray, bitorder="little")
@@ -1702,24 +1518,31 @@ class NumpyArray(NumpyMeta, Content):
                         backend=self._backend,
                     )._to_list(behavior, json_conversions)
 
-        out = self._data.tolist()
+        data = self._data
+        if json_conversions is not None and data.dtype.kind == "f":
+            # JSON uses binary64 numbers, including when complex values are
+            # exported as records of real and imaginary components.
+            (data,) = maybe_materialize(data)
+            with np.errstate(over="ignore", invalid="ignore"):
+                data = self._backend.nplike.astype(data, np.dtype(np.float64))
+        out = data.tolist()
 
         if json_conversions is not None:
             nan_string = json_conversions["nan_string"]
             if nan_string is not None:
-                for i in self._backend.nplike.nonzero(
-                    self._backend.nplike.isnan(self._data)
-                )[0]:
+                for i in self._backend.nplike.nonzero(self._backend.nplike.isnan(data))[
+                    0
+                ]:
                     out[i] = nan_string
 
             posinf_string = json_conversions["posinf_string"]
             if posinf_string is not None:
-                for i in self._backend.nplike.nonzero(self._data == np.inf)[0]:
+                for i in self._backend.nplike.nonzero(data == np.inf)[0]:
                     out[i] = posinf_string
 
             neginf_string = json_conversions["neginf_string"]
             if neginf_string is not None:
-                for i in self._backend.nplike.nonzero(self._data == -np.inf)[0]:
+                for i in self._backend.nplike.nonzero(data == -np.inf)[0]:
                     out[i] = neginf_string
 
         return out
