@@ -193,11 +193,11 @@ namespace awkward {
           params = std::string(", \"parameters\": { " + parameters_ + " }");
         }
 
-        if (std::is_arithmetic<PRIMITIVE>::value) {
+        if constexpr (is_layout_arithmetic_v<PRIMITIVE>) {
           return "{ \"class\": \"NumpyArray\", \"primitive\": \"" +
                  type_to_name<PRIMITIVE>() + "\"" + params +
                  ", \"form_key\": \"" + form_key.str() + "\" }";
-        } else if (is_specialization<PRIMITIVE, std::complex>::value) {
+        } else if constexpr (is_specialization<PRIMITIVE, std::complex>::value) {
           return "{ \"class\": \"NumpyArray\", \"primitive\": \"" +
                  type_to_name<PRIMITIVE>() + "\"" + params +
                  ", \"form_key\": \"" + form_key.str() + "\" }";

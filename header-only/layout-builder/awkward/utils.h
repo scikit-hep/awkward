@@ -16,14 +16,36 @@
 #include <sstream>
 #include <vector>
 
+#if __has_include(<stdfloat>)
+#include <stdfloat>
+#endif
+
 namespace awkward {
+
+  // Prefer the C++23 type. Some compilers provide IEEE binary16 before
+  // their standard library provides <stdfloat> or the arithmetic traits.
+#if defined(__STDCPP_FLOAT16_T__)
+  using float16 = std::float16_t;
+#define AWKWARD_HAVE_FLOAT16 1
+#elif defined(__FLT16_MANT_DIG__) && __FLT16_MANT_DIG__ == 11 && \
+      defined(__FLT16_MAX_EXP__) && __FLT16_MAX_EXP__ == 16
+  using float16 = _Float16;
+#define AWKWARD_HAVE_FLOAT16 1
+#endif
+
+  template <typename T>
+  inline constexpr bool is_layout_arithmetic_v = std::is_arithmetic_v<T>
+#ifdef AWKWARD_HAVE_FLOAT16
+      || std::is_same_v<T, float16>
+#endif
+      ;
 
   /// @brief Returns the name of a primitive type as a string.
   template <typename T>
   inline const std::string
   type_to_name() {
-    if (std::is_integral_v<T>) {
-      if (std::is_signed_v<T>) {
+    if constexpr (std::is_integral_v<T>) {
+      if constexpr (std::is_signed_v<T>) {
         if (sizeof(T) == 1) {
           return "int8";
         }
@@ -52,16 +74,32 @@ namespace awkward {
         }
       }
     }
-    else if (std::is_same_v<T, float>) {
+#ifdef AWKWARD_HAVE_FLOAT16
+    else if constexpr (std::is_same_v<T, float16>) {
+      static_assert(sizeof(float16) == 2);
+      return "float16";
+    }
+#endif
+    else if constexpr (std::is_same_v<T, long double>) {
+      if (sizeof(T) == 16) return "float128";
+      if (sizeof(T) == 8) return "float64";
+      throw std::runtime_error("unsupported long double storage size");
+    }
+    else if constexpr (std::is_same_v<T, std::complex<long double>>) {
+      if (sizeof(T) == 32) return "complex256";
+      if (sizeof(T) == 16) return "complex128";
+      throw std::runtime_error("unsupported complex<long double> storage size");
+    }
+    else if constexpr (std::is_same_v<T, float>) {
       return "float32";
     }
-    else if (std::is_same_v<T, double>) {
+    else if constexpr (std::is_same_v<T, double>) {
       return "float64";
     }
-    else if (std::is_same_v<T, std::complex<float>>) {
+    else if constexpr (std::is_same_v<T, std::complex<float>>) {
       return "complex64";
     }
-    else if (std::is_same_v<T, std::complex<double>>) {
+    else if constexpr (std::is_same_v<T, std::complex<double>>) {
       return "complex128";
     }
 
@@ -157,14 +195,17 @@ namespace awkward {
   template <typename T, typename OFFSETS>
   std::string
   type_to_form(int64_t form_key_id) {
-    if (std::string(typeid(T).name()).find("awkward") != std::string::npos) {
-      return std::string("awkward type");
+    if constexpr (!is_layout_arithmetic_v<T> &&
+                  !is_specialization<T, std::complex>::value) {
+      if (std::string(typeid(T).name()).find("awkward") != std::string::npos) {
+        return std::string("awkward type");
+      }
     }
 
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
-    if constexpr (std::is_arithmetic<T>::value) {
+    if constexpr (is_layout_arithmetic_v<T>) {
       std::string parameters(type_to_name<T>() + "\", ");
       if (std::is_same<T, char>::value) {
         parameters = std::string(
