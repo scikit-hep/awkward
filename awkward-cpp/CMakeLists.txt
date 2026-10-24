@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-cmake_minimum_required(VERSION 3.15...3.30)
+cmake_minimum_required(VERSION 3.20...3.30)
 
 if(NOT DEFINED SKBUILD)
   set(SKBUILD_PROJECT_NAME awkward_cpp)
@@ -123,7 +123,7 @@ file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 add_library(awkward-parent INTERFACE)
 target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${SKBUILD_PROJECT_VERSION}")
 target_include_directories(awkward-parent INTERFACE include)
-target_compile_features(awkward-parent INTERFACE cxx_std_17)
+target_compile_features(awkward-parent INTERFACE cxx_std_23)
 
 # C++ dependencies (header-only): RapidJSON
 target_include_directories(awkward-parent INTERFACE rapidjson/include)
