@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to create arrays of lists by unflattening or grouping a flat array."
 ---
 
 How to create arrays by "unflattening" or "grouping"

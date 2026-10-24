@@ -100,9 +100,9 @@ jobs:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
 
-    - uses: pypa/cibuildwheel@adba99c781d3746d38b3a09b1cf797965bcb7fe6 # v4.3.0
+    - uses: pypa/cibuildwheel@b3395e271a35f73dad77f21802abe9b986dfe299 # v4.3.1
       env:
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
@@ -132,13 +132,13 @@ jobs:
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
 
     # The pyodide cross-build cannot generate the kernel tests (no host numpy)
     - name: Generate kernel tests for the wheel test suite
       run: pipx run nox -s prepare -- --tests
 
-    - uses: pypa/cibuildwheel@adba99c781d3746d38b3a09b1cf797965bcb7fe6 # v4.3.0
+    - uses: pypa/cibuildwheel@b3395e271a35f73dad77f21802abe9b986dfe299 # v4.3.1
       env:
         CIBW_PLATFORM: pyodide
       with:
@@ -167,7 +167,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
 
     - name: Prepare build files
       run: pipx run nox -s prepare
