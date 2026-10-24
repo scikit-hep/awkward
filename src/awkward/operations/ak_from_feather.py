@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+import warnings
+
 import awkward as ak
 from awkward._dispatch import high_level_function
 
@@ -74,7 +76,21 @@ def _impl(
 ):
     import pyarrow.feather
 
-    arrow_table = pyarrow.feather.read_table(path, columns, memory_map, use_threads)
+    with warnings.catch_warnings():
+        # PyArrow 24.0.0 through 25.0.0 warn even for supported Feather V2.
+        # Do not suppress the distinct Feather V1 DeprecationWarning.
+        warnings.filterwarnings(
+            "ignore",
+            message=r"pyarrow\.feather\.read_table is deprecated as of 24\.0\.0\.",
+            category=FutureWarning,
+        )
+
+        arrow_table = pyarrow.feather.read_table(
+            path,
+            columns=columns,
+            memory_map=memory_map,
+            use_threads=use_threads,
+        )
 
     return ak.operations.ak_from_arrow._impl(
         arrow_table,

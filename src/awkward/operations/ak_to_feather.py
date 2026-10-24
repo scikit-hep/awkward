@@ -181,9 +181,22 @@ def _impl(
             f"'destination' argument of 'ak.to_feather' must be a path-like, not {type(destination).__name__} ('array' argument is first; 'destination' second)"
         ) from None
 
-    pyarrow.feather.write_feather(
-        table, destination, compression, compression_level, chunksize, feather_version
-    )
+    with warnings.catch_warnings():
+        # PyArrow 24.0.0 through 25.0.0 warn even for supported Feather V2.
+        # Do not suppress the distinct Feather V1 DeprecationWarning.
+        warnings.filterwarnings(
+            "ignore",
+            message=r"pyarrow\.feather\.write_feather is deprecated as of 24\.0\.0\.",
+            category=FutureWarning,
+        )
+        pyarrow.feather.write_feather(
+            table,
+            destination,
+            compression,
+            compression_level,
+            chunksize,
+            feather_version,
+        )
 
 
 def _contains_union(form):
