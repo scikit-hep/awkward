@@ -1,3 +1,11 @@
+---
+myst:
+  html_meta:
+    description: Awkward Array is a library for nested, variable-sized data,
+      including arbitrary-length lists, records, mixed types, and missing data,
+      using NumPy-like idioms.
+---
+
 # Awkward Array documentation
 
 

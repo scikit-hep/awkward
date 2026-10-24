@@ -1,4 +1,4 @@
-// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 enum class INDEXEDARRAY_VALIDITY_ERRORS {
   IND_LT_0,   // message: "index[i] < 0"
