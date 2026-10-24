@@ -1,0 +1,118 @@
+name: C++23 evaluation
+
+# Evaluation only: production targets and release wheels continue to require C++17.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/cxx23-evaluation.yml
+      - awkward-cpp/**
+      - header-only/**
+      - dev/**
+      - kernel-specification.yml
+      - kernel-test-data.json
+      - pyproject.toml
+      - tests/*forth*
+  push:
+    branches:
+      - main
+      - ianna/experimental-cxx23
+      - ianna/experimental-cxx23/**
+    paths:
+      - .github/workflows/cxx23-evaluation.yml
+      - awkward-cpp/**
+      - header-only/**
+      - dev/**
+      - kernel-specification.yml
+      - kernel-test-data.json
+      - pyproject.toml
+      - tests/*forth*
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cxx23-evaluation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    name: C++23 (${{ matrix.compiler }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            compiler: GCC
+            cc: gcc
+            cxx: g++
+            generator: Ninja
+          - os: ubuntu-24.04
+            compiler: Clang
+            cc: clang
+            cxx: clang++
+            generator: Ninja
+          - os: macos-15
+            compiler: AppleClang
+            cc: clang
+            cxx: clang++
+            generator: Ninja
+          - os: windows-2022
+            compiler: MSVC
+            cc: ""
+            cxx: ""
+            generator: Visual Studio 17 2022
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+      CMAKE_GENERATOR: ${{ matrix.generator }}
+      CMAKE_BUILD_PARALLEL_LEVEL: "2"
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: true
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install build and test dependencies
+        run: python -m pip install "scikit-build-core>=1.0" "pybind11>=3" "cmake>=3.29" ninja numpy pyyaml pytest
+
+      - name: Build and install awkward-cpp in C++23 mode
+        run: >-
+          python -m pip install -v --no-build-isolation ./awkward-cpp
+          -Ccmake.define.CMAKE_CXX_STANDARD=23
+          -Ccmake.define.CMAKE_CXX_STANDARD_REQUIRED=ON
+          -Ccmake.define.CMAKE_CXX_EXTENSIONS=OFF
+          "-Ccmake.define.CMAKE_PROJECT_INCLUDE=${{ github.workspace }}/dev/cmake/cxx23-evaluation.cmake"
+
+      - name: Install the matching Python package
+        run: python -m pip install .
+
+      - name: Test canonical specifications and compiled CPU kernels
+        run: >-
+          python -m pytest -q
+          awkward-cpp/tests-spec awkward-cpp/tests-spec-explicit
+          awkward-cpp/tests-cpu-kernels awkward-cpp/tests-cpu-kernels-explicit
+          tests/test_3209_awkwardforth_read_negative_number_of_items.py
+          tests/test_4105_forth_vm_and_libawkward_fixes.py
+          tests/test_4359_forth_output_strides.py
+
+      - name: Configure header-only tests in C++23 mode
+        run: >-
+          cmake -S header-only -B build-cxx23-headers
+          -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_STANDARD_REQUIRED=ON
+          -DCMAKE_CXX_EXTENSIONS=OFF
+          "-DCMAKE_PROJECT_INCLUDE=${{ github.workspace }}/dev/cmake/cxx23-evaluation.cmake"
+
+      - name: Build header-only tests
+        run: cmake --build build-cxx23-headers --config Debug
+
+      - name: Run header-only tests
+        run: ctest --test-dir build-cxx23-headers -C Debug --output-on-failure --no-tests=error
