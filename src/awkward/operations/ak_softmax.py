@@ -43,7 +43,11 @@ def softmax(
 
     Passing all arguments to the reducers, the softmax is calculated as::
 
-        np.exp(x) / ak.sum(np.exp(x))
+        shifted = x - ak.max(x, keepdims=True)
+        np.exp(shifted) / ak.sum(np.exp(shifted))
+
+    Subtracting the maximum from each group before exponentiating avoids
+    overflow for large finite values.
 
     See #ak.sum for a complete description of handling nested lists and
     missing values (None) in reducers, and #ak.mean for an example with another
@@ -114,7 +118,17 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
         )
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        expx = ufuncs.exp(x)
+        maximum = ak.operations.ak_max._impl(
+            x,
+            axis,
+            True,
+            None,
+            mask_identity,
+            highlevel=True,
+            behavior=ctx.behavior,
+            attrs=ctx.attrs,
+        )
+        expx = ufuncs.exp(x - maximum)
         denom = ak.operations.ak_sum._impl(
             expx,
             axis,
