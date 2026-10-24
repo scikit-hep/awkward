@@ -51,7 +51,7 @@ class Filter(IRNode):
 
     Args:
         array: The input node/array to filter.
-        predicate (callable): A callable compiled with numba.cuda for the CCCL
+        predicate (callable): A callable compiled with numba_cuda_mlir.cuda for the CCCL
             select path (not a materialized boolean array).
     """
 

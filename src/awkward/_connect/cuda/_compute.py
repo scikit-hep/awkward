@@ -17,7 +17,7 @@ from cuda.compute import (
 from cuda.compute import (
     segmented_reduce as _segmented_reduce_raw,
 )
-from numba import cuda
+from numba_cuda_mlir import cuda as numba_cuda
 
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
@@ -544,7 +544,7 @@ def awkward_reduce_argmax(
     )
 
 
-@cuda.jit(device=True)
+@numba_cuda.jit(device=True)
 def lexargmax_complex(values, start_idx, end_idx):
     if start_idx == end_idx:
         return np.int64(-1)
@@ -624,7 +624,7 @@ def awkward_reduce_argmin(
     )
 
 
-@cuda.jit(device=True)
+@numba_cuda.jit(device=True)
 def lexargmin_complex(values, start_idx, end_idx):
     if start_idx == end_idx:
         return np.int64(-1)
