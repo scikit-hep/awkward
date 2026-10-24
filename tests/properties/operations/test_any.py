@@ -12,7 +12,7 @@ from hypothesis import HealthCheck, assume, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-from tests.properties.operations import known_issues, util
+from tests.properties.operations import util
 
 
 class Kwargs(TypedDict, total=False):
@@ -171,12 +171,6 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
     in `known_issues`, and this function applies any option
     conditions.
     """
-    axis = kwargs.get("axis", DEFAULTS["axis"])
-
-    match axis:
-        case int():
-            if known_issues.has_issue_4264(a):
-                return True
     return False
 
 
