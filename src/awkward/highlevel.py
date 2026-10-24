@@ -133,6 +133,17 @@ def prepare_layout(layout: T) -> T | str | bytes:
         return layout
 
 
+def _has_plain_setattr(cls: type) -> bool:
+    """
+    True if only `ak.Array`/`ak.Record` define `__setattr__` in the MRO of `cls`,
+    so their private state can be written to `__dict__` directly.
+    """
+    return all(
+        "__setattr__" not in vars(base) or base in (Array, Record, object)
+        for base in cls.__mro__
+    )
+
+
 class Array(NDArrayOperatorsMixin, Iterable, Sized):
     """
     Args:
@@ -278,6 +289,11 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     numeric leaves of the data structure, maintaining structure in the output.
     """
 
+    # lazily built caches, reset by `_update_class`
+    _numbaview = _cpp_type = _generator = _lookup = None
+    # see `_has_plain_setattr`
+    _plain_setattr = True
+
     def __init__(
         self,
         data,
@@ -289,7 +305,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         attrs=None,
         named_axis=None,
     ):
-        self._cpp_type = None
         if isinstance(data, ak.contents.Content):
             layout = data
 
@@ -353,21 +368,18 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
             attrs[NAMED_AXIS_KEY] = _named_axis
 
-        self._layout = layout
-        self._behavior = behavior
-        self._attrs = None if attrs is None else Attrs(attrs)
-
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
             self.__doc__ = docstr
 
-        self._update_class()
+        self._set_state(layout, behavior, None if attrs is None else Attrs(attrs))
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
+        cls._plain_setattr = _has_plain_setattr(cls)
 
         ak.jax.register_behavior_class(cls)
 
@@ -376,13 +388,35 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
     def __dask_tokenize__(self):
         return id(self)
 
+    def _set_state(self, layout, behavior, attrs):
+        # skip `__setattr__`'s per-name checks if no other class defines one
+        if self._plain_setattr:
+            state = self.__dict__
+            state["_layout"] = layout
+            state["_behavior"] = behavior
+            state["_attrs"] = attrs
+        else:
+            self._layout = layout
+            self._behavior = behavior
+            self._attrs = attrs
+        self._update_class()
+
     def _update_class(self, restore=None):
-        self._numbaview = None
+        previous_class = self.__class__
+        new_class = get_array_class(self._layout, self._behavior)
         # invalidate the cached cppyy type, generator, and lookup: they hold raw
         # pointers into the old buffers, which are stale after the layout changes
-        self._cpp_type = self._generator = self._lookup = None
-        previous_class = self.__class__
-        self.__class__ = get_array_class(self._layout, self._behavior)
+        if previous_class._plain_setattr:
+            state = self.__dict__
+            state.pop("_numbaview", None)
+            state.pop("_cpp_type", None)
+            state.pop("_generator", None)
+            state.pop("_lookup", None)
+            object.__setattr__(self, "__class__", new_class)
+        else:
+            self._numbaview = None
+            self._cpp_type = self._generator = self._lookup = None
+            self.__class__ = new_class
         if hasattr(self, "__awkward_validation__"):
             try:
                 self.__awkward_validation__()
@@ -1758,11 +1792,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 buffer_key="{form_key}-{attribute}",
                 byteorder=ak._util.native_byteorder,
             )
-        self._layout = layout
-        self._behavior = behavior
-        self._attrs = None
-
-        self._update_class()
+        self._set_state(layout, behavior, None)
 
     def __copy__(self):
         return Array(self._layout, behavior=self._behavior, attrs=self._attrs)
@@ -1858,6 +1888,10 @@ class Record(NDArrayOperatorsMixin):
     See also #ak.Array and #ak.behavior.
     """
 
+    _numbaview = None  # lazily built cache, reset by `_update_class`
+    # see `_has_plain_setattr`
+    _plain_setattr = True
+
     def __init__(
         self,
         data,
@@ -1927,28 +1961,43 @@ class Record(NDArrayOperatorsMixin):
             # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
             attrs[NAMED_AXIS_KEY] = _named_axis
 
-        self._layout = layout
-        self._behavior = behavior
-        self._attrs = None if attrs is None else Attrs(attrs)
-
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
             self.__doc__ = docstr
 
-        self._update_class()
+        self._set_state(layout, behavior, None if attrs is None else Attrs(attrs))
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
+        cls._plain_setattr = _has_plain_setattr(cls)
 
         ak.jax.register_behavior_class(cls)
 
+    def _set_state(self, layout, behavior, attrs):
+        # skip `__setattr__`'s per-name checks if no other class defines one
+        if self._plain_setattr:
+            state = self.__dict__
+            state["_layout"] = layout
+            state["_behavior"] = behavior
+            state["_attrs"] = attrs
+        else:
+            self._layout = layout
+            self._behavior = behavior
+            self._attrs = attrs
+        self._update_class()
+
     def _update_class(self, restore=None):
-        self._numbaview = None
         previous_class = self.__class__
-        self.__class__ = get_record_class(self._layout, self._behavior)
+        new_class = get_record_class(self._layout, self._behavior)
+        if previous_class._plain_setattr:
+            self.__dict__.pop("_numbaview", None)
+            object.__setattr__(self, "__class__", new_class)
+        else:
+            self._numbaview = None
+            self.__class__ = new_class
         if hasattr(self, "__awkward_validation__"):
             try:
                 self.__awkward_validation__()
@@ -2596,11 +2645,7 @@ class Record(NDArrayOperatorsMixin):
             byteorder=ak._util.native_byteorder,
         )
         layout = ak.record.Record(layout, at)
-        self._layout = layout
-        self._behavior = behavior
-        self._attrs = None
-
-        self._update_class()
+        self._set_state(layout, behavior, None)
 
     def __copy__(self):
         return Record(self._layout, behavior=self._behavior, attrs=self._attrs)
