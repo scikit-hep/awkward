@@ -17,7 +17,7 @@ pytest.importorskip("cuda.compute")
 spec = importlib.util.spec_from_file_location(
     "indexedarray_simplify_cases",
     Path(__file__).resolve().parents[1]
-    / "tests/test_3793_indexedarray_simplify_compute.py",
+    / "tests/test_4484_indexedarray_simplify_compute.py",
 )
 contract = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = contract
