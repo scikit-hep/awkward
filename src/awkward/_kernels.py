@@ -251,7 +251,7 @@ class CudaComputeKernel(BaseKernel):
         super().__init__(impl, key)
         self._cupy = Cupy.instance()
 
-    def __call__(self, *args) -> None:
+    def __call__(self, *args) -> KernelError | None:
         import awkward._connect.cuda as ak_cuda
 
         args = maybe_materialize(*args)

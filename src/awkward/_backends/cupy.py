@@ -62,6 +62,7 @@ class CupyBackend(Backend):
     # ---------------------------------------------------------
     def _supports_cuda_compute(self, kernel_name: str) -> bool:
         return kernel_name in (
+            "awkward_IndexedArray_simplify",
             # core reducers
             "awkward_reduce_sum",
             "awkward_reduce_sumofsquares",
@@ -186,6 +187,7 @@ class CupyBackend(Backend):
         from awkward._connect.cuda import _compute as cuda_compute
 
         return {
+            "awkward_IndexedArray_simplify": cuda_compute.awkward_IndexedArray_simplify,
             "awkward_sort": cuda_compute.segmented_sort,
             "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
