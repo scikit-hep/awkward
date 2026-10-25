@@ -13,7 +13,7 @@ pytest.importorskip("cuda.compute")
 
 spec = importlib.util.spec_from_file_location(
     "utf8_contracts",
-    Path(__file__).resolve().parents[1] / "tests/test_3793_utf8_compute.py",
+    Path(__file__).resolve().parents[1] / "tests/test_4487_utf8_compute.py",
 )
 contracts = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(contracts)
