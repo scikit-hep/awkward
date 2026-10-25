@@ -38,7 +38,7 @@ addtest_nolibs(test_4270-extended-layout-types
 target_link_libraries(test_4270-extended-layout-types
                       PRIVATE awkward::layout-builder)
 
-addtest_nolibs(test_4467-layoutbuilder-concepts
-               test_4467-layoutbuilder-concepts.cpp)
-target_link_libraries(test_4467-layoutbuilder-concepts
+addtest_nolibs(test_4468-layoutbuilder-concepts
+               test_4468-layoutbuilder-concepts.cpp)
+target_link_libraries(test_4468-layoutbuilder-concepts
                       PRIVATE awkward::layout-builder)
