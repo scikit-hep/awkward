@@ -16,7 +16,7 @@ pytest.importorskip("cuda.compute")
 
 spec = importlib.util.spec_from_file_location(
     "listoffsetarray_contract_cases",
-    Path(__file__).resolve().parents[1] / "tests/test_3793_listoffsetarray_compute.py",
+    Path(__file__).resolve().parents[1] / "tests/test_4483_listoffsetarray_compute.py",
 )
 contract = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = contract
