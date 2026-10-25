@@ -1205,15 +1205,8 @@ class NumpyArray(NumpyMeta, Content):
         assert self.is_contiguous
         assert self._data.ndim == 1
 
-        # Half precision accumulates in float32. The specialized statistical
-        # reducers explicitly promise float64 accumulation for real inputs.
+        # Half precision widens exactly before invoking compiled reducers.
         cast = _kernel_unsupported_cast(self._data.dtype)
-        if (
-            self.dtype.kind == "f"
-            and self.dtype.itemsize > 8
-            and reducer.name in ("sumofsquares", "sumofpowers")
-        ):
-            cast = np.dtype(np.float64)
         out = None
         if cast is not None:
             original = self._data.dtype

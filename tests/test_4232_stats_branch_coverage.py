@@ -225,11 +225,11 @@ def test_corr_named_axis_matches_unnamed():
 # --- reducer dtype guards ---------------------------------------------------
 
 
-def test_sumofsquares_rejects_complex():
-    with pytest.raises(TypeError, match="sum-of-squares"):
-        ak.operations.ak_sumofsquares._impl(
-            ak.Array([1 + 2j, 3 + 4j]), None, False, False, True, None, None
-        )
+def test_sumofsquares_accepts_complex():
+    result = ak.operations.ak_sumofsquares._impl(
+        ak.Array([1 + 2j, 3 + 4j]), None, False, False, True, None, None
+    )
+    assert result == -10 + 28j
 
 
 def test_sumofsquares_rejects_datetime():
@@ -238,11 +238,11 @@ def test_sumofsquares_rejects_datetime():
         ak.operations.ak_sumofsquares._impl(data, None, False, False, True, None, None)
 
 
-def test_sumofpowers_rejects_complex():
-    with pytest.raises(TypeError, match="sum-of-powers"):
-        ak.operations.ak_sumofpowers._impl(
-            ak.Array([1 + 2j, 3 + 4j]), 3, None, False, False, True, None, None
-        )
+def test_sumofpowers_accepts_complex():
+    result = ak.operations.ak_sumofpowers._impl(
+        ak.Array([1 + 2j, 3 + 4j]), 3, None, False, False, True, None, None
+    )
+    assert result == -128 + 42j
 
 
 def test_sumofpowers_rejects_datetime():

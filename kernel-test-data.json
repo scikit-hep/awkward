@@ -27217,6 +27217,316 @@
           }
         }
       ]
+    },
+    {
+      "name": "awkward_reduce_sumofsquares",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [
+              0
+            ],
+            "outlength": 0
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ],
+            "offsets": [
+              1,
+              3,
+              3,
+              4
+            ],
+            "outlength": 3
+          },
+          "outputs": {
+            "toptr": [
+              1,
+              0,
+              1
+            ]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_centered_sumofsquares",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [
+              0
+            ],
+            "outlength": 0,
+            "means": []
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ],
+            "offsets": [
+              1,
+              3,
+              3,
+              4
+            ],
+            "outlength": 3,
+            "means": [
+              0.5,
+              0,
+              1
+            ]
+          },
+          "outputs": {
+            "toptr": [
+              0.5,
+              0,
+              0
+            ]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_sumofpowers",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [
+              0
+            ],
+            "outlength": 0,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [
+              0,
+              1,
+              0,
+              1,
+              0
+            ],
+            "offsets": [
+              1,
+              3,
+              3,
+              4
+            ],
+            "outlength": 3,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [
+              1,
+              0,
+              1
+            ]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_sumofsquares_complex",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [
+              0
+            ],
+            "outlength": 0
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [
+              99,
+              0,
+              1,
+              1,
+              2,
+              -1,
+              3,
+              2,
+              88,
+              0
+            ],
+            "offsets": [
+              1,
+              3,
+              3,
+              4
+            ],
+            "outlength": 3
+          },
+          "outputs": {
+            "toptr": [
+              3,
+              -2,
+              0,
+              0,
+              5,
+              12
+            ]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_centered_sumofsquares_complex",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [
+              0
+            ],
+            "outlength": 0,
+            "means": []
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [
+              99,
+              0,
+              1,
+              1,
+              2,
+              -1,
+              3,
+              2,
+              88,
+              0
+            ],
+            "offsets": [
+              1,
+              3,
+              3,
+              4
+            ],
+            "outlength": 3,
+            "means": [
+              1.5,
+              0,
+              0,
+              0,
+              3,
+              0
+            ]
+          },
+          "outputs": {
+            "toptr": [
+              2.5,
+              0,
+              4
+            ]
+          },
+          "error": false
+        }
+      ]
+    },
+    {
+      "name": "awkward_reduce_sumofpowers_complex",
+      "status": true,
+      "tests": [
+        {
+          "inputs": {
+            "fromptr": [],
+            "offsets": [
+              0
+            ],
+            "outlength": 0,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": []
+          },
+          "error": false
+        },
+        {
+          "inputs": {
+            "fromptr": [
+              99,
+              0,
+              1,
+              1,
+              2,
+              -1,
+              3,
+              2,
+              88,
+              0
+            ],
+            "offsets": [
+              1,
+              3,
+              3,
+              4
+            ],
+            "outlength": 3,
+            "n": 3
+          },
+          "outputs": {
+            "toptr": [
+              0,
+              -9,
+              0,
+              0,
+              -9,
+              46
+            ]
+          },
+          "error": false
+        }
+      ]
     }
   ]
 }

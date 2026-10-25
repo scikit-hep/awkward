@@ -79,8 +79,8 @@ Half precision continues to accumulate through float32 and restores value
 result dtypes; subrange equality also uses that exact widening.
 
 Wide real statistics preserve their accumulator precision. Variance and
-moments use the general expression path where the optimized float64 kernels
-would discard digits or overflow. No changes are made to the algorithms or
+moments use precision-preserving fused kernels for complex and extended real
+inputs as well as ordinary real inputs. No changes are made to the algorithms or
 results of existing float32/float64 kernel specializations.
 
 NumPy complex scalars are handled explicitly by ArrayBuilder and from_iter,
@@ -112,7 +112,32 @@ Validation for the extended-precision operations change (macOS arm64):
 - All 554 existing CUDA dispatch keys are unchanged.
 
 True extended-range/precision cases and ROOT tests skip where unavailable;
-the compiler workflow runs the extended cases on Linux. The repository's
-kernel-order diagnostic also reports pre-existing ordering of the separate
-sum-of-squares specializations; the modified kernel groups are ordered using
-that diagnostic's sorting rule.
+the compiler workflow runs the extended cases on Linux. Kernel specialization
+ordering has also been corrected for the fused statistics groups.
+
+
+## Fused statistics
+
+The sum-of-squares, centered sum-of-squares, and integer-power reducers now
+have native long-double specializations and interleaved-complex kernels.
+Complex moments accumulate algebraic powers; complex centered variance
+accumulates squared magnitudes into real buffers. Real accumulation uses at
+least float64, preserving wider input and mean precision. These are internal
+kernels behind existing operations; no public API is added.
+
+Matching CUDA compute helpers handle complex64/complex128 without host data
+transfers. Extended real CUDA registrations remain excluded because the
+hardware/backend does not represent long double. The centered CUDA indexing
+also handles unused prefixes, suffixes, and empty bins. New specification
+reference definitions and explicit test data drive generated CPU and CUDA
+cases. Regression tests cover dtype/typetracer agreement, integer powers,
+complex components, and precision/range beyond binary64.
+
+
+Local validation for fused statistics: the complete Python/reference/CPU
+suite passed 28,560 tests with 994 skips in the final environment. The focused
+statistics/reference checks passed 121 tests with one precision-dependent
+skip. Ruff, Pylint, actionlint, naming, whitespace, and kernel ordering checks
+passed. CUDA callback logic was checked with host Numba compilation and NumPy
+emulation; the new CUDA tests still require an NVIDIA runner. True extended
+precision and ROOT remain platform-dependent CI checks.

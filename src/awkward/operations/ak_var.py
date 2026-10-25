@@ -25,16 +25,13 @@ __all__ = ("nanvar", "var")
 np = NumpyMetadata.instance()
 
 
-def _has_complex_leaf(layout, *, include_extended=False) -> bool:
-    """Find leaves that need the general, precision-preserving statistics path."""
+def _has_complex_leaf(layout) -> bool:
+    """Identify complex inputs for variance's squared-magnitude semantics."""
     found = False
 
     def action(node, **kwargs):
         nonlocal found
-        if node.is_numpy and (
-            node.dtype.kind == "c"
-            or (include_extended and node.dtype.kind == "f" and node.dtype.itemsize > 8)
-        ):
+        if node.is_numpy and node.dtype.kind == "c":
             found = True
             return node
         return None
@@ -236,7 +233,6 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
         "attrs": ctx.attrs,
     }
     is_complex = _has_complex_leaf(x.layout)
-    general_path = _has_complex_leaf(x.layout, include_extended=True)
 
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
@@ -255,7 +251,6 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
         posaxis = maybe_posaxis(x.layout, axis, 1) if axis is not None else None
         if (
             weight is None
-            and not general_path
             and axis is not None
             and depth_min == depth_max
             and posaxis == depth_max - 1
@@ -289,7 +284,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
             # Two-pass, like NumPy and ak.covar: centre on the (float64) mean, then
             # sum the squared deviations. Numerically stable (the one-pass
             # E[x**2]-E[x]**2 form catastrophically cancels) and overflow-safe.
-            # Used for weighted, complex, axis=None, a non-innermost axis, and
+            # Used for weighted data, axis=None, a non-innermost axis, and
             # non-cpu/cuda backends (typetracer, jax).
             # Centring needs `x - xmean` to broadcast, which is undefined when the
             # reduced axis is not the innermost one of a *ragged* array; there the
@@ -313,7 +308,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                     dev = None
 
             if dev is not None:
-                if general_path:
+                if is_complex:
                     # Variance of complex data is E[|x - mean|**2], a real number.
                     squared_dev = abs(dev) ** 2
                     if weight is not None:
@@ -329,7 +324,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                 # is E[|x|**2] - |E[x]|**2 (real), matching the innermost path.
                 if weight is None:
                     sumwx = ak.operations.ak_sum._impl(x, axis, dtype=np.float64, **kw)
-                    if general_path:
+                    if is_complex:
                         sumwxx = ak.operations.ak_sum._impl(abs(x) ** 2, axis, **kw)
                     else:
                         sumwxx = ak.operations.ak_sumofsquares._impl(x, axis, **kw)
@@ -338,7 +333,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
                     sumwx = ak.operations.ak_sum._impl(
                         xp * weight, axis, dtype=np.float64, **kw
                     )
-                    if general_path:
+                    if is_complex:
                         sumwxx = ak.operations.ak_sum._impl(
                             abs(xp) ** 2 * weight, axis, **kw
                         )

@@ -883,6 +883,12 @@ def gencpuunittests(specdict):
 
 
 cuda_kernels_tests = [
+    "awkward_reduce_sumofsquares",
+    "awkward_reduce_centered_sumofsquares",
+    "awkward_reduce_sumofpowers",
+    "awkward_reduce_sumofsquares_complex",
+    "awkward_reduce_centered_sumofsquares_complex",
+    "awkward_reduce_sumofpowers_complex",
     "awkward_Index_nones_as_index",
     "awkward_ListArray_min_range",
     "awkward_ListArray_validity",

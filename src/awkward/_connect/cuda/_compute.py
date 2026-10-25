@@ -739,9 +739,14 @@ def awkward_reduce_centered_sumofsquares(
     # PLUS segmented_reduce -- the subtraction is done in float64 (means is
     # double), so integer/float32 inputs neither overflow nor lose precision, and
     # no (x - mean) deviation buffer feeds the reduction. `result` is float64.
-    counts = offsets_data[1:] - offsets_data[:-1]
-    segment_ids = cp.repeat(cp.arange(outlength, dtype=offsets_data.dtype), counts)
-    mean_per_element = means[segment_ids]
+    if outlength == 0:
+        return
+    segment_ids = cp.searchsorted(
+        offsets_data[1:],
+        cp.arange(input_data.size, dtype=offsets_data.dtype),
+        side="right",
+    )
+    mean_per_element = means[cp.minimum(segment_ids, outlength - 1)]
 
     def _centered_square(pair):
         # field_0 is x (its dtype); field_1 is the float64 mean, so the
@@ -4708,4 +4713,116 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
         )
     raise ValueError(
         "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
+    )
+
+
+def _add_complex_values(a, b):
+    return a + b
+
+
+@functools.cache
+def _make_complex_power(dtype, n):
+    component = np.float32 if dtype == np.complex64 else np.float64
+    one, zero = component(1), component(0)
+    power = abs(int(n))
+    negative = n < 0
+
+    def transform(value):
+        if n == 1:
+            return value
+        br, bi = value.real, value.imag
+        if negative:
+            if br == zero and bi == zero:
+                br, bi = component(np.nan), component(np.nan)
+            elif abs(br) >= abs(bi):
+                ratio = bi / br
+                denom = br + bi * ratio
+                br, bi = one / denom, -ratio / denom
+            else:
+                ratio = br / bi
+                denom = bi + br * ratio
+                br, bi = ratio / denom, -one / denom
+        pr, pi = one, zero
+        exponent = power
+        while exponent:
+            if exponent & 1:
+                pr, pi = pr * br - pi * bi, pr * bi + pi * br
+            exponent >>= 1
+            if exponent:
+                br, bi = br * br - bi * bi, component(2) * br * bi
+        return dtype(complex(pr, pi))
+
+    transform.__annotations__ = {"value": dtype, "return": dtype}
+    return transform
+
+
+@functools.cache
+def _make_complex_square(dtype):
+    def transform(value):
+        a, b = value.real, value.imag
+        return dtype(complex(a * a - b * b, a * b + a * b))
+
+    transform.__annotations__ = {"value": dtype, "return": dtype}
+    return transform
+
+
+def _complex_transform_reduce(result, input_data, offsets_data, outlength, transform):
+    dtype = infer_complex_dtype(input_data.dtype)
+    start_o, end_o = make_segment_views(offsets_data)
+    segmented_reduce(
+        d_in=TransformIterator(input_data.view(dtype), transform),
+        d_out=result.view(dtype),
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=_add_complex_values,
+        h_init=np.asarray(0, dtype=dtype),
+    )
+
+
+def awkward_reduce_sumofpowers_complex(result, input_data, offsets_data, outlength, n):
+    dtype = infer_complex_dtype(input_data.dtype)
+    _complex_transform_reduce(
+        result, input_data, offsets_data, outlength, _make_complex_power(dtype, int(n))
+    )
+
+
+def awkward_reduce_sumofsquares_complex(result, input_data, offsets_data, outlength):
+    dtype = infer_complex_dtype(input_data.dtype)
+    _complex_transform_reduce(
+        result, input_data, offsets_data, outlength, _make_complex_square(dtype)
+    )
+
+
+def _centered_complex_magnitude(pair):
+    difference = pair.field_0 - pair.field_1
+    return difference.real * difference.real + difference.imag * difference.imag
+
+
+def awkward_reduce_centered_sumofsquares_complex(
+    result, input_data, offsets_data, outlength, means
+):
+    if outlength == 0:
+        return
+    dtype = infer_complex_dtype(input_data.dtype)
+    values = input_data.view(dtype)
+    complex_means = means.view(dtype)
+    # Keep all indexing on device. Prefix/suffix elements outside the bins are
+    # ignored by segmented_reduce, but still need valid ZipIterator operands.
+    segment_ids = cp.searchsorted(
+        offsets_data[1:], cp.arange(values.size, dtype=offsets_data.dtype), side="right"
+    )
+    mean_values = complex_means[cp.minimum(segment_ids, outlength - 1)]
+
+    start_o, end_o = make_segment_views(offsets_data)
+    segmented_reduce(
+        d_in=TransformIterator(
+            ZipIterator(values, mean_values), _centered_complex_magnitude
+        ),
+        d_out=result,
+        num_segments=outlength,
+        start_offsets_in=start_o,
+        end_offsets_in=end_o,
+        op=OpKind.PLUS,
+        h_init=np.asarray(0, dtype=result.dtype),
     )
