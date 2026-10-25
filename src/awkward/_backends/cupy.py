@@ -114,6 +114,8 @@ class CupyBackend(Backend):
             "awkward_RegularArray_getitem_next_array",
             "awkward_index_rpad_and_clip_axis1",
             # sort
+            "awkward_ListOffsetArray_argsort_strings",
+            "awkward_NumpyArray_sort_asstrings_uint8",
             "awkward_sort",
             "awkward_argsort",
             # other kernels
@@ -186,6 +188,8 @@ class CupyBackend(Backend):
         from awkward._connect.cuda import _compute as cuda_compute
 
         return {
+            "awkward_ListOffsetArray_argsort_strings": cuda_compute.awkward_ListOffsetArray_argsort_strings,
+            "awkward_NumpyArray_sort_asstrings_uint8": cuda_compute.awkward_NumpyArray_sort_asstrings_uint8,
             "awkward_sort": cuda_compute.segmented_sort,
             "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
