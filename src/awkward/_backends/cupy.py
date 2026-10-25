@@ -118,6 +118,12 @@ class CupyBackend(Backend):
             "awkward_NumpyArray_sort_asstrings_uint8",
             "awkward_sort",
             "awkward_argsort",
+            # uniqueness
+            "awkward_IndexedArray_unique_next_index_and_offsets_64",
+            "awkward_NumpyArray_unique_strings",
+            "awkward_unique_offsets",
+            "awkward_unique_ranges",
+            "awkward_unique_ranges_bool",
             # other kernels
             "awkward_RegularArray_getitem_carry",
             "awkward_NumpyArray_subrange_equal",
@@ -188,6 +194,11 @@ class CupyBackend(Backend):
         from awkward._connect.cuda import _compute as cuda_compute
 
         return {
+            "awkward_IndexedArray_unique_next_index_and_offsets_64": cuda_compute.awkward_IndexedArray_unique_next_index_and_offsets_64,
+            "awkward_NumpyArray_unique_strings": cuda_compute.awkward_NumpyArray_unique_strings,
+            "awkward_unique_offsets": cuda_compute.awkward_unique_offsets,
+            "awkward_unique_ranges": cuda_compute.awkward_unique_ranges,
+            "awkward_unique_ranges_bool": cuda_compute.awkward_unique_ranges_bool,
             "awkward_ListOffsetArray_argsort_strings": cuda_compute.awkward_ListOffsetArray_argsort_strings,
             "awkward_NumpyArray_sort_asstrings_uint8": cuda_compute.awkward_NumpyArray_sort_asstrings_uint8,
             "awkward_sort": cuda_compute.segmented_sort,

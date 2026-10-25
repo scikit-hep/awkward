@@ -27567,6 +27567,244 @@
           }
         }
       ]
+    },
+    {
+      "name": "awkward_IndexedArray_unique_next_index_and_offsets_64",
+      "status": true,
+      "tests": [
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromoffsets": [
+              0
+            ],
+            "fromnulls": [
+              0
+            ],
+            "startslength": 0
+          },
+          "outputs": {
+            "toindex": [
+              0
+            ],
+            "tooffsets": [
+              0
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromoffsets": [
+              0,
+              0,
+              0
+            ],
+            "fromnulls": [
+              1,
+              1,
+              0
+            ],
+            "startslength": 2
+          },
+          "outputs": {
+            "toindex": [
+              -1,
+              -1,
+              123
+            ],
+            "tooffsets": [
+              0,
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromoffsets": [
+              0,
+              2,
+              2,
+              3
+            ],
+            "fromnulls": [
+              0,
+              0,
+              1,
+              0,
+              1,
+              0
+            ],
+            "startslength": 3
+          },
+          "outputs": {
+            "toindex": [
+              0,
+              1,
+              -1,
+              2,
+              -1,
+              123,
+              123
+            ],
+            "tooffsets": [
+              0,
+              3,
+              3,
+              5
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "awkward_NumpyArray_unique_strings",
+      "status": true,
+      "tests": [
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [],
+            "offsets": [
+              0
+            ],
+            "offsetslength": 1
+          },
+          "outputs": {
+            "toptr": [],
+            "outoffsets": [
+              0
+            ],
+            "tolength": [
+              1
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [],
+            "offsets": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "offsetslength": 4
+          },
+          "outputs": {
+            "toptr": [],
+            "outoffsets": [
+              0,
+              0,
+              123,
+              123
+            ],
+            "tolength": [
+              2
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [
+              97,
+              0,
+              98,
+              97,
+              0,
+              98,
+              97,
+              0,
+              99,
+              255
+            ],
+            "offsets": [
+              0,
+              3,
+              6,
+              9,
+              10
+            ],
+            "offsetslength": 5
+          },
+          "outputs": {
+            "toptr": [
+              97,
+              0,
+              98,
+              97,
+              0,
+              99,
+              255,
+              0,
+              99,
+              255
+            ],
+            "outoffsets": [
+              0,
+              3,
+              6,
+              7,
+              123
+            ],
+            "tolength": [
+              4
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [
+              97,
+              97,
+              98,
+              98,
+              99
+            ],
+            "offsets": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "offsetslength": 6
+          },
+          "outputs": {
+            "toptr": [
+              97,
+              98,
+              99,
+              98,
+              99
+            ],
+            "outoffsets": [
+              0,
+              1,
+              2,
+              3,
+              123,
+              123
+            ],
+            "tolength": [
+              4
+            ]
+          }
+        }
+      ]
     }
   ]
 }
