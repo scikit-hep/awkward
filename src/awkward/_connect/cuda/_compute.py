@@ -1067,7 +1067,8 @@ def awkward_reduce_max(
     # def max_op(a, b):
     #     return a if a > b else b
 
-    segmented_reduce(
+    # Let cuda.compute choose without downloading device offsets for a hint.
+    _segmented_reduce_raw(
         d_in=input_data,
         d_out=result,
         num_segments=outlength,
@@ -1100,7 +1101,8 @@ def awkward_reduce_max_complex(
             return a
         return b
 
-    segmented_reduce(
+    # Let cuda.compute choose without downloading device offsets for a hint.
+    _segmented_reduce_raw(
         d_in=input_complex,
         d_out=result_complex,
         num_segments=outlength,
