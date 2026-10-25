@@ -4177,8 +4177,14 @@ def awkward_IndexedArray_simplify(
         return i if index >= 0 and index >= parameters[0] else np.int64(outer.size)
 
     indices = CountingIterator(np.int64(0))
-    positions = TransformIterator(
-        indices, error_position, value_type=indices.value_type
+    # Plain array input avoids stateful TransformIterator launch failures.
+    positions = cp.empty(outerlength, dtype=cp.int64)
+    unary_transform(
+        d_in=indices,
+        d_out=positions,
+        op=error_position,
+        num_items=outerlength,
+        stream=stream,
     )
     first = cp.empty(1, dtype=cp.int64)
     reduce_into(

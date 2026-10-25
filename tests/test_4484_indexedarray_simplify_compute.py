@@ -166,17 +166,6 @@ class _DeviceArray(np.ndarray):
 class _Counting:
     def __init__(self, start):
         self.start = start
-        self.value_type = np.dtype(np.int64)
-
-
-class _Transform:
-    def __init__(self, source, op, *, value_type):
-        assert value_type == source.value_type
-        self.source = source
-        self.op = op
-
-    def __getitem__(self, i):
-        return self.op(np.int64(self.source.start + i))
 
 
 class _Discard:
@@ -204,6 +193,8 @@ def host_implementation():
                 d_out[i] = value
 
     def reduce(*, d_in, d_out, num_items, h_init, **kwargs):
+        assert isinstance(d_in, np.ndarray)
+        assert d_in.dtype == np.dtype(np.int64)
         assert kwargs["stream"].__cuda_stream__() == (0, 123)
         d_out[0] = min([int(h_init), *(int(d_in[i]) for i in range(num_items))])
 
@@ -220,7 +211,6 @@ def host_implementation():
         "cp": cp,
         "SimpleNamespace": SimpleNamespace,
         "CountingIterator": _Counting,
-        "TransformIterator": _Transform,
         "DiscardIterator": _Discard,
         "OpKind": SimpleNamespace(MINIMUM=1),
         "unary_transform": transform,
