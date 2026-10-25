@@ -561,6 +561,10 @@ def _unique_ranges(toptr, fromoffsets, offsetslength, tooffsets, is_bool):
     if offsetslength == 1:
         tooffsets[0] = 0
         return
+    # Avoid the i1*/i8* mismatch when CCCL reconstructs captured bool arrays.
+    # Keep boolean data byte-addressed without copying or changing the kernel ABI.
+    if is_bool:
+        toptr = toptr.view(cp.uint8)
     source = toptr.copy()
     offsets = fromoffsets[:offsetslength]
     # Empty ranges and first-element NaNs have stateful legacy semantics.
@@ -568,7 +572,7 @@ def _unique_ranges(toptr, fromoffsets, offsetslength, tooffsets, is_bool):
     exceptional = offsets[1:] <= offsets[:-1]
     if toptr.dtype.kind == "f":
         exceptional = exceptional | cp.isnan(source[offsets[:-1]])
-    legacy = cp.any(exceptional).reshape(1)
+    legacy = cp.any(exceptional).astype(cp.uint8).reshape(1)
     keep = cp.zeros(source.size, dtype=cp.int64)
 
     def classify(row):

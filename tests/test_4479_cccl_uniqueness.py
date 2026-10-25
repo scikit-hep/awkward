@@ -238,3 +238,63 @@ def test_full_width_integer_equality(dtype, values, expected):
     call("awkward_unique_ranges", [output, offsets, outoffsets], [(2, 2)])
     assert host(output)[: len(expected)].tolist() == expected
     assert host(outoffsets).tolist() == [0, len(expected)]
+
+
+@pytest.mark.parametrize("dtype", [np.bool_, np.int64, np.float64])
+@pytest.mark.parametrize("offsets", [[0, 2, 4], [0, 0, 3, 3]])
+def test_compute_closures_use_byte_sized_state(dtype, offsets):
+    import ast
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    source = (
+        Path(__file__).resolve().parents[1] / "src/awkward/_connect/cuda/_compute.py"
+    )
+    tree = ast.parse(source.read_text())
+    functions = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_unique_ranges"
+    ]
+
+    class Counting:
+        def __init__(self, start):
+            self.start = start
+
+    def transform(*, d_in, d_out, op, num_items):
+        for cell in op.__closure__ or ():
+            value = cell.cell_contents
+            if isinstance(value, np.ndarray):
+                assert value.dtype.kind != "b", "bool array captured by a CCCL closure"
+        for i in range(num_items):
+            op(np.int64(d_in.start + i))
+
+    def scan(*, d_in, d_out, num_items, **kwargs):
+        d_out[:num_items] = np.cumsum(d_in[:num_items])
+
+    namespace = {
+        "np": np,
+        "cp": np,
+        "CountingIterator": Counting,
+        "DiscardIterator": object,
+        "OpKind": SimpleNamespace(PLUS=0),
+        "unary_transform": transform,
+        "inclusive_scan": scan,
+    }
+    exec(
+        compile(ast.Module(body=functions, type_ignores=[]), str(source), "exec"),
+        namespace,
+    )
+    values = np.asarray([1, 1, 0, 0, 1, 0], dtype=dtype)
+    expected = values.copy()
+    result_offsets = np.full(len(offsets) + 2, -99, dtype=np.int64)
+    expected_offsets = result_offsets.copy()
+    name = (
+        "awkward_unique_ranges_bool" if dtype == np.bool_ else "awkward_unique_ranges"
+    )
+    call(name, [expected, np.asarray(offsets), expected_offsets], [(2, len(offsets))])
+    namespace["_unique_ranges"](
+        values, np.asarray(offsets), len(offsets), result_offsets, dtype == np.bool_
+    )
+    np.testing.assert_array_equal(values, expected)
+    np.testing.assert_array_equal(result_offsets, expected_offsets)
