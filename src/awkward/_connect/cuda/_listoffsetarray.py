@@ -8,7 +8,6 @@ from cuda.compute import (
     CountingIterator,
     DiscardIterator,
     OpKind,
-    TransformIterator,
     inclusive_scan,
     reduce_into,
     segmented_reduce,
@@ -235,10 +234,10 @@ def nonlocal_ranges(outstarts, outstops, distincts, lendistincts, outlength):
     def position(i):
         return i + 1 if source[i] != -1 else np.int64(0)
 
-    indices = CountingIterator(np.int64(0))
-    # CCCL cannot infer the return type of a transform capturing device state.
-    # The global positions have the same int64 type as the counting iterator.
-    positions = TransformIterator(indices, position, value_type=indices.value_type)
+    # Feed a plain array to segmented_reduce. Stateful transform iterators hit
+    # inference and launch failures with the supported CCCL/Numba combination.
+    positions = cp.empty(lendistincts, dtype=cp.int64)
+    _transform(position, lendistincts, positions)
     segmented_reduce(
         d_in=positions,
         d_out=outstops[:outlength],

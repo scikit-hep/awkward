@@ -106,17 +106,6 @@ class _DeviceArray(np.ndarray):
 class _Counting:
     def __init__(self, start):
         self.start = start
-        self.value_type = np.dtype(np.int64)
-
-
-class _Transform:
-    def __init__(self, source, op, *, value_type):
-        assert value_type == source.value_type
-        self.source = source
-        self.op = op
-
-    def __getitem__(self, i):
-        return self.op(np.int64(self.source.start + i))
 
 
 class _Discard:
@@ -159,6 +148,10 @@ def host_implementation():
         *, d_in, d_out, num_segments, start_offsets_in, end_offsets_in, h_init, **kwargs
     ):
         assert kwargs["stream"].__cuda_stream__() == (0, 123)
+        # Exercise the supported array-input path, not a stateful iterator.
+        assert isinstance(d_in, np.ndarray)
+        assert d_in.dtype == np.dtype(np.int64)
+        assert kwargs["max_segment_size"] is not None
         for row in range(num_segments):
             values = [
                 d_in[i] for i in range(start_offsets_in[row], end_offsets_in[row])
@@ -178,7 +171,6 @@ def host_implementation():
         "dataclass": dataclass,
         "_SLICE_NONE": ak._util.kSliceNone,
         "CountingIterator": _Counting,
-        "TransformIterator": _Transform,
         "segmented_reduce": segmented,
         "DiscardIterator": _Discard,
         "OpKind": SimpleNamespace(PLUS=0, MINIMUM=1, MAXIMUM=2),
