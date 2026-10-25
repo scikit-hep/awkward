@@ -49,9 +49,29 @@ def exported_layouts(tmp_path_factory):
     return [json.loads(line) for line in result.stdout.splitlines()]
 
 
-def test_cpp_extended_layout_roundtrip(exported_layouts):
+@pytest.mark.parametrize("kind", ["float16", "longdouble_complex"])
+def test_cpp_extended_layout_roundtrip(exported_layouts, kind):
     assert len(exported_layouts) in (2, 4)
+    cases = []
     for case in exported_layouts:
+        leaf = case["form"].get("content", case["form"])
+        if (leaf["primitive"] == "float16") == (kind == "float16"):
+            cases.append(case)
+    if not cases:
+        pytest.skip(f"compiler does not provide {kind}")
+    if kind == "longdouble_complex":
+        info = np.finfo(np.longdouble)
+        for case in cases:
+            if (
+                case["component_size"] != np.dtype(np.longdouble).itemsize
+                or case["component_mantissa"] != info.nmant + 1
+                or case["component_max_exponent"] != info.maxexp
+            ):
+                pytest.skip(
+                    "compiler long double representation differs from NumPy; "
+                    "native raw buffers cannot be interpreted without conversion"
+                )
+    for case in cases:
         form = ak.forms.from_dict(case["form"])
         buffers = {key: bytes.fromhex(value) for key, value in case["buffers"].items()}
         array = ak.from_buffers(

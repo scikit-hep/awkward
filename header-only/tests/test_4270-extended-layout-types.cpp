@@ -9,7 +9,9 @@
 #include <limits>
 
 // Emit real builder buffers so Python can validate their NumPy interpretation.
-template <typename Builder> void emit(const Builder &builder) {
+template <typename Builder>
+void emit(const Builder &builder, int digits, int max_exponent,
+          int component_size) {
   std::map<std::string, size_t> sizes;
   builder.buffer_nbytes(sizes);
   std::map<std::string, std::vector<std::max_align_t>> storage;
@@ -21,7 +23,10 @@ template <typename Builder> void emit(const Builder &builder) {
   }
   builder.to_buffers(pointers);
   std::cout << "{\"form\":" << builder.form()
-            << ",\"length\":" << builder.length() << ",\"buffers\":{";
+            << ",\"length\":" << builder.length()
+            << ",\"component_mantissa\":" << digits
+            << ",\"component_max_exponent\":" << max_exponent
+            << ",\"component_size\":" << component_size << ",\"buffers\":{";
   bool first = true;
   for (const auto &[name, size] : sizes) {
     if (!first)
@@ -61,7 +66,13 @@ template <typename T> void check(const std::vector<T> &values) {
       assert(std::memcmp(&copy[i], &values[i], sizeof(T)) == 0);
     }
   }
-  emit(flat);
+  int digits = 0, max_exponent = 0, component_size = 0;
+  if constexpr (awkward::is_specialization<T, std::complex>::value) {
+    component_size = sizeof(typename T::value_type);
+    digits = std::numeric_limits<typename T::value_type>::digits;
+    max_exponent = std::numeric_limits<typename T::value_type>::max_exponent;
+  }
+  emit(flat, digits, max_exponent, component_size);
 
   awkward::LayoutBuilder::ListOffset<int64_t, awkward::LayoutBuilder::Numpy<T>>
       nested;
@@ -71,7 +82,7 @@ template <typename T> void check(const std::vector<T> &values) {
   nested.end_list();
   nested.begin_list();
   nested.end_list();
-  emit(nested);
+  emit(nested, digits, max_exponent, component_size);
   flat.clear();
   assert(flat.length() == 0);
 }

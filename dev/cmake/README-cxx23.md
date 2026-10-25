@@ -154,3 +154,11 @@ Modern Pyodide builds supply `-fwasm-exceptions` for their unwinding ABI. The
 CMake target preserves this mode rather than appending the incompatible
 JavaScript `-fexceptions` flag. Legacy Emscripten configurations without a
 native-Wasm exception flag retain the existing `-fexceptions` fallback.
+
+
+The C++ layout test exporter reports long-double storage size, significand
+precision, and exponent range. Python checks those against NumPy before
+reading native buffers. In particular, a standalone Windows GNU compiler can
+have an extended long-double ABI while Windows NumPy uses binary64. Only
+that incompatible round trip skips; half-precision checks remain independent.
+C++ forms continue to describe the producer's actual representation.
