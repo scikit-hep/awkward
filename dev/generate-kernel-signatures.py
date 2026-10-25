@@ -144,8 +144,6 @@ cuda_kernels_impl = [
     # helpers in awkward._connect.cuda._compute. Their signature-table entries
     # are emitted as None (this kernel name is absent from cuda_kernels_impl),
     # which routes CupyBackend.__getitem__ to the CudaComputeKernel path.
-    "awkward_sorting_ranges",
-    "awkward_sorting_ranges_length",
 ]
 
 

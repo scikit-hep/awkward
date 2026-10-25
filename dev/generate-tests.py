@@ -1005,8 +1005,6 @@ cuda_kernels_tests = [
     "awkward_reduce_prod_complex",
     "awkward_reduce_countnonzero",
     "awkward_reduce_countnonzero_complex",
-    "awkward_sorting_ranges",
-    "awkward_sorting_ranges_length",
 ]
 
 

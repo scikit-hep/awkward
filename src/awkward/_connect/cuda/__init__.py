@@ -146,8 +146,6 @@ def fetch_template_specializations(kernel_dict):
         "awkward_reduce_argmin_complex",
         # "awkward_reduce_argmax",
         "awkward_reduce_argmax_complex",
-        "awkward_sorting_ranges",
-        "awkward_sorting_ranges_length",
         "awkward_UnionArray_flatten_length",
         "awkward_UnionArray_flatten_combine",
         "awkward_UnionArray_nestedfill_tags_index",
