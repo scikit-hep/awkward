@@ -4918,13 +4918,24 @@ kernels:
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    reference-output-type: true
+    description: >-
+      Integer outputs wrap modulo 2**N at the output width N. Signed outputs
+      interpret the result in [-2**(N-1), 2**(N-1)-1]. Floating outputs retain
+      serial accumulation. The generated reference binds output_type from the
+      specialization signature; this is not a kernel argument.
     definition: |
-      def awkward_reduce_prod(toptr, fromptr, offsets, outlength):
+      def awkward_reduce_prod(toptr, fromptr, offsets, outlength, output_type=None):
           for bin in range(outlength):
               acc = 1
               for i in range(offsets[bin], offsets[bin + 1]):
                   acc *= fromptr[i]
+              if output_type in ("int32_t", "uint32_t", "int64_t", "uint64_t"):
+                  bits = 32 if "32" in output_type else 64
+                  modulus = 1 << bits
+                  acc = int(acc) % modulus
+                  if output_type.startswith("int") and acc >= modulus // 2:
+                      acc -= modulus
               toptr[bin] = acc
     automatic-tests: true
   - name: awkward_reduce_prod_complex
@@ -5213,13 +5224,24 @@ kernels:
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    reference-output-type: true
+    description: >-
+      Integer outputs wrap modulo 2**N at the output width N. Signed outputs
+      interpret the result in [-2**(N-1), 2**(N-1)-1]. Floating outputs retain
+      serial accumulation. The generated reference binds output_type from the
+      specialization signature; this is not a kernel argument.
     definition: |
-      def awkward_reduce_sum(toptr, fromptr, offsets, outlength):
+      def awkward_reduce_sum(toptr, fromptr, offsets, outlength, output_type=None):
           for bin in range(outlength):
               acc = 0
               for i in range(offsets[bin], offsets[bin + 1]):
                   acc += fromptr[i]
+              if output_type in ("int32_t", "uint32_t", "int64_t", "uint64_t"):
+                  bits = 32 if "32" in output_type else 64
+                  modulus = 1 << bits
+                  acc = int(acc) % modulus
+                  if output_type.startswith("int") and acc >= modulus // 2:
+                      acc -= modulus
               toptr[bin] = acc
     automatic-tests: true
   - name: awkward_reduce_sumofsquares

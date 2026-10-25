@@ -4,6 +4,21 @@
 #define AWKWARD_KERNEL_UTILS_H_
 
 #include "common.h"
+#include <limits>
+#include <type_traits>
+
+namespace awkward::kernel {
+  // Convert a modulo-2**N accumulator without out-of-range signed casts.
+  template <typename T>
+  T signed_from_unsigned(std::make_unsigned_t<T> value) noexcept {
+    static_assert(std::is_integral_v<T> && std::is_signed_v<T>);
+    using U = std::make_unsigned_t<T>;
+    if (value <= static_cast<U>(std::numeric_limits<T>::max())) {
+      return static_cast<T>(value);
+    }
+    return T{-1} - static_cast<T>(static_cast<U>(~value));
+  }
+}
 
 extern "C" {
 

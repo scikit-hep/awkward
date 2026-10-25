@@ -337,6 +337,7 @@ def gettypename(spectype):
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
+import functools
 import numpy
 from numpy import uint8
 kMaxInt64  = 9223372036854775806
@@ -423,9 +424,21 @@ def awkward_ListArray_combinations_step(
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
                     for childfunc in spec["specializations"]:
-                        outfile.write(
-                            "{} = {}\n".format(childfunc["name"], spec["name"])
-                        )
+                        if spec.get("reference-output-type", False):
+                            # Preserve the typed output semantics in the Python
+                            # oracle without adding an argument to the C ABI.
+                            output_type = childfunc["args"][0]["type"]
+                            output_type = output_type.removeprefix(
+                                "List["
+                            ).removesuffix("]")
+                            outfile.write(
+                                f"{childfunc['name']} = functools.partial("
+                                f"{spec['name']}, output_type={output_type!r})\n"
+                            )
+                        else:
+                            outfile.write(
+                                "{} = {}\n".format(childfunc["name"], spec["name"])
+                            )
                     outfile.write("\n\n")
 
     unit_tests = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit")
