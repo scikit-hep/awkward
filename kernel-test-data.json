@@ -5259,6 +5259,55 @@
           "outputs": {
             "nextparents": [0]
           }
+        },
+        {
+          "inputs": {
+            "size": 0,
+            "length": 4
+          },
+          "outputs": {
+            "nextparents": []
+          },
+          "error": false,
+          "message": ""
+        },
+        {
+          "inputs": {
+            "size": 3,
+            "length": 0
+          },
+          "outputs": {
+            "nextparents": []
+          },
+          "error": false,
+          "message": ""
+        },
+        {
+          "inputs": {
+            "size": 5,
+            "length": 3
+          },
+          "outputs": {
+            "nextparents": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ]
+          },
+          "error": false,
+          "message": ""
         }
       ]
     },
@@ -8882,6 +8931,105 @@
           "outputs": {
             "toarray": [4,5]
           }
+        },
+        {
+          "inputs": {
+            "fromarray": [
+              0,
+              -1,
+              99,
+              1
+            ],
+            "lenarray": 4,
+            "size": 3
+          },
+          "outputs": {
+            "toarray": [
+              0,
+              2,
+              99,
+              123
+            ]
+          },
+          "error": true,
+          "message": "index out of range"
+        },
+        {
+          "inputs": {
+            "fromarray": [
+              -9223372036854775808,
+              -1
+            ],
+            "lenarray": 2,
+            "size": 3
+          },
+          "outputs": {
+            "toarray": [
+              -9223372036854775805,
+              123
+            ]
+          },
+          "error": true,
+          "message": "index out of range"
+        },
+        {
+          "inputs": {
+            "fromarray": [
+              9223372036854775807,
+              -1
+            ],
+            "lenarray": 2,
+            "size": 3
+          },
+          "outputs": {
+            "toarray": [
+              9223372036854775807,
+              123
+            ]
+          },
+          "error": true,
+          "message": "index out of range"
+        },
+        {
+          "inputs": {
+            "fromarray": [
+              2,
+              -3,
+              3,
+              -1
+            ],
+            "lenarray": 4,
+            "size": 3
+          },
+          "outputs": {
+            "toarray": [
+              2,
+              0,
+              3,
+              123
+            ]
+          },
+          "error": true,
+          "message": "index out of range"
+        },
+        {
+          "inputs": {
+            "fromarray": [
+              -1,
+              1,
+              9
+            ],
+            "lenarray": 2,
+            "size": 3
+          },
+          "outputs": {
+            "toarray": [
+              2,
+              1
+            ]
+          },
+          "error": false,
+          "message": ""
         }
       ]
     },
@@ -13241,6 +13389,227 @@
             ],
             "toindex": [30,30]
           }
+        },
+        {
+          "inputs": {
+            "fromindex": [
+              6,
+              17,
+              17
+            ],
+            "n": 1,
+            "replacement": false,
+            "size": 3,
+            "length": 2
+          },
+          "outputs": {
+            "tocarry": [
+              [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ]
+            ],
+            "toindex": [
+              6
+            ]
+          },
+          "error": false,
+          "message": ""
+        },
+        {
+          "inputs": {
+            "fromindex": [
+              6,
+              6,
+              7,
+              17,
+              17
+            ],
+            "n": 3,
+            "replacement": false,
+            "size": 3,
+            "length": 2
+          },
+          "outputs": {
+            "tocarry": [
+              [
+                0,
+                3
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                5
+              ]
+            ],
+            "toindex": [
+              2,
+              2,
+              2
+            ]
+          },
+          "error": false,
+          "message": ""
+        },
+        {
+          "inputs": {
+            "fromindex": [
+              6,
+              6,
+              6,
+              17,
+              17
+            ],
+            "n": 3,
+            "replacement": true,
+            "size": 3,
+            "length": 2
+          },
+          "outputs": {
+            "tocarry": [
+              [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                1,
+                1,
+                2,
+                3,
+                3,
+                3,
+                3,
+                3,
+                3,
+                4,
+                4,
+                4,
+                5
+              ],
+              [
+                0,
+                0,
+                0,
+                1,
+                1,
+                2,
+                1,
+                1,
+                2,
+                2,
+                3,
+                3,
+                3,
+                4,
+                4,
+                5,
+                4,
+                4,
+                5,
+                5
+              ],
+              [
+                0,
+                1,
+                2,
+                1,
+                2,
+                2,
+                1,
+                2,
+                2,
+                2,
+                3,
+                4,
+                5,
+                4,
+                5,
+                5,
+                4,
+                5,
+                5,
+                5
+              ]
+            ],
+            "toindex": [
+              20,
+              20,
+              20
+            ]
+          },
+          "error": false,
+          "message": ""
+        },
+        {
+          "inputs": {
+            "fromindex": [
+              4,
+              4,
+              5,
+              6,
+              17,
+              17
+            ],
+            "n": 4,
+            "replacement": false,
+            "size": 2,
+            "length": 2
+          },
+          "outputs": {
+            "tocarry": [
+              [],
+              [],
+              [],
+              []
+            ],
+            "toindex": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          "error": false,
+          "message": ""
+        },
+        {
+          "inputs": {
+            "fromindex": [
+              0,
+              17,
+              17,
+              17,
+              17
+            ],
+            "n": 3,
+            "replacement": false,
+            "size": 0,
+            "length": 2
+          },
+          "outputs": {
+            "tocarry": [
+              [],
+              [],
+              []
+            ],
+            "toindex": [
+              0,
+              0,
+              0
+            ]
+          },
+          "error": false,
+          "message": ""
         }
       ]
     },

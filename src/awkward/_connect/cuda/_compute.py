@@ -2199,23 +2199,9 @@ def awkward_RegularArray_rpad_and_clip_axis1(toindex, target, size, length):
 def awkward_RegularArray_getitem_next_array_regularize(
     toarray, fromarray, lenarray, size
 ):
-    if lenarray == 0:
-        return
-    dtype = toarray.dtype.type
+    from awkward._connect.cuda import _regulararray
 
-    def _regularize(v):
-        return dtype(v + size) if v < 0 else dtype(v)
-
-    unary_transform(
-        d_in=fromarray[:lenarray],
-        d_out=toarray[:lenarray],
-        op=_regularize,
-        num_items=lenarray,
-    )
-    if cp.any((toarray[:lenarray] < 0) | (toarray[:lenarray] >= size)):
-        raise ValueError(
-            "index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_array_regularize)"
-        )
+    return _regulararray.regularize(toarray, fromarray, lenarray, size)
 
 
 # Builds a gather index for selecting one element per row from a RegularArray.
@@ -4708,4 +4694,20 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
         )
     raise ValueError(
         "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
+    )
+
+
+def awkward_RegularArray_reduce_local_nextparents_64(nextparents, size, length):
+    from awkward._connect.cuda import _regulararray
+
+    return _regulararray.local_parents(nextparents, size, length)
+
+
+def awkward_RegularArray_combinations_64(
+    tocarry, toindex, fromindex, n, replacement, size, length
+):
+    from awkward._connect.cuda import _regulararray
+
+    return _regulararray.combinations(
+        tocarry, toindex, fromindex, n, replacement, size, length
     )
