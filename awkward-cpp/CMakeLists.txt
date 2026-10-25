@@ -132,16 +132,14 @@ target_include_directories(awkward-parent INTERFACE rapidjson/include)
 add_subdirectory(header-only EXCLUDE_FROM_ALL)
 target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
 
-# WASM needs exceptions enabled
-if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
-  set_property(
-    TARGET awkward-parent
-    APPEND
-    PROPERTY INTERFACE_LINK_OPTIONS -fexceptions)
-  set_property(
-    TARGET awkward-parent
-    APPEND
-    PROPERTY INTERFACE_COMPILE_OPTIONS -fexceptions)
+# Legacy Emscripten builds need JavaScript exception handling enabled explicitly. Modern Pyodide
+# supplies native WebAssembly exception flags for compilation and linking. Do not append
+# -fexceptions: it selects an incompatible unwinding ABI.
+if(CMAKE_SYSTEM_NAME MATCHES Emscripten
+   AND NOT CMAKE_CXX_FLAGS MATCHES "(^|[ ;])-fwasm-exceptions($|[ ;])"
+   AND NOT "$ENV{CXXFLAGS}" MATCHES "(^|[ ;])-fwasm-exceptions($|[ ;])")
+  target_compile_options(awkward-parent INTERFACE -fexceptions)
+  target_link_options(awkward-parent INTERFACE -fexceptions)
 endif()
 
 # First tier: cpu-kernels

@@ -141,3 +141,16 @@ skip. Ruff, Pylint, actionlint, naming, whitespace, and kernel ordering checks
 passed. CUDA callback logic was checked with host Numba compilation and NumPy
 emulation; the new CUDA tests still require an NVIDIA runner. True extended
 precision and ROOT remain platform-dependent CI checks.
+
+
+## Wheel toolchains
+
+Python 3.10 x86-64 Linux wheels use `manylinux_2_28`, matching newer Python
+wheel builds. The previous `manylinux2014` image provides GCC 10, which cannot
+satisfy `cxx_std_23`. This raises the Python 3.10 Linux wheel baseline from
+glibc 2.17 to glibc 2.28; older systems require another compatible build.
+
+Modern Pyodide builds supply `-fwasm-exceptions` for their unwinding ABI. The
+CMake target preserves this mode rather than appending the incompatible
+JavaScript `-fexceptions` flag. Legacy Emscripten configurations without a
+native-Wasm exception flag retain the existing `-fexceptions` fallback.
