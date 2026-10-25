@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,8 @@ import awkward as ak
 
 @pytest.fixture(scope="module")
 def exported_layouts(tmp_path_factory):
+    if sys.platform == "emscripten":
+        pytest.skip("Emscripten does not support subprocess execution")
     executable = os.environ.get("AWKWARD_EXTENDED_LAYOUT_TEST_EXECUTABLE")
     if executable is None:
         compiler = shutil.which("c++")

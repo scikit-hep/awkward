@@ -80,6 +80,10 @@ def test_extended_initial_precision():
     np.testing.assert_array_equal(ak.to_numpy(ak.sort(array)), data)
 
 
+@pytest.mark.skipif(
+    sys.platform == "emscripten",
+    reason="Emscripten does not support subprocess execution",
+)
 def test_numpy_complex_scalar_ingestion_is_safe():
     # A regression must report a failed subprocess rather than crash pytest.
     code = """
