@@ -27138,9 +27138,111 @@
       ]
     },
     {
+      "name": "awkward_argsort",
+      "status": true,
+      "tests": [
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [-1,-1,-1,-1,-1],
+            "fromptr": [1,0,0,1,1],
+            "offsets": [0,2],
+            "offsetslength": 2,
+            "length": 5,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [1,0,2,3,4]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [-1,-1,-1,-1,-1],
+            "fromptr": [1,0,0,1,1],
+            "offsets": [0,0,0],
+            "offsetslength": 3,
+            "length": 5,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [0,1,2,3,4]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [-1,-1,-1,-1,-1],
+            "fromptr": [1,0,0,1,1],
+            "offsets": [0,2,5],
+            "offsetslength": 2,
+            "length": 5,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [1,0,2,3,4]
+          }
+        }
+      ]
+    },
+    {
       "name": "awkward_sort",
       "status": true,
       "tests": [
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [1,1,1,1,1],
+            "fromptr": [1,0,0,1,1],
+            "offsets": [0,2],
+            "offsetslength": 2,
+            "length": 5,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [0,1,1,1,1]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [1,1,1,1,1],
+            "fromptr": [1,0,0,1,1],
+            "offsets": [0,0,0],
+            "offsetslength": 3,
+            "length": 5,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [1,1,1,1,1]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "toptr": [1,1,1,1,1],
+            "fromptr": [1,0,0,1,1],
+            "offsets": [0,2,5],
+            "offsetslength": 2,
+            "length": 5,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [0,1,1,1,1]
+          }
+        },
         {
           "error": false,
           "message": "",
