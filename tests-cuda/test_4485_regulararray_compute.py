@@ -72,9 +72,18 @@ def test_combinations_cpu_parity(n, replacement, size, length):
 @pytest.mark.parametrize("n", [1, 2, 3, 5])
 @pytest.mark.parametrize("replacement", [False, True])
 def test_public_regular_operations(n, replacement):
-    source = ak.Array(np.arange(12).reshape(3, 4))
+    source = ak.Array(
+        ak.contents.RegularArray(
+            ak.contents.NumpyArray(np.arange(12)),
+            size=4,
+        )
+    )
     with cp.cuda.Stream(non_blocking=True):
         array = ak.to_backend(source, "cuda")
+        # Multidimensional NumpyArray indexing delegates directly to CuPy and
+        # bypasses the RegularArray regularization kernel under test.
+        assert isinstance(array.layout, ak.contents.RegularArray)
+        assert array.layout.content.data.ndim == 1
         assert (
             ak.combinations(array, n, replacement=replacement).to_list()
             == ak.combinations(source, n, replacement=replacement).to_list()
