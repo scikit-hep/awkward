@@ -16,6 +16,7 @@ pytestmark = pytest.mark.skipif(
 @pytest.mark.parametrize("machine", [ak.forth.ForthMachine32, ak.forth.ForthMachine64])
 @pytest.mark.parametrize("repeated", [False, True])
 @pytest.mark.parametrize("offset", [0, 1])
+@pytest.mark.parametrize("byteorder", ["<", ">"])
 @pytest.mark.parametrize(
     "code,dtype",
     [
@@ -31,7 +32,7 @@ pytestmark = pytest.mark.skipif(
         ("d", "float64"),
     ],
 )
-def test_big_endian_scalar_and_bulk_bits(machine, repeated, offset, code, dtype):
+def test_endian_scalar_and_bulk_bits(machine, repeated, offset, byteorder, code, dtype):
     dtype = np.dtype(dtype)
     unsigned = np.dtype(f"uint{dtype.itemsize * 8}")
     if dtype.kind == "f":
@@ -44,10 +45,17 @@ def test_big_endian_scalar_and_bulk_bits(machine, repeated, offset, code, dtype)
     else:
         bits = [0, 1, 1 << (dtype.itemsize * 8 - 1), (1 << (dtype.itemsize * 8)) - 1]
     expected = np.asarray(bits, dtype=unsigned)
-    raw = bytearray(offset) + bytearray(expected.astype(unsigned.newbyteorder(">")))
-    data = np.frombuffer(raw, dtype=unsigned.newbyteorder(">"), offset=offset)
+    raw = bytearray(offset) + bytearray(
+        expected.astype(unsigned.newbyteorder(byteorder))
+    )
+    data = np.frombuffer(raw, dtype=unsigned.newbyteorder(byteorder), offset=offset)
     original = data.tobytes()
-    read = f"4 data #!{code}-> out" if repeated else f"4 0 do data !{code}-> out loop"
+    marker = "!" if byteorder == ">" else ""
+    read = (
+        f"4 data #{marker}{code}-> out"
+        if repeated
+        else f"4 0 do data {marker}{code}-> out loop"
+    )
     vm = machine(f"input data output out {dtype.name} {read}")
     vm.run({"data": data})
     np.testing.assert_array_equal(vm.output("out").view(unsigned), expected)
@@ -61,3 +69,22 @@ def test_big_endian_pointer_sized_stack(code, dtype):
     vm = ak.forth.ForthMachine64(f"input data 3 data #!{code}-> stack")
     vm.run({"data": data})
     assert vm.stack == values.tolist()
+
+
+@pytest.mark.parametrize("machine", [ak.forth.ForthMachine32, ak.forth.ForthMachine64])
+@pytest.mark.parametrize("repeated", [False, True])
+@pytest.mark.parametrize("big_endian", [False, True])
+def test_endian_readonly_input_requirement(machine, repeated, big_endian):
+    data = np.asarray([1, 2], dtype=">i4" if big_endian else "<i4")
+    data.flags.writeable = False
+    marker = "!" if big_endian else ""
+    read = (
+        f"2 data #{marker}i-> out" if repeated else f"2 0 do data {marker}i-> out loop"
+    )
+    vm = machine(f"input data output out int32 {read}")
+    if repeated and big_endian:
+        with pytest.raises(ValueError, match="read-only"):
+            vm.run({"data": data})
+    else:
+        vm.run({"data": data})
+        np.testing.assert_array_equal(vm.output("out"), [1, 2])

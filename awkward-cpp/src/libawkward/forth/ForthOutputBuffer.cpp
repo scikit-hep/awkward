@@ -21,8 +21,7 @@ namespace awkward {
       std::array<std::byte, sizeof(T)> representation;
       std::memcpy(representation.data(), ptr, sizeof(T));
       const auto integer = std::bit_cast<uint16_t>(representation);
-      uint16_t output = ((integer >> 8) & 0x00ff) |
-                        ((integer << 8) & 0xff00);
+      const auto output = std::byteswap(integer);
       representation = std::bit_cast<decltype(representation)>(output);
       std::memcpy(ptr, representation.data(), sizeof(T));
       ptr += sizeof(T);
@@ -38,10 +37,7 @@ namespace awkward {
       std::array<std::byte, sizeof(T)> representation;
       std::memcpy(representation.data(), ptr, sizeof(T));
       const auto integer = std::bit_cast<uint32_t>(representation);
-      uint32_t output = ((integer >> 24) & 0x000000ff) |
-                        ((integer >>  8) & 0x0000ff00) |
-                        ((integer <<  8) & 0x00ff0000) |
-                        ((integer << 24) & 0xff000000);
+      const auto output = std::byteswap(integer);
       representation = std::bit_cast<decltype(representation)>(output);
       std::memcpy(ptr, representation.data(), sizeof(T));
       ptr += sizeof(T);
@@ -57,14 +53,7 @@ namespace awkward {
       std::array<std::byte, sizeof(T)> representation;
       std::memcpy(representation.data(), ptr, sizeof(T));
       const auto integer = std::bit_cast<uint64_t>(representation);
-      uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
-                        ((integer >> 40) & 0x000000000000ff00) |
-                        ((integer >> 24) & 0x0000000000ff0000) |
-                        ((integer >>  8) & 0x00000000ff000000) |
-                        ((integer <<  8) & 0x000000ff00000000) |
-                        ((integer << 24) & 0x0000ff0000000000) |
-                        ((integer << 40) & 0x00ff000000000000) |
-                        ((integer << 56) & 0xff00000000000000);
+      const auto output = std::byteswap(integer);
       representation = std::bit_cast<decltype(representation)>(output);
       std::memcpy(ptr, representation.data(), sizeof(T));
       ptr += sizeof(T);
