@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_sort.cpp", line)
 
 #include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -67,17 +68,18 @@ ERROR awkward_sort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
+  const auto error = awkward::kernel::validate_sort_offsets(
+      offsets, offsetslength, length, FILENAME(__LINE__));
+  if (error.str != nullptr) {
+    return error;
+  }
   std::vector<int64_t> index(length);
   std::iota(index.begin(), index.end(), int64_t{0});
 
   // Each segment of `index` is sorted independently.
   for (int64_t i = 0; i < offsetslength - 1; i++) {
-    // Clamp against `length` so malformed offsets cannot index past the end
-    // of `index` (well-formed offsets satisfy offsets[last] <= length).
     int64_t start_off = static_cast<int64_t>(offsets[i]);
     int64_t stop_off = static_cast<int64_t>(offsets[i + 1]);
-    if (start_off > length) start_off = length;
-    if (stop_off > length) stop_off = length;
     if (start_off >= stop_off) continue;
     auto start = index.begin() + start_off;
     auto stop = index.begin() + stop_off;

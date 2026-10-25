@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 
 // Per-segment argsort. Integer types compare directly (no isnan, no
 // conversion to double — casting int64/uint64 through double would round
@@ -67,17 +68,18 @@ ERROR awkward_argsort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
+  const auto error = awkward::kernel::validate_sort_offsets(
+      offsets, offsetslength, length, FILENAME(__LINE__));
+  if (error.str != nullptr) {
+    return error;
+  }
   // The uncovered suffix retains global identity indices, including zero coverage.
   std::iota(toptr, toptr + length, int64_t{0});
 
   // Each segment of `toptr` is sorted independently.
   for (int64_t i = 0; i < offsetslength - 1; i++) {
-    // Clamp against `length` so malformed offsets cannot index past the end
-    // of `toptr` (well-formed offsets satisfy offsets[last] <= length).
     int64_t start_off = static_cast<int64_t>(offsets[i]);
     int64_t stop_off = static_cast<int64_t>(offsets[i + 1]);
-    if (start_off > length) start_off = length;
-    if (stop_off > length) stop_off = length;
     if (start_off >= stop_off) continue;
     int64_t* segment_start = toptr + start_off;
     int64_t* segment_stop = toptr + stop_off;

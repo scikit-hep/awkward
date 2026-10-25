@@ -4152,10 +4152,31 @@ kernels:
       of the offsets buffer are used. Offsets may cover less than length;
       uncovered carry entries retain their initial global identity indices.
       Empty or zero-coverage offsets still initialize the full carry.
+      Negative length/count, negative offsets, offsets exceeding length,
+      a nonzero first offset, or decreasing offsets raise an error before any
+      output writes, in that validation order at the first invalid offset.
+      Backing buffers must contain the declared counts; their allocation size
+      is a caller precondition, not encoded in the C ABI.
     definition: |
+      def _validate_sort_offsets(offsets, offsetslength, length):
+          if length < 0:
+              raise ValueError("length must be non-negative")
+          if offsetslength < 0:
+              raise ValueError("offsetslength must be non-negative")
+          for i in range(offsetslength):
+              if offsets[i] < 0:
+                  raise ValueError("offsets must be non-negative")
+              if offsets[i] > length:
+                  raise ValueError("offsets exceed length")
+              if i == 0 and offsets[i] != 0:
+                  raise ValueError("offsets[0] must be zero")
+              if i > 0 and offsets[i] < offsets[i - 1]:
+                  raise ValueError("offsets must be nondecreasing")
+
       def awkward_argsort(
         toptr, fromptr, length, offsets, offsetslength, ascending, stable
       ):
+          _validate_sort_offsets(offsets, offsetslength, length)
           result = list(range(length))
           indices = list(range(length))
           for i in range(offsetslength - 1):
@@ -5755,10 +5776,16 @@ kernels:
       Write only the covered prefix ending at offsets[offsetslength - 1];
       the destination suffix remains untouched. Empty or zero-coverage offsets
       perform no writes.
+      Negative length/count, negative offsets, offsets exceeding length,
+      a nonzero first offset, or decreasing offsets raise an error before any
+      output writes, in that validation order at the first invalid offset.
+      Backing buffers must contain the declared counts; their allocation size
+      is a caller precondition, not encoded in the C ABI.
     definition: |
       def awkward_sort(
           toptr, fromptr, length, offsets, offsetslength, ascending, stable
       ):
+          _validate_sort_offsets(offsets, offsetslength, length)
           result = []
           for i in range(offsetslength - 1):
               sub_list = sorted(fromptr[offsets[i]:offsets[i+1]], reverse=not ascending)

@@ -369,6 +369,47 @@ def _float_order_keys(cp, values, ascending):
     return _float_order_key_kernel(cp, width)(u, nan_sentinel)
 
 
+def _validated_sort_offsets(offsets, offsetslength, length, kernel_name):
+    def fail(message):
+        raise ValueError(f"{message} in compiled CUDA code ({kernel_name})")
+
+    if length < 0:
+        fail("length must be non-negative")
+    if offsetslength < 0:
+        fail("offsetslength must be non-negative")
+    offsets = offsets[:offsetslength]
+    if offsetslength == 0:
+        return offsets, 0
+    positions = cp.arange(offsetslength, dtype=cp.int64)
+    negative = offsets < 0
+    oversized = offsets > length
+    nonzero_first = (positions == 0) & (offsets != 0)
+    decreasing = cp.concatenate(
+        (cp.zeros(1, dtype=cp.bool_), offsets[1:] < offsets[:-1])
+    )
+    codes = cp.where(
+        negative,
+        1,
+        cp.where(oversized, 2, cp.where(nonzero_first, 3, cp.where(decreasing, 4, 0))),
+    )
+    first = cp.min(cp.where(codes != 0, positions, offsetslength))
+    safe_first = cp.minimum(first, offsetslength - 1)
+    # Replace the existing covered-length device read with one packed read.
+    # Invalid uint64 offsets are masked before narrowing to int64.
+    covered = cp.where(first == offsetslength, offsets[-1], 0).astype(cp.int64)
+    summary = cp.stack((covered, first, codes[safe_first])).get()
+    if summary[1] != offsetslength:
+        fail(
+            (
+                "offsets must be non-negative",
+                "offsets exceed length",
+                "offsets[0] must be zero",
+                "offsets must be nondecreasing",
+            )[int(summary[2]) - 1]
+        )
+    return offsets.astype(cp.int64, copy=False), int(summary[0])
+
+
 def segmented_sort(
     toptr,
     fromptr,
@@ -383,15 +424,10 @@ def segmented_sort(
     cupy_nplike = Cupy.instance()
     cp = cupy_nplike._module
 
-    # Only the declared prefix of the offsets buffer belongs to this call.
-    offsets = offsets[:offsetslength]
-
-    # Ensure offsets are int64 as expected by segmented_sort
-    if offsets.dtype != cp.int64:
-        offsets = offsets.astype(cp.int64, copy=False)
-
+    offsets, num_items = _validated_sort_offsets(
+        offsets, offsetslength, length, "awkward_sort"
+    )
     num_segments = offsetslength - 1
-    num_items = int(offsets[-1]) if len(offsets) > 0 else 0
 
     if num_items == 0:
         return
@@ -472,18 +508,13 @@ def segmented_argsort(
     cupy_nplike = Cupy.instance()
     cp = cupy_nplike._module
 
-    # Only the declared prefix of the offsets buffer belongs to this call.
-    offsets = offsets[:offsetslength]
-
-    # Ensure offsets are int64 as expected by segmented_sort
-    if offsets.dtype != cp.int64:
-        offsets = offsets.astype(cp.int64, copy=False)
-
+    offsets, num_items = _validated_sort_offsets(
+        offsets, offsetslength, length, "awkward_argsort"
+    )
     # CPU argsort initializes every carry entry, even with no covered items.
     values_in = cp.arange(length, dtype=cp.int64)
     toptr[:length] = values_in
     num_segments = offsetslength - 1
-    num_items = int(offsets[-1]) if len(offsets) > 0 else 0
     if num_items == 0:
         return
     fromptr = fromptr[:num_items]
