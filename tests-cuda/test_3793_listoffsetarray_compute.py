@@ -1,0 +1,82 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+import importlib.util
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+import awkward as ak
+from awkward._backends.cupy import CupyBackend
+from awkward._backends.numpy import NumpyBackend
+
+cp = pytest.importorskip("cupy")
+pytest.importorskip("cuda.compute")
+
+spec = importlib.util.spec_from_file_location(
+    "listoffsetarray_contract_cases",
+    Path(__file__).resolve().parents[1] / "tests/test_3793_listoffsetarray_compute.py",
+)
+contract = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = contract
+spec.loader.exec_module(contract)
+
+
+@pytest.mark.parametrize("name,specialization,case", contract.CASES)
+def test_cuda_cpu_parity(name, specialization, case):
+    with cp.cuda.Stream(non_blocking=True):
+        _cuda_cpu_parity(name, specialization, case)
+
+
+def _cuda_cpu_parity(name, specialization, case):
+    args, outputs, key = contract.arguments(specialization, case)
+    gpu_args = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+    expected = NumpyBackend.instance()[(name, *key)](*args)
+    kernel = CupyBackend.instance()[(name, *key)]
+    assert isinstance(kernel, ak._kernels.CudaComputeKernel)
+    actual = kernel(*gpu_args)
+    contract.assert_error(actual, expected)
+    for i in outputs:
+        np.testing.assert_array_equal(cp.asnumpy(gpu_args[i]), args[i])
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_highlevel_operations(dtype):
+    with cp.cuda.Stream(non_blocking=True):
+        offsets = ak.index.Index(np.asarray([2, 4, 4, 7], dtype=dtype))
+        source = ak.Array(
+            ak.contents.ListOffsetArray(offsets, ak.contents.NumpyArray(np.arange(9)))
+        )
+        array = ak.to_backend(source, "cuda")
+        assert ak.pad_none(array, 4).to_list() == ak.pad_none(source, 4).to_list()
+        assert ak.flatten(array).to_list() == ak.flatten(source).to_list()
+        assert (
+            ak.drop_none(ak.mask(array, array % 2 == 0), axis=-1).to_list()
+            == ak.drop_none(ak.mask(source, source % 2 == 0), axis=-1).to_list()
+        )
+        regular = ak.to_backend([[1, 2], [3, 4]], "cuda")
+        assert ak.to_regular(regular).to_list() == [[1, 2], [3, 4]]
+        with pytest.raises(ValueError, match="not regular"):
+            ak.to_regular(array)
+
+
+@pytest.mark.parametrize("groups,width", [(1, 1), (17, 33), (257, 513)])
+def test_nonlocal_ranges_across_block_boundaries(groups, width):
+    rng = np.random.default_rng(2026)
+    distincts = rng.choice([-1, -2, 0, 7], groups * width).astype(np.int64)
+    starts = np.full(groups + 3, 123, dtype=np.int64)
+    stops = starts.copy()
+    args = [starts, stops, distincts, distincts.size, groups]
+    key = (
+        "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+        np.int64,
+        np.int64,
+        np.int64,
+    )
+    with cp.cuda.Stream(non_blocking=True):
+        gpu_args = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+        NumpyBackend.instance()[key](*args)
+        CupyBackend.instance()[key](*gpu_args)
+        np.testing.assert_array_equal(cp.asnumpy(gpu_args[0]), starts)
+        np.testing.assert_array_equal(cp.asnumpy(gpu_args[1]), stops)

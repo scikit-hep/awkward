@@ -2135,9 +2135,11 @@ kernels:
           - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: length_offsets, type: "int64_t", dir: in, role: default}
           - {name: length_indexes, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "CPU and CUDA preserve the canonical result and untouched output capacity. Buffers must cover the declared lengths and every reference index read. Errors return immediately, preserving the canonical error row and partial output."
     definition: |
       def awkward_ListOffsetArray_drop_none_indexes(tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes):
+          if length_offsets > 0 and fromoffsets[length_offsets - 1] > length_indexes:
+              raise ValueError("offsets[i] > len(content)")
           nr_of_nones, offset1, offset2 = 0, 0, 0
           for i in range(length_offsets):
             offset2 = fromoffsets[i]
@@ -2168,7 +2170,7 @@ kernels:
           - {name: outeroffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: outeroffsetslen, type: "int64_t", dir: in, role: default}
           - {name: inneroffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
-    description: null
+    description: "CPU and CUDA preserve the canonical result and untouched output capacity. Buffers must cover the declared lengths and every reference index read."
     definition: |
       def awkward_ListOffsetArray_flatten_offsets(
           tooffsets, outeroffsets, outeroffsetslen, inneroffsets
@@ -2291,7 +2293,7 @@ kernels:
           - {name: distincts, type: "Const[List[int64_t]]", dir: in, role: reducer-distincts}
           - {name: lendistincts, type: "int64_t", dir: in, role: reducer-lendistincts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: "CPU and CUDA preserve the canonical result and untouched output capacity. Buffers must cover the declared lengths and every reference index read. For nonempty groups, lendistincts is divisible by outlength. Stops extend through the last entry unequal to -1, preserving interior holes."
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
           outstarts, outstops, distincts, lendistincts, outlength
@@ -2422,7 +2424,7 @@ kernels:
           - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: fromlength, type: "int64_t", dir: in, role: default}
           - {name: target, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "CPU and CUDA preserve the canonical result and untouched output capacity. Buffers must cover the declared lengths and every reference index read. Input offsets are nondecreasing."
     definition: |
       def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target):
           count = 0
@@ -2491,7 +2493,7 @@ kernels:
           - {name: size, type: "List[int64_t]", dir: out}
           - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
-    description: null
+    description: "CPU and CUDA preserve the canonical result and untouched output capacity. Buffers must cover the declared lengths and every reference index read. Errors return immediately, preserving the canonical error row and partial output."
     definition: |
       def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
           size[0] = -1
