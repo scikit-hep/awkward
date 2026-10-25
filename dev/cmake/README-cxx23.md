@@ -164,7 +164,8 @@ that incompatible round trip skips; half-precision checks remain independent.
 C++ forms continue to describe the producer's actual representation.
 
 The regular Windows Python jobs build the layout exporter with the Visual
-Studio 2022 generator and select x64 or Win32 to match Python and NumPy. They
+Studio generator discovered from the installed MSVC toolchain, and select
+x64 or Win32 to match Python and NumPy. They
 pass the CMake-built executable to pytest through
 `AWKWARD_EXTENDED_LAYOUT_TEST_EXECUTABLE`, including the free-threaded run.
 This avoids selecting an unrelated MinGW compiler from `PATH`.

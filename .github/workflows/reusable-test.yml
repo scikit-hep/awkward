@@ -163,6 +163,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: python {0}
         run: |
+          import json
           import os
           import pathlib
           import struct
@@ -170,10 +171,28 @@ jobs:
 
           # Match the Python/NumPy architecture, including the x86 jobs.
           architecture = "x64" if struct.calcsize("P") == 8 else "Win32"
+          vswhere = pathlib.Path(os.environ["ProgramFiles(x86)"]) / "Microsoft Visual Studio/Installer/vswhere.exe"
+          installations = json.loads(subprocess.check_output([
+              str(vswhere), "-latest", "-products", "*",
+              "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+              "-format", "json", "-utf8",
+          ], text=True, encoding="utf-8"))
+          if not installations:
+              raise RuntimeError("No Visual Studio installation with MSVC x86/x64 tools found")
+          installation = installations[0]
+          major = installation["installationVersion"].split(".")[0]
+          capabilities = json.loads(subprocess.check_output([
+              "cmake", "-E", "capabilities",
+          ], text=True))
+          generator = next(
+              entry["name"] for entry in capabilities["generators"]
+              if entry["name"].startswith(f"Visual Studio {major} ")
+          )
           build = pathlib.Path("build-layout-roundtrip")
           subprocess.run([
               "cmake", "-S", "header-only", "-B", str(build),
-              "-G", "Visual Studio 17 2022", "-A", architecture,
+              "-G", generator, "-A", architecture,
+              f"-DCMAKE_GENERATOR_INSTANCE={installation['installationPath']}",
               "-DBUILD_TESTS=ON",
           ], check=True)
           subprocess.run([
