@@ -1395,62 +1395,9 @@ def awkward_RegularArray_getitem_jagged_expand(
 def awkward_UnionArray_nestedfill_tags_index(
     totags, toindex, tmpstarts, tag, fromcounts, length
 ):
-    if length == 0:
-        return
+    from awkward._connect.cuda._unionarray import nestedfill_tags_index
 
-    starts = tmpstarts[:length]
-    counts = fromcounts[:length]
-
-    # Total span of the output arrays we need to touch:
-    # the last segment's start + its count gives the furthest written position
-    total_size = int(starts[length - 1]) + int(counts[length - 1])
-
-    if total_size == 0:
-        return
-
-    # +1 at each segment start, -1 just past each segment end.
-    # cumsum of this will later yield 1 inside any covered range, 0 in gaps.
-    diff = cp.zeros(total_size + 1, dtype=cp.int8)
-
-    def scatter_and_update(i):
-        start = starts[i]
-        count = counts[i]
-        # Mark this segment's range in the difference array
-        diff[start] += cp.int8(1)
-        diff[start + count] -= cp.int8(1)
-        # update tmpstarts (for the next call of this kernel (for a different union type))?
-        tmpstarts[i] = start + count
-        return 0
-
-    # Scatter segment's ranges and update tmpstarts
-    unary_transform(
-        d_in=CountingIterator(cp.int64(0)),
-        d_out=DiscardIterator(),
-        op=scatter_and_update,
-        num_items=length,
-    )
-
-    # coverage[j] == 1 if position j falls inside any segment's range, 0 otherwise
-    coverage = cp.cumsum(diff[:total_size])
-
-    # scan[j] == local index of element j within its segment
-    # Since it's a cumsum, the first index starts from 1, 2, 3 ...
-    # so we'll have to -1 before writing it in toindex
-    scan = cp.cumsum(coverage, dtype=cp.int64)
-
-    def fill(j):
-        if coverage[j]:
-            # Mark this position as belonging to the current tag
-            totags[j] = tag
-            toindex[j] = scan[j] - 1
-        return 0
-
-    unary_transform(
-        d_in=CountingIterator(cp.int64(0)),
-        d_out=DiscardIterator(),
-        op=fill,
-        num_items=total_size,
-    )
+    return nestedfill_tags_index(totags, toindex, tmpstarts, tag, fromcounts, length)
 
 
 # For each position i where fromtags[i] == fromwhich, sets totags[i] = towhich and
@@ -4331,22 +4278,9 @@ def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
 def awkward_UnionArray_flatten_length(
     total_length, fromtags, fromindex, length, offsetsraws
 ):
-    if length == 0:
-        total_length[0] = 0
-        return
-    tags = fromtags[:length]
-    idxs = fromindex[:length]
+    from awkward._connect.cuda._unionarray import flatten_length
 
-    type_starts = cp.array(
-        [0]
-        + [sum(len(o) for o in offsetsraws[: k + 1]) for k in range(len(offsetsraws))],
-        dtype=cp.int64,
-    )
-    all_offsets = cp.concatenate(offsetsraws)
-
-    flat_idx = type_starts[tags] + idxs
-    sizes = all_offsets[flat_idx + 1] - all_offsets[flat_idx]
-    total_length[0] = int(cp.sum(sizes))
+    return flatten_length(total_length, fromtags, fromindex, length, offsetsraws)
 
 
 # THIS KERNEL IS NOT USED (just for archive)
@@ -4365,96 +4299,11 @@ def awkward_UnionArray_flatten_length(
 def awkward_UnionArray_flatten_combine(
     totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws
 ):
-    tooffsets[0] = 0
-    if length == 0:
-        return
-    if len(offsetsraws) == 2:
-        offsets0, offsets1 = offsetsraws[0], offsetsraws[1]
+    from awkward._connect.cuda._unionarray import flatten_combine
 
-        # Phase 1: compute per-element sublist sizes → inclusive scan → tooffsets
-        sizes = cp.empty(length, dtype=tooffsets.dtype)
-
-        def compute_size(i):
-            j = fromindex.dtype.type(fromindex[i])
-            if fromtags[i] == fromtags.dtype.type(0):
-                return offsets0.dtype.type(offsets0[j + 1] - offsets0[j])
-            return offsets1.dtype.type(offsets1[j + 1] - offsets1[j])
-
-        unary_transform(
-            d_in=CountingIterator(fromindex.dtype.type(0)),
-            d_out=sizes,
-            op=compute_size,
-            num_items=length,
-        )
-        inclusive_scan(
-            d_in=sizes,
-            d_out=tooffsets[1 : length + 1],
-            op=OpKind.PLUS,
-            init_value=None,
-            num_items=length,
-        )
-
-        total_len = int(tooffsets[length])
-        if total_len == 0:
-            return
-
-        # Phase 2: binary-search each output position back to its parent row,
-        # then write totags/toindex — no flat_pos or parent_ids temporaries
-        def fill_out(q):
-            lo = tooffsets.dtype.type(0)
-            hi = tooffsets.dtype.type(length - 1)
-            while lo < hi:
-                mid = (lo + hi + tooffsets.dtype.type(1)) >> tooffsets.dtype.type(1)
-                if tooffsets[mid] <= q:
-                    lo = mid
-                else:
-                    hi = mid - tooffsets.dtype.type(1)
-            i = lo
-            j = fromindex.dtype.type(fromindex[i])
-            local_offset = q - tooffsets[i]
-            totags[q] = fromtags[i]
-            if fromtags[i] == fromtags.dtype.type(0):
-                toindex[q] = offsets0.dtype.type(offsets0[j]) + local_offset
-            else:
-                toindex[q] = offsets1.dtype.type(offsets1[j]) + local_offset
-            return tooffsets.dtype.type(0)
-
-        unary_transform(
-            d_in=CountingIterator(tooffsets.dtype.type(0)),
-            d_out=DiscardIterator(),
-            op=fill_out,
-            num_items=total_len,
-        )
-    else:
-        tags = fromtags[:length]
-        idxs = fromindex[:length]
-        sizes = cp.zeros(length, dtype=tooffsets.dtype)
-        global_start = cp.zeros(length, dtype=tooffsets.dtype)
-        for k, offsets_k in enumerate(offsetsraws):
-            pos = cp.where(tags == k)[0]
-            if pos.size > 0:
-                local_idxs = idxs[pos]
-                starts = offsets_k[local_idxs]
-                sizes[pos] = offsets_k[local_idxs + 1] - starts
-                global_start[pos] = starts
-        inclusive_scan(
-            d_in=sizes,
-            d_out=tooffsets[1 : length + 1],
-            op=OpKind.PLUS,
-            init_value=None,
-            num_items=length,
-        )
-        total_len = int(tooffsets[length])
-        if total_len == 0:
-            return
-        flat_pos = cp.arange(total_len, dtype=tooffsets.dtype)
-        parent_ids = (
-            cp.searchsorted(tooffsets[: length + 1], flat_pos, side="right") - 1
-        )
-        totags[:total_len] = tags[parent_ids].astype(totags.dtype, copy=False)
-        toindex[:total_len] = (
-            global_start[parent_ids] + flat_pos - tooffsets[parent_ids]
-        ).astype(toindex.dtype, copy=False)
+    return flatten_combine(
+        totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws
+    )
 
 
 # Filters fromindex by fromtags == which, scattering matching entries compactly

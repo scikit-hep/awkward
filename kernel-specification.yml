@@ -3279,7 +3279,8 @@ kernels:
           - {name: fromindex, type: "Const[List[uint32_t]]", dir: in, role: UnionArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsetsraws, type: "List[List[int64_t]]", dir: in, role: ListOffsetArray-rawoffsets}
-    description: null
+    description: >-
+      Concatenate selected ranges in input order using an int64 offset pointer table. Output offsets sum signed differences; carry entries enumerate only nonempty ranges. Output buffers must have sufficient capacity and selected offset pairs must be accessible.
     definition: |
       def awkward_UnionArray_flatten_combine(
           totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws
@@ -3321,7 +3322,8 @@ kernels:
           - {name: fromindex, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray-index}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: offsetsraws, type: "List[List[int64_t]]", dir: in, role: ListOffsetArray-rawoffsets}
-    description: null
+    description: >-
+      Sum signed offset differences selected by tags and indices. offsetsraws is an int64 pointer table whose entries and selected offset pairs must be accessible. Only total_length[0] is written.
     definition: |
       def awkward_UnionArray_flatten_length(
           total_length, fromtags, fromindex, length, offsetsraws
@@ -3369,7 +3371,8 @@ kernels:
           - {name: tag, type: "int8_t", dir: in, role: default}
           - {name: fromcounts, type: "Const[List[int64_t]]", dir: in, role: default}
           - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
+    description: >-
+      Read the initial tmpstarts and advance each by its count. Fill positive ranges in row order with consecutive indices; overlapping destinations retain the last row write. Destinations must be in bounds. Unwritten buffer entries are preserved.
     definition: |
       def awkward_UnionArray_nestedfill_tags_index(
           totags, toindex, tmpstarts, tag, fromcounts, length
