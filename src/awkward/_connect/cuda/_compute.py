@@ -2450,91 +2450,21 @@ def awkward_ListOffsetArray_drop_none_indexes(
     )
 
 
-## NOT USED (revisit later)
-# Validates that each non-empty row satisfies 0 <= starts[i] <= stops[i] <= lencontent.
-# Empty rows (starts[i] == stops[i]) are skipped.
-# Raises ValueError on the first failing row
-#
-# Example: starts=[0,2,5], stops=[2,5,8], lencontent=8  → no error
-# Example: starts=[0,3], stops=[2,1], lencontent=8      → raises "start[i] > stop[i]"
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_validity(starts, stops, length, lencontent):
-    if length == 0:
-        return
-    s = starts[:length]
-    e = stops[:length]
-    nonempty = s != e
-    # Fuse all three condition checks into one cp.any() so the happy path
-    # (no errors, the common case) only needs a single GPU→CPU sync instead of three.
-    if not cp.any(nonempty & ((s > e) | (s < 0) | (e > lencontent))):
-        return
-    # Error path: identify which condition failed and find its first index.
-    mask = nonempty & (s > e)
-    if cp.any(mask):
-        raise ValueError(f"start[i] > stop[i] at i={int(cp.argmax(mask))}")
-    mask = nonempty & (s < 0)
-    if cp.any(mask):
-        raise ValueError(f"start[i] < 0 at i={int(cp.argmax(mask))}")
-    mask = nonempty & (e > lencontent)
-    raise ValueError(f"stop[i] > len(content) at i={int(cp.argmax(mask))}")
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.validity(starts, stops, length, lencontent)
 
 
-## NOT USED (revisit later)
-# Pads each sublist to at least `target` elements, writing -1 for padding slots.
-# Also writes tostarts/tostops describing the new (padded) layout.
-# Unlike the ListOffsetArray variant, starts/stops are separate arrays rather than a single offsets array.
-#
-# For each row i with rangeval = stops[i] - starts[i]:
-#   tostarts[i] = cumulative offset of row i in the output
-#   tostops[i]  = tostarts[i] + max(rangeval, target)
-#   toindex[tostarts[i]+j] = starts[i]+j  for j < rangeval  (copy from source)
-#   toindex[tostarts[i]+j] = -1           for j >= rangeval  (padding)
-#
-# Example: starts=[0,3,3], stops=[3,3,5], target=4
-#   tostarts=[0,4,8], tostops=[4,8,9]  (row 1 is empty → padded to 4; row 2 has 2 elems → stays 4 max(2,4)=4... wait)
-#   Actually: max(3,4)=4, max(0,4)=4, max(2,4)=4 → tostarts=[0,4,8], tostops=[4,8,12]
-#   toindex = [0,1,2,-1, -1,-1,-1,-1, 3,4,-1,-1]
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_rpad_axis1(
     toindex, fromstarts, fromstops, tostarts, tostops, target, length
 ):
-    if length == 0:
-        return
-    counts = fromstops[:length] - fromstarts[:length]
-    row_starts = cp.empty(length + 1, dtype=tostarts.dtype)
-    row_starts[0] = 0
-    inclusive_scan(
-        d_in=cp.maximum(counts, target).astype(row_starts.dtype, copy=False),
-        d_out=row_starts[1 : length + 1],
-        op=OpKind.PLUS,
-        init_value=None,
-        num_items=length,
-    )
-    tostarts[:length] = row_starts[:length]
-    tostops[:length] = row_starts[1 : length + 1]
-    total = int(row_starts[length])
-    if total == 0:
-        return
-    dtype = toindex.dtype.type
+    from awkward._connect.cuda import _listarray
 
-    def fill(q):
-        lo = 0
-        hi = length - 1
-        while lo < hi:
-            mid = (lo + hi + 1) >> 1
-            if row_starts[mid] <= q:
-                lo = mid
-            else:
-                hi = mid - 1
-        i = lo
-        j = q - row_starts[i]
-        if j < counts[i]:
-            return dtype(fromstarts[i] + j)
-        return dtype(-1)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toindex[:total],
-        op=fill,
-        num_items=total,
+    return _listarray.rpad(
+        toindex, fromstarts, fromstops, tostarts, tostops, target, length
     )
 
 
@@ -2591,39 +2521,13 @@ def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
         tomin[:1] = result.astype(tomin.dtype, copy=False)
 
 
-## NOT USED (revisit later)
-# Broadcasts fromadvanced[i] across all positions in row i's output range [fromoffsets[i], fromoffsets[i+1]).
-# toadvanced[fromoffsets[i] + j] = fromadvanced[i] for j in [0, fromoffsets[i+1] - fromoffsets[i]).
-#
-# Example: fromadvanced=[7,8,9], fromoffsets=[0,2,2,3]
-#   toadvanced = [7,7, 9]  (row 1 is empty, row 2 has 1 element)
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_range_spreadadvanced(
     toadvanced, fromadvanced, fromoffsets, lenstarts
 ):
-    if lenstarts == 0:
-        return
-    total = int(fromoffsets[lenstarts])
-    if total == 0:
-        return
-    dtype = toadvanced.dtype.type
+    from awkward._connect.cuda import _listarray
 
-    def lookup(q):
-        lo = 0
-        hi = lenstarts - 1
-        while lo < hi:
-            mid = (lo + hi + 1) >> 1
-            if fromoffsets[mid] <= q:
-                lo = mid
-            else:
-                hi = mid - 1
-        return dtype(fromadvanced[lo])
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toadvanced[:total],
-        op=lookup,
-        num_items=total,
-    )
+    return _listarray.spreadadvanced(toadvanced, fromadvanced, fromoffsets, lenstarts)
 
 
 # Computes the total number of elements across all rows: fromoffsets[lenstarts] - fromoffsets[0].
@@ -2638,35 +2542,11 @@ def awkward_ListArray_getitem_next_range_counts(total, fromoffsets, lenstarts):
     ].astype(total.dtype, copy=False)
 
 
-## NOT USED (revisit later)
-# For each row i, selects the element at position `at` within that row.
-# Negative `at` wraps relative to each row's own length: regular_at = at + (stops[i] - starts[i]).
-# tocarry[i] = starts[i] + regular_at.
-# Raises ValueError if any regular_at is out of [0, length_i).
-#
-# Example: starts=[0,3,5], stops=[3,5,6], at=-1
-#   lengths=[3,2,1], regular_at=[2,1,0]  →  tocarry=[2,4,5]
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_at(tocarry, fromstarts, fromstops, lenstarts, at):
-    if lenstarts == 0:
-        return
-    dtype = tocarry.dtype.type
+    from awkward._connect.cuda import _listarray
 
-    def compute(i):
-        length = fromstops[i] - fromstarts[i]
-        reg = length + at if at < 0 else at
-        if reg < 0 or reg >= length:
-            return dtype(-1)
-        return dtype(fromstarts[i] + reg)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=tocarry[:lenstarts],
-        op=compute,
-        num_items=lenstarts,
-    )
-    if cp.any(tocarry[:lenstarts] < 0):
-        i = int(cp.argmax(tocarry[:lenstarts] < 0))
-        raise ValueError(f"index out of range at i={i}, at={at}")
+    return _listarray.next_at(tocarry, fromstarts, fromstops, lenstarts, at)
 
 
 # kSliceNone sentinel value (matches C++ kMaxInt64 + 1 = 2**63 - 1)
@@ -2761,100 +2641,18 @@ def awkward_ListArray_getitem_next_range_carrylength(
     )
 
 
-## NOT USED (revisit later) (1.76x slower than raw CUDA)
-# Applies a range slice to a ListArray, writing offsets and carry indices.
-# tooffsets[i] is the start of row i in the flat carry output.
-# tocarry[tooffsets[i] + j] = fromstarts[i] + regular_start_i + j*step  for j in [0, count_i).
-#
-# Example: fromstarts=[0,3,5], fromstops=[3,5,6], start=1, stop=kSliceNone, step=1
-#   row 0: length=3, rs=1, re=3 → count=2 → carry [1,2]
-#   row 1: length=2, rs=1, re=2 → count=1 → carry [4]
-#   row 2: length=1, rs=1, re=1 → count=0
-#   tooffsets=[0,2,3,3], tocarry=[1,2,4]
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_range(
     tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step
 ):
-    if lenstarts == 0:
-        tooffsets[:1] = 0
-        return
-    # create an int64 type specifically, so that _make_count_row() doesn't break
-    counts = cp.empty(lenstarts, dtype=cp.int64)
-    unary_transform(
-        d_in=CountingIterator(fromstarts.dtype.type(0)),
-        d_out=counts,
-        op=_make_count_row(fromstarts, fromstops, start, stop, step, cp.int64),
-        num_items=lenstarts,
-    )
+    from awkward._connect.cuda import _listarray
 
-    offsets = cp.empty(lenstarts + 1, dtype=tooffsets.dtype)
-    offsets[0] = 0
-    inclusive_scan(
-        d_in=counts,
-        d_out=offsets[1:],
-        op=OpKind.PLUS,
-        init_value=None,
-        num_items=lenstarts,
-    )
-    tooffsets[: lenstarts + 1] = offsets
-
-    total = int(offsets[lenstarts])
-    if total == 0:
-        return
-
-    dtype = tocarry.dtype.type
-
-    def fill_carry(q):
-        lo = 0
-        hi = lenstarts - 1
-        while lo < hi:
-            mid = (lo + hi + 1) >> 1
-            if offsets[mid] <= q:
-                lo = mid
-            else:
-                hi = mid - 1
-        i = lo
-        j = q - offsets[i]
-        length = fromstops[i] - fromstarts[i]
-        rs = start
-        if step > 0:
-            if rs == _kSliceNone:
-                rs = 0
-            elif rs < 0:
-                rs = rs + length
-            if rs < 0:
-                rs = 0
-            if rs > length:
-                rs = length
-        else:
-            if rs == _kSliceNone:
-                rs = length - 1
-            elif rs < 0:
-                rs = rs + length
-            if rs < -1:
-                rs = -1
-            if rs > length - 1:
-                rs = length - 1
-        return dtype(fromstarts[i] + rs + j * step)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=tocarry[:total],
-        op=fill_carry,
-        num_items=total,
+    return _listarray.next_range(
+        tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step
     )
 
 
-## NOT USED (revisit later) (error checks take too much time)
-# Selects one element per row using two simultaneous advanced indices.
-# fromadvanced[i] selects which index in fromarray to use for row i.
-# tocarry[i] = fromstarts[i] + fromarray[fromadvanced[i]]  (content index)
-# toadvanced[i] = i  (output advanced position)
-# Raises ValueError if stops < starts, stops > lencontent, or index out of range.
-#
-# Example: fromstarts=[0,3], fromstops=[3,5], fromarray=[1,2,0], fromadvanced=[2,0]
-#   row 0: reg_at=fromarray[2]=0 → tocarry[0]=0
-#   row 1: reg_at=fromarray[0]=1 → tocarry[1]=4
-#   toadvanced=[0,1]
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_array_advanced(
     tocarry,
     toadvanced,
@@ -2865,50 +2663,21 @@ def awkward_ListArray_getitem_next_array_advanced(
     lenstarts,
     lencontent,
 ):
-    if lenstarts == 0:
-        return
+    from awkward._connect.cuda import _listarray
 
-    starts = fromstarts[:lenstarts]
-    stops = fromstops[:lenstarts]
-    if cp.any(stops < starts):
-        raise ValueError("stops[i] < starts[i]")
-    nonempty = starts != stops
-    if cp.any(nonempty & (stops > lencontent)):
-        raise ValueError("stops[i] > len(content)")
-
-    dtype = tocarry.dtype.type
-    adtype = toadvanced.dtype.type
-
-    def fill(i):
-        length = fromstops[i] - fromstarts[i]
-        reg_at = fromarray[fromadvanced[i]]
-        if reg_at < 0:
-            reg_at = reg_at + length
-        if reg_at < 0 or reg_at >= length:
-            tocarry[i] = dtype(-1)
-        else:
-            tocarry[i] = dtype(fromstarts[i] + reg_at)
-        toadvanced[i] = adtype(i)
-        return dtype(0)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=DiscardIterator(),
-        op=fill,
-        num_items=lenstarts,
+    return _listarray.next_array_advanced(
+        tocarry,
+        toadvanced,
+        fromstarts,
+        fromstops,
+        fromarray,
+        fromadvanced,
+        lenstarts,
+        lencontent,
     )
-    if cp.any(tocarry[:lenstarts] < 0):
-        raise ValueError("index out of range")
 
 
-## NOT USED (revisit later) (error checks take too much time)
-# Indexes each row of a ListArray by a 1-D array, producing lenstarts*lenarray outputs.
-# tocarry[i*lenarray + j] = fromstarts[i] + fromarray[j]  (content index)
-# toadvanced[i*lenarray + j] = j  (which fromarray entry was used)
-# Raises ValueError if stops < starts, stops > lencontent, or index out of range.
-#
-# Example: fromstarts=[0,3], fromstops=[3,5], fromarray=[1,0], lenstarts=2, lenarray=2
-#   tocarry=[1,0, 4,3],  toadvanced=[0,1, 0,1]
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_array(
     tocarry,
     toadvanced,
@@ -2919,54 +2688,21 @@ def awkward_ListArray_getitem_next_array(
     lenarray,
     lencontent,
 ):
-    if lenstarts == 0 or lenarray == 0:
-        return
+    from awkward._connect.cuda import _listarray
 
-    starts = fromstarts[:lenstarts]
-    stops = fromstops[:lenstarts]
-    if cp.any(stops < starts):
-        raise ValueError("stops[i] < starts[i]")
-    nonempty = starts != stops
-    if cp.any(nonempty & (stops > lencontent)):
-        raise ValueError("stops[i] > len(content)")
-
-    dtype = tocarry.dtype.type
-    adtype = toadvanced.dtype.type
-
-    def fill(k):
-        i = k // lenarray
-        j = k % lenarray
-        length = fromstops[i] - fromstarts[i]
-        reg_at = fromarray[j]
-        if reg_at < 0:
-            reg_at = reg_at + length
-        if reg_at < 0 or reg_at >= length:
-            tocarry[k] = dtype(-1)
-        else:
-            tocarry[k] = dtype(fromstarts[i] + reg_at)
-        toadvanced[k] = adtype(j)
-        return dtype(0)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=DiscardIterator(),
-        op=fill,
-        num_items=lenstarts * lenarray,
+    return _listarray.next_array(
+        tocarry,
+        toadvanced,
+        fromstarts,
+        fromstops,
+        fromarray,
+        lenstarts,
+        lenarray,
+        lencontent,
     )
-    if cp.any(tocarry[: lenstarts * lenarray] < 0):
-        raise ValueError("index out of range")
 
 
-## NOT USED (revisit later) (error checks take too much time)
-# Expands a ListArray to accommodate jagged indexing, producing length*jaggedsize outputs.
-# Each row i must have exactly jaggedsize elements.
-# multistarts[i*jaggedsize + j] = singleoffsets[j]
-# multistops[i*jaggedsize + j]  = singleoffsets[j+1]
-# tocarry[i*jaggedsize + j]     = fromstarts[i] + j
-# Raises ValueError if stops < starts or row size != jaggedsize.
-#
-# Example: fromstarts=[0,2], fromstops=[2,4], singleoffsets=[0,3,5], jaggedsize=2, length=2
-#   multistarts=[0,3, 0,3],  multistops=[3,5, 3,5],  tocarry=[0,1, 2,3]
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_jagged_expand(
     multistarts,
     multistops,
@@ -2977,33 +2713,17 @@ def awkward_ListArray_getitem_jagged_expand(
     jaggedsize,
     length,
 ):
-    if length == 0 or jaggedsize == 0:
-        return
+    from awkward._connect.cuda import _listarray
 
-    starts = fromstarts[:length]
-    stops = fromstops[:length]
-    if cp.any(stops < starts):
-        raise ValueError("stops[i] < starts[i]")
-    if cp.any((stops - starts) != jaggedsize):
-        raise ValueError("cannot fit jagged slice into nested list")
-
-    dtype_ms = multistarts.dtype.type
-    dtype_me = multistops.dtype.type
-    dtype_c = tocarry.dtype.type
-
-    def fill(k):
-        i = k // jaggedsize
-        j = k % jaggedsize
-        multistarts[k] = dtype_ms(singleoffsets[j])
-        multistops[k] = dtype_me(singleoffsets[j + 1])
-        tocarry[k] = dtype_c(fromstarts[i] + j)
-        return dtype_c(0)
-
-    unary_transform(
-        d_in=CountingIterator(dtype_c(0)),
-        d_out=DiscardIterator(),
-        op=fill,
-        num_items=length * jaggedsize,
+    return _listarray.jagged_expand(
+        multistarts,
+        multistops,
+        singleoffsets,
+        tocarry,
+        fromstarts,
+        fromstops,
+        jaggedsize,
+        length,
     )
 
 
@@ -4708,4 +4428,50 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
         )
     raise ValueError(
         "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
+    )
+
+
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
+def awkward_ListArray_getitem_jagged_apply(
+    tooffsets,
+    tocarry,
+    slicestarts,
+    slicestops,
+    sliceouterlen,
+    sliceindex,
+    sliceinnerlen,
+    fromstarts,
+    fromstops,
+    contentlen,
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.jagged_apply(
+        tooffsets,
+        tocarry,
+        slicestarts,
+        slicestops,
+        sliceouterlen,
+        sliceindex,
+        sliceinnerlen,
+        fromstarts,
+        fromstops,
+        contentlen,
+    )
+
+
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
+def awkward_ListArray_getitem_jagged_shrink(
+    tocarry, tosmalloffsets, tolargeoffsets, slicestarts, slicestops, length, missing
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.jagged_shrink(
+        tocarry,
+        tosmalloffsets,
+        tolargeoffsets,
+        slicestarts,
+        slicestops,
+        length,
+        missing,
     )

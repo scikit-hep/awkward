@@ -16,7 +16,8 @@ ERROR awkward_ListArray_rpad_axis1(
   int64_t offset = 0;
   for (int64_t i = 0; i < length; i++) {
     tostarts[i] = offset;
-    int64_t rangeval = fromstops[i] - fromstarts[i];
+    int64_t rangeval =
+      static_cast<int64_t>(fromstops[i]) - static_cast<int64_t>(fromstarts[i]);
     for (int64_t j = 0; j < rangeval; j++) {
      toindex[offset + j] = fromstarts[i] + j;
     }

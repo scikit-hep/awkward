@@ -62,6 +62,17 @@ class CupyBackend(Backend):
     # ---------------------------------------------------------
     def _supports_cuda_compute(self, kernel_name: str) -> bool:
         return kernel_name in (
+            # ListArray
+            "awkward_ListArray_validity",
+            "awkward_ListArray_getitem_next_at",
+            "awkward_ListArray_getitem_next_array",
+            "awkward_ListArray_getitem_next_array_advanced",
+            "awkward_ListArray_getitem_jagged_expand",
+            "awkward_ListArray_getitem_jagged_apply",
+            "awkward_ListArray_getitem_jagged_shrink",
+            "awkward_ListArray_rpad_axis1",
+            "awkward_ListArray_getitem_next_range_spreadadvanced",
+            "awkward_ListArray_getitem_next_range",
             # core reducers
             "awkward_reduce_sum",
             "awkward_reduce_sumofsquares",
@@ -186,6 +197,16 @@ class CupyBackend(Backend):
         from awkward._connect.cuda import _compute as cuda_compute
 
         return {
+            "awkward_ListArray_validity": cuda_compute.awkward_ListArray_validity,
+            "awkward_ListArray_getitem_next_at": cuda_compute.awkward_ListArray_getitem_next_at,
+            "awkward_ListArray_getitem_next_array": cuda_compute.awkward_ListArray_getitem_next_array,
+            "awkward_ListArray_getitem_next_array_advanced": cuda_compute.awkward_ListArray_getitem_next_array_advanced,
+            "awkward_ListArray_getitem_jagged_expand": cuda_compute.awkward_ListArray_getitem_jagged_expand,
+            "awkward_ListArray_getitem_jagged_apply": cuda_compute.awkward_ListArray_getitem_jagged_apply,
+            "awkward_ListArray_getitem_jagged_shrink": cuda_compute.awkward_ListArray_getitem_jagged_shrink,
+            "awkward_ListArray_rpad_axis1": cuda_compute.awkward_ListArray_rpad_axis1,
+            "awkward_ListArray_getitem_next_range_spreadadvanced": cuda_compute.awkward_ListArray_getitem_next_range_spreadadvanced,
+            "awkward_ListArray_getitem_next_range": cuda_compute.awkward_ListArray_getitem_next_range,
             "awkward_sort": cuda_compute.segmented_sort,
             "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
