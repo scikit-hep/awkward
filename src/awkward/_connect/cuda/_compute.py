@@ -2,6 +2,7 @@
 
 
 import functools
+from types import SimpleNamespace
 
 from cuda.compute import (
     CountingIterator,
@@ -2557,7 +2558,7 @@ _kSliceNone = 9223372036854775807
 # an analogy of what is used in raw cuda kernels (awkward_regularize_rangeslice() inside cuda_common.cu)
 def _make_count_row(fromstarts, fromstops, start, stop, step, dtype):
     def count_row(i):
-        length = fromstops[i] - fromstarts[i]
+        length = np.int64(fromstops[i]) - np.int64(fromstarts[i])
         rs = start
         re = stop
         if step > 0:
@@ -2625,18 +2626,22 @@ def awkward_ListArray_getitem_next_range_carrylength(
         return
 
     # create an int64 type specifically, so that _make_count_row() doesn't break
+    current_stream = cp.cuda.get_current_stream()
+    stream = SimpleNamespace(__cuda_stream__=lambda: (0, current_stream.ptr))
     counts = cp.empty(lenstarts, dtype=cp.int64)
     unary_transform(
         d_in=CountingIterator(fromstarts.dtype.type(0)),
         d_out=counts,
         op=_make_count_row(fromstarts, fromstops, start, stop, step, cp.int64),
         num_items=lenstarts,
+        stream=stream,
     )
     reduce_into(
         d_in=counts,
         d_out=carrylength[:1],
         op=OpKind.PLUS,
         num_items=lenstarts,
+        stream=stream,
         h_init=np.array([0], dtype=counts.dtype),
     )
 

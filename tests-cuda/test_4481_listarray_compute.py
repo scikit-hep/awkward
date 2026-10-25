@@ -88,12 +88,18 @@ def _highlevel_listarray_operations(dtype):
         slice(None, None, -1),
         slice(1, None),
         slice(None, None, 2),
+    ):
+        assert array[:, index].to_list() == source[:, index].to_list()
+    for index in (
         [[1, 0], [], [-1, 0], [1]],
         [[0, None, -1], [], [None, 1], [0, 1, None]],
     ):
-        assert array[:, index].to_list() == source[:, index].to_list()
+        assert array[index].to_list() == source[index].to_list()
     assert ak.pad_none(array, 4).to_list() == ak.pad_none(source, 4).to_list()
     assert ak.is_valid(array)
-    for index in (0, [0, 99], [[0], [0], [0], [0]]):
+    for index in (0, [0, 99]):
         with pytest.raises(IndexError):
             array[:, index]
+
+    with pytest.raises(IndexError):
+        array[[[0], [0], [0], [0]]]

@@ -32,6 +32,7 @@ FUNCTIONS = {
     "awkward_ListArray_rpad_axis1": "rpad",
     "awkward_ListArray_getitem_next_range_spreadadvanced": "spreadadvanced",
     "awkward_ListArray_getitem_next_range": "next_range",
+    "awkward_ListArray_getitem_next_range_carrylength": "awkward_ListArray_getitem_next_range_carrylength",
 }
 DTYPES = {"int32_t": np.int32, "uint32_t": np.uint32, "int64_t": np.int64}
 
@@ -145,7 +146,11 @@ def host_implementation():
 
     def reduce(*, d_in, d_out, num_items, h_init, **kwargs):
         assert kwargs["stream"].__cuda_stream__() == (0, 123)
-        d_out[0] = min(int(h_init), *(int(x) for x in d_in[:num_items]))
+        values = [
+            int(np.asarray(h_init).reshape(-1)[0]),
+            *(int(x) for x in d_in[:num_items]),
+        ]
+        d_out[0] = sum(values) if kwargs["op"] == 0 else min(values)
 
     tree = ast.parse((ROOT / "src/awkward/_connect/cuda/_listarray.py").read_text())
     body = [
@@ -156,6 +161,8 @@ def host_implementation():
         "np": np,
         "cp": cp,
         "dataclass": dataclass,
+        "SimpleNamespace": SimpleNamespace,
+        "_kSliceNone": ak._util.kSliceNone,
         "_SLICE_NONE": ak._util.kSliceNone,
         "CountingIterator": _Counting,
         "DiscardIterator": _Discard,
@@ -171,6 +178,18 @@ def host_implementation():
             "exec",
         ),
         namespace,
+    )
+    source = ROOT / "src/awkward/_connect/cuda/_compute.py"
+    tree = ast.parse(source.read_text())
+    body = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name
+        in ("_make_count_row", "awkward_ListArray_getitem_next_range_carrylength")
+    ]
+    exec(
+        compile(ast.Module(body=body, type_ignores=[]), str(source), "exec"), namespace
     )
     return namespace
 
@@ -204,6 +223,7 @@ def test_cpu_parity(name, specialization, case, implementation):
     assert _DeviceArray.reads <= 1
     if name in {
         "awkward_ListArray_getitem_next_range",
+        "awkward_ListArray_getitem_next_range_carrylength",
         "awkward_ListArray_getitem_next_range_spreadadvanced",
         "awkward_ListArray_getitem_jagged_shrink",
         "awkward_ListArray_rpad_axis1",
@@ -269,4 +289,33 @@ def test_public_index_error_contract(compute_backend, selector):
     )
     layout._backend = compute_backend
     with pytest.raises(IndexError):
-        ak.Array(layout)[:, selector]
+        if isinstance(selector, list) and isinstance(selector[0], list):
+            ak.Array(layout)[selector]
+        else:
+            ak.Array(layout)[:, selector]
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_public_slicing_operations(compute_backend, dtype):
+    content = ak.contents.NumpyArray(np.arange(10))
+    layout = ak.contents.ListArray(
+        ak.index.Index(np.asarray([0, 4, 2, 7], dtype=dtype)),
+        ak.index.Index(np.asarray([3, 4, 5, 9], dtype=dtype)),
+        content,
+    )
+    source = ak.Array(layout)
+    slices = [slice(None, None, -1), slice(1, None), slice(None, None, 2)]
+    jagged = [
+        [[1, 0], [], [-1, 0], [1]],
+        [[0, None, -1], [], [None, 1], [0, 1, None]],
+    ]
+    expected_slices = [source[:, index].to_list() for index in slices]
+    expected_jagged = [source[index].to_list() for index in jagged]
+    expected_pad = ak.pad_none(source, 4).to_list()
+    layout._backend = compute_backend
+    content._backend = compute_backend
+    for index, expected in zip(slices, expected_slices, strict=True):
+        assert source[:, index].to_list() == expected
+    for index, expected in zip(jagged, expected_jagged, strict=True):
+        assert source[index].to_list() == expected
+    assert ak.pad_none(source, 4).to_list() == expected_pad
