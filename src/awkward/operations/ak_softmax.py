@@ -8,6 +8,7 @@ from awkward._layout import (
     HighLevelContext,
     maybe_highlevel_to_lowlevel,
     maybe_posaxis,
+    promote_integral_to_float64,
 )
 from awkward._namedaxis import (
     _get_named_axis,
@@ -110,7 +111,7 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             "See https://github.com/scikit-hep/awkward/issues/2760"
         )
 
-    x = ctx.wrap(x_layout)
+    x = promote_integral_to_float64(ctx.wrap(x_layout))
 
     if maybe_posaxis(x_layout, axis, 1) != maybe_posaxis(x_layout, -1, 1):
         raise NotImplementedError(
@@ -138,6 +139,15 @@ def _impl(x, axis, keepdims, mask_identity, highlevel, behavior, attrs):
             behavior=ctx.behavior,
             attrs=ctx.attrs,
         )
+
+        if not keepdims and isinstance(denom, ak.highlevel.Array):
+            # Insert the broadcast dimension below any option nodes so that
+            # missing groups remain missing lists rather than lists of None.
+            def add_dimension(layout, **kwargs):
+                if layout.is_numpy:
+                    return ak.contents.RegularArray(layout, 1)
+
+            denom = ctx.wrap(ak._do.recursively_apply(denom.layout, add_dimension))
 
         out = expx / denom
 
