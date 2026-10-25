@@ -106,10 +106,12 @@ class _DeviceArray(np.ndarray):
 class _Counting:
     def __init__(self, start):
         self.start = start
+        self.value_type = np.dtype(np.int64)
 
 
 class _Transform:
-    def __init__(self, source, op):
+    def __init__(self, source, op, *, value_type):
+        assert value_type == source.value_type
         self.source = source
         self.op = op
 

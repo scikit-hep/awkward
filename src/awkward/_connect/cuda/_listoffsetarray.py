@@ -235,8 +235,12 @@ def nonlocal_ranges(outstarts, outstops, distincts, lendistincts, outlength):
     def position(i):
         return i + 1 if source[i] != -1 else np.int64(0)
 
+    indices = CountingIterator(np.int64(0))
+    # CCCL cannot infer the return type of a transform capturing device state.
+    # The global positions have the same int64 type as the counting iterator.
+    positions = TransformIterator(indices, position, value_type=indices.value_type)
     segmented_reduce(
-        d_in=TransformIterator(CountingIterator(np.int64(0)), position),
+        d_in=positions,
         d_out=outstops[:outlength],
         num_segments=outlength,
         start_offsets_in=starts,
