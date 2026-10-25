@@ -5,7 +5,6 @@ import pytest
 
 cp = pytest.importorskip("cupy")
 pytest.importorskip("cuda.compute")
-allow_synchronize = pytest.importorskip("cupyx").allow_synchronize
 
 _compute = pytest.importorskip("awkward._connect.cuda._compute")
 
@@ -20,7 +19,7 @@ _compute = pytest.importorskip("awkward._connect.cuda._compute")
         ("awkward_reduce_countnonzero", [2, 0, 3]),
     ],
 )
-def test_repeated_reduction_without_offset_synchronization(name, expected):
+def test_repeated_reduction_without_device_derived_hint(monkeypatch, name, expected):
     data = cp.asarray([1, 2, 3, 4, 5], dtype=cp.int64)
     offsets = cp.asarray([0, 2, 2, 5], dtype=cp.int64)
     result = cp.empty(3, dtype=cp.int64)
@@ -31,7 +30,18 @@ def test_repeated_reduction_without_offset_synchronization(name, expected):
     # Compile and initialize CCCL before checking steady-state launches.
     reduce(result, data, offsets, 3, *extra)
     cp.cuda.get_current_stream().synchronize()
-    with allow_synchronize(False):
-        for _ in range(5):
-            reduce(result, data, offsets, 3, *extra)
+    raw_reduce = _compute._segmented_reduce_raw
+    hints = []
+
+    def checked_reduce(**kwargs):
+        # Deriving this optional dispatch hint from offsets was the source of
+        # the unwanted host synchronization. Check the actual CCCL boundary.
+        assert kwargs["max_segment_size"] is None
+        hints.append(kwargs["max_segment_size"])
+        return raw_reduce(**kwargs)
+
+    monkeypatch.setattr(_compute, "_segmented_reduce_raw", checked_reduce)
+    for _ in range(5):
+        reduce(result, data, offsets, 3, *extra)
+    assert hints == [None] * 5
     np.testing.assert_array_equal(cp.asnumpy(result), expected)
