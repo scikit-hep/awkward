@@ -111,7 +111,7 @@ jobs:
           tests/test_3209_awkwardforth_read_negative_number_of_items.py
           tests/test_4105_forth_vm_and_libawkward_fixes.py
           tests/test_4359_forth_output_strides.py
-          tests/test_4467_forth_bit_cast.py
+          tests/test_4469_forth_bit_cast.py
           tests/test_4270_extended_precision_operations.py
           tests/test_4270_float16_float128_complex256_reducers.py
           tests/test_4270_complex_nan_reducers.py
