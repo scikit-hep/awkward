@@ -177,12 +177,13 @@ def _make_widening_cast(in_type, out_type):
     Returned with a stable identity (cached per dtype pair) so cuda.compute
     builds one kernel per pair instead of recompiling a fresh closure each call.
     The op only needs to widen; cuda.compute uses the return annotation to pick
-    the output type, so an `int()` / `float()` body suffices.
+    the output type. Explicit NumPy floating casts also accept boolean inputs
+    in Numba device compilation.
     """
     if np.dtype(out_type).kind == "f":
 
         def _cast(x):
-            return float(x)
+            return np.float64(x)
 
     else:
 
@@ -204,7 +205,7 @@ def _make_square_to_float64(in_type):
     """
 
     def _sq(x):
-        v = float(x)
+        v = np.float64(x)
         return v * v
 
     _sq.__annotations__ = {"x": in_type, "return": np.float64}
@@ -230,12 +231,12 @@ def _make_power_to_float64(in_type, n):
     if n_int < 0:
         # Unusual; keep the generic path.
         def _pow(x):
-            return float(x) ** n_int
+            return np.float64(x) ** n_int
 
     else:
 
         def _pow(x):
-            base = float(x)
+            base = np.float64(x)
             result = 1.0
             e = n_int
             while e > 0:

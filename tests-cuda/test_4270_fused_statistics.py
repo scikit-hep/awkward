@@ -54,3 +54,19 @@ def test_centered_kernel_prefix_and_empty_bins(complex_input, monkeypatch):
         patch.setattr(cp, "asnumpy", forbidden)
         kernel(result, values, offsets, 3, means)
     np.testing.assert_allclose(cp.asnumpy(result), expected)
+
+
+@pytest.mark.parametrize("dtype", [np.bool_, np.int64, np.uint64])
+@pytest.mark.parametrize("n", [0, 1, 2, 3])
+def test_integer_and_boolean_fused_powers(dtype, n):
+    from awkward._backends.cupy import CupyBackend
+
+    values = np.asarray([0, 1, 1, 0], dtype=dtype)
+    offsets = cp.asarray([0, 2, 4], dtype=cp.int64)
+    result = cp.empty(2, dtype=cp.float64)
+    kernel = CupyBackend.instance()[
+        "awkward_reduce_sumofpowers", np.float64, dtype, np.int64
+    ]
+    kernel(result, cp.asarray(values), offsets, 2, n)
+    expected = (values.astype(np.float64) ** n).reshape(2, 2).sum(axis=1)
+    np.testing.assert_array_equal(cp.asnumpy(result), expected)
