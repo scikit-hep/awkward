@@ -6,7 +6,7 @@ from functools import lru_cache
 from threading import RLock
 
 import numpy as np
-from cuda.compute import CountingIterator, make_unary_transform
+from cuda.compute import CountingIterator, make_reduce_into, make_unary_transform
 from cuda.compute.op import make_op_adapter
 
 from awkward._nplikes.cupy import Cupy
@@ -141,3 +141,78 @@ def nonlocal_offsets(starts, stops, source, length, groups, stream):
             length // groups,
         )
         setup(stops, starts, source, groups, stream)
+
+
+def _first_error(left, right):
+    # Zero is success; magnitude orders rows and sign preserves the error kind.
+    # row + 1 fits int64 because a row precedes the final declared offset.
+    if left == 0:
+        return right
+    if right == 0:
+        return left
+    return left if abs(left) <= abs(right) else right
+
+
+class _Regular(_Gather):
+    def __init__(self, offsets_dtype):
+        self.outer = size = _ArrayState(np.int64)
+        self.inner = offsets = _ArrayState(offsets_dtype)
+
+        def check(i):
+            first = np.int64(offsets[1]) - np.int64(offsets[0])
+            count = np.int64(offsets[i + 1]) - np.int64(offsets[i])
+            if i == 0:
+                size[0] = -1 if first < 0 else first
+            if count < 0:
+                return -(i + 1)
+            if count != first:
+                return i + 1
+            return np.int64(0)
+
+        self.operation = None
+        self.gather = check
+        self.iterator = CountingIterator(np.int64(0))
+        self.prepared = None
+        self.reducer = None
+        self.reduce_operation = None
+        self.initial = np.asarray(0, dtype=np.int64)
+
+    def validate(self, size, offsets, length, stream):
+        errors = cp.empty(length - 1, dtype=cp.int64)
+        status = cp.empty(1, dtype=cp.int64)
+        self(errors, size, offsets, length - 1, stream)
+        if self.reducer is None:
+            self.reduce_operation = make_op_adapter(_first_error)
+            self.reducer = make_reduce_into(
+                d_in=errors,
+                d_out=status,
+                op=self.reduce_operation,
+                h_init=self.initial,
+            )
+        arguments = {
+            "d_in": errors,
+            "d_out": status,
+            "num_items": length - 1,
+            "op": self.reduce_operation,
+            "h_init": self.initial,
+            "stream": stream,
+        }
+        storage_bytes = self.reducer(temp_storage=None, **arguments)
+        storage = cp.empty(storage_bytes, dtype=cp.uint8)
+        self.reducer(temp_storage=storage, **arguments)
+        return status
+
+
+@lru_cache(maxsize=16)
+def _regular_setup(device, context, offsets_dtype):
+    return _Regular(offsets_dtype)
+
+
+def regular_status(size, offsets, length, stream):
+    with _lock:
+        setup = _regular_setup(
+            cp.cuda.runtime.getDevice(),
+            cp.cuda.driver.ctxGetCurrent(),
+            offsets.dtype.str,
+        )
+        return setup.validate(size, offsets, length, stream)

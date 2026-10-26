@@ -83,44 +83,51 @@ def to_regular(size, fromoffsets, offsetslength):
     if offsetslength <= 1:
         size[:1] = 0
         return None
-    offsets = fromoffsets[:offsetslength]
-    n = offsetslength - 1
-    bad = cp.empty(n, dtype=cp.int64)
+    if hasattr(fromoffsets, "__cuda_array_interface__"):
+        from awkward._connect.cuda._prepared_gather import regular_status
 
-    def check(i):
-        count = np.int64(offsets[i + 1]) - np.int64(offsets[i])
-        first = np.int64(offsets[1]) - np.int64(offsets[0])
-        return i if count < 0 or count != first else np.int64(offsets.size - 1)
+        status = regular_status(size, fromoffsets, offsetslength, _Stream())
+    else:
+        # Host execution used by the canonical parity tests.
+        offsets = fromoffsets[:offsetslength]
+        n = offsetslength - 1
+        bad = cp.empty(n, dtype=cp.int64)
 
-    _transform(check, n, bad)
-    first_bad = cp.empty(1, dtype=cp.int64)
-    reduce_into(
-        d_in=bad,
-        d_out=first_bad,
-        op=OpKind.MINIMUM,
-        h_init=np.asarray(n, dtype=np.int64),
-        num_items=n,
-        stream=_Stream(),
-    )
-    status = cp.empty(2, dtype=cp.int64)
+        def check(i):
+            count = np.int64(offsets[i + 1]) - np.int64(offsets[i])
+            first = np.int64(offsets[1]) - np.int64(offsets[0])
+            if i == 0:
+                size[0] = -1 if first < 0 else first
+            if count < 0:
+                return -(i + 1)
+            if count != first:
+                return i + 1
+            return np.int64(0)
 
-    def finish(_):
-        row = first_bad[0]
-        first = np.int64(offsets[1]) - np.int64(offsets[0])
-        size[0] = -1 if first < 0 else first
-        status[0] = row
-        status[1] = 0
-        if row < offsets.size - 1:
-            count = np.int64(offsets[row + 1]) - np.int64(offsets[row])
-            status[1] = 1 if count < 0 else 2
-        return np.int8(0)
+        def first_error(left, right):
+            if left == 0:
+                return right
+            if right == 0:
+                return left
+            return left if abs(left) <= abs(right) else right
 
-    _transform(finish, 1)
-    row, code = status.get().tolist()
+        _transform(check, n, bad)
+        status = cp.empty(1, dtype=cp.int64)
+        reduce_into(
+            d_in=bad,
+            d_out=status,
+            op=first_error,
+            h_init=np.asarray(0, dtype=np.int64),
+            num_items=n,
+            stream=_Stream(),
+        )
+    # Zero means success; sign distinguishes the error, magnitude its first row.
+    code = int(status.get()[0])
+    row = abs(code) - 1
     if code:
         message = (
             "offsets must be monotonically increasing"
-            if code == 1
+            if code < 0
             else "cannot convert to RegularArray because subarray lengths are not regular"
         )
         return _Error(

@@ -141,7 +141,11 @@ def host_implementation():
 
     def reduce(*, d_in, d_out, num_items, h_init, **kwargs):
         assert kwargs["stream"].__cuda_stream__() == (0, 123)
-        d_out[0] = min(int(h_init), *(int(x) for x in d_in[:num_items]))
+        operation = kwargs["op"]
+        value = int(h_init)
+        for item in d_in[:num_items]:
+            value = operation(value, item)
+        d_out[0] = value
 
     def segmented(
         *, d_in, d_out, num_segments, start_offsets_in, end_offsets_in, h_init, **kwargs
@@ -328,7 +332,7 @@ def test_padding_length_scan_uses_current_stream(dtype, rows):
     assert length.tolist() == [4 * rows, 99, 99]
 
 
-def test_prepared_gather_reuses_setup_without_retaining_buffers():
+def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
     import gc
     import weakref
     from functools import lru_cache
@@ -363,17 +367,35 @@ def test_prepared_gather_reuses_setup_without_retaining_buffers():
 
         return launch
 
+    def prepare_reduce(**kwargs):
+        builds.append(True)
+
+        def launch(*, temp_storage, **kwargs):
+            if temp_storage is None:
+                return 64
+            value = int(kwargs["h_init"])
+            for item in kwargs["d_in"][: kwargs["num_items"]]:
+                value = kwargs["op"](value, item)
+            kwargs["d_out"][0] = value
+            return 64
+
+        return launch
+
     namespace = {
         "np": np,
         "cp": SimpleNamespace(
+            empty=lambda *args, **kwargs: np.empty(*args, **kwargs).view(Buffer),
+            int64=np.int64,
+            uint8=np.uint8,
             cuda=SimpleNamespace(
                 runtime=SimpleNamespace(getDevice=lambda: 0),
                 driver=SimpleNamespace(ctxGetCurrent=lambda: 1),
-            )
+            ),
         ),
         "CountingIterator": _Counting,
         "make_op_adapter": lambda op: op,
         "make_unary_transform": prepare,
+        "make_reduce_into": prepare_reduce,
         "lru_cache": lru_cache,
         "_lock": RLock(),
     }
@@ -468,3 +490,25 @@ def test_prepared_gather_reuses_setup_without_retaining_buffers():
         gc.collect()
         assert all(reference() is None for reference in references)
     assert len(builds) - initial_builds == 3
+
+    initial_builds = len(builds)
+    for dtype in (np.int32, np.uint32, np.int64):
+        for values, code, expected_size in (
+            ([5, 7, 9], 0, 2),
+            ([0, 2, 5, 1], 2, 2),
+            ([5, 3, 4], -1, -1),
+            ([0, 2, 1, 9], -2, 2),
+            ([0, 0, 0, 0, 0], 0, 0),
+        ):
+            offsets = np.asarray(values, dtype=dtype).view(Buffer)
+            size = np.full(3, 123, dtype=np.int64).view(Buffer)
+            references = [weakref.ref(x) for x in (offsets, size)]
+            status = namespace["regular_status"](size, offsets, len(offsets), None)
+            assert status.shape == (1,)
+            assert status.nbytes == 8
+            assert int(status[0]) == code
+            np.testing.assert_array_equal(size, [expected_size, 123, 123])
+            del offsets, size, status
+            gc.collect()
+            assert all(reference() is None for reference in references)
+    assert len(builds) - initial_builds == 6
