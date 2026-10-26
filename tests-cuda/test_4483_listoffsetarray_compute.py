@@ -80,3 +80,20 @@ def test_nonlocal_ranges_across_block_boundaries(groups, width):
         CupyBackend.instance()[key](*gpu_args)
         np.testing.assert_array_equal(cp.asnumpy(gpu_args[0]), starts)
         np.testing.assert_array_equal(cp.asnumpy(gpu_args[1]), stops)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("offsets", [[0], [2, 4, 4, 7]])
+@pytest.mark.parametrize("target", [0, 2, 4])
+def test_padding_offset_widths(dtype, offsets, target):
+    source = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.asarray(offsets, dtype=dtype)),
+            ak.contents.NumpyArray(np.arange(9)),
+        )
+    )
+    expected = ak.pad_none(source, target)
+    with cp.cuda.Stream(non_blocking=True):
+        result = ak.pad_none(ak.to_backend(source, "cuda"), target)
+        assert result.to_list() == expected.to_list()
+        assert result.layout.offsets.dtype == np.dtype(np.int64)

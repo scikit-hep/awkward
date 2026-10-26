@@ -281,3 +281,49 @@ def test_nonlocal_ranges_across_block_boundaries(implementation, groups, width):
     implementation["nonlocal_ranges"](starts, stops, distincts, distincts.size, groups)
     np.testing.assert_array_equal(starts, expected_starts)
     np.testing.assert_array_equal(stops, expected_stops)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("offsets", [[0], [2, 4, 4, 7]])
+@pytest.mark.parametrize("target", [0, 2, 4])
+def test_pad_none_offset_widths(dtype, offsets, target):
+    source = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.asarray(offsets, dtype=dtype)),
+            ak.contents.NumpyArray(np.arange(9)),
+        )
+    )
+    padded = ak.pad_none(source, target)
+    expected = [row + [None] * max(0, target - len(row)) for row in source.to_list()]
+    assert padded.to_list() == expected
+    assert padded.layout.offsets.dtype == np.dtype(np.int64)
+    assert (
+        ak.pad_none(
+            source.layout.to_typetracer(forget_length=True), target, highlevel=False
+        ).form
+        == padded.layout.form
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("rows", [0, 3])
+def test_padding_length_scan_uses_current_stream(dtype, rows):
+    source = ROOT / "src/awkward/_connect/cuda/_compute.py"
+    node = next(
+        x
+        for x in ast.parse(source.read_text()).body
+        if isinstance(x, ast.FunctionDef)
+        and x.name == "awkward_ListOffsetArray_rpad_length_axis1"
+    )
+    node.body = [x for x in node.body if not isinstance(x, ast.ImportFrom)]
+    namespace = host_implementation()
+    exec(
+        compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
+        namespace,
+    )
+    offsets = np.arange(rows + 1, dtype=dtype) * 2
+    output = np.full(rows + 3, 99, dtype=dtype)
+    length = np.full(3, 99, dtype=np.int64)
+    namespace[node.name](output, offsets, rows, 4, length)
+    assert output.tolist() == [4 * i for i in range(rows + 1)] + [99, 99]
+    assert length.tolist() == [4 * rows, 99, 99]

@@ -2256,6 +2256,8 @@ def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
 def awkward_ListOffsetArray_rpad_length_axis1(
     tooffsets, fromoffsets, fromlength, target, tolength
 ):
+    from awkward._connect.cuda._listoffsetarray import _Stream
+
     if fromlength == 0:
         tooffsets[:1] = cp.zeros(1, dtype=tooffsets.dtype)
         tolength[:1] = cp.zeros(1, dtype=tolength.dtype)
@@ -2269,6 +2271,7 @@ def awkward_ListOffsetArray_rpad_length_axis1(
         op=OpKind.PLUS,
         init_value=None,
         num_items=fromlength,
+        stream=_Stream(),
     )
     tolength[:1] = tooffsets[fromlength : fromlength + 1].astype(
         tolength.dtype, copy=False
