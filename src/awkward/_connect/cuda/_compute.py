@@ -4626,13 +4626,3 @@ def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
     return _listoffsetarray.nonlocal_ranges(
         outstarts, outstops, distincts, lendistincts, outlength
     )
-
-
-def awkward_ListOffsetArray_reduce_local_nextparents_64(
-    nextparents, offsets, length, nextparents_length
-):
-    from awkward._connect.cuda import _listoffsetarray
-
-    return _listoffsetarray.local_parents(
-        nextparents, offsets, length, nextparents_length
-    )

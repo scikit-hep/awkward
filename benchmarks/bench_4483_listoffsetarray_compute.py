@@ -55,11 +55,6 @@ def workloads(rows, width):
             [0],
         ),
         (
-            "reduce_local_nextparents_64",
-            [np.empty(indexes.size, dtype=np.int64), offsets, rows, indexes.size],
-            [0],
-        ),
-        (
             "reduce_nonlocal_outstartsstops_64",
             [
                 np.empty(rows, dtype=np.int64),

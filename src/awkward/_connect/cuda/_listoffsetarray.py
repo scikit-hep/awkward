@@ -196,29 +196,6 @@ def drop_none(tooffsets, noneindexes, fromoffsets, length_offsets, length_indexe
     return None
 
 
-def local_parents(nextparents, offsets, length, nextparents_length):
-    if length == 0 or nextparents_length == 0:
-        return
-    offsets = offsets[: length + 1]
-    parameters = cp.asarray([nextparents_length], dtype=cp.int64)
-
-    def write(_):
-        # Deprecated ABI compatibility path, with no live layout callers.
-        # Preserve sequential overwrites even for overlapping offset intervals.
-        initial = np.int64(offsets[0])
-        i = 0
-        while i < offsets.size - 1:
-            j = np.int64(offsets[i]) - initial
-            stop = np.int64(offsets[i + 1]) - initial
-            while j < stop and j < parameters[0]:
-                nextparents[j] = i
-                j += 1
-            i += 1
-        return np.int8(0)
-
-    _transform(write, 1)
-
-
 def nonlocal_ranges(outstarts, outstops, distincts, lendistincts, outlength):
     if outlength == 0:
         return

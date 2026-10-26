@@ -125,6 +125,7 @@ cuda_kernels_impl = [
     # "awkward_ListOffsetArray_rpad_length_axis1",
     # "awkward_MaskedArray_getitem_next_jagged_project",
     # "awkward_UnionArray_project",
+    "awkward_ListOffsetArray_reduce_local_nextparents_64",
     # "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",

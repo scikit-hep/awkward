@@ -26,7 +26,6 @@ FUNCTIONS = {
     "awkward_ListOffsetArray_toRegularArray": "to_regular",
     "awkward_ListOffsetArray_rpad_axis1": "rpad",
     "awkward_ListOffsetArray_drop_none_indexes": "drop_none",
-    "awkward_ListOffsetArray_reduce_local_nextparents_64": "local_parents",
     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64": "nonlocal_ranges",
 }
 
