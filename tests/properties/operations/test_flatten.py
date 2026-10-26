@@ -125,9 +125,10 @@ def _should_not_raise(form: ak.forms.Form, kwargs: Kwargs) -> bool:
     affect whether `ak.flatten` raises.
 
     The rules, written against `ak.flatten`'s deliberate error paths
-    (axis beyond depth, strings, records):
+    (axis beyond depth, strings, records, leaves that cannot merge):
 
-    - `axis=None`: always `True`.
+    - `axis=None`: `True` unless the leaves cannot merge (see
+      `util.merges_unmergeable_leaves`).
     - Any other axis is first resolved against the depth (see
       `_normalize_axis`); an axis that stays negative is `False`.
     - A resolved `0`: always `True`.
@@ -139,7 +140,7 @@ def _should_not_raise(form: ak.forms.Form, kwargs: Kwargs) -> bool:
     """
     axis = kwargs.get("axis", DEFAULTS["axis"])
     if axis is None:
-        return True
+        return not util.merges_unmergeable_leaves(form, drop_nones=True)
     axis = _normalize_axis(axis, form)
     if axis == 0:
         return True
@@ -159,8 +160,6 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
 
     match axis:
         case None:
-            if known_issues.has_issue_4261(a):
-                return True
             if known_issues.has_issue_4278(a):
                 return True
             if known_issues.has_issue_4280(a):
