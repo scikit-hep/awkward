@@ -23,6 +23,7 @@ P = ParamSpec("P")
 class ErrorContext:
     # Any other threads should get a completely independent _slate.
     _slate = threading.local()
+    _frozen = False
 
     @classmethod
     def primary(cls):
@@ -32,8 +33,9 @@ class ErrorContext:
     def frozen_primary(cls):
         """The primary context, frozen so that it can outlive the call."""
         context = cls.primary()
-        if context is not None:
+        if context is not None and not context._frozen:
             context.freeze()
+            context._frozen = True
         return context
 
     def freeze(self) -> None:

@@ -81,6 +81,24 @@ def test_frozen_slicing_context_drops_raw_arguments():
     assert "1:" in context.note
 
 
+def test_frozen_primary_freezes_once(monkeypatch):
+    calls = []
+    freeze = OperationErrorContext.freeze
+
+    def spy(self):
+        calls.append(self)
+        freeze(self)
+
+    monkeypatch.setattr(OperationErrorContext, "freeze", spy)
+
+    context = OperationErrorContext("ak.num", (ak.Array([1, 2, 3]),), {})
+    with context:
+        for _ in range(4):
+            assert ErrorContext.frozen_primary() is context
+
+    assert calls == [context]
+
+
 def test_frozen_primary_without_context():
     assert ErrorContext.frozen_primary() is None
 
