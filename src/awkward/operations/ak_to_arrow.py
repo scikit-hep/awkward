@@ -2,6 +2,7 @@
 
 
 import awkward as ak
+from awkward._attrs import serializable_attrs_of
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 
@@ -35,6 +36,11 @@ def to_arrow(
     even through Parquet, making Parquet a good way to save Awkward Arrays for later
     use. If any third-party tools don't recognize Arrow's extension arrays, set this
     option to False for plain Arrow arrays.
+
+    With `extensionarray=True`, the array's #ak.Array.attrs are stored in the Arrow
+    type as well, so that #ak.from_arrow can restore them; they must therefore be
+    JSON-compatible. Transient attrs (those whose keys start with `"@"`) are dropped,
+    as they are when pickling.
 
     See also #ak.from_arrow, #ak.to_arrow_table, #ak.to_parquet, #ak.from_arrow_schema.
 
@@ -96,6 +102,8 @@ def _impl(
     extensionarray,
     count_nulls,
 ):
+    from awkward._connect.pyarrow import AwkwardArrowType, pyarrow
+
     layout = ak.operations.to_layout(array, allow_record=True, primitive_policy="error")
     if isinstance(layout, ak.record.Record):
         layout = layout.array[layout.at : layout.at + 1]
@@ -103,7 +111,7 @@ def _impl(
     else:
         record_is_scalar = False
 
-    return layout.to_arrow(
+    out = layout.to_arrow(
         list_to32=list_to32,
         string_to32=string_to32,
         bytestring_to32=bytestring_to32,
@@ -113,3 +121,13 @@ def _impl(
         count_nulls=count_nulls,
         record_is_scalar=record_is_scalar,
     )
+
+    # A bare Arrow array has nowhere to put metadata other than its type, so the
+    # attrs can only be stored (in the outermost type) if this is an extension array
+    attrs = serializable_attrs_of(array)
+    if attrs is not None and isinstance(out.type, AwkwardArrowType):
+        out = pyarrow.ExtensionArray.from_storage(
+            out.type.with_attrs(attrs), out.storage
+        )
+
+    return out
