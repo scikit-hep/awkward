@@ -166,6 +166,21 @@ def test_record_roundtrip(roundtrip, point_behavior):
     assert result._numbaview is None
 
 
+def test_record_awkward1_setstate(point_behavior):
+    # awkward 1 pickled a record as (form, length, container, behavior, at)
+    array = ak.Array([{"x": 1, "y": 2}, {"x": 3, "y": 4}], with_name="point")
+    form, length, container = ak.to_buffers(
+        array, buffer_key="{form_key}-{attribute}", form_key="node{id}"
+    )
+
+    record = ak.Record.__new__(ak.Record)
+    record.__setstate__((form.to_dict(), length, container, None, 1))
+    assert isinstance(record, PointRecord)
+    assert record.to_list() == {"x": 3, "y": 4}
+    assert record._attrs is None
+    assert record._numbaview is None
+
+
 @pytest.mark.parametrize("wrapper", [ak.Array, ak.Record])
 def test_setattr_still_guarded(wrapper):
     layout = ak.to_layout([{"x": 1}])
