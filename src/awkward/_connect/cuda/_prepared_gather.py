@@ -24,6 +24,9 @@ _lock = RLock()
 
 
 class _ArrayState:
+    # CCCL rewrites captured CUDA-array-interface objects into device arrays.
+    # These proxies carry launch metadata only; indexing in compiled operators
+    # acts on the replacement arrays, not on this Python class.
     def __init__(self, dtype):
         self.dtype = np.dtype(dtype)
         self.clear()
@@ -125,7 +128,7 @@ class _Ranges(_Gather):
             stop = start + width
             while stop > start and source[stop - 1] == -1:
                 stop -= 1
-            starts[i] = start
+            starts[i] = start  # pylint: disable=unsupported-assignment-operation
             return stop
 
         self.operation = None
@@ -179,6 +182,8 @@ class _Regular(_Gather):
             first = np.int64(offsets[1]) - np.int64(offsets[0])
             count = np.int64(offsets[i + 1]) - np.int64(offsets[i])
             if i == 0:
+                # Assignment targets the device array substituted by CCCL.
+                # pylint: disable-next=unsupported-assignment-operation
                 size[0] = -1 if first < 0 else first
             if count < 0:
                 return -(i + 1)
@@ -243,8 +248,10 @@ class _ParallelRanges(_Gather):
 
         def positions(i):
             if i < groups:
+                # pylint: disable-next=unsupported-assignment-operation
                 starts[i] = i * width
             if i <= groups:
+                # pylint: disable-next=unsupported-assignment-operation
                 boundaries[i] = i * width
             # Empty groups reduce to their own start, avoiding a clamp kernel.
             return i + 1 if source[i] != -1 else (i // width) * width
