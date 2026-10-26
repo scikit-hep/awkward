@@ -119,3 +119,35 @@ def test_prepared_gather_rebinds_buffers_and_streams(dtype):
         expected = np.full(length + 4, -1, dtype=np.int64)
         expected[1 : length + 1] = np.arange(1, length + 1) + length * 10
         np.testing.assert_array_equal(cp.asnumpy(storage), expected)
+
+
+@pytest.mark.parametrize("width", [1, 8, 4096])
+def test_prepared_nonlocal_ranges_rebinds_buffers_and_streams(width):
+    from awkward._connect.cuda._listoffsetarray import nonlocal_ranges
+
+    pending = []
+    for groups in (3, 7, 4):
+        source = np.full(groups * width, -1, dtype=np.int64)
+        source[width] = -2
+        source[3 * width - 1] = 0
+        expected_starts = np.full(groups + 3, 123, dtype=np.int64)
+        expected_stops = expected_starts.copy()
+        NumpyBackend.instance()[
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+            np.int64,
+            np.int64,
+            np.int64,
+        ](expected_starts, expected_stops, source, source.size, groups)
+        stream = cp.cuda.Stream(non_blocking=True)
+        with stream:
+            distincts = cp.asarray(source)
+            starts = cp.full(groups + 3, 123, dtype=cp.int64)
+            stops = starts.copy()
+            nonlocal_ranges(starts, stops, distincts, source.size, groups)
+        pending.append(
+            (stream, distincts, starts, stops, expected_starts, expected_stops)
+        )
+    for stream, _distincts, starts, stops, expected_starts, expected_stops in pending:
+        stream.synchronize()
+        np.testing.assert_array_equal(cp.asnumpy(starts), expected_starts)
+        np.testing.assert_array_equal(cp.asnumpy(stops), expected_stops)

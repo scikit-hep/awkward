@@ -437,3 +437,34 @@ def test_prepared_gather_reuses_setup_without_retaining_buffers():
     with pytest.raises(RuntimeError, match="launch failed"):
         gather(output, outer, inner, 2, None)
     assert setup.outer.data_ptr() == setup.inner.data_ptr() == 0
+
+    state.__setitem__ = lambda self, i, value: registry[self.data_ptr()].__setitem__(
+        i, value
+    )
+    ranges = namespace["nonlocal_offsets"]
+    initial_builds = len(builds)
+    for width, groups in ((1, 3), (8, 3), (4096, 5), (8, 5)):
+        source = np.full(groups * width, -1, dtype=np.int64).view(Buffer)
+        source[width] = -2
+        source[3 * width - 1] = 7
+        starts = np.full(groups + 3, 123, dtype=np.int64).view(Buffer)
+        stops = starts.copy().view(Buffer)
+        expected_starts, expected_stops = starts.copy(), stops.copy()
+        NumpyBackend.instance()[
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+            np.int64,
+            np.int64,
+            np.int64,
+        ](expected_starts, expected_stops, source, source.size, groups)
+        references = [weakref.ref(x) for x in (source, starts, stops)]
+        ranges(starts, stops, source, source.size, groups, None)
+        np.testing.assert_array_equal(starts, expected_starts)
+        np.testing.assert_array_equal(stops, expected_stops)
+        range_setup = namespace["_ranges_setup"](
+            0, 1, starts.dtype.str, source.dtype.str, stops.dtype.str, width
+        )
+        assert range_setup.outer.data_ptr() == range_setup.inner.data_ptr() == 0
+        del source, starts, stops
+        gc.collect()
+        assert all(reference() is None for reference in references)
+    assert len(builds) - initial_builds == 3

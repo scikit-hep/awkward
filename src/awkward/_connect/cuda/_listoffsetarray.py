@@ -10,7 +10,6 @@ from cuda.compute import (
     OpKind,
     inclusive_scan,
     reduce_into,
-    segmented_reduce,
     unary_transform,
 )
 
@@ -211,28 +210,22 @@ def nonlocal_ranges(outstarts, outstops, distincts, lendistincts, outlength):
         outstarts[:outlength] = 0
         outstops[:outlength] = 0
         return
+    if hasattr(distincts, "__cuda_array_interface__"):
+        from awkward._connect.cuda._prepared_gather import nonlocal_offsets
+
+        nonlocal_offsets(
+            outstarts, outstops, distincts, lendistincts, outlength, _Stream()
+        )
+        return
+
     width = lendistincts // outlength
-    starts = cp.arange(outlength, dtype=cp.int64) * width
-    stops = starts + width
-    source = distincts[:lendistincts]
 
-    def position(i):
-        return i + 1 if source[i] != -1 else np.int64(0)
+    def find_stop(i):
+        start = i * width
+        stop = start + width
+        while stop > start and distincts[stop - 1] == -1:
+            stop -= 1
+        outstarts[i] = start
+        return stop
 
-    # Feed a plain array to segmented_reduce. Stateful transform iterators hit
-    # inference and launch failures with the supported CCCL/Numba combination.
-    positions = cp.empty(lendistincts, dtype=cp.int64)
-    _transform(position, lendistincts, positions)
-    segmented_reduce(
-        d_in=positions,
-        d_out=outstops[:outlength],
-        num_segments=outlength,
-        start_offsets_in=starts,
-        end_offsets_in=stops,
-        op=OpKind.MAXIMUM,
-        h_init=np.asarray(0, dtype=np.int64),
-        max_segment_size=width,
-        stream=_Stream(),
-    )
-    outstarts[:outlength] = starts
-    outstops[:outlength] = cp.maximum(outstops[:outlength], starts)
+    _transform(find_stop, outlength, outstops)

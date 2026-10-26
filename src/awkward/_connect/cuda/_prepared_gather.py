@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-"""Reusable CCCL setup for offset gathers, without owning caller buffers."""
+"""Reusable CCCL offset transforms, without owning caller buffers."""
 
 from functools import lru_cache
 from threading import RLock
@@ -102,3 +102,42 @@ def gather_offsets(output, outer, inner, length, stream):
             output.dtype.str,
         )
         setup(output, outer, inner, length, stream)
+
+
+class _Ranges(_Gather):
+    # Width is host metadata and part of the setup key. The backward search
+    # avoids materializing one position per element or launching a reduction.
+    def __init__(self, starts_dtype, source_dtype, width):
+        self.outer = starts = _ArrayState(starts_dtype)
+        self.inner = source = _ArrayState(source_dtype)
+
+        def find_stop(i):
+            start = i * width
+            stop = start + width
+            while stop > start and source[stop - 1] == -1:
+                stop -= 1
+            starts[i] = start
+            return stop
+
+        self.operation = None
+        self.gather = find_stop
+        self.iterator = CountingIterator(np.int64(0))
+        self.prepared = None
+
+
+@lru_cache(maxsize=16)
+def _ranges_setup(device, context, starts_dtype, source_dtype, stops_dtype, width):
+    return _Ranges(starts_dtype, source_dtype, width)
+
+
+def nonlocal_offsets(starts, stops, source, length, groups, stream):
+    with _lock:
+        setup = _ranges_setup(
+            cp.cuda.runtime.getDevice(),
+            cp.cuda.driver.ctxGetCurrent(),
+            starts.dtype.str,
+            source.dtype.str,
+            stops.dtype.str,
+            length // groups,
+        )
+        setup(stops, starts, source, groups, stream)
