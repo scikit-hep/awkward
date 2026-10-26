@@ -345,6 +345,85 @@ class _DropCount(_Gather):
         self.prepared = None
 
 
+class _DropCountTiled(_Gather):
+    def __init__(self, dtype, length_offsets, length_indexes):
+        self.outer = offsets = _ArrayState(dtype)
+        self.inner = indexes = _ArrayState(dtype)
+        self.boundaries = boundaries = _ArrayState(np.int64)
+        lanes = 32
+
+        def count(i):
+            if i <= length_offsets:
+                # pylint: disable-next=unsupported-assignment-operation
+                boundaries[i] = i * lanes
+            if offsets[length_offsets - 1] > length_indexes:
+                return np.int64(-1) if i == 0 else np.int64(0)
+            row = i // lanes
+            lane = i % lanes
+            start = np.int64(0) if row == 0 else np.int64(offsets[row - 1])
+            stop = np.int64(offsets[row])
+            total = np.int64(0)
+            # Logical lanes cooperate on tiles. Decreasing intervals are empty,
+            # while later increasing intervals can revisit earlier entries.
+            if stop <= start or lane >= stop - start:
+                return total
+            j = start + lane
+            while j < stop:
+                if indexes[j] < 0:
+                    total += 1
+                if stop - j <= lanes:
+                    break
+                j += lanes
+            return total
+
+        self.operation = None
+        self.gather = count
+        self.iterator = CountingIterator(np.int64(0))
+        self.prepared = None
+        self.reducer = None
+        self.reduce_operation = None
+        self.initial = np.asarray(0, dtype=np.int64)
+        self.lanes = lanes
+
+    def __call__(self, counts, offsets, indexes, length, stream):
+        partials = cp.empty(length * self.lanes, dtype=cp.int64)
+        boundaries = cp.empty(length + 1, dtype=cp.int64)
+        self.outer.bind(offsets)
+        self.inner.bind(indexes)
+        self.boundaries.bind(boundaries)
+        try:
+            self._launch(partials, length * self.lanes, stream)
+        finally:
+            self.outer.clear()
+            self.inner.clear()
+            self.boundaries.clear()
+        first, last = boundaries[:-1], boundaries[1:]
+        if self.reducer is None:
+            self.reduce_operation = make_op_adapter(OpKind.PLUS)
+            self.reducer = make_segmented_reduce(
+                d_in=partials,
+                d_out=counts,
+                start_offsets_in=first,
+                end_offsets_in=last,
+                op=self.reduce_operation,
+                h_init=self.initial,
+            )
+        arguments = {
+            "d_in": partials,
+            "d_out": counts,
+            "num_segments": length,
+            "start_offsets_in": first,
+            "end_offsets_in": last,
+            "op": self.reduce_operation,
+            "h_init": self.initial,
+            "max_segment_size": self.lanes,
+            "stream": stream,
+        }
+        storage_bytes = self.reducer(temp_storage=None, **arguments)
+        storage = cp.empty(storage_bytes, dtype=cp.uint8)
+        self.reducer(temp_storage=storage, **arguments)
+
+
 class _DropWrite(_Gather):
     def __init__(self, dtype):
         self.outer = output = _ArrayState(dtype)
@@ -378,7 +457,14 @@ class _DropWrite(_Gather):
 
 class _Drop:
     def __init__(self, dtype, length_offsets, length_indexes):
-        self.count = _DropCount(dtype, length_offsets, length_indexes)
+        # Select from host metadata; a content-size hint can overestimate work
+        # for sliced layouts, so the crossover must also be checked on a GPU.
+        counter = (
+            _DropCountTiled
+            if length_indexes > 1024 * max(length_offsets - 1, 1)
+            else _DropCount
+        )
+        self.count = counter(dtype, length_offsets, length_indexes)
         self.write = _DropWrite(dtype)
         self.scanner = None
         self.operation = None

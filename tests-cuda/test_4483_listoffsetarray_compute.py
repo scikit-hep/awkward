@@ -227,3 +227,47 @@ def test_prepared_drop_none_rebinds_buffers_and_streams(dtype, width):
         stream.synchronize()
         np.testing.assert_array_equal(cp.asnumpy(output), expected)
         assert (int(cp.asnumpy(status)[0]) < 0) == failed
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.int64])
+@pytest.mark.parametrize(
+    "offsets,declared_length",
+    [
+        ([7, 4096, 32, 8192], 8192),
+        ([0, 8192, 4096], 4096),
+        ([0, 8193], 8192),
+        ([0, 1024, 2048], 2048),
+        ([0, 1025, 2050], 2050),
+    ],
+)
+def test_tiled_drop_none_decreasing_offsets_and_dispatch(
+    dtype, offsets, declared_length
+):
+    from awkward._connect.cuda._prepared_gather import _drop_setup, _DropCountTiled
+
+    indexes = np.arange(8192, dtype=dtype)
+    indexes[::3] = -2
+    source = np.asarray(offsets, dtype=dtype)
+    expected = np.full(len(offsets) + 3, 123, dtype=dtype)
+    key = ("awkward_ListOffsetArray_drop_none_indexes", dtype, dtype, dtype)
+    error = NumpyBackend.instance()[key](
+        expected, indexes, source, len(offsets), declared_length
+    )
+    with cp.cuda.Stream(non_blocking=True):
+        gpu_source, gpu_indexes = cp.asarray(source), cp.asarray(indexes)
+        output = cp.full(len(offsets) + 3, 123, dtype=dtype)
+        actual = CupyBackend.instance()[key](
+            output, gpu_indexes, gpu_source, len(offsets), declared_length
+        )
+        contract.assert_error(actual, error)
+        np.testing.assert_array_equal(cp.asnumpy(output), expected)
+        setup = _drop_setup(
+            cp.cuda.runtime.getDevice(),
+            cp.cuda.driver.ctxGetCurrent(),
+            np.dtype(dtype).str,
+            len(offsets),
+            declared_length,
+        )
+        assert isinstance(setup.count, _DropCountTiled) == (
+            declared_length > 1024 * max(len(offsets) - 1, 1)
+        )

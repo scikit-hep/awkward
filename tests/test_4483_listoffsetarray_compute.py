@@ -404,7 +404,8 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
             for i in range(kwargs["num_segments"]):
                 start = kwargs["start_offsets_in"][i]
                 stop = kwargs["end_offsets_in"][i]
-                kwargs["d_out"][i] = max(kwargs["d_in"][start:stop])
+                values = kwargs["d_in"][start:stop]
+                kwargs["d_out"][i] = sum(values) if kwargs["op"] == 0 else max(values)
             return 64
 
         return launch
@@ -583,7 +584,12 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
             ([0, 6], [-1, 0, -2, 2, -1], 5),
             ([0, 0, 0], [], 0),
             ([1], [-2, -1], 2),
+            ([0, 2048, 4096], [-1, 0] * 2048, 4096),
+            ([0, 1024, 2048], [-1, 0] * 1024, 2048),
             ([0, 4096, 8192], [-1, 0] * 4096, 8192),
+            ([7, 4096, 32, 8192], [-1, 0] * 4096, 8192),
+            ([0, 8192, 4096], [-1, 0] * 4096, 4096),
+            ([0, 8193], [-1, 0] * 4096, 8192),
         ]
         for values, entries, declared_length in cases * 2:
             offsets = np.asarray(values, dtype=dtype).view(Buffer)
@@ -602,7 +608,8 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
             np.testing.assert_array_equal(output, expected)
             # Each variant compiles its count/scan/write only on first use.
             key = (np.dtype(dtype).str, len(values), declared_length)
-            assert len(builds) - before == (0 if key in seen_drop_setups else 3)
+            factories = 4 if declared_length > 1024 * max(len(values) - 1, 1) else 3
+            assert len(builds) - before == (0 if key in seen_drop_setups else factories)
             seen_drop_setups.add(key)
             del offsets, indexes, output, status
             gc.collect()
@@ -665,3 +672,15 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
             n for n, dtype in allocations if dtype == np.dtype(np.int64)
         ]
         assert int64_allocations == ([1] if rows == 32 else [1, 64])
+
+    def concurrent_tiled_drop(value):
+        offsets = np.asarray([0, 4096, 8192], dtype=np.int64).view(Buffer)
+        indexes = np.full(8192, value, dtype=np.int64).view(Buffer)
+        output = np.full(5, 123, dtype=np.int64).view(Buffer)
+        status = namespace["drop_status"](output, indexes, offsets, 3, 8192, None)
+        assert int(status[0]) >= 0
+        expected = [0, 0, 0] if value < 0 else [0, 4096, 8192]
+        np.testing.assert_array_equal(output, [*expected, 123, 123])
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(concurrent_tiled_drop, [-1, -2, 0, 7] * 3))
