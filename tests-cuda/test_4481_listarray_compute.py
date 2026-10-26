@@ -103,3 +103,108 @@ def _highlevel_listarray_operations(dtype):
 
     with pytest.raises(IndexError):
         array[[[0], [0], [0], [0]]]
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("error_at", [None, 17])
+def test_prepared_jagged_long_parallel_output(dtype, error_at):
+    rows, width = 32, 4096
+    starts = (3 + np.arange(rows) * width).astype(dtype)
+    stops = (starts + width).astype(dtype)
+    if error_at is not None:
+        stops[error_at] -= 1
+    output = np.full(rows * width + 3, 123, dtype=np.int64)
+    args = [
+        output.copy(),
+        output.copy(),
+        np.arange(width + 1, dtype=np.int64) * 2,
+        output.copy(),
+        starts,
+        stops,
+        width,
+        rows,
+    ]
+    key = (
+        "awkward_ListArray_getitem_jagged_expand",
+        *(x.dtype.type for x in args if isinstance(x, np.ndarray)),
+    )
+    expected = NumpyBackend.instance()[key](*args)
+    with cp.cuda.Stream(non_blocking=True):
+        gpu = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+        # Reset outputs: CPU execution above may have populated their prefixes.
+        for i in (0, 1, 3):
+            gpu[i].fill(123)
+        actual = CupyBackend.instance()[key](*gpu)
+        contract.assert_error(actual, expected)
+        for i in (0, 1, 3):
+            np.testing.assert_array_equal(cp.asnumpy(gpu[i]), args[i])
+
+
+@pytest.mark.parametrize(
+    "offsets",
+    [[0, 4096, 8192], [3, 3, 5, 6], [0, 8, 2, 10], [*range(33), 5, *range(34, 66)]],
+)
+def test_prepared_spread_parallel_and_overlap(offsets):
+    output = np.full(max(offsets) + 3, 123, dtype=np.int64)
+    args = [
+        output,
+        np.arange(len(offsets) - 1, dtype=np.int64) + 7,
+        np.asarray(offsets, dtype=np.int64),
+        len(offsets) - 1,
+    ]
+    key = (
+        "awkward_ListArray_getitem_next_range_spreadadvanced",
+        np.int64,
+        np.int64,
+        np.int64,
+    )
+    NumpyBackend.instance()[key](*args)
+    with cp.cuda.Stream(non_blocking=True):
+        gpu = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+        gpu[0].fill(123)
+        CupyBackend.instance()[key](*gpu)
+        np.testing.assert_array_equal(cp.asnumpy(gpu[0]), output)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("rows", [32, 129])
+@pytest.mark.parametrize("bad_kind", [0, 1, 2, 3])
+def test_prepared_advanced_first_error_and_rebinding(dtype, rows, bad_kind):
+    starts = (np.arange(rows) * 8).astype(dtype)
+    stops = starts + 8
+    indices = np.asarray([0, -1, 8], dtype=np.int64)
+    previous = (np.arange(rows) % 2).astype(np.int64)
+    if bad_kind:
+        row = min(rows - 1, 64)
+        if bad_kind == 1:
+            stops[row] = starts[row] - 1
+        elif bad_kind == 2:
+            stops[row] = rows * 8 + 1
+        else:
+            previous[row] = 2
+        if row < rows - 1:
+            stops[-1] = starts[-1] - 1
+    output = np.full(rows + 3, 123, dtype=np.int64)
+    args = [
+        output.copy(),
+        output.copy(),
+        starts,
+        stops,
+        indices,
+        previous,
+        rows,
+        rows * 8,
+    ]
+    key = (
+        "awkward_ListArray_getitem_next_array_advanced",
+        *(x.dtype.type for x in args if isinstance(x, np.ndarray)),
+    )
+    expected = NumpyBackend.instance()[key](*args)
+    with cp.cuda.Stream(non_blocking=True):
+        gpu = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+        gpu[0].fill(123)
+        gpu[1].fill(123)
+        actual = CupyBackend.instance()[key](*gpu)
+        contract.assert_error(actual, expected)
+        np.testing.assert_array_equal(cp.asnumpy(gpu[0]), args[0])
+        np.testing.assert_array_equal(cp.asnumpy(gpu[1]), args[1])

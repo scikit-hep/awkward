@@ -319,3 +319,290 @@ def test_public_slicing_operations(compute_backend, dtype):
     for index, expected in zip(jagged, expected_jagged, strict=True):
         assert source[index].to_list() == expected
     assert ak.pad_none(source, 4).to_list() == expected_pad
+
+
+@pytest.fixture(scope="module")
+def prepared_implementation():
+    import weakref
+    from functools import lru_cache
+    from threading import RLock
+
+    registry = weakref.WeakValueDictionary()
+    events = []
+
+    class Buffer(_DeviceArray):
+        @property
+        def __cuda_array_interface__(self):
+            registry[self.ctypes.data] = self
+            return {
+                "shape": self.shape,
+                "strides": None,
+                "typestr": self.dtype.str,
+                "data": (self.ctypes.data, False),
+                "version": 3,
+            }
+
+    def prepare(**kwargs):
+        events.append(("prepare",))
+        operation = kwargs["op"]
+
+        def launch(**kwargs):
+            import time
+
+            time.sleep(0.0001)
+            events.append(("transform", kwargs["num_items"]))
+            for i in range(kwargs["num_items"]):
+                value = operation(i)
+                if not isinstance(kwargs["d_out"], _Discard):
+                    kwargs["d_out"][i] = value
+
+        return launch
+
+    def prepare_reduce(**kwargs):
+        events.append(("prepare_reduce",))
+
+        def launch(*, temp_storage, **kwargs):
+            if temp_storage is None:
+                return 64
+            events.append(("reduce", kwargs["num_items"]))
+            values = [int(kwargs["h_init"]), *kwargs["d_in"][: kwargs["num_items"]]]
+            kwargs["d_out"][0] = max(values) if kwargs["op"] == 2 else min(values)
+            return 64
+
+        return launch
+
+    def empty(length, dtype):
+        events.append(("allocate", length, np.dtype(dtype).str))
+        return np.empty(length, dtype=dtype).view(Buffer)
+
+    namespace = {
+        "np": np,
+        "cp": SimpleNamespace(
+            empty=empty,
+            int64=np.int64,
+            uint8=np.uint8,
+            cuda=SimpleNamespace(
+                get_current_stream=lambda: SimpleNamespace(ptr=123),
+                runtime=SimpleNamespace(getDevice=lambda: 0),
+                driver=SimpleNamespace(ctxGetCurrent=lambda: 1),
+            ),
+        ),
+        "lru_cache": lru_cache,
+        "_lock": RLock(),
+        "CountingIterator": _Counting,
+        "DiscardIterator": _Discard,
+        "OpKind": SimpleNamespace(MINIMUM=1, MAXIMUM=2),
+        "make_op_adapter": lambda op: op,
+        "make_unary_transform": prepare,
+        "make_reduce_into": prepare_reduce,
+    }
+    path = ROOT / "src/awkward/_connect/cuda/_listarray_prepared.py"
+    tree = ast.parse(path.read_text())
+    body = [
+        node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.ClassDef))
+    ]
+    exec(compile(ast.Module(body=body, type_ignores=[]), str(path), "exec"), namespace)
+    state = namespace["_ArrayState"]
+    state.__getitem__ = lambda self, i: registry[self.data_ptr()][i]
+    state.__setitem__ = lambda self, i, value: registry[self.data_ptr()].__setitem__(
+        i, value
+    )
+    return namespace, Buffer, events
+
+
+PREPARED_NAMES = {
+    "awkward_ListArray_getitem_next_array_advanced": "advanced",
+    "awkward_ListArray_getitem_jagged_expand": "jagged",
+    "awkward_ListArray_getitem_next_range_spreadadvanced": "spread",
+}
+
+
+def run_prepared(namespace, implementation, name, args):
+    kind = PREPARED_NAMES[name]
+    if kind == "spread":
+        length, parameter, arrays = args[3], 0, args[:3]
+    elif kind == "jagged":
+        length, parameter, arrays = args[7], args[6], args[:6]
+    else:
+        length, parameter, arrays = args[6], args[7], args[:6]
+    if not length:
+        return None
+    status = namespace["run"](
+        kind, tuple(arrays), length, parameter, implementation["_Stream"]()
+    )
+    if kind == "spread":
+        return None
+    messages = (
+        ("stops[i] < starts[i]", "cannot fit jagged slice into nested list")
+        if kind == "jagged"
+        else ("stops[i] < starts[i]", "stops[i] > len(content)", "index out of range")
+    )
+    return implementation["_prepared_error"](status, length, messages, name)
+
+
+@pytest.mark.parametrize(
+    "name,specialization,case",
+    [case for case in CASES if case.values[0] in PREPARED_NAMES],
+)
+def test_prepared_cpu_parity(
+    name, specialization, case, prepared_implementation, implementation
+):
+    namespace, buffer, _ = prepared_implementation
+    args, outputs, key = arguments(specialization, case)
+    expected_args = copy.deepcopy(args)
+    expected = NumpyBackend.instance()[(name, *key)](*expected_args)
+    device = [x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = run_prepared(namespace, implementation, name, device)
+    assert_error(actual, expected)
+    for i in outputs:
+        np.testing.assert_array_equal(device[i], expected_args[i])
+
+
+@pytest.mark.parametrize("rows,width", [(32, 8), (32, 4096), (65, 8), (257, 33)])
+@pytest.mark.parametrize("error_at", [None, 0, 31, 64])
+def test_prepared_jagged_parallel_prefix(
+    rows, width, error_at, prepared_implementation, implementation
+):
+    namespace, buffer, events = prepared_implementation
+    starts = np.arange(rows, dtype=np.int64) * width
+    stops = starts + width
+    if error_at is not None and error_at < rows:
+        stops[error_at] -= 1
+        stops[-1] = starts[-1] - 1
+    output = np.full(rows * width + 3, 123, dtype=np.int64)
+    args = [
+        output.copy(),
+        output.copy(),
+        np.arange(width + 1, dtype=np.int64),
+        output.copy(),
+        starts,
+        stops,
+        width,
+        rows,
+    ]
+    expected = copy.deepcopy(args)
+    name = "awkward_ListArray_getitem_jagged_expand"
+    error = NumpyBackend.instance()[(name, *([np.int64] * 6))](*expected)
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    events.clear()
+    actual = run_prepared(namespace, implementation, name, device)
+    assert_error(actual, error)
+    for i in (0, 1, 3):
+        np.testing.assert_array_equal(device[i], expected[i])
+    assert ("transform", rows * width) in events
+
+
+@pytest.mark.parametrize(
+    "offsets",
+    [
+        [3, 3, 5, 6],
+        [0, 8, 2, 10],
+        [5, 2, 7, 4, 9],
+        [0, 4096, 8192],
+        list(range(66)),
+        [*range(33), 5, *range(34, 66)],
+    ],
+)
+def test_prepared_spread_sequential_overlap(
+    offsets, prepared_implementation, implementation
+):
+    namespace, buffer, _ = prepared_implementation
+    length = len(offsets) - 1
+    output = np.full(max(offsets) + 3, 123, dtype=np.int64)
+    args = [
+        output,
+        np.arange(length, dtype=np.int64) + 7,
+        np.asarray(offsets, dtype=np.int64),
+        length,
+    ]
+    expected = output.copy()
+    NumpyBackend.instance()[
+        "awkward_ListArray_getitem_next_range_spreadadvanced",
+        np.int64,
+        np.int64,
+        np.int64,
+    ](expected, *args[1:])
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    run_prepared(
+        namespace,
+        implementation,
+        "awkward_ListArray_getitem_next_range_spreadadvanced",
+        device,
+    )
+    np.testing.assert_array_equal(device[0], expected)
+
+
+def test_prepared_reuse_lifetimes_and_concurrent_stream_state(
+    prepared_implementation, implementation
+):
+    import gc
+    import weakref
+    from concurrent.futures import ThreadPoolExecutor
+
+    namespace, buffer, events = prepared_implementation
+
+    def run_case(task):
+        kind, seed = task
+        output = np.full(15, 123, dtype=np.int64)
+        starts = np.arange(3, dtype=np.int64) * 4 + seed % 4
+        if kind == "jagged":
+            name = "awkward_ListArray_getitem_jagged_expand"
+            args = [
+                output.copy(),
+                output.copy(),
+                np.arange(5, dtype=np.int64) * (seed + 1),
+                output.copy(),
+                starts,
+                starts + 4,
+                4,
+                3,
+            ]
+        elif kind == "advanced":
+            name = "awkward_ListArray_getitem_next_array_advanced"
+            args = [
+                output.copy(),
+                output.copy(),
+                starts,
+                starts + 4,
+                np.asarray([0, 10 if seed % 2 else -1], dtype=np.int64),
+                np.asarray([0, 1, 0], dtype=np.int64),
+                3,
+                64,
+            ]
+        else:
+            name = "awkward_ListArray_getitem_next_range_spreadadvanced"
+            args = [
+                output.copy(),
+                np.arange(3, dtype=np.int64) + seed,
+                np.asarray(
+                    [0, 8, 2, 12] if seed % 2 else [0, 4, 8, 12], dtype=np.int64
+                ),
+                3,
+            ]
+        expected = copy.deepcopy(args)
+        key = tuple(x.dtype.type for x in args if isinstance(x, np.ndarray))
+        error = NumpyBackend.instance()[(name, *key)](*expected)
+        device = [
+            x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args
+        ]
+        references = [weakref.ref(x) for x in device if isinstance(x, np.ndarray)]
+        actual = run_prepared(namespace, implementation, name, device)
+        assert_error(actual, error)
+        output_indices = (
+            (0, 1, 3) if kind == "jagged" else ((0, 1) if kind == "advanced" else (0,))
+        )
+        for i in output_indices:
+            np.testing.assert_array_equal(device[i], expected[i])
+        return references
+
+    tasks = [
+        (kind, seed) for seed in range(4) for kind in ("jagged", "advanced", "spread")
+    ]
+    for kind in ("jagged", "advanced", "spread"):
+        run_case((kind, 0))
+    events.clear()
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        references = list(executor.map(run_case, tasks))
+    gc.collect()
+    assert all(reference() is None for group in references for reference in group)
+    assert not any(event[0].startswith("prepare") for event in events)

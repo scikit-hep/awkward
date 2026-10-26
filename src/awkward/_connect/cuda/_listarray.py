@@ -105,6 +105,19 @@ def _error(codes, attempts, first, messages, name):
     return None
 
 
+def _prepared_error(status, length, messages, name):
+    tag, payload = status.get().tolist()
+    if tag >= length:
+        return None
+    if tag < 0:
+        row, code, attempt = -tag - 1, payload, _SLICE_NONE
+    else:
+        row, code, attempt = tag, 3, payload
+    return _Error(
+        messages[code - 1].encode(), row, attempt, f"cuda.compute ({name})".encode()
+    )
+
+
 def validity(starts, stops, length, lencontent):
     if length == 0:
         return None
@@ -254,6 +267,22 @@ def next_array_advanced(
 ):
     if lenstarts == 0:
         return None
+    if hasattr(fromstarts, "__cuda_array_interface__"):
+        from awkward._connect.cuda._listarray_prepared import run
+
+        status = run(
+            "advanced",
+            (tocarry, toadvanced, fromstarts, fromstops, fromarray, fromadvanced),
+            lenstarts,
+            lencontent,
+            _Stream(),
+        )
+        return _prepared_error(
+            status,
+            lenstarts,
+            ("stops[i] < starts[i]", "stops[i] > len(content)", "index out of range"),
+            "awkward_ListArray_getitem_next_array_advanced",
+        )
     starts = fromstarts[:lenstarts]
     stops = fromstops[:lenstarts]
     parameters = cp.asarray([lencontent], dtype=cp.int64)
@@ -311,6 +340,22 @@ def jagged_expand(
 ):
     if length == 0:
         return None
+    if hasattr(fromstarts, "__cuda_array_interface__"):
+        from awkward._connect.cuda._listarray_prepared import run
+
+        status = run(
+            "jagged",
+            (multistarts, multistops, singleoffsets, tocarry, fromstarts, fromstops),
+            length,
+            jaggedsize,
+            _Stream(),
+        )
+        return _prepared_error(
+            status,
+            length,
+            ("stops[i] < starts[i]", "cannot fit jagged slice into nested list"),
+            "awkward_ListArray_getitem_jagged_expand",
+        )
     starts = fromstarts[:length]
     stops = fromstops[:length]
     parameters = cp.asarray([jaggedsize], dtype=cp.int64)
@@ -502,6 +547,13 @@ def rpad(toindex, fromstarts, fromstops, tostarts, tostops, target, length):
 
 
 def spreadadvanced(toadvanced, fromadvanced, fromoffsets, lenstarts):
+    if lenstarts == 0:
+        return
+    if hasattr(fromoffsets, "__cuda_array_interface__"):
+        from awkward._connect.cuda._listarray_prepared import run
+
+        run("spread", (toadvanced, fromadvanced, fromoffsets), lenstarts, 0, _Stream())
+        return
     offsets = fromoffsets[: lenstarts + 1]
 
     def write(i):
