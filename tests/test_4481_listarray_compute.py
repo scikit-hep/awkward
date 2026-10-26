@@ -417,7 +417,7 @@ PREPARED_NAMES = {
 }
 
 
-def run_prepared(namespace, implementation, name, args):
+def run_prepared(namespace, implementation, name, args, **options):
     kind = PREPARED_NAMES[name]
     if kind == "spread":
         length, parameter, arrays = args[3], 0, args[:3]
@@ -428,7 +428,7 @@ def run_prepared(namespace, implementation, name, args):
     if not length:
         return None
     status = namespace["run"](
-        kind, tuple(arrays), length, parameter, implementation["_Stream"]()
+        kind, tuple(arrays), length, parameter, implementation["_Stream"](), **options
     )
     if kind == "spread":
         return None
@@ -460,8 +460,9 @@ def test_prepared_cpu_parity(
 
 @pytest.mark.parametrize("rows,width", [(32, 8), (32, 4096), (65, 8), (257, 33)])
 @pytest.mark.parametrize("error_at", [None, 0, 31, 64])
+@pytest.mark.parametrize("chunk_size", [1, 8, 64])
 def test_prepared_jagged_parallel_prefix(
-    rows, width, error_at, prepared_implementation, implementation
+    rows, width, error_at, chunk_size, prepared_implementation, implementation
 ):
     namespace, buffer, events = prepared_implementation
     starts = np.arange(rows, dtype=np.int64) * width
@@ -485,7 +486,9 @@ def test_prepared_jagged_parallel_prefix(
     error = NumpyBackend.instance()[(name, *([np.int64] * 6))](*expected)
     device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
     events.clear()
-    actual = run_prepared(namespace, implementation, name, device)
+    actual = run_prepared(
+        namespace, implementation, name, device, chunk_size=chunk_size
+    )
     assert_error(actual, error)
     for i in (0, 1, 3):
         np.testing.assert_array_equal(device[i], expected[i])
@@ -647,3 +650,93 @@ def test_small_prepared_paths_use_one_launch(prepared_implementation, implementa
             else [("allocate", 2, np.dtype(np.int64).str)]
         )
         np.testing.assert_array_equal(device[0], expected[0])
+
+
+@pytest.mark.parametrize("chunk_size", [1, 4, 8, 16, 32, 64])
+@pytest.mark.parametrize("error_at", [None, 0, 63, 64, 128])
+def test_tunable_advanced_error_order(
+    chunk_size, error_at, prepared_implementation, implementation
+):
+    namespace, buffer, _ = prepared_implementation
+    rows = 129
+    starts = np.arange(rows, dtype=np.int64) * 8
+    stops = starts + 8
+    indices = np.asarray([0, -1, 8], dtype=np.int64)
+    previous = np.arange(rows, dtype=np.int64) % 2
+    if error_at is not None:
+        previous[error_at] = 2
+        if error_at < rows - 1:
+            stops[-1] = starts[-1] - 1
+    args = [
+        np.full(rows + 3, 123, dtype=np.int64),
+        np.full(rows + 3, 123, dtype=np.int64),
+        starts,
+        stops,
+        indices,
+        previous,
+        rows,
+        rows * 8,
+    ]
+    expected = copy.deepcopy(args)
+    name = "awkward_ListArray_getitem_next_array_advanced"
+    error = NumpyBackend.instance()[(name, *([np.int64] * 6))](*expected)
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = run_prepared(
+        namespace, implementation, name, device, chunk_size=chunk_size
+    )
+    assert_error(actual, error)
+    for i in (0, 1):
+        np.testing.assert_array_equal(device[i], expected[i])
+
+
+@pytest.mark.parametrize(
+    "offsets", [[3, 3, 5, 6], [0, 8, 2, 10], [0, 4096, 8192], list(range(66))]
+)
+def test_tiled_spread_candidate_preserves_cpu_result(
+    offsets, prepared_implementation, implementation
+):
+    namespace, buffer, _ = prepared_implementation
+    output = np.full(max(offsets) + 3, 123, dtype=np.int64)
+    args = [
+        output.copy(),
+        np.arange(len(offsets) - 1, dtype=np.int64) + 7,
+        np.asarray(offsets, dtype=np.int64),
+        len(offsets) - 1,
+    ]
+    expected = output.copy()
+    name = "awkward_ListArray_getitem_next_range_spreadadvanced"
+    NumpyBackend.instance()[(name, np.int64, np.int64, np.int64)](expected, *args[1:])
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    run_prepared(namespace, implementation, name, device, spread_lanes=32)
+    np.testing.assert_array_equal(device[0], expected)
+
+
+@pytest.mark.parametrize("width,fused", [(8, True), (9, False), (4096, False)])
+def test_jagged_fusion_is_bounded(
+    width, fused, prepared_implementation, implementation
+):
+    namespace, buffer, events = prepared_implementation
+    rows = 32
+    output = np.full(rows * width + 3, 123, dtype=np.int64)
+    starts = np.arange(rows, dtype=np.int64) * width
+    args = [
+        output.copy(),
+        output.copy(),
+        np.arange(width + 1, dtype=np.int64),
+        output.copy(),
+        starts,
+        starts + width,
+        width,
+        rows,
+    ]
+    expected = copy.deepcopy(args)
+    name = "awkward_ListArray_getitem_jagged_expand"
+    error = NumpyBackend.instance()[(name, *([np.int64] * 6))](*expected)
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    events.clear()
+    actual = run_prepared(namespace, implementation, name, device)
+    assert_error(actual, error)
+    transforms = [event for event in events if event[0] == "transform"]
+    assert len(transforms) == (1 if fused else 2)
+    for i in (0, 1, 3):
+        np.testing.assert_array_equal(device[i], expected[i])

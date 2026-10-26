@@ -57,9 +57,9 @@ class _ArrayState:
 
 
 class _Prepared:
-    def __init__(self, length, kind, initial):
+    def __init__(self, length, kind, initial, chunk_size=64):
         self.length = length
-        self.chunks = (length + 63) // 64
+        self.chunks = (length + chunk_size - 1) // chunk_size
         self.iterator = CountingIterator(np.int64(0))
         self.discard = DiscardIterator()
         self.transforms = {}
@@ -118,15 +118,15 @@ class _Prepared:
 
 
 class _Advanced(_Prepared):
-    def __init__(self, dtypes, length, lencontent):
-        super().__init__(length, OpKind.MINIMUM, length)
+    def __init__(self, dtypes, length, lencontent, chunk_size=64):
+        super().__init__(length, OpKind.MINIMUM, length, chunk_size)
         self.states = tuple(
             _ArrayState(dtype) for dtype in (*dtypes, np.int64, np.int64)
         )
         carry, advanced, starts, stops, indices, previous, first, status = self.states
 
         def check(chunk):
-            for row in range(chunk * 64, min(chunk * 64 + 64, length)):
+            for row in range(chunk * chunk_size, min((chunk + 1) * chunk_size, length)):
                 start = np.int64(starts[row])
                 stop = np.int64(stops[row])
                 if stop < start or (start != stop and stop > lencontent):
@@ -209,8 +209,8 @@ class _Advanced(_Prepared):
 
 
 class _Jagged(_Prepared):
-    def __init__(self, dtypes, length, size):
-        super().__init__(length, OpKind.MINIMUM, length)
+    def __init__(self, dtypes, length, size, chunk_size=64):
+        super().__init__(length, OpKind.MINIMUM, length, chunk_size)
         self.states = tuple(
             _ArrayState(dtype) for dtype in (*dtypes, np.int64, np.int64)
         )
@@ -219,7 +219,7 @@ class _Jagged(_Prepared):
         )
 
         def check(chunk):
-            for row in range(chunk * 64, min(chunk * 64 + 64, length)):
+            for row in range(chunk * chunk_size, min((chunk + 1) * chunk_size, length)):
                 start = np.int64(starts[row])
                 stop = np.int64(stops[row])
                 if stop < start or stop - start != size:
@@ -243,28 +243,58 @@ class _Jagged(_Prepared):
                     status[1] = 1 if stops[boundary] < starts[boundary] else 2
             return np.int8(0)
 
+        def small(k):
+            boundary = length
+            for row in range(length):
+                start = np.int64(starts[row])
+                stop = np.int64(stops[row])
+                if stop < start or stop - start != size:
+                    boundary = row
+                    break
+            if size > 0:
+                row, j = k // size, k % size
+                if row < boundary:
+                    multistarts[k] = single[j]
+                    multistops[k] = single[j + 1]
+                    carry[k] = np.int64(starts[row]) + j
+            if k == 0:
+                status[0] = length
+                status[1] = np.int64(9223372036854775807)
+                if boundary < length:
+                    status[0] = -(boundary + 1)
+                    status[1] = 1 if stops[boundary] < starts[boundary] else 2
+            return np.int8(0)
+
+        self.small = small
         self.check, self.write = check, write
         self.items = max(1, length * max(size, 0))
 
     def __call__(self, arrays, stream):
-        first, status = cp.empty(1, dtype=cp.int64), cp.empty(2, dtype=cp.int64)
+        # Bound both repeated validation and total output work. Long outputs
+        # retain the measured element-parallel validation/write pipeline.
+        small = self.length <= 64 and self.items <= 256
+        status = cp.empty(2, dtype=cp.int64)
+        first = status[:1] if small else cp.empty(1, dtype=cp.int64)
         self.bind((*arrays, first, status))
         try:
-            self.find(first, stream)
-            self.transform("write", self.write, self.discard, self.items, stream)
+            if small:
+                self.transform("small", self.small, self.discard, self.items, stream)
+            else:
+                self.find(first, stream)
+                self.transform("write", self.write, self.discard, self.items, stream)
         finally:
             self.clear()
         return status
 
 
 class _Spread(_Prepared):
-    def __init__(self, dtypes, length):
-        super().__init__(length, OpKind.MAXIMUM, 0)
+    def __init__(self, dtypes, length, chunk_size=64, lanes=0, capacity=0):
+        super().__init__(length, OpKind.MAXIMUM, 0, chunk_size)
         self.states = tuple(_ArrayState(dtype) for dtype in (*dtypes, np.int64))
         output, advanced, offsets, unordered = self.states
 
         def check(chunk):
-            for row in range(chunk * 64, min(chunk * 64 + 64, length)):
+            for row in range(chunk * chunk_size, min((chunk + 1) * chunk_size, length)):
                 if offsets[row + 1] < offsets[row]:
                     return np.int64(1)
             return np.int64(0)
@@ -304,12 +334,36 @@ class _Spread(_Prepared):
                 row -= 1
             return np.int8(0)
 
+        def tiled(k):
+            if unordered[0] == 0:
+                row, lane = k // lanes, k % lanes
+                if row < length:
+                    start = np.int64(offsets[row])
+                    stop = np.int64(offsets[row + 1])
+                    if stop > start and lane < stop - start:
+                        j = start + lane
+                        while j < stop:
+                            output[j] = advanced[row]
+                            if stop - j <= lanes:
+                                break
+                            j += lanes
+            elif k < capacity:
+                row = length - 1
+                while row >= 0:
+                    if offsets[row] <= k and k < offsets[row + 1]:
+                        output[k] = advanced[row]
+                        break
+                    row -= 1
+            return np.int8(0)
+
+        self.tiled = tiled
+        self.lanes = lanes
         self.small = small
         self.check, self.write = check, write
 
     def __call__(self, arrays, stream):
         # Keep the measured parallel binary-search path for large outputs.
-        small = self.length <= 64 and arrays[0].size <= 1024
+        small = self.lanes == 0 and self.length <= 64 and arrays[0].size <= 1024
         unordered = arrays[0] if small else cp.empty(1, dtype=cp.int64)
         self.bind((*arrays, unordered))
         try:
@@ -319,23 +373,44 @@ class _Spread(_Prepared):
                 )
             else:
                 self.find(unordered, stream)
-                self.transform(
-                    "write", self.write, self.discard, arrays[0].size, stream
-                )
+                if self.lanes:
+                    self.transform(
+                        "tiled",
+                        self.tiled,
+                        self.discard,
+                        max(self.length * self.lanes, arrays[0].size),
+                        stream,
+                    )
+                else:
+                    self.transform(
+                        "write", self.write, self.discard, arrays[0].size, stream
+                    )
         finally:
             self.clear()
 
 
 @lru_cache(maxsize=32)
-def _setup(device, context, kind, dtypes, length, parameter):
+def _setup(
+    device,
+    context,
+    kind,
+    dtypes,
+    length,
+    parameter,
+    chunk_size=64,
+    spread_lanes=0,
+    capacity=0,
+):
     if kind == "advanced":
-        return _Advanced(dtypes, length, parameter)
+        return _Advanced(dtypes, length, parameter, chunk_size)
     if kind == "jagged":
-        return _Jagged(dtypes, length, parameter)
-    return _Spread(dtypes, length)
+        return _Jagged(dtypes, length, parameter, chunk_size)
+    return _Spread(dtypes, length, chunk_size, spread_lanes, capacity)
 
 
-def run(kind, arrays, length, parameter, stream):
+def run(kind, arrays, length, parameter, stream, *, chunk_size=64, spread_lanes=0):
+    if chunk_size < 1 or spread_lanes < 0:
+        raise ValueError("chunk size must be positive and lanes nonnegative")
     with _lock:
         setup = _setup(
             cp.cuda.runtime.getDevice(),
@@ -344,5 +419,8 @@ def run(kind, arrays, length, parameter, stream):
             tuple(array.dtype.str for array in arrays),
             length,
             parameter,
+            chunk_size,
+            spread_lanes,
+            arrays[0].size if spread_lanes else 0,
         )
         return setup(arrays, stream)

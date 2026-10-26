@@ -208,3 +208,65 @@ def test_prepared_advanced_first_error_and_rebinding(dtype, rows, bad_kind):
         contract.assert_error(actual, expected)
         np.testing.assert_array_equal(cp.asnumpy(gpu[0]), args[0])
         np.testing.assert_array_equal(cp.asnumpy(gpu[1]), args[1])
+
+
+@pytest.mark.parametrize("chunk_size", [1, 4, 16, 64])
+def test_validation_tuning_candidates_gpu(chunk_size):
+    from awkward._connect.cuda._listarray import _prepared_error, _Stream
+    from awkward._connect.cuda._listarray_prepared import run
+
+    rows = 129
+    starts = np.arange(rows, dtype=np.int64) * 8
+    stops = starts + 8
+    indices = np.asarray([0, -1, 8], dtype=np.int64)
+    previous = np.arange(rows, dtype=np.int64) % 2
+    previous[64] = 2
+    stops[-1] = starts[-1] - 1
+    output = np.full(rows + 3, 123, dtype=np.int64)
+    args = [
+        output.copy(),
+        output.copy(),
+        starts,
+        stops,
+        indices,
+        previous,
+        rows,
+        rows * 8,
+    ]
+    key = ("awkward_ListArray_getitem_next_array_advanced", *([np.int64] * 6))
+    expected = NumpyBackend.instance()[key](*args)
+    with cp.cuda.Stream(non_blocking=True):
+        gpu = tuple(cp.asarray(x) for x in args[:6])
+        gpu[0].fill(123)
+        gpu[1].fill(123)
+        status = run("advanced", gpu, rows, rows * 8, _Stream(), chunk_size=chunk_size)
+        actual = _prepared_error(
+            status,
+            rows,
+            ("stops[i] < starts[i]", "stops[i] > len(content)", "index out of range"),
+            key[0],
+        )
+        contract.assert_error(actual, expected)
+        for i in (0, 1):
+            np.testing.assert_array_equal(cp.asnumpy(gpu[i]), args[i])
+
+
+@pytest.mark.parametrize("offsets", [[0, 4096, 8192], [0, 8, 2, 10], list(range(66))])
+def test_tiled_spread_tuning_candidate_gpu(offsets):
+    from awkward._connect.cuda._listarray import _Stream
+    from awkward._connect.cuda._listarray_prepared import run
+
+    output = np.full(max(offsets) + 3, 123, dtype=np.int64)
+    args = [
+        output,
+        np.arange(len(offsets) - 1, dtype=np.int64) + 7,
+        np.asarray(offsets, dtype=np.int64),
+        len(offsets) - 1,
+    ]
+    key = ("awkward_ListArray_getitem_next_range_spreadadvanced", *([np.int64] * 3))
+    NumpyBackend.instance()[key](*args)
+    with cp.cuda.Stream(non_blocking=True):
+        gpu = tuple(cp.asarray(x) for x in args[:3])
+        gpu[0].fill(123)
+        run("spread", gpu, args[3], 0, _Stream(), spread_lanes=32)
+        np.testing.assert_array_equal(cp.asnumpy(gpu[0]), output)
