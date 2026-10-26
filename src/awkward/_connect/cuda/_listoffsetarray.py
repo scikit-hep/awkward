@@ -171,36 +171,53 @@ def rpad(toindex, fromoffsets, fromlength, target):
 def drop_none(tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes):
     if length_offsets == 0:
         return None
-    offsets = fromoffsets[:length_offsets]
-    parameters = cp.asarray([length_indexes], dtype=cp.int64)
-    status = cp.empty(1, dtype=cp.int64)
+    if hasattr(fromoffsets, "__cuda_array_interface__"):
+        from awkward._connect.cuda._prepared_gather import drop_status
 
-    def check(_):
-        return np.int64(offsets[-1] > parameters[0])
+        status = drop_status(
+            tooffsets,
+            noneindexes,
+            fromoffsets,
+            length_offsets,
+            length_indexes,
+            _Stream(),
+        )
+    else:
+        offsets = fromoffsets[:length_offsets]
+        counts = cp.empty(length_offsets, dtype=cp.int64)
 
-    _transform(check, 1, status)
-    counts = cp.zeros(length_offsets, dtype=cp.int64)
-
-    def count(i):
-        total = np.int64(0)
-        if status[0] == 0:
+        def count(i):
+            if offsets[length_offsets - 1] > length_indexes:
+                return np.int64(-1) if i == 0 else np.int64(0)
+            total = np.int64(0)
             j = np.int64(0) if i == 0 else np.int64(offsets[i - 1])
             while j < np.int64(offsets[i]):
                 if noneindexes[j] < 0:
                     total += 1
                 j += 1
-        return total
+            return total
 
-    _transform(count, length_offsets, counts)
-    positions = _prefix(counts)
+        _transform(count, length_offsets, counts)
+        positions = cp.empty(length_offsets, dtype=cp.int64)
+        inclusive_scan(
+            d_in=counts,
+            d_out=positions,
+            op=OpKind.PLUS,
+            init_value=np.asarray(0, dtype=np.int64),
+            num_items=length_offsets,
+            stream=_Stream(),
+        )
 
-    def write(i):
-        if status[0] == 0:
-            tooffsets[i] = np.int64(offsets[i]) - positions[i + 1]
-        return np.int8(0)
+        def write(i):
+            if positions[0] >= 0:
+                tooffsets[i] = np.int64(offsets[i]) - positions[i]
+            return np.int8(0)
 
-    _transform(write, length_offsets)
-    if status.get()[0]:
+        _transform(write, length_offsets)
+        status = counts[:1]
+    # Immediate canonical errors require reading one scalar; valid counts are
+    # nonnegative and -1 denotes the bounds failure without touching outputs.
+    if status.get()[0] < 0:
         return _Error(
             b"offsets[i] > len(content)",
             length_offsets - 1,

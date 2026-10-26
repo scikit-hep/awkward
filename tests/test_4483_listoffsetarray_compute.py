@@ -363,7 +363,9 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
 
             time.sleep(0.001)
             for i in range(kwargs["num_items"]):
-                kwargs["d_out"][i] = operation(i)
+                value = operation(i)
+                if not isinstance(kwargs["d_out"], _Discard):
+                    kwargs["d_out"][i] = value
 
         return launch
 
@@ -377,6 +379,18 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
             for item in kwargs["d_in"][: kwargs["num_items"]]:
                 value = kwargs["op"](value, item)
             kwargs["d_out"][0] = value
+            return 64
+
+        return launch
+
+    def prepare_scan(**kwargs):
+        builds.append(True)
+
+        def launch(*, temp_storage, **kwargs):
+            if temp_storage is None:
+                return 64
+            length = kwargs["num_items"]
+            kwargs["d_out"][:length] = np.cumsum(kwargs["d_in"][:length])
             return 64
 
         return launch
@@ -411,7 +425,9 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
         "make_unary_transform": prepare,
         "make_reduce_into": prepare_reduce,
         "make_segmented_reduce": prepare_segmented,
-        "OpKind": SimpleNamespace(MAXIMUM=2),
+        "make_inclusive_scan": prepare_scan,
+        "DiscardIterator": _Discard,
+        "OpKind": SimpleNamespace(MAXIMUM=2, PLUS=0),
         "lru_cache": lru_cache,
         "_lock": RLock(),
     }
@@ -557,3 +573,52 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
             gc.collect()
             assert all(reference() is None for reference in references)
     assert len(builds) - initial_builds == 6
+
+    seen_drop_setups = set()
+    for dtype in (np.int32, np.int64):
+        cases = [
+            ([0, 2, 2, 5], [-1, 0, -2, 2, -1], 5),
+            ([2, 4, 5], [-1, 0, -2, 2, -1], 5),
+            ([3, 1, 5], [-1, 0, -2, 2, -1], 5),
+            ([0, 6], [-1, 0, -2, 2, -1], 5),
+            ([0, 0, 0], [], 0),
+            ([1], [-2, -1], 2),
+            ([0, 4096, 8192], [-1, 0] * 4096, 8192),
+        ]
+        for values, entries, declared_length in cases * 2:
+            offsets = np.asarray(values, dtype=dtype).view(Buffer)
+            indexes = np.asarray(entries, dtype=dtype).view(Buffer)
+            output = np.full(len(values) + 3, 123, dtype=dtype).view(Buffer)
+            expected = output.copy()
+            error = NumpyBackend.instance()[
+                "awkward_ListOffsetArray_drop_none_indexes", dtype, dtype, dtype
+            ](expected, indexes, offsets, len(values), declared_length)
+            references = [weakref.ref(x) for x in (offsets, indexes, output)]
+            before = len(builds)
+            status = namespace["drop_status"](
+                output, indexes, offsets, len(values), declared_length, None
+            )
+            assert (int(status[0]) < 0) == bool(error.str)
+            np.testing.assert_array_equal(output, expected)
+            # Each variant compiles its count/scan/write only on first use.
+            key = (np.dtype(dtype).str, len(values), declared_length)
+            assert len(builds) - before == (0 if key in seen_drop_setups else 3)
+            seen_drop_setups.add(key)
+            del offsets, indexes, output, status
+            gc.collect()
+            assert all(reference() is None for reference in references)
+
+    before = len(builds)
+
+    def concurrent_drop(value):
+        offsets = np.asarray([0, 2, 3, 5], dtype=np.int64).view(Buffer)
+        indexes = np.full(5, value, dtype=np.int64).view(Buffer)
+        output = np.full(6, 123, dtype=np.int64).view(Buffer)
+        status = namespace["drop_status"](output, indexes, offsets, 4, 5, None)
+        assert int(status[0]) >= 0
+        expected = [0] * 4 if value < 0 else [0, 2, 3, 5]
+        np.testing.assert_array_equal(output, [*expected, 123, 123])
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(concurrent_drop, [-1, -2, 0, 7] * 3))
+    assert len(builds) == before

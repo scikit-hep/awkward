@@ -8,7 +8,9 @@ from threading import RLock
 import numpy as np
 from cuda.compute import (
     CountingIterator,
+    DiscardIterator,
     OpKind,
+    make_inclusive_scan,
     make_reduce_into,
     make_segmented_reduce,
     make_unary_transform,
@@ -304,3 +306,106 @@ class _ParallelRanges(_Gather):
         storage_bytes = self.reducer(temp_storage=None, **arguments)
         storage = cp.empty(storage_bytes, dtype=cp.uint8)
         self.reducer(temp_storage=storage, **arguments)
+
+
+class _DropCount(_Gather):
+    def __init__(self, dtype, length_offsets, length_indexes):
+        self.outer = offsets = _ArrayState(dtype)
+        self.inner = indexes = _ArrayState(dtype)
+
+        def count(i):
+            if offsets[length_offsets - 1] > length_indexes:
+                return np.int64(-1) if i == 0 else np.int64(0)
+            total = np.int64(0)
+            j = np.int64(0) if i == 0 else np.int64(offsets[i - 1])
+            while j < np.int64(offsets[i]):
+                if indexes[j] < 0:
+                    total += 1
+                j += 1
+            return total
+
+        self.operation = None
+        self.gather = count
+        self.iterator = CountingIterator(np.int64(0))
+        self.prepared = None
+
+
+class _DropWrite(_Gather):
+    def __init__(self, dtype):
+        self.outer = output = _ArrayState(dtype)
+        self.inner = offsets = _ArrayState(dtype)
+        self.prefix = prefix = _ArrayState(np.int64)
+
+        def write(i):
+            if prefix[0] >= 0:
+                # Assignment targets the device array substituted by CCCL.
+                # pylint: disable-next=unsupported-assignment-operation
+                output[i] = np.int64(offsets[i]) - prefix[i]
+            return np.int8(0)
+
+        self.operation = None
+        self.gather = write
+        self.iterator = CountingIterator(np.int64(0))
+        self.prepared = None
+        self.discard = DiscardIterator()
+
+    def __call__(self, output, offsets, prefix, length, stream):
+        self.outer.bind(output)
+        self.inner.bind(offsets)
+        self.prefix.bind(prefix)
+        try:
+            self._launch(self.discard, length, stream)
+        finally:
+            self.outer.clear()
+            self.inner.clear()
+            self.prefix.clear()
+
+
+class _Drop:
+    def __init__(self, dtype, length_offsets, length_indexes):
+        self.count = _DropCount(dtype, length_offsets, length_indexes)
+        self.write = _DropWrite(dtype)
+        self.scanner = None
+        self.operation = None
+        self.initial = np.asarray(0, dtype=np.int64)
+
+    def __call__(self, output, indexes, offsets, length, stream):
+        counts = cp.empty(length, dtype=cp.int64)
+        prefix = cp.empty(length, dtype=cp.int64)
+        self.count(counts, offsets, indexes, length, stream)
+        if self.scanner is None:
+            self.operation = make_op_adapter(OpKind.PLUS)
+            self.scanner = make_inclusive_scan(
+                d_in=counts, d_out=prefix, op=self.operation, init_value=self.initial
+            )
+        arguments = {
+            "d_in": counts,
+            "d_out": prefix,
+            "num_items": length,
+            "op": self.operation,
+            "init_value": self.initial,
+            "stream": stream,
+        }
+        storage_bytes = self.scanner(temp_storage=None, **arguments)
+        storage = cp.empty(storage_bytes, dtype=cp.uint8)
+        self.scanner(temp_storage=storage, **arguments)
+        self.write(output, offsets, prefix, length, stream)
+        # Reuse the first count as the error flag instead of allocating status.
+        return counts[:1]
+
+
+@lru_cache(maxsize=16)
+def _drop_setup(device, context, dtype, length_offsets, length_indexes):
+    return _Drop(dtype, length_offsets, length_indexes)
+
+
+def drop_status(output, indexes, offsets, length_offsets, length_indexes, stream):
+    with _lock:
+        setup = _drop_setup(
+            cp.cuda.runtime.getDevice(),
+            cp.cuda.driver.ctxGetCurrent(),
+            offsets.dtype.str,
+            length_offsets,
+            length_indexes,
+        )
+        return setup(output, indexes, offsets, length_offsets, stream)

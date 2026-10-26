@@ -180,3 +180,37 @@ def test_prepared_regular_validation_rebinds_buffers_and_streams(dtype):
         stream.synchronize()
         np.testing.assert_array_equal(cp.asnumpy(size), expected)
         np.testing.assert_array_equal(cp.asnumpy(status), [code])
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.int64])
+@pytest.mark.parametrize("width", [8, 4096])
+def test_prepared_drop_none_rebinds_buffers_and_streams(dtype, width):
+    from awkward._connect.cuda._listoffsetarray import _Stream
+    from awkward._connect.cuda._prepared_gather import drop_status
+
+    pending = []
+    for iteration, groups in enumerate((3, 3, 7)):
+        offsets = (2 + np.arange(groups + 1) * width).astype(dtype)
+        indexes = np.arange(int(offsets[-1]), dtype=dtype)
+        indexes[iteration::3] = -2
+        if iteration == 2:
+            offsets[-1] += 1
+        expected = np.full(groups + 4, 123, dtype=dtype)
+        error = NumpyBackend.instance()[
+            "awkward_ListOffsetArray_drop_none_indexes", dtype, dtype, dtype
+        ](expected, indexes, offsets, len(offsets), len(indexes))
+        stream = cp.cuda.Stream(non_blocking=True)
+        with stream:
+            source = cp.asarray(offsets)
+            noneindexes = cp.asarray(indexes)
+            output = cp.full(groups + 4, 123, dtype=dtype)
+            status = drop_status(
+                output, noneindexes, source, len(offsets), len(indexes), _Stream()
+            )
+        pending.append(
+            (stream, source, noneindexes, output, status, expected, bool(error.str))
+        )
+    for stream, _source, _indexes, output, status, expected, failed in pending:
+        stream.synchronize()
+        np.testing.assert_array_equal(cp.asnumpy(output), expected)
+        assert (int(cp.asnumpy(status)[0]) < 0) == failed
