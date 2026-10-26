@@ -6,7 +6,13 @@ from functools import lru_cache
 from threading import RLock
 
 import numpy as np
-from cuda.compute import CountingIterator, make_reduce_into, make_unary_transform
+from cuda.compute import (
+    CountingIterator,
+    OpKind,
+    make_reduce_into,
+    make_segmented_reduce,
+    make_unary_transform,
+)
 from cuda.compute.op import make_op_adapter
 
 from awkward._nplikes.cupy import Cupy
@@ -65,24 +71,27 @@ class _Gather:
         self.outer.bind(outer)
         self.inner.bind(inner)
         try:
-            if self.operation is None:
-                self.operation = make_op_adapter(self.gather)
-            if self.prepared is None:
-                self.prepared = make_unary_transform(
-                    d_in=self.iterator, d_out=output, op=self.operation
-                )
-            self.prepared(
-                d_in=self.iterator,
-                d_out=output,
-                op=self.operation,
-                num_items=length,
-                stream=stream,
-            )
+            self._launch(output, length, stream)
         finally:
             # Kernel arguments have been copied at launch. Retain no array
             # owners or active pointers in the Python operator's captured state.
             self.outer.clear()
             self.inner.clear()
+
+    def _launch(self, output, length, stream):
+        if self.operation is None:
+            self.operation = make_op_adapter(self.gather)
+        if self.prepared is None:
+            self.prepared = make_unary_transform(
+                d_in=self.iterator, d_out=output, op=self.operation
+            )
+        self.prepared(
+            d_in=self.iterator,
+            d_out=output,
+            op=self.operation,
+            num_items=length,
+            stream=stream,
+        )
 
 
 @lru_cache(maxsize=16)
@@ -126,11 +135,18 @@ class _Ranges(_Gather):
 
 
 @lru_cache(maxsize=16)
-def _ranges_setup(device, context, starts_dtype, source_dtype, stops_dtype, width):
+def _ranges_setup(
+    device, context, starts_dtype, source_dtype, stops_dtype, width, groups
+):
+    # Bound serial scanning to short groups. Long groups need parallel work
+    # even when their count is too small to fill the device with one thread each.
+    if width > 64:
+        return _ParallelRanges(starts_dtype, source_dtype, width, groups)
     return _Ranges(starts_dtype, source_dtype, width)
 
 
 def nonlocal_offsets(starts, stops, source, length, groups, stream):
+    width = length // groups
     with _lock:
         setup = _ranges_setup(
             cp.cuda.runtime.getDevice(),
@@ -138,7 +154,8 @@ def nonlocal_offsets(starts, stops, source, length, groups, stream):
             starts.dtype.str,
             source.dtype.str,
             stops.dtype.str,
-            length // groups,
+            width,
+            groups if width > 64 else 0,
         )
         setup(stops, starts, source, groups, stream)
 
@@ -216,3 +233,67 @@ def regular_status(size, offsets, length, stream):
             offsets.dtype.str,
         )
         return setup.validate(size, offsets, length, stream)
+
+
+class _ParallelRanges(_Gather):
+    def __init__(self, starts_dtype, source_dtype, width, groups):
+        self.outer = starts = _ArrayState(starts_dtype)
+        self.inner = source = _ArrayState(source_dtype)
+        self.boundaries = boundaries = _ArrayState(np.int64)
+
+        def positions(i):
+            if i < groups:
+                starts[i] = i * width
+            if i <= groups:
+                boundaries[i] = i * width
+            # Empty groups reduce to their own start, avoiding a clamp kernel.
+            return i + 1 if source[i] != -1 else (i // width) * width
+
+        self.operation = None
+        self.gather = positions
+        self.iterator = CountingIterator(np.int64(0))
+        self.prepared = None
+        self.reducer = None
+        self.reduce_operation = None
+        self.initial = np.asarray(0, dtype=np.int64)
+        self.width = width
+
+    def __call__(self, stops, starts, source, groups, stream):
+        length = groups * self.width
+        positions = cp.empty(length, dtype=cp.int64)
+        boundaries = cp.empty(groups + 1, dtype=cp.int64)
+        self.outer.bind(starts)
+        self.inner.bind(source)
+        self.boundaries.bind(boundaries)
+        try:
+            self._launch(positions, length, stream)
+        finally:
+            self.outer.clear()
+            self.inner.clear()
+            self.boundaries.clear()
+        first = boundaries[:-1]
+        last = boundaries[1:]
+        if self.reducer is None:
+            self.reduce_operation = make_op_adapter(OpKind.MAXIMUM)
+            self.reducer = make_segmented_reduce(
+                d_in=positions,
+                d_out=stops,
+                start_offsets_in=first,
+                end_offsets_in=last,
+                op=self.reduce_operation,
+                h_init=self.initial,
+            )
+        arguments = {
+            "d_in": positions,
+            "d_out": stops,
+            "num_segments": groups,
+            "start_offsets_in": first,
+            "end_offsets_in": last,
+            "op": self.reduce_operation,
+            "h_init": self.initial,
+            "max_segment_size": self.width,
+            "stream": stream,
+        }
+        storage_bytes = self.reducer(temp_storage=None, **arguments)
+        storage = cp.empty(storage_bytes, dtype=cp.uint8)
+        self.reducer(temp_storage=storage, **arguments)

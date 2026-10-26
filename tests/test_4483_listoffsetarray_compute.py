@@ -381,6 +381,20 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
 
         return launch
 
+    def prepare_segmented(**kwargs):
+        builds.append(True)
+
+        def launch(*, temp_storage, **kwargs):
+            if temp_storage is None:
+                return 64
+            for i in range(kwargs["num_segments"]):
+                start = kwargs["start_offsets_in"][i]
+                stop = kwargs["end_offsets_in"][i]
+                kwargs["d_out"][i] = max(kwargs["d_in"][start:stop])
+            return 64
+
+        return launch
+
     namespace = {
         "np": np,
         "cp": SimpleNamespace(
@@ -396,6 +410,8 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
         "make_op_adapter": lambda op: op,
         "make_unary_transform": prepare,
         "make_reduce_into": prepare_reduce,
+        "make_segmented_reduce": prepare_segmented,
+        "OpKind": SimpleNamespace(MAXIMUM=2),
         "lru_cache": lru_cache,
         "_lock": RLock(),
     }
@@ -465,7 +481,15 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
     )
     ranges = namespace["nonlocal_offsets"]
     initial_builds = len(builds)
-    for width, groups in ((1, 3), (8, 3), (4096, 5), (8, 5)):
+    for width, groups in (
+        (1, 3),
+        (8, 3),
+        (64, 3),
+        (65, 3),
+        (4096, 5),
+        (8, 5),
+        (4096, 5),
+    ):
         source = np.full(groups * width, -1, dtype=np.int64).view(Buffer)
         source[width] = -2
         source[3 * width - 1] = 7
@@ -483,13 +507,34 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
         np.testing.assert_array_equal(starts, expected_starts)
         np.testing.assert_array_equal(stops, expected_stops)
         range_setup = namespace["_ranges_setup"](
-            0, 1, starts.dtype.str, source.dtype.str, stops.dtype.str, width
+            0,
+            1,
+            starts.dtype.str,
+            source.dtype.str,
+            stops.dtype.str,
+            width,
+            groups if width > 64 else 0,
         )
         assert range_setup.outer.data_ptr() == range_setup.inner.data_ptr() == 0
+        if width > 64:
+            assert range_setup.boundaries.data_ptr() == 0
         del source, starts, stops
         gc.collect()
         assert all(reference() is None for reference in references)
-    assert len(builds) - initial_builds == 3
+    assert len(builds) - initial_builds == 7
+
+    def concurrent_ranges(value):
+        source = np.full(3 * 65, value, dtype=np.int64).view(Buffer)
+        starts = np.full(5, 123, dtype=np.int64).view(Buffer)
+        stops = starts.copy().view(Buffer)
+        ranges(starts, stops, source, source.size, 3, None)
+        np.testing.assert_array_equal(starts, [0, 65, 130, 123, 123])
+        expected = [0, 65, 130] if value == -1 else [65, 130, 195]
+        np.testing.assert_array_equal(stops, [*expected, 123, 123])
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(concurrent_ranges, [-1, -2, 0, 7] * 3))
+    assert len(builds) - initial_builds == 7
 
     initial_builds = len(builds)
     for dtype in (np.int32, np.uint32, np.int64):

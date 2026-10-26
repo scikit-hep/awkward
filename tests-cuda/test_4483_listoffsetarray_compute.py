@@ -121,7 +121,7 @@ def test_prepared_gather_rebinds_buffers_and_streams(dtype):
         np.testing.assert_array_equal(cp.asnumpy(storage), expected)
 
 
-@pytest.mark.parametrize("width", [1, 8, 4096])
+@pytest.mark.parametrize("width", [1, 8, 64, 65, 4096])
 def test_prepared_nonlocal_ranges_rebinds_buffers_and_streams(width):
     from awkward._connect.cuda._listoffsetarray import nonlocal_ranges
 
