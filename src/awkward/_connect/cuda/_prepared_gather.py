@@ -241,8 +241,9 @@ def _regular_setup(device, context, offsets_dtype, rows, chunk_size):
     return _Regular(offsets_dtype, rows, chunk_size)
 
 
-def regular_status(size, offsets, length, stream, *, chunk_size=1):
-    # Keep the existing granularity until a GPU sweep selects a chunk size.
+def regular_status(size, offsets, length, stream, *, chunk_size=64):
+    # The A100 sweep favors 64-row chunks: bounded serial work, fewer error
+    # values, and no reduction launch for inputs containing at most 64 rows.
     if chunk_size < 1:
         raise ValueError("chunk_size must be positive")
     with _lock:

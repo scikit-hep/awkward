@@ -572,7 +572,7 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
             del offsets, size, status
             gc.collect()
             assert all(reference() is None for reference in references)
-    assert len(builds) - initial_builds == 6
+    assert len(builds) - initial_builds == 9
 
     seen_drop_setups = set()
     for dtype in (np.int32, np.int64):
@@ -645,3 +645,23 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
                     code = -code
                 assert int(status[0]) == code
                 np.testing.assert_array_equal(size, expected)
+
+    allocations = []
+    allocate = namespace["cp"].empty
+
+    def track_allocate(length, *, dtype):
+        allocations.append((length, np.dtype(dtype)))
+        return allocate(length, dtype=dtype)
+
+    namespace["cp"].empty = track_allocate
+    for rows in (32, 4096):
+        allocations.clear()
+        offsets = (np.arange(rows + 1, dtype=np.int64) * 4).view(Buffer)
+        size = np.full(3, 123, dtype=np.int64).view(Buffer)
+        status = namespace["regular_status"](size, offsets, len(offsets), None)
+        assert int(status[0]) == 0
+        np.testing.assert_array_equal(size, [4, 123, 123])
+        int64_allocations = [
+            n for n, dtype in allocations if dtype == np.dtype(np.int64)
+        ]
+        assert int64_allocations == ([1] if rows == 32 else [1, 64])
