@@ -176,23 +176,28 @@ def _first_error(left, right):
 
 
 class _Regular(_Gather):
-    def __init__(self, offsets_dtype):
+    def __init__(self, offsets_dtype, rows, chunk_size):
         self.outer = size = _ArrayState(np.int64)
         self.inner = offsets = _ArrayState(offsets_dtype)
 
         def check(i):
             first = np.int64(offsets[1]) - np.int64(offsets[0])
-            count = np.int64(offsets[i + 1]) - np.int64(offsets[i])
-            if i == 0:
+            start = i * chunk_size
+            stop = start + 1 if chunk_size == 1 else min(start + chunk_size, rows)
+            if start == 0:
                 # Assignment targets the device array substituted by CCCL.
                 # pylint: disable-next=unsupported-assignment-operation
                 size[0] = -1 if first < 0 else first
-            if count < 0:
-                return -(i + 1)
-            if count != first:
-                return i + 1
+            for row in range(start, stop):
+                count = np.int64(offsets[row + 1]) - np.int64(offsets[row])
+                if count < 0:
+                    return -(row + 1)
+                if count != first:
+                    return row + 1
             return np.int64(0)
 
+        self.chunks = (rows + chunk_size - 1) // chunk_size
+        self.chunk_size = chunk_size
         self.operation = None
         self.gather = check
         self.iterator = CountingIterator(np.int64(0))
@@ -202,9 +207,13 @@ class _Regular(_Gather):
         self.initial = np.asarray(0, dtype=np.int64)
 
     def validate(self, size, offsets, length, stream):
-        errors = cp.empty(length - 1, dtype=cp.int64)
+        chunks = length - 1 if self.chunk_size == 1 else self.chunks
         status = cp.empty(1, dtype=cp.int64)
-        self(errors, size, offsets, length - 1, stream)
+        if chunks == 1:
+            self(status, size, offsets, 1, stream)
+            return status
+        errors = cp.empty(chunks, dtype=cp.int64)
+        self(errors, size, offsets, chunks, stream)
         if self.reducer is None:
             self.reduce_operation = make_op_adapter(_first_error)
             self.reducer = make_reduce_into(
@@ -216,7 +225,7 @@ class _Regular(_Gather):
         arguments = {
             "d_in": errors,
             "d_out": status,
-            "num_items": length - 1,
+            "num_items": chunks,
             "op": self.reduce_operation,
             "h_init": self.initial,
             "stream": stream,
@@ -228,16 +237,21 @@ class _Regular(_Gather):
 
 
 @lru_cache(maxsize=16)
-def _regular_setup(device, context, offsets_dtype):
-    return _Regular(offsets_dtype)
+def _regular_setup(device, context, offsets_dtype, rows, chunk_size):
+    return _Regular(offsets_dtype, rows, chunk_size)
 
 
-def regular_status(size, offsets, length, stream):
+def regular_status(size, offsets, length, stream, *, chunk_size=1):
+    # Keep the existing granularity until a GPU sweep selects a chunk size.
+    if chunk_size < 1:
+        raise ValueError("chunk_size must be positive")
     with _lock:
         setup = _regular_setup(
             cp.cuda.runtime.getDevice(),
             cp.cuda.driver.ctxGetCurrent(),
             offsets.dtype.str,
+            0 if chunk_size == 1 else length - 1,
+            chunk_size,
         )
         return setup.validate(size, offsets, length, stream)
 

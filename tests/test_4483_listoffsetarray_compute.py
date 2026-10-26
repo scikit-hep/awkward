@@ -622,3 +622,26 @@ def test_prepared_offset_transforms_reuse_setup_without_retaining_buffers():
     with ThreadPoolExecutor(max_workers=4) as executor:
         list(executor.map(concurrent_drop, [-1, -2, 0, 7] * 3))
     assert len(builds) == before
+
+    for chunk_size in (2, 4, 8, 16, 32, 64):
+        for rows in (1, chunk_size - 1, chunk_size, chunk_size + 1, 2 * chunk_size + 1):
+            for error_row in (None, 0, rows - 1, min(rows - 1, chunk_size)):
+                offsets = (np.arange(rows + 1, dtype=np.int64) * 4).view(Buffer)
+                if error_row is not None:
+                    # The first mismatch precedes a later decreasing interval.
+                    offsets[error_row + 1 :] += 1
+                    if error_row + 2 < rows:
+                        offsets[error_row + 3] = offsets[error_row + 2] - 1
+                size = np.full(3, 123, dtype=np.int64).view(Buffer)
+                expected = size.copy()
+                error = NumpyBackend.instance()[
+                    "awkward_ListOffsetArray_toRegularArray", np.int64, np.int64
+                ](expected, offsets, len(offsets))
+                status = namespace["regular_status"](
+                    size, offsets, len(offsets), None, chunk_size=chunk_size
+                )
+                code = 0 if not error.str else error.id + 1
+                if error.str and b"monotonically" in error.str:
+                    code = -code
+                assert int(status[0]) == code
+                np.testing.assert_array_equal(size, expected)

@@ -154,12 +154,23 @@ def test_prepared_nonlocal_ranges_rebinds_buffers_and_streams(width):
 
 
 @pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
-def test_prepared_regular_validation_rebinds_buffers_and_streams(dtype):
+@pytest.mark.parametrize("chunk_size", [1, 8, 32, 64])
+def test_prepared_regular_validation_rebinds_buffers_and_streams(dtype, chunk_size):
     from awkward._connect.cuda._listoffsetarray import _Stream
     from awkward._connect.cuda._prepared_gather import regular_status
 
     pending = []
-    for values in ([5, 7, 9], [0, 2, 5, 1], [5, 3, 4], [0, 2, 1, 9], [0] * 4097):
+    boundary = np.arange(2 * chunk_size + 4) * 4
+    boundary[chunk_size + 1 :] += 1
+    boundary[chunk_size + 3] = boundary[chunk_size + 2] - 1
+    for values in (
+        [5, 7, 9],
+        [0, 2, 5, 1],
+        [5, 3, 4],
+        [0, 2, 1, 9],
+        [0] * 4097,
+        boundary,
+    ):
         offsets = np.asarray(values, dtype=dtype)
         expected = np.full(3, 123, dtype=np.int64)
         error = NumpyBackend.instance()[
@@ -174,7 +185,9 @@ def test_prepared_regular_validation_rebinds_buffers_and_streams(dtype):
         with stream:
             source = cp.asarray(offsets)
             size = cp.full(3, 123, dtype=cp.int64)
-            status = regular_status(size, source, len(offsets), _Stream())
+            status = regular_status(
+                size, source, len(offsets), _Stream(), chunk_size=chunk_size
+            )
         pending.append((stream, source, size, status, expected, code))
     for stream, _source, size, status, expected, code in pending:
         stream.synchronize()
