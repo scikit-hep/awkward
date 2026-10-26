@@ -4165,6 +4165,22 @@ def awkward_IndexedArray_simplify(
 ):
     if outerlength == 0:
         return None
+    if hasattr(outerindex, "__cuda_array_interface__"):
+        from awkward._connect.cuda._indexedarray import simplify_status
+
+        row, attempt = (
+            simplify_status(toindex, outerindex, outerlength, innerindex, innerlength)
+            .get()
+            .tolist()
+        )
+        if row < outerlength:
+            return SimpleNamespace(
+                str=b"index out of range",
+                id=row,
+                attempt=attempt,
+                filename=b"cuda.compute (awkward_IndexedArray_simplify)",
+            )
+        return None
     outer = outerindex[:outerlength]
     inner = innerindex[:innerlength]
     parameters = cp.asarray([innerlength], dtype=cp.int64)

@@ -87,3 +87,37 @@ def test_first_error_across_blocks(length, error_at):
         actual = CupyBackend.instance()[key](*gpu_args)
         contract.assert_error(actual, expected)
         np.testing.assert_array_equal(cp.asnumpy(gpu_args[0]), args[0])
+
+
+@pytest.mark.parametrize("outer_dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("inner_dtype", [np.int32, np.uint32, np.int64])
+def test_prepared_rebinding_and_chunk_boundary(outer_dtype, inner_dtype):
+    from awkward._connect.cuda._indexedarray import simplify_status
+
+    pending = []
+    key = ("awkward_IndexedArray_simplify", np.int64, outer_dtype, inner_dtype)
+    for length in (32, 64, 65, 129):
+        for invalid in (False, True):
+            outer = (np.arange(length) % 3).astype(outer_dtype)
+            inner = np.asarray([2, 1, 0], dtype=inner_dtype)
+            if invalid:
+                outer[min(length - 1, 64)] = 3
+                outer[-1] = 99
+            expected = np.full(length + 3, 123, dtype=np.int64)
+            error = NumpyBackend.instance()[key](expected, outer, length, inner, 3)
+            stream = cp.cuda.Stream(non_blocking=True)
+            with stream:
+                gpu_outer, gpu_inner = cp.asarray(outer), cp.asarray(inner)
+                output = cp.full(length + 3, 123, dtype=cp.int64)
+                status = simplify_status(output, gpu_outer, length, gpu_inner, 3)
+            pending.append(
+                (stream, gpu_outer, gpu_inner, output, status, expected, error, length)
+            )
+    for stream, _outer, _inner, output, status, expected, error, length in pending:
+        stream.synchronize()
+        np.testing.assert_array_equal(cp.asnumpy(output), expected)
+        row, attempt = cp.asnumpy(status)
+        if error.str:
+            assert (row, attempt) == (error.id, error.attempt)
+        else:
+            assert row == length

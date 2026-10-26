@@ -333,3 +333,181 @@ def test_first_error_across_blocks(implementation, length, error_at):
     actual = implementation["awkward_IndexedArray_simplify"](*args)
     assert_error(actual, expected)
     np.testing.assert_array_equal(args[0], expected_args[0])
+
+
+@pytest.fixture(scope="module")
+def prepared_implementation():
+    import weakref
+    from functools import lru_cache
+    from threading import RLock
+
+    registry = weakref.WeakValueDictionary()
+    events = []
+
+    class Buffer(_DeviceArray):
+        @property
+        def __cuda_array_interface__(self):
+            registry[self.ctypes.data] = self
+            return {
+                "shape": self.shape,
+                "strides": None,
+                "typestr": self.dtype.str,
+                "data": (self.ctypes.data, False),
+                "version": 3,
+            }
+
+    def prepare(**kwargs):
+        events.append(("prepare",))
+        operation = kwargs["op"]
+
+        def launch(**kwargs):
+            import time
+
+            time.sleep(0.0001)
+            events.append(("transform", kwargs["num_items"]))
+            for i in range(kwargs["num_items"]):
+                value = operation(i)
+                if not isinstance(kwargs["d_out"], _Discard):
+                    kwargs["d_out"][i] = value
+
+        return launch
+
+    def prepare_reduce(**kwargs):
+        events.append(("prepare_reduce",))
+
+        def launch(*, temp_storage, **kwargs):
+            if temp_storage is None:
+                return 64
+            events.append(("reduce", kwargs["num_items"]))
+            kwargs["d_out"][0] = min(
+                [int(kwargs["h_init"]), *kwargs["d_in"][: kwargs["num_items"]]]
+            )
+            return 64
+
+        return launch
+
+    def empty(length, dtype):
+        events.append(("allocate", length, np.dtype(dtype).str))
+        return np.empty(length, dtype=dtype).view(Buffer)
+
+    namespace = {
+        "np": np,
+        "cp": SimpleNamespace(
+            empty=empty,
+            int64=np.int64,
+            uint8=np.uint8,
+            cuda=SimpleNamespace(
+                get_current_stream=lambda: SimpleNamespace(ptr=123),
+                runtime=SimpleNamespace(getDevice=lambda: 0),
+                driver=SimpleNamespace(ctxGetCurrent=lambda: 1),
+            ),
+        ),
+        "lru_cache": lru_cache,
+        "_lock": RLock(),
+        "CountingIterator": _Counting,
+        "DiscardIterator": _Discard,
+        "OpKind": SimpleNamespace(MINIMUM=1),
+        "make_op_adapter": lambda op: op,
+        "make_unary_transform": prepare,
+        "make_reduce_into": prepare_reduce,
+    }
+    path = ROOT / "src/awkward/_connect/cuda/_indexedarray.py"
+    tree = ast.parse(path.read_text())
+    body = [
+        node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.ClassDef))
+    ]
+    exec(compile(ast.Module(body=body, type_ignores=[]), str(path), "exec"), namespace)
+    state = namespace["_ArrayState"]
+    state.__getitem__ = lambda self, i: registry[self.data_ptr()][i]
+    state.__setitem__ = lambda self, i, value: registry[self.data_ptr()].__setitem__(
+        i, value
+    )
+    return namespace, Buffer, events
+
+
+@pytest.mark.parametrize("name,specialization,case", CASES)
+def test_prepared_cpu_parity(name, specialization, case, prepared_implementation):
+    namespace, buffer, _ = prepared_implementation
+    args, outputs, key = arguments(specialization, case)
+    expected_args = copy.deepcopy(args)
+    expected = NumpyBackend.instance()[(name, *key)](*expected_args)
+    device = [x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    if args[2] == 0:
+        return
+    row, attempt = namespace["simplify_status"](*device).get().tolist()
+    assert (row < args[2]) == bool(expected.str)
+    if expected.str:
+        assert (row, attempt) == (expected.id, expected.attempt)
+    for i in outputs:
+        np.testing.assert_array_equal(device[i], expected_args[i])
+
+
+@pytest.mark.parametrize("length", [1, 32, 64, 65, 129, 4097])
+@pytest.mark.parametrize("error_row", [None, 0, 63, 64, 128])
+def test_prepared_partial_output_and_scratch(
+    length, error_row, prepared_implementation
+):
+    namespace, buffer, events = prepared_implementation
+    outer = (np.arange(length, dtype=np.int64) % 3).view(buffer)
+    inner = np.asarray([-7, 10, 20], dtype=np.int64).view(buffer)
+    if error_row is not None and error_row < length:
+        outer[error_row] = 3
+        outer[-1] = 99
+    output = np.full(length + 3, 123, dtype=np.int64).view(buffer)
+    expected = output.copy()
+    error = NumpyBackend.instance()[
+        "awkward_IndexedArray_simplify", np.int64, np.int64, np.int64
+    ](expected, outer, length, inner, len(inner))
+    events.clear()
+    row, attempt = namespace["simplify_status"](
+        output, outer, length, inner, len(inner)
+    ).get()
+    np.testing.assert_array_equal(output, expected)
+    if error.str:
+        assert (row, attempt) == (error.id, error.attempt)
+    else:
+        assert row == length
+    transforms = [event for event in events if event[0] == "transform"]
+    if length <= 64:
+        assert transforms == [("transform", 1)]
+        assert not any(event[0] == "reduce" for event in events)
+    else:
+        chunks = (length + 63) // 64
+        assert transforms == [("transform", chunks), ("transform", length)]
+        assert ("allocate", chunks, np.dtype(np.int64).str) in events
+
+
+def test_prepared_reuse_lifetimes_and_concurrent_calls(prepared_implementation):
+    import gc
+    import weakref
+    from concurrent.futures import ThreadPoolExecutor
+
+    namespace, buffer, events = prepared_implementation
+
+    def run(value):
+        outer = (np.arange(129, dtype=np.int64) % 3).view(buffer)
+        inner = np.asarray([value, -7, 20], dtype=np.int64).view(buffer)
+        output = np.full(132, 123, dtype=np.int64).view(buffer)
+        if value % 2:
+            outer[64] = 3
+            outer[100] = 99
+        expected = output.copy()
+        error = NumpyBackend.instance()[
+            "awkward_IndexedArray_simplify", np.int64, np.int64, np.int64
+        ](expected, outer, 129, inner, 3)
+        references = [weakref.ref(x) for x in (outer, inner, output)]
+        row, attempt = namespace["simplify_status"](output, outer, 129, inner, 3).get()
+        np.testing.assert_array_equal(output, expected)
+        if error.str:
+            assert (row, attempt) == (error.id, error.attempt)
+        else:
+            assert row == 129
+        return references
+
+    run(0)
+    events.clear()
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        references = list(executor.map(run, range(12)))
+    gc.collect()
+    assert all(reference() is None for group in references for reference in group)
+    assert not any(event[0].startswith("prepare") for event in events)
