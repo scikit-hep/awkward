@@ -606,3 +606,44 @@ def test_prepared_reuse_lifetimes_and_concurrent_stream_state(
     gc.collect()
     assert all(reference() is None for group in references for reference in group)
     assert not any(event[0].startswith("prepare") for event in events)
+
+
+def test_small_prepared_paths_use_one_launch(prepared_implementation, implementation):
+    namespace, buffer, events = prepared_implementation
+    output = np.full(19, 123, dtype=np.int64)
+    cases = {
+        "awkward_ListArray_getitem_next_array_advanced": [
+            output.copy(),
+            output.copy(),
+            np.asarray([0, 4, 8], dtype=np.int64),
+            np.asarray([4, 8, 12], dtype=np.int64),
+            np.asarray([0, -1], dtype=np.int64),
+            np.asarray([0, 1, 0], dtype=np.int64),
+            3,
+            12,
+        ],
+        "awkward_ListArray_getitem_next_range_spreadadvanced": [
+            output.copy(),
+            np.asarray([7, 8, 9], dtype=np.int64),
+            np.asarray([0, 8, 2, 12], dtype=np.int64),
+            3,
+        ],
+    }
+    for name, args in cases.items():
+        expected = copy.deepcopy(args)
+        key = tuple(x.dtype.type for x in args if isinstance(x, np.ndarray))
+        error = NumpyBackend.instance()[(name, *key)](*expected)
+        device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+        events.clear()
+        actual = run_prepared(namespace, implementation, name, device)
+        assert_error(actual, error)
+        transforms = [event for event in events if event[0] == "transform"]
+        expected_items = 1 if "array_advanced" in name else output.size
+        assert transforms == [("transform", expected_items)]
+        allocations = [event for event in events if event[0] == "allocate"]
+        assert allocations == (
+            []
+            if "spreadadvanced" in name
+            else [("allocate", 2, np.dtype(np.int64).str)]
+        )
+        np.testing.assert_array_equal(device[0], expected[0])

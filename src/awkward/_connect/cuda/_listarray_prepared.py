@@ -165,14 +165,44 @@ class _Advanced(_Prepared):
                         status[1] = indices[previous[boundary]]
             return np.int8(0)
 
+        def small(_):
+            status[0] = length
+            status[1] = np.int64(9223372036854775807)
+            for row in range(length):
+                start = np.int64(starts[row])
+                stop = np.int64(stops[row])
+                if stop < start:
+                    status[0] = -(row + 1)
+                    status[1] = 1
+                    break
+                if start != stop and stop > lencontent:
+                    status[0] = -(row + 1)
+                    status[1] = 2
+                    break
+                index = indices[previous[row]]
+                size = stop - start
+                regular = index + size if index < 0 else index
+                if regular < 0 or regular >= size:
+                    status[0] = row
+                    status[1] = index
+                    break
+                carry[row] = start + regular
+                advanced[row] = row
+            return np.int8(0)
+
+        self.small = small
         self.check, self.write = check, write
 
     def __call__(self, arrays, stream):
-        first, status = cp.empty(1, dtype=cp.int64), cp.empty(2, dtype=cp.int64)
+        status = cp.empty(2, dtype=cp.int64)
+        first = status[:1] if self.length <= 64 else cp.empty(1, dtype=cp.int64)
         self.bind((*arrays, first, status))
         try:
-            self.find(first, stream)
-            self.transform("write", self.write, self.discard, self.length, stream)
+            if self.length <= 64:
+                self.transform("small", self.small, self.discard, 1, stream)
+            else:
+                self.find(first, stream)
+                self.transform("write", self.write, self.discard, self.length, stream)
         finally:
             self.clear()
         return status
@@ -263,14 +293,35 @@ class _Spread(_Prepared):
                     row -= 1
             return np.int8(0)
 
+        def small(j):
+            # Bounded reverse lookup fuses ownership resolution with writing.
+            # It is deterministic for overlapping intervals as well as repeats.
+            row = length - 1
+            while row >= 0:
+                if offsets[row] <= j and j < offsets[row + 1]:
+                    output[j] = advanced[row]
+                    break
+                row -= 1
+            return np.int8(0)
+
+        self.small = small
         self.check, self.write = check, write
 
     def __call__(self, arrays, stream):
-        unordered = cp.empty(1, dtype=cp.int64)
+        # Keep the measured parallel binary-search path for large outputs.
+        small = self.length <= 64 and arrays[0].size <= 1024
+        unordered = arrays[0] if small else cp.empty(1, dtype=cp.int64)
         self.bind((*arrays, unordered))
         try:
-            self.find(unordered, stream)
-            self.transform("write", self.write, self.discard, arrays[0].size, stream)
+            if small:
+                self.transform(
+                    "small", self.small, self.discard, arrays[0].size, stream
+                )
+            else:
+                self.find(unordered, stream)
+                self.transform(
+                    "write", self.write, self.discard, arrays[0].size, stream
+                )
         finally:
             self.clear()
 
