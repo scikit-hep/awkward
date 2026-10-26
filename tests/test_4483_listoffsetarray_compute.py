@@ -326,3 +326,114 @@ def test_padding_length_scan_uses_current_stream(dtype, rows):
     namespace[node.name](output, offsets, rows, 4, length)
     assert output.tolist() == [4 * i for i in range(rows + 1)] + [99, 99]
     assert length.tolist() == [4 * rows, 99, 99]
+
+
+def test_prepared_gather_reuses_setup_without_retaining_buffers():
+    import gc
+    import weakref
+    from functools import lru_cache
+    from threading import RLock
+
+    registry = weakref.WeakValueDictionary()
+    builds = []
+
+    class Buffer(np.ndarray):
+        @property
+        def __cuda_array_interface__(self):
+            pointer = self.ctypes.data
+            registry[pointer] = self
+            return {
+                "shape": self.shape,
+                "strides": None,
+                "typestr": self.dtype.str,
+                "data": (pointer, False),
+                "version": 3,
+            }
+
+    def prepare(**kwargs):
+        builds.append(True)
+        operation = kwargs["op"]
+
+        def launch(**kwargs):
+            import time
+
+            time.sleep(0.001)
+            for i in range(kwargs["num_items"]):
+                kwargs["d_out"][i] = operation(i)
+
+        return launch
+
+    namespace = {
+        "np": np,
+        "cp": SimpleNamespace(
+            cuda=SimpleNamespace(
+                runtime=SimpleNamespace(getDevice=lambda: 0),
+                driver=SimpleNamespace(ctxGetCurrent=lambda: 1),
+            )
+        ),
+        "CountingIterator": _Counting,
+        "make_op_adapter": lambda op: op,
+        "make_unary_transform": prepare,
+        "lru_cache": lru_cache,
+        "_lock": RLock(),
+    }
+    path = ROOT / "src/awkward/_connect/cuda/_prepared_gather.py"
+    tree = ast.parse(path.read_text())
+    exec(
+        compile(
+            ast.Module(
+                body=[
+                    node
+                    for node in tree.body
+                    if isinstance(node, (ast.FunctionDef, ast.ClassDef))
+                ],
+                type_ignores=[],
+            ),
+            str(path),
+            "exec",
+        ),
+        namespace,
+    )
+    state = namespace["_ArrayState"]
+    state.__getitem__ = lambda self, i: registry[self.data_ptr()][i]
+    gather = namespace["gather_offsets"]
+    for length in (3, 2, 4):
+        outer = np.arange(length, dtype=np.int32).view(Buffer)
+        inner = (np.arange(length, dtype=np.int64) + 10 * length).view(Buffer)
+        output = np.full(length + 2, -1, dtype=np.int64).view(Buffer)
+        references = [weakref.ref(x) for x in (outer, inner, output)]
+        gather(output, outer, inner, length, None)
+        np.testing.assert_array_equal(output[:length], inner)
+        np.testing.assert_array_equal(output[length:], [-1, -1])
+        setup = namespace["_setup"](
+            0, 1, outer.dtype.str, inner.dtype.str, output.dtype.str
+        )
+        assert setup.outer.data_ptr() == setup.inner.data_ptr() == 0
+        del outer, inner, output
+        gc.collect()
+        assert all(reference() is None for reference in references)
+    assert len(builds) == 1
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    def concurrent_launch(value):
+        outer = np.arange(3, dtype=np.int32).view(Buffer)
+        inner = np.full(3, value, dtype=np.int64).view(Buffer)
+        output = np.zeros(3, dtype=np.int64).view(Buffer)
+        gather(output, outer, inner, 3, None)
+        np.testing.assert_array_equal(output, [value] * 3)
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        list(executor.map(concurrent_launch, range(12)))
+    assert len(builds) == 1
+
+    def fail(**kwargs):
+        raise RuntimeError("launch failed")
+
+    setup.prepared = fail
+    outer = np.arange(2, dtype=np.int32).view(Buffer)
+    inner = np.arange(2, dtype=np.int64).view(Buffer)
+    output = np.zeros(2, dtype=np.int64).view(Buffer)
+    with pytest.raises(RuntimeError, match="launch failed"):
+        gather(output, outer, inner, 2, None)
+    assert setup.outer.data_ptr() == setup.inner.data_ptr() == 0

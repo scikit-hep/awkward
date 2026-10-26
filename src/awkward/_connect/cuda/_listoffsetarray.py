@@ -64,6 +64,14 @@ def _prefix(counts):
 
 
 def flatten_offsets(tooffsets, outeroffsets, outeroffsetslen, inneroffsets):
+    if hasattr(outeroffsets, "__cuda_array_interface__"):
+        from awkward._connect.cuda._prepared_gather import gather_offsets
+
+        gather_offsets(
+            tooffsets, outeroffsets, inneroffsets, outeroffsetslen, _Stream()
+        )
+        return
+
     outer = outeroffsets[:outeroffsetslen]
 
     def gather(i):

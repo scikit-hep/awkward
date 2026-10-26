@@ -97,3 +97,25 @@ def test_padding_offset_widths(dtype, offsets, target):
         result = ak.pad_none(ak.to_backend(source, "cuda"), target)
         assert result.to_list() == expected.to_list()
         assert result.layout.offsets.dtype == np.dtype(np.int64)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_prepared_gather_rebinds_buffers_and_streams(dtype):
+    from awkward._connect.cuda._listoffsetarray import flatten_offsets
+
+    pending = []
+    # Submit all launches before synchronizing, with different shapes, origins,
+    # pointers and streams. Prepared state must be copied into each launch.
+    for length in (3, 7, 2, 9):
+        stream = cp.cuda.Stream(non_blocking=True)
+        with stream:
+            outer = cp.arange(1, length + 1, dtype=dtype)
+            inner = cp.arange(length + 2, dtype=cp.int64) + length * 10
+            storage = cp.full(length + 4, -1, dtype=cp.int64)
+            flatten_offsets(storage[1:], outer, length, inner)
+        pending.append((stream, outer, inner, storage, length))
+    for stream, _outer, _inner, storage, length in pending:
+        stream.synchronize()
+        expected = np.full(length + 4, -1, dtype=np.int64)
+        expected[1 : length + 1] = np.arange(1, length + 1) + length * 10
+        np.testing.assert_array_equal(cp.asnumpy(storage), expected)
