@@ -1,6 +1,6 @@
 name: C++23 evaluation
 
-# Experimental C++23 branch: validate kernels and headers across compiler families.
+# Evaluation only: production targets and release wheels continue to require C++17.
 on:
   workflow_dispatch:
   pull_request:
