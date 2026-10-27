@@ -16,7 +16,7 @@ using StringBuilder = awkward::LayoutBuilder::String<PRIMITIVE>;
 
 void
 test_Indexed_categorical() {
-  IndexedBuilder<uint32_t, StringBuilder<double>> builder;
+  IndexedBuilder<uint32_t, StringBuilder<int64_t>> builder;
   assert(builder.length() == 0);
   builder.set_parameters("\"__array__\": \"categorical\"");
 
@@ -36,7 +36,7 @@ test_Indexed_categorical() {
 
 void
 test_Indexed_categorical_invalid_index() {
-  IndexedBuilder<uint32_t, StringBuilder<double>> builder;
+  IndexedBuilder<uint32_t, StringBuilder<int64_t>> builder;
   assert(builder.length() == 0);
   builder.set_parameters("\"__array__\": \"categorical\"");
 
@@ -59,7 +59,7 @@ test_Indexed_categorical_invalid_index() {
 
 void
 test_IndexedOption_categorical() {
-  IndexedOptionBuilder<int32_t, StringBuilder<double>> builder;
+  IndexedOptionBuilder<int32_t, StringBuilder<int64_t>> builder;
   assert(builder.length() == 0);
   builder.set_parameters("\"__array__\": \"categorical\"");
 
@@ -83,7 +83,7 @@ test_IndexedOption_categorical() {
 
 void
 test_IndexedOption_categorical_invalid_index() {
-  IndexedOptionBuilder<int32_t, StringBuilder<double>> builder;
+  IndexedOptionBuilder<int32_t, StringBuilder<int64_t>> builder;
   assert(builder.length() == 0);
   builder.set_parameters("\"__array__\": \"categorical\"");
 
@@ -108,7 +108,7 @@ test_IndexedOption_categorical_invalid_index() {
 
 void
 test_Indexed_empty() {
-  IndexedBuilder<uint32_t, StringBuilder<double>> builder;
+  IndexedBuilder<uint32_t, StringBuilder<int64_t>> builder;
   assert(builder.length() == 0);
 
   // empty indexed builder should be valid
@@ -118,7 +118,7 @@ test_Indexed_empty() {
 
 void
 test_IndexedOption_empty() {
-  IndexedOptionBuilder<uint32_t, StringBuilder<double>> builder;
+  IndexedOptionBuilder<int32_t, StringBuilder<int64_t>> builder;
   assert(builder.length() == 0);
 
   // empty indexed builder should be valid
