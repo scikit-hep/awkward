@@ -3879,8 +3879,17 @@ def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
     null_iter = TransformIterator(fromindex[:lenindex], is_null)
 
     h_init = np.array([0], dtype=index_dtype)
+    # The caller immediately reads this scalar on the current CuPy stream.
+    # A nonblocking stream does not wait for CCCL's default stream.
+    current_stream = cp.cuda.get_current_stream()
+    stream = SimpleNamespace(__cuda_stream__=lambda: (0, current_stream.ptr))
     reduce_into(
-        d_in=null_iter, d_out=numnull, op=OpKind.PLUS, num_items=lenindex, h_init=h_init
+        d_in=null_iter,
+        d_out=numnull,
+        op=OpKind.PLUS,
+        num_items=lenindex,
+        h_init=h_init,
+        stream=stream,
     )
 
 
