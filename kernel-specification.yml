@@ -2324,7 +2324,10 @@ kernels:
           - {name: distincts, type: "Const[List[int64_t]]", dir: in, role: reducer-distincts}
           - {name: lendistincts, type: "int64_t", dir: in, role: reducer-lendistincts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: >
+      For each fixed-width group in distincts, return its start and one past its
+      last nonmissing slot. Missing (-1) slots may occur inside a group; empty
+      groups have stop equal to start. Empty input produces zero starts/stops.
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
           outstarts, outstops, distincts, lendistincts, outlength

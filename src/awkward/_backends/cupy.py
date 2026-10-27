@@ -73,6 +73,7 @@ class CupyBackend(Backend):
             "awkward_ListArray_rpad_axis1",
             "awkward_ListArray_getitem_next_range_spreadadvanced",
             "awkward_ListArray_getitem_next_range",
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
             # core reducers
             "awkward_reduce_sum",
             "awkward_reduce_sumofsquares",
@@ -207,6 +208,7 @@ class CupyBackend(Backend):
             "awkward_ListArray_rpad_axis1": cuda_compute.awkward_ListArray_rpad_axis1,
             "awkward_ListArray_getitem_next_range_spreadadvanced": cuda_compute.awkward_ListArray_getitem_next_range_spreadadvanced,
             "awkward_ListArray_getitem_next_range": cuda_compute.awkward_ListArray_getitem_next_range,
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64,
             "awkward_sort": cuda_compute.segmented_sort,
             "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,

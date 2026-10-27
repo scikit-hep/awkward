@@ -30,6 +30,7 @@ CUDA_COMPUTE_KERNELS = {
     "awkward_ListArray_getitem_next_array_advanced",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_apply",
+    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListArray_compact_offsets",
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_RegularArray_getitem_next_at",

@@ -4480,3 +4480,22 @@ def awkward_ListArray_getitem_jagged_shrink(
         length,
         missing,
     )
+def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
+    outstarts, outstops, distincts, lendistincts, outlength
+):
+    if outlength == 0:
+        return
+    if lendistincts == 0:
+        outstarts[:outlength] = 0
+        outstops[:outlength] = 0
+        return
+
+    maxcount = lendistincts // outlength
+    starts = cp.arange(outlength, dtype=cp.int64) * maxcount
+    # Stops extend to the last present slot, not the number of present slots:
+    # holes within a group must retain their coordinates, as in the reference.
+    columns = cp.arange(1, maxcount + 1, dtype=cp.int64)
+    present = distincts[:lendistincts].reshape(outlength, maxcount) != -1
+    last = cp.max(cp.where(present, columns, 0), axis=1)
+    outstarts[:outlength] = starts
+    outstops[:outlength] = starts + last
