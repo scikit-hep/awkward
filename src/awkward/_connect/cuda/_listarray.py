@@ -395,6 +395,26 @@ def jagged_expand(
     )
 
 
+def _apply_error(status):
+    tag, attempt = status.get().tolist()
+    if tag < 0:
+        return None
+    row, code = divmod(tag, 5)
+    messages = (
+        "jagged slice's stops[i] < starts[i]",
+        "jagged slice's offsets extend beyond its content",
+        "stops[i] < starts[i]",
+        "stops[i] > len(content)",
+        "index out of range",
+    )
+    return _Error(
+        messages[code].encode(),
+        row,
+        attempt,
+        b"cuda.compute (awkward_ListArray_getitem_jagged_apply)",
+    )
+
+
 def jagged_apply(
     tooffsets,
     tocarry,
@@ -410,6 +430,25 @@ def jagged_apply(
     if sliceouterlen == 0:
         tooffsets[0] = 0
         return None
+    if hasattr(fromstarts, "__cuda_array_interface__"):
+        from awkward._connect.cuda._listarray_slicing import run
+
+        status = run(
+            "apply",
+            (
+                tooffsets,
+                tocarry,
+                slicestarts,
+                slicestops,
+                sliceindex,
+                fromstarts,
+                fromstops,
+            ),
+            sliceouterlen,
+            (sliceinnerlen, contentlen),
+            _Stream(),
+        )
+        return _apply_error(status)
     starts = fromstarts[:sliceouterlen]
     stops = fromstops[:sliceouterlen]
     ss = slicestarts[:sliceouterlen]
@@ -567,6 +606,17 @@ def spreadadvanced(toadvanced, fromadvanced, fromoffsets, lenstarts):
 
 
 def next_range(tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step):
+    if lenstarts and hasattr(fromstarts, "__cuda_array_interface__"):
+        from awkward._connect.cuda._listarray_slicing import run
+
+        run(
+            "range",
+            (tooffsets, tocarry, fromstarts, fromstops),
+            lenstarts,
+            (start, stop, step),
+            _Stream(),
+        )
+        return
     tooffsets[0] = 0
     if lenstarts == 0:
         return

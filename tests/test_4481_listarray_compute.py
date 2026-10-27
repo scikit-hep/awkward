@@ -740,3 +740,299 @@ def test_jagged_fusion_is_bounded(
     assert len(transforms) == (1 if fused else 2)
     for i in (0, 1, 3):
         np.testing.assert_array_equal(device[i], expected[i])
+
+
+@pytest.fixture(scope="module")
+def slicing_implementation(prepared_implementation):
+    base, buffer, events = prepared_implementation
+    namespace = dict(base)
+
+    def prepare_scan(**kwargs):
+        events.append(("prepare_scan",))
+
+        def launch(*, temp_storage, **kwargs):
+            if temp_storage is None:
+                return 64
+            events.append(("scan", kwargs["num_items"]))
+            kwargs["d_out"][: kwargs["num_items"]] = np.cumsum(
+                kwargs["d_in"][: kwargs["num_items"]]
+            )
+            return 64
+
+        return launch
+
+    namespace["OpKind"] = SimpleNamespace(MINIMUM=1, MAXIMUM=2, PLUS=0)
+    namespace["make_inclusive_scan"] = prepare_scan
+    path = ROOT / "src/awkward/_connect/cuda/_listarray_slicing.py"
+    tree = ast.parse(path.read_text())
+    body = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
+    exec(compile(ast.Module(body=body, type_ignores=[]), str(path), "exec"), namespace)
+    return namespace, buffer, events
+
+
+def run_slicing(namespace, implementation, name, args):
+    if name == "awkward_ListArray_getitem_jagged_apply":
+        arrays = tuple(args[i] for i in (0, 1, 2, 3, 5, 7, 8))
+        if not args[4]:
+            args[0][0] = 0
+            return None
+        status = namespace["run"](
+            "apply", arrays, args[4], (args[6], args[9]), implementation["_Stream"]()
+        )
+        return implementation["_apply_error"](status)
+    if not args[4]:
+        args[0][0] = 0
+        return None
+    return namespace["run"](
+        "range", tuple(args[:4]), args[4], tuple(args[5:]), implementation["_Stream"]()
+    )
+
+
+SLICING_NAMES = {
+    "awkward_ListArray_getitem_jagged_apply",
+    "awkward_ListArray_getitem_next_range",
+}
+
+
+@pytest.mark.parametrize(
+    "name,specialization,case", [c for c in CASES if c.values[0] in SLICING_NAMES]
+)
+def test_prepared_slicing_contract(
+    name, specialization, case, slicing_implementation, implementation
+):
+    namespace, buffer, _ = slicing_implementation
+    args, outputs, key = arguments(specialization, case)
+    expected_args = copy.deepcopy(args)
+    expected = NumpyBackend.instance()[(name, *key)](*expected_args)
+    device = [x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    buffer.reads = 0
+    actual = run_slicing(namespace, implementation, name, device)
+    assert_error(actual, expected)
+    for index in outputs:
+        np.testing.assert_array_equal(device[index], expected_args[index])
+    assert buffer.reads == (1 if name.endswith("jagged_apply") and args[4] else 0)
+
+
+def slicing_apply_arguments(
+    rows, width, error_at=None, position=1, failure="index", dtype=np.int64
+):
+    starts = (np.arange(rows) * width).astype(dtype)
+    stops = (starts + width).astype(dtype)
+    ss = np.arange(rows, dtype=np.int64) * 3
+    se = ss + 3
+    indices = np.tile(np.array([0, -1, 1], dtype=np.int64), rows)
+    if error_at is not None:
+        if failure == "index":
+            indices[ss[error_at] + position] = width
+        elif failure == "slice_stop":
+            se[error_at] = len(indices) + 1
+        elif failure == "slice_reverse":
+            se[error_at] = ss[error_at] - 1
+        elif failure == "reverse":
+            stops[error_at] = starts[error_at] - 1
+        elif failure == "content":
+            stops[error_at] = rows * width + 1
+    # A later, different error must never win the first-error reduction.
+    if error_at is not None and error_at + 1 < rows:
+        se[-1] = len(indices) + 2
+    return [
+        np.full(rows + 4, 123, dtype=np.int64),
+        np.full(rows * 3 + 4, 123, dtype=np.int64),
+        ss,
+        se,
+        rows,
+        indices,
+        len(indices),
+        starts,
+        stops,
+        rows * width,
+    ]
+
+
+@pytest.mark.parametrize("rows", [1, 63, 64, 65, 129, 4097])
+@pytest.mark.parametrize(
+    "failure", [None, "index", "slice_stop", "slice_reverse", "reverse", "content"]
+)
+def test_prepared_apply_first_error_and_partial_writes(
+    rows, failure, slicing_implementation, implementation
+):
+    namespace, buffer, _ = slicing_implementation
+    args = slicing_apply_arguments(
+        rows, 4, min(64, rows - 1) if failure else None, failure=failure
+    )
+    expected_args = copy.deepcopy(args)
+    key = ("awkward_ListArray_getitem_jagged_apply", *([np.int64] * 7))
+    expected = NumpyBackend.instance()[key](*expected_args)
+    device = [x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = run_slicing(namespace, implementation, key[0], device)
+    assert_error(actual, expected)
+    for index in (0, 1):
+        np.testing.assert_array_equal(device[index], expected_args[index])
+
+
+@pytest.mark.parametrize("ss,se,inner", [([0], [0], 0), ([2], [1], 0), ([0], [2], 1)])
+def test_apply_does_not_read_skipped_buffers(
+    ss, se, inner, slicing_implementation, implementation
+):
+    namespace, buffer, _ = slicing_implementation
+    # The reference never dereferences source bounds for empty or invalid slices.
+    args = [
+        np.full(3, 123, dtype=np.int64),
+        np.full(4, 123, dtype=np.int64),
+        np.array(ss, dtype=np.int64),
+        np.array(se, dtype=np.int64),
+        1,
+        np.empty(0, dtype=np.int64),
+        inner,
+        np.empty(0, dtype=np.int64),
+        np.empty(0, dtype=np.int64),
+        0,
+    ]
+    expected_args = copy.deepcopy(args)
+    key = ("awkward_ListArray_getitem_jagged_apply", *([np.int64] * 7))
+    expected = NumpyBackend.instance()[key](*expected_args)
+    device = [x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = run_slicing(namespace, implementation, key[0], device)
+    assert_error(actual, expected)
+    for index in (0, 1):
+        np.testing.assert_array_equal(device[index], expected_args[index])
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize(
+    "start,stop,step",
+    [
+        (ak._util.kSliceNone, ak._util.kSliceNone, 1),
+        (ak._util.kSliceNone, ak._util.kSliceNone, -1),
+        (-4, 7, 2),
+        (7, -8, -2),
+        (99, 2, 1),
+        (-99, 99, 3),
+        (ak._util.kSliceNone, ak._util.kSliceNone, -9223372036854775808),
+    ],
+)
+def test_prepared_ranges_parallel_output_and_empty_lists(
+    dtype, start, stop, step, slicing_implementation, implementation
+):
+    namespace, buffer, events = slicing_implementation
+    starts = np.asarray([2, 11, 5, 4, 2], dtype=dtype)
+    stops = np.asarray([10, 11, 4101, 3, 8], dtype=dtype)
+    args = [
+        np.full(9, 123, dtype=dtype),
+        np.full(4200, 123, dtype=np.int64),
+        starts,
+        stops,
+        5,
+        start,
+        stop,
+        step,
+    ]
+    expected_args = copy.deepcopy(args)
+    key = ("awkward_ListArray_getitem_next_range", dtype, np.int64, dtype, dtype)
+    expected = NumpyBackend.instance()[key](*expected_args)
+    device = [x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    before = len(events)
+    buffer.reads = 0
+    actual = run_slicing(namespace, implementation, key[0], device)
+    assert_error(actual, expected)
+    assert buffer.reads == 0
+    for index in (0, 1):
+        np.testing.assert_array_equal(device[index], expected_args[index])
+    assert any(e[0] == "transform" and e[1] >= len(args[1]) for e in events[before:])
+
+
+def test_slicing_setup_reuse_owners_and_concurrent_streams(
+    slicing_implementation, implementation
+):
+    import gc
+    import weakref
+    from concurrent.futures import ThreadPoolExecutor
+
+    namespace, buffer, events = slicing_implementation
+
+    def task(pair):
+        kind, seed = pair
+        if kind == "apply":
+            name = "awkward_ListArray_getitem_jagged_apply"
+            args = slicing_apply_arguments(129, 4, 64 if seed % 2 else None)
+            args[7] += seed
+            args[8] += seed
+            args[9] = 4096
+        else:
+            name = "awkward_ListArray_getitem_next_range"
+            starts = np.arange(129, dtype=np.int64) * 4 + seed
+            args = [
+                np.full(133, 123, dtype=np.int64),
+                np.full(520, 123, dtype=np.int64),
+                starts,
+                starts + 4,
+                129,
+                ak._util.kSliceNone,
+                ak._util.kSliceNone,
+                -1,
+            ]
+        expected_args = copy.deepcopy(args)
+        key = (name, *(x.dtype.type for x in args if isinstance(x, np.ndarray)))
+        expected = NumpyBackend.instance()[key](*expected_args)
+        device = [
+            x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args
+        ]
+        refs = [weakref.ref(x) for x in device if isinstance(x, np.ndarray)]
+        actual = run_slicing(namespace, implementation, name, device)
+        assert_error(actual, expected)
+        for i in (0, 1):
+            np.testing.assert_array_equal(device[i], expected_args[i])
+        return refs
+
+    for kind in ("apply", "range"):
+        task((kind, 0))
+    events.clear()
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        groups = list(
+            executor.map(
+                task, [(kind, seed) for seed in range(4) for kind in ("apply", "range")]
+            )
+        )
+    gc.collect()
+    assert all(ref() is None for group in groups for ref in group)
+    assert not any(e[0].startswith("prepare") for e in events)
+
+
+@pytest.mark.parametrize("position", [0, 1, 2])
+@pytest.mark.parametrize("bad", [-9223372036854775808, -5, 4, 9223372036854775807])
+def test_apply_preserves_signed_attempts(
+    position, bad, slicing_implementation, implementation
+):
+    namespace, buffer, _ = slicing_implementation
+    args = slicing_apply_arguments(65, 4)
+    args[5][64 * 3 + position] = bad
+    expected_args = copy.deepcopy(args)
+    key = ("awkward_ListArray_getitem_jagged_apply", *([np.int64] * 7))
+    expected = NumpyBackend.instance()[key](*expected_args)
+    device = [x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = run_slicing(namespace, implementation, key[0], device)
+    assert_error(actual, expected)
+    for i in (0, 1):
+        np.testing.assert_array_equal(device[i], expected_args[i])
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_prepared_range_zero_capacity(dtype, slicing_implementation, implementation):
+    namespace, buffer, _ = slicing_implementation
+    args = [
+        np.full(7, 123, dtype=dtype),
+        np.empty(0, dtype=np.int64),
+        np.array([0, 3, 4], dtype=dtype),
+        np.array([0, 3, 4], dtype=dtype),
+        3,
+        ak._util.kSliceNone,
+        ak._util.kSliceNone,
+        -1,
+    ]
+    expected_args = copy.deepcopy(args)
+    key = ("awkward_ListArray_getitem_next_range", dtype, np.int64, dtype, dtype)
+    expected = NumpyBackend.instance()[key](*expected_args)
+    device = [x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = run_slicing(namespace, implementation, key[0], device)
+    assert_error(actual, expected)
+    np.testing.assert_array_equal(device[0], expected_args[0])

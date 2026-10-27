@@ -270,3 +270,70 @@ def test_tiled_spread_tuning_candidate_gpu(offsets):
         gpu[0].fill(123)
         run("spread", gpu, args[3], 0, _Stream(), spread_lanes=32)
         np.testing.assert_array_equal(cp.asnumpy(gpu[0]), output)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("rows", [1, 64, 65, 129])
+@pytest.mark.parametrize(
+    "failure", [None, "index", "slice_stop", "slice_reverse", "reverse", "content"]
+)
+def test_prepared_apply_chunk_boundaries_gpu(dtype, rows, failure):
+    # Two launches with different contents exercise descriptor rebinding.
+    with cp.cuda.Stream(non_blocking=True) as stream:
+        for seed in range(2):
+            error_at = min(64, rows - 1) if failure else None
+            # Avoid unsigned underflow in source-bound failure fixtures.
+            args = contract.slicing_apply_arguments(rows, 4, error_at, failure=failure)
+            args[7] += 4 + seed
+            args[8] += 4 + seed
+            args[7] = args[7].astype(dtype)
+            args[8] = args[8].astype(dtype)
+            args[9] = rows * 4 + 16
+            if failure == "content":
+                args[8][error_at] = args[9] + 1
+            key = (
+                "awkward_ListArray_getitem_jagged_apply",
+                *(x.dtype.type for x in args if isinstance(x, np.ndarray)),
+            )
+            gpu = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+            expected = NumpyBackend.instance()[key](*args)
+            actual = CupyBackend.instance()[key](*gpu)
+            contract.assert_error(actual, expected)
+            for i in (0, 1):
+                np.testing.assert_array_equal(cp.asnumpy(gpu[i]), args[i])
+            ak._connect.cuda.synchronize_cuda(stream)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("rows,width", [(32, 0), (32, 8), (4096, 8), (32, 4096)])
+@pytest.mark.parametrize(
+    "start,stop,step",
+    [
+        (ak._util.kSliceNone, ak._util.kSliceNone, 1),
+        (ak._util.kSliceNone, ak._util.kSliceNone, -1),
+        (-7, 99, 3),
+        (99, -99, -2),
+    ],
+)
+def test_prepared_range_parallel_gpu(dtype, rows, width, start, stop, step):
+    with cp.cuda.Stream(non_blocking=True) as stream:
+        starts = (np.arange(rows) * width + 3).astype(dtype)
+        stops = starts + width
+        args = [
+            np.full(rows + 4, 123, dtype=dtype),
+            np.full(rows * width + 8, 123, dtype=np.int64),
+            starts,
+            stops,
+            rows,
+            start,
+            stop,
+            step,
+        ]
+        key = ("awkward_ListArray_getitem_next_range", dtype, np.int64, dtype, dtype)
+        gpu = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+        expected = NumpyBackend.instance()[key](*args)
+        actual = CupyBackend.instance()[key](*gpu)
+        contract.assert_error(actual, expected)
+        for i in (0, 1):
+            np.testing.assert_array_equal(cp.asnumpy(gpu[i]), args[i])
+        ak._connect.cuda.synchronize_cuda(stream)
