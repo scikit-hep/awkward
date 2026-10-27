@@ -20,6 +20,8 @@ from awkward._backends.numpy import NumpyBackend
 
 yaml = pytest.importorskip("yaml")
 ROOT = Path(__file__).resolve().parents[1]
+# Match the installed package covered by --cov=awkward in CI.
+CUDA_SOURCE = Path(ak.__file__).resolve().parent / "_connect/cuda"
 FUNCTIONS = {"awkward_IndexedArray_simplify": "awkward_IndexedArray_simplify"}
 
 DTYPES = {"int32_t": np.int32, "uint32_t": np.uint32, "int64_t": np.int64}
@@ -198,7 +200,7 @@ def host_implementation():
         assert kwargs["stream"].__cuda_stream__() == (0, 123)
         d_out[0] = min([int(h_init), *(int(d_in[i]) for i in range(num_items))])
 
-    tree = ast.parse((ROOT / "src/awkward/_connect/cuda/_compute.py").read_text())
+    tree = ast.parse((CUDA_SOURCE / "_compute.py").read_text())
     body = [
         node
         for node in tree.body
@@ -206,7 +208,7 @@ def host_implementation():
         and node.name == "awkward_IndexedArray_simplify"
     ]
     namespace = {
-        "__name__": __name__,
+        "__name__": "awkward._connect.cuda._compute",
         "np": np,
         "cp": cp,
         "SimpleNamespace": SimpleNamespace,
@@ -219,7 +221,7 @@ def host_implementation():
     exec(
         compile(
             ast.Module(body=body, type_ignores=[]),
-            str(ROOT / "src/awkward/_connect/cuda/_compute.py"),
+            str(CUDA_SOURCE / "_compute.py"),
             "exec",
         ),
         namespace,
@@ -411,7 +413,8 @@ def prepared_implementation():
         "make_unary_transform": prepare,
         "make_reduce_into": prepare_reduce,
     }
-    path = ROOT / "src/awkward/_connect/cuda/_indexedarray.py"
+    namespace["__name__"] = "awkward._connect.cuda._indexedarray"
+    path = CUDA_SOURCE / "_indexedarray.py"
     tree = ast.parse(path.read_text())
     body = [
         node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.ClassDef))
@@ -511,3 +514,38 @@ def test_prepared_reuse_lifetimes_and_concurrent_calls(prepared_implementation):
     gc.collect()
     assert all(reference() is None for group in references for reference in group)
     assert not any(event[0].startswith("prepare") for event in events)
+
+
+@pytest.mark.parametrize("name,specialization,case", CASES)
+def test_prepared_production_dispatch(
+    name, specialization, case, prepared_implementation, implementation, monkeypatch
+):
+    import sys
+    from types import ModuleType
+
+    namespace, buffer, _ = prepared_implementation
+    module = ModuleType("awkward._connect.cuda._indexedarray")
+    module.simplify_status = namespace["simplify_status"]
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    args, outputs, key = arguments(specialization, case)
+    expected = copy.deepcopy(args)
+    error = NumpyBackend.instance()[(name, *key)](*expected)
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = implementation[name](*device)
+    assert_error(actual, error)
+    for i in outputs:
+        np.testing.assert_array_equal(device[i], expected[i])
+
+
+def test_prepared_descriptor_lengths(prepared_implementation):
+    namespace, buffer, _ = prepared_implementation
+    assert namespace["_Stream"]().__cuda_stream__() == (0, 123)
+    state = namespace["_ArrayState"](np.int64)
+    assert len(state) == 0
+    array = np.arange(7, dtype=np.int64).view(buffer)
+    state.bind(array)
+    assert len(state) == 7
+    assert state.data_ptr() == array.ctypes.data
+    state.clear()
+    assert len(state) == 0
+    assert state.data_ptr() == 0
