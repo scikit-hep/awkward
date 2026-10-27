@@ -349,16 +349,9 @@ def _read_parquet_file(
 
     arrow_table = ak._connect.pyarrow.convert_native_arrow_table_to_awkward(arrow_table)
 
-    array_attrs = {}
-    if arrow_table.schema.metadata:
-        if b"PANDAS_ATTRS" in arrow_table.schema.metadata:
-            array_metadata = arrow_table.schema.metadata[b"PANDAS_ATTRS"]
-            array_attrs = json.loads(array_metadata)
-        elif b"AWKWARD_ATTRS" in arrow_table.schema.metadata:
-            array_metadata = arrow_table.schema.metadata[b"AWKWARD_ATTRS"]
-            array_attrs = json.loads(array_metadata)
-    else:
-        array_attrs = {}
+    array_attrs = ak._connect.pyarrow.attrs_from_schema_metadata(
+        arrow_table.schema.metadata
+    )
 
     result = ak.operations.ak_from_arrow._impl(
         arrow_table,
