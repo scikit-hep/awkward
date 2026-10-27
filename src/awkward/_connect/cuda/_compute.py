@@ -4480,6 +4480,8 @@ def awkward_ListArray_getitem_jagged_shrink(
         length,
         missing,
     )
+
+
 def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
     outstarts, outstops, distincts, lendistincts, outlength
 ):
