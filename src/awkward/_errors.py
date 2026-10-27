@@ -38,6 +38,33 @@ class ErrorContext:
             context._frozen = True
         return context
 
+    @classmethod
+    def cuda_primary(cls):
+        """Capture bounded, host-only diagnostic metadata without retaining buffers."""
+        context = cls.primary()
+        if context is None:
+            return None
+        snapshot = context.__dict__.get("_cuda_snapshot")
+        if snapshot is None:
+            if isinstance(context, OperationErrorContext):
+                snapshot = OperationErrorContext(context.name, (), {})
+                snapshot.args = [_cuda_argument(value) for value in context._raw_args]
+                snapshot.kwargs = {
+                    key: _cuda_argument(value)
+                    for key, value in context._raw_kwargs.items()
+                    if isinstance(key, str)
+                }
+            elif isinstance(context, SlicingErrorContext):
+                snapshot = SlicingErrorContext(None, None)
+                snapshot.array = _cuda_argument(context._raw_array)
+                snapshot.where = _cuda_argument(context._raw_where)
+            else:
+                # Unknown context subclasses may retain arbitrary arguments.
+                # Preserve the context name without calling custom formatters.
+                snapshot = OperationErrorContext(type(context).__name__, (), {})
+            context._cuda_snapshot = snapshot
+        return snapshot
+
     def freeze(self) -> None:
         """Format the note now and drop the references to the raw arguments."""
 
@@ -325,3 +352,31 @@ def with_operation_context(func: Callable[P, T]) -> Callable[P, T]:
             return func(*args, **kwargs)
 
     return wrapper
+
+
+def _cuda_argument(value, *, depth=0):
+    """Never inspect array values: formatting a CUDA array can synchronize."""
+    from awkward import contents, highlevel, index, record
+
+    if isinstance(value, (highlevel.Array, highlevel.Record)):
+        return f"<{type(value).__name__} type='{value.type}'>"
+    if isinstance(value, contents.Content):
+        return f"<{type(value).__name__} length={len(value)}>"
+    if isinstance(value, record.Record):
+        return "<Record>"
+    if isinstance(value, index.Index):
+        return f"<{type(value).__name__} length={len(value)} dtype={value.dtype}>"
+    if isinstance(value, slice):
+        return SlicingErrorContext.format_slice(value)
+    if value is None or type(value) in (bool, int, float, str, bytes):
+        if isinstance(value, (str, bytes)):
+            value = value[:72]
+        return repr(value)
+    if type(value) in (tuple, list) and depth < 3:
+        parts = [_cuda_argument(x, depth=depth + 1) for x in value[:8]]
+        if len(value) > 8:
+            parts.append("...")
+        if isinstance(value, tuple):
+            return "(" + ", ".join(parts) + ("," if len(value) == 1 else "") + ")"
+        return "[" + ", ".join(parts) + "]"
+    return f"<{type(value).__name__}>"
