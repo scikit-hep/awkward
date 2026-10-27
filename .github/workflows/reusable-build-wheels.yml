@@ -102,7 +102,7 @@ jobs:
     - name: Setup uv
       uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
 
-    - uses: pypa/cibuildwheel@b3395e271a35f73dad77f21802abe9b986dfe299 # v4.3.1
+    - uses: pypa/cibuildwheel@b9e566a2b284570af229f6c2a33673410d0389a3  # v4.3.4
       env:
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
@@ -138,7 +138,7 @@ jobs:
     - name: Generate kernel tests for the wheel test suite
       run: pipx run nox -s prepare -- --tests
 
-    - uses: pypa/cibuildwheel@b3395e271a35f73dad77f21802abe9b986dfe299 # v4.3.1
+    - uses: pypa/cibuildwheel@b9e566a2b284570af229f6c2a33673410d0389a3  # v4.3.4
       env:
         CIBW_PLATFORM: pyodide
       with:
