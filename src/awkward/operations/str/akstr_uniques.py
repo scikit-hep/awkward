@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 from awkward._dispatch import high_level_function
+from awkward._experimental import experimental
 
 __all__ = ("uniques",)
 
 
 @high_level_function(module="ak.str")
+@experimental
 def uniques(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:

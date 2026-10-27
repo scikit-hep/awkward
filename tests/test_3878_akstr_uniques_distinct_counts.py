@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 
@@ -254,3 +257,25 @@ def test_no_strings_unchanged(func):
 
     assert func(array).layout.form == array.layout.form
     assert func(array).tolist() == [[0, 1], [2, 3]]
+
+
+@pytest.mark.parametrize("name", ["uniques", "distinct_counts"])
+def test_experimental_warning(name):
+    # the warning is issued once per process so check it in a fresh one
+    code = rf"""
+import re
+import warnings
+
+import awkward as ak
+
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always")
+    ak.str.{name}(["a", "b", "a"])
+
+assert any(
+    issubclass(w.category, ak.errors.ExperimentalWarning)
+    and re.match(r"{name} is experimental\.", str(w.message))
+    for w in caught
+)
+"""
+    subprocess.run([sys.executable, "-c", code], check=True)

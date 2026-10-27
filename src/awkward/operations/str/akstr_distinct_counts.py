@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 from awkward._dispatch import high_level_function
+from awkward._experimental import experimental
 
 __all__ = ("distinct_counts",)
 
 
 @high_level_function(module="ak.str")
+@experimental
 def distinct_counts(array, *, highlevel=True, behavior=None, attrs=None):
     """
     Args:
