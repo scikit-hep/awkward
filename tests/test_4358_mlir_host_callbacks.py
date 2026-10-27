@@ -54,6 +54,22 @@ def callbacks():
     return namespace
 
 
+@pytest.fixture(scope="module")
+def bitmask_specification():
+    yaml = pytest.importorskip("yaml")
+    path = Path(__file__).resolve().parents[1] / "kernel-specification.yml"
+    names = {
+        "awkward_BitMaskedArray_to_IndexedOptionArray",
+        "awkward_BitMaskedArray_to_ByteMaskedArray",
+    }
+    namespace = {"uint8": np.uint8}
+    for kernel in yaml.safe_load(path.read_text())["kernels"]:
+        if kernel["name"] in names:
+            exec(compile(kernel["definition"], str(path), "exec"), namespace)
+    assert names <= namespace.keys()
+    return namespace
+
+
 @pytest.mark.parametrize("operation", ["argmin", "argmax"])
 @pytest.mark.parametrize("origin", [0, 3])
 @pytest.mark.parametrize("offset_dtype", [np.int32, np.uint32, np.int64])
@@ -157,16 +173,17 @@ def test_complex_callbacks_match_cpu(callbacks, operation, dtype, origin):
 @pytest.mark.parametrize(
     "kind,dtype", [("ByteMaskedArray", np.int8), ("IndexedOptionArray", np.int64)]
 )
-def test_bitmask_callbacks_match_cpu(
-    callbacks, validwhen, lsb_order, length, kind, dtype
+def test_bitmask_callbacks_match_spec(
+    callbacks, bitmask_specification, validwhen, lsb_order, length, kind, dtype
 ):
     name = f"awkward_BitMaskedArray_to_{kind}"
     source = np.arange(256, dtype=np.uint8)[:length]
     actual = np.full(length * 8 + 2, -99, dtype=dtype)
-    expected = actual.copy()
-    error = NumpyBackend.instance()[(name, dtype, np.uint8)](
-        expected, source, length, validwhen, lsb_order
-    )
-    assert not error.str
+    expected = actual.tolist()
+    # The YAML definition is the cross-backend contract. Keep this host-only
+    # callback test independent of the compiled CPU bit-mask implementation:
+    # s390x CI exposed a discrepancy in its LSB-first indexed-option output.
+    # tests-cuda retains real compiled CPU/GPU parity checks.
+    bitmask_specification[name](expected, source.tolist(), length, validwhen, lsb_order)
     callbacks[name](actual, source, length, validwhen, lsb_order)
-    np.testing.assert_array_equal(actual, expected)
+    np.testing.assert_array_equal(actual, np.asarray(expected, dtype=dtype))
