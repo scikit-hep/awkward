@@ -14,6 +14,7 @@ from awkward.operations.str.akstr_center import *
 # https://arrow.apache.org/docs/python/api/compute.html#containment-tests
 from awkward.operations.str.akstr_count_substring import *
 from awkward.operations.str.akstr_count_substring_regex import *
+from awkward.operations.str.akstr_distinct_counts import *
 from awkward.operations.str.akstr_ends_with import *
 
 # string component extraction
@@ -80,6 +81,7 @@ from awkward.operations.str.akstr_title import *
 from awkward.operations.str.akstr_to_categorical import *
 from awkward.operations.str.akstr_trim import *
 from awkward.operations.str.akstr_trim_whitespace import *
+from awkward.operations.str.akstr_uniques import *
 from awkward.operations.str.akstr_upper import *
 
 __all__ = [k for k in locals() if not k.startswith("akstr_")]
@@ -296,3 +298,134 @@ def _get_split_action(
                 )
 
     return action
+
+
+def _is_string(layout):
+    return layout.is_list and layout.parameter("__array__") in {"string", "bytestring"}
+
+
+def _is_maybe_optional_string(layout):
+    if _is_string(layout):
+        return True
+    elif layout.is_option or layout.is_indexed:
+        return _is_maybe_optional_string(layout.content)
+    else:
+        return False
+
+
+def _string_parameters(layout):
+    while not _is_string(layout):
+        layout = layout.content
+    return layout._parameters
+
+
+def _without_categorical(layout):
+    # plain strings avoid arrow dictionaries and give the same form on every backend
+    if _is_string(layout):
+        return layout
+    elif layout.parameter("__array__") == "categorical":
+        return layout.copy(parameters=None)
+    else:
+        return layout.copy(content=_without_categorical(layout.content))
+
+
+def _distinct_per_list(list_array, with_counts, function_name):
+    from awkward._connect.pyarrow import import_pyarrow, import_pyarrow_compute
+    from awkward._nplikes.numpy import Numpy
+
+    pa = import_pyarrow(function_name)
+    pc = import_pyarrow_compute(function_name)
+    numpy = Numpy.instance()
+
+    # missing lists never get here so every list is valid
+    assert list_array.null_count == 0
+
+    table = pa.table(
+        {
+            "parent": pc.list_parent_indices(list_array),
+            "values": pc.list_flatten(list_array),
+        }
+    )
+    # without threads the groups come out in order of first appearance
+    groups = (
+        table.drop_null()
+        .group_by(["parent", "values"], use_threads=False)
+        .aggregate([([], "count_all")])
+    )
+
+    # groups are sorted by parent so each list starts at its first group
+    offsets = numpy.searchsorted(
+        groups["parent"].to_numpy(), numpy.arange(len(list_array) + 1)
+    )
+    values = groups["values"].combine_chunks()
+    if with_counts:
+        values = pa.StructArray.from_arrays(
+            [values, groups["count_all"].combine_chunks()],
+            names=["values", "counts"],
+        )
+
+    return pa.LargeListArray.from_arrays(pa.array(offsets, type=pa.int64()), values)
+
+
+def _distinct_strings(array, with_counts, function_name, highlevel, behavior, attrs):
+    from awkward._connect.pyarrow import import_pyarrow_compute
+    from awkward._do import recursively_apply
+    from awkward._layout import HighLevelContext
+    from awkward._nplikes.numpy_like import NumpyMetadata
+    from awkward.contents import ListOffsetArray
+    from awkward.index import Index64
+
+    np = NumpyMetadata.instance()
+    pc = import_pyarrow_compute(function_name)
+
+    def with_string_parameters(out, parameters):
+        # arrow drops any custom parameters on the strings
+        if with_counts:
+            values = out.content("values").copy(parameters=parameters)
+            return out.copy(contents=[values, out.content("counts")])
+        else:
+            return out.copy(parameters=parameters)
+
+    def action(layout, **kwargs):
+        if layout.is_list and _is_maybe_optional_string(layout.content):
+            out = _apply_through_arrow(
+                _distinct_per_list,
+                layout.copy(content=_without_categorical(layout.content)),
+                with_counts,
+                function_name,
+            )
+
+            offsets = out.offsets
+            if not layout.backend.nplike.known_data:
+                # the typetracer forgets the length but it matches the input
+                offsets = Index64(
+                    layout.backend.nplike.empty(layout.length + 1, dtype=np.int64)
+                )
+
+            return ListOffsetArray(
+                offsets,
+                with_string_parameters(out.content, _string_parameters(layout.content)),
+                parameters=layout._parameters,
+            )
+
+        elif _is_string(layout):
+            raise TypeError(
+                "strings inside a record or union are not supported because "
+                "the result would have a different length"
+            )
+
+    with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
+        layout = ctx.unwrap(array, allow_record=False)
+
+    if _is_maybe_optional_string(layout):
+        # a flat array of strings is one big list
+        kernel = pc.value_counts if with_counts else pc.unique
+        out = _apply_through_arrow(
+            lambda strings: kernel(pc.drop_null(strings)),
+            _without_categorical(layout),
+        )
+        out = with_string_parameters(out, _string_parameters(layout))
+    else:
+        out = recursively_apply(layout, action, numpy_to_regular=False)
+
+    return ctx.wrap(out, highlevel=highlevel)
