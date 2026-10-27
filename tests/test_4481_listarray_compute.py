@@ -21,6 +21,9 @@ from awkward._backends.numpy import NumpyBackend
 
 yaml = pytest.importorskip("yaml")
 ROOT = Path(__file__).resolve().parents[1]
+# Execute the installed implementation so coverage attributes host callbacks to
+# the same package files as the normal test run (CI uses a wheel install).
+CUDA_SOURCE = Path(ak.__file__).resolve().parent / "_connect/cuda"
 FUNCTIONS = {
     "awkward_ListArray_validity": "validity",
     "awkward_ListArray_getitem_next_at": "next_at",
@@ -152,12 +155,12 @@ def host_implementation():
         ]
         d_out[0] = sum(values) if kwargs["op"] == 0 else min(values)
 
-    tree = ast.parse((ROOT / "src/awkward/_connect/cuda/_listarray.py").read_text())
+    tree = ast.parse((CUDA_SOURCE / "_listarray.py").read_text())
     body = [
         node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.ClassDef))
     ]
     namespace = {
-        "__name__": __name__,
+        "__name__": "awkward._connect.cuda._listarray",
         "np": np,
         "cp": cp,
         "dataclass": dataclass,
@@ -174,12 +177,12 @@ def host_implementation():
     exec(
         compile(
             ast.Module(body=body, type_ignores=[]),
-            str(ROOT / "src/awkward/_connect/cuda/_listarray.py"),
+            str(CUDA_SOURCE / "_listarray.py"),
             "exec",
         ),
         namespace,
     )
-    source = ROOT / "src/awkward/_connect/cuda/_compute.py"
+    source = CUDA_SOURCE / "_compute.py"
     tree = ast.parse(source.read_text())
     body = [
         node
@@ -397,7 +400,8 @@ def prepared_implementation():
         "make_unary_transform": prepare,
         "make_reduce_into": prepare_reduce,
     }
-    path = ROOT / "src/awkward/_connect/cuda/_listarray_prepared.py"
+    namespace["__name__"] = "awkward._connect.cuda._listarray_prepared"
+    path = CUDA_SOURCE / "_listarray_prepared.py"
     tree = ast.parse(path.read_text())
     body = [
         node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.ClassDef))
@@ -764,7 +768,8 @@ def slicing_implementation(prepared_implementation):
 
     namespace["OpKind"] = SimpleNamespace(MINIMUM=1, MAXIMUM=2, PLUS=0)
     namespace["make_inclusive_scan"] = prepare_scan
-    path = ROOT / "src/awkward/_connect/cuda/_listarray_slicing.py"
+    namespace["__name__"] = "awkward._connect.cuda._listarray_slicing"
+    path = CUDA_SOURCE / "_listarray_slicing.py"
     tree = ast.parse(path.read_text())
     body = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
     exec(compile(ast.Module(body=body, type_ignores=[]), str(path), "exec"), namespace)
@@ -1072,3 +1077,101 @@ def test_jagged_scratch_arena_and_cached_workspace_query(
         assert len(queries) == (1 if iteration == 0 else 0)
         np.testing.assert_array_equal(device[3][:-3], np.arange(rows * width))
         np.testing.assert_array_equal(device[3][-3:], [123, 123, 123])
+
+
+@pytest.mark.parametrize("error_kind", ["decreasing", "past_content"])
+def test_prepared_advanced_structural_error_after_chunk_boundary(
+    error_kind, prepared_implementation, implementation
+):
+    namespace, buffer, _ = prepared_implementation
+    rows, boundary = 129, 65
+    starts = np.arange(rows, dtype=np.int64)
+    stops = starts + 1
+    stops[boundary] = starts[boundary] - 1 if error_kind == "decreasing" else rows + 1
+    args = [
+        np.full(rows + 2, 123, dtype=np.int64),
+        np.full(rows + 2, 123, dtype=np.int64),
+        starts,
+        stops,
+        np.array([0], dtype=np.int64),
+        np.zeros(rows, dtype=np.int64),
+        rows,
+        rows,
+    ]
+    name = "awkward_ListArray_getitem_next_array_advanced"
+    expected = copy.deepcopy(args)
+    error = NumpyBackend.instance()[(name, *([np.int64] * 6))](*expected)
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = run_prepared(namespace, implementation, name, device)
+    assert_error(actual, error)
+    for i in (0, 1):
+        np.testing.assert_array_equal(device[i], expected[i])
+
+
+@pytest.mark.parametrize(
+    "name,specialization,case",
+    [
+        case
+        for case in CASES
+        if case.values[0] in PREPARED_NAMES
+        or case.values[0]
+        in (
+            "awkward_ListArray_getitem_jagged_apply",
+            "awkward_ListArray_getitem_next_range",
+        )
+    ],
+)
+def test_prepared_production_wrapper_dispatch(
+    name,
+    specialization,
+    case,
+    prepared_implementation,
+    slicing_implementation,
+    implementation,
+    monkeypatch,
+):
+    import sys
+    from types import ModuleType
+
+    namespace, buffer, _ = prepared_implementation
+    slicing, _, _ = slicing_implementation
+    for suffix, functions in (
+        ("_listarray_prepared", namespace),
+        ("_listarray_slicing", slicing),
+    ):
+        module_name = f"awkward._connect.cuda.{suffix}"
+        module = ModuleType(module_name)
+        module.run = functions["run"]
+        monkeypatch.setitem(sys.modules, module_name, module)
+    args, outputs, key = arguments(specialization, case)
+    expected = copy.deepcopy(args)
+    error = NumpyBackend.instance()[(name, *key)](*expected)
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    actual = implementation[FUNCTIONS[name]](*device)
+    assert_error(actual, error)
+    for i in outputs:
+        np.testing.assert_array_equal(device[i], expected[i])
+
+
+def test_prepared_invalid_tuning_parameters(prepared_implementation, implementation):
+    namespace, _, _ = prepared_implementation
+    for options in ({"chunk_size": 0}, {"spread_lanes": -1}):
+        with pytest.raises(ValueError, match="chunk size"):
+            namespace["run"]("jagged", (), 1, 1, implementation["_Stream"](), **options)
+
+
+def test_prepared_descriptor_rebinding_and_clear(prepared_implementation):
+    namespace, buffer, _ = prepared_implementation
+    state = namespace["_ArrayState"](np.int64)
+    assert len(state) == 0
+    first = np.arange(3, dtype=np.int64).view(buffer)
+    second = np.arange(7, dtype=np.int64).view(buffer)
+    state.bind(first)
+    assert len(state) == 3
+    assert state.data_ptr() == first.ctypes.data
+    state.bind(second)
+    assert len(state) == 7
+    assert state.data_ptr() == second.ctypes.data
+    state.clear()
+    assert len(state) == 0
+    assert state.data_ptr() == 0

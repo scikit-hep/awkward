@@ -3,6 +3,7 @@
 import gc
 import weakref
 
+import numpy as np
 import pytest
 
 import awkward as ak
@@ -55,3 +56,24 @@ def test_cuda_capture_bounds_nested_selectors():
         snapshot = ErrorContext.cuda_primary()
     assert len(snapshot.where) < 500
     assert "..." in snapshot.where
+
+
+def test_cuda_capture_lowlevel_arguments_and_unknown_context():
+    from awkward._errors import _cuda_argument
+
+    layout = ak.to_layout([{"x": 1}])
+    assert _cuda_argument(layout) == "<RecordArray length=1>"
+    assert _cuda_argument(layout[0]) == "<Record>"
+    assert "length=2 dtype=int64" in _cuda_argument(ak.index.Index64(np.array([0, 1])))
+    assert _cuda_argument((1,)) == "(1,)"
+    assert _cuda_argument(object()) == "<object>"
+    assert len(_cuda_argument("x" * 1000)) == 74
+
+    class CustomContext(ErrorContext):
+        @property
+        def note(self):
+            raise AssertionError("custom formatting must not run during capture")
+
+    with CustomContext():
+        snapshot = ErrorContext.cuda_primary()
+    assert "CustomContext(" in snapshot.note
