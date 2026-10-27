@@ -218,8 +218,7 @@ or
             else:
                 newrows = [numpy.repeat(x, counts) for x in row_arrays]
             newrows.append(
-                numpy.arange(offsets[-1], dtype=np.int64)
-                - numpy.repeat(starts, counts)
+                numpy.arange(offsets[-1], dtype=np.int64) - numpy.repeat(starts, counts)
             )
             return recurse(flattened, newrows, col_names)
 
