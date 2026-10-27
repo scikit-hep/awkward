@@ -2,6 +2,8 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthOutputBuffer.cpp", line)
 
+#include <array>
+#include <bit>
 #include <cmath>
 #include <cstring>
 #include <sstream>
@@ -13,40 +15,48 @@ namespace awkward {
 
   template <typename T>
   void byteswap16(int64_t num_items, T& value) {
-    T* ptr = &value;
+    auto* ptr = reinterpret_cast<std::byte*>(&value);
     while (num_items != 0) {
-      uint16_t integer;
-      std::memcpy(&integer, ptr, sizeof(uint16_t));
+      // Forth input buffers may be unaligned: copy bytes before converting.
+      std::array<std::byte, sizeof(T)> representation;
+      std::memcpy(representation.data(), ptr, sizeof(T));
+      const auto integer = std::bit_cast<uint16_t>(representation);
       uint16_t output = ((integer >> 8) & 0x00ff) |
                         ((integer << 8) & 0xff00);
-      std::memcpy(ptr, &output, sizeof(T));
-      ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 2);
+      representation = std::bit_cast<decltype(representation)>(output);
+      std::memcpy(ptr, representation.data(), sizeof(T));
+      ptr += sizeof(T);
       num_items--;
     }
   }
 
   template <typename T>
   void byteswap32(int64_t num_items, T& value) {
-    T* ptr = &value;
+    auto* ptr = reinterpret_cast<std::byte*>(&value);
     while (num_items != 0) {
-      uint32_t integer;
-      std::memcpy(&integer, ptr, sizeof(uint32_t));
+      // Forth input buffers may be unaligned: copy bytes before converting.
+      std::array<std::byte, sizeof(T)> representation;
+      std::memcpy(representation.data(), ptr, sizeof(T));
+      const auto integer = std::bit_cast<uint32_t>(representation);
       uint32_t output = ((integer >> 24) & 0x000000ff) |
                         ((integer >>  8) & 0x0000ff00) |
                         ((integer <<  8) & 0x00ff0000) |
                         ((integer << 24) & 0xff000000);
-      std::memcpy(ptr, &output, sizeof(T));
-      ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
+      representation = std::bit_cast<decltype(representation)>(output);
+      std::memcpy(ptr, representation.data(), sizeof(T));
+      ptr += sizeof(T);
       num_items--;
     }
   }
 
   template <typename T>
   void byteswap64(int64_t num_items, T& value) {
-    T* ptr = &value;
+    auto* ptr = reinterpret_cast<std::byte*>(&value);
     while (num_items != 0) {
-      uint64_t integer;
-      std::memcpy(&integer, ptr, sizeof(uint64_t));
+      // Forth input buffers may be unaligned: copy bytes before converting.
+      std::array<std::byte, sizeof(T)> representation;
+      std::memcpy(representation.data(), ptr, sizeof(T));
+      const auto integer = std::bit_cast<uint64_t>(representation);
       uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
                         ((integer >> 40) & 0x000000000000ff00) |
                         ((integer >> 24) & 0x0000000000ff0000) |
@@ -55,43 +65,21 @@ namespace awkward {
                         ((integer << 24) & 0x0000ff0000000000) |
                         ((integer << 40) & 0x00ff000000000000) |
                         ((integer << 56) & 0xff00000000000000);
-      std::memcpy(ptr, &output, sizeof(T));
-      ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
+      representation = std::bit_cast<decltype(representation)>(output);
+      std::memcpy(ptr, representation.data(), sizeof(T));
+      ptr += sizeof(T);
       num_items--;
     }
   }
 
   template <typename T>
   void byteswap_intp(int64_t num_items, T& value) {
-    T* ptr = &value;
-    if (sizeof(ssize_t) == 4) {
-      while (num_items != 0) {
-        uint32_t integer;
-        std::memcpy(&integer, ptr, sizeof(uint32_t));
-        uint32_t output = ((integer >> 24) & 0x000000ff) |
-                          ((integer >>  8) & 0x0000ff00) |
-                          ((integer <<  8) & 0x00ff0000) |
-                          ((integer << 24) & 0xff000000);
-        std::memcpy(ptr, &output, sizeof(T));
-        ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 4);
-        num_items--;
-      }
+    if constexpr (sizeof(T) == 4) {
+      byteswap32(num_items, value);
     }
     else {
-      while (num_items != 0) {
-        uint64_t integer = *reinterpret_cast<uint64_t*>(ptr);
-        uint64_t output = ((integer >> 56) & 0x00000000000000ff) |
-                          ((integer >> 40) & 0x000000000000ff00) |
-                          ((integer >> 24) & 0x0000000000ff0000) |
-                          ((integer >>  8) & 0x00000000ff000000) |
-                          ((integer <<  8) & 0x000000ff00000000) |
-                          ((integer << 24) & 0x0000ff0000000000) |
-                          ((integer << 40) & 0x00ff000000000000) |
-                          ((integer << 56) & 0xff00000000000000);
-        std::memcpy(ptr, &output, sizeof(T));
-        ptr = reinterpret_cast<T*>(reinterpret_cast<size_t>(ptr) + 8);
-        num_items--;
-      }
+      static_assert(sizeof(T) == 8);
+      byteswap64(num_items, value);
     }
   }
 
@@ -242,7 +230,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_intp(ssize_t value, bool byteswap) noexcept {
     if (byteswap) {
-      if (sizeof(ssize_t) == 4) {
+      if constexpr (sizeof(ssize_t) == 4) {
         byteswap32(1, value);
       }
       else {
@@ -289,7 +277,7 @@ namespace awkward {
   void
   ForthOutputBufferOf<OUT>::write_one_uintp(size_t value, bool byteswap) noexcept {
     if (byteswap) {
-      if (sizeof(size_t) == 4) {
+      if constexpr (sizeof(size_t) == 4) {
         byteswap32(1, value);
       }
       else {
@@ -390,7 +378,7 @@ namespace awkward {
                                        ssize_t* values,
                                        bool byteswap) noexcept {
     if (byteswap) {
-      if (sizeof(ssize_t) == 4) {
+      if constexpr (sizeof(ssize_t) == 4) {
         byteswap32(num_items, *values);
       }
       else {
@@ -399,7 +387,7 @@ namespace awkward {
     }
     write_copy(num_items, values);
     if (byteswap) {
-      if (sizeof(ssize_t) == 4) {
+      if constexpr (sizeof(ssize_t) == 4) {
         byteswap32(num_items, *values);
       }
       else {
@@ -471,7 +459,7 @@ namespace awkward {
                                         size_t* values,
                                         bool byteswap) noexcept {
     if (byteswap) {
-      if (sizeof(size_t) == 4) {
+      if constexpr (sizeof(size_t) == 4) {
         byteswap32(num_items, *values);
       }
       else {
@@ -480,7 +468,7 @@ namespace awkward {
     }
     write_copy(num_items, values);
     if (byteswap) {
-      if (sizeof(size_t) == 4) {
+      if constexpr (sizeof(size_t) == 4) {
         byteswap32(num_items, *values);
       }
       else {
