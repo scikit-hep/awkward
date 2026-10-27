@@ -363,6 +363,7 @@ def prepared_implementation():
 
         def launch(*, temp_storage, **kwargs):
             if temp_storage is None:
+                events.append(("reduce_storage_query",))
                 return 64
             events.append(("reduce", kwargs["num_items"]))
             values = [int(kwargs["h_init"]), *kwargs["d_in"][: kwargs["num_items"]]]
@@ -1036,3 +1037,38 @@ def test_prepared_range_zero_capacity(dtype, slicing_implementation, implementat
     actual = run_slicing(namespace, implementation, key[0], device)
     assert_error(actual, expected)
     np.testing.assert_array_equal(device[0], expected_args[0])
+
+
+def test_jagged_scratch_arena_and_cached_workspace_query(
+    prepared_implementation, implementation
+):
+    namespace, buffer, events = prepared_implementation
+    namespace["_setup"].cache_clear()
+    rows, width = 131, 2
+    starts = np.arange(rows, dtype=np.int64) * width
+    output = np.full(rows * width + 3, 123, dtype=np.int64)
+    args = [
+        output.copy(),
+        output.copy(),
+        np.arange(width + 1, dtype=np.int64),
+        output.copy(),
+        starts,
+        starts + width,
+        width,
+        rows,
+    ]
+    device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+    name = "awkward_ListArray_getitem_jagged_expand"
+    for iteration in range(2):
+        events.clear()
+        result = run_prepared(namespace, implementation, name, device)
+        assert result is None
+        allocations = [event for event in events if event[0] == "allocate"]
+        assert allocations == [
+            ("allocate", 6, np.dtype(np.int64).str),
+            ("allocate", 64, np.dtype(np.uint8).str),
+        ]
+        queries = [event for event in events if event[0] == "reduce_storage_query"]
+        assert len(queries) == (1 if iteration == 0 else 0)
+        np.testing.assert_array_equal(device[3][:-3], np.arange(rows * width))
+        np.testing.assert_array_equal(device[3][-3:], [123, 123, 123])

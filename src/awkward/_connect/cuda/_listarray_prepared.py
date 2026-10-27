@@ -64,6 +64,7 @@ class _Prepared:
         self.discard = DiscardIterator()
         self.transforms = {}
         self.reducer = None
+        self.reduce_storage_bytes = None
         self.reduce_operation = make_op_adapter(kind)
         self.initial = np.asarray(initial, dtype=np.int64)
 
@@ -83,11 +84,12 @@ class _Prepared:
             stream=stream,
         )
 
-    def find(self, result, stream):
+    def find(self, result, stream, partials=None):
         if self.chunks == 1:
             self.transform("check", self.check, result, 1, stream)
             return
-        partials = cp.empty(self.chunks, dtype=cp.int64)
+        if partials is None:
+            partials = cp.empty(self.chunks, dtype=cp.int64)
         self.transform("check", self.check, partials, self.chunks, stream)
         if self.reducer is None:
             self.reducer = make_reduce_into(
@@ -104,8 +106,9 @@ class _Prepared:
             "h_init": self.initial,
             "stream": stream,
         }
-        storage_bytes = self.reducer(temp_storage=None, **arguments)
-        storage = cp.empty(storage_bytes, dtype=cp.uint8)
+        if self.reduce_storage_bytes is None:
+            self.reduce_storage_bytes = self.reducer(temp_storage=None, **arguments)
+        storage = cp.empty(self.reduce_storage_bytes, dtype=cp.uint8)
         self.reducer(temp_storage=storage, **arguments)
 
     def bind(self, arrays):
@@ -211,12 +214,8 @@ class _Advanced(_Prepared):
 class _Jagged(_Prepared):
     def __init__(self, dtypes, length, size, chunk_size=64):
         super().__init__(length, OpKind.MINIMUM, length, chunk_size)
-        self.states = tuple(
-            _ArrayState(dtype) for dtype in (*dtypes, np.int64, np.int64)
-        )
-        multistarts, multistops, single, carry, starts, stops, first, status = (
-            self.states
-        )
+        self.states = tuple(_ArrayState(dtype) for dtype in (*dtypes, np.int64))
+        multistarts, multistops, single, carry, starts, stops, status = self.states
 
         def check(chunk):
             for row in range(chunk * chunk_size, min((chunk + 1) * chunk_size, length)):
@@ -227,7 +226,7 @@ class _Jagged(_Prepared):
             return np.int64(length)
 
         def write(k):
-            boundary = first[0]
+            boundary = status[2]
             if size > 0:
                 row = k // size
                 j = k % size
@@ -273,14 +272,17 @@ class _Jagged(_Prepared):
         # Bound both repeated validation and total output work. Long outputs
         # retain the measured element-parallel validation/write pipeline.
         small = self.length <= 64 and self.items <= 256
-        status = cp.empty(2, dtype=cp.int64)
-        first = status[:1] if small else cp.empty(1, dtype=cp.int64)
-        self.bind((*arrays, first, status))
+        # One allocation for status, the first-error row and chunk results.
+        # Each invocation owns its arena; cached operators never retain it.
+        arena = cp.empty(2 if small else 3 + self.chunks, dtype=cp.int64)
+        status = arena[:2]
+        first = status[:1] if small else arena[2:3]
+        self.bind((*arrays, arena))
         try:
             if small:
                 self.transform("small", self.small, self.discard, self.items, stream)
             else:
-                self.find(first, stream)
+                self.find(first, stream, arena[3:])
                 self.transform("write", self.write, self.discard, self.items, stream)
         finally:
             self.clear()
