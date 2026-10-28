@@ -225,3 +225,40 @@ def test_control_flow():
         np.testing.assert_allclose(
             evaluate(ak.Array(values), use_sine), evaluate(values, use_sine)
         )
+
+
+def test_python_overload_implementation_bodies(monkeypatch):
+    from awkward._connect.numba import ufunc as overloads
+
+    factories = []
+
+    def capture(function):
+        def register(factory):
+            factories.append(factory)
+            return factory
+
+        return register
+
+    monkeypatch.setattr(numba.extending, "overload", capture)
+    overloads._register_unary(np.sin)
+    overloads._register_binary(np.add)
+    array = ak.Array([1.0, 2.0])
+    viewtype = array.numba_type
+    output = np.empty(2)
+    outtype = numba.typeof(output)
+    for out in (None, numba.types.none):
+        unary = factories[0](viewtype, out)
+        binary = factories[1](viewtype, numba.types.float64, out)
+        np.testing.assert_allclose(np.asarray(unary(array)), np.sin([1, 2]))
+        np.testing.assert_allclose(np.asarray(binary(array, 2)), [3, 4])
+    unary = factories[0](viewtype, outtype)
+    binary = factories[1](viewtype, numba.types.float64, outtype)
+    assert unary(np.asarray(array), output) is output
+    assert binary(np.asarray(array), 2, output) is output
+    np.testing.assert_array_equal(output, [3, 4])
+    convert = overloads._overload_as_numpy(viewtype)
+    np.testing.assert_array_equal(convert(array), [1, 2])
+    unchanged = overloads._overload_as_numpy(outtype)
+    assert unchanged(output) is output
+    assert overloads._as_numpy(output) is output
+    assert overloads._replace_variables(42, {}) == 42
