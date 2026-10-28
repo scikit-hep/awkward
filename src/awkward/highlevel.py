@@ -133,13 +133,29 @@ def prepare_layout(layout: T) -> T | str | bytes:
         return layout
 
 
+# `__setattr__` and the private state that `ak.Array`/`ak.Record` write directly
+_PLAIN_STATE_NAMES = frozenset(
+    (
+        "__setattr__",
+        "_layout",
+        "_behavior",
+        "_attrs",
+        "_numbaview",
+        "_cpp_type",
+        "_generator",
+        "_lookup",
+    )
+)
+
+
 def _has_plain_setattr(cls: type) -> bool:
     """
-    True if only `ak.Array`/`ak.Record` define `__setattr__` in the MRO of `cls`,
-    so their private state can be written to `__dict__` directly.
+    True if no class in the MRO of `cls` other than `ak.Array`/`ak.Record` defines
+    `__setattr__` or any of their private state (as a property, slot, or default),
+    so that state can be written to `__dict__` directly.
     """
     return all(
-        "__setattr__" not in vars(base) or base in (Array, Record, object)
+        base in (Array, Record, object) or _PLAIN_STATE_NAMES.isdisjoint(vars(base))
         for base in cls.__mro__
     )
 
@@ -368,11 +384,13 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
             attrs[NAMED_AXIS_KEY] = _named_axis
 
+        self._set_state(layout, behavior, None if attrs is None else Attrs(attrs))
+
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
             self.__doc__ = docstr
 
-        self._set_state(layout, behavior, None if attrs is None else Attrs(attrs))
+        self._update_class()
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
@@ -389,7 +407,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
         return id(self)
 
     def _set_state(self, layout, behavior, attrs):
-        # skip `__setattr__`'s per-name checks if no other class defines one
+        # skip `__setattr__`'s per-name checks, see `_has_plain_setattr`
         if self._plain_setattr:
             state = self.__dict__
             state["_layout"] = layout
@@ -399,7 +417,6 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
             self._layout = layout
             self._behavior = behavior
             self._attrs = attrs
-        self._update_class()
 
     def _update_class(self, restore=None):
         previous_class = self.__class__
@@ -1793,6 +1810,7 @@ class Array(NDArrayOperatorsMixin, Iterable, Sized):
                 byteorder=ak._util.native_byteorder,
             )
         self._set_state(layout, behavior, None)
+        self._update_class()
 
     def __copy__(self):
         return Array(self._layout, behavior=self._behavior, attrs=self._attrs)
@@ -1961,11 +1979,13 @@ class Record(NDArrayOperatorsMixin):
             # if NAMED_AXIS_KEY is already in attrs, it will be overwritten
             attrs[NAMED_AXIS_KEY] = _named_axis
 
+        self._set_state(layout, behavior, None if attrs is None else Attrs(attrs))
+
         docstr = layout.purelist_parameter("__doc__")
         if isinstance(docstr, str):
             self.__doc__ = docstr
 
-        self._set_state(layout, behavior, None if attrs is None else Attrs(attrs))
+        self._update_class()
 
         if check_valid:
             ak.operations.validity_error(self, exception=True)
@@ -1977,7 +1997,7 @@ class Record(NDArrayOperatorsMixin):
         ak.jax.register_behavior_class(cls)
 
     def _set_state(self, layout, behavior, attrs):
-        # skip `__setattr__`'s per-name checks if no other class defines one
+        # skip `__setattr__`'s per-name checks, see `_has_plain_setattr`
         if self._plain_setattr:
             state = self.__dict__
             state["_layout"] = layout
@@ -1987,7 +2007,6 @@ class Record(NDArrayOperatorsMixin):
             self._layout = layout
             self._behavior = behavior
             self._attrs = attrs
-        self._update_class()
 
     def _update_class(self, restore=None):
         previous_class = self.__class__
@@ -2646,6 +2665,7 @@ class Record(NDArrayOperatorsMixin):
         )
         layout = ak.record.Record(layout, at)
         self._set_state(layout, behavior, None)
+        self._update_class()
 
     def __copy__(self):
         return Record(self._layout, behavior=self._behavior, attrs=self._attrs)

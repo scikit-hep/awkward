@@ -123,6 +123,43 @@ def test_setattr_of_later_mixin_is_called(wrapper):
     assert thing._foo == 1
 
 
+@pytest.mark.parametrize("wrapper", [ak.Array, ak.Record])
+def test_state_property_of_subclass_is_used(wrapper):
+    class Stored(wrapper):
+        @property
+        def _layout(self):
+            return self.__dict__["_stored_layout"]
+
+        @_layout.setter
+        def _layout(self, value):
+            self.__dict__["_stored_layout"] = value
+
+    thing = _make(wrapper, Stored)
+    assert type(thing) is Stored
+    assert "_layout" not in vars(thing)
+    assert thing.layout is vars(thing)["_stored_layout"]
+
+
+@pytest.mark.parametrize("wrapper", [ak.Array, ak.Record])
+def test_doc_is_set_after_state(wrapper):
+    class Documented(wrapper):
+        def __setattr__(self, name, value):
+            if name == "__doc__":
+                self.__dict__["_doc_fields"] = self.layout.fields
+            super().__setattr__(name, value)
+
+    layout = ak.with_parameter(
+        ak.with_name([{"x": 1}], "custom"), "__doc__", "documented", highlevel=False
+    )
+    if wrapper is ak.Array:
+        thing = Documented(layout, behavior={("*", "custom"): Documented})
+    else:
+        thing = Documented(layout[0], behavior={"custom": Documented})
+    assert type(thing) is Documented
+    assert thing.__doc__ == "documented"
+    assert thing._doc_fields == ["x"]
+
+
 def test_numbaview_reset_on_new_layout():
     array = ak.Array([[1, 2, 3], [], [4, 5]])
     assert array._numbaview is None
