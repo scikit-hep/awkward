@@ -50,9 +50,10 @@ def kernels():
     )
     module.zeros = zeros
     namespace = {
+        "__name__": "awkward._connect.cuda._utf8",
         "cp": module,
         "np": np,
-        "register_jitable": lambda f: f,
+        "numba_cuda": SimpleNamespace(jit=lambda **kwargs: lambda f: f),
         "dataclass": dataclass,
         "OpKind": SimpleNamespace(PLUS="sum", MAXIMUM="max", MINIMUM="min"),
         "CountingIterator": lambda x: x,
@@ -163,7 +164,7 @@ def test_native_width():
         for node in tree.body
         if isinstance(node, ast.FunctionDef) and node.name == "_width"
     ]
-    namespace = {"register_jitable": lambda f: f}
+    namespace = {"numba_cuda": SimpleNamespace(jit=lambda **kwargs: lambda f: f)}
     exec(compile(tree, str(source), "exec"), namespace)
     compiled = numba.njit(namespace["_width"])
     for byte in range(256):

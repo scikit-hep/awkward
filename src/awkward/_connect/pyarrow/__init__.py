@@ -9,6 +9,7 @@ __all__ = [
     "AwkwardArrowArray",
     "AwkwardArrowType",
     "and_validbytes",
+    "attrs_from_schema_metadata",
     "convert_awkward_arrow_table_to_native",
     "convert_native_arrow_table_to_awkward",
     "convert_to_array",
@@ -21,6 +22,7 @@ __all__ = [
     "import_pyarrow_parquet",
     "popbuffers",
     "remove_optiontype",
+    "table_with_attrs",
     "to_awkwardarrow_storage_types",
     "to_awkwardarrow_type",
     "to_length",
@@ -70,8 +72,10 @@ if error_message is None:
         to_awkwardarrow_storage_types,
     )
     from .table_conv import (
+        attrs_from_schema_metadata,
         convert_awkward_arrow_table_to_native,
         convert_native_arrow_table_to_awkward,
+        table_with_attrs,
     )
 else:
     AwkwardArrowArray = None
@@ -84,6 +88,8 @@ else:
 
     convert_awkward_arrow_table_to_native = nothing_without_pyarrow
     convert_native_arrow_table_to_awkward = nothing_without_pyarrow
+    table_with_attrs = nothing_without_pyarrow
+    attrs_from_schema_metadata = nothing_without_pyarrow
     and_validbytes = nothing_without_pyarrow
     to_validbits = nothing_without_pyarrow
     to_length = nothing_without_pyarrow

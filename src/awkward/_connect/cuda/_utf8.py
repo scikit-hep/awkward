@@ -11,7 +11,7 @@ from cuda.compute import (
     reduce_into,
     unary_transform,
 )
-from numba.extending import register_jitable
+from numba_cuda_mlir import cuda as numba_cuda
 
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
@@ -20,7 +20,7 @@ cp = Cupy.instance()._module
 np = Numpy.instance()._module
 
 
-@register_jitable
+@numba_cuda.jit(device=True)
 def _width(byte):
     if byte & 0x80 == 0:
         return 1
