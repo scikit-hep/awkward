@@ -7,8 +7,9 @@ the issue it detects, with the description and link in its docstring;
 an issue not yet reported takes a placeholder number (`NNN1`, `NNN2`,
 ...). A predicate takes only the array — nothing else decides whether
 an array is affected — so any operation's test module can use it. A
-test module calls the predicates it needs from its private
-`_would_raise_from_known_issue` function and applies any option
+test module calls the predicates it needs from one function of its
+own (`_would_raise_from_known_issue` in the operation modules,
+`has_issues` in the roundtrip modules) and applies any option
 conditions there (a negative `axis` for `ak.flatten`, for example). A
 predicate may over-match — an extra skipped draw is harmless, and a
 missed one fails the tests — so widen a trigger rather than narrow
@@ -18,11 +19,99 @@ intended behavior instead, the exclusion moves into the design
 predicate (`_should_not_raise`) of each affected operation.
 """
 
+import json
 import re
 
 import numpy as np
 
 import awkward as ak
+
+
+def has_issue_4221(a: ak.Array) -> bool:
+    """Return `True` if a non-empty `IndexedOptionArray` has empty content.
+
+    `to_arrow` crashes projecting nulls over a zero-length content
+    (`IndexError` in `ListOffsetArray._to_arrow`). Reported:
+    https://github.com/scikit-hep/awkward/issues/4221
+    """
+    stack = [a.layout]
+    while stack:
+        node = stack.pop()
+        if (
+            isinstance(node, ak.contents.IndexedOptionArray)
+            and node.length > 0
+            and node.content.length == 0
+        ):
+            return True
+        stack.extend(_children(node))
+    return False
+
+
+def has_issue_4228(a: ak.Array) -> bool:
+    """Return `True` if a union's option-type children or incoming validity break `to_arrow`.
+
+    `UnionArray._to_arrow` converts each child whole but sizes it by
+    the tag's highest index plus one, so an option-type child holding
+    more nulls than that length fails in `pyarrow.Array.from_buffers`
+    (`ArrowInvalid`, "Null count exceeds array length"), a masked child
+    longer than that length fails in `ListOffsetArray._to_arrow` when a
+    list or string lies below the option (`IndexError` or `ValueError`,
+    with or without nulls; an `UnmaskedArray` passes no validity bytes
+    and is exempt), and it scatters incoming validity bytes with a
+    per-child index that it misapplies when the index skips values
+    (`IndexError`). Any operation that drops union elements without
+    trimming the children creates the first two conditions from a valid
+    union. The trigger is walked by `_issue_4228_at`. Reported:
+    https://github.com/scikit-hep/awkward/issues/4228
+    """
+    return _issue_4228_at(a.layout)
+
+
+def has_issue_4229(a: ak.Array) -> bool:
+    """Return `True` if a regular list of size 0 is in the array.
+
+    `from_arrow` (and `from_feather`) loses the length of a size-0
+    fixed-size list: a `3 * 0 * float64` array reads back with length 0.
+    Reported: https://github.com/scikit-hep/awkward/issues/4229
+    """
+    stack = [a.layout]
+    while stack:
+        node = stack.pop()
+        if node.is_regular and node.size == 0:
+            return True
+        stack.extend(_children(node))
+    return False
+
+
+def has_issue_4241(a: ak.Array) -> bool:
+    """Return `True` if a written float value reads back changed from JSON.
+
+    `from_json` parses numbers with rapidjson's approximate default
+    algorithm, not `kParseFullPrecisionFlag`: a shortest-repr double can
+    read back off by one ULP, and re-parsing its new repr can drift
+    further, so affected values neither roundtrip nor reach a fixed
+    point (silent corruption).
+
+    Only values the writer visits count, as in `_has_infinity` in
+    `test_to_from_json`. Whether a value is affected depends on its
+    digit string, so each float leaf is checked directly against a
+    `from_json` readback (`_issue_4241_at`). Reported:
+    https://github.com/scikit-hep/awkward/issues/4241
+    """
+    return _issue_4241_at(a.layout)
+
+
+def has_issue_4255(a: ak.Array) -> bool:
+    """Return `True` if an indexed node over unknown type receives option validity.
+
+    `to_arrow` writes an indexed node over unknown-type content below
+    an enclosing option as a nullable Arrow null type without the
+    revertable stamp, so `from_arrow` cannot strip the option the field
+    metadata says it must (`AttributeError` in `remove_optiontype`).
+    The trigger is walked by `_issue_4255_at`. Reported:
+    https://github.com/scikit-hep/awkward/issues/4255
+    """
+    return _issue_4255_at(a.layout)
 
 
 def has_issue_4260(a: ak.Array) -> bool:
@@ -174,6 +263,26 @@ def has_issue_4264(a: ak.Array) -> bool:
     return False
 
 
+def has_issue_4274(a: ak.Array) -> bool:
+    """Return `True` if a root `UnmaskedArray` over a record has a uint32-indexed field.
+
+    `to_arrow_table` (which `to_feather` and `to_parquet` call) projects
+    each record field through a root `UnmaskedArray` with
+    `to_IndexedOptionArray64`, which passes an `IndexedArray`'s uint32
+    index into `IndexedOptionArray` unconverted (`TypeError`). Only the
+    root takes this path: nested layouts convert through `_to_arrow`,
+    which projects the indexed node away. Reported:
+    https://github.com/scikit-hep/awkward/issues/4274
+    """
+    layout = a.layout
+    if not (isinstance(layout, ak.contents.UnmaskedArray) and layout.content.is_record):
+        return False
+    return any(
+        isinstance(x, ak.contents.IndexedArray) and x.index.dtype == np.dtype(np.uint32)
+        for x in layout.content.contents
+    )
+
+
 def has_issue_4278(a: ak.Array) -> bool:
     """Return `True` if one family's temporal units need an overflowing conversion.
 
@@ -306,6 +415,35 @@ def has_issue_4283(a: ak.Array) -> bool:
     return False
 
 
+def has_issue_4316(a: ak.Array) -> bool:
+    """Return `True` if a union's list child holds records or lists.
+
+    `ak.array_equal`, the roundtrip tests' oracle, returns `False` for
+    two equal unions when one side's index into a list child is a
+    permutation of the other's and the list's content is a record or a
+    list: the visitor in `ak_almost_equal` carries the used child
+    lazily, the list branch then compacts the permuted side with another
+    lazy carry, which wraps a record in an `IndexedArray` and turns a
+    list into a `ListArray`, and the `same_content_types` class check
+    fails before the projection that would undo it. The roundtrip pairs
+    such sides whenever `to_packed` renumbers the original's index (an
+    over-long child, or a union that was sliced) while the
+    reconstruction keeps the drawn permutation. A regular list child
+    compares equal through the roundtrip but not in general
+    (`1 * var * {}`), so it is excluded too. Reported:
+    https://github.com/scikit-hep/awkward/issues/4316
+    """
+    stack = [a.layout]
+    while stack:
+        node = stack.pop()
+        if node.is_union and any(
+            x.is_list and _carried_lazily(x.content) for x in node.contents
+        ):
+            return True
+        stack.extend(_children(node))
+    return False
+
+
 def _is_variable_length_list(form: ak.forms.Form) -> bool:
     """Return `True` if the node has `var` type.
 
@@ -369,6 +507,157 @@ def _leaf_families(form: ak.forms.Form) -> set[str]:
         elif not node.is_unknown:
             stack.append(node.content)
     return families
+
+
+def _issue_4228_at(
+    layout: ak.contents.Content,
+    nullable: bool = False,
+    sliced: bool = False,
+) -> bool:
+    """Return `True` if `has_issue_4228`'s trigger is at or below the node.
+
+    `nullable` tracks whether enclosing option validity reaches this node.
+
+    `sliced` tracks whether `to_arrow` reaches this node through a
+    transformation that can drop union elements. A list or regular node
+    counts only when it does not span its whole content, and a record
+    field only when it is longer than the record. Under such a node any
+    null in a masked child of a union, or any masked child with a list
+    below, triggers; at an unsliced union the counts and lengths are
+    compared.
+    """
+    if layout.is_union:
+        if nullable:
+            return True
+        tags = layout.tags.data
+        index = layout.index.data[: len(tags)]
+        for tag, x in enumerate(layout.contents):
+            if not x.is_option or isinstance(x, ak.contents.UnmaskedArray):
+                continue
+            masked_list = _contains_list(x.content)
+            if _null_count(x) == 0 and not masked_list:
+                continue
+            if sliced:
+                return True
+            used = index[tags == tag]
+            length = int(used.max()) + 1 if len(used) else 0
+            if _null_count(x) > length or (masked_list and x.length > length):
+                return True
+        return any(_issue_4228_at(x, False, True) for x in layout.contents)
+    if layout.is_record:
+        return any(
+            _issue_4228_at(x, nullable, sliced or x.length > layout.length)
+            for x in layout.contents
+        )
+    if layout.is_regular:
+        return _issue_4228_at(
+            layout.content,
+            False,
+            sliced or layout.length * layout.size != layout.content.length,
+        )
+    if layout.is_option:
+        return _issue_4228_at(
+            layout.content,
+            True,
+            sliced or isinstance(layout, ak.contents.IndexedOptionArray),
+        )
+    if layout.is_indexed:
+        return _issue_4228_at(layout.content, nullable, True)
+    if layout.is_list:
+        if isinstance(layout, ak.contents.ListOffsetArray):
+            child_sliced = sliced or bool(
+                layout.offsets[0] != 0 or layout.offsets[-1] != layout.content.length
+            )
+        else:
+            child_sliced = True
+        return _issue_4228_at(layout.content, False, child_sliced)
+    return False
+
+
+def _issue_4241_at(layout: ak.contents.Content) -> bool:
+    """Return `True` if `has_issue_4241`'s trigger is at or below the node.
+
+    Descends only into the values the writer visits: projected options
+    and indexed nodes, union children by projection, and the spanned
+    part of record fields and list contents.
+    """
+    if layout.is_numpy:
+        if layout.dtype.kind != "f":
+            return False
+        # `to_json` serializes the repr of the exact widened double
+        data = np.asarray(layout.data, dtype=np.float64)
+        data = data[np.isfinite(data)]
+        if data.size == 0:
+            return False
+        returned = np.asarray(ak.from_json(json.dumps(data.tolist())))
+        return not np.array_equal(returned, data)
+    if layout.is_union:
+        contents = range(len(layout.contents))
+        return any(_issue_4241_at(layout.project(i)) for i in contents)
+    if layout.is_record:
+        return any(_issue_4241_at(c[: layout.length]) for c in layout.contents)
+    if layout.is_option or layout.is_indexed:
+        return _issue_4241_at(layout.project())
+    if layout.is_regular:
+        return _issue_4241_at(layout.content[: layout.length * layout.size])
+    if layout.is_list:
+        layout = layout.to_ListOffsetArray64(False)
+        return _issue_4241_at(layout.content[layout.offsets[0] : layout.offsets[-1]])
+    return False
+
+
+def _issue_4255_at(layout: ak.contents.Content, nullable: bool = False) -> bool:
+    """Return `True` if `has_issue_4255`'s trigger is at or below the node.
+
+    `nullable` tracks whether enclosing option validity reaches this node.
+    """
+    if layout.is_union:
+        return any(_issue_4255_at(x, False) for x in layout.contents)
+    if layout.is_record:
+        return any(_issue_4255_at(x, nullable) for x in layout.contents)
+    if layout.is_regular:
+        return _issue_4255_at(layout.content, False)
+    if layout.is_option:
+        return _issue_4255_at(layout.content, True)
+    if layout.is_indexed:
+        if nullable and layout.content.is_unknown:
+            return True
+        return _issue_4255_at(layout.content, nullable)
+    if layout.is_list:
+        return _issue_4255_at(layout.content, False)
+    return False
+
+
+def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
+    """Return the direct child layouts of a node."""
+    if layout.is_record or layout.is_union:
+        return list(layout.contents)
+    if layout.is_option or layout.is_indexed or layout.is_list:
+        return [layout.content]
+    return []
+
+
+def _null_count(layout: ak.contents.Content) -> int:
+    """Return the number of missing values in an option node."""
+    return int(np.count_nonzero(layout.mask_as_bool(valid_when=False)))
+
+
+def _contains_list(layout: ak.contents.Content) -> bool:
+    """Return `True` if a list node (a string or regular list included)
+    is the node or lies below it."""
+    if layout.is_list:
+        return True
+    return any(_contains_list(x) for x in _children(layout))
+
+
+def _carried_lazily(layout: ak.contents.Content) -> bool:
+    """Return `True` if a lazy carry changes the node's class: a record
+    becomes an `IndexedArray` and a list a `ListArray`. Indexed and
+    option wrappers are looked through because `to_packed` projects
+    them."""
+    while layout.is_indexed or layout.is_option:
+        layout = layout.content
+    return layout.is_list or layout.is_record
 
 
 # The linear datetime units, as exact attosecond multiples; the
