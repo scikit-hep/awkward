@@ -17,7 +17,7 @@ from cuda.compute import (
 from cuda.compute import (
     segmented_reduce as _segmented_reduce_raw,
 )
-from numba import cuda
+from numba_cuda_mlir import cuda as numba_cuda
 
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
@@ -527,11 +527,20 @@ def awkward_reduce_argmax(
     def segment_reduce_argmax(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        segment = input_data[start_idx:end_idx]
         if start_idx == end_idx:
-            return -1
-        # return a global index
-        return np.argmax(segment) + start_idx
+            return np.int64(-1)
+        # Match the canonical strict comparison: retain the first tie and do
+        # not replace an initial NaN. Avoid NumPy's unsupported array.flat path.
+        best_idx = start_idx
+        best = input_data[start_idx]
+        i = start_idx + 1
+        while i < end_idx:
+            value = input_data[i]
+            if value > best:
+                best = value
+                best_idx = i
+            i += 1
+        return best_idx
 
     segment_ids = CountingIterator(index_dtype(0))
 
@@ -544,7 +553,7 @@ def awkward_reduce_argmax(
     )
 
 
-@cuda.jit(device=True)
+@numba_cuda.jit(device=True)
 def lexargmax_complex(values, start_idx, end_idx):
     if start_idx == end_idx:
         return np.int64(-1)
@@ -607,11 +616,20 @@ def awkward_reduce_argmin(
     def segment_reduce_argmin(segment_id):
         start_idx = start_o[segment_id]
         end_idx = end_o[segment_id]
-        segment = input_data[start_idx:end_idx]
         if start_idx == end_idx:
-            return -1
-        # return a global index
-        return np.argmin(segment) + start_idx
+            return np.int64(-1)
+        # Match the canonical strict comparison: retain the first tie and do
+        # not replace an initial NaN. Avoid NumPy's unsupported array.flat path.
+        best_idx = start_idx
+        best = input_data[start_idx]
+        i = start_idx + 1
+        while i < end_idx:
+            value = input_data[i]
+            if value < best:
+                best = value
+                best_idx = i
+            i += 1
+        return best_idx
 
     segment_ids = CountingIterator(index_dtype(0))
 
@@ -624,7 +642,7 @@ def awkward_reduce_argmin(
     )
 
 
-@cuda.jit(device=True)
+@numba_cuda.jit(device=True)
 def lexargmin_complex(values, start_idx, end_idx):
     if start_idx == end_idx:
         return np.int64(-1)
@@ -3688,7 +3706,9 @@ def awkward_BitMaskedArray_to_IndexedOptionArray(
                 bit = (byte >> bit_idx) & out_dtype.type(1)
             else:
                 bit = (byte >> (7 - bit_idx)) & out_dtype.type(1)
-            return p if (bit != out_dtype.type(0)) == validwhen else out_dtype.type(-1)
+            if validwhen:
+                return p if bit == out_dtype.type(1) else out_dtype.type(-1)
+            return p if bit == out_dtype.type(0) else out_dtype.type(-1)
 
         return fill
 
@@ -3726,7 +3746,11 @@ def awkward_BitMaskedArray_to_ByteMaskedArray(
                 bit = (byte >> bit_idx) & 1
             else:
                 bit = (byte >> (7 - bit_idx)) & 1
-            return out_dtype.type((bit != 0) != validwhen)
+            # The extracted bit is 0 or 1. Avoid bool != bool, which the
+            # MLIR compiler cannot lower, without changing validwhen semantics.
+            if validwhen:
+                return out_dtype.type(1 - bit)
+            return out_dtype.type(bit)
 
         return fill
 
