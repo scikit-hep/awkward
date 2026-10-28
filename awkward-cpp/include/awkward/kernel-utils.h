@@ -5,6 +5,7 @@
 
 #include "common.h"
 #include <limits>
+#include <optional>
 #include <type_traits>
 
 namespace awkward::kernel {
@@ -17,6 +18,17 @@ namespace awkward::kernel {
       return static_cast<T>(value);
     }
     return T{-1} - static_cast<T>(static_cast<U>(~value));
+  }
+
+  [[nodiscard]] constexpr std::optional<int64_t>
+  normalize_index(int64_t index, int64_t length) noexcept {
+    if (index < 0) {
+      index += length;
+    }
+    if (!(0 <= index && index < length)) {
+      return std::nullopt;
+    }
+    return index;
   }
 }
 
