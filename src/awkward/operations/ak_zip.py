@@ -43,8 +43,10 @@ def zip(
     structure or not.
 
     Args:
-        arrays (mapping or sequence of arrays): Each value in this mapping or
-            sequence can be any array-like data that #ak.to_layout recognizes.
+        arrays (non-empty mapping or sequence of arrays): Each value in this
+            mapping or sequence can be any array-like data that #ak.to_layout
+            recognizes. At least one array is required to infer the output length;
+            the arrays themselves may be empty.
         depth_limit (None or int): If None, attempt to fully broadcast the
             `array` to all levels. If an int, limit the number of dimensions
             that get broadcasted. The minimum value is `1`, for no
@@ -211,6 +213,9 @@ def _impl(
                 )
             )
             fields = None
+
+    if not layouts:
+        raise ValueError("ak.zip requires at least one array")
 
     # Promote any integers or records
     backend = next((b.backend for b in layouts if hasattr(b, "backend")), "cpu")
