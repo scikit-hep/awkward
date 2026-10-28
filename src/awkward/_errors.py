@@ -98,7 +98,11 @@ class ErrorContext:
                 exception.__notes__ = [note]
             return exception
 
-        note = self.note
+        # CUDA dispatch already captured a host-only note. Reuse it for an
+        # immediate error too: formatting the original context would read device
+        # values while unwinding the public call.
+        context = self.__dict__.get("_cuda_snapshot", self)
+        note = context.note
         if issubclass(cls, (NotImplementedError, AssertionError)):
             note = "\n\nSee if this has been reported at https://github.com/scikit-hep/awkward/issues"
         return _add_note(exception, note)
