@@ -243,7 +243,7 @@ def test_prepared_flatten_rebinding_and_workspace_reuse(kernels):
         assert all(state.array is None for state in setup.states)
 
 
-@pytest.mark.parametrize("length", [3, 65, 1024])
+@pytest.mark.parametrize("length", [3, 64, 65, 1024])
 @pytest.mark.parametrize("overlap", [False, True])
 def test_prepared_nested_rebinding_workspace_and_no_upload(kernels, length, overlap):
     module, _ = kernels
@@ -253,6 +253,9 @@ def test_prepared_nested_rebinding_workspace_and_no_upload(kernels, length, over
         raise AssertionError("nested fill must not upload host parameters")
 
     module.cp.asarray = forbidden
+    module.cp.maximum = forbidden
+    module.cp.where = forbidden
+    module.cp.zeros = forbidden
     for shift in (0, 1):
         starts = np.arange(length, dtype=np.int64) * (1 if overlap else 4)
         counts = np.full(length, 3 + shift, dtype=np.int64)
@@ -272,7 +275,7 @@ def test_prepared_nested_rebinding_workspace_and_no_upload(kernels, length, over
         np.testing.assert_array_equal(index, expected_index)
         np.testing.assert_array_equal(scratch, np.append(starts + counts, 99))
         retained.append((index, expected_index))
-    assert module.queries == ["scan", "scan", "reduce"]
+    assert module.queries == ([] if length <= 64 else ["scan", "scan", "reduce"])
     setup = module._nested_setup(
         0,
         1,

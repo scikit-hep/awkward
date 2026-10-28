@@ -148,7 +148,7 @@ def test_prepared_flatten_rebinds_buffers():
 
 
 @pytest.mark.parametrize("overlap", [False, True])
-@pytest.mark.parametrize("length", [3, 65, 1024])
+@pytest.mark.parametrize("length", [3, 64, 65, 1024])
 def test_prepared_nested_rebinding(length, overlap):
     from awkward._connect.cuda import _unionarray
 

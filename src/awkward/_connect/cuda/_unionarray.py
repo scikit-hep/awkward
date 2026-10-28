@@ -272,6 +272,8 @@ class _NestedFill:
         self.counts = counts = _ArrayState(counts_dtype)
         self.starts = starts = _ArrayState(starts_dtype)
         self.stops = stops = _ArrayState(starts_dtype)
+        self.positive = positive = _ArrayState(np.int64)
+        self.present_stops = present_stops = _ArrayState(np.int64)
         self.positions = positions = _ArrayState(np.int64)
         self.maxima = maxima = _ArrayState(np.int64)
         self.serial = serial = _ArrayState(np.int64)
@@ -282,10 +284,37 @@ class _NestedFill:
             counts,
             starts,
             stops,
+            positive,
+            present_stops,
             positions,
             maxima,
             serial,
         )
+
+        def prepare(row):
+            # Fuse the old copy/add/maximum/where launches into one pass.
+            # pylint: disable=unsupported-assignment-operation
+            start, count = scratch[row], counts[row]
+            starts[row], stops[row] = start, start + count
+            positive[row] = max(count, 0)
+            present_stops[row] = start + count if count > 0 else 0
+            return np.int8(0)
+
+        def prepare_small(_):
+            # Bounded row metadata work only; output writes remain parallel.
+            # pylint: disable=unsupported-assignment-operation
+            rank, maximum, overlaps = np.int64(0), np.int64(0), np.int64(0)
+            for row in range(length):
+                start, count = scratch[row], counts[row]
+                stop = start + count
+                starts[row], stops[row] = start, stop
+                if row > 0 and count > 0 and start < maximum:
+                    overlaps = np.int64(1)
+                maximum = max(maximum, stop if count > 0 else 0)
+                rank += max(count, 0)
+                positions[row] = rank
+            serial[0] = overlaps
+            return np.int8(0)
 
         def check(row):
             return np.int64(
@@ -310,6 +339,7 @@ class _NestedFill:
             scratch[row] = stops[row]
             return np.int8(0)
 
+        self.prepare, self.prepare_small = prepare, prepare_small
         self.check, self.fill = check, fill
         self.iterator = CountingIterator(np.int64(0))
         self.discard = DiscardIterator()
@@ -317,19 +347,30 @@ class _NestedFill:
         self.algorithms = {}
         self.initial = np.asarray(0, dtype=np.int64)
 
+    def transform_small(self, stream):
+        if "small" not in self.transforms:
+            adapter = make_op_adapter(self.prepare_small)
+            prepared = make_unary_transform(
+                d_in=self.iterator, d_out=self.discard, op=adapter
+            )
+            self.transforms["small"] = adapter, prepared
+        adapter, prepared = self.transforms["small"]
+        prepared(
+            d_in=self.iterator,
+            d_out=self.discard,
+            op=adapter,
+            num_items=1,
+            stream=stream,
+        )
+
     def run(self, tags, index, scratch, counts):
         length = self.length
-        # All scratch belongs to this invocation. Snapshot starts before writes.
-        starts = scratch[:length].copy()
-        counts = counts[:length]
-        stops = starts + counts
-        positive = cp.maximum(counts, 0)
-        present_stops = cp.where(counts > 0, stops, 0)
-        positions = cp.empty(length, dtype=cp.int64)
-        maxima = cp.empty(length, dtype=cp.int64)
-        overlap = cp.empty(length, dtype=cp.int64)
-        serial = cp.empty(1, dtype=cp.int64)
-        zero = cp.zeros(1, dtype=cp.int64)
+        # One arena per invocation; no input copy or scalar upload is needed.
+        arena = cp.empty(7 * length + 1, dtype=cp.int64)
+        starts, stops, positive, present_stops, positions, maxima, overlap = (
+            arena[i * length : (i + 1) * length] for i in range(7)
+        )
+        serial = arena[-1:]
         arrays = (
             tags,
             index,
@@ -337,6 +378,8 @@ class _NestedFill:
             counts,
             starts,
             stops,
+            positive,
+            present_stops,
             positions,
             maxima,
             serial,
@@ -345,22 +388,31 @@ class _NestedFill:
             state.bind(array)
         stream = _Stream()
         try:
-            for name, source, target, op in (
-                ("positions", positive, positions, OpKind.PLUS),
-                ("maxima", present_stops, maxima, OpKind.MAXIMUM),
-            ):
-                build = {"d_in": source, "d_out": target, "op": op, "init_value": zero}
+            if length <= 64:
+                self.transform_small(stream)
+            else:
+                self.transform("prepare", self.prepare, self.discard, stream)
+                for name, source, target, op in (
+                    ("positions", positive, positions, OpKind.PLUS),
+                    ("maxima", present_stops, maxima, OpKind.MAXIMUM),
+                ):
+                    build = {
+                        "d_in": source,
+                        "d_out": target,
+                        "op": op,
+                        "init_value": self.initial,
+                    }
+                    arguments = {**build, "num_items": length, "stream": stream}
+                    self.algorithm(name, make_inclusive_scan, build, arguments)
+                self.transform("check", self.check, overlap, stream)
+                build = {
+                    "d_in": overlap,
+                    "d_out": serial,
+                    "op": OpKind.MAXIMUM,
+                    "h_init": self.initial,
+                }
                 arguments = {**build, "num_items": length, "stream": stream}
-                self.algorithm(name, make_inclusive_scan, build, arguments)
-            self.transform("check", self.check, overlap, stream)
-            build = {
-                "d_in": overlap,
-                "d_out": serial,
-                "op": OpKind.MAXIMUM,
-                "h_init": self.initial,
-            }
-            arguments = {**build, "num_items": length, "stream": stream}
-            self.algorithm("overlap", make_reduce_into, build, arguments)
+                self.algorithm("overlap", make_reduce_into, build, arguments)
             self.transform("fill", self.fill, self.discard, stream)
         finally:
             for state in self.states:
