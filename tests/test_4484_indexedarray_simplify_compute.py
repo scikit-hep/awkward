@@ -379,6 +379,7 @@ def prepared_implementation():
 
         def launch(*, temp_storage, **kwargs):
             if temp_storage is None:
+                events.append(("workspace_query",))
                 return 64
             events.append(("reduce", kwargs["num_items"]))
             kwargs["d_out"][0] = min(
@@ -477,7 +478,7 @@ def test_prepared_partial_output_and_scratch(
     else:
         chunks = (length + 63) // 64
         assert transforms == [("transform", chunks), ("transform", length)]
-        assert ("allocate", chunks, np.dtype(np.int64).str) in events
+        assert ("allocate", 2 + chunks, np.dtype(np.int64).str) in events
 
 
 def test_prepared_reuse_lifetimes_and_concurrent_calls(prepared_implementation):
@@ -549,3 +550,31 @@ def test_prepared_descriptor_lengths(prepared_implementation):
     state.clear()
     assert len(state) == 0
     assert state.data_ptr() == 0
+
+
+@pytest.mark.parametrize("length", [32, 129, 4096])
+def test_compact_scratch_and_workspace_sizing_reuse(length, prepared_implementation):
+    namespace, buffer, events = prepared_implementation
+    namespace["_setup"].cache_clear()
+    outer = (np.arange(length, dtype=np.int64) % 3).view(buffer)
+    inner = np.array([-7, 10, 20], dtype=np.int64).view(buffer)
+    output = np.full(length + 3, 123, dtype=np.int64).view(buffer)
+    chunks = (length + 63) // 64
+    for iteration in range(2):
+        events.clear()
+        status = namespace["simplify_status"](output, outer, length, inner, len(inner))
+        assert status.shape == (2,)
+        assert status.get().tolist() == [length, np.iinfo(np.int64).max]
+        allocations = [event for event in events if event[0] == "allocate"]
+        assert allocations == (
+            [("allocate", 2, np.dtype(np.int64).str)]
+            if length <= 64
+            else [
+                ("allocate", 2 + chunks, np.dtype(np.int64).str),
+                ("allocate", 64, np.dtype(np.uint8).str),
+            ]
+        )
+        queries = [event for event in events if event[0] == "workspace_query"]
+        assert len(queries) == (1 if length > 64 and iteration == 0 else 0)
+        np.testing.assert_array_equal(output[:length], inner[outer])
+        np.testing.assert_array_equal(output[length:], [123, 123, 123])

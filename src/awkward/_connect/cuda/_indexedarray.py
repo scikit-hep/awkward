@@ -116,6 +116,7 @@ class _Simplify:
         self.discard = DiscardIterator()
         self.transforms = {}
         self.reducer = None
+        self.reduce_storage_bytes = None
         self.reduce_operation = None
         self.initial = np.asarray(length, dtype=np.int64)
 
@@ -136,7 +137,10 @@ class _Simplify:
         )
 
     def __call__(self, output, outer, inner, stream):
-        status = cp.empty(2, dtype=cp.int64)
+        # Scratch belongs to this invocation; prepared state retains only
+        # descriptors. Keep the externally returned status at two int64s.
+        arena = cp.empty(2 if self.length <= 64 else 2 + self.chunks, dtype=cp.int64)
+        status = arena[:2]
         states = (self.output, self.outer, self.inner, self.status)
         for state, array in zip(states, (output, outer, inner, status), strict=True):
             state.bind(array)
@@ -144,7 +148,7 @@ class _Simplify:
             if self.length <= 64:
                 self.transform("small", self.small, self.discard, 1, stream)
             else:
-                positions = cp.empty(self.chunks, dtype=cp.int64)
+                positions = arena[2:]
                 self.transform("check", self.check, positions, self.chunks, stream)
                 first = status[:1]
                 if self.reducer is None:
@@ -163,8 +167,13 @@ class _Simplify:
                     "h_init": self.initial,
                     "stream": stream,
                 }
-                storage_bytes = self.reducer(temp_storage=None, **arguments)
-                storage = cp.empty(storage_bytes, dtype=cp.uint8)
+                # The cache key fixes device/context, dtypes and item count.
+                # Only sizing is reused; workspace itself remains per-call.
+                if self.reduce_storage_bytes is None:
+                    self.reduce_storage_bytes = self.reducer(
+                        temp_storage=None, **arguments
+                    )
+                storage = cp.empty(self.reduce_storage_bytes, dtype=cp.uint8)
                 self.reducer(temp_storage=storage, **arguments)
                 self.transform("write", self.write, self.discard, self.length, stream)
         finally:
