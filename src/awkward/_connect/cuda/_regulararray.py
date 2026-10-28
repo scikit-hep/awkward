@@ -2,6 +2,7 @@
 
 """RegularArray CCCL kernels with canonical errors and device pointer tables."""
 
+import ctypes
 import math
 from dataclasses import dataclass
 from functools import lru_cache
@@ -15,8 +16,7 @@ from cuda.compute import (
     unary_transform,
 )
 from cuda.compute.op import make_op_adapter
-from numba import types
-from numba.extending import intrinsic, register_jitable
+from numba_cuda_mlir import cuda as numba_cuda
 
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
@@ -26,27 +26,14 @@ np = Numpy.instance()._module
 _SLICE_NONE = 9223372036854775807
 
 
-@intrinsic
-def _store_i64(typingctx, address, index, value):
-    """Store through an entry of the canonical int64** carry-pointer table."""
-    if not all(isinstance(t, types.Integer) for t in (address, index, value)):
-        return None
-    signature = types.void(address, index, value)
-
-    def codegen(context, builder, sig, args):
-        pointer = builder.inttoptr(
-            context.cast(builder, args[0], sig.args[0], types.uintp),
-            context.get_value_type(types.CPointer(types.int64)),
-        )
-        offset = context.cast(builder, args[1], sig.args[1], types.intp)
-        item = context.cast(builder, args[2], sig.args[2], types.int64)
-        builder.store(item, builder.gep(pointer, [offset]))
-        return context.get_dummy_value()
-
-    return signature, codegen
+@numba_cuda.jit(device=True)
+def _store_i64(address, index, value):
+    """Store into the canonical int64 pointer table using MLIR typed pointers."""
+    pointer = ctypes.cast(address, ctypes.POINTER(ctypes.c_int64))
+    pointer[index] = value
 
 
-@register_jitable
+@numba_cuda.jit(device=True)
 def _choose(top, choose):
     if choose < 0 or top < choose:
         return np.int64(0)

@@ -114,3 +114,24 @@ def test_prepared_regularize_rebinding(length, bad):
             )
             contract.assert_error(gpu_error, cpu_error)
             np.testing.assert_array_equal(cp.asnumpy(output), expected)
+
+
+def test_mlir_combination_helpers_and_pointer_offset():
+    from awkward._connect.cuda import _regulararray
+
+    with cp.cuda.Stream(non_blocking=True) as stream:
+        output = cp.full(8, -99, dtype=cp.int64)
+        pointers = cp.asarray([output[2:].data.ptr], dtype=cp.uint64)
+
+        # Capture device helpers directly, as production combinations does.
+        store, choose = _regulararray._store_i64, _regulararray._choose
+
+        def compiled_write(_):
+            store(pointers[0], 1, choose(10, 3))
+            return np.int8(0)
+
+        _regulararray._transform(compiled_write, 1)
+        stream.synchronize()
+    np.testing.assert_array_equal(
+        cp.asnumpy(output), [-99, -99, -99, 120, -99, -99, -99, -99]
+    )

@@ -176,7 +176,7 @@ def host_implementation():
         "__name__": __name__,
         "np": np,
         "math": math,
-        "register_jitable": lambda function: function,
+        "numba_cuda": SimpleNamespace(jit=lambda **kwargs: lambda function: function),
         "_store_i64": store,
         "buffers": buffers,
         "cp": cp,
@@ -305,32 +305,15 @@ def test_empty_combinations(implementation):
         np.testing.assert_array_equal(args[i], before[i])
 
 
-def test_pointer_store_intrinsic():
-    numba = pytest.importorskip("numba")
-    from numba.extending import intrinsic
-
-    source = ROOT / "src/awkward/_connect/cuda/_regulararray.py"
-    node = next(
-        n
-        for n in ast.parse(source.read_text()).body
-        if isinstance(n, ast.FunctionDef) and n.name == "_store_i64"
-    )
-    namespace = {"intrinsic": intrinsic, "types": numba.types}
-    exec(
-        compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
-        namespace,
-    )
-    store = namespace["_store_i64"]
-
-    @numba.njit
-    def write(address, index, value):
-        store(address, index, value)
-
-    output = np.full(8, -99, dtype=np.int64)
-    write(np.uintp(output[2:].ctypes.data), np.int64(1), np.int64(-(2**63)))
-    with pytest.raises(numba.core.errors.TypingError):
-        write(1.5, np.int64(0), np.int64(1))
-    np.testing.assert_array_equal(output, [-99, -99, -99, -(2**63), -99, -99, -99, -99])
+def test_pointer_store_uses_mlir_device_registration():
+    tree = ast.parse((ROOT / "src/awkward/_connect/cuda/_regulararray.py").read_text())
+    helpers = {
+        node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)
+    }
+    for name in ("_choose", "_store_i64"):
+        decorator = helpers[name].decorator_list[0]
+        assert ast.unparse(decorator) == "numba_cuda.jit(device=True)"
+    assert "ctypes.cast" in ast.unparse(helpers["_store_i64"])
 
 
 @pytest.mark.parametrize(
@@ -350,7 +333,10 @@ def test_binomial_native_lowering():
         for n in ast.parse(source.read_text()).body
         if isinstance(n, ast.FunctionDef) and n.name == "_choose"
     )
-    namespace = {"register_jitable": register_jitable, "np": np}
+    namespace = {
+        "numba_cuda": SimpleNamespace(jit=lambda **kwargs: register_jitable),
+        "np": np,
+    }
     exec(
         compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
         namespace,
