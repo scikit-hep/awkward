@@ -864,22 +864,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
 
                 self_starts, self_stops = self._offsets[:-1], self._offsets[1:]
 
-                # `awkward_ListOffsetArray_argsort_strings` is still parents-based,
-                # so reconstruct parents on the fly from offsets+outlength.
-                # Cast counts to np.intp; see numpyarray._argsort_next for the
-                # cross-platform 'safe' cast rationale.
-                counts = offsets.data[1:] - offsets.data[:-1]
-                parents_data = nplike.repeat(
-                    nplike.arange(
-                        nplike.shape_item_as_index(outlength), dtype=np.int64
-                    ),
-                    nplike.astype(counts, np.intp),
-                )
-                parents = Index64(parents_data, nplike=nplike)
-
                 assert (
                     nextcarry.nplike is self._backend.nplike
-                    and parents.nplike is self._backend.nplike
+                    and offsets.nplike is self._backend.nplike
                     and self._content.backend is self._backend
                     and self_starts.nplike is self._backend.nplike
                     and self_stops.nplike is self._backend.nplike
@@ -888,14 +875,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     self._backend[
                         "awkward_ListOffsetArray_argsort_strings",
                         nextcarry.dtype.type,
-                        parents.dtype.type,
+                        offsets.dtype.type,
                         self._content.dtype.type,
                         self_starts.dtype.type,
                         self_stops.dtype.type,
                     ](
                         nextcarry.data,
-                        parents.data,
-                        parents.length,
+                        offsets.data,
+                        outlength,
                         self._content._data,
                         self_starts.data,
                         self_stops.data,
@@ -1034,27 +1021,11 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             if isinstance(self._content, ak.contents.NumpyArray):
                 nextcarry = Index64.empty(self._offsets.length - 1, nplike)
 
-                # `awkward_ListOffsetArray_argsort_strings` is still parents-based,
-                # so reconstruct parents on the fly from offsets+outlength. The
-                # `offsets` parameter here is the outer-bin offsets (length
-                # outlength + 1), NOT self._offsets (which is the per-string
-                # byte offsets and has a different shape).
-                # Cast counts to np.intp; see numpyarray._argsort_next for the
-                # cross-platform 'safe' cast rationale.
-                counts = offsets.data[1:] - offsets.data[:-1]
-                parents_data = nplike.repeat(
-                    nplike.arange(
-                        nplike.shape_item_as_index(outlength), dtype=np.int64
-                    ),
-                    nplike.astype(counts, np.intp),
-                )
-                parents = Index64(parents_data, nplike=nplike)
-
                 self_starts, self_stops = self._offsets[:-1], self._offsets[1:]
 
                 assert (
                     nextcarry.nplike is nplike
-                    and parents.nplike is nplike
+                    and offsets.nplike is nplike
                     and self._content.backend is self._backend
                     and self_starts.nplike is nplike
                     and self_stops.nplike is nplike
@@ -1063,14 +1034,14 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     self._backend[
                         "awkward_ListOffsetArray_argsort_strings",
                         nextcarry.dtype.type,
-                        parents.dtype.type,
+                        offsets.dtype.type,
                         self._content.dtype.type,
                         self_starts.dtype.type,
                         self_stops.dtype.type,
                     ](
                         nextcarry.data,
-                        parents.data,
-                        parents.length,
+                        offsets.data,
+                        outlength,
                         self._content._data,
                         self_starts.data,
                         self_stops.data,
