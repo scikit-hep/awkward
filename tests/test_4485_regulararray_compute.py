@@ -173,7 +173,7 @@ def host_implementation():
         and node.name != "_store_i64"
     ]
     namespace = {
-        "__name__": __name__,
+        "__name__": "awkward._connect.cuda._regulararray",
         "np": np,
         "math": math,
         "numba_cuda": SimpleNamespace(jit=lambda **kwargs: lambda function: function),
