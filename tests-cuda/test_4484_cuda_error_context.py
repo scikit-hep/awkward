@@ -32,6 +32,11 @@ def test_invalid_field_projection_uses_metadata_note(monkeypatch, option, length
         raise AssertionError("Invalid CUDA projection must not format device values")
 
     monkeypatch.setattr(ErrorContext, "format_argument", forbidden)
+    from awkward._connect.cuda import synchronize_cuda
+
     with pytest.raises(ValueError, match="index out of range") as caught:
         array["x"]
+        # Simplification is immediate on #4484 but remains deferred on other
+        # migration branches sharing the metadata-only context implementation.
+        synchronize_cuda(cp.cuda.get_current_stream())
     assert any("type='" in note for note in caught.value.__notes__)
