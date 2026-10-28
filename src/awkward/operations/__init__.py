@@ -15,6 +15,7 @@ from awkward.operations.ak_array_equal import *
 from awkward.operations.ak_backend import *
 from awkward.operations.ak_broadcast_arrays import *
 from awkward.operations.ak_broadcast_fields import *
+from awkward.operations.ak_broadcast_slice import *
 from awkward.operations.ak_cartesian import *
 from awkward.operations.ak_categories import *
 from awkward.operations.ak_centered_sumofsquares import *
