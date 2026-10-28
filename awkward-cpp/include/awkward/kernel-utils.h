@@ -4,6 +4,22 @@
 #define AWKWARD_KERNEL_UTILS_H_
 
 #include "common.h"
+#include <optional>
+
+namespace awkward::kernel {
+  /// Normalize a scalar Python index; callers retain their own error context.
+  /// As with the kernel specification, length is a nonnegative list size.
+  [[nodiscard]] constexpr std::optional<int64_t>
+  normalize_index(int64_t index, int64_t length) noexcept {
+    if (index < 0) {
+      index += length;
+    }
+    if (!(0 <= index && index < length)) {
+      return std::nullopt;
+    }
+    return index;
+  }
+}
 
 extern "C" {
 
