@@ -1022,9 +1022,9 @@ class NumpyArray(NumpyMeta, Content):
             # consecutive equal values (e.g. [0, 3, 3, 5, 6, 10, 10]).
             # `awkward_unique_ranges` and `awkward_unique_offsets` are still
             # parents-era kernels that expect a *compact* offsets array (one
-            # entry per non-empty bin, like the original `awkward_sorting_ranges`
-            # output). Compact the offsets here, run the unchanged kernels on
-            # the compact form, then let `awkward_unique_offsets` re-expand to
+            # entry per non-empty bin). Compact the offsets here, run the
+            # unchanged kernels on the compact form, then let
+            # `awkward_unique_offsets` re-expand to
             # the full outlength+1 outoffsets using `starts`.
             nplike = self._backend.nplike
             keep = nplike.empty(offsets.length, dtype=np.bool_)
