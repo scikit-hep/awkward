@@ -31,3 +31,12 @@ def test_index_values():
         (1, 0, 0),
         (2, 0, 0),
     ]
+
+
+@pytest.mark.parametrize("how", ["inner", "outer", "left", "right"])
+@pytest.mark.parametrize("fields", [["x", "y", "z"], ["z", "y", "x"]])
+def test_merge_extra_index_levels_in_both_field_orders(how, fields):
+    frame = ak.to_dataframe(array[fields], how=how)
+    assert frame.index.nlevels == 3
+    assert all(dtype == np.dtype(np.int64) for dtype in frame.index.to_frame().dtypes)
+    assert set(frame.columns) == set(fields)
