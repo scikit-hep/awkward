@@ -95,3 +95,22 @@ def test_public_regular_operations(n, replacement):
         assert array[:, [-1, 0, 1]].to_list() == source[:, [-1, 0, 1]].to_list()
         with pytest.raises(IndexError, match="index out of range"):
             array[:, [0, 4]]
+
+
+@pytest.mark.parametrize("length", [64, 65, 129, 4096])
+@pytest.mark.parametrize("bad", [None, 0, -1])
+def test_prepared_regularize_rebinding(length, bad):
+    key = ("awkward_RegularArray_getitem_next_array_regularize", np.int64, np.int64)
+    with cp.cuda.Stream(non_blocking=True):
+        for shift in (0, 1):
+            source = (np.arange(length, dtype=np.int64) + shift) % 8 - 4
+            if bad is not None:
+                source[bad] = -9
+            expected = np.full(length + 3, -123, dtype=np.int64)
+            output = cp.asarray(expected)
+            cpu_error = NumpyBackend.instance()[key](expected, source, length, 8)
+            gpu_error = CupyBackend.instance()[key](
+                output, cp.asarray(source), length, 8
+            )
+            contract.assert_error(gpu_error, cpu_error)
+            np.testing.assert_array_equal(cp.asnumpy(output), expected)

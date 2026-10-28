@@ -11,7 +11,9 @@ import copy
 import json
 import math
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
+from threading import RLock
 from types import SimpleNamespace
 
 import numpy as np
@@ -122,8 +124,13 @@ def host_implementation():
             for name in ("empty", "zeros", "full", "asarray", "arange")
         },
         int64=np.int64,
+        uint8=np.uint8,
         maximum=np.maximum,
-        cuda=SimpleNamespace(get_current_stream=lambda: SimpleNamespace(ptr=123)),
+        cuda=SimpleNamespace(
+            get_current_stream=lambda: SimpleNamespace(ptr=123),
+            runtime=SimpleNamespace(getDevice=lambda: 0),
+            driver=SimpleNamespace(ctxGetCurrent=lambda: 1),
+        ),
     )
 
     def transform(*, d_in, d_out, op, num_items, stream):
@@ -136,6 +143,20 @@ def host_implementation():
     def reduce(*, d_in, d_out, num_items, h_init, **kwargs):
         assert kwargs["stream"].__cuda_stream__() == (0, 123)
         d_out[0] = min(int(h_init), *(int(x) for x in d_in[:num_items]))
+
+    def make_transform(**kwargs):
+        return transform
+
+    def make_reduce(**kwargs):
+        def prepared(*, temp_storage, d_in, d_out, op, num_items, h_init, stream):
+            if temp_storage is None:
+                return 16
+            value = np.int64(h_init)
+            for row in range(num_items):
+                value = op(value, np.int64(row))
+            d_out[0] = value
+
+        return prepared
 
     buffers = {}
 
@@ -160,6 +181,12 @@ def host_implementation():
         "buffers": buffers,
         "cp": cp,
         "dataclass": dataclass,
+        "lru_cache": lru_cache,
+        "RLock": RLock,
+        "_regularize_lock": RLock(),
+        "make_op_adapter": lambda op: op,
+        "make_unary_transform": make_transform,
+        "make_reduce_into": make_reduce,
         "_SLICE_NONE": ak._util.kSliceNone,
         "CountingIterator": _Counting,
         "DiscardIterator": _Discard,
@@ -175,6 +202,11 @@ def host_implementation():
         ),
         namespace,
     )
+    state = namespace["_ArrayState"]
+    state.bind = lambda self, array: setattr(self, "array", array)
+    state.clear = lambda self: setattr(self, "array", None)
+    state.__getitem__ = lambda self, index: self.array[index]
+    state.__setitem__ = lambda self, index, value: self.array.__setitem__(index, value)
     return namespace
 
 
@@ -331,3 +363,29 @@ def test_binomial_native_lowering():
 @pytest.mark.parametrize("top,choose", [(2, 3), (3, -1)])
 def test_empty_binomial_coefficients(implementation, top, choose):
     assert implementation["_choose"](top, choose) == 0
+
+
+@pytest.mark.parametrize("length", [1, 64, 65, 129, 4096])
+@pytest.mark.parametrize("bad", [None, 0, -1])
+def test_prepared_regularize_prefix_and_rebinding(implementation, length, bad):
+    regularize = implementation["regularize"]
+    for shift in (0, 1):
+        source = (np.arange(length, dtype=np.int64) + shift) % 8 - 4
+        if bad is not None:
+            source[bad] = -9
+            if bad == 0 and length > 1:
+                source[-1] = 10
+        expected = np.full(length + 3, -123, dtype=np.int64)
+        actual = expected.copy()
+        cpu = NumpyBackend.instance()[
+            "awkward_RegularArray_getitem_next_array_regularize", np.int64, np.int64
+        ]
+        error = cpu(expected, source, length, 8)
+        result = regularize(actual, source, length, 8)
+        np.testing.assert_array_equal(actual, expected)
+        assert_error(result, error)
+    setup = implementation["_regularize_setup"](0, 1, actual.dtype.str, length, 8)
+    assert setup.source.array is None and setup.output.array is None
+    assert setup.status.array is None
+    if length > 64:
+        assert setup.storage_bytes == 16
