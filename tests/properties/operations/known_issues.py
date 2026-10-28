@@ -61,10 +61,61 @@ def has_issue_4228(a: ak.Array) -> bool:
     per-child index that it misapplies when the index skips values
     (`IndexError`). Any operation that drops union elements without
     trimming the children creates the first two conditions from a valid
-    union. The trigger is walked by `_issue_4228_at`. Reported:
+    union.
+
+    Each node on the stack carries two flags. `nullable` tracks whether
+    enclosing option validity reaches the node. `sliced` tracks whether
+    `to_arrow` reaches the node through a transformation that can drop
+    union elements. A list or regular node counts only when it does not
+    span its whole content, and a record field only when it is longer
+    than the record. Under such a node any null in a masked child of a
+    union, or any masked child with a list below, triggers; at an
+    unsliced union the counts and lengths are compared. Reported:
     https://github.com/scikit-hep/awkward/issues/4228
     """
-    return _issue_4228_at(a.layout)
+    stack = [(a.layout, False, False)]
+    while stack:
+        node, nullable, sliced = stack.pop()
+        if node.is_union:
+            if nullable:
+                return True
+            tags = node.tags.data
+            index = node.index.data[: len(tags)]
+            for tag, x in enumerate(node.contents):
+                if not x.is_option or isinstance(x, ak.contents.UnmaskedArray):
+                    continue
+                masked_list = _contains_list(x.content)
+                if _null_count(x) == 0 and not masked_list:
+                    continue
+                if sliced:
+                    return True
+                used = index[tags == tag]
+                length = int(used.max()) + 1 if len(used) else 0
+                if _null_count(x) > length or (masked_list and x.length > length):
+                    return True
+            stack.extend((x, False, True) for x in node.contents)
+        elif node.is_record:
+            stack.extend(
+                (x, nullable, sliced or x.length > node.length) for x in node.contents
+            )
+        elif node.is_regular:
+            spans = node.length * node.size == node.content.length
+            stack.append((node.content, False, sliced or not spans))
+        elif node.is_option:
+            indexed = isinstance(node, ak.contents.IndexedOptionArray)
+            stack.append((node.content, True, sliced or indexed))
+        elif node.is_indexed:
+            stack.append((node.content, nullable, True))
+        elif node.is_list:
+            if isinstance(node, ak.contents.ListOffsetArray):
+                spans = bool(
+                    node.offsets[0] == 0 and node.offsets[-1] == node.content.length
+                )
+                child_sliced = sliced or not spans
+            else:
+                child_sliced = True
+            stack.append((node.content, False, child_sliced))
+    return False
 
 
 def has_issue_4229(a: ak.Array) -> bool:
@@ -93,12 +144,39 @@ def has_issue_4241(a: ak.Array) -> bool:
     point (silent corruption).
 
     Only values the writer visits count, as in `_has_infinity` in
-    `test_to_from_json`. Whether a value is affected depends on its
-    digit string, so each float leaf is checked directly against a
-    `from_json` readback (`_issue_4241_at`). Reported:
+    `test_to_from_json`: the walk descends into projected options and
+    indexed nodes, union children by projection, and the spanned part
+    of record fields and list contents. Whether a value is affected
+    depends on its digit string, so each float leaf is checked directly
+    against a `from_json` readback. Reported:
     https://github.com/scikit-hep/awkward/issues/4241
     """
-    return _issue_4241_at(a.layout)
+    stack = [a.layout]
+    while stack:
+        node = stack.pop()
+        if node.is_numpy:
+            if node.dtype.kind != "f":
+                continue
+            # `to_json` serializes the repr of the exact widened double
+            data = np.asarray(node.data, dtype=np.float64)
+            data = data[np.isfinite(data)]
+            if data.size == 0:
+                continue
+            returned = np.asarray(ak.from_json(json.dumps(data.tolist())))
+            if not np.array_equal(returned, data):
+                return True
+        elif node.is_union:
+            stack.extend(node.project(i) for i in range(len(node.contents)))
+        elif node.is_record:
+            stack.extend(c[: node.length] for c in node.contents)
+        elif node.is_option or node.is_indexed:
+            stack.append(node.project())
+        elif node.is_regular:
+            stack.append(node.content[: node.length * node.size])
+        elif node.is_list:
+            node = node.to_ListOffsetArray64(False)
+            stack.append(node.content[node.offsets[0] : node.offsets[-1]])
+    return False
 
 
 def has_issue_4255(a: ak.Array) -> bool:
@@ -108,10 +186,28 @@ def has_issue_4255(a: ak.Array) -> bool:
     an enclosing option as a nullable Arrow null type without the
     revertable stamp, so `from_arrow` cannot strip the option the field
     metadata says it must (`AttributeError` in `remove_optiontype`).
-    The trigger is walked by `_issue_4255_at`. Reported:
+    Each node on the stack carries `nullable`, which tracks whether
+    enclosing option validity reaches the node. Reported:
     https://github.com/scikit-hep/awkward/issues/4255
     """
-    return _issue_4255_at(a.layout)
+    stack = [(a.layout, False)]
+    while stack:
+        node, nullable = stack.pop()
+        if node.is_union:
+            stack.extend((x, False) for x in node.contents)
+        elif node.is_record:
+            stack.extend((x, nullable) for x in node.contents)
+        elif node.is_regular:
+            stack.append((node.content, False))
+        elif node.is_option:
+            stack.append((node.content, True))
+        elif node.is_indexed:
+            if nullable and node.content.is_unknown:
+                return True
+            stack.append((node.content, nullable))
+        elif node.is_list:
+            stack.append((node.content, False))
+    return False
 
 
 def has_issue_4260(a: ak.Array) -> bool:
@@ -507,125 +603,6 @@ def _leaf_families(form: ak.forms.Form) -> set[str]:
         elif not node.is_unknown:
             stack.append(node.content)
     return families
-
-
-def _issue_4228_at(
-    layout: ak.contents.Content,
-    nullable: bool = False,
-    sliced: bool = False,
-) -> bool:
-    """Return `True` if `has_issue_4228`'s trigger is at or below the node.
-
-    `nullable` tracks whether enclosing option validity reaches this node.
-
-    `sliced` tracks whether `to_arrow` reaches this node through a
-    transformation that can drop union elements. A list or regular node
-    counts only when it does not span its whole content, and a record
-    field only when it is longer than the record. Under such a node any
-    null in a masked child of a union, or any masked child with a list
-    below, triggers; at an unsliced union the counts and lengths are
-    compared.
-    """
-    if layout.is_union:
-        if nullable:
-            return True
-        tags = layout.tags.data
-        index = layout.index.data[: len(tags)]
-        for tag, x in enumerate(layout.contents):
-            if not x.is_option or isinstance(x, ak.contents.UnmaskedArray):
-                continue
-            masked_list = _contains_list(x.content)
-            if _null_count(x) == 0 and not masked_list:
-                continue
-            if sliced:
-                return True
-            used = index[tags == tag]
-            length = int(used.max()) + 1 if len(used) else 0
-            if _null_count(x) > length or (masked_list and x.length > length):
-                return True
-        return any(_issue_4228_at(x, False, True) for x in layout.contents)
-    if layout.is_record:
-        return any(
-            _issue_4228_at(x, nullable, sliced or x.length > layout.length)
-            for x in layout.contents
-        )
-    if layout.is_regular:
-        return _issue_4228_at(
-            layout.content,
-            False,
-            sliced or layout.length * layout.size != layout.content.length,
-        )
-    if layout.is_option:
-        return _issue_4228_at(
-            layout.content,
-            True,
-            sliced or isinstance(layout, ak.contents.IndexedOptionArray),
-        )
-    if layout.is_indexed:
-        return _issue_4228_at(layout.content, nullable, True)
-    if layout.is_list:
-        if isinstance(layout, ak.contents.ListOffsetArray):
-            child_sliced = sliced or bool(
-                layout.offsets[0] != 0 or layout.offsets[-1] != layout.content.length
-            )
-        else:
-            child_sliced = True
-        return _issue_4228_at(layout.content, False, child_sliced)
-    return False
-
-
-def _issue_4241_at(layout: ak.contents.Content) -> bool:
-    """Return `True` if `has_issue_4241`'s trigger is at or below the node.
-
-    Descends only into the values the writer visits: projected options
-    and indexed nodes, union children by projection, and the spanned
-    part of record fields and list contents.
-    """
-    if layout.is_numpy:
-        if layout.dtype.kind != "f":
-            return False
-        # `to_json` serializes the repr of the exact widened double
-        data = np.asarray(layout.data, dtype=np.float64)
-        data = data[np.isfinite(data)]
-        if data.size == 0:
-            return False
-        returned = np.asarray(ak.from_json(json.dumps(data.tolist())))
-        return not np.array_equal(returned, data)
-    if layout.is_union:
-        contents = range(len(layout.contents))
-        return any(_issue_4241_at(layout.project(i)) for i in contents)
-    if layout.is_record:
-        return any(_issue_4241_at(c[: layout.length]) for c in layout.contents)
-    if layout.is_option or layout.is_indexed:
-        return _issue_4241_at(layout.project())
-    if layout.is_regular:
-        return _issue_4241_at(layout.content[: layout.length * layout.size])
-    if layout.is_list:
-        layout = layout.to_ListOffsetArray64(False)
-        return _issue_4241_at(layout.content[layout.offsets[0] : layout.offsets[-1]])
-    return False
-
-
-def _issue_4255_at(layout: ak.contents.Content, nullable: bool = False) -> bool:
-    """Return `True` if `has_issue_4255`'s trigger is at or below the node.
-
-    `nullable` tracks whether enclosing option validity reaches this node.
-    """
-    if layout.is_union:
-        return any(_issue_4255_at(x, False) for x in layout.contents)
-    if layout.is_record:
-        return any(_issue_4255_at(x, nullable) for x in layout.contents)
-    if layout.is_regular:
-        return _issue_4255_at(layout.content, False)
-    if layout.is_option:
-        return _issue_4255_at(layout.content, True)
-    if layout.is_indexed:
-        if nullable and layout.content.is_unknown:
-            return True
-        return _issue_4255_at(layout.content, nullable)
-    if layout.is_list:
-        return _issue_4255_at(layout.content, False)
-    return False
 
 
 def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
