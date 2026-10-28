@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        What you're looking for might already be possible as a combination of existing functions, but ask anyway. If what you want can be performed by a combination of existing features, we'll convert this issue into a [Discussion Q&A](https://github.com/scikit-hep/awkward-1.0/discussions/categories/q-a).
+        What you're looking for might already be possible as a combination of existing functions, but ask anyway. If what you want can be performed by a combination of existing features, we'll convert this issue into a [Discussion Q&A](https://github.com/scikit-hep/awkward/discussions/categories/q-a).
 
         The following links might help:
 

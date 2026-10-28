@@ -25,9 +25,10 @@ class CupyBackend(Backend):
         return self._cupy
 
     def __init__(self):
+        super().__init__()
         self._cupy = Cupy.instance()
 
-    def __getitem__(
+    def _new_kernel(
         self, index: KernelKeyType
     ) -> CudaComputeKernel | CupyKernel | NumpyKernel:
         from awkward._connect import cuda
@@ -61,6 +62,7 @@ class CupyBackend(Backend):
     # ---------------------------------------------------------
     def _supports_cuda_compute(self, kernel_name: str) -> bool:
         return kernel_name in (
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
             # core reducers
             "awkward_reduce_sum",
             "awkward_reduce_sumofsquares",
@@ -185,6 +187,7 @@ class CupyBackend(Backend):
         from awkward._connect.cuda import _compute as cuda_compute
 
         return {
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64,
             "awkward_sort": cuda_compute.segmented_sort,
             "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
