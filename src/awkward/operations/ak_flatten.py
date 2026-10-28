@@ -223,7 +223,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
             # A zero-field record or a union that no values reach
             out = ak.contents.EmptyArray(backend=layout.backend)
         else:
-            out = ak._do.mergemany(out)
+            out = ak._do.merge_leaves(out)
 
     elif axis == 0 or maybe_posaxis(layout, axis, 1) == 0:
 
