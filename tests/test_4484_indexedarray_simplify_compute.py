@@ -382,9 +382,12 @@ def prepared_implementation():
                 events.append(("workspace_query",))
                 return 64
             events.append(("reduce", kwargs["num_items"]))
-            kwargs["d_out"][0] = min(
-                [int(kwargs["h_init"]), *kwargs["d_in"][: kwargs["num_items"]]]
-            )
+            result = int(kwargs["h_init"])
+            assert isinstance(kwargs["d_in"], _Counting)
+            assert kwargs["d_in"].start == 0
+            for row in range(kwargs["num_items"]):
+                result = kwargs["op"](result, np.int64(row))
+            kwargs["d_out"][0] = result
             return 64
 
         return launch
@@ -476,9 +479,9 @@ def test_prepared_partial_output_and_scratch(
         assert transforms == [("transform", 1)]
         assert not any(event[0] == "reduce" for event in events)
     else:
-        chunks = (length + 63) // 64
-        assert transforms == [("transform", chunks), ("transform", length)]
-        assert ("allocate", 2 + chunks, np.dtype(np.int64).str) in events
+        assert transforms == [("transform", length)]
+        assert ("reduce", length) in events
+        assert ("allocate", 2, np.dtype(np.int64).str) in events
 
 
 def test_prepared_reuse_lifetimes_and_concurrent_calls(prepared_implementation):
@@ -559,7 +562,6 @@ def test_compact_scratch_and_workspace_sizing_reuse(length, prepared_implementat
     outer = (np.arange(length, dtype=np.int64) % 3).view(buffer)
     inner = np.array([-7, 10, 20], dtype=np.int64).view(buffer)
     output = np.full(length + 3, 123, dtype=np.int64).view(buffer)
-    chunks = (length + 63) // 64
     for iteration in range(2):
         events.clear()
         status = namespace["simplify_status"](output, outer, length, inner, len(inner))
@@ -570,7 +572,7 @@ def test_compact_scratch_and_workspace_sizing_reuse(length, prepared_implementat
             [("allocate", 2, np.dtype(np.int64).str)]
             if length <= 64
             else [
-                ("allocate", 2 + chunks, np.dtype(np.int64).str),
+                ("allocate", 2, np.dtype(np.int64).str),
                 ("allocate", 64, np.dtype(np.uint8).str),
             ]
         )
@@ -578,3 +580,23 @@ def test_compact_scratch_and_workspace_sizing_reuse(length, prepared_implementat
         assert len(queries) == (1 if length > 64 and iteration == 0 else 0)
         np.testing.assert_array_equal(output[:length], inner[outer])
         np.testing.assert_array_equal(output[length:], [123, 123, 123])
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_actual_fused_operator_is_associative(dtype, prepared_implementation):
+    import itertools
+
+    namespace, buffer, _ = prepared_implementation
+    values = np.array([0, 1, 3, 0, 99, 2], dtype=dtype).view(buffer)
+    if dtype is not np.uint32:
+        values[1] = -1
+    setup = namespace["_Simplify"](np.int64, dtype, np.int64, len(values), 3)
+    setup.outer.bind(values)
+    try:
+        domain = range(len(values) + 1)
+        op = setup.combine
+        for a, b, c in itertools.product(domain, repeat=3):
+            assert op(op(a, b), c) == op(a, op(b, c))
+            assert op(a, b) == op(b, a)
+    finally:
+        setup.outer.clear()

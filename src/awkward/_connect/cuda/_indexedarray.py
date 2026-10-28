@@ -8,7 +8,6 @@ from threading import RLock
 from cuda.compute import (
     CountingIterator,
     DiscardIterator,
-    OpKind,
     make_reduce_into,
     make_unary_transform,
 )
@@ -70,7 +69,6 @@ class _Simplify:
         self.outer = outer = _ArrayState(outer_dtype)
         self.inner = inner = _ArrayState(inner_dtype)
         self.status = status = _ArrayState(np.int64)
-        chunk_size = 64
 
         def small(_):
             # CCCL substitutes device arrays for metadata proxies.
@@ -86,14 +84,21 @@ class _Simplify:
                 output[row] = -1 if index < 0 else np.int64(inner[index])
             return np.int8(0)
 
-        def check(chunk):
-            start = chunk * chunk_size
-            stop = min(start + chunk_size, length)
-            for row in range(start, stop):
-                index = np.int64(outer[row])
+        def combine(left, right):
+            # Map valid row numbers to the length sentinel, then take MIN.
+            # The map is idempotent, making this associative/commutative on
+            # row numbers plus the sentinel. No stateful iterator is needed.
+            a = np.int64(length)
+            if left < length:
+                index = np.int64(outer[left])
                 if index >= 0 and index >= innerlength:
-                    return row
-            return np.int64(length)
+                    a = left
+            b = np.int64(length)
+            if right < length:
+                index = np.int64(outer[right])
+                if index >= 0 and index >= innerlength:
+                    b = right
+            return a if a < b else b
 
         def write(row):
             # pylint: disable=unsupported-assignment-operation
@@ -109,9 +114,8 @@ class _Simplify:
                 )
             return np.int8(0)
 
-        self.small, self.check, self.write = small, check, write
+        self.small, self.combine, self.write = small, combine, write
         self.length = length
-        self.chunks = (length + chunk_size - 1) // chunk_size
         self.iterator = CountingIterator(np.int64(0))
         self.discard = DiscardIterator()
         self.transforms = {}
@@ -137,10 +141,9 @@ class _Simplify:
         )
 
     def __call__(self, output, outer, inner, stream):
-        # Scratch belongs to this invocation; prepared state retains only
-        # descriptors. Keep the externally returned status at two int64s.
-        arena = cp.empty(2 if self.length <= 64 else 2 + self.chunks, dtype=cp.int64)
-        status = arena[:2]
+        # Status and reduction workspace belong to this invocation; cached
+        # operators retain only descriptors. The small path remains fused.
+        status = cp.empty(2, dtype=cp.int64)
         states = (self.output, self.outer, self.inner, self.status)
         for state, array in zip(states, (output, outer, inner, status), strict=True):
             state.bind(array)
@@ -148,21 +151,19 @@ class _Simplify:
             if self.length <= 64:
                 self.transform("small", self.small, self.discard, 1, stream)
             else:
-                positions = arena[2:]
-                self.transform("check", self.check, positions, self.chunks, stream)
                 first = status[:1]
                 if self.reducer is None:
-                    self.reduce_operation = make_op_adapter(OpKind.MINIMUM)
+                    self.reduce_operation = make_op_adapter(self.combine)
                     self.reducer = make_reduce_into(
-                        d_in=positions,
+                        d_in=self.iterator,
                         d_out=first,
                         op=self.reduce_operation,
                         h_init=self.initial,
                     )
                 arguments = {
-                    "d_in": positions,
+                    "d_in": self.iterator,
                     "d_out": first,
-                    "num_items": self.chunks,
+                    "num_items": self.length,
                     "op": self.reduce_operation,
                     "h_init": self.initial,
                     "stream": stream,

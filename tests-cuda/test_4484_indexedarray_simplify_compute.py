@@ -121,3 +121,33 @@ def test_prepared_rebinding_and_chunk_boundary(outer_dtype, inner_dtype):
             assert (row, attempt) == (error.id, error.attempt)
         else:
             assert row == length
+
+
+@pytest.mark.parametrize("outer_dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("inner_dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("length", [64, 65, 129, 4096, 4097])
+@pytest.mark.parametrize("nondefault", [False, True])
+def test_fused_dtype_stream_and_rebinding(outer_dtype, inner_dtype, length, nondefault):
+    stream = cp.cuda.Stream(non_blocking=True) if nondefault else cp.cuda.Stream.null
+    key = ("awkward_IndexedArray_simplify", np.int64, outer_dtype, inner_dtype)
+    with stream:
+        kernel = CupyBackend.instance()[key]
+        for error_row in (None, 0, min(64, length - 1), length - 1):
+            for repeat in range(2):
+                outer = (np.arange(length) % 3).astype(outer_dtype)
+                if outer_dtype is not np.uint32:
+                    outer[::5] = -1
+                inner = np.asarray([repeat + 2, repeat + 1, repeat], dtype=inner_dtype)
+                if inner_dtype is not np.uint32:
+                    inner[0] = -7 - repeat
+                if error_row is not None:
+                    outer[error_row] = 3
+                    if error_row < length - 1:
+                        outer[-1] = 99
+                expected = np.full(length + 3, 123, dtype=np.int64)
+                error = NumpyBackend.instance()[key](expected, outer, length, inner, 3)
+                output = cp.full(length + 3, 123, dtype=cp.int64)
+                actual = kernel(output, cp.asarray(outer), length, cp.asarray(inner), 3)
+                contract.assert_error(actual, error)
+                np.testing.assert_array_equal(cp.asnumpy(output), expected)
+        ak._connect.cuda.synchronize_cuda(stream)
