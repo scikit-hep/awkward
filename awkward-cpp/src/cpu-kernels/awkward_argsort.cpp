@@ -67,6 +67,7 @@ ERROR awkward_argsort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
+  // The uncovered suffix retains global identity indices, including zero coverage.
   std::iota(toptr, toptr + length, int64_t{0});
 
   // Each segment of `toptr` is sorted independently.
