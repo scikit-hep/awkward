@@ -9,11 +9,9 @@ from cuda.compute import (
     CountingIterator,
     DiscardIterator,
     OpKind,
-    inclusive_scan,
     make_inclusive_scan,
     make_reduce_into,
     make_unary_transform,
-    reduce_into,
     unary_transform,
 )
 from cuda.compute.op import make_op_adapter
@@ -61,32 +59,6 @@ def _transform(op, length, output=None):
             num_items=length,
             stream=_Stream(),
         )
-
-
-def _scan(values, length, op=OpKind.PLUS):
-    result = cp.empty(length, dtype=cp.int64)
-    if length:
-        inclusive_scan(
-            d_in=values,
-            d_out=result,
-            op=op,
-            init_value=cp.zeros(1, dtype=cp.int64),
-            num_items=length,
-            stream=_Stream(),
-        )
-    return result
-
-
-def _sizes(tags, index, length, pointers):
-    sizes = cp.empty(length, dtype=cp.int64)
-
-    def size(i):
-        pointer = pointers[tags[i]]
-        position = np.int64(index[i])
-        return _load_i64(pointer, position + 1) - _load_i64(pointer, position)
-
-    _transform(size, length, sizes)
-    return sizes
 
 
 class _ArrayState:
@@ -299,48 +271,135 @@ def flatten_combine(
         )
 
 
+class _NestedFill:
+    transform = _Flatten.transform
+    algorithm = _Flatten.algorithm
+
+    def __init__(self, tag_dtype, index_dtype, starts_dtype, counts_dtype, tag, length):
+        self.length = length
+        self.tags = tags = _ArrayState(tag_dtype)
+        self.index = index = _ArrayState(index_dtype)
+        self.scratch = scratch = _ArrayState(starts_dtype)
+        self.counts = counts = _ArrayState(counts_dtype)
+        self.starts = starts = _ArrayState(starts_dtype)
+        self.stops = stops = _ArrayState(starts_dtype)
+        self.positions = positions = _ArrayState(np.int64)
+        self.maxima = maxima = _ArrayState(np.int64)
+        self.serial = serial = _ArrayState(np.int64)
+        self.states = (
+            tags,
+            index,
+            scratch,
+            counts,
+            starts,
+            stops,
+            positions,
+            maxima,
+            serial,
+        )
+
+        def check(row):
+            return np.int64(
+                row > 0 and counts[row] > 0 and starts[row] < maxima[row - 1]
+            )
+
+        def fill(row):
+            # Disjoint rows write in parallel. Overlapping/unordered ranges use
+            # the canonical row order, retaining last-row-wins behavior.
+            # pylint: disable=unsupported-assignment-operation
+            if serial[0] == 0:
+                rank = positions[row - 1] if row else np.int64(0)
+                for item in range(starts[row], stops[row]):
+                    tags[item], index[item] = tag, rank
+                    rank += 1
+            elif row == 0:
+                rank = np.int64(0)
+                for other in range(length):
+                    for item in range(starts[other], stops[other]):
+                        tags[item], index[item] = tag, rank
+                        rank += 1
+            scratch[row] = stops[row]
+            return np.int8(0)
+
+        self.check, self.fill = check, fill
+        self.iterator = CountingIterator(np.int64(0))
+        self.discard = DiscardIterator()
+        self.transforms = {}
+        self.algorithms = {}
+        self.initial = np.asarray(0, dtype=np.int64)
+
+    def run(self, tags, index, scratch, counts):
+        length = self.length
+        # All scratch belongs to this invocation. Snapshot starts before writes.
+        starts = scratch[:length].copy()
+        counts = counts[:length]
+        stops = starts + counts
+        positive = cp.maximum(counts, 0)
+        present_stops = cp.where(counts > 0, stops, 0)
+        positions = cp.empty(length, dtype=cp.int64)
+        maxima = cp.empty(length, dtype=cp.int64)
+        overlap = cp.empty(length, dtype=cp.int64)
+        serial = cp.empty(1, dtype=cp.int64)
+        zero = cp.zeros(1, dtype=cp.int64)
+        arrays = (
+            tags,
+            index,
+            scratch,
+            counts,
+            starts,
+            stops,
+            positions,
+            maxima,
+            serial,
+        )
+        for state, array in zip(self.states, arrays, strict=True):
+            state.bind(array)
+        stream = _Stream()
+        try:
+            for name, source, target, op in (
+                ("positions", positive, positions, OpKind.PLUS),
+                ("maxima", present_stops, maxima, OpKind.MAXIMUM),
+            ):
+                build = {"d_in": source, "d_out": target, "op": op, "init_value": zero}
+                arguments = {**build, "num_items": length, "stream": stream}
+                self.algorithm(name, make_inclusive_scan, build, arguments)
+            self.transform("check", self.check, overlap, stream)
+            build = {
+                "d_in": overlap,
+                "d_out": serial,
+                "op": OpKind.MAXIMUM,
+                "h_init": self.initial,
+            }
+            arguments = {**build, "num_items": length, "stream": stream}
+            self.algorithm("overlap", make_reduce_into, build, arguments)
+            self.transform("fill", self.fill, self.discard, stream)
+        finally:
+            for state in self.states:
+                state.clear()
+
+
+@lru_cache(maxsize=32)
+def _nested_setup(
+    device, context, tag_dtype, index_dtype, starts_dtype, counts_dtype, tag, length
+):
+    return _NestedFill(tag_dtype, index_dtype, starts_dtype, counts_dtype, tag, length)
+
+
+_nested_lock = RLock()
+
+
 def nestedfill_tags_index(totags, toindex, tmpstarts, tag, fromcounts, length):
     if not length:
         return
-    starts = tmpstarts[:length].copy()
-    counts = fromcounts[:length]
-    positions = _scan(cp.maximum(counts, 0), length)
-    stops = starts + counts
-    maxima = _scan(cp.where(counts > 0, stops, 0), length, OpKind.MAXIMUM)
-    # Disjoint ordered ranges admit independent writes. Otherwise retain the
-    # CPU's last-row-wins ordering without atomics or a host synchronization.
-    overlap = cp.zeros(length, dtype=cp.int64)
-
-    def check(i):
-        return np.int64(i > 0 and counts[i] > 0 and starts[i] < maxima[i - 1])
-
-    _transform(check, length, overlap)
-    serial = cp.empty(1, dtype=cp.int64)
-    reduce_into(
-        d_in=overlap,
-        d_out=serial,
-        op=OpKind.MAXIMUM,
-        num_items=length,
-        h_init=np.asarray(0, dtype=np.int64),
-        stream=_Stream(),
-    )
-    parameters = cp.asarray([tag, length], dtype=cp.int64)
-
-    def fill(i):
-        if serial[0] == 0:
-            k = positions[i - 1] if i else np.int64(0)
-            for j in range(starts[i], stops[i]):
-                totags[j] = parameters[0]
-                toindex[j] = k
-                k += 1
-        elif i == 0:
-            k = np.int64(0)
-            for row in range(parameters[1]):
-                for j in range(starts[row], stops[row]):
-                    totags[j] = parameters[0]
-                    toindex[j] = k
-                    k += 1
-        tmpstarts[i] = stops[i]
-        return np.int8(0)
-
-    _transform(fill, length)
+    with _nested_lock:
+        setup = _nested_setup(
+            cp.cuda.runtime.getDevice(),
+            cp.cuda.driver.ctxGetCurrent(),
+            totags.dtype.str,
+            toindex.dtype.str,
+            tmpstarts.dtype.str,
+            fromcounts.dtype.str,
+            int(tag),
+            length,
+        )
+        setup.run(totags, toindex, tmpstarts, fromcounts)

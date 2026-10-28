@@ -145,3 +145,36 @@ def test_prepared_flatten_rebinds_buffers():
             previous.append((outindex, expected + [99] * (10 - len(expected))))
         for output, expected in previous:
             assert output.get().tolist() == expected
+
+
+@pytest.mark.parametrize("overlap", [False, True])
+@pytest.mark.parametrize("length", [3, 65, 1024])
+def test_prepared_nested_rebinding(length, overlap):
+    from awkward._connect.cuda import _unionarray
+
+    retained = []
+    with cp.cuda.Stream(non_blocking=True):
+        for shift in (0, 1):
+            starts = np.arange(length, dtype=np.int64) * (1 if overlap else 4)
+            counts = np.full(length, 3 + shift, dtype=np.int64)
+            counts[length // 2] = -1
+            capacity = int(max(starts + np.maximum(counts, 0))) + 3
+            expected_tags = np.full(capacity, 99, dtype=np.int8)
+            expected_index = np.full(capacity, 99, dtype=np.int64)
+            rank = 0
+            for start, count in zip(starts, counts, strict=True):
+                for item in range(start, start + count):
+                    expected_tags[item], expected_index[item] = 3, rank
+                    rank += 1
+            tags = cp.full(capacity, 99, dtype=cp.int8)
+            index = cp.full(capacity, 99, dtype=cp.int64)
+            scratch = cp.asarray(np.append(starts, 99))
+            _unionarray.nestedfill_tags_index(
+                tags, index, scratch, 3, cp.asarray(counts), length
+            )
+            np.testing.assert_array_equal(tags.get(), expected_tags)
+            np.testing.assert_array_equal(index.get(), expected_index)
+            np.testing.assert_array_equal(scratch.get(), np.append(starts + counts, 99))
+            retained.append((index, expected_index))
+        for index, expected in retained:
+            np.testing.assert_array_equal(index.get(), expected)

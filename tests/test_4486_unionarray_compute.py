@@ -81,6 +81,7 @@ def kernels():
         "lru_cache": lru_cache,
         "RLock": RLock,
         "_flatten_lock": RLock(),
+        "_nested_lock": RLock(),
         "make_op_adapter": lambda op: op,
         "make_unary_transform": lambda **build: transform,
         "make_inclusive_scan": prepared(scan),
@@ -241,3 +242,48 @@ def test_prepared_flatten_rebinding_and_workspace_reuse(kernels):
             combine,
         )
         assert all(state.array is None for state in setup.states)
+
+
+@pytest.mark.parametrize("length", [3, 65, 1024])
+@pytest.mark.parametrize("overlap", [False, True])
+def test_prepared_nested_rebinding_workspace_and_no_upload(kernels, length, overlap):
+    module, _ = kernels
+    retained = []
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("nested fill must not upload host parameters")
+
+    module.cp.asarray = forbidden
+    for shift in (0, 1):
+        starts = np.arange(length, dtype=np.int64) * (1 if overlap else 4)
+        counts = np.full(length, 3 + shift, dtype=np.int64)
+        counts[length // 2] = -1
+        capacity = int(max(starts + np.maximum(counts, 0))) + 3
+        tags = np.full(capacity, 99, dtype=np.int8)
+        index = np.full(capacity, 99, dtype=np.int64)
+        expected_tags, expected_index = tags.copy(), index.copy()
+        rank = 0
+        for start, count in zip(starts, counts, strict=True):
+            for item in range(start, start + count):
+                expected_tags[item], expected_index[item] = 3, rank
+                rank += 1
+        scratch = np.append(starts, 99)
+        module.nestedfill_tags_index(tags, index, scratch, 3, counts, length)
+        np.testing.assert_array_equal(tags, expected_tags)
+        np.testing.assert_array_equal(index, expected_index)
+        np.testing.assert_array_equal(scratch, np.append(starts + counts, 99))
+        retained.append((index, expected_index))
+    assert module.queries == ["scan", "scan", "reduce"]
+    setup = module._nested_setup(
+        0,
+        1,
+        tags.dtype.str,
+        index.dtype.str,
+        scratch.dtype.str,
+        counts.dtype.str,
+        3,
+        length,
+    )
+    assert all(state.array is None for state in setup.states)
+    for actual, expected in retained:
+        np.testing.assert_array_equal(actual, expected)
