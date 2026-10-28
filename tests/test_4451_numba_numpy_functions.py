@@ -115,3 +115,26 @@ def test_record_field():
         return np.sum(array.x)
 
     assert evaluate(ak.Array([{"x": 1}, {"x": 2}])) == 3
+
+
+def test_overload_python_implementations(monkeypatch):
+    from awkward._connect.numba import numpy as overloads
+
+    factories = []
+
+    def capture(function):
+        def register(factory):
+            factories.append(factory)
+            return factory
+
+        return register
+
+    monkeypatch.setattr(numba.extending, "overload", capture)
+    overloads._register_unary(np.prod)
+    overloads._register_axis_dtype(np.sum)
+    array = ak.Array([1, 2, 3])
+    product = factories[0](array.numba_type)
+    total = factories[1](array.numba_type)
+    assert product(array) == 6
+    assert total(array, axis=0, dtype=np.float64) == 6.0
+    assert total(array, dtype=np.float64).dtype == np.dtype(np.float64)
