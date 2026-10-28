@@ -20521,6 +20521,19 @@
           "error": false,
           "message": "",
           "inputs": {
+            "distincts": [0,-1,2,-1,-1,5],
+            "lendistincts": 6,
+            "outlength": 2
+          },
+          "outputs": {
+            "outstarts": [0,3],
+            "outstops": [3,6]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
             "distincts": [],
             "lendistincts": 0,
             "outlength": 0

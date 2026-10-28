@@ -65,6 +65,7 @@ class CupyBackend(Backend):
             "awkward_RegularArray_combinations_64",
             "awkward_RegularArray_getitem_next_array_regularize",
             "awkward_RegularArray_reduce_local_nextparents_64",
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
             # core reducers
             "awkward_reduce_sum",
             "awkward_reduce_sumofsquares",
@@ -192,6 +193,7 @@ class CupyBackend(Backend):
             "awkward_RegularArray_combinations_64": cuda_compute.awkward_RegularArray_combinations_64,
             "awkward_RegularArray_getitem_next_array_regularize": cuda_compute.awkward_RegularArray_getitem_next_array_regularize,
             "awkward_RegularArray_reduce_local_nextparents_64": cuda_compute.awkward_RegularArray_reduce_local_nextparents_64,
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64,
             "awkward_sort": cuda_compute.segmented_sort,
             "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,
