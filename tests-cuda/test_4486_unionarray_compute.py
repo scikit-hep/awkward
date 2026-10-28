@@ -111,3 +111,37 @@ def test_public_flatten():
     source = ak.Array([[1, 2], ["x"], [], [3], ["y", "z"]])
     gpu = ak.to_backend(source, "cuda")
     assert ak.to_list(ak.flatten(gpu)) == ak.to_list(ak.flatten(source))
+
+
+def test_prepared_flatten_rebinds_buffers():
+    from awkward._connect.cuda import _unionarray
+
+    previous = []
+    with cp.cuda.Stream(non_blocking=True):
+        for offsets in ([2, 4, 4], [1, 2, 5]):
+            device_offsets = cp.asarray(offsets, dtype=cp.int64)
+            pointers = cp.asarray([device_offsets.data.ptr], dtype=cp.int64)
+            tags = cp.asarray([0, 0], dtype=cp.int8)
+            index = cp.asarray([1, 0], dtype=cp.int64)
+            total = cp.full(2, 99, dtype=cp.int64)
+            outtags = cp.full(10, 99, dtype=cp.int8)
+            outindex = cp.full(10, 99, dtype=cp.int64)
+            outoffsets = cp.full(4, 99, dtype=cp.int64)
+            _unionarray.flatten_length(total, tags, index, 2, pointers)
+            _unionarray.flatten_combine(
+                outtags, outindex, outoffsets, tags, index, 2, pointers
+            )
+            expected = list(range(offsets[1], offsets[2])) + list(
+                range(offsets[0], offsets[1])
+            )
+            assert total.get().tolist() == [len(expected), 99]
+            assert outindex.get().tolist() == expected + [99] * (10 - len(expected))
+            assert outoffsets.get().tolist() == [
+                0,
+                offsets[2] - offsets[1],
+                len(expected),
+                99,
+            ]
+            previous.append((outindex, expected + [99] * (10 - len(expected))))
+        for output, expected in previous:
+            assert output.get().tolist() == expected

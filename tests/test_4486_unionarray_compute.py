@@ -1,7 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 import ast
+from functools import lru_cache
 from pathlib import Path
+from threading import RLock
 from types import SimpleNamespace
 
 import numpy as np
@@ -41,15 +43,49 @@ def kernels():
         values = kw["d_in"][: kw["num_items"]]
         kw["d_out"][0] = values.sum() if kw["op"] == "sum" else values.max()
 
+    queries = []
+
+    def prepared(function):
+        def factory(**build):
+            def call(*, temp_storage, **arguments):
+                if temp_storage is None:
+                    queries.append(function.__name__)
+                    return 16
+                return function(**arguments)
+
+            return call
+
+        return factory
+
     module = SimpleNamespace(
         **{
             name: getattr(np, name)
-            for name in ("empty", "zeros", "asarray", "maximum", "where", "int64")
+            for name in (
+                "empty",
+                "zeros",
+                "asarray",
+                "maximum",
+                "where",
+                "int64",
+                "uint8",
+            )
         },
-        cuda=SimpleNamespace(get_current_stream=lambda: SimpleNamespace(ptr=123)),
+        cuda=SimpleNamespace(
+            get_current_stream=lambda: SimpleNamespace(ptr=123),
+            runtime=SimpleNamespace(getDevice=lambda: 0),
+            driver=SimpleNamespace(ctxGetCurrent=lambda: 1),
+        ),
     )
     namespace = {
         "cp": module,
+        "lru_cache": lru_cache,
+        "RLock": RLock,
+        "_flatten_lock": RLock(),
+        "make_op_adapter": lambda op: op,
+        "make_unary_transform": lambda **build: transform,
+        "make_inclusive_scan": prepared(scan),
+        "make_reduce_into": prepared(reduce),
+        "queries": queries,
         "np": np,
         "intrinsic": lambda f: f,
         "OpKind": SimpleNamespace(PLUS="sum", MAXIMUM="max"),
@@ -61,6 +97,11 @@ def kernels():
         "_load_i64": lambda address, i: pointers[address][i],
     }
     exec(compile(tree, str(source), "exec"), namespace)
+    state = namespace["_ArrayState"]
+    state.bind = lambda self, array: setattr(self, "array", array)
+    state.clear = lambda self: setattr(self, "array", None)
+    state.__getitem__ = lambda self, index: self.array[index]
+    state.__setitem__ = lambda self, index, value: self.array.__setitem__(index, value)
     return SimpleNamespace(**namespace), pointers
 
 
@@ -158,3 +199,45 @@ def test_pointer_load_native():
     values = np.array([123, -(2**63), 2**63 - 1], dtype=np.int64)
     for i, value in enumerate(values):
         assert read(values.ctypes.data, i) == value
+
+
+def test_prepared_flatten_rebinding_and_workspace_reuse(kernels):
+    module, pointers = kernels
+    previous = []
+    for address, offset_values in ((100, [2, 4, 4]), (200, [1, 2, 5])):
+        pointers[address] = np.array(offset_values, dtype=np.int64)
+        tags = np.array([0, 0], dtype=np.int8)
+        index = np.array([1, 0], dtype=np.int64)
+        table = np.array([address], dtype=np.int64)
+        total = np.full(2, 99, dtype=np.int64)
+        outtags = np.full(10, 99, dtype=np.int8)
+        outindex = np.full(10, 99, dtype=np.int64)
+        outoffsets = np.full(4, 99, dtype=np.int64)
+        module.flatten_length(total, tags, index, 2, table)
+        module.flatten_combine(outtags, outindex, outoffsets, tags, index, 2, table)
+        expected = list(range(offset_values[1], offset_values[2])) + list(
+            range(offset_values[0], offset_values[1])
+        )
+        assert total.tolist() == [len(expected), 99]
+        assert outindex.tolist() == expected + [99] * (10 - len(expected))
+        assert outoffsets.tolist() == [
+            0,
+            offset_values[2] - offset_values[1],
+            len(expected),
+            99,
+        ]
+        previous.append((outindex, outindex.copy()))
+    assert module.queries == ["reduce", "scan", "scan"]
+    for array, snapshot in previous:
+        np.testing.assert_array_equal(array, snapshot)
+    for combine, dtype in ((False, np.int64), (True, np.int8)):
+        setup = module._flatten_setup(
+            0,
+            1,
+            np.dtype(np.int8).str,
+            np.dtype(np.int64).str,
+            np.dtype(dtype).str,
+            2,
+            combine,
+        )
+        assert all(state.array is None for state in setup.states)

@@ -2,14 +2,21 @@
 
 """Union kernels consuming the canonical device-resident int64** offset table."""
 
+from functools import lru_cache
+from threading import RLock
+
 from cuda.compute import (
     CountingIterator,
     DiscardIterator,
     OpKind,
     inclusive_scan,
+    make_inclusive_scan,
+    make_reduce_into,
+    make_unary_transform,
     reduce_into,
     unary_transform,
 )
+from cuda.compute.op import make_op_adapter
 from numba import types
 from numba.extending import intrinsic
 
@@ -82,47 +89,214 @@ def _sizes(tags, index, length, pointers):
     return sizes
 
 
+class _ArrayState:
+    # CCCL rewrites captured CUDA-array-interface objects into device arrays.
+    # These proxies carry launch metadata only; indexing in compiled operators
+    # acts on the replacement arrays, not on this Python class.
+    def __init__(self, dtype):
+        self.dtype = np.dtype(dtype)
+        self.clear()
+
+    def bind(self, array):
+        interface = array.__cuda_array_interface__
+        self.__cuda_array_interface__ = {
+            "shape": tuple(interface["shape"]),
+            "strides": interface.get("strides"),
+            "typestr": interface["typestr"],
+            "data": (interface["data"][0], False),
+            "version": 3,
+        }
+
+    def __len__(self):
+        return self.__cuda_array_interface__["shape"][0]
+
+    def data_ptr(self):
+        return self.__cuda_array_interface__["data"][0]
+
+    def clear(self):
+        self.__cuda_array_interface__ = {
+            "shape": (0,),
+            "strides": None,
+            "typestr": self.dtype.str,
+            "data": (0, False),
+            "version": 3,
+        }
+
+
+class _Flatten:
+    def __init__(self, tag_dtype, index_dtype, output_tag_dtype, length, combine):
+        self.length, self.combine = length, combine
+        self.tags = tags = _ArrayState(tag_dtype)
+        self.index = index = _ArrayState(index_dtype)
+        self.pointers = pointers = _ArrayState(np.int64)
+        self.sizes = sizes = _ArrayState(np.int64)
+        self.offsets = offsets = _ArrayState(np.int64)
+        self.positions = positions = _ArrayState(np.int64)
+        self.outtags = outtags = _ArrayState(output_tag_dtype)
+        self.outindex = outindex = _ArrayState(np.int64)
+        self.outoffsets = outoffsets = _ArrayState(np.int64)
+        self.states = (
+            tags,
+            index,
+            pointers,
+            sizes,
+            offsets,
+            positions,
+            outtags,
+            outindex,
+            outoffsets,
+        )
+
+        def size(row):
+            pointer = pointers[tags[row]]
+            at = np.int64(index[row])
+            return _load_i64(pointer, at + 1) - _load_i64(pointer, at)
+
+        def fill(row):
+            # pylint: disable=unsupported-assignment-operation
+            tag = tags[row]
+            pointer = pointers[tag]
+            at = np.int64(index[row])
+            start, stop = _load_i64(pointer, at), _load_i64(pointer, at + 1)
+            cursor = positions[row - 1] if row else np.int64(0)
+            for item in range(start, stop):
+                outtags[cursor], outindex[cursor] = tag, item
+                cursor += 1
+            outoffsets[row + 1] = offsets[row]
+            return np.int8(0)
+
+        self.size, self.fill = size, fill
+        self.iterator = CountingIterator(np.int64(0))
+        self.discard = DiscardIterator()
+        self.transforms = {}
+        self.algorithms = {}
+        self.initial = np.asarray(0, dtype=np.int64)
+
+    def transform(self, name, operation, output, stream):
+        if name not in self.transforms:
+            adapter = make_op_adapter(operation)
+            self.transforms[name] = (
+                adapter,
+                make_unary_transform(d_in=self.iterator, d_out=output, op=adapter),
+            )
+        adapter, prepared = self.transforms[name]
+        prepared(
+            d_in=self.iterator,
+            d_out=output,
+            op=adapter,
+            num_items=self.length,
+            stream=stream,
+        )
+
+    def algorithm(self, name, factory, build, arguments):
+        if name not in self.algorithms:
+            prepared = factory(**build)
+            storage_bytes = prepared(temp_storage=None, **arguments)
+            self.algorithms[name] = (prepared, storage_bytes)
+        prepared, storage_bytes = self.algorithms[name]
+        storage = cp.empty(storage_bytes, dtype=cp.uint8)
+        prepared(temp_storage=storage, **arguments)
+
+    def run(self, tags, index, pointers, outputs):
+        sizes = cp.empty(self.length, dtype=cp.int64)
+        temporary = [sizes]
+        bindings = [
+            (self.tags, tags),
+            (self.index, index),
+            (self.pointers, pointers),
+            (self.sizes, sizes),
+        ]
+        if self.combine:
+            offsets = cp.empty(self.length, dtype=cp.int64)
+            positions = cp.empty(self.length, dtype=cp.int64)
+            zero = cp.zeros(1, dtype=cp.int64)
+            temporary.extend((offsets, positions, zero))
+            bindings.extend(
+                zip(
+                    (
+                        self.offsets,
+                        self.positions,
+                        self.outtags,
+                        self.outindex,
+                        self.outoffsets,
+                    ),
+                    (offsets, positions, *outputs),
+                    strict=True,
+                )
+            )
+        for state, array in bindings:
+            state.bind(array)
+        stream = _Stream()
+        try:
+            self.transform("sizes", self.size, sizes, stream)
+            if self.combine:
+                positive = cp.maximum(sizes, 0)
+                temporary.append(positive)
+                for name, source, target in (
+                    ("offsets", sizes, offsets),
+                    ("positions", positive, positions),
+                ):
+                    build = {
+                        "d_in": source,
+                        "d_out": target,
+                        "op": OpKind.PLUS,
+                        "init_value": zero,
+                    }
+                    arguments = {**build, "num_items": self.length, "stream": stream}
+                    self.algorithm(name, make_inclusive_scan, build, arguments)
+                self.transform("fill", self.fill, self.discard, stream)
+            else:
+                build = {
+                    "d_in": sizes,
+                    "d_out": outputs[0][:1],
+                    "op": OpKind.PLUS,
+                    "h_init": self.initial,
+                }
+                arguments = {**build, "num_items": self.length, "stream": stream}
+                self.algorithm("total", make_reduce_into, build, arguments)
+        finally:
+            for state in self.states:
+                state.clear()
+
+
+@lru_cache(maxsize=32)
+def _flatten_setup(
+    device, context, tag_dtype, index_dtype, output_tag_dtype, length, combine
+):
+    return _Flatten(tag_dtype, index_dtype, output_tag_dtype, length, combine)
+
+
+_flatten_lock = RLock()
+
+
+def _flatten(fromtags, fromindex, length, offsetsraws, outputs, combine):
+    with _flatten_lock:
+        setup = _flatten_setup(
+            cp.cuda.runtime.getDevice(),
+            cp.cuda.driver.ctxGetCurrent(),
+            fromtags.dtype.str,
+            fromindex.dtype.str,
+            outputs[0].dtype.str,
+            length,
+            combine,
+        )
+        setup.run(fromtags, fromindex, offsetsraws, outputs)
+
+
 def flatten_length(total_length, fromtags, fromindex, length, offsetsraws):
     total_length[:1] = 0
     if length:
-        sizes = _sizes(fromtags, fromindex, length, offsetsraws)
-        reduce_into(
-            d_in=sizes,
-            d_out=total_length[:1],
-            op=OpKind.PLUS,
-            num_items=length,
-            h_init=np.asarray(0, dtype=np.int64),
-            stream=_Stream(),
-        )
+        _flatten(fromtags, fromindex, length, offsetsraws, (total_length,), False)
 
 
 def flatten_combine(
     totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws
 ):
     tooffsets[:1] = 0
-    if not length:
-        return
-    sizes = _sizes(fromtags, fromindex, length, offsetsraws)
-    offsets = _scan(sizes, length)
-    # The CPU advances its carry cursor only for nonempty ranges, even when
-    # an offset pair decreases. Its signed output offsets still include that pair.
-    positions = _scan(cp.maximum(sizes, 0), length)
-
-    def fill(i):
-        tag = fromtags[i]
-        pointer = offsetsraws[tag]
-        position = np.int64(fromindex[i])
-        start = _load_i64(pointer, position)
-        stop = _load_i64(pointer, position + 1)
-        k = positions[i - 1] if i else np.int64(0)
-        for j in range(start, stop):
-            totags[k] = tag
-            toindex[k] = j
-            k += 1
-        tooffsets[i + 1] = offsets[i]
-        return np.int8(0)
-
-    _transform(fill, length)
+    if length:
+        _flatten(
+            fromtags, fromindex, length, offsetsraws, (totags, toindex, tooffsets), True
+        )
 
 
 def nestedfill_tags_index(totags, toindex, tmpstarts, tag, fromcounts, length):
