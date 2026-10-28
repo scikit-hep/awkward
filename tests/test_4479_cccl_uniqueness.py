@@ -298,3 +298,21 @@ def test_compute_closures_use_byte_sized_state(dtype, offsets):
     )
     np.testing.assert_array_equal(values, expected)
     np.testing.assert_array_equal(result_offsets, expected_offsets)
+
+
+@pytest.fixture(autouse=True, params=["native", "callbacks"])
+def exercise_native_and_actual_cuda_callbacks(request, monkeypatch):
+    if request.param == "callbacks":
+        import sys
+
+        from tests.test_4478_cuda_callbacks import load_callbacks
+
+        callbacks = load_callbacks(monkeypatch)
+
+        def host_call(name, arrays, scalars=()):
+            arguments = [*arrays]
+            for position, value in scalars:
+                arguments.insert(position, value)
+            getattr(callbacks, name)(*arguments)
+
+        monkeypatch.setattr(sys.modules[__name__], "call", host_call)

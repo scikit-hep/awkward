@@ -62,6 +62,7 @@ class CupyBackend(Backend):
     # ---------------------------------------------------------
     def _supports_cuda_compute(self, kernel_name: str) -> bool:
         return kernel_name in (
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
             # core reducers
             "awkward_reduce_sum",
             "awkward_reduce_sumofsquares",
@@ -201,6 +202,7 @@ class CupyBackend(Backend):
             "awkward_unique_ranges_bool": cuda_compute.awkward_unique_ranges_bool,
             "awkward_ListOffsetArray_argsort_strings": cuda_compute.awkward_ListOffsetArray_argsort_strings,
             "awkward_NumpyArray_sort_asstrings_uint8": cuda_compute.awkward_NumpyArray_sort_asstrings_uint8,
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64": cuda_compute.awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64,
             "awkward_sort": cuda_compute.segmented_sort,
             "awkward_argsort": cuda_compute.segmented_argsort,
             "awkward_reduce_sum": cuda_compute.awkward_reduce_sum,

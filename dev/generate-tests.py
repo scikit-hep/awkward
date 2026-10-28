@@ -30,6 +30,7 @@ CUDA_COMPUTE_KERNELS = {
     "awkward_unique_ranges_bool",
     "awkward_ListOffsetArray_argsort_strings",
     "awkward_NumpyArray_sort_asstrings_uint8",
+    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListArray_compact_offsets",
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_RegularArray_getitem_next_at",
