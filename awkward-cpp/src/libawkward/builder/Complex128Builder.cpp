@@ -18,10 +18,10 @@ namespace awkward {
 
   const BuilderPtr
   Complex128Builder::fromint64(const BuilderOptions& options,
-                               const GrowableBuffer<int64_t>& old) {
+                               const GrowableBuffer<std::int64_t>& old) {
     return std::make_shared<Complex128Builder>(
       options,
-      std::move(GrowableBuffer<int64_t>::copy_as<std::complex<double>>(old)));
+      std::move(GrowableBuffer<std::int64_t>::copy_as<std::complex<double>>(old)));
   }
 
   const BuilderPtr
@@ -43,12 +43,12 @@ namespace awkward {
   }
 
   const std::string
-  Complex128Builder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  Complex128Builder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     void* ptr = container.empty_buffer(form_key.str() + "-data",
-      (int64_t)buffer_.length() * (int64_t)sizeof(std::complex<double>));
+      (std::int64_t)buffer_.length() * (std::int64_t)sizeof(std::complex<double>));
 
     buffer_.concatenate(reinterpret_cast<std::complex<double>*>(ptr));
 
@@ -56,9 +56,9 @@ namespace awkward {
            + form_key.str() + "\"}";
   }
 
-  int64_t
+  std::int64_t
   Complex128Builder::length() const {
-    return (int64_t)buffer_.length();
+    return (std::int64_t)buffer_.length();
   }
 
   void
@@ -86,7 +86,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  Complex128Builder::integer(int64_t x) {
+  Complex128Builder::integer(std::int64_t x) {
     buffer_.append(std::complex<double>((double)x, 0));
     return nullptr;
   }
@@ -104,21 +104,21 @@ namespace awkward {
   }
 
   const BuilderPtr
-  Complex128Builder::datetime(int64_t x, const std::string& unit) {
+  Complex128Builder::datetime(std::int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
     return out;
   }
 
   const BuilderPtr
-  Complex128Builder::timedelta(int64_t x, const std::string& unit) {
+  Complex128Builder::timedelta(std::int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
     return out;
   }
 
   const BuilderPtr
-  Complex128Builder::string(const char* x, int64_t length, const char* encoding) {
+  Complex128Builder::string(const char* x, std::int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return out;
@@ -139,14 +139,14 @@ namespace awkward {
   }
 
   const BuilderPtr
-  Complex128Builder::begintuple(int64_t numfields) {
+  Complex128Builder::begintuple(std::int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return out;
   }
 
   const BuilderPtr
-  Complex128Builder::index(int64_t /* index */) {
+  Complex128Builder::index(std::int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begin_tuple' at the same level before it")
       + FILENAME(__LINE__));

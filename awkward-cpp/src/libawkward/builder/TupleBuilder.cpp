@@ -22,18 +22,18 @@ namespace awkward {
 
   TupleBuilder::TupleBuilder(const BuilderOptions& options,
                              const std::vector<BuilderPtr>& contents,
-                             int64_t length,
+                             std::int64_t length,
                              bool begun,
-                             size_t nextindex)
+                             std::size_t nextindex)
       : options_(options)
       , contents_(contents)
       , length_(length)
       , begun_(begun)
-      , nextindex_((int64_t)nextindex) { }
+      , nextindex_((std::int64_t)nextindex) { }
 
-  int64_t
+  std::int64_t
   TupleBuilder::numfields() const {
-    return (int64_t)contents_.size();
+    return (std::int64_t)contents_.size();
   }
 
   const std::string
@@ -42,13 +42,13 @@ namespace awkward {
   };
 
   const std::string
-  TupleBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  TupleBuilder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     std::stringstream out;
     out << "{\"class\": \"RecordArray\", \"contents\": [";
-    for (size_t i = 0;  i < contents_.size();  i++) {
+    for (std::size_t i = 0;  i < contents_.size();  i++) {
       if (i != 0) {
         out << ", ";
       }
@@ -58,7 +58,7 @@ namespace awkward {
     return out.str();
   }
 
-  int64_t
+  std::int64_t
   TupleBuilder::length() const {
     return length_;
   }
@@ -112,16 +112,16 @@ namespace awkward {
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
     else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->boolean(x));
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->boolean(x));
     }
     else {
-      contents_[(size_t)nextindex_].get()->boolean(x);
+      contents_[(std::size_t)nextindex_].get()->boolean(x);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  TupleBuilder::integer(int64_t x) {
+  TupleBuilder::integer(std::int64_t x) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->integer(x);
@@ -132,11 +132,11 @@ namespace awkward {
         std::string("called 'integer' immediately after 'begin_tuple'; "
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->integer(x));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->integer(x));
     }
     else {
-      contents_[(size_t)nextindex_].get()->integer(x);
+      contents_[(std::size_t)nextindex_].get()->integer(x);
     }
     return shared_from_this();
   }
@@ -153,11 +153,11 @@ namespace awkward {
         std::string("called 'real' immediately after 'begin_tuple'; "
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->real(x));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->real(x));
     }
     else {
-      contents_[(size_t)nextindex_].get()->real(x);
+      contents_[(std::size_t)nextindex_].get()->real(x);
     }
     return shared_from_this();
   }
@@ -174,17 +174,17 @@ namespace awkward {
         std::string("called 'complex' immediately after 'begin_tuple'; "
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->complex(x));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->complex(x));
     }
     else {
-      contents_[(size_t)nextindex_].get()->complex(x);
+      contents_[(std::size_t)nextindex_].get()->complex(x);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  TupleBuilder::datetime(int64_t x, const std::string& unit) {
+  TupleBuilder::datetime(std::int64_t x, const std::string& unit) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->datetime(x, unit);
@@ -195,17 +195,17 @@ namespace awkward {
         std::string("called 'datetime' immediately after 'begin_tuple'; "
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->datetime(x, unit));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->datetime(x, unit));
     }
     else {
-      contents_[(size_t)nextindex_].get()->datetime(x, unit);
+      contents_[(std::size_t)nextindex_].get()->datetime(x, unit);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  TupleBuilder::timedelta(int64_t x, const std::string& unit) {
+  TupleBuilder::timedelta(std::int64_t x, const std::string& unit) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->timedelta(x, unit);
@@ -216,17 +216,17 @@ namespace awkward {
         std::string("called 'timedelta' immediately after 'begin_tuple'; "
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
-      maybeupdate(nextindex_, contents_[(size_t)nextindex_].get()->timedelta(x, unit));
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
+      maybeupdate(nextindex_, contents_[(std::size_t)nextindex_].get()->timedelta(x, unit));
     }
     else {
-      contents_[(size_t)nextindex_].get()->timedelta(x, unit);
+      contents_[(std::size_t)nextindex_].get()->timedelta(x, unit);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  TupleBuilder::string(const char* x, int64_t length, const char* encoding) {
+  TupleBuilder::string(const char* x, std::int64_t length, const char* encoding) {
     if (!begun_) {
       BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
       out.get()->string(x, length, encoding);
@@ -237,14 +237,14 @@ namespace awkward {
         std::string("called 'string' immediately after 'begin_tuple'; "
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->string(x,
+                  contents_[(std::size_t)nextindex_].get()->string(x,
                                                               length,
                                                               encoding));
     }
     else {
-      contents_[(size_t)nextindex_].get()->string(x, length, encoding);
+      contents_[(std::size_t)nextindex_].get()->string(x, length, encoding);
     }
     return shared_from_this();
   }
@@ -261,12 +261,12 @@ namespace awkward {
         std::string("called 'begin_list' immediately after 'begin_tuple'; "
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->beginlist());
+                  contents_[(std::size_t)nextindex_].get()->beginlist());
     }
     else {
-      contents_[(size_t)nextindex_].get()->beginlist();
+      contents_[(std::size_t)nextindex_].get()->beginlist();
     }
     return shared_from_this();
   }
@@ -285,21 +285,21 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      contents_[(size_t)nextindex_].get()->endlist();
+      contents_[(std::size_t)nextindex_].get()->endlist();
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  TupleBuilder::begintuple(int64_t numfields) {
+  TupleBuilder::begintuple(std::int64_t numfields) {
     if (length_ == -1) {
-      for (int64_t i = 0;  i < numfields;  i++) {
+      for (std::int64_t i = 0;  i < numfields;  i++) {
         contents_.push_back(BuilderPtr(UnknownBuilder::fromempty(options_)));
       }
       length_ = 0;
     }
 
-    if (!begun_  &&  numfields == (int64_t)contents_.size()) {
+    if (!begun_  &&  numfields == (std::int64_t)contents_.size()) {
       begun_ = true;
       nextindex_ = -1;
     }
@@ -314,24 +314,24 @@ namespace awkward {
                     "needs 'index' or 'end_tuple'")
         + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->begintuple(numfields));
+                  contents_[(std::size_t)nextindex_].get()->begintuple(numfields));
     }
     else {
-      contents_[(size_t)nextindex_].get()->begintuple(numfields);
+      contents_[(std::size_t)nextindex_].get()->begintuple(numfields);
     }
     return shared_from_this();
   }
 
   const BuilderPtr
-  TupleBuilder::index(int64_t index) {
+  TupleBuilder::index(std::int64_t index) {
     if (!begun_) {
       throw std::invalid_argument(
         std::string("called 'index' without 'begin_tuple' at the same level before it")
         + FILENAME(__LINE__));
     }
-    else if (index >= (int64_t)contents_.size()) {
+    else if (index >= (std::int64_t)contents_.size()) {
       throw std::invalid_argument(
         std::string("'index' ")
         + std::to_string(index)
@@ -340,11 +340,11 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
-             !contents_[(size_t)nextindex_].get()->active()) {
+             !contents_[(std::size_t)nextindex_].get()->active()) {
       nextindex_ = index;
     }
     else {
-      contents_[(size_t)nextindex_].get()->index(index);
+      contents_[(std::size_t)nextindex_].get()->index(index);
     }
     return shared_from_this();
   }
@@ -357,10 +357,10 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else if (nextindex_ == -1  ||
-             !contents_[(size_t)nextindex_].get()->active()) {
-      for (size_t i = 0;  i < contents_.size();  i++) {
+             !contents_[(std::size_t)nextindex_].get()->active()) {
+      for (std::size_t i = 0;  i < contents_.size();  i++) {
         if (contents_[i].get()->length() == length_) {
-          maybeupdate((int64_t)i, contents_[i].get()->null());
+          maybeupdate((std::int64_t)i, contents_[i].get()->null());
         }
         if (contents_[i].get()->length() != length_ + 1) {
           throw std::invalid_argument(
@@ -372,7 +372,7 @@ namespace awkward {
       begun_ = false;
     }
     else {
-      contents_[(size_t)nextindex_].get()->endtuple();
+      contents_[(std::size_t)nextindex_].get()->endtuple();
     }
     return shared_from_this();
   }
@@ -389,13 +389,13 @@ namespace awkward {
         std::string("called 'begin_record' immediately after 'begin_tuple'; "
                     "needs 'index' or 'end_tuple'") + FILENAME(__LINE__));
     }
-    else if (!contents_[(size_t)nextindex_].get()->active()) {
+    else if (!contents_[(std::size_t)nextindex_].get()->active()) {
       maybeupdate(nextindex_,
-                  contents_[(size_t)nextindex_].get()->beginrecord(name, check)
+                  contents_[(std::size_t)nextindex_].get()->beginrecord(name, check)
                   );
     }
     else {
-      contents_[(size_t)nextindex_].get()->beginrecord(name, check);
+      contents_[(std::size_t)nextindex_].get()->beginrecord(name, check);
     }
     return shared_from_this();
   }
@@ -414,7 +414,7 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      contents_[(size_t)nextindex_].get()->field(key, check);
+      contents_[(std::size_t)nextindex_].get()->field(key, check);
     }
   }
 
@@ -432,15 +432,15 @@ namespace awkward {
         + FILENAME(__LINE__));
     }
     else {
-      contents_[(size_t)nextindex_].get()->endrecord();
+      contents_[(std::size_t)nextindex_].get()->endrecord();
     }
     return shared_from_this();
   }
 
   void
-  TupleBuilder::maybeupdate(int64_t i, const BuilderPtr tmp) {
-    if (tmp  &&  tmp.get() != contents_[(size_t)i].get()) {
-      contents_[(size_t)i] = std::move(tmp);
+  TupleBuilder::maybeupdate(std::int64_t i, const BuilderPtr tmp) {
+    if (tmp  &&  tmp.get() != contents_[(std::size_t)i].get()) {
+      contents_[(std::size_t)i] = std::move(tmp);
     }
   }
 }
