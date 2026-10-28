@@ -2,6 +2,7 @@
 
 """Union kernels consuming the canonical device-resident int64** offset table."""
 
+import ctypes
 from functools import lru_cache
 from threading import RLock
 
@@ -15,8 +16,7 @@ from cuda.compute import (
     unary_transform,
 )
 from cuda.compute.op import make_op_adapter
-from numba import types
-from numba.extending import intrinsic
+from numba_cuda_mlir import cuda as numba_cuda
 
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
@@ -25,21 +25,10 @@ cp = Cupy.instance()._module
 np = Numpy.instance()._module
 
 
-@intrinsic
-def _load_i64(typingctx, address, index):
-    if not all(isinstance(t, types.Integer) for t in (address, index)):
-        return None
-    signature = types.int64(address, index)
-
-    def codegen(context, builder, sig, args):
-        pointer = builder.inttoptr(
-            context.cast(builder, args[0], sig.args[0], types.uintp),
-            context.get_value_type(types.CPointer(types.int64)),
-        )
-        offset = context.cast(builder, args[1], sig.args[1], types.intp)
-        return builder.load(builder.gep(pointer, [offset]))
-
-    return signature, codegen
+@numba_cuda.jit(device=True)
+def _load_i64(address, index):
+    pointer = ctypes.cast(address, ctypes.POINTER(ctypes.c_int64))
+    return pointer[index]
 
 
 class _Stream:

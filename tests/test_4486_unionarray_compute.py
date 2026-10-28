@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 import ast
+import ctypes
 from functools import lru_cache
 from pathlib import Path
 from threading import RLock
@@ -180,22 +181,20 @@ def test_nested(kernels, starts, counts, tag_dtype, index_dtype):
 
 
 def test_pointer_load_native():
-    numba = pytest.importorskip("numba")
-    from numba import types
-    from numba.extending import intrinsic
-
     source = ROOT / "src/awkward/_connect/cuda/_unionarray.py"
-    tree = ast.parse(source.read_text())
-    tree.body = [
-        n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_load_i64"
-    ]
-    namespace = {"types": types, "intrinsic": intrinsic}
-    exec(compile(tree, str(source), "exec"), namespace)
-    load = namespace["_load_i64"]
-
-    @numba.njit
-    def read(address, index):
-        return load(address, index)
+    node = next(
+        n
+        for n in ast.parse(source.read_text()).body
+        if isinstance(n, ast.FunctionDef) and n.name == "_load_i64"
+    )
+    assert ast.unparse(node.decorator_list[0]) == "numba_cuda.jit(device=True)"
+    node.decorator_list = []
+    namespace = {"ctypes": ctypes}
+    exec(
+        compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
+        namespace,
+    )
+    read = namespace["_load_i64"]
 
     values = np.array([123, -(2**63), 2**63 - 1], dtype=np.int64)
     for i, value in enumerate(values):
