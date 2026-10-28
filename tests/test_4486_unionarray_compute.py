@@ -78,6 +78,7 @@ def kernels():
         ),
     )
     namespace = {
+        "__name__": "awkward._connect.cuda._unionarray",
         "cp": module,
         "lru_cache": lru_cache,
         "RLock": RLock,
@@ -189,7 +190,7 @@ def test_pointer_load_native():
     )
     assert ast.unparse(node.decorator_list[0]) == "numba_cuda.jit(device=True)"
     node.decorator_list = []
-    namespace = {"ctypes": ctypes}
+    namespace = {"__name__": "awkward._connect.cuda._unionarray", "ctypes": ctypes}
     exec(
         compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
         namespace,
@@ -289,3 +290,35 @@ def test_prepared_nested_rebinding_workspace_and_no_upload(kernels, length, over
     assert all(state.array is None for state in setup.states)
     for actual, expected in retained:
         np.testing.assert_array_equal(actual, expected)
+
+
+def test_actual_union_proxy_metadata_lifecycle():
+    import awkward as ak
+
+    source = Path(ak.__file__).parent / "_connect/cuda/_unionarray.py"
+    node = next(
+        n
+        for n in ast.parse(source.read_text()).body
+        if isinstance(n, ast.ClassDef) and n.name == "_ArrayState"
+    )
+    namespace = {"__name__": "awkward._connect.cuda._unionarray", "np": np}
+    exec(
+        compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
+        namespace,
+    )
+    state = namespace["_ArrayState"](np.int64)
+    assert len(state) == 0 and state.data_ptr() == 0
+    state.bind(
+        SimpleNamespace(
+            __cuda_array_interface__={
+                "shape": (3,),
+                "strides": None,
+                "typestr": np.dtype(np.int64).str,
+                "data": (4096, False),
+                "version": 3,
+            }
+        )
+    )
+    assert len(state) == 3 and state.data_ptr() == 4096
+    state.clear()
+    assert len(state) == 0 and state.data_ptr() == 0
