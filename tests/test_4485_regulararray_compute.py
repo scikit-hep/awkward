@@ -375,3 +375,48 @@ def test_prepared_regularize_prefix_and_rebinding(implementation, length, bad):
     assert setup.status.array is None
     if length > 64:
         assert setup.storage_bytes == 16
+
+
+def test_real_array_state_metadata_and_release():
+    source = Path(ak.__file__).parent / "_connect/cuda/_regulararray.py"
+    tree = ast.parse(source.read_text())
+    node = next(
+        n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "_ArrayState"
+    )
+    namespace = {"__name__": "awkward._connect.cuda._regulararray", "np": np}
+    exec(
+        compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
+        namespace,
+    )
+    state = namespace["_ArrayState"](np.int64)
+    assert len(state) == 0 and state.data_ptr() == 0
+    interface = {
+        "shape": (4,),
+        "typestr": np.dtype(np.int64).str,
+        "data": (1234, False),
+        "version": 3,
+    }
+    state.bind(SimpleNamespace(__cuda_array_interface__=interface))
+    assert len(state) == 4 and state.data_ptr() == 1234
+    state.clear()
+    assert len(state) == 0 and state.data_ptr() == 0
+
+
+def test_pointer_store_python_body():
+    import ctypes
+
+    source = Path(ak.__file__).parent / "_connect/cuda/_regulararray.py"
+    node = next(
+        n
+        for n in ast.parse(source.read_text()).body
+        if isinstance(n, ast.FunctionDef) and n.name == "_store_i64"
+    )
+    node.decorator_list = []
+    namespace = {"__name__": "awkward._connect.cuda._regulararray", "ctypes": ctypes}
+    exec(
+        compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
+        namespace,
+    )
+    values = np.full(4, 99, dtype=np.int64)
+    namespace["_store_i64"](values[1:].ctypes.data, 1, -(2**63))
+    np.testing.assert_array_equal(values, [99, 99, -(2**63), 99])
