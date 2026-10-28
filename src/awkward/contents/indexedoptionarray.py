@@ -1031,7 +1031,21 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             return True
 
         projected = self.project()
-        return projected._is_unique(negaxis, starts, offsets, outlength)
+        if negaxis is None:
+            return projected._is_unique(negaxis, starts, offsets, outlength)
+
+        # Projection removes missing entries. Remap both kinds of boundaries
+        # into the projected coordinates before descending to the content.
+        nplike = self._index.nplike
+        prefix = nplike.empty(self._index.length + 1, dtype=np.int64)
+        prefix[0] = 0
+        nplike.cumsum(
+            nplike.astype(self._index.data >= 0, np.int64),
+            maybe_out=prefix[1:],
+        )
+        nextstarts = ak.index.Index64(prefix[starts.data], nplike=nplike)
+        nextoffsets = ak.index.Index64(prefix[offsets.data], nplike=nplike)
+        return projected._is_unique(negaxis, nextstarts, nextoffsets, outlength)
 
     def _unique(self, negaxis, starts, offsets, outlength):
         branch, depth = self.branch_depth
