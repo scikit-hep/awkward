@@ -29,13 +29,15 @@ def test_0d_array_operands_match_eager_promotion():
         fused = (cpu.lazy(arr) + s).compute(fuse=True)
         unfused = (cpu.lazy(arr) + s).compute(fuse=False)
 
-        assert eager.layout.content.dtype == expected_dtype
-        assert fused.layout.content.dtype == expected_dtype
-        assert unfused.layout.content.dtype == expected_dtype
+        assert fused.layout.content.dtype == eager.layout.content.dtype
+        assert unfused.layout.content.dtype == eager.layout.content.dtype
 
         assert ak.to_list(eager) == expected_values
         assert ak.to_list(fused) == expected_values
         assert ak.to_list(unfused) == expected_values
+
+        if np.__version__.startswith("2."):
+            assert eager.layout.content.dtype == expected_dtype
 
 
 def test_numpy_scalar_operands_match_eager_promotion():
@@ -56,13 +58,15 @@ def test_numpy_scalar_operands_match_eager_promotion():
         fused = (cpu.lazy(arr) + s).compute(fuse=True)
         unfused = (cpu.lazy(arr) + s).compute(fuse=False)
 
-        assert eager.layout.content.dtype == expected_dtype
-        assert fused.layout.content.dtype == expected_dtype
-        assert unfused.layout.content.dtype == expected_dtype
+        assert fused.layout.content.dtype == eager.layout.content.dtype
+        assert unfused.layout.content.dtype == eager.layout.content.dtype
 
         assert ak.to_list(eager) == expected_values
         assert ak.to_list(fused) == expected_values
         assert ak.to_list(unfused) == expected_values
+
+        if np.__version__.startswith("2."):
+            assert eager.layout.content.dtype == expected_dtype
 
 
 def test_python_scalars_preserve_weak_promotion():
@@ -93,10 +97,13 @@ def test_python_scalars_preserve_weak_promotion():
 def test_non_finite_numpy_scalars():
     f32 = ak.values_astype(ak.Array([[1.0, 2.0], [3.0]]), np.float32)
 
-    # float32 with np.float64 non-finites promotes to float64
+    # float32 with np.float64 non-finites matches eager promotion
     fused_inf64 = (cpu.lazy(f32) + np.float64("inf")).compute(fuse=True)
-    assert fused_inf64.layout.content.dtype == np.float64
+    eager_inf64 = f32 + np.float64("inf")
+    assert fused_inf64.layout.content.dtype == eager_inf64.layout.content.dtype
     assert np.all(np.isinf(fused_inf64))
+    if np.__version__.startswith("2."):
+        assert fused_inf64.layout.content.dtype == np.float64
 
     # float32 with np.float32 non-finites stays float32
     fused_inf32 = (cpu.lazy(f32) + np.float32("inf")).compute(fuse=True)
@@ -110,9 +117,9 @@ def test_non_finite_numpy_scalars():
 
 
 def test_py_scalar_literal_numpy_scalars():
-    assert py_scalar_literal(np.int64(42)) == "np.int64(42)"
-    assert py_scalar_literal(np.float32(1.5)) == "np.float32(1.5)"
-    assert py_scalar_literal(np.float64(1.5)) == "np.float64(1.5)"
+    assert py_scalar_literal(np.int64(42)) == repr(np.int64(42))
+    assert py_scalar_literal(np.float32(1.5)) == repr(np.float32(1.5))
+    assert py_scalar_literal(np.float64(1.5)) == repr(np.float64(1.5))
     assert py_scalar_literal(np.float32("inf")) == "np.float32('inf')"
     assert py_scalar_literal(np.float32("-inf")) == "np.float32('-inf')"
     assert py_scalar_literal(np.float32("nan")) == "np.float32('nan')"
@@ -150,4 +157,5 @@ def test_cuda_infer_out_dtype_with_numpy_scalars():
     op = ns["_fused_op"]
     col_u8 = [ak.values_astype(ak.Array([[1, 2]]), np.uint8)]
     dtype_inferred = cuda_fc._infer_out_dtype(op, col_u8, single=True)
-    assert dtype_inferred == np.int64
+    expected_dtype = (np.zeros(1, dtype=np.uint8) + np.int64(5)).dtype
+    assert dtype_inferred == expected_dtype
