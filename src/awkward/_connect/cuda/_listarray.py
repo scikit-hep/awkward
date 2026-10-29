@@ -78,8 +78,10 @@ def _first_error(codes):
     def position(i):
         return i if codes[i] != 0 else np.int64(codes.size)
 
+    iterator = CountingIterator(np.int64(0))
     reduce_into(
-        d_in=TransformIterator(CountingIterator(np.int64(0)), position),
+        # CCCL 1.3 cannot infer the return type of stateful operators.
+        d_in=TransformIterator(iterator, position, value_type=iterator.value_type),
         d_out=result,
         op=OpKind.MINIMUM,
         h_init=np.asarray(codes.size, dtype=np.int64),
@@ -231,8 +233,9 @@ def next_array(
         return starts.size * stride
 
     first = cp.empty(1, dtype=cp.int64)
+    iterator = CountingIterator(np.int64(0))
     reduce_into(
-        d_in=TransformIterator(CountingIterator(np.int64(0)), check),
+        d_in=TransformIterator(iterator, check, value_type=iterator.value_type),
         d_out=first,
         op=OpKind.MINIMUM,
         h_init=np.asarray(lenstarts * (lenarray + 1), dtype=np.int64),
@@ -444,7 +447,7 @@ def _apply_error(status):
         messages[code].encode(),
         row,
         attempt,
-        b"cuda.compute (awkward_ListArray_getitem_jagged_apply)",
+        b"(cuda.compute: awkward_ListArray_getitem_jagged_apply)",
     )
 
 

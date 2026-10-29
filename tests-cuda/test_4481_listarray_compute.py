@@ -414,3 +414,23 @@ def test_returned_error_public_format():
         "(in compiled code: cuda.compute: awkward_ListArray_getitem_next_at)"
     )
     assert "while attempting to get index 5" in message
+
+
+def test_prepared_jagged_apply_public_error_format():
+    key = ("awkward_ListArray_getitem_jagged_apply", *([np.int64] * 7))
+    kernel = CupyBackend.instance()[key]
+    arrays = [
+        cp.full(4, 123, dtype=cp.int64),
+        cp.full(3, 123, dtype=cp.int64),
+        cp.asarray([1, 2, 0], dtype=cp.int64),
+        cp.asarray([0, 2, 5], dtype=cp.int64),
+        cp.asarray([2, 5, 6], dtype=cp.int64),
+        cp.asarray([0, 2, 2], dtype=cp.int64),
+        cp.asarray([2, 2, 3], dtype=cp.int64),
+    ]
+    error = kernel(*arrays, 3, 3, 6)
+    assert (error.id, error.attempt) == (0, 2)
+    assert CupyBackend.instance().format_kernel_error(error) == (
+        "index out of range while attempting to get index 2 "
+        "(in compiled code: cuda.compute: awkward_ListArray_getitem_jagged_apply)"
+    )

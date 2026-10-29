@@ -114,6 +114,7 @@ class _DeviceArray(np.ndarray):
 class _Counting:
     def __init__(self, start):
         self.start = start
+        self.value_type = np.dtype(type(start))
 
 
 class _Discard:
@@ -121,7 +122,10 @@ class _Discard:
 
 
 class _Transformed:
-    def __init__(self, iterator, operation):
+    def __init__(self, iterator, operation, *, value_type):
+        # Match CCCL 1.3's stateful-op limitation instead of inferring a type
+        # in host emulation and masking a GPU-only constructor failure.
+        assert value_type == iterator.value_type
         self.iterator, self.operation = iterator, operation
 
     def __getitem__(self, index):
@@ -1324,3 +1328,19 @@ def test_generated_adapter_checks_actual_public_error_format(implementation):
     assert re.fullmatch(
         legacy, "bad index in compiled CUDA code (awkward_IndexedArray_validity)"
     )
+
+
+@pytest.mark.parametrize("code", range(5))
+def test_prepared_jagged_apply_uses_public_error_format(code, implementation):
+    # Exercise the separate prepared-status decoder, not just the fallback
+    # _error helper: GPU dispatch uses this decoder for jagged application.
+    attempt = -5 if code in (1, 4) else ak._util.kSliceNone
+    status = np.array([2 * 5 + code, attempt], dtype=np.int64).view(_DeviceArray)
+    error = implementation["_apply_error"](status)
+    assert (error.id, error.attempt) == (2, attempt)
+    message = NumpyBackend.instance().format_kernel_error(error)
+    suffix = " (in compiled code: cuda.compute: awkward_ListArray_getitem_jagged_apply)"
+    expected = error.str.decode()
+    if attempt != ak._util.kSliceNone:
+        expected += f" while attempting to get index {attempt}"
+    assert message == expected + suffix
