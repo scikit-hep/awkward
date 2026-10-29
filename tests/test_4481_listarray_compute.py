@@ -1344,3 +1344,34 @@ def test_prepared_jagged_apply_uses_public_error_format(code, implementation):
     if attempt != ak._util.kSliceNone:
         expected += f" while attempting to get index {attempt}"
     assert message == expected + suffix
+
+
+def test_gpu_error_format_regression_uses_canonical_argument_order(implementation):
+    # Execute the GPU regression's actual function with host array substitutes.
+    # This checks its full call wiring, including interleaved scalar arguments.
+    path = ROOT / "tests-cuda/test_4481_listarray_compute.py"
+    function = next(
+        node
+        for node in ast.parse(path.read_text()).body
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "test_prepared_jagged_apply_public_error_format"
+    )
+
+    class Backend:
+        def __getitem__(self, key):
+            assert key == ("awkward_ListArray_getitem_jagged_apply", *([np.int64] * 7))
+            return implementation["jagged_apply"]
+
+        def format_kernel_error(self, error):
+            return NumpyBackend.instance().format_kernel_error(error)
+
+    namespace = {
+        "np": np,
+        "cp": np,
+        "CupyBackend": SimpleNamespace(instance=Backend),
+    }
+    exec(
+        compile(ast.Module(body=[function], type_ignores=[]), str(path), "exec"),
+        namespace,
+    )
+    namespace[function.name]()
