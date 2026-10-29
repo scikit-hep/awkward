@@ -33,6 +33,7 @@ FUNCTIONS = {
     "awkward_ListArray_getitem_jagged_apply": "jagged_apply",
     "awkward_ListArray_getitem_jagged_shrink": "jagged_shrink",
     "awkward_ListArray_rpad_axis1": "rpad",
+    "awkward_ListArray_rpad_and_clip_length_axis1": "awkward_ListArray_rpad_and_clip_length_axis1",
     "awkward_ListArray_getitem_next_range_spreadadvanced": "spreadadvanced",
     "awkward_ListArray_getitem_next_range": "next_range",
     "awkward_ListArray_getitem_next_range_carrylength": "awkward_ListArray_getitem_next_range_carrylength",
@@ -119,6 +120,14 @@ class _Discard:
     pass
 
 
+class _Transformed:
+    def __init__(self, iterator, operation):
+        self.iterator, self.operation = iterator, operation
+
+    def __getitem__(self, index):
+        return [self.operation(self.iterator.start + i) for i in range(index.stop)]
+
+
 def host_implementation():
     def array_factory(function):
         def allocate(*args, **kwargs):
@@ -133,6 +142,7 @@ def host_implementation():
         },
         int64=np.int64,
         maximum=np.maximum,
+        sum=np.sum,
         cuda=SimpleNamespace(get_current_stream=lambda: SimpleNamespace(ptr=123)),
     )
 
@@ -168,6 +178,7 @@ def host_implementation():
         "_kSliceNone": ak._util.kSliceNone,
         "_SLICE_NONE": ak._util.kSliceNone,
         "CountingIterator": _Counting,
+        "TransformIterator": _Transformed,
         "DiscardIterator": _Discard,
         "OpKind": SimpleNamespace(PLUS=0, MINIMUM=1),
         "unary_transform": transform,
@@ -189,7 +200,11 @@ def host_implementation():
         for node in tree.body
         if isinstance(node, ast.FunctionDef)
         and node.name
-        in ("_make_count_row", "awkward_ListArray_getitem_next_range_carrylength")
+        in (
+            "_make_count_row",
+            "awkward_ListArray_getitem_next_range_carrylength",
+            "awkward_ListArray_rpad_and_clip_length_axis1",
+        )
     ]
     exec(
         compile(ast.Module(body=body, type_ignores=[]), str(source), "exec"), namespace
@@ -383,6 +398,7 @@ def prepared_implementation():
         "np": np,
         "cp": SimpleNamespace(
             empty=empty,
+            asarray=lambda values, dtype: np.asarray(values, dtype=dtype).view(Buffer),
             int64=np.int64,
             uint8=np.uint8,
             cuda=SimpleNamespace(
@@ -1175,3 +1191,136 @@ def test_prepared_descriptor_rebinding_and_clear(prepared_implementation):
     state.clear()
     assert len(state) == 0
     assert state.data_ptr() == 0
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_padding_decreasing_offsets_preserves_guard_buffers(dtype, implementation):
+    # A view makes writes before/after the declared output observable.
+    for backend in ("cpu", "callbacks"):
+        guard = np.full(8, 123, dtype=np.int64)
+        starts = np.array([5], dtype=dtype)
+        stops = np.array([2], dtype=dtype)
+        outstarts, outstops = np.full(1, 123, dtype=dtype), np.full(1, 123, dtype=dtype)
+        args = (guard[3:5], starts, stops, outstarts, outstops, 2, 1)
+        if backend == "cpu":
+            error = NumpyBackend.instance()[
+                ("awkward_ListArray_rpad_axis1", np.int64, dtype, dtype, dtype, dtype)
+            ](*args)
+            assert error.str is None
+        else:
+            implementation["rpad"](*args)
+        np.testing.assert_array_equal(guard, [123, 123, 123, -1, -1, 123, 123, 123])
+        np.testing.assert_array_equal(outstarts, [0])
+        np.testing.assert_array_equal(outstops, [2])
+
+
+def test_returned_error_uses_public_formatter(implementation):
+    error = implementation["next_at"](
+        np.full(1, 123), np.array([0]), np.array([2]), 1, 5
+    )
+    message = NumpyBackend.instance().format_kernel_error(error)
+    assert message == (
+        "index out of range while attempting to get index 5 "
+        "(in compiled code: cuda.compute: awkward_ListArray_getitem_next_at)"
+    )
+
+
+def test_prepared_setup_reused_across_lengths_and_values(
+    prepared_implementation, implementation
+):
+    namespace, buffer, events = prepared_implementation
+    namespace["_setup"].cache_clear()
+    prepare_counts = []
+    for rows, width in [(2, 3), (129, 4), (4, 5), (129, 4)]:
+        starts = np.arange(rows, dtype=np.int64) * width
+        output = np.full(rows * width + 3, 123, dtype=np.int64)
+        args = [
+            output.copy(),
+            output.copy(),
+            np.arange(width + 1, dtype=np.int64),
+            output.copy(),
+            starts,
+            starts + width,
+            width,
+            rows,
+        ]
+        device = [x.view(buffer) if isinstance(x, np.ndarray) else x for x in args]
+        assert (
+            run_prepared(
+                namespace,
+                implementation,
+                "awkward_ListArray_getitem_jagged_expand",
+                device,
+            )
+            is None
+        )
+        np.testing.assert_array_equal(
+            device[3][: rows * width], np.arange(rows * width)
+        )
+        prepare_counts.append(sum(event[0] == "prepare" for event in events))
+    info = namespace["_setup"].cache_info()
+    assert (info.misses, info.hits) == (1, 3)
+    # Reusing a previously visited length needs no transform preparation.
+    assert prepare_counts[-1] == prepare_counts[-2]
+
+
+def test_device_closures_do_not_capture_runtime_integers():
+    for filename in ("_listarray_prepared.py", "_listarray_slicing.py"):
+        tree = ast.parse((CUDA_SOURCE / filename).read_text())
+        dynamic = {
+            "length",
+            "lencontent",
+            "inner_length",
+            "content_length",
+            "start",
+            "stop",
+            "step",
+            "size",
+            "capacity",
+        }
+        for cls in (node for node in tree.body if isinstance(node, ast.ClassDef)):
+            for init in (
+                node
+                for node in cls.body
+                if isinstance(node, ast.FunctionDef) and node.name == "__init__"
+            ):
+                for op in (
+                    node for node in init.body if isinstance(node, ast.FunctionDef)
+                ):
+                    loads = {
+                        node.id
+                        for node in ast.walk(op)
+                        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+                    }
+                    stores = {
+                        node.id
+                        for node in ast.walk(op)
+                        if isinstance(node, ast.Name)
+                        and isinstance(node.ctx, ast.Store)
+                    }
+                    assert not (loads - stores) & dynamic, (filename, cls.name, op.name)
+
+
+def test_generated_adapter_checks_actual_public_error_format(implementation):
+    import re
+    import runpy
+
+    generator = runpy.run_path(str(ROOT / "dev/generate-tests.py"))
+    namespace = {"re": re, "cupy_backend": NumpyBackend.instance()}
+    exec(generator["CUDA_CHECK_ERROR_HELPER"], namespace)
+    error = implementation["next_at"](
+        np.full(1, 123), np.array([0]), np.array([2]), 1, 5
+    )
+    checked = namespace["_checked_kernel"](lambda: error)
+    name = "awkward_ListArray_getitem_next_at"
+    pattern = namespace["_cuda_error_pattern"]("index out of range", name)
+    with pytest.raises(ValueError, match=pattern) as caught:
+        checked()
+    assert str(caught.value) == NumpyBackend.instance().format_kernel_error(error)
+    assert not re.match(pattern, str(caught.value) + " extra text")
+    legacy = namespace["_cuda_error_pattern"](
+        "bad index", "awkward_IndexedArray_validity"
+    )
+    assert re.fullmatch(
+        legacy, "bad index in compiled CUDA code (awkward_IndexedArray_validity)"
+    )

@@ -2104,9 +2104,11 @@ kernels:
           for i in range(length):
               tostarts[i] = offset
               rangeval = fromstops[i] - fromstarts[i]
+              # Decreasing intervals contain no elements to copy. Padding
+              # starts at zero, never at a negative output index.
               for j in range(rangeval):
                   toindex[offset + j] = fromstarts[i] + j
-              for j in range(rangeval, target):
+              for j in range(max(0, rangeval), target):
                   toindex[offset + j] = -1
               offset = tostarts[i] + target if target > rangeval else tostarts[i] + rangeval
               tostops[i] = offset

@@ -60,10 +60,18 @@ CUDA_CHECK_ERROR_HELPER = """def _checked_kernel(kernel):
     def checked(*args):
         error = kernel(*args)
         if error is not None and error.str is not None:
-            message = error.str.decode(errors="surrogateescape")
-            raise ValueError(f"{message} in compiled CUDA code ({kernel.key[0]})")
+            raise ValueError(cupy_backend.format_kernel_error(error))
         return error
     return checked
+
+
+"""
+CUDA_CHECK_ERROR_HELPER += f"""def _cuda_error_pattern(message, name):
+    if name in {tuple(sorted(CUDA_RETURN_ERROR_KERNELS))!r}:
+        return ("^" + re.escape(message)
+                + r"(?: while attempting to get index -?[0-9]+)?"
+                + re.escape(f" (in compiled code: cuda.compute: {{name}})") + "$")
+    return "^" + re.escape(f"{{message}} in compiled CUDA code ({{name}})") + "$"
 
 
 """
@@ -1407,7 +1415,7 @@ def gencudaunittests_new(specdict):
             if spec.templatized_kernel_name in CUDA_COMPUTE_KERNELS:
                 f.write(
                     "\n    if case['error']:\n"
-                    "        error_message = re.escape(case['message'])\n"
+                    f"        error_message = _cuda_error_pattern(case['message'], {spec.templatized_kernel_name!r})\n"
                     "        with pytest.raises(ValueError, match=error_message):\n"
                     f"            funcC_{spec.name}({args_str})\n"
                     "        return\n"
@@ -1639,7 +1647,7 @@ def gencudaunittests(specdict):
                         )
 
                         if test["error"]:
-                            error_message_line = f'    error_message = re.escape("{test["message"]} in compiled CUDA code ({spec.templatized_kernel_name})")\n'
+                            error_message_line = f"    error_message = _cuda_error_pattern({test['message']!r}, {spec.templatized_kernel_name!r})\n"
                             if raises_error_eagerly:
                                 # call a kernel directly inside `pytest.raises()`
                                 f.write(

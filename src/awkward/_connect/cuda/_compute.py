@@ -2498,7 +2498,9 @@ def awkward_ListArray_rpad_and_clip_length_axis1(
     if lenstarts == 0:
         tomin[:1] = 0
         return
-    counts = fromstops[:lenstarts] - fromstarts[:lenstarts]
+    counts = fromstops[:lenstarts].astype(cp.int64) - fromstarts[:lenstarts].astype(
+        cp.int64
+    )
     tomin[:1] = cp.sum(cp.maximum(counts, target)).astype(tomin.dtype, copy=False)
 
 

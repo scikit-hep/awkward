@@ -337,3 +337,80 @@ def test_prepared_range_parallel_gpu(dtype, rows, width, start, stop, step):
         for i in (0, 1):
             np.testing.assert_array_equal(cp.asnumpy(gpu[i]), args[i])
         ak._connect.cuda.synchronize_cuda(stream)
+
+
+@pytest.mark.parametrize("bad_index", [None, 0, 65536, 131071])
+def test_few_rows_long_index_array(bad_index):
+    rows, width = 4, 131072
+    indices = np.arange(width, dtype=np.int64)
+    if bad_index is not None:
+        indices[bad_index] = width
+    starts = np.arange(rows, dtype=np.int64) * width
+    expected = [np.full(rows * width + 3, 123, dtype=np.int64) for _ in range(2)]
+    args = [*expected, starts, starts + width, indices, rows, width, rows * width]
+    device = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+    key = ("awkward_ListArray_getitem_next_array", *([np.int64] * 5))
+    error = NumpyBackend.instance()[key](*args)
+    actual = CupyBackend.instance()[key](*device)
+    contract.assert_error(actual, error)
+    for i in (0, 1):
+        np.testing.assert_array_equal(cp.asnumpy(device[i]), expected[i])
+
+
+def test_varying_shapes_reuse_prepared_setup():
+    from awkward._connect.cuda import _listarray_prepared as prepared
+    from awkward._connect.cuda import _listarray_slicing as slicing
+
+    prepared._setup.cache_clear()
+    slicing._setup.cache_clear()
+    stream = cp.cuda.Stream(non_blocking=True)
+    with stream:
+        for rows, width in [(2, 3), (129, 4), (4, 5), (129, 4)]:
+            cpu = ak.Array(
+                ak.contents.ListArray(
+                    ak.index.Index64(np.arange(rows, dtype=np.int64) * width),
+                    ak.index.Index64(np.arange(1, rows + 1, dtype=np.int64) * width),
+                    ak.contents.NumpyArray(np.arange(rows * width)),
+                )
+            )
+            array = ak.to_backend(cpu, "cuda")
+            for slc in (slice(None, None, -1), slice(1, None), slice(None, None, 2)):
+                assert array[:, slc].to_list() == cpu[:, slc].to_list()
+            jagged = [[0, -1] for _ in range(rows)]
+            assert array[jagged].to_list() == cpu[jagged].to_list()
+        stream.synchronize()
+    # Slice parameters and lengths must not be setup/JIT specialization keys.
+    assert slicing._setup.cache_info().misses == 2  # apply and range
+    assert slicing._setup.cache_info().hits > 2
+
+
+def test_decreasing_padding_offsets_guard_buffers():
+    from awkward._connect.cuda._listarray import rpad
+
+    stream = cp.cuda.Stream(non_blocking=True)
+    with stream:
+        for dtype in (np.int32, np.uint32, np.int64):
+            guard = cp.full(8, 123, dtype=cp.int64)
+            starts, stops = cp.asarray([5], dtype=dtype), cp.asarray([2], dtype=dtype)
+            outstarts, outstops = cp.empty(1, dtype=dtype), cp.empty(1, dtype=dtype)
+            rpad(guard[3:5], starts, stops, outstarts, outstops, 2, 1)
+            np.testing.assert_array_equal(
+                cp.asnumpy(guard), [123, 123, 123, -1, -1, 123, 123, 123]
+            )
+
+
+def test_returned_error_public_format():
+    key = ("awkward_ListArray_getitem_next_at", *([np.int64] * 3))
+    kernel = CupyBackend.instance()[key]
+    error = kernel(
+        cp.empty(1, dtype=cp.int64),
+        cp.asarray([0], dtype=cp.int64),
+        cp.asarray([2], dtype=cp.int64),
+        1,
+        5,
+    )
+    message = CupyBackend.instance().format_kernel_error(error)
+    assert message.endswith(
+        "(in compiled code: cuda.compute: awkward_ListArray_getitem_next_at)"
+    )
+    assert "while attempting to get index 5" in message

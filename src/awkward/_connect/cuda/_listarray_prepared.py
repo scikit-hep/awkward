@@ -59,6 +59,7 @@ class _ArrayState:
 class _Prepared:
     def __init__(self, length, kind, initial, chunk_size=64):
         self.length = length
+        self.chunk_size = chunk_size
         self.chunks = (length + chunk_size - 1) // chunk_size
         self.iterator = CountingIterator(np.int64(0))
         self.discard = DiscardIterator()
@@ -67,6 +68,20 @@ class _Prepared:
         self.reduce_storage_bytes = None
         self.reduce_operation = make_op_adapter(kind)
         self.initial = np.asarray(initial, dtype=np.int64)
+        self.runtime = _ArrayState(np.int64)
+        self.runtime_array = None
+        self.workspace_sizes = {}
+
+    def configure(self, length, parameter, capacity=0):
+        self.length = length
+        self.chunks = (length + self.chunk_size - 1) // self.chunk_size
+        self.runtime_values = (length, parameter)
+        if isinstance(self, _Spread):
+            self.runtime_values = (length, capacity)
+        else:
+            self.initial = np.asarray(length, dtype=np.int64)
+        if isinstance(self, _Jagged):
+            self.items = max(1, length * max(parameter, 0))
 
     def transform(self, name, operation, output, length, stream):
         if name not in self.transforms:
@@ -106,18 +121,29 @@ class _Prepared:
             "h_init": self.initial,
             "stream": stream,
         }
-        if self.reduce_storage_bytes is None:
-            self.reduce_storage_bytes = self.reducer(temp_storage=None, **arguments)
+        if self.chunks not in self.workspace_sizes:
+            if len(self.workspace_sizes) >= 32:
+                self.workspace_sizes.pop(next(iter(self.workspace_sizes)))
+            self.workspace_sizes[self.chunks] = self.reducer(
+                temp_storage=None, **arguments
+            )
+        self.reduce_storage_bytes = self.workspace_sizes[self.chunks]
         storage = cp.empty(self.reduce_storage_bytes, dtype=cp.uint8)
         self.reducer(temp_storage=storage, **arguments)
 
     def bind(self, arrays):
+        # Values vary per invocation; only dtype/rank enter CCCL's JIT key.
+        # Retain the upload until all dependent work has been enqueued.
+        self.runtime_array = cp.asarray(self.runtime_values, dtype=cp.int64)
+        self.runtime.bind(self.runtime_array)
         for state, array in zip(self.states, arrays, strict=True):
             state.bind(array)
 
     def clear(self):
         for state in self.states:
             state.clear()
+        self.runtime.clear()
+        self.runtime_array = None
 
 
 class _Advanced(_Prepared):
@@ -128,18 +154,26 @@ class _Advanced(_Prepared):
         )
         carry, advanced, starts, stops, indices, previous, first, status = self.states
 
+        runtime = self.runtime
+        self.runtime_values = (
+            length,
+            lencontent,
+        )
+
         def check(chunk):
-            for row in range(chunk * chunk_size, min((chunk + 1) * chunk_size, length)):
+            for row in range(
+                chunk * chunk_size, min((chunk + 1) * chunk_size, runtime[0])
+            ):
                 start = np.int64(starts[row])
                 stop = np.int64(stops[row])
-                if stop < start or (start != stop and stop > lencontent):
+                if stop < start or (start != stop and stop > runtime[1]):
                     return row
                 index = indices[previous[row]]
                 size = stop - start
                 regular = index + size if index < 0 else index
                 if regular < 0 or regular >= size:
                     return row
-            return np.int64(length)
+            return np.int64(runtime[0])
 
         def write(row):
             # CCCL replaces metadata proxies with device arrays.
@@ -155,13 +189,13 @@ class _Advanced(_Prepared):
             if row == 0:
                 status[0] = boundary
                 status[1] = np.int64(9223372036854775807)
-                if boundary < length:
+                if boundary < runtime[0]:
                     start = np.int64(starts[boundary])
                     stop = np.int64(stops[boundary])
                     if stop < start:
                         status[0] = -(boundary + 1)
                         status[1] = 1
-                    elif start != stop and stop > lencontent:
+                    elif start != stop and stop > runtime[1]:
                         status[0] = -(boundary + 1)
                         status[1] = 2
                     else:
@@ -169,16 +203,16 @@ class _Advanced(_Prepared):
             return np.int8(0)
 
         def small(_):
-            status[0] = length
+            status[0] = runtime[0]
             status[1] = np.int64(9223372036854775807)
-            for row in range(length):
+            for row in range(runtime[0]):
                 start = np.int64(starts[row])
                 stop = np.int64(stops[row])
                 if stop < start:
                     status[0] = -(row + 1)
                     status[1] = 1
                     break
-                if start != stop and stop > lencontent:
+                if start != stop and stop > runtime[1]:
                     status[0] = -(row + 1)
                     status[1] = 2
                     break
@@ -217,49 +251,57 @@ class _Jagged(_Prepared):
         self.states = tuple(_ArrayState(dtype) for dtype in (*dtypes, np.int64))
         multistarts, multistops, single, carry, starts, stops, status = self.states
 
+        runtime = self.runtime
+        self.runtime_values = (
+            length,
+            size,
+        )
+
         def check(chunk):
-            for row in range(chunk * chunk_size, min((chunk + 1) * chunk_size, length)):
+            for row in range(
+                chunk * chunk_size, min((chunk + 1) * chunk_size, runtime[0])
+            ):
                 start = np.int64(starts[row])
                 stop = np.int64(stops[row])
-                if stop < start or stop - start != size:
+                if stop < start or stop - start != runtime[1]:
                     return row
-            return np.int64(length)
+            return np.int64(runtime[0])
 
         def write(k):
             boundary = status[2]
-            if size > 0:
-                row = k // size
-                j = k % size
+            if runtime[1] > 0:
+                row = k // runtime[1]
+                j = k % runtime[1]
                 if row < boundary:
                     multistarts[k] = single[j]
                     multistops[k] = single[j + 1]
                     carry[k] = np.int64(starts[row]) + j
             if k == 0:
-                status[0] = length
+                status[0] = runtime[0]
                 status[1] = np.int64(9223372036854775807)
-                if boundary < length:
+                if boundary < runtime[0]:
                     status[0] = -(boundary + 1)
                     status[1] = 1 if stops[boundary] < starts[boundary] else 2
             return np.int8(0)
 
         def small(k):
-            boundary = length
-            for row in range(length):
+            boundary = runtime[0]
+            for row in range(runtime[0]):
                 start = np.int64(starts[row])
                 stop = np.int64(stops[row])
-                if stop < start or stop - start != size:
+                if stop < start or stop - start != runtime[1]:
                     boundary = row
                     break
-            if size > 0:
-                row, j = k // size, k % size
+            if runtime[1] > 0:
+                row, j = k // runtime[1], k % runtime[1]
                 if row < boundary:
                     multistarts[k] = single[j]
                     multistops[k] = single[j + 1]
                     carry[k] = np.int64(starts[row]) + j
             if k == 0:
-                status[0] = length
+                status[0] = runtime[0]
                 status[1] = np.int64(9223372036854775807)
-                if boundary < length:
+                if boundary < runtime[0]:
                     status[0] = -(boundary + 1)
                     status[1] = 1 if stops[boundary] < starts[boundary] else 2
             return np.int8(0)
@@ -295,8 +337,16 @@ class _Spread(_Prepared):
         self.states = tuple(_ArrayState(dtype) for dtype in (*dtypes, np.int64))
         output, advanced, offsets, unordered = self.states
 
+        runtime = self.runtime
+        self.runtime_values = (
+            length,
+            capacity,
+        )
+
         def check(chunk):
-            for row in range(chunk * chunk_size, min((chunk + 1) * chunk_size, length)):
+            for row in range(
+                chunk * chunk_size, min((chunk + 1) * chunk_size, runtime[0])
+            ):
                 if offsets[row + 1] < offsets[row]:
                     return np.int64(1)
             return np.int64(0)
@@ -305,8 +355,8 @@ class _Spread(_Prepared):
             if unordered[0] == 0:
                 # Upper bound selects the last repeated offset. Write only
                 # inside the declared range, preserving origin and spare tail.
-                if j >= offsets[0] and j < offsets[length]:
-                    left, right = 0, length + 1
+                if j >= offsets[0] and j < offsets[runtime[0]]:
+                    left, right = 0, runtime[0] + 1
                     while left < right:
                         middle = (left + right) // 2
                         if offsets[middle] <= j:
@@ -317,7 +367,7 @@ class _Spread(_Prepared):
             else:
                 # Preserve the sequential CPU's last writer for overlapping
                 # intervals, including intervals following decreasing offsets.
-                row = length - 1
+                row = runtime[0] - 1
                 while row >= 0:
                     if offsets[row] <= j and j < offsets[row + 1]:
                         output[j] = advanced[row]
@@ -328,7 +378,7 @@ class _Spread(_Prepared):
         def small(j):
             # Bounded reverse lookup fuses ownership resolution with writing.
             # It is deterministic for overlapping intervals as well as repeats.
-            row = length - 1
+            row = runtime[0] - 1
             while row >= 0:
                 if offsets[row] <= j and j < offsets[row + 1]:
                     output[j] = advanced[row]
@@ -339,7 +389,7 @@ class _Spread(_Prepared):
         def tiled(k):
             if unordered[0] == 0:
                 row, lane = k // lanes, k % lanes
-                if row < length:
+                if row < runtime[0]:
                     start = np.int64(offsets[row])
                     stop = np.int64(offsets[row + 1])
                     if stop > start and lane < stop - start:
@@ -349,8 +399,8 @@ class _Spread(_Prepared):
                             if stop - j <= lanes:
                                 break
                             j += lanes
-            elif k < capacity:
-                row = length - 1
+            elif k < runtime[1]:
+                row = runtime[0] - 1
                 while row >= 0:
                     if offsets[row] <= k and k < offsets[row + 1]:
                         output[k] = advanced[row]
@@ -397,17 +447,14 @@ def _setup(
     context,
     kind,
     dtypes,
-    length,
-    parameter,
     chunk_size=64,
     spread_lanes=0,
-    capacity=0,
 ):
     if kind == "advanced":
-        return _Advanced(dtypes, length, parameter, chunk_size)
+        return _Advanced(dtypes, 0, 0, chunk_size)
     if kind == "jagged":
-        return _Jagged(dtypes, length, parameter, chunk_size)
-    return _Spread(dtypes, length, chunk_size, spread_lanes, capacity)
+        return _Jagged(dtypes, 0, 0, chunk_size)
+    return _Spread(dtypes, 0, chunk_size, spread_lanes, 0)
 
 
 def run(kind, arrays, length, parameter, stream, *, chunk_size=64, spread_lanes=0):
@@ -419,10 +466,8 @@ def run(kind, arrays, length, parameter, stream, *, chunk_size=64, spread_lanes=
             cp.cuda.driver.ctxGetCurrent(),
             kind,
             tuple(array.dtype.str for array in arrays),
-            length,
-            parameter,
             chunk_size,
             spread_lanes,
-            arrays[0].size if spread_lanes else 0,
         )
+        setup.configure(length, parameter, arrays[0].size)
         return setup(arrays, stream)

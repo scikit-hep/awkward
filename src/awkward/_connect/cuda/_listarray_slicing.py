@@ -21,6 +21,13 @@ class _Scan(_Prepared):
         self.scanner = None
         self.scan_operation = make_op_adapter(OpKind.PLUS)
         self.zero = np.asarray(0, dtype=np.int64)
+        self.scan_workspace_sizes = {}
+
+    def configure(self, length, parameters):
+        self.length = length
+        self.chunks = (length + 63) // 64
+        self.initial = np.asarray(length, dtype=np.int64)
+        self.runtime_values = (length, *parameters)
 
     def scan(self, counts, output, stream):
         if self.scanner is None:
@@ -35,7 +42,13 @@ class _Scan(_Prepared):
             "init_value": self.zero,
             "stream": stream,
         }
-        storage_bytes = self.scanner(temp_storage=None, **arguments)
+        if self.length not in self.scan_workspace_sizes:
+            if len(self.scan_workspace_sizes) >= 32:
+                self.scan_workspace_sizes.pop(next(iter(self.scan_workspace_sizes)))
+            self.scan_workspace_sizes[self.length] = self.scanner(
+                temp_storage=None, **arguments
+            )
+        storage_bytes = self.scan_workspace_sizes[self.length]
         storage = cp.empty(storage_bytes, dtype=cp.uint8)
         self.scanner(temp_storage=storage, **arguments)
 
@@ -60,9 +73,16 @@ class _JaggedApply(_Scan):
             status,
         ) = self.states
 
+        runtime = self.runtime
+        self.runtime_values = (
+            length,
+            inner_length,
+            content_length,
+        )
+
         def check(chunk):
-            boundary = np.int64(length)
-            for row in range(chunk * 64, min((chunk + 1) * 64, length)):
+            boundary = np.int64(runtime[0])
+            for row in range(chunk * 64, min((chunk + 1) * 64, runtime[0])):
                 # Every row is initialized even after this chunk's first error:
                 # the scan must never consume undefined scratch values.
                 counts[row] = 0
@@ -72,13 +92,11 @@ class _JaggedApply(_Scan):
                     left, right = ss[row], se[row]
                     # Empty slices skip all structural checks in the reference.
                     if left != right:
-                        if right < left or right > inner_length:
+                        if right < left or right > runtime[1]:
                             boundary = row
                         else:
                             start, stop = np.int64(starts[row]), np.int64(stops[row])
-                            if stop < start or (
-                                start != stop and stop > content_length
-                            ):
+                            if stop < start or (start != stop and stop > runtime[2]):
                                 boundary = row
                             else:
                                 size = stop - start
@@ -105,14 +123,14 @@ class _JaggedApply(_Scan):
             if row == 0:
                 status[0] = -1
                 status[1] = np.int64(9223372036854775807)
-                if boundary == length:
-                    offsets[length] = positions[length]
+                if boundary == runtime[0]:
+                    offsets[runtime[0]] = positions[runtime[0]]
                 else:
                     left, right = ss[boundary], se[boundary]
                     code = np.int64(4)
                     if right < left:
                         code = np.int64(0)
-                    elif right > inner_length:
+                    elif right > runtime[1]:
                         code = np.int64(1)
                         status[1] = right
                     else:
@@ -122,7 +140,7 @@ class _JaggedApply(_Scan):
                         )
                         if stop < start:
                             code = np.int64(2)
-                        elif start != stop and stop > content_length:
+                        elif start != stop and stop > runtime[2]:
                             code = np.int64(3)
                         else:
                             status[1] = indices[left + counts[boundary]]
@@ -155,12 +173,20 @@ class _NextRange(_Scan):
         offsets, carry, starts, stops, positions = self.states
         narrow = np.dtype(dtypes[0]) != np.dtype(np.int64)
 
+        runtime = self.runtime
+        self.runtime_values = (
+            length,
+            start,
+            stop,
+            step,
+        )
+
         def count(row):
             if row == 0:
                 positions[0] = 0
-            stride = np.int64(step)
+            stride = np.int64(runtime[3])
             size = np.int64(stops[row]) - np.int64(starts[row])
-            left, right = np.int64(start), np.int64(stop)
+            left, right = np.int64(runtime[1]), np.int64(runtime[2])
             if stride > 0:
                 if left == 9223372036854775807:
                     left = 0
@@ -194,11 +220,11 @@ class _NextRange(_Scan):
             return 1 + (left - right - 1) // -stride
 
         def write(k):
-            if narrow and k <= length:
+            if narrow and k <= runtime[0]:
                 offsets[k] = positions[k]
-            if k < positions[length]:
+            if k < positions[runtime[0]]:
                 # Prefix offsets are monotone, including repeated empty lists.
-                left, right = 0, length + 1
+                left, right = 0, runtime[0] + 1
                 while left < right:
                     middle = (left + right) // 2
                     if positions[middle] <= k:
@@ -207,8 +233,8 @@ class _NextRange(_Scan):
                         right = middle
                 row = left - 1
                 size = np.int64(stops[row]) - np.int64(starts[row])
-                begin = np.int64(start)
-                if step > 0:
+                begin = np.int64(runtime[1])
+                if runtime[3] > 0:
                     if begin == 9223372036854775807:
                         begin = 0
                     elif begin < 0:
@@ -223,7 +249,7 @@ class _NextRange(_Scan):
                 carry[k] = (
                     np.int64(starts[row])
                     + begin
-                    + (k - positions[row]) * np.int64(step)
+                    + (k - positions[row]) * np.int64(runtime[3])
                 )
             return np.int8(0)
 
@@ -247,10 +273,10 @@ class _NextRange(_Scan):
 
 
 @lru_cache(maxsize=32)
-def _setup(device, context, kind, dtypes, shapes, length, parameters):
+def _setup(device, context, kind, dtypes):
     if kind == "apply":
-        return _JaggedApply(dtypes, length, *parameters)
-    return _NextRange(dtypes, length, *parameters)
+        return _JaggedApply(dtypes, 0, 0, 0)
+    return _NextRange(dtypes, 0, 0, 0, 1)
 
 
 def run(kind, arrays, length, parameters, stream):
@@ -260,8 +286,6 @@ def run(kind, arrays, length, parameters, stream):
             cp.cuda.driver.ctxGetCurrent(),
             kind,
             tuple(array.dtype.str for array in arrays),
-            tuple(array.shape for array in arrays),
-            length,
-            parameters,
         )
+        setup.configure(length, parameters)
         return setup(arrays, stream)

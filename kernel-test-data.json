@@ -14191,6 +14191,8 @@
       "name": "awkward_ListArray_getitem_next_range_carrylength",
       "status": true,
       "tests": [
+      {"error": false, "message": "", "inputs": {"fromstarts": [5], "fromstops": [2], "lenstarts": 1, "start": 9223372036854775807, "stop": 9223372036854775807, "step": 1}, "outputs": {"carrylength": [0]}},
+      {"error": false, "message": "", "inputs": {"fromstarts": [2147483647], "fromstops": [-2147483648], "lenstarts": 1, "start": 9223372036854775807, "stop": 9223372036854775807, "step": 1}, "outputs": {"carrylength": [0]}},
         {
           "error": false,
           "message": "",
@@ -14287,6 +14289,8 @@
       "name": "awkward_ListArray_getitem_next_range",
       "status": true,
       "tests": [
+      {"error": false, "message": "", "inputs": {"fromstarts": [5], "fromstops": [2], "lenstarts": 1, "start": 9223372036854775807, "stop": 9223372036854775807, "step": 1}, "outputs": {"tooffsets": [0, 0], "tocarry": []}},
+      {"error": false, "message": "", "inputs": {"fromstarts": [2147483647], "fromstops": [-2147483648], "lenstarts": 1, "start": 9223372036854775807, "stop": 9223372036854775807, "step": 1}, "outputs": {"tooffsets": [0, 0], "tocarry": []}},
         {
           "error": false,
           "message": "",
@@ -14993,6 +14997,8 @@
       "name": "awkward_ListArray_rpad_and_clip_length_axis1",
       "status": true,
       "tests": [
+      {"error": false, "message": "", "inputs": {"fromstarts": [5], "fromstops": [2], "lenstarts": 1, "target": 2}, "outputs": {"tomin": [2]}},
+      {"error": false, "message": "", "inputs": {"fromstarts": [2147483647], "fromstops": [-2147483648], "lenstarts": 1, "target": 2}, "outputs": {"tomin": [2]}},
         {
           "error": false,
           "message": "",
@@ -20044,6 +20050,8 @@
       "name": "awkward_ListArray_rpad_axis1",
       "status": true,
       "tests": [
+      {"error": false, "message": "", "inputs": {"fromstarts": [5], "fromstops": [2], "length": 1, "target": 2}, "outputs": {"toindex": [-1, -1], "tostarts": [0], "tostops": [2]}},
+      {"error": false, "message": "", "inputs": {"fromstarts": [2147483647], "fromstops": [-2147483648], "length": 1, "target": 2}, "outputs": {"toindex": [-1, -1], "tostarts": [0], "tostops": [2]}},
         {
           "error": false,
           "message": "",

@@ -5,6 +5,10 @@
 Error-capable calls return the same KernelError protocol as the CPU kernels.
 One compact status read is required for their immediate Python result. Kernels
 without error returns do not read device scalars to determine launch sizes.
+
+CuPy arrays use the prepared paths for multi-stage slicing. The remaining
+paths provide host-executable operator bodies for reference-contract tests;
+they must preserve the same overlap ordering as the prepared implementations.
 """
 
 from dataclasses import dataclass
@@ -13,6 +17,7 @@ from cuda.compute import (
     CountingIterator,
     DiscardIterator,
     OpKind,
+    TransformIterator,
     inclusive_scan,
     reduce_into,
     unary_transform,
@@ -73,10 +78,8 @@ def _first_error(codes):
     def position(i):
         return i if codes[i] != 0 else np.int64(codes.size)
 
-    positions = cp.empty(codes.size, dtype=cp.int64)
-    _transform(position, codes.size, positions)
     reduce_into(
-        d_in=positions,
+        d_in=TransformIterator(CountingIterator(np.int64(0)), position),
         d_out=result,
         op=OpKind.MINIMUM,
         h_init=np.asarray(codes.size, dtype=np.int64),
@@ -93,14 +96,19 @@ def _error(codes, attempts, first, messages, name):
         i = first[0]
         status[0] = i
         status[1] = codes[i] if i < codes.size else 0
-        status[2] = attempts[i] if i < codes.size else _SLICE_NONE
+        status[2] = (
+            attempts[min(i, attempts.size - 1)] if i < codes.size else _SLICE_NONE
+        )
         return np.int8(0)
 
     _transform(pack, 1)
     row, code, attempt = status.get().tolist()
     if code:
         return _Error(
-            messages[code - 1].encode(), row, attempt, f"cuda.compute ({name})".encode()
+            messages[code - 1].encode(),
+            row,
+            attempt,
+            f"(cuda.compute: {name})".encode(),
         )
     return None
 
@@ -114,7 +122,7 @@ def _prepared_error(status, length, messages, name):
     else:
         row, code, attempt = tag, 3, payload
     return _Error(
-        messages[code - 1].encode(), row, attempt, f"cuda.compute ({name})".encode()
+        messages[code - 1].encode(), row, attempt, f"(cuda.compute: {name})".encode()
     )
 
 
@@ -125,7 +133,7 @@ def validity(starts, stops, length, lencontent):
     stops = stops[:length]
     parameters = cp.asarray([lencontent], dtype=cp.int64)
     codes = cp.empty(length, dtype=cp.int64)
-    attempts = cp.full(length, _SLICE_NONE, dtype=cp.int64)
+    attempts = cp.asarray([_SLICE_NONE], dtype=cp.int64)
 
     def check(i):
         start = np.int64(starts[i])
@@ -156,7 +164,7 @@ def next_at(tocarry, fromstarts, fromstops, lenstarts, at):
     stops = fromstops[:lenstarts]
     parameters = cp.asarray([at], dtype=cp.int64)
     codes = cp.empty(lenstarts, dtype=cp.int64)
-    attempts = cp.full(lenstarts, at, dtype=cp.int64)
+    attempts = parameters
 
     def check(i):
         size = np.int64(stops[i]) - np.int64(starts[i])
@@ -203,56 +211,81 @@ def next_array(
     stops = fromstops[:lenstarts]
     indices = fromarray[:lenarray]
     parameters = cp.asarray([lencontent], dtype=cp.int64)
-    codes = cp.empty(lenstarts, dtype=cp.int64)
-    attempts = cp.full(lenstarts, _SLICE_NONE, dtype=cp.int64)
-    written = cp.zeros(lenstarts, dtype=cp.int64)
 
-    def check(i):
-        start = np.int64(starts[i])
-        stop = np.int64(stops[i])
-        if stop < start:
-            return np.int64(1)
-        if start != stop and stop > parameters[0]:
-            return np.int64(2)
+    # Each validation thread checks at most 64 indices, even for few-row
+    # million-index inputs. The reduction selects the canonical (row, index)
+    # boundary; structural errors precede every element in their row.
+    def check(k):
+        chunks = max(1, (indices.size + 63) // 64)
+        row, chunk = k // chunks, k % chunks
+        start = np.int64(starts[row])
+        stop = np.int64(stops[row])
+        stride = indices.size + 1
+        if stop < start or (start != stop and stop > parameters[0]):
+            return row * stride
         size = stop - start
-        j = 0
-        while j < indices.size:
+        for j in range(chunk * 64, min((chunk + 1) * 64, indices.size)):
+            index = indices[j]
+            if index < -size or index >= size:
+                return row * stride + j
+        return starts.size * stride
+
+    first = cp.empty(1, dtype=cp.int64)
+    reduce_into(
+        d_in=TransformIterator(CountingIterator(np.int64(0)), check),
+        d_out=first,
+        op=OpKind.MINIMUM,
+        h_init=np.asarray(lenstarts * (lenarray + 1), dtype=np.int64),
+        num_items=lenstarts * max(1, (lenarray + 63) // 64),
+        stream=_Stream(),
+    )
+
+    def write(k):
+        row, j = k // indices.size, k % indices.size
+        if row * (indices.size + 1) + j < first[0]:
+            start = np.int64(starts[row])
+            size = np.int64(stops[row]) - start
             index = indices[j]
             if index < 0:
                 index += size
-            if index < 0 or index >= size:
-                attempts[i] = indices[j]
-                return np.int64(3)
-            written[i] += 1
-            j += 1
-        return np.int64(0)
-
-    _transform(check, lenstarts, codes)
-    first = _first_error(codes)
-
-    def write(i):
-        if i <= first[0]:
-            start = np.int64(starts[i])
-            size = np.int64(stops[i]) - start
-            j = 0
-            while j < written[i]:
-                index = indices[j]
-                if index < 0:
-                    index += size
-                destination = i * indices.size + j
-                tocarry[destination] = start + index
-                toadvanced[destination] = j
-                j += 1
+            tocarry[k] = start + index
+            toadvanced[k] = j
         return np.int8(0)
 
-    _transform(write, lenstarts)
-    return _error(
-        codes,
-        attempts,
-        first,
-        ("stops[i] < starts[i]", "stops[i] > len(content)", "index out of range"),
-        "awkward_ListArray_getitem_next_array",
-    )
+    _transform(write, lenstarts * lenarray)
+    status = cp.empty(3, dtype=cp.int64)
+
+    def pack(_):
+        row, j = first[0] // (indices.size + 1), first[0] % (indices.size + 1)
+        status[0] = row
+        status[1] = 0
+        status[2] = _SLICE_NONE
+        if row < starts.size:
+            start, stop = np.int64(starts[row]), np.int64(stops[row])
+            if stop < start:
+                status[1] = 1
+            elif start != stop and stop > parameters[0]:
+                status[1] = 2
+            else:
+                status[1] = 3
+                status[2] = indices[j]
+        return np.int8(0)
+
+    _transform(pack, 1)
+    row, code, attempt = status.get().tolist()
+    if code:
+        messages = (
+            "stops[i] < starts[i]",
+            "stops[i] > len(content)",
+            "index out of range",
+        )
+        return _Error(
+            messages[code - 1].encode(),
+            row,
+            attempt,
+            b"(cuda.compute: awkward_ListArray_getitem_next_array)",
+        )
+    return None
 
 
 def next_array_advanced(
@@ -595,14 +628,17 @@ def spreadadvanced(toadvanced, fromadvanced, fromoffsets, lenstarts):
         return
     offsets = fromoffsets[: lenstarts + 1]
 
-    def write(i):
-        j = np.int64(offsets[i])
-        while j < np.int64(offsets[i + 1]):
-            toadvanced[j] = fromadvanced[i]
-            j += 1
+    # Host emulation for contract tests; CuPy dispatches to prepared operations.
+    def write(j):
+        row = offsets.size - 2
+        while row >= 0:
+            if offsets[row] <= j and j < offsets[row + 1]:
+                toadvanced[j] = fromadvanced[row]
+                break
+            row -= 1
         return np.int8(0)
 
-    _transform(write, lenstarts)
+    _transform(write, toadvanced.size)
 
 
 def next_range(tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step):
