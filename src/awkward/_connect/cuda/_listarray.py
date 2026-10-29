@@ -73,6 +73,10 @@ def _prefix(counts):
 
 
 def _first_error(codes):
+    if hasattr(codes, "__cuda_array_interface__"):
+        from awkward._connect.cuda._listarray_prepared import run
+
+        return run("first_error", (codes,), codes.size, 0, _Stream())
     result = cp.empty(1, dtype=cp.int64)
 
     def position(i):
@@ -209,6 +213,23 @@ def next_array(
 ):
     if lenstarts == 0:
         return None
+    if hasattr(fromstarts, "__cuda_array_interface__"):
+        from awkward._connect.cuda._listarray_prepared import run
+
+        status = run(
+            "array",
+            (
+                tocarry,
+                toadvanced,
+                fromstarts[:lenstarts],
+                fromstops[:lenstarts],
+                fromarray[:lenarray],
+            ),
+            lenstarts,
+            lencontent,
+            _Stream(),
+        )
+        return _array_error(status)
     starts = fromstarts[:lenstarts]
     stops = fromstops[:lenstarts]
     indices = fromarray[:lenarray]
@@ -275,6 +296,10 @@ def next_array(
         return np.int8(0)
 
     _transform(pack, 1)
+    return _array_error(status)
+
+
+def _array_error(status):
     row, code, attempt = status.get().tolist()
     if code:
         messages = (

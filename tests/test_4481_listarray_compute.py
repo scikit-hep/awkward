@@ -388,8 +388,21 @@ def prepared_implementation():
                 events.append(("reduce_storage_query",))
                 return 64
             events.append(("reduce", kwargs["num_items"]))
-            values = [int(kwargs["h_init"]), *kwargs["d_in"][: kwargs["num_items"]]]
-            kwargs["d_out"][0] = max(values) if kwargs["op"] == 2 else min(values)
+            source = kwargs["d_in"]
+            items = kwargs["num_items"]
+            values = (
+                [source.start + i for i in range(items)]
+                if isinstance(source, _Counting)
+                else source[:items]
+            )
+            if callable(kwargs["op"]):
+                from functools import reduce
+
+                result = reduce(kwargs["op"], values, int(kwargs["h_init"]))
+            else:
+                values = [int(kwargs["h_init"]), *values]
+                result = max(values) if kwargs["op"] == 2 else min(values)
+            kwargs["d_out"][0] = result
             return 64
 
         return launch
@@ -436,6 +449,7 @@ def prepared_implementation():
 
 
 PREPARED_NAMES = {
+    "awkward_ListArray_getitem_next_array": "array",
     "awkward_ListArray_getitem_next_array_advanced": "advanced",
     "awkward_ListArray_getitem_jagged_expand": "jagged",
     "awkward_ListArray_getitem_next_range_spreadadvanced": "spread",
@@ -448,6 +462,9 @@ def run_prepared(namespace, implementation, name, args, **options):
         length, parameter, arrays = args[3], 0, args[:3]
     elif kind == "jagged":
         length, parameter, arrays = args[7], args[6], args[:6]
+    elif kind == "array":
+        length, parameter = args[5], args[7]
+        arrays = (*args[:2], args[2][:length], args[3][:length], args[4][: args[6]])
     else:
         length, parameter, arrays = args[6], args[7], args[:6]
     if not length:
@@ -457,6 +474,8 @@ def run_prepared(namespace, implementation, name, args, **options):
     )
     if kind == "spread":
         return None
+    if kind == "array":
+        return implementation["_array_error"](status)
     messages = (
         ("stops[i] < starts[i]", "cannot fit jagged slice into nested list")
         if kind == "jagged"
@@ -1375,3 +1394,60 @@ def test_gpu_error_format_regression_uses_canonical_argument_order(implementatio
         namespace,
     )
     namespace[function.name]()
+
+
+@pytest.mark.parametrize("rows,columns", [(1, 0), (1, 1), (4, 129), (65, 2)])
+@pytest.mark.parametrize("bad", [None, 0, 64, 128])
+def test_prepared_next_array_chunks_reuse(
+    rows, columns, bad, prepared_implementation, implementation
+):
+    namespace, buffer, events = prepared_implementation
+    namespace["_setup"].cache_clear()
+    starts = np.arange(rows, dtype=np.int64) * max(columns, 1)
+    indices = np.arange(columns, dtype=np.int64)
+    if bad is not None and bad < columns:
+        indices[bad] = columns
+    output = np.full(rows * columns + 3, 123, dtype=np.int64)
+    args = [
+        output.copy(),
+        output.copy(),
+        starts,
+        starts + columns,
+        indices,
+        rows,
+        columns,
+        rows * max(columns, 1),
+    ]
+    reference = copy.deepcopy(args)
+    name = "awkward_ListArray_getitem_next_array"
+    expected = NumpyBackend.instance()[(name, *([np.int64] * 5))](*reference)
+    first_builds = None
+    for _ in range(3):
+        device = [
+            x.copy().view(buffer) if isinstance(x, np.ndarray) else x for x in args
+        ]
+        actual = run_prepared(namespace, implementation, name, device)
+        assert_error(actual, expected)
+        for i in (0, 1):
+            np.testing.assert_array_equal(device[i], reference[i])
+        builds = sum(event[0] in ("prepare", "prepare_reduce") for event in events)
+        if first_builds is None:
+            first_builds = builds
+        assert builds == first_builds
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.int64])
+def test_prepared_first_error_rebinds_without_rebuilding(
+    dtype, prepared_implementation
+):
+    namespace, buffer, events = prepared_implementation
+    namespace["_setup"].cache_clear()
+    events.clear()
+    for size, bad in [(1, None), (65, 0), (129, 64), (4097, 4096), (65, 32), (1, 0)]:
+        codes = np.zeros(size, dtype=dtype).view(buffer)
+        if bad is not None:
+            codes[bad] = 3
+        actual = namespace["run"]("first_error", (codes,), size, 0, SimpleNamespace())
+        assert actual[0] == (size if bad is None else bad)
+    assert sum(event[0] == "prepare_reduce" for event in events) == 1
+    assert namespace["_setup"].cache_info().misses == 1

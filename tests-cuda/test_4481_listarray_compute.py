@@ -438,3 +438,44 @@ def test_prepared_jagged_apply_public_error_format():
         "index out of range while attempting to get index 2 "
         "(in compiled code: cuda.compute: awkward_ListArray_getitem_jagged_apply)"
     )
+
+
+def test_next_array_reuses_prepared_operations_after_warmup(monkeypatch):
+    from awkward._connect.cuda import _listarray_prepared as prepared
+
+    prepared._setup.cache_clear()
+    key = ("awkward_ListArray_getitem_next_array", *([np.int64] * 5))
+    kernel = CupyBackend.instance()[key]
+
+    def execute(rows, columns):
+        starts = cp.arange(rows, dtype=cp.int64) * columns
+        output = cp.full(rows * columns + 2, 123, dtype=cp.int64)
+        advanced = cp.full_like(output, 123)
+        error = kernel(
+            output,
+            advanced,
+            starts,
+            starts + columns,
+            cp.arange(columns, dtype=cp.int64),
+            rows,
+            columns,
+            rows * columns,
+        )
+        assert error is None
+        np.testing.assert_array_equal(
+            cp.asnumpy(output[:-2]), np.arange(rows * columns)
+        )
+        np.testing.assert_array_equal(
+            cp.asnumpy(advanced[:-2]), np.tile(np.arange(columns), rows)
+        )
+        np.testing.assert_array_equal(cp.asnumpy(output[-2:]), [123, 123])
+
+    execute(4, 129)
+
+    def unexpected_build(*args, **kwargs):
+        pytest.fail("A warmed next_array call constructed a new prepared operation")
+
+    monkeypatch.setattr(prepared, "make_unary_transform", unexpected_build)
+    monkeypatch.setattr(prepared, "make_reduce_into", unexpected_build)
+    for rows, columns in [(4, 129), (65, 8), (1, 0), (1, 1)]:
+        execute(rows, columns)

@@ -46,6 +46,10 @@ class _ArrayState:
     def data_ptr(self):
         return self.__cuda_array_interface__["data"][0]
 
+    @property
+    def size(self):
+        return len(self)
+
     def clear(self):
         self.__cuda_array_interface__ = {
             "shape": (0,),
@@ -106,28 +110,29 @@ class _Prepared:
         if partials is None:
             partials = cp.empty(self.chunks, dtype=cp.int64)
         self.transform("check", self.check, partials, self.chunks, stream)
+        self.reduce(partials, result, self.chunks, stream)
+
+    def reduce(self, inputs, result, length, stream):
         if self.reducer is None:
             self.reducer = make_reduce_into(
-                d_in=partials,
+                d_in=inputs,
                 d_out=result,
                 op=self.reduce_operation,
                 h_init=self.initial,
             )
         arguments = {
-            "d_in": partials,
+            "d_in": inputs,
             "d_out": result,
-            "num_items": self.chunks,
+            "num_items": length,
             "op": self.reduce_operation,
             "h_init": self.initial,
             "stream": stream,
         }
-        if self.chunks not in self.workspace_sizes:
+        if length not in self.workspace_sizes:
             if len(self.workspace_sizes) >= 32:
                 self.workspace_sizes.pop(next(iter(self.workspace_sizes)))
-            self.workspace_sizes[self.chunks] = self.reducer(
-                temp_storage=None, **arguments
-            )
-        self.reduce_storage_bytes = self.workspace_sizes[self.chunks]
+            self.workspace_sizes[length] = self.reducer(temp_storage=None, **arguments)
+        self.reduce_storage_bytes = self.workspace_sizes[length]
         storage = cp.empty(self.reduce_storage_bytes, dtype=cp.uint8)
         self.reducer(temp_storage=storage, **arguments)
 
@@ -144,6 +149,103 @@ class _Prepared:
             state.clear()
         self.runtime.clear()
         self.runtime_array = None
+
+
+class _FirstError(_Prepared):
+    def __init__(self, dtype):
+        super().__init__(0, OpKind.MINIMUM, 0)
+        codes = _ArrayState(dtype)
+        self.states = (codes,)
+
+        def earliest(left, right):
+            a, b = np.int64(codes.size), np.int64(codes.size)
+            if left < codes.size and codes[left] != 0:
+                a = left
+            if right < codes.size and codes[right] != 0:
+                b = right
+            return min(a, b)
+
+        # The map is idempotent, so min(map(a), map(b)) is associative on
+        # rows plus the sentinel. No stateful TransformIterator is constructed.
+        self.reduce_operation = make_op_adapter(earliest)
+
+    def __call__(self, arrays, stream):
+        result = cp.empty(1, dtype=cp.int64)
+        self.states[0].bind(arrays[0])
+        try:
+            self.reduce(self.iterator, result, arrays[0].size, stream)
+        finally:
+            self.clear()
+        return result
+
+
+class _NextArray(_Prepared):
+    def __init__(self, dtypes):
+        super().__init__(0, OpKind.MINIMUM, 0)
+        self.states = tuple(
+            _ArrayState(dtype) for dtype in (*dtypes, np.int64, np.int64)
+        )
+        carry, advanced, starts, stops, indices, first, status = self.states
+        runtime = self.runtime
+
+        def check(k):
+            chunks = max(1, (indices.size + 63) // 64)
+            row, chunk = k // chunks, k % chunks
+            start, stop = np.int64(starts[row]), np.int64(stops[row])
+            stride = indices.size + 1
+            if stop < start or (start != stop and stop > runtime[1]):
+                return row * stride
+            size = stop - start
+            for j in range(chunk * 64, min((chunk + 1) * 64, indices.size)):
+                index = indices[j]
+                if index < -size or index >= size:
+                    return row * stride + j
+            return runtime[0] * stride
+
+        def write(k):
+            stride = indices.size + 1
+            if indices.size:
+                row, j = k // indices.size, k % indices.size
+                if row * stride + j < first[0]:
+                    start = np.int64(starts[row])
+                    size = np.int64(stops[row]) - start
+                    index = indices[j]
+                    if index < 0:
+                        index += size
+                    carry[k] = start + index
+                    advanced[k] = j
+            if k == 0:
+                row, j = first[0] // stride, first[0] % stride
+                status[0], status[1] = row, 0
+                status[2] = np.int64(9223372036854775807)
+                if row < runtime[0]:
+                    start, stop = np.int64(starts[row]), np.int64(stops[row])
+                    if stop < start:
+                        status[1] = 1
+                    elif start != stop and stop > runtime[1]:
+                        status[1] = 2
+                    else:
+                        status[1] = 3
+                        status[2] = indices[j]
+            return np.int8(0)
+
+        self.check, self.write = check, write
+
+    def __call__(self, arrays, stream):
+        columns = arrays[4].size
+        self.chunks = self.length * max(1, (columns + 63) // 64)
+        self.initial = np.asarray(self.length * (columns + 1), dtype=np.int64)
+        arena = cp.empty(4 + self.chunks, dtype=cp.int64)
+        status, first = arena[:3], arena[3:4]
+        self.bind((*arrays, first, status))
+        try:
+            self.find(first, stream, arena[4:])
+            self.transform(
+                "write", self.write, self.discard, max(1, self.length * columns), stream
+            )
+        finally:
+            self.clear()
+        return status
 
 
 class _Advanced(_Prepared):
@@ -450,6 +552,10 @@ def _setup(
     chunk_size=64,
     spread_lanes=0,
 ):
+    if kind == "first_error":
+        return _FirstError(dtypes[0])
+    if kind == "array":
+        return _NextArray(dtypes)
     if kind == "advanced":
         return _Advanced(dtypes, 0, 0, chunk_size)
     if kind == "jagged":
