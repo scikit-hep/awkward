@@ -147,20 +147,79 @@ def _has_issue_4221(layout: ak.contents.Content) -> bool:
     return any(_has_issue_4221(x) for x in _children(layout))
 
 
-def _has_issue_4228(layout: ak.contents.Content, in_list: bool = False) -> bool:
-    """`UnionArray._to_arrow` passes option-type data a length that
-    disagrees with its validity bytes: a union with an option-type child,
-    or an option-type node over a union inside a list, raises IndexError or
-    `ArrowInvalid: Null count exceeds array length` (#4228)."""
-    if layout.is_union and any(x.is_option for x in layout.contents):
-        return True
-    if layout.is_option and in_list and _has_union(layout.content):
-        return True
-    return any(_has_issue_4228(x, in_list or layout.is_list) for x in _children(layout))
+def _has_issue_4228(
+    layout: ak.contents.Content,
+    nullable: bool = False,
+    sliced: bool = False,
+) -> bool:
+    """`UnionArray._to_arrow` converts each child whole but sizes it by
+    the tag's highest index plus one, so an option-type child holding
+    more nulls than that length fails in `pyarrow.Array.from_buffers`
+    (`ArrowInvalid`, "Null count exceeds array length"), a masked child
+    longer than that length fails in `ListOffsetArray._to_arrow` when a
+    list or string lies below the option (`IndexError` or `ValueError`,
+    with or without nulls; an `UnmaskedArray` passes no validity bytes
+    and is exempt), and it scatters incoming validity bytes with a
+    per-child index that it misapplies when the index skips values
+    (`IndexError`, #4228). Any operation that drops union elements
+    without trimming the children creates the first two conditions from
+    a valid union.
 
+    `nullable` tracks whether enclosing option validity reaches this node.
 
-def _has_union(layout: ak.contents.Content) -> bool:
-    return layout.is_union or any(_has_union(x) for x in _children(layout))
+    `sliced` tracks whether `to_arrow` reaches this node through a
+    transformation that can drop union elements. A list or regular node
+    counts only when it does not span its whole content, and a record
+    field only when it is longer than the record. Under such a node any null in a masked child of a union, or
+    any masked child with a list below, triggers; at an unsliced union
+    the counts and lengths are compared.
+    """
+    if layout.is_union:
+        if nullable:
+            return True
+        tags = layout.tags.data
+        index = layout.index.data[: len(tags)]
+        for tag, x in enumerate(layout.contents):
+            if not x.is_option or isinstance(x, ak.contents.UnmaskedArray):
+                continue
+            masked_list = _contains_list(x.content)
+            if _null_count(x) == 0 and not masked_list:
+                continue
+            if sliced:
+                return True
+            used = index[tags == tag]
+            length = int(used.max()) + 1 if len(used) else 0
+            if _null_count(x) > length or (masked_list and x.length > length):
+                return True
+        return any(_has_issue_4228(x, False, True) for x in layout.contents)
+    if layout.is_record:
+        return any(
+            _has_issue_4228(x, nullable, sliced or x.length > layout.length)
+            for x in layout.contents
+        )
+    if layout.is_regular:
+        return _has_issue_4228(
+            layout.content,
+            False,
+            sliced or layout.length * layout.size != layout.content.length,
+        )
+    if layout.is_option:
+        return _has_issue_4228(
+            layout.content,
+            True,
+            sliced or isinstance(layout, ak.contents.IndexedOptionArray),
+        )
+    if layout.is_indexed:
+        return _has_issue_4228(layout.content, nullable, True)
+    if layout.is_list:
+        if isinstance(layout, ak.contents.ListOffsetArray):
+            child_sliced = sliced or bool(
+                layout.offsets[0] != 0 or layout.offsets[-1] != layout.content.length
+            )
+        else:
+            child_sliced = True
+        return _has_issue_4228(layout.content, False, child_sliced)
+    return False
 
 
 def _has_issue_4229(layout: ak.contents.Content) -> bool:
@@ -193,6 +252,19 @@ def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
     if layout.is_option or layout.is_indexed or layout.is_list:
         return [layout.content]
     return []
+
+
+def _null_count(layout: ak.contents.Content) -> int:
+    """The number of missing values in an option node."""
+    return int(np.count_nonzero(layout.mask_as_bool(valid_when=False)))
+
+
+def _contains_list(layout: ak.contents.Content) -> bool:
+    """Whether a list node (a string or regular list included) is the
+    node or lies below it."""
+    if layout.is_list:
+        return True
+    return any(_contains_list(x) for x in _children(layout))
 
 
 def _strip_options(
