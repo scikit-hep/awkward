@@ -123,6 +123,31 @@ is not allowed. Unpack the data structures one level at a time.
 
 One-dimensional Awkward Arrays of numbers, which are completely equivalent to NumPy arrays, can be _cast_ as NumPy arrays within the compiled function.
 
+NumPy ufuncs supported by Numba also accept flat numeric Awkward Arrays
+directly, without an explicit cast. This includes unary functions such as
+`np.sin` and `np.sqrt`, and binary functions such as `np.add` and `np.maximum`.
+Inputs may combine flat Awkward views, NumPy arrays, and scalars, using the
+same broadcasting and dtype rules as Numba's NumPy implementation.
+
+```{code-cell} ipython3
+@nb.njit
+def trig_expression(array):
+    return np.sin(array) * 2 + np.cos(array)
+
+trig_expression(ak.Array([1.0, 2.0, 3.0]))
+```
+
+These calls reuse zero-copy NumPy views, including sliced views and flat
+subarrays inside ragged data. Numba's fused array expressions and
+`parallel=True` are supported. Results are NumPy arrays. Explicit output
+arrays must be NumPy arrays; their buffers are updated in place. Other keyword arguments and ufunc signatures are limited to those
+supported by Numba itself.
+
+This does not implicitly convert whole ragged arrays, optional arrays,
+records, or strings. It also does not introduce arithmetic operators on
+Awkward views inside Numba: use `np.add(a, b)`, for example, or cast explicitly.
+
+
 ```{code-cell} ipython3
 @nb.jit
 def return_last_y_list_squared(array):
