@@ -172,6 +172,11 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
   else if (py::isinstance(obj, py::module::import("numpy").attr("floating"))) {
     self.real(obj.cast<double>());
   }
+  else if (py::isinstance(obj, py::module::import("numpy").attr("complexfloating"))) {
+    // NumPy's extended complex .tolist() can return another NumPy scalar.
+    // Handle it before the generic recursive iterable conversion.
+    self.complex(py::module::import("builtins").attr("complex")(obj).cast<std::complex<double>>());
+  }
   else if (py::hasattr(obj, "to_list")) {
     builder_fromiter(self, obj.attr("to_list")());
   }

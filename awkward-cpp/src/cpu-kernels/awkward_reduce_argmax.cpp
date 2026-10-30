@@ -50,3 +50,5 @@ REDUCE_ARGMAX(awkward_reduce_argmax_int64_64, int64_t)
 REDUCE_ARGMAX(awkward_reduce_argmax_uint64_64, uint64_t)
 REDUCE_ARGMAX(awkward_reduce_argmax_float32_64, float)
 REDUCE_ARGMAX(awkward_reduce_argmax_float64_64, double)
+
+REDUCE_ARGMAX(awkward_reduce_argmax_float128_64, long double)

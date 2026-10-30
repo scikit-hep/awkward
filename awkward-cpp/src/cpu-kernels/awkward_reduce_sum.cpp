@@ -56,3 +56,5 @@ REDUCE_SUM(awkward_reduce_sum_float64_uint32_64, double, uint32_t)
 REDUCE_SUM(awkward_reduce_sum_float64_int64_64, double, int64_t)
 REDUCE_SUM(awkward_reduce_sum_float64_uint64_64, double, uint64_t)
 REDUCE_SUM(awkward_reduce_sum_float64_float32_64, double, float)
+
+REDUCE_SUM(awkward_reduce_sum_float128_float128_64, long double, long double)

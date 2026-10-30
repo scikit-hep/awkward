@@ -40,3 +40,5 @@ WRAPPER(awkward_unique_ranges_int64, int64_t)
 WRAPPER(awkward_unique_ranges_uint64, uint64_t)
 WRAPPER(awkward_unique_ranges_float32, float)
 WRAPPER(awkward_unique_ranges_float64, double)
+
+WRAPPER(awkward_unique_ranges_float128, long double)

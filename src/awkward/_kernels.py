@@ -85,6 +85,21 @@ class CTypesKernel(BaseKernel):
             ),
         )(ctypes.cast(impl, ctypes.c_void_p).value)
 
+        long_double_positions = tuple(
+            i for i, dtype in enumerate(argtypes) if dtype is ctypes.c_longdouble
+        )
+        if long_double_positions:
+            call = self._call
+
+            def call_with_long_doubles(*args):
+                args = list(args)
+                for i in long_double_positions:
+                    value = metadata.dtype("longdouble").type(args[i])
+                    args[i] = ctypes.c_longdouble.from_buffer_copy(value.tobytes())
+                return call(*args)
+
+            self._call = call_with_long_doubles
+
     def _pointer_of(self, x):
         """The address of ``x``'s buffer, rejecting anything this backend cannot pass."""
         raise NotImplementedError

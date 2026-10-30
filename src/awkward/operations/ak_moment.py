@@ -124,9 +124,6 @@ def _impl(
     x = ctx.wrap(x_layout)
     weight = ctx.wrap(weight_layout, allow_other=True)
 
-    # sum-of-squares is float64-only, so complex falls back to the sum(x**n) path.
-    is_complex = "complex" in str(ak.type(x))
-
     with np.errstate(invalid="ignore", divide="ignore"):
         if weight is None:
             sumw = ak.operations.ak_count._impl(
@@ -138,19 +135,7 @@ def _impl(
                 behavior=ctx.behavior,
                 attrs=ctx.attrs,
             )
-            if is_complex:
-                # The sum-of-squares/powers reducers are float64-only, so complex
-                # input uses sum(x**n) (matching NumPy's complex moment).
-                sumwxn = ak.operations.ak_sum._impl(
-                    x**n,
-                    axis,
-                    keepdims,
-                    mask_identity,
-                    highlevel=True,
-                    behavior=ctx.behavior,
-                    attrs=ctx.attrs,
-                )
-            elif n == 2:
+            if n == 2:
                 # E[x**2]: sum of squares accumulated in float64 directly from
                 # the input -- no x**2 buffer, no integer/float32 overflow.
                 sumwxn = ak.operations.ak_sumofsquares._impl(

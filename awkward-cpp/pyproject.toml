@@ -137,7 +137,8 @@ repair-wheel-command = "delvewheel repair -w {dest_dir} -v --ignore-existing {wh
 select = "*pyodide*"
 build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
 
-# Use older manylinux for Python 3.10
+# C++23 requires a newer compiler than manylinux2014 provides.
+# Python 3.10 Linux wheels now use the same glibc 2.28 baseline as newer Python.
 [[tool.cibuildwheel.overrides]]
 select = "cp310-manylinux*"
-manylinux-x86_64-image = "manylinux2014"
+manylinux-x86_64-image = "manylinux_2_28"
