@@ -107,7 +107,7 @@ def test_properties(data: st.DataObject) -> None:
     a = data.draw(st_ak.constructors.arrays(), label="a")
     kwargs = data.draw(st_kwargs(a), label="kwargs")
 
-    assume(_should_not_raise(a.layout.form, kwargs))
+    assume(_should_not_raise(a, kwargs))
 
     assume(not _would_raise_from_known_issue(a, kwargs))
 
@@ -116,18 +116,22 @@ def test_properties(data: st.DataObject) -> None:
     # TODO: assert properties
 
 
-def _should_not_raise(form: ak.forms.Form, kwargs: Kwargs) -> bool:
+def _should_not_raise(a: ak.Array, kwargs: Kwargs) -> bool:
     """Return `True` if the operation should be successful.
 
     Conservative: `False` makes no statement — the call may still
     succeed; a rule shown too permissive by a failure is narrowed
-    toward `False`. Only `axis` decides: the other options never
-    affect whether `ak.flatten` raises.
+    toward `False`. Only `axis` decides, together with the values at
+    `axis=None`: the other options never affect whether `ak.flatten`
+    raises.
 
     The rules, written against `ak.flatten`'s deliberate error paths
-    (axis beyond depth, strings, records):
+    (axis beyond depth, strings, records, an unrepresentable merged
+    temporal value):
 
-    - `axis=None`: always `True`.
+    - `axis=None`: `True` unless the leaves it merges hold a temporal
+      value that the merged unit cannot represent (see
+      `util.merges_out_of_range_temporal_value`).
     - Any other axis is first resolved against the depth (see
       `_normalize_axis`); an axis that stays negative is `False`.
     - A resolved `0`: always `True`.
@@ -137,9 +141,10 @@ def _should_not_raise(form: ak.forms.Form, kwargs: Kwargs) -> bool:
       also flattens a union whose branches are all lists at that
       level, and the fields of a record above the axis.
     """
+    form = a.layout.form
     axis = kwargs.get("axis", DEFAULTS["axis"])
     if axis is None:
-        return True
+        return not util.merges_out_of_range_temporal_value(a)
     axis = _normalize_axis(axis, form)
     if axis == 0:
         return True
@@ -162,8 +167,6 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
             if known_issues.has_issue_4261(a):
                 return True
             if known_issues.has_issue_4278(a):
-                return True
-            if known_issues.has_issue_4280(a):
                 return True
         case int() if axis < 0:
             if known_issues.has_issue_4260(a):
