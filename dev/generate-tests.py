@@ -23,6 +23,8 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 # this set must be updated to match, or the generated CUDA unit tests will
 # wrap `pytest.raises` around the wrong statement.
 CUDA_COMPUTE_KERNELS = {
+    "awkward_sort",
+    "awkward_argsort",
     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListArray_compact_offsets",
     "awkward_ListArray_broadcast_tooffsets",
@@ -884,6 +886,8 @@ def gencpuunittests(specdict):
 
 
 cuda_kernels_tests = [
+    "awkward_sort",
+    "awkward_argsort",
     "awkward_Index_nones_as_index",
     "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
@@ -1366,6 +1370,18 @@ def gencudaunittests_new(specdict):
 
             # --- Kernel call ---
             args_str = ", ".join(arg.name for arg in spec.args)
+            if spec.templatized_kernel_name in CUDA_COMPUTE_KERNELS:
+                f.write(
+                    f"""
+    if case['error']:
+        error_message = re.escape(
+            case['message'] + " in compiled CUDA code ({spec.templatized_kernel_name})"
+        )
+        with pytest.raises(ValueError, match=error_message):
+            funcC_{spec.name}({args_str})
+        return
+"""
+                )
             f.write(f"\n    funcC_{spec.name}({args_str})\n")
 
             # --- Error vs success path ---
