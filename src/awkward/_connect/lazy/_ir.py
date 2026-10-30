@@ -160,7 +160,7 @@ class ConstantNode(OpNode):
             dtype = value.dtype
         super().__init__(op_type=OpType.CONSTANT, dtype=dtype)
 
-        if isinstance(value, (int, float, np.ndarray)) or (
+        if isinstance(value, (int, float, complex, np.generic, np.ndarray)) or (
             cp is not None and isinstance(value, cp.ndarray)
         ):
             self.value = value
