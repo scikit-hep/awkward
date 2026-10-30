@@ -1,0 +1,255 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+"""CCCL ListOffsetArray kernels, preserving canonical errors and output tails."""
+
+from dataclasses import dataclass
+
+from cuda.compute import (
+    CountingIterator,
+    DiscardIterator,
+    OpKind,
+    inclusive_scan,
+    reduce_into,
+    unary_transform,
+)
+
+from awkward._nplikes.cupy import Cupy
+from awkward._nplikes.numpy import Numpy
+
+cp = Cupy.instance()._module
+np = Numpy.instance()._module
+_SLICE_NONE = 9223372036854775807
+
+
+class _Stream:
+    def __init__(self):
+        self.stream = cp.cuda.get_current_stream()
+
+    def __cuda_stream__(self):
+        return (0, self.stream.ptr)
+
+
+@dataclass
+class _Error:
+    str: bytes
+    id: int
+    attempt: int
+    filename: bytes
+
+
+def _transform(op, length, output=None):
+    if length:
+        unary_transform(
+            d_in=CountingIterator(np.int64(0)),
+            d_out=DiscardIterator() if output is None else output,
+            op=op,
+            num_items=length,
+            stream=_Stream(),
+        )
+
+
+def _prefix(counts):
+    offsets = cp.zeros(counts.size + 1, dtype=cp.int64)
+    if counts.size:
+        inclusive_scan(
+            d_in=counts,
+            d_out=offsets[1:],
+            op=OpKind.PLUS,
+            init_value=np.asarray(0, dtype=np.int64),
+            num_items=counts.size,
+            stream=_Stream(),
+        )
+    return offsets
+
+
+def flatten_offsets(tooffsets, outeroffsets, outeroffsetslen, inneroffsets):
+    if hasattr(outeroffsets, "__cuda_array_interface__"):
+        from awkward._connect.cuda._prepared_gather import gather_offsets
+
+        gather_offsets(
+            tooffsets, outeroffsets, inneroffsets, outeroffsetslen, _Stream()
+        )
+        return
+
+    outer = outeroffsets[:outeroffsetslen]
+
+    def gather(i):
+        return inneroffsets[outer[i]]
+
+    _transform(gather, outeroffsetslen, tooffsets)
+
+
+def to_regular(size, fromoffsets, offsetslength):
+    if offsetslength <= 1:
+        size[:1] = 0
+        return None
+    if hasattr(fromoffsets, "__cuda_array_interface__"):
+        from awkward._connect.cuda._prepared_gather import regular_status
+
+        status = regular_status(size, fromoffsets, offsetslength, _Stream())
+    else:
+        # Host execution used by the canonical parity tests.
+        offsets = fromoffsets[:offsetslength]
+        n = offsetslength - 1
+        bad = cp.empty(n, dtype=cp.int64)
+
+        def check(i):
+            count = np.int64(offsets[i + 1]) - np.int64(offsets[i])
+            first = np.int64(offsets[1]) - np.int64(offsets[0])
+            if i == 0:
+                size[0] = -1 if first < 0 else first
+            if count < 0:
+                return -(i + 1)
+            if count != first:
+                return i + 1
+            return np.int64(0)
+
+        def first_error(left, right):
+            if left == 0:
+                return right
+            if right == 0:
+                return left
+            return left if abs(left) <= abs(right) else right
+
+        _transform(check, n, bad)
+        status = cp.empty(1, dtype=cp.int64)
+        reduce_into(
+            d_in=bad,
+            d_out=status,
+            op=first_error,
+            h_init=np.asarray(0, dtype=np.int64),
+            num_items=n,
+            stream=_Stream(),
+        )
+    # Zero means success; sign distinguishes the error, magnitude its first row.
+    code = int(status.get()[0])
+    row = abs(code) - 1
+    if code:
+        message = (
+            "offsets must be monotonically increasing"
+            if code < 0
+            else "cannot convert to RegularArray because subarray lengths are not regular"
+        )
+        return _Error(
+            message.encode(),
+            row,
+            _SLICE_NONE,
+            b"cuda.compute (awkward_ListOffsetArray_toRegularArray)",
+        )
+    return None
+
+
+def rpad(toindex, fromoffsets, fromlength, target):
+    if fromlength == 0:
+        return
+    offsets = fromoffsets[: fromlength + 1]
+    parameters = cp.asarray([target], dtype=cp.int64)
+    counts = cp.empty(fromlength, dtype=cp.int64)
+
+    def count(i):
+        size = np.int64(offsets[i + 1]) - np.int64(offsets[i])
+        return max(size, parameters[0])
+
+    _transform(count, fromlength, counts)
+    positions = _prefix(counts)
+
+    def write(i):
+        start = np.int64(offsets[i])
+        size = np.int64(offsets[i + 1]) - start
+        j = 0
+        while j < size:
+            toindex[positions[i] + j] = start + j
+            j += 1
+        while j < parameters[0]:
+            toindex[positions[i] + j] = -1
+            j += 1
+        return np.int8(0)
+
+    _transform(write, fromlength)
+
+
+def drop_none(tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes):
+    if length_offsets == 0:
+        return None
+    if hasattr(fromoffsets, "__cuda_array_interface__"):
+        from awkward._connect.cuda._prepared_gather import drop_status
+
+        status = drop_status(
+            tooffsets,
+            noneindexes,
+            fromoffsets,
+            length_offsets,
+            length_indexes,
+            _Stream(),
+        )
+    else:
+        offsets = fromoffsets[:length_offsets]
+        counts = cp.empty(length_offsets, dtype=cp.int64)
+
+        def count(i):
+            if offsets[length_offsets - 1] > length_indexes:
+                return np.int64(-1) if i == 0 else np.int64(0)
+            total = np.int64(0)
+            j = np.int64(0) if i == 0 else np.int64(offsets[i - 1])
+            while j < np.int64(offsets[i]):
+                if noneindexes[j] < 0:
+                    total += 1
+                j += 1
+            return total
+
+        _transform(count, length_offsets, counts)
+        positions = cp.empty(length_offsets, dtype=cp.int64)
+        inclusive_scan(
+            d_in=counts,
+            d_out=positions,
+            op=OpKind.PLUS,
+            init_value=np.asarray(0, dtype=np.int64),
+            num_items=length_offsets,
+            stream=_Stream(),
+        )
+
+        def write(i):
+            if positions[0] >= 0:
+                tooffsets[i] = np.int64(offsets[i]) - positions[i]
+            return np.int8(0)
+
+        _transform(write, length_offsets)
+        status = counts[:1]
+    # Immediate canonical errors require reading one scalar; valid counts are
+    # nonnegative and -1 denotes the bounds failure without touching outputs.
+    if status.get()[0] < 0:
+        return _Error(
+            b"offsets[i] > len(content)",
+            length_offsets - 1,
+            _SLICE_NONE,
+            b"cuda.compute (awkward_ListOffsetArray_drop_none_indexes)",
+        )
+    return None
+
+
+def nonlocal_ranges(outstarts, outstops, distincts, lendistincts, outlength):
+    if outlength == 0:
+        return
+    if lendistincts == 0:
+        outstarts[:outlength] = 0
+        outstops[:outlength] = 0
+        return
+    if hasattr(distincts, "__cuda_array_interface__"):
+        from awkward._connect.cuda._prepared_gather import nonlocal_offsets
+
+        nonlocal_offsets(
+            outstarts, outstops, distincts, lendistincts, outlength, _Stream()
+        )
+        return
+
+    width = lendistincts // outlength
+
+    def find_stop(i):
+        start = i * width
+        stop = start + width
+        while stop > start and distincts[stop - 1] == -1:
+            stop -= 1
+        outstarts[i] = start
+        return stop
+
+    _transform(find_stop, outlength, outstops)

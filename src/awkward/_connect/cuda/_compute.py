@@ -2261,26 +2261,10 @@ def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
     tocarry[:length] = cp.arange(length, dtype=dtype) * dtype(size) + dtype(regular_at)
 
 
-# IS NOT USED (keep for archive). Takes too long to check for error cases.
-# Checks that all sublists have equal length and writes that length to size[0].
-# Raises ValueError immediately if offsets decrease or sublists have different lengths.
-#
-# Example: fromoffsets=[0, 2, 4, 6] → size[0]=2
 def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
-    if offsetslength <= 1:
-        size[:1] = cp.zeros(1, dtype=size.dtype)
-        return
-    n = offsetslength - 1
-    counts = fromoffsets[1:offsetslength] - fromoffsets[:n]
-    if cp.any(counts < 0):
-        raise ValueError(
-            "offsets must be monotonically increasing in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
-        )
-    if not cp.all(counts == counts[0]):
-        raise ValueError(
-            "cannot convert to RegularArray because subarray lengths are not regular in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
-        )
-    size[:1] = counts[:1].astype(size.dtype, copy=False)  # GPU→GPU
+    from awkward._connect.cuda import _listoffsetarray
+
+    return _listoffsetarray.to_regular(size, fromoffsets, offsetslength)
 
 
 # Pads each sublist to at least target length (longer sublists kept as-is).
@@ -2290,6 +2274,8 @@ def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
 def awkward_ListOffsetArray_rpad_length_axis1(
     tooffsets, fromoffsets, fromlength, target, tolength
 ):
+    from awkward._connect.cuda._listoffsetarray import _Stream
+
     if fromlength == 0:
         tooffsets[:1] = cp.zeros(1, dtype=tooffsets.dtype)
         tolength[:1] = cp.zeros(1, dtype=tolength.dtype)
@@ -2303,64 +2289,17 @@ def awkward_ListOffsetArray_rpad_length_axis1(
         op=OpKind.PLUS,
         init_value=None,
         num_items=fromlength,
+        stream=_Stream(),
     )
     tolength[:1] = tooffsets[fromlength : fromlength + 1].astype(
         tolength.dtype, copy=False
     )  # GPU→GPU, no sync
 
 
-## NOT USED (revisit later)
-# Builds a flat gather index for padding each sublist to at least `target` elements.
-# The output size per row is max(len_i, target): longer sublists are kept in full,
-# shorter ones are extended with -1 (missing).  toindex is sized to sum(max(len_i, target)).
-# For output element q in row i at intra-row position j:
-#   j < len_i  →  fromoffsets[i] + j   (copy actual element)
-#   j >= len_i →  -1                    (pad with missing)
-#
-# Example (target=3): fromoffsets=[0,1,5,7], fromlength=3
-#   row lengths: [1, 4, 2], padded: [3, 4, 3]
-#   toindex = [0,-1,-1, 1,2,3,4, 5,6,-1]
 def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target):
-    if fromlength == 0 or len(toindex) == 0:
-        return
-    counts = fromoffsets[1 : fromlength + 1] - fromoffsets[:fromlength]
-    starts = cp.empty(fromlength + 1, dtype=fromoffsets.dtype)
-    padded = cp.maximum(counts, target).astype(starts.dtype, copy=False)
-    starts[0] = 0
-    inclusive_scan(
-        d_in=padded,
-        d_out=starts[1 : fromlength + 1],
-        op=OpKind.PLUS,
-        init_value=None,
-        num_items=fromlength,
-    )
-    dtype = toindex.dtype.type
+    from awkward._connect.cuda import _listoffsetarray
 
-    # For each flat output index q, binary-searches starts to find which row i that position belongs to.
-    # Computes the intra-row offset j = q - starts[i], and returns
-    # either the source index (fromoffsets[i] + j) if within the original sublist length,
-    # or -1 if it's a padding slot.
-    def fill(q):
-        lo = 0
-        hi = fromlength - 1
-        while lo < hi:
-            mid = (lo + hi + 1) >> 1
-            if starts[mid] <= q:
-                lo = mid
-            else:
-                hi = mid - 1
-        i = lo
-        j = q - starts[i]
-        if j < counts[i]:
-            return dtype(fromoffsets[i] + j)
-        return dtype(-1)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toindex,
-        op=fill,
-        num_items=len(toindex),
-    )
+    return _listoffsetarray.rpad(toindex, fromoffsets, fromlength, target)
 
 
 # Builds a flat gather index for padding/clipping each sublist to exactly `target` elements.
@@ -2416,55 +2355,23 @@ def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
     tocarry[:length] = cp.argsort(fromindex[:length])
 
 
-## NOT USED (revisit later)
-# Gathers inneroffsets at positions given by outeroffsets:
-# tooffsets[i] = inneroffsets[outeroffsets[i]] for i in [0, outeroffsetslen).
-# Used when flattening a nested ListOffsetArray: the outer offsets index into
-# the inner offset array to produce the combined flat offsets.
-#
-# Example: outeroffsets=[0,2,3], inneroffsets=[0,4,7,9,11]
-#   tooffsets = [inneroffsets[0], inneroffsets[2], inneroffsets[3]] = [0, 9, 11]
 def awkward_ListOffsetArray_flatten_offsets(
     tooffsets, outeroffsets, outeroffsetslen, inneroffsets
 ):
-    if outeroffsetslen == 0:
-        return
-    tooffsets[:outeroffsetslen] = inneroffsets[outeroffsets[:outeroffsetslen]]
+    from awkward._connect.cuda import _listoffsetarray
+
+    return _listoffsetarray.flatten_offsets(
+        tooffsets, outeroffsets, outeroffsetslen, inneroffsets
+    )
 
 
-## NOT USED (revisit later)
-# Rewrites fromoffsets to exclude None entries counted by noneindexes.
-# tooffsets[i] = fromoffsets[i] - (number of nones in noneindexes[0:fromoffsets[i]])
-# which equals the number of non-None elements before position fromoffsets[i].
-#
-# Computed via a single inclusive scan over the None mask, then indexed at each fromoffsets value.
-#
-# Example: noneindexes=[-1, 0, -1, 0, 0, -1, 0], fromoffsets=[0,2,3,5,7], length_offsets=5
-#   none mask:        [1, 0, 1, 0, 0, 1, 0]
-#   cumulative_nones: [0, 1, 1, 2, 2, 2, 3, 3]
-#   tooffsets = fromoffsets - cumulative_nones[fromoffsets] = [0,2,3,5,7] - [0,1,2,2,3] = [0,1,1,3,4]
 def awkward_ListOffsetArray_drop_none_indexes(
     tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes
 ):
-    if length_offsets == 0:
-        return
-    # cumulative_nones[k] = number of nones in noneindexes[0:k]
-    cumulative_nones = cp.empty(length_indexes + 1, dtype=tooffsets.dtype)
-    cumulative_nones[0] = 0
-    if length_indexes > 0:
-        none_mask = (noneindexes[:length_indexes] < 0).astype(
-            cumulative_nones.dtype, copy=False
-        )
-        inclusive_scan(
-            d_in=none_mask,
-            d_out=cumulative_nones[1 : length_indexes + 1],
-            op=OpKind.PLUS,
-            init_value=None,
-            num_items=length_indexes,
-        )
-    idx = fromoffsets[:length_offsets]
-    tooffsets[:length_offsets] = (idx - cumulative_nones[idx]).astype(
-        tooffsets.dtype, copy=False
+    from awkward._connect.cuda import _listoffsetarray
+
+    return _listoffsetarray.drop_none(
+        tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes
     )
 
 
@@ -4738,19 +4645,8 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
 def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
     outstarts, outstops, distincts, lendistincts, outlength
 ):
-    if outlength == 0:
-        return
-    if lendistincts == 0:
-        outstarts[:outlength] = 0
-        outstops[:outlength] = 0
-        return
+    from awkward._connect.cuda import _listoffsetarray
 
-    maxcount = lendistincts // outlength
-    starts = cp.arange(outlength, dtype=cp.int64) * maxcount
-    # Stops extend to the last present slot, not the number of present slots:
-    # holes within a group must retain their coordinates, as in the reference.
-    columns = cp.arange(1, maxcount + 1, dtype=cp.int64)
-    present = distincts[:lendistincts].reshape(outlength, maxcount) != -1
-    last = cp.max(cp.where(present, columns, 0), axis=1)
-    outstarts[:outlength] = starts
-    outstops[:outlength] = starts + last
+    return _listoffsetarray.nonlocal_ranges(
+        outstarts, outstops, distincts, lendistincts, outlength
+    )
