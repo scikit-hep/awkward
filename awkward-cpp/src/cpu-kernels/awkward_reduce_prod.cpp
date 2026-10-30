@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_reduce_prod.cpp", line)
 
 #include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 
 // Per-bin product: serial left-to-right accumulation, matching the
 // kernel-specification.yml reference exactly. `__restrict__` lets the
@@ -15,11 +16,20 @@ ERROR awkward_reduce_prod(
   const int64_t* __restrict__ offsets,
   int64_t outlength) {
   for (int64_t bin = 0; bin < outlength; bin++) {
-    OUT acc = static_cast<OUT>(1);
-    for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
-      acc *= static_cast<OUT>(fromptr[i]);
+    if constexpr (std::is_integral_v<OUT> && std::is_signed_v<OUT>) {
+      using U = std::make_unsigned_t<OUT>;
+      U acc = U{1};
+      for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+        acc *= static_cast<U>(fromptr[i]);
+      }
+      toptr[bin] = awkward::kernel::signed_from_unsigned<OUT>(acc);
+    } else {
+      OUT acc = static_cast<OUT>(1);
+      for (int64_t i = offsets[bin]; i < offsets[bin + 1]; i++) {
+        acc *= static_cast<OUT>(fromptr[i]);
+      }
+      toptr[bin] = acc;
     }
-    toptr[bin] = acc;
   }
   return success();
 }
