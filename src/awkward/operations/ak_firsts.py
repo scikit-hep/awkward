@@ -21,7 +21,7 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def firsts(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
+def firsts(array, axis=-1, *, highlevel=True, behavior=None, attrs=None):
     """Returns the first element of each list, or None for each empty list.
 
     See #ak.singletons to invert this function.
@@ -107,7 +107,7 @@ def _impl(array, axis, highlevel, behavior, attrs):
             if posaxis == depth and layout.is_list:
                 # this is a copy of the raw array
                 index = starts = backend.nplike.asarray(
-                    layout.starts.data, dtype=np.int64, copy=True
+                    layout.starts.data, dtype=np.int64
                 )
 
                 # this might be a view
