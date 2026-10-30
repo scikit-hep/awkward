@@ -2646,9 +2646,28 @@ kernels:
           - {name: is_stable, type: "bool", dir: in}
           - {name: is_ascending, type: "bool", dir: in}
           - {name: is_local, type: "bool", dir: in}
-    description: null
+    description: |
+      Sort byte strings lexicographically within contiguous runs of equal parents.
+      Embedded NUL bytes are ordinary bytes. Prefixes precede longer strings in
+      ascending order. Stable sorting preserves input order among equal strings;
+      unstable tie order is unspecified. Local indices are relative to the run.
+      Input starts/stops must describe valid ranges in stringdata.
     definition: |
-      Insert Python definition here
+      def awkward_ListOffsetArray_argsort_strings(tocarry, fromparents, length,
+                                                 stringdata, stringstarts,
+                                                 stringstops, is_stable,
+                                                 is_ascending, is_local):
+          start = 0
+          while start < length:
+              stop = start + 1
+              while stop < length and fromparents[stop] == fromparents[start]:
+                  stop += 1
+              order = sorted(range(start, stop),
+                             key=lambda i: bytes(stringdata[stringstarts[i]:stringstops[i]]),
+                             reverse=not is_ascending)
+              for i, index in enumerate(order):
+                  tocarry[start + i] = index - start if is_local else index
+              start = stop
     automatic-tests: false
 
   - name: awkward_NumpyArray_sort_asstrings_uint8
@@ -2662,9 +2681,27 @@ kernels:
           - {name: outoffsets, type: "List[int64_t]", dir: out}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: |
+      Sort offset-delimited byte strings lexicographically and pack their bytes
+      into toptr starting at zero. Write rebased sorted offsets to outoffsets.
+      Embedded NUL bytes are ordinary bytes. Offsets must be nonnegative,
+      nondecreasing, and within fromptr. Output buffers must have enough capacity.
+      Stable sorting preserves input order among equal strings; unstable tie
+      order is unspecified. Bytes outside the covered output prefix are unchanged.
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_sort_asstrings_uint8(toptr, fromptr, offsets,
+                                                offsetslength, outoffsets,
+                                                ascending, stable):
+          words = [bytes(fromptr[offsets[i]:offsets[i + 1]])
+                   for i in range(offsetslength - 1)]
+          words.sort(reverse=not ascending)
+          outoffsets[0] = 0
+          position = 0
+          for i, word in enumerate(words):
+              for byte in word:
+                  toptr[position] = byte
+                  position += 1
+              outoffsets[i + 1] = position
     automatic-tests: true
 
   - name: awkward_NumpyArray_unique_strings

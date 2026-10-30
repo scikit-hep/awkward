@@ -27230,6 +27230,356 @@
           }
         }
       ]
+    },
+    {
+      "name": "awkward_ListOffsetArray_argsort_strings",
+      "status": true,
+      "tests": [
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromparents": [],
+            "length": 0,
+            "stringdata": [
+              120,
+              120,
+              122,
+              122
+            ],
+            "stringstarts": [],
+            "stringstops": [],
+            "is_stable": true,
+            "is_ascending": true,
+            "is_local": true
+          },
+          "outputs": {
+            "tocarry": []
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromparents": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "length": 7,
+            "stringdata": [
+              120,
+              120,
+              97,
+              0,
+              99,
+              97,
+              0,
+              98,
+              97,
+              255,
+              128,
+              97,
+              122,
+              122
+            ],
+            "stringstarts": [
+              2,
+              5,
+              8,
+              9,
+              9,
+              10,
+              11
+            ],
+            "stringstops": [
+              5,
+              8,
+              9,
+              9,
+              10,
+              11,
+              12
+            ],
+            "is_stable": true,
+            "is_ascending": true,
+            "is_local": true
+          },
+          "outputs": {
+            "tocarry": [
+              3,
+              2,
+              6,
+              1,
+              0,
+              5,
+              4
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromparents": [],
+            "length": 0,
+            "stringdata": [
+              120,
+              120,
+              122,
+              122
+            ],
+            "stringstarts": [],
+            "stringstops": [],
+            "is_stable": true,
+            "is_ascending": false,
+            "is_local": true
+          },
+          "outputs": {
+            "tocarry": []
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromparents": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "length": 7,
+            "stringdata": [
+              120,
+              120,
+              97,
+              0,
+              99,
+              97,
+              0,
+              98,
+              97,
+              255,
+              128,
+              97,
+              122,
+              122
+            ],
+            "stringstarts": [
+              2,
+              5,
+              8,
+              9,
+              9,
+              10,
+              11
+            ],
+            "stringstops": [
+              5,
+              8,
+              9,
+              9,
+              10,
+              11,
+              12
+            ],
+            "is_stable": true,
+            "is_ascending": false,
+            "is_local": true
+          },
+          "outputs": {
+            "tocarry": [
+              4,
+              5,
+              0,
+              1,
+              2,
+              6,
+              3
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "awkward_NumpyArray_sort_asstrings_uint8",
+      "status": true,
+      "tests": [
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [
+              120,
+              120,
+              122,
+              122
+            ],
+            "offsets": [
+              2
+            ],
+            "offsetslength": 1,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [],
+            "outoffsets": [
+              0
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [
+              120,
+              120,
+              97,
+              0,
+              99,
+              97,
+              0,
+              98,
+              97,
+              255,
+              128,
+              97,
+              122,
+              122
+            ],
+            "offsets": [
+              2,
+              5,
+              8,
+              9,
+              9,
+              10,
+              11,
+              12
+            ],
+            "offsetslength": 8,
+            "ascending": true,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [
+              97,
+              97,
+              97,
+              0,
+              98,
+              97,
+              0,
+              99,
+              128,
+              255
+            ],
+            "outoffsets": [
+              0,
+              0,
+              1,
+              2,
+              5,
+              8,
+              9,
+              10
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [
+              120,
+              120,
+              122,
+              122
+            ],
+            "offsets": [
+              2
+            ],
+            "offsetslength": 1,
+            "ascending": false,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [],
+            "outoffsets": [
+              0
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [
+              120,
+              120,
+              97,
+              0,
+              99,
+              97,
+              0,
+              98,
+              97,
+              255,
+              128,
+              97,
+              122,
+              122
+            ],
+            "offsets": [
+              2,
+              5,
+              8,
+              9,
+              9,
+              10,
+              11,
+              12
+            ],
+            "offsetslength": 8,
+            "ascending": false,
+            "stable": true
+          },
+          "outputs": {
+            "toptr": [
+              255,
+              128,
+              97,
+              0,
+              99,
+              97,
+              0,
+              98,
+              97,
+              97
+            ],
+            "outoffsets": [
+              0,
+              1,
+              2,
+              5,
+              8,
+              9,
+              10,
+              10
+            ]
+          }
+        }
+      ]
     }
   ]
 }

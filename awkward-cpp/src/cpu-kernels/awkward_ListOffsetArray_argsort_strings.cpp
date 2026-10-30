@@ -24,20 +24,12 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
           size_t right_n = stringstops[right] - stringstarts[right];
           const char* left_str = &stringdata[stringstarts[left]];
           const char* right_str = &stringdata[stringstarts[right]];
-          int cmp = strncmp(left_str, right_str, std::min(left_n, right_n));
-          bool out;
+          const size_t common = std::min(left_n, right_n);
+          int cmp = common == 0 ? 0 : memcmp(left_str, right_str, common);
           if (cmp == 0) {
-            out = left_n < right_n;
+            cmp = (left_n > right_n) - (left_n < right_n);
           }
-          else {
-            out = cmp < 0;
-          }
-          if (is_ascending) {
-            return out;
-          }
-          else {
-            return !out;
-          }
+          return is_ascending ? cmp < 0 : cmp > 0;
         };
 
   int64_t firstindex = 0;
