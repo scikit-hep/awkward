@@ -17,12 +17,14 @@ from numpy import uint8  # noqa: F401 (used in evaluated strings)
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-# Kernels dispatched to `cuda.compute` rather than compiled CUDA: these raise
-# errors eagerly (inside the call) instead of after `ak_cu.synchronize_cuda()`.
+# Kernels dispatched to `cuda.compute` rather than compiled CUDA: their errors
+# are raised eagerly (or checked by the generated KernelError adapter), rather
+# than after `ak_cu.synchronize_cuda()`.
 # IMPORTANT: whenever an error-raising kernel moves to `cuda.compute` (or back),
 # this set must be updated to match, or the generated CUDA unit tests will
 # wrap `pytest.raises` around the wrong statement.
 CUDA_COMPUTE_KERNELS = {
+    "awkward_NumpyArray_utf8_to_utf32_padded",
     "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListArray_compact_offsets",
     "awkward_ListArray_broadcast_tooffsets",
@@ -36,6 +38,25 @@ CUDA_COMPUTE_KERNELS = {
     "awkward_IndexedArray_flatten_nextcarry",
     "awkward_UnionArray_validity",
 }
+
+
+# These compute kernels return the CPU KernelError protocol. High-level callers
+# consume that record; standalone generated tests turn it into an exception.
+CUDA_RETURN_ERROR_KERNELS = {
+    "awkward_NumpyArray_utf8_to_utf32_padded",
+}
+
+CUDA_CHECK_ERROR_HELPER = """def _checked_kernel(kernel):
+    def checked(*args):
+        error = kernel(*args)
+        if error is not None and error.str is not None:
+            message = error.str.decode(errors="surrogateescape")
+            raise ValueError(f"{message} in compiled CUDA code ({kernel.key[0]})")
+        return error
+    return checked
+
+
+"""
 
 # The C loader may be missing (pyyaml built without libyaml) and is avoided on
 # free-threaded builds.
@@ -920,6 +941,8 @@ cuda_kernels_tests = [
     "awkward_RegularArray_getitem_next_range_spreadadvanced",
     "awkward_RegularArray_getitem_next_array",
     "awkward_RegularArray_getitem_next_array_regularize",
+    "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
+    "awkward_NumpyArray_utf8_to_utf32_padded",
     "awkward_RegularArray_reduce_local_nextparents_64",
     "awkward_RegularArray_reduce_nonlocal_preparenext_64",
     "awkward_missing_repeat",
@@ -1061,6 +1084,7 @@ def gencudakerneltests(specdict):
                     "import awkward._connect.cuda as ak_cu\n"
                     "from awkward._backends.cupy import CupyBackend\n\n"
                     "cupy_backend = CupyBackend.instance()\n\n"
+                    + CUDA_CHECK_ERROR_HELPER
                 )
                 num = 1
                 if spec.tests == []:
@@ -1101,6 +1125,8 @@ def gencudakerneltests(specdict):
                         + "', {}]\n".format(", ".join(dtypes))
                     )
                     f.write(" " * 4 + cuda_string)
+                    if spec.templatized_kernel_name in CUDA_RETURN_ERROR_KERNELS:
+                        f.write("    funcC = _checked_kernel(funcC)\n")
                     args = ""
                     count = 0
                     for arg in spec.args:
@@ -1212,7 +1238,7 @@ def gencudaunittests_new(specdict):
                 "import awkward as ak\n"
                 "import awkward._connect.cuda as ak_cu\n"
                 "from awkward._backends.cupy import CupyBackend\n\n"
-                "cupy_backend = CupyBackend.instance()\n\n"
+                "cupy_backend = CupyBackend.instance()\n\n" + CUDA_CHECK_ERROR_HELPER
             )
 
             # CASES list
@@ -1231,9 +1257,13 @@ def gencudaunittests_new(specdict):
             f.write("@pytest.fixture(scope='session')\n")
             f.write(f"def funcC_{spec.name}():\n")
             f.write(
-                f"    return cupy_backend['{spec.templatized_kernel_name}',"
-                f" {', '.join(dtypes)}]\n\n"
+                f"    kernel = cupy_backend['{spec.templatized_kernel_name}',"
+                f" {', '.join(dtypes)}]\n"
             )
+            if spec.templatized_kernel_name in CUDA_RETURN_ERROR_KERNELS:
+                f.write("    return _checked_kernel(kernel)\n\n")
+            else:
+                f.write("    return kernel\n\n")
 
             if not status:
                 f.write(
@@ -1366,6 +1396,14 @@ def gencudaunittests_new(specdict):
 
             # --- Kernel call ---
             args_str = ", ".join(arg.name for arg in spec.args)
+            if spec.templatized_kernel_name in CUDA_COMPUTE_KERNELS:
+                f.write(
+                    "\n    if case['error']:\n"
+                    "        error_message = re.escape(case['message'])\n"
+                    "        with pytest.raises(ValueError, match=error_message):\n"
+                    f"            funcC_{spec.name}({args_str})\n"
+                    "        return\n"
+                )
             f.write(f"\n    funcC_{spec.name}({args_str})\n")
 
             # --- Error vs success path ---
@@ -1499,6 +1537,7 @@ def gencudaunittests(specdict):
                     "import awkward._connect.cuda as ak_cu\n"
                     "from awkward._backends.cupy import CupyBackend\n\n"
                     "cupy_backend = CupyBackend.instance()\n\n"
+                    + CUDA_CHECK_ERROR_HELPER
                 )
                 unit_test_values = unit_test_map[spec.templatized_kernel_name]
                 tests = unit_test_values["tests"]
@@ -1577,6 +1616,8 @@ def gencudaunittests(specdict):
                             + "', {}]\n".format(", ".join(dtypes))
                         )
                         f.write(" " * 4 + cuda_string)
+                        if spec.templatized_kernel_name in CUDA_RETURN_ERROR_KERNELS:
+                            f.write("    funcC = _checked_kernel(funcC)\n")
                         args = ""
                         count = 0
                         for arg in spec.args:

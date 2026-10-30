@@ -27230,6 +27230,206 @@
           }
         }
       ]
+    },
+    {
+      "name": "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
+      "status": true,
+      "tests": [
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [],
+            "fromoffsets": [
+              0
+            ],
+            "offsetslength": 1
+          },
+          "outputs": {
+            "outmaxcodepoints": [
+              0
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [],
+            "fromoffsets": [
+              0,
+              0
+            ],
+            "offsetslength": 2
+          },
+          "outputs": {
+            "outmaxcodepoints": [
+              0
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [
+              120,
+              120,
+              120,
+              97,
+              195,
+              169,
+              230,
+              151,
+              165,
+              230,
+              156,
+              172,
+              240,
+              159,
+              152,
+              128,
+              97,
+              0,
+              98
+            ],
+            "fromoffsets": [
+              3,
+              4,
+              6,
+              12,
+              16,
+              19,
+              19
+            ],
+            "offsetslength": 7
+          },
+          "outputs": {
+            "outmaxcodepoints": [
+              3
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "awkward_NumpyArray_utf8_to_utf32_padded",
+      "status": true,
+      "tests": [
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [],
+            "fromoffsets": [
+              0
+            ],
+            "offsetslength": 1,
+            "maxcodepoints": 0
+          },
+          "outputs": {
+            "toptr": []
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [],
+            "fromoffsets": [
+              0,
+              0
+            ],
+            "offsetslength": 2,
+            "maxcodepoints": 0
+          },
+          "outputs": {
+            "toptr": []
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromptr": [
+              120,
+              120,
+              120,
+              97,
+              195,
+              169,
+              230,
+              151,
+              165,
+              230,
+              156,
+              172,
+              240,
+              159,
+              152,
+              128,
+              97,
+              0,
+              98
+            ],
+            "fromoffsets": [
+              3,
+              4,
+              6,
+              12,
+              16,
+              19,
+              19
+            ],
+            "offsetslength": 7,
+            "maxcodepoints": 3
+          },
+          "outputs": {
+            "toptr": [
+              97,
+              0,
+              0,
+              233,
+              0,
+              0,
+              26085,
+              26412,
+              0,
+              128512,
+              0,
+              0,
+              97,
+              0,
+              98,
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "could not convert UTF8 code point to UTF32: invalid byte in UTF8 string",
+          "inputs": {
+            "fromptr": [
+              97,
+              128
+            ],
+            "fromoffsets": [
+              0,
+              2
+            ],
+            "offsetslength": 2,
+            "maxcodepoints": 2
+          },
+          "outputs": {
+            "toptr": [
+              97,
+              0
+            ]
+          }
+        }
+      ]
     }
   ]
 }

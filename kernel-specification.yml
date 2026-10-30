@@ -2701,9 +2701,21 @@ kernels:
           - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: outmaxcodepoints, type: "List[int64_t]", dir: out}
-    description: null
+    description: >-
+      Offsets delimit complete UTF-8 strings in accessible storage, with recognized leading-byte widths. Return the maximum code-point count in outmaxcodepoints[0], preserving its tail.
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_prepare_utf8_to_utf32_padded(fromptr, fromoffsets, offsetslength, outmaxcodepoints):
+          outmaxcodepoints[0] = 0
+          position = fromoffsets[0]
+          for row in range(offsetslength - 1):
+              stop = position + fromoffsets[row + 1] - fromoffsets[row]
+              count = 0
+              while position < stop:
+                  byte = fromptr[position]
+                  width = (1 if byte & 0x80 == 0 else 2 if byte & 0xE0 == 0xC0 else 3 if byte & 0xF0 == 0xE0 else 4 if byte & 0xF8 == 0xF0 else 0)
+                  position += width
+                  count += 1
+              outmaxcodepoints[0] = max(outmaxcodepoints[0], count)
     automatic-tests: false
 
   - name: awkward_NumpyArray_utf8_to_utf32_padded
@@ -2729,9 +2741,30 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: maxcodepoints, type: "int64_t", dir: in,  role: default}
           - {name: toptr, type: "List[uint32_t]", dir: out}
-    description: null
+    description: >-
+      Offsets delimit complete strings and fit accessible input storage; output capacity must cover all padded rows. The padding width must be at least the largest decoded row. Continuation bytes are masked, not validated.
     definition: |
-      Insert Python definition here
+      def awkward_NumpyArray_utf8_to_utf32_padded(fromptr, fromoffsets, offsetslength, maxcodepoints, toptr):
+          position = fromoffsets[0]
+          output = 0
+          for row in range(offsetslength - 1):
+              stop = position + fromoffsets[row + 1] - fromoffsets[row]
+              count = 0
+              while position < stop:
+                  byte = fromptr[position]
+                  width = (1 if byte & 0x80 == 0 else 2 if byte & 0xE0 == 0xC0 else 3 if byte & 0xF0 == 0xE0 else 4 if byte & 0xF8 == 0xF0 else 0)
+                  if width == 0:
+                      raise ValueError("could not convert UTF8 code point to UTF32: invalid byte in UTF8 string")
+                  value = byte & (0x7F if width == 1 else (1 << (7 - width)) - 1)
+                  for j in range(1, width):
+                      value = (value << 6) | (fromptr[position + j] & 0x3F)
+                  toptr[output] = value
+                  output += 1
+                  position += width
+                  count += 1
+              for j in range(maxcodepoints - count):
+                  toptr[output] = 0
+                  output += 1
     automatic-tests: false
 
   - name: awkward_NumpyArray_pad_zero_to_length

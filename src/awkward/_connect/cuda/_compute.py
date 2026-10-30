@@ -4735,6 +4735,22 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
     )
 
 
+def awkward_NumpyArray_prepare_utf8_to_utf32_padded(
+    fromptr, fromoffsets, offsetslength, outmaxcodepoints
+):
+    from awkward._connect.cuda._utf8 import prepare
+
+    return prepare(fromptr, fromoffsets, offsetslength, outmaxcodepoints)
+
+
+def awkward_NumpyArray_utf8_to_utf32_padded(
+    fromptr, fromoffsets, offsetslength, maxcodepoints, toptr
+):
+    from awkward._connect.cuda._utf8 import decode
+
+    return decode(fromptr, fromoffsets, offsetslength, maxcodepoints, toptr)
+
+
 def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
     outstarts, outstops, distincts, lendistincts, outlength
 ):
