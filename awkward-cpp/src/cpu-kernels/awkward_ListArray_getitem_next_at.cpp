@@ -13,7 +13,8 @@ ERROR awkward_ListArray_getitem_next_at(
   int64_t lenstarts,
   int64_t at) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t length = fromstops[i] - fromstarts[i];
+    int64_t length =
+      static_cast<int64_t>(fromstops[i]) - static_cast<int64_t>(fromstarts[i]);
     const auto regular_at = awkward::kernel::normalize_index(at, length);
     if (!regular_at) {
       return failure("index out of range", i, at, FILENAME(__LINE__));

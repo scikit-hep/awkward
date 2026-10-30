@@ -16,7 +16,8 @@ ERROR awkward_ListArray_getitem_next_range_carrylength(
   int64_t step) {
   *carrylength = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t length = fromstops[i] - fromstarts[i];
+    int64_t length =
+      static_cast<int64_t>(fromstops[i]) - static_cast<int64_t>(fromstarts[i]);
     int64_t regular_start = start;
     int64_t regular_stop = stop;
     awkward_regularize_rangeslice(&regular_start, &regular_stop, step > 0,
