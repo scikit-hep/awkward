@@ -36,9 +36,9 @@ or
     else:
         if not _has_checked_version:
             _numexpr_version = importlib.metadata.version("numexpr")
-            if parse_version(_numexpr_version) < parse_version("2.7.1"):
+            if parse_version(_numexpr_version) < parse_version("2.10.0"):
                 warnings.warn(
-                    "Awkward Array is only known to work with numexpr 2.7.1 or later"
+                    "Awkward Array is only known to work with numexpr 2.10.0 or later"
                     f"(you have version {_numexpr_version})",
                     RuntimeWarning,
                     stacklevel=1,

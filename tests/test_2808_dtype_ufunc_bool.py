@@ -2,13 +2,8 @@
 
 
 import numpy as np
-import packaging.version
-import pytest
 
 import awkward as ak
-
-if packaging.version.Version(np.__version__) < packaging.version.Version("1.24.0"):
-    pytest.skip("Only NumPy>=1.24 supports `resolve_dtypes`", allow_module_level=True)
 
 
 def test_bool():

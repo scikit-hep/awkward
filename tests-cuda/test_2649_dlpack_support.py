@@ -1,16 +1,9 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
-import numpy as np
 import pytest
-from packaging.version import parse as parse_version
 
 import awkward as ak
-
-if parse_version(np.__version__) < parse_version("1.23.0"):
-    pytest.skip(
-        "NumPy 1.23 or greater is required for DLPack testing", allow_module_level=True
-    )
 
 
 def test_from_dlpack_cupy():
