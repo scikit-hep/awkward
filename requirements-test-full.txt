@@ -3,7 +3,9 @@ hypothesis-awkward==0.20.3
 jax[cpu]>=0.2.15;sys_platform != "win32"
 numba>=0.50.0;sys_platform != "win32"
 numexpr>=2.7;python_version < "3.15"
-pandas>=0.24.0;sys_platform != "win32"
+# The last pandas with 32-bit Windows wheels (2.0.3) is not ABI-compatible with NumPy 2,
+# and markers cannot detect 32-bit Python on Windows; the x86 CI job runs Python 3.10
+pandas>=0.24.0;sys_platform != "win32" or python_version >= "3.11"
 pyarrow>=17.0.0;sys_platform != "win32" and python_version < "3.15"
 pytest>=6
 pytest-cov
