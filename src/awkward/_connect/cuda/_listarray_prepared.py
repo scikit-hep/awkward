@@ -204,7 +204,10 @@ class _NextArray(_Prepared):
 
         def write(k):
             stride = indices.size + 1
-            if indices.size:
+            # Use an explicit predicate: the device compiler must not lower
+            # an integer truth test by truncating an even size to a false bit.
+            # The dummy status invocation for empty indices must not divide.
+            if k < runtime[0] * indices.size:
                 row, j = k // indices.size, k % indices.size
                 if row * stride + j < first[0]:
                     start = np.int64(starts[row])

@@ -479,3 +479,32 @@ def test_next_array_reuses_prepared_operations_after_warmup(monkeypatch):
     monkeypatch.setattr(prepared, "make_reduce_into", unexpected_build)
     for rows, columns in [(4, 129), (65, 8), (1, 0), (1, 1)]:
         execute(rows, columns)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("columns", [0, 1, 2, 3, 4, 5, 64, 65])
+def test_next_array_even_and_odd_index_counts(dtype, columns):
+    rows = 3
+    starts = cp.asarray([0, 8, 16], dtype=dtype)
+    indices = cp.arange(columns, dtype=cp.int64) % 8
+    carry = cp.full(rows * columns, 123, dtype=cp.int64)
+    advanced = cp.full_like(carry, 123)
+    key = (
+        "awkward_ListArray_getitem_next_array",
+        np.int64,
+        np.int64,
+        dtype,
+        dtype,
+        np.int64,
+    )
+    error = CupyBackend.instance()[key](
+        carry, advanced, starts, starts + 8, indices, rows, columns, 24
+    )
+    assert error is None
+    np.testing.assert_array_equal(
+        cp.asnumpy(carry),
+        (np.asarray([0, 8, 16])[:, None] + np.arange(columns) % 8).ravel(),
+    )
+    np.testing.assert_array_equal(
+        cp.asnumpy(advanced), np.tile(np.arange(columns), rows)
+    )
