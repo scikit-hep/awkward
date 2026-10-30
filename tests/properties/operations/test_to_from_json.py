@@ -10,6 +10,7 @@ from hypothesis import strategies as st
 from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
 
 import awkward as ak
+from tests.properties.operations import known_issues
 
 
 def json_dtype(dtype: np.dtype) -> bool:
@@ -138,44 +139,8 @@ def has_issues(a: ak.Array) -> bool:
     released fix deletes it; with all of them gone the test filters
     reduce to `json_compatible` and `json_writable`.
     """
-    if _has_issue_4241(a.layout):
+    if known_issues.has_issue_4241(a):
         return True
-    return False
-
-
-def _has_issue_4241(layout: ak.contents.Content) -> bool:
-    """`from_json` parses numbers with rapidjson's approximate default
-    algorithm, not `kParseFullPrecisionFlag`: a shortest-repr double can
-    read back off by one ULP, and re-parsing its new repr can drift
-    further, so affected values neither roundtrip nor reach a fixed
-    point (silent corruption, #4241).
-
-    Only values the writer visits count, as in `_has_infinity`. Whether
-    a value is affected depends on its digit string, so each float leaf
-    is checked directly against a `from_json` readback.
-    """
-    if layout.is_numpy:
-        if layout.dtype.kind != "f":
-            return False
-        # `to_json` serializes the repr of the exact widened double
-        data = np.asarray(layout.data, dtype=np.float64)
-        data = data[np.isfinite(data)]
-        if data.size == 0:
-            return False
-        returned = np.asarray(ak.from_json(json.dumps(data.tolist())))
-        return not np.array_equal(returned, data)
-    if layout.is_union:
-        contents = range(len(layout.contents))
-        return any(_has_issue_4241(layout.project(i)) for i in contents)
-    if layout.is_record:
-        return any(_has_issue_4241(c[: layout.length]) for c in layout.contents)
-    if layout.is_option or layout.is_indexed:
-        return _has_issue_4241(layout.project())
-    if layout.is_regular:
-        return _has_issue_4241(layout.content[: layout.length * layout.size])
-    if layout.is_list:
-        layout = layout.to_ListOffsetArray64(False)
-        return _has_issue_4241(layout.content[layout.offsets[0] : layout.offsets[-1]])
     return False
 
 

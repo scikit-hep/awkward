@@ -11,6 +11,7 @@ from hypothesis import strategies as st
 from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
 
 import awkward as ak
+from tests.properties.operations import known_issues
 
 pytest.importorskip("pyarrow.parquet")
 
@@ -61,16 +62,6 @@ def parquet_dtypes() -> st.SearchStrategy[np.dtype]:
 
 
 def parquet_writable(a: ak.Array) -> bool:
-    if isinstance(a.layout, ak.contents.UnmaskedArray) and a.layout.content.is_record:
-        if any(
-            isinstance(x, ak.contents.IndexedArray)
-            and x.index.dtype == np.dtype(np.uint32)
-            for x in a.layout.content.contents
-        ):
-            # `to_parquet` projects each record field through the root
-            # `UnmaskedArray` with `to_IndexedOptionArray64`, which passes
-            # the uint32 index through unconverted (TypeError, #4274)
-            return False
     layout, is_option = a.layout, False
     while layout.is_option or layout.is_indexed:
         is_option = is_option or layout.is_option
@@ -87,59 +78,6 @@ def parquet_writable(a: ak.Array) -> bool:
     return _nodes_writable(a.layout)
 
 
-def _nodes_writable(layout: ak.contents.Content, nullable: bool = False) -> bool:
-    """Exclude layouts that `to_arrow` currently mishandles.
-
-    `nullable` tracks whether Arrow validity bytes flow into this node from
-    an enclosing option: they start at option nodes, pass through records
-    and indexed nodes, and stop below lists. A var-length list receiving
-    validity bytes whose offsets do not start at zero is compacted against
-    unshifted content in `ListOffsetArray._to_arrow`, shifting every list
-    by `offsets[0]` (data corruption, #4222); indexed nodes can recreate such
-    offsets from anywhere in their content, so they are excluded outright
-    when nullable.
-    """
-
-
-def _has_issue_4305(layout: ak.contents.Content, nullable: bool = False) -> bool:
-    """Return `True` if an `UnmaskedArray` receives validity from an
-    enclosing option.
-
-    `to_arrow` records an `UnmaskedArray`'s class name as `mask_type` on
-    the content it wraps, noting that the node carried no mask, and parquet
-    stores each column's validity in full, so an enclosing option's nulls
-    arrive in that content's validity bitmap. `from_parquet` requires a
-    node with that metadata to read back all-ones (message-less
-    `AssertionError` in `popbuffers_finalize`, #4305).
-
-    `nullable` tracks whether Arrow validity bytes flow into this node from
-    an enclosing option: they start at option nodes, pass through records
-    and indexed nodes, and stop below lists.
-
-    The condition here is wider than the failure in three ways, each
-    chosen over a special case: an option holding no null roundtrips; an
-    array shorter than eight roundtrips, because the assertion compares
-    whole bytes (`[: len(out) // 8]`) and so compares nothing; and the one
-    root-level shape `option(record(...))` roundtrips, because
-    `to_parquet` projects the enclosing option into each field of a
-    root-level named record, replacing the `UnmaskedArray` with an
-    `IndexedOptionArray`. Every other root-level option shape fails.
-    """
-    if layout.is_record:
-        return any(_has_issue_4305(x, nullable) for x in layout.contents)
-    if layout.is_regular:
-        return _has_issue_4305(layout.content, False)
-    if layout.is_option:
-        if nullable and isinstance(layout, ak.contents.UnmaskedArray):
-            return True
-        return _has_issue_4305(layout.content, True)
-    if layout.is_indexed:
-        return _has_issue_4305(layout.content, nullable)
-    if layout.is_list:
-        return _has_issue_4305(layout.content, False)
-    return False
-
-
 def _nodes_writable(layout: ak.contents.Content) -> bool:
     """Exclude layouts that `to_arrow` currently mishandles."""
     if layout.is_record:
@@ -153,17 +91,26 @@ def _nodes_writable(layout: ak.contents.Content) -> bool:
         # (pyarrow: "Expected all lists to be of size=0")
         return layout.size > 0 and _nodes_writable(layout.content)
     if layout.is_option:
-        if isinstance(layout, ak.contents.IndexedOptionArray):
-            if layout.length > 0 and layout.content.length == 0:
-                # `to_arrow` crashes projecting nulls over a zero-length
-                # content (IndexError in `ListOffsetArray._to_arrow`, #4221)
-                return False
         return _nodes_writable(layout.content)
     if layout.is_indexed:
         return _nodes_writable(layout.content)
     if layout.is_list:
         return _nodes_writable(layout.content)
     return True
+
+
+def has_issues(a: ak.Array) -> bool:
+    """Arrays affected by a known issue in the conversion.
+
+    One function per known issue, each named after the issue whose
+    released fix deletes it; with all of them gone the test filters
+    reduce to `parquet_writable`.
+    """
+    if known_issues.has_issue_4221(a):
+        return True
+    if known_issues.has_issue_4274(a):
+        return True
+    return False
 
 
 @no_deadline
@@ -180,7 +127,7 @@ def _nodes_writable(layout: ak.contents.Content) -> bool:
         allow_byte_masked=False,
         allow_bit_masked=False,
         allow_unmasked=False,
-    ).filter(parquet_writable)
+    ).filter(lambda a: parquet_writable(a) and not has_issues(a))
 )
 def test_roundtrip(a: ak.Array) -> None:
     """`to_parquet` followed by `from_parquet` reconstructs the array."""
@@ -200,7 +147,7 @@ def test_roundtrip(a: ak.Array) -> None:
         # not supported")
         allow_regular=False,
         allow_union=False,
-    ).filter(parquet_writable)
+    ).filter(lambda a: parquet_writable(a) and not has_issues(a))
 )
 def test_roundtrip_masked(a: ak.Array) -> None:
     """Option-type arrays roundtrip through nullable parquet columns.
