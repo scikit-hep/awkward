@@ -95,6 +95,13 @@ def num(
 
         >>> array.mask[ak.num(array) > 0][:, 0]
         <Array [[1.1, 2.2, 3.3], None, [7.7]] type='3 * option[var * float64]'>
+
+        Strings and bytestrings are treated as leaves, not as lists of
+        characters, so an `axis` that would count characters raises an
+        `AxisError`. Use #ak.str.length to get the length of each string.
+
+        >>> ak.num(ak.Array([["abc", "de"], []]), axis=1)
+        <Array [2, 0] type='2 * int64'>
     """
     # Dispatch
     yield (array,)
@@ -133,7 +140,19 @@ def _impl(
     def action(layout, depth, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
 
-        if posaxis == depth and layout.is_list:
+        # Strings are not lists of characters: like other operations, ak.num
+        # treats them as leaves, so `axis` cannot reach inside them.
+        if layout.is_list and layout.parameter("__array__") in {
+            "string",
+            "bytestring",
+        }:
+            raise AxisError(
+                f"axis={axis} exceeds the depth of this array ({depth}); "
+                "strings are not counted as lists of characters, "
+                "use ak.str.length to get the length of each string"
+            )
+
+        elif posaxis == depth and layout.is_list:
             return ak.contents.NumpyArray(layout.stops.data - layout.starts.data)
 
         elif layout.is_leaf:
