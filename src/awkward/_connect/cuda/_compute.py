@@ -4086,21 +4086,9 @@ def awkward_RegularArray_reduce_nonlocal_preparenext_64(
 # Example: fromindex=[1,-1,3], toindexoffset=2, base=10
 #   toindex[2:5] = [11, -1, 13]
 def awkward_IndexedArray_fill(toindex, toindexoffset, fromindex, length, base):
-    if length == 0:
-        return
+    from awkward._connect.cuda._indexed_fill import fill
 
-    out_dtype = toindex.dtype.type
-
-    def fill(i):
-        x = fromindex[i]
-        return out_dtype(-1) if x < 0 else out_dtype(x + base)
-
-    unary_transform(
-        d_in=CountingIterator(out_dtype(0)),
-        d_out=toindex[toindexoffset : toindexoffset + length],
-        op=fill,
-        num_items=length,
-    )
+    fill(toindex, toindexoffset, fromindex, length, base)
 
 
 def awkward_ListArray_getitem_jagged_carrylen(
