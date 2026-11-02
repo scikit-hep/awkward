@@ -54,7 +54,6 @@ cuda_kernels_impl = [
     "awkward_ListOffsetArray_rpad_axis1",
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
-    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     # "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
