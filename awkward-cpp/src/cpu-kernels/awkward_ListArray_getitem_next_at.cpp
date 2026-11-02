@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_ListArray_getitem_next_at.cpp", line)
 
 #include "awkward/kernels.h"
+#include "awkward/kernel-utils.h"
 
 template <typename C, typename T>
 ERROR awkward_ListArray_getitem_next_at(
@@ -13,14 +14,11 @@ ERROR awkward_ListArray_getitem_next_at(
   int64_t at) {
   for (int64_t i = 0;  i < lenstarts;  i++) {
     int64_t length = fromstops[i] - fromstarts[i];
-    int64_t regular_at = at;
-    if (regular_at < 0) {
-      regular_at += length;
-    }
-    if (!(0 <= regular_at  &&  regular_at < length)) {
+    const auto regular_at = awkward::kernel::normalize_index(at, length);
+    if (!regular_at) {
       return failure("index out of range", i, at, FILENAME(__LINE__));
     }
-    tocarry[i] = fromstarts[i] + regular_at;
+    tocarry[i] = fromstarts[i] + *regular_at;
   }
   return success();
 }
