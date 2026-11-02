@@ -358,8 +358,14 @@ def _cuda_argument(value, *, depth=0):
     """Never inspect array values: formatting a CUDA array can synchronize."""
     from awkward import contents, highlevel, index, record
 
-    if isinstance(value, (highlevel.Array, highlevel.Record)):
-        return f"<{type(value).__name__} type='{value.type}'>"
+    # Full high-level types recursively visit every field and nested layout.
+    # Only capture outer metadata: no form/type construction, behavior lookup,
+    # value formatting, or references that keep device buffers alive.
+    if isinstance(value, highlevel.Array):
+        layout = value._layout
+        return f"<Array layout={type(layout).__name__} length={layout.length}>"
+    if isinstance(value, highlevel.Record):
+        return f"<Record layout={type(value._layout.array).__name__}>"
     if isinstance(value, contents.Content):
         return f"<{type(value).__name__} length={len(value)}>"
     if isinstance(value, record.Record):

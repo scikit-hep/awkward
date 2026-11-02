@@ -31,13 +31,13 @@ def test_cuda_capture_no_value_formatting_or_buffer_retention(monkeypatch, kind)
     with context:
         snapshot = ErrorContext.cuda_primary()
         assert ErrorContext.cuda_primary() is snapshot
-        assert "var * int64" in snapshot.note
+        assert "layout=ListOffsetArray length=2" in snapshot.note
         assert "[1, 2]" not in snapshot.note
     del context, array, index
     gc.collect()
     assert all(ref() is None for ref in references)
     error = snapshot.decorate_exception(ValueError, ValueError("bad index"))
-    assert "type='2 * var * int64'" in error.__notes__[0]
+    assert "<Array layout=ListOffsetArray length=2>" in error.__notes__[0]
     if kind == "operation":
         assert "ak.example(" in error.__notes__[0]
         assert "axis = 1" in error.__notes__[0]
@@ -77,3 +77,40 @@ def test_cuda_capture_lowlevel_arguments_and_unknown_context():
     with CustomContext():
         snapshot = ErrorContext.cuda_primary()
     assert "CustomContext(" in snapshot.note
+
+
+@pytest.mark.thread_unsafe
+@pytest.mark.parametrize("kind", ["array", "record"])
+@pytest.mark.parametrize("fields", [1, 1000])
+def test_cuda_capture_never_constructs_recursive_type(monkeypatch, kind, fields):
+    array = ak.Array([{f"field{i}": [1, 2] for i in range(fields)}])
+    value = array if kind == "array" else array[0]
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("CUDA capture must use outer metadata only")
+
+    for cls in (ak.Array, ak.Record):
+        monkeypatch.setattr(cls, "type", property(forbidden))
+        monkeypatch.setattr(cls, "__repr__", forbidden)
+        monkeypatch.setattr(cls, "__str__", forbidden)
+    monkeypatch.setattr(ak.contents.RecordArray, "form", property(forbidden))
+    with OperationErrorContext("ak.example", (value,), {}):
+        snapshot = ErrorContext.cuda_primary()
+    expected = (
+        "<Array layout=RecordArray length=1>"
+        if kind == "array"
+        else "<Record layout=RecordArray>"
+    )
+    assert snapshot.args == [expected]
+    assert len(snapshot.note) < 200
+    assert "field0" not in snapshot.note
+
+
+def test_cuda_capture_nested_metadata_and_unknown_length():
+    from awkward._errors import _cuda_argument
+
+    array = ak.Array([[1, 2], []])
+    assert _cuda_argument([array]) == "[<Array layout=ListOffsetArray length=2>]"
+    assert _cuda_argument({"pt": array}) == "<dict>"
+    tracer = ak.Array(array.layout.to_typetracer(forget_length=True))
+    assert _cuda_argument(tracer) == "<Array layout=ListOffsetArray length=##>"
