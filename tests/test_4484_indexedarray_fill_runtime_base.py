@@ -90,6 +90,8 @@ def test_runtime_base_matches_reference(dtype, length, base, implementation):
     np.testing.assert_array_equal(output, expected)
 
 
+# These tests inspect or replace cached setup shared by the fixture threads.
+@pytest.mark.thread_unsafe
 def test_reuses_operation_across_base_pointer_length_and_scalar_type(implementation):
     namespace, array, events = implementation
     for length, base in [
@@ -112,6 +114,7 @@ def test_reuses_operation_across_base_pointer_length_and_scalar_type(implementat
     assert namespace["_setup"].cache_info().maxsize == 32
 
 
+@pytest.mark.thread_unsafe
 def test_descriptor_is_cleared_when_launch_fails(implementation):
     namespace, array, _ = implementation
     source = np.arange(2, dtype=np.int64).view(array)
