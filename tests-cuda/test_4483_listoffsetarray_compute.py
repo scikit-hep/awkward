@@ -1,0 +1,273 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+import importlib.util
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+import awkward as ak
+from awkward._backends.cupy import CupyBackend
+from awkward._backends.numpy import NumpyBackend
+
+cp = pytest.importorskip("cupy")
+pytest.importorskip("cuda.compute")
+
+spec = importlib.util.spec_from_file_location(
+    "listoffsetarray_contract_cases",
+    Path(__file__).resolve().parents[1] / "tests/test_4483_listoffsetarray_compute.py",
+)
+contract = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = contract
+spec.loader.exec_module(contract)
+
+
+@pytest.mark.parametrize("name,specialization,case", contract.CASES)
+def test_cuda_cpu_parity(name, specialization, case):
+    with cp.cuda.Stream(non_blocking=True):
+        _cuda_cpu_parity(name, specialization, case)
+
+
+def _cuda_cpu_parity(name, specialization, case):
+    args, outputs, key = contract.arguments(specialization, case)
+    gpu_args = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+    expected = NumpyBackend.instance()[(name, *key)](*args)
+    kernel = CupyBackend.instance()[(name, *key)]
+    assert isinstance(kernel, ak._kernels.CudaComputeKernel)
+    actual = kernel(*gpu_args)
+    contract.assert_error(actual, expected)
+    for i in outputs:
+        np.testing.assert_array_equal(cp.asnumpy(gpu_args[i]), args[i])
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_highlevel_operations(dtype):
+    with cp.cuda.Stream(non_blocking=True):
+        offsets = ak.index.Index(np.asarray([2, 4, 4, 7], dtype=dtype))
+        source = ak.Array(
+            ak.contents.ListOffsetArray(offsets, ak.contents.NumpyArray(np.arange(9)))
+        )
+        array = ak.to_backend(source, "cuda")
+        assert ak.pad_none(array, 4).to_list() == ak.pad_none(source, 4).to_list()
+        assert ak.flatten(array).to_list() == ak.flatten(source).to_list()
+        assert (
+            ak.drop_none(ak.mask(array, array % 2 == 0), axis=-1).to_list()
+            == ak.drop_none(ak.mask(source, source % 2 == 0), axis=-1).to_list()
+        )
+        regular = ak.to_backend([[1, 2], [3, 4]], "cuda")
+        assert ak.to_regular(regular).to_list() == [[1, 2], [3, 4]]
+        with pytest.raises(ValueError, match="not regular"):
+            ak.to_regular(array)
+
+
+@pytest.mark.parametrize("groups,width", [(1, 1), (17, 33), (257, 513)])
+def test_nonlocal_ranges_across_block_boundaries(groups, width):
+    rng = np.random.default_rng(2026)
+    distincts = rng.choice([-1, -2, 0, 7], groups * width).astype(np.int64)
+    starts = np.full(groups + 3, 123, dtype=np.int64)
+    stops = starts.copy()
+    args = [starts, stops, distincts, distincts.size, groups]
+    key = (
+        "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+        np.int64,
+        np.int64,
+        np.int64,
+    )
+    with cp.cuda.Stream(non_blocking=True):
+        gpu_args = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+        NumpyBackend.instance()[key](*args)
+        CupyBackend.instance()[key](*gpu_args)
+        np.testing.assert_array_equal(cp.asnumpy(gpu_args[0]), starts)
+        np.testing.assert_array_equal(cp.asnumpy(gpu_args[1]), stops)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("offsets", [[0], [2, 4, 4, 7]])
+@pytest.mark.parametrize("target", [0, 2, 4])
+def test_padding_offset_widths(dtype, offsets, target):
+    source = ak.Array(
+        ak.contents.ListOffsetArray(
+            ak.index.Index(np.asarray(offsets, dtype=dtype)),
+            ak.contents.NumpyArray(np.arange(9)),
+        )
+    )
+    expected = ak.pad_none(source, target)
+    with cp.cuda.Stream(non_blocking=True):
+        result = ak.pad_none(ak.to_backend(source, "cuda"), target)
+        assert result.to_list() == expected.to_list()
+        assert result.layout.offsets.dtype == np.dtype(np.int64)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+def test_prepared_gather_rebinds_buffers_and_streams(dtype):
+    from awkward._connect.cuda._listoffsetarray import flatten_offsets
+
+    pending = []
+    # Submit all launches before synchronizing, with different shapes, origins,
+    # pointers and streams. Prepared state must be copied into each launch.
+    for length in (3, 7, 2, 9):
+        stream = cp.cuda.Stream(non_blocking=True)
+        with stream:
+            outer = cp.arange(1, length + 1, dtype=dtype)
+            inner = cp.arange(length + 2, dtype=cp.int64) + length * 10
+            storage = cp.full(length + 4, -1, dtype=cp.int64)
+            flatten_offsets(storage[1:], outer, length, inner)
+        pending.append((stream, outer, inner, storage, length))
+    for stream, _outer, _inner, storage, length in pending:
+        stream.synchronize()
+        expected = np.full(length + 4, -1, dtype=np.int64)
+        expected[1 : length + 1] = np.arange(1, length + 1) + length * 10
+        np.testing.assert_array_equal(cp.asnumpy(storage), expected)
+
+
+@pytest.mark.parametrize("width", [1, 8, 64, 65, 4096])
+def test_prepared_nonlocal_ranges_rebinds_buffers_and_streams(width):
+    from awkward._connect.cuda._listoffsetarray import nonlocal_ranges
+
+    pending = []
+    for groups in (3, 7, 4):
+        source = np.full(groups * width, -1, dtype=np.int64)
+        source[width] = -2
+        source[3 * width - 1] = 0
+        expected_starts = np.full(groups + 3, 123, dtype=np.int64)
+        expected_stops = expected_starts.copy()
+        NumpyBackend.instance()[
+            "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
+            np.int64,
+            np.int64,
+            np.int64,
+        ](expected_starts, expected_stops, source, source.size, groups)
+        stream = cp.cuda.Stream(non_blocking=True)
+        with stream:
+            distincts = cp.asarray(source)
+            starts = cp.full(groups + 3, 123, dtype=cp.int64)
+            stops = starts.copy()
+            nonlocal_ranges(starts, stops, distincts, source.size, groups)
+        pending.append(
+            (stream, distincts, starts, stops, expected_starts, expected_stops)
+        )
+    for stream, _distincts, starts, stops, expected_starts, expected_stops in pending:
+        stream.synchronize()
+        np.testing.assert_array_equal(cp.asnumpy(starts), expected_starts)
+        np.testing.assert_array_equal(cp.asnumpy(stops), expected_stops)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("chunk_size", [1, 8, 32, 64])
+def test_prepared_regular_validation_rebinds_buffers_and_streams(dtype, chunk_size):
+    from awkward._connect.cuda._listoffsetarray import _Stream
+    from awkward._connect.cuda._prepared_gather import regular_status
+
+    pending = []
+    boundary = np.arange(2 * chunk_size + 4) * 4
+    boundary[chunk_size + 1 :] += 1
+    boundary[chunk_size + 3] = boundary[chunk_size + 2] - 1
+    for values in (
+        [5, 7, 9],
+        [0, 2, 5, 1],
+        [5, 3, 4],
+        [0, 2, 1, 9],
+        [0] * 4097,
+        boundary,
+    ):
+        offsets = np.asarray(values, dtype=dtype)
+        expected = np.full(3, 123, dtype=np.int64)
+        error = NumpyBackend.instance()[
+            "awkward_ListOffsetArray_toRegularArray", np.int64, dtype
+        ](expected, offsets, len(offsets))
+        code = 0
+        if error.str:
+            code = error.id + 1
+            if b"monotonically" in error.str:
+                code = -code
+        stream = cp.cuda.Stream(non_blocking=True)
+        with stream:
+            source = cp.asarray(offsets)
+            size = cp.full(3, 123, dtype=cp.int64)
+            status = regular_status(
+                size, source, len(offsets), _Stream(), chunk_size=chunk_size
+            )
+        pending.append((stream, source, size, status, expected, code))
+    for stream, _source, size, status, expected, code in pending:
+        stream.synchronize()
+        np.testing.assert_array_equal(cp.asnumpy(size), expected)
+        np.testing.assert_array_equal(cp.asnumpy(status), [code])
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.int64])
+@pytest.mark.parametrize("width", [8, 4096])
+def test_prepared_drop_none_rebinds_buffers_and_streams(dtype, width):
+    from awkward._connect.cuda._listoffsetarray import _Stream
+    from awkward._connect.cuda._prepared_gather import drop_status
+
+    pending = []
+    for iteration, groups in enumerate((3, 3, 7)):
+        offsets = (2 + np.arange(groups + 1) * width).astype(dtype)
+        indexes = np.arange(int(offsets[-1]), dtype=dtype)
+        indexes[iteration::3] = -2
+        if iteration == 2:
+            offsets[-1] += 1
+        expected = np.full(groups + 4, 123, dtype=dtype)
+        error = NumpyBackend.instance()[
+            "awkward_ListOffsetArray_drop_none_indexes", dtype, dtype, dtype
+        ](expected, indexes, offsets, len(offsets), len(indexes))
+        stream = cp.cuda.Stream(non_blocking=True)
+        with stream:
+            source = cp.asarray(offsets)
+            noneindexes = cp.asarray(indexes)
+            output = cp.full(groups + 4, 123, dtype=dtype)
+            status = drop_status(
+                output, noneindexes, source, len(offsets), len(indexes), _Stream()
+            )
+        pending.append(
+            (stream, source, noneindexes, output, status, expected, bool(error.str))
+        )
+    for stream, _source, _indexes, output, status, expected, failed in pending:
+        stream.synchronize()
+        np.testing.assert_array_equal(cp.asnumpy(output), expected)
+        assert (int(cp.asnumpy(status)[0]) < 0) == failed
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.int64])
+@pytest.mark.parametrize(
+    "offsets,declared_length",
+    [
+        ([7, 4096, 32, 8192], 8192),
+        ([0, 8192, 4096], 4096),
+        ([0, 8193], 8192),
+        ([0, 1024, 2048], 2048),
+        ([0, 1025, 2050], 2050),
+    ],
+)
+def test_tiled_drop_none_decreasing_offsets_and_dispatch(
+    dtype, offsets, declared_length
+):
+    from awkward._connect.cuda._prepared_gather import _drop_setup, _DropCountTiled
+
+    indexes = np.arange(8192, dtype=dtype)
+    indexes[::3] = -2
+    source = np.asarray(offsets, dtype=dtype)
+    expected = np.full(len(offsets) + 3, 123, dtype=dtype)
+    key = ("awkward_ListOffsetArray_drop_none_indexes", dtype, dtype, dtype)
+    error = NumpyBackend.instance()[key](
+        expected, indexes, source, len(offsets), declared_length
+    )
+    with cp.cuda.Stream(non_blocking=True):
+        gpu_source, gpu_indexes = cp.asarray(source), cp.asarray(indexes)
+        output = cp.full(len(offsets) + 3, 123, dtype=dtype)
+        actual = CupyBackend.instance()[key](
+            output, gpu_indexes, gpu_source, len(offsets), declared_length
+        )
+        contract.assert_error(actual, error)
+        np.testing.assert_array_equal(cp.asnumpy(output), expected)
+        setup = _drop_setup(
+            cp.cuda.runtime.getDevice(),
+            cp.cuda.driver.ctxGetCurrent(),
+            np.dtype(dtype).str,
+            len(offsets),
+            declared_length,
+        )
+        assert isinstance(setup.count, _DropCountTiled) == (
+            declared_length > 1024 * max(len(offsets) - 1, 1)
+        )

@@ -1581,22 +1581,30 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             return self._pad_none_axis0(target, clip)
         if posaxis is not None and posaxis + 1 == depth + 1:
             if not clip:
+                # The canonical length kernel requires matching input/output
+                # offset types. Padding produces int64 offsets, so widen the
+                # input on-device before selecting its signature.
+                fromoffsets = (
+                    self._offsets
+                    if self._offsets.dtype == np.dtype(np.int64)
+                    else self._offsets.to64()
+                )
                 _tolength = Index64.empty(1, nplike)
                 offsets_ = Index64.empty(self._offsets.length, nplike)
                 assert (
                     offsets_.nplike is nplike
-                    and self._offsets.nplike is nplike
+                    and fromoffsets.nplike is nplike
                     and _tolength.nplike is nplike
                 )
                 self._backend.maybe_kernel_error(
                     self._backend[
                         "awkward_ListOffsetArray_rpad_length_axis1",
                         offsets_.dtype.type,
-                        self._offsets.dtype.type,
+                        fromoffsets.dtype.type,
                         _tolength.dtype.type,
                     ](
                         offsets_.data,
-                        self._offsets.data,
+                        fromoffsets.data,
                         self._offsets.length - 1,
                         target,
                         _tolength.data,
