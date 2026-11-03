@@ -75,34 +75,20 @@ def fetch_specialization(keys):
     return specialized_name
 
 
-def fetch_template_specializations(kernel_dict):
-    # These cuda kernels consist of multiple kernels that don't have templated
-    # specializations of the same name (e.g. '_a', '_b').
-    kernel_exclusions = [
-        "awkward_RegularArray_combinations_64",
-        "awkward_ListArray_getitem_jagged_apply",
-        "awkward_ListArray_getitem_jagged_shrink",
-        "awkward_ListArray_getitem_next_range",
-        "awkward_ListArray_rpad_axis1",
-        "awkward_ListOffsetArray_drop_none_indexes",
-        "awkward_ListOffsetArray_rpad_axis1",
-        "awkward_UnionArray_flatten_length",
-        "awkward_UnionArray_flatten_combine",
-        "awkward_UnionArray_nestedfill_tags_index",
-    ]
-    template_specializations = []
+def fetch_template_specializations(kernel_dict, cuda_src):
+    # Only signatures whose name matches a __global__ template in the CUDA
+    # sources get specialized. This skips kernels dispatched to cuda.compute
+    # and launchers built from several sub-kernels (e.g. '_a', '_b'), while
+    # including those sub-kernels' own signatures.
     import re
 
-    for keys, value in kernel_dict.items():
-        pattern = re.compile("_[a-z]$")
-        if keys[0] not in kernel_exclusions:
-            if value is None:
-                if pattern.search(keys[0]):
-                    template_specializations.append(fetch_specialization(list(keys)))
-            else:
-                template_specializations.append(fetch_specialization(list(keys)))
+    kernel_templates = set(re.findall(r"__global__\s+void\s+(\w+)\s*\(", cuda_src))
 
-    return template_specializations
+    return [
+        fetch_specialization(list(keys))
+        for keys in kernel_dict
+        if keys[0] in kernel_templates
+    ]
 
 
 def populate_kernel_errors(kernel_name, cu_file):
@@ -172,7 +158,7 @@ def initialize_cuda_kernels(cupy):
 
             # Pass an empty Raw Module to fetch all template specializations
             template_specializations = fetch_template_specializations(
-                awkward._connect.cuda._kernel_signatures.by_signature(None)
+                awkward._connect.cuda._kernel_signatures.by_signature(None), cuda_src
             )
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
