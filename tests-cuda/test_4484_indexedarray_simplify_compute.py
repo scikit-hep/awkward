@@ -1,0 +1,153 @@
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
+
+import importlib.util
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+import awkward as ak
+from awkward._backends.cupy import CupyBackend
+from awkward._backends.numpy import NumpyBackend
+
+cp = pytest.importorskip("cupy")
+pytest.importorskip("cuda.compute")
+
+spec = importlib.util.spec_from_file_location(
+    "indexedarray_simplify_cases",
+    Path(__file__).resolve().parents[1]
+    / "tests/test_4484_indexedarray_simplify_compute.py",
+)
+contract = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = contract
+spec.loader.exec_module(contract)
+
+
+@pytest.mark.parametrize("name,specialization,case", contract.CASES)
+def test_cuda_cpu_parity(name, specialization, case):
+    with cp.cuda.Stream(non_blocking=True):
+        _cuda_cpu_parity(name, specialization, case)
+
+
+def _cuda_cpu_parity(name, specialization, case):
+    args, outputs, key = contract.arguments(specialization, case)
+    gpu_args = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+    expected = NumpyBackend.instance()[(name, *key)](*args)
+    kernel = CupyBackend.instance()[(name, *key)]
+    assert isinstance(kernel, ak._kernels.CudaComputeKernel)
+    actual = kernel(*gpu_args)
+    contract.assert_error(actual, expected)
+    for i in outputs:
+        np.testing.assert_array_equal(cp.asnumpy(gpu_args[i]), args[i])
+
+
+@pytest.mark.parametrize("outer_dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("inner_dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("option", [False, True])
+def test_public_simplification(outer_dtype, inner_dtype, option):
+    inner_class = (
+        ak.contents.IndexedOptionArray
+        if option and inner_dtype != np.uint32
+        else ak.contents.IndexedArray
+    )
+    inner_values = (
+        [2, -1, 0] if inner_class is ak.contents.IndexedOptionArray else [2, 1, 0]
+    )
+    inner = inner_class(
+        ak.index.Index(np.asarray(inner_values, dtype=inner_dtype)),
+        ak.contents.NumpyArray(np.asarray([10, 20, 30])),
+    )
+    outer_values = [1, -1, 0] if option and outer_dtype != np.uint32 else [1, 0, 2]
+    outer_class = ak.contents.IndexedOptionArray if option else ak.contents.IndexedArray
+    expected = outer_class.simplified(
+        ak.index.Index(np.asarray(outer_values, dtype=outer_dtype)), inner
+    ).to_list()
+    with cp.cuda.Stream(non_blocking=True) as stream:
+        gpu_inner = ak.to_backend(inner, "cuda", highlevel=False)
+        outer = ak.index.Index(cp.asarray(outer_values, dtype=outer_dtype))
+        assert outer_class.simplified(outer, gpu_inner).to_list() == expected
+        with pytest.raises(ValueError, match="index out of range"):
+            outer_class.simplified(
+                ak.index.Index(cp.asarray([1, 3], dtype=outer_dtype)), gpu_inner
+            )
+        ak._connect.cuda.synchronize_cuda(stream)
+        assert outer_class.simplified(outer, gpu_inner).to_list() == expected
+
+
+@pytest.mark.parametrize(
+    "length,error_at", [(33, None), (257, 0), (4097, 256), (4097, 4096)]
+)
+def test_first_error_across_blocks(length, error_at):
+    args = contract.large_case(length, error_at)
+    key = ("awkward_IndexedArray_simplify", np.int64, np.int64, np.int64)
+    with cp.cuda.Stream(non_blocking=True):
+        gpu_args = [cp.asarray(x) if isinstance(x, np.ndarray) else x for x in args]
+        expected = NumpyBackend.instance()[key](*args)
+        actual = CupyBackend.instance()[key](*gpu_args)
+        contract.assert_error(actual, expected)
+        np.testing.assert_array_equal(cp.asnumpy(gpu_args[0]), args[0])
+
+
+@pytest.mark.parametrize("outer_dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("inner_dtype", [np.int32, np.uint32, np.int64])
+def test_prepared_rebinding_and_chunk_boundary(outer_dtype, inner_dtype):
+    from awkward._connect.cuda._indexedarray import simplify_status
+
+    pending = []
+    key = ("awkward_IndexedArray_simplify", np.int64, outer_dtype, inner_dtype)
+    for length in (32, 64, 65, 129):
+        for invalid in (False, True):
+            outer = (np.arange(length) % 3).astype(outer_dtype)
+            inner = np.asarray([2, 1, 0], dtype=inner_dtype)
+            if invalid:
+                outer[min(length - 1, 64)] = 3
+                outer[-1] = 99
+            expected = np.full(length + 3, 123, dtype=np.int64)
+            error = NumpyBackend.instance()[key](expected, outer, length, inner, 3)
+            stream = cp.cuda.Stream(non_blocking=True)
+            with stream:
+                gpu_outer, gpu_inner = cp.asarray(outer), cp.asarray(inner)
+                output = cp.full(length + 3, 123, dtype=cp.int64)
+                status = simplify_status(output, gpu_outer, length, gpu_inner, 3)
+            pending.append(
+                (stream, gpu_outer, gpu_inner, output, status, expected, error, length)
+            )
+    for stream, _outer, _inner, output, status, expected, error, length in pending:
+        stream.synchronize()
+        np.testing.assert_array_equal(cp.asnumpy(output), expected)
+        row, attempt = cp.asnumpy(status)
+        if error.str:
+            assert (row, attempt) == (error.id, error.attempt)
+        else:
+            assert row == length
+
+
+@pytest.mark.parametrize("outer_dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("inner_dtype", [np.int32, np.uint32, np.int64])
+@pytest.mark.parametrize("length", [64, 65, 129, 4096, 4097])
+@pytest.mark.parametrize("nondefault", [False, True])
+def test_fused_dtype_stream_and_rebinding(outer_dtype, inner_dtype, length, nondefault):
+    stream = cp.cuda.Stream(non_blocking=True) if nondefault else cp.cuda.Stream.null
+    key = ("awkward_IndexedArray_simplify", np.int64, outer_dtype, inner_dtype)
+    with stream:
+        kernel = CupyBackend.instance()[key]
+        for error_row in (None, 0, min(64, length - 1), length - 1):
+            for repeat in range(2):
+                outer = (np.arange(length) % 3).astype(outer_dtype)
+                if outer_dtype is not np.uint32:
+                    outer[::5] = -1
+                inner = np.asarray([repeat + 2, repeat + 1, repeat], dtype=inner_dtype)
+                if inner_dtype is not np.uint32:
+                    inner[0] = -7 - repeat
+                if error_row is not None:
+                    outer[error_row] = 3
+                    if error_row < length - 1:
+                        outer[-1] = 99
+                expected = np.full(length + 3, 123, dtype=np.int64)
+                error = NumpyBackend.instance()[key](expected, outer, length, inner, 3)
+                output = cp.full(length + 3, 123, dtype=cp.int64)
+                actual = kernel(output, cp.asarray(outer), length, cp.asarray(inner), 3)
+                contract.assert_error(actual, error)
+                np.testing.assert_array_equal(cp.asnumpy(output), expected)
+        ak._connect.cuda.synchronize_cuda(stream)

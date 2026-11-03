@@ -2,6 +2,7 @@
 
 
 import functools
+from types import SimpleNamespace
 
 from cuda.compute import (
     CountingIterator,
@@ -4183,37 +4184,90 @@ def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
     )
 
 
-# KERNEL IS NOT USED: checking for out of range errors takes too much time if I take it outside the closure
-# composes two index arrays into one by resolving outerindex through innerindex:
-# toindex[i] = innerindex[outerindex[i]], preserving -1 (missing) entries from outerindex
 def awkward_IndexedArray_simplify(
     toindex, outerindex, outerlength, innerindex, innerlength
 ):
     if outerlength == 0:
-        return
+        return None
+    if hasattr(outerindex, "__cuda_array_interface__"):
+        from awkward._connect.cuda._indexedarray import simplify_status
 
-    def simplify_op(j):
-        if j < 0:
-            return -1
-        if j >= innerlength:
-            # raise inside a JIT closure is silently swallowed
-            raise IndexError(
-                "index out of range in compiled CUDA code (awkward_IndexedArray_simplify)"
+        row, attempt = (
+            simplify_status(toindex, outerindex, outerlength, innerindex, innerlength)
+            .get()
+            .tolist()
+        )
+        if row < outerlength:
+            return SimpleNamespace(
+                str=b"index out of range",
+                id=row,
+                attempt=attempt,
+                filename=b"cuda.compute (awkward_IndexedArray_simplify)",
             )
-        return innerindex[j]
+        return None
+    outer = outerindex[:outerlength]
+    inner = innerindex[:innerlength]
+    parameters = cp.asarray([innerlength], dtype=cp.int64)
+    current_stream = cp.cuda.get_current_stream()
+    # Adapt older CuPy streams to the CUDA Stream Protocol as well.
+    stream = SimpleNamespace(__cuda_stream__=lambda: (0, current_stream.ptr))
 
-    # to prevent out-of-bounds error
-    out_buf = (
-        toindex[:outerlength]
-        if len(toindex) >= outerlength
-        else cp.empty(outerlength, dtype=toindex.dtype)
-    )
+    def error_position(i):
+        index = np.int64(outer[i])
+        return i if index >= 0 and index >= parameters[0] else np.int64(outer.size)
+
+    indices = CountingIterator(np.int64(0))
+    # Plain array input avoids stateful TransformIterator launch failures.
+    positions = cp.empty(outerlength, dtype=cp.int64)
     unary_transform(
-        d_in=outerindex[:outerlength],
-        d_out=out_buf,
-        op=simplify_op,
+        d_in=indices,
+        d_out=positions,
+        op=error_position,
         num_items=outerlength,
+        stream=stream,
     )
+    first = cp.empty(1, dtype=cp.int64)
+    reduce_into(
+        d_in=positions,
+        d_out=first,
+        op=OpKind.MINIMUM,
+        num_items=outerlength,
+        h_init=np.asarray(outerlength, dtype=np.int64),
+        stream=stream,
+    )
+
+    status = cp.empty(2, dtype=cp.int64)
+
+    def write(i):
+        # Match the CPU's sequential output prefix, without ever reading an
+        # invalid inner index. Leave the error row and remaining capacity alone.
+        if i < first[0]:
+            index = np.int64(outer[i])
+            toindex[i] = -1 if index < 0 else np.int64(inner[index])
+        if i == 0:
+            row = first[0]
+            status[0] = row
+            status[1] = (
+                outer[row] if row < outer.size else np.int64(9223372036854775807)
+            )
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=write,
+        num_items=outerlength,
+        stream=stream,
+    )
+    row, attempt = status.get().tolist()
+    if row < outerlength:
+        return SimpleNamespace(
+            str=b"index out of range",
+            id=row,
+            attempt=attempt,
+            filename=b"cuda.compute (awkward_IndexedArray_simplify)",
+        )
+    return None
 
 
 # filters an indexed array by collecting all valid (non-negative) indices into a carry array
