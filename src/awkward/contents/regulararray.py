@@ -373,7 +373,8 @@ class RegularArray(RegularMeta[Content], Content):
         if not nplike.known_data:
             self._touch_shape(recursive=False)
             return self
-
+        
+        stop = max(start, stop)
         zeros_length = nplike.index_as_shape_item(stop - start)
         substart, substop = (
             start * nplike.shape_item_as_index(self._size),
