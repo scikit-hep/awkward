@@ -3,6 +3,8 @@
 import ast
 import runpy
 import shutil
+import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -12,27 +14,68 @@ CUDA = ROOT / "src/awkward/_connect/cuda"
 GENERATOR = ROOT / "dev/generate-kernel-signatures.py"
 KERNEL = "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64"
 
+# Kernels in the specification that have neither a raw CUDA source nor a
+# cuda.compute implementation. Shrink this set when one gains CUDA support.
+KNOWN_UNSUPPORTED_ON_CUDA = {
+    "awkward_IndexedArray_unique_next_index_and_offsets_64",
+    "awkward_ListOffsetArray_argsort_strings",
+    "awkward_ListOffsetArray_getitem_boolmask",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
+    "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
+    "awkward_NumpyArray_sort_asstrings_uint8",
+    "awkward_NumpyArray_unique_strings",
+    "awkward_NumpyArray_utf8_to_utf32_padded",
+    "awkward_unique_offsets",
+    "awkward_unique_ranges",
+    "awkward_unique_ranges_bool",
+}
 
-def test_raw_kernel_registry_matches_remaining_sources():
-    tree = ast.parse(GENERATOR.read_text())
-    assignment = next(
-        n
-        for n in tree.body
-        if isinstance(n, ast.Assign)
-        and any(
-            isinstance(t, ast.Name) and t.id == "cuda_kernels_impl" for t in n.targets
-        )
-    )
-    registered = ast.literal_eval(assignment.value)
+
+@pytest.fixture(scope="module")
+def generator():
+    pytest.importorskip("yaml")
+    return runpy.run_path(str(GENERATOR))
+
+
+def test_raw_kernel_registry_matches_remaining_sources(generator):
+    registered = generator["cuda_kernels_impl"]
     sources = {p.stem for p in (CUDA / "cuda_kernels").glob("awkward_*.cu")}
     assert len(registered) == len(set(registered))
     assert set(registered) == sources
 
 
 @pytest.mark.thread_unsafe
-def test_nonlocal_ranges_generate_compute_dispatch(tmp_path, monkeypatch):
+def test_kernels_without_raw_source_dispatch_to_cuda_compute(generator, monkeypatch):
     yaml = pytest.importorskip("yaml")
-    generator = runpy.run_path(str(GENERATOR))
+    import awkward._connect.cuda
+    from awkward._backends.cupy import CupyBackend
+
+    # Stand in for cuda.compute so the dispatch table can be built without a GPU.
+    class StubCompute(types.ModuleType):
+        def __getattr__(self, name):
+            return name
+
+    stub = StubCompute("awkward._connect.cuda._compute")
+    monkeypatch.setitem(sys.modules, stub.__name__, stub)
+    monkeypatch.setattr(awkward._connect.cuda, "_compute", stub, raising=False)
+
+    specification = yaml.safe_load((ROOT / "kernel-specification.yml").read_text())
+    names = {kernel["name"] for kernel in specification["kernels"]}
+    raw = set(generator["cuda_kernels_impl"])
+    backend = object.__new__(CupyBackend)
+
+    uncovered = {
+        name
+        for name in names - raw
+        if not backend._supports_cuda_compute(name)
+        or backend._get_cuda_compute_impl(name) is None
+    }
+    assert uncovered == KNOWN_UNSUPPORTED_ON_CUDA
+
+
+@pytest.mark.thread_unsafe
+def test_nonlocal_ranges_generate_compute_dispatch(tmp_path, monkeypatch, generator):
+    yaml = pytest.importorskip("yaml")
     generate = generator["kernel_signatures_cuda_py"]
     monkeypatch.setitem(generate.__globals__, "CURRENT_DIR", str(tmp_path / "dev"))
     destination = tmp_path / "src/awkward/_connect/cuda"
