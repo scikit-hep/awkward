@@ -8,6 +8,7 @@ from threading import RLock
 from cuda.compute import make_unary_transform
 from cuda.compute.op import make_op_adapter
 
+from awkward._connect.cuda._compute_cache import load_or_build
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 
@@ -65,8 +66,12 @@ class _PreparedFill:
         self.base.bind(parameter)
         try:
             if self.transform is None:
-                self.transform = make_unary_transform(
-                    d_in=source, d_out=output, op=self.operation
+                self.transform = load_or_build(
+                    make_unary_transform,
+                    source_path=__file__,
+                    d_in=source,
+                    d_out=output,
+                    op=self.operation,
                 )
             self.transform(
                 d_in=source,

@@ -57,6 +57,8 @@ def implementation():
         "RLock": RLock,
         "make_op_adapter": lambda op: op,
         "make_unary_transform": prepare,
+        "load_or_build": lambda factory, source_path, **kw: factory(**kw),
+        "__file__": __file__,
     }
     source = (
         Path(__file__).resolve().parents[1]

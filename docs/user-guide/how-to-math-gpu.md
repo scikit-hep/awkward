@@ -137,3 +137,34 @@ type: 50000 * var * float64
 ## JIT-compilation in Numba
 
 Just as Awkward Arrays in main memory can be iterated over in functions that have been JIT-compiled by [Numba](https://numba.pydata.org/), Awkward Arrays on GPUs can be iterated over in functions JIT-compiled by `@numba.cuda.jit`. The same restrictions apply (iteration only; no `ak.*` functions); see {doc}`how-to-use-in-numba-cuda.md`.
+
+## Optional persistent compilation artifacts
+
+Set `AWKWARD_CUDA_CACHE_DIR` before starting a worker to reuse prepared
+`IndexedArray_fill` transforms across Python processes:
+
+```bash
+export AWKWARD_CUDA_CACHE_DIR="$HOME/.cache/awkward-cuda"
+```
+
+This experimental cache is disabled by default and currently covers only
+`IndexedArray_fill`, not all CUDA kernels. It requires a `cuda.compute` version
+with serialization support. The first use builds and saves an artifact;
+compatible later processes load the compiled code and bind their own device
+arrays and runtime scalar state. Initial CUDA context setup and device-code
+loading still occur.
+
+Entries are keyed by implementation source, input/output dtypes, GPU compute
+capability, Python and CUDA runtime versions, and relevant compiler/package
+versions. Changing runtime values, lengths or buffer pointers does not create
+new entries. Noncontiguous arrays use normal compilation. Each invocation
+retains its own parameter storage; access to a
+shared prepared transform remains serialized by Awkward's host lock.
+
+Missing, rejected or corrupt artifacts and cache filesystem errors fall back to
+normal compilation. Writes use atomic replacement. Build and execution errors
+still propagate normally. The cache does not evict old entries; remove the
+cache directory to reclaim space or force a rebuild in new workers. Unsetting
+`AWKWARD_CUDA_CACHE_DIR` disables disk reuse but keeps normal in-process caching.
+Use a directory you control: artifacts contain compiled device code. These are
+disposable artifacts rather than a stable distribution format.
