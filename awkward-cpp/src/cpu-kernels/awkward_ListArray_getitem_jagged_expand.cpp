@@ -20,7 +20,7 @@ ERROR awkward_ListArray_getitem_jagged_expand(
     if (stop < start) {
       return failure("stops[i] < starts[i]", i, kSliceNone, FILENAME(__LINE__));
     }
-    if (stop - start != jaggedsize) {
+    if (static_cast<int64_t>(stop) - static_cast<int64_t>(start) != jaggedsize) {
       return failure("cannot fit jagged slice into nested list", i, kSliceNone, FILENAME(__LINE__));
     }
     for (int64_t j = 0;  j < jaggedsize;  j++) {

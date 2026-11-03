@@ -9964,6 +9964,36 @@
           "outputs": {
             "toadvanced": [0,0,0,0,1,2,2,3,3,3]
           }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromadvanced": [
+              6,
+              7,
+              8
+            ],
+            "fromoffsets": [
+              3,
+              3,
+              5,
+              6
+            ],
+            "lenstarts": 3
+          },
+          "outputs": {
+            "toadvanced": [
+              123,
+              123,
+              123,
+              7,
+              7,
+              8,
+              123,
+              123
+            ]
+          }
         }
       ]
     },
@@ -14061,6 +14091,99 @@
             "multistops": [3,4],
             "tocarry": [2,3]
           }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              0,
+              3
+            ],
+            "fromstops": [
+              0,
+              3
+            ],
+            "singleoffsets": [
+              0,
+              1,
+              2
+            ],
+            "jaggedsize": 0,
+            "length": 2
+          },
+          "outputs": {
+            "multistarts": [],
+            "multistops": [],
+            "tocarry": []
+          }
+        },
+        {
+          "error": true,
+          "message": "cannot fit jagged slice into nested list",
+          "inputs": {
+            "fromstarts": [
+              0,
+              3
+            ],
+            "fromstops": [
+              0,
+              4
+            ],
+            "singleoffsets": [
+              0,
+              1,
+              2
+            ],
+            "jaggedsize": 0,
+            "length": 2
+          },
+          "outputs": {
+            "multistarts": [],
+            "multistops": [],
+            "tocarry": []
+          }
+        },
+        {
+          "error": true,
+          "message": "stops[i] < starts[i]",
+          "inputs": {
+            "fromstarts": [
+              0,
+              3
+            ],
+            "fromstops": [
+              2,
+              2
+            ],
+            "singleoffsets": [
+              0,
+              1,
+              2
+            ],
+            "jaggedsize": 2,
+            "length": 2
+          },
+          "outputs": {
+            "multistarts": [
+              0,
+              1,
+              123,
+              123
+            ],
+            "multistops": [
+              1,
+              2,
+              123,
+              123
+            ],
+            "tocarry": [
+              0,
+              1,
+              123,
+              123
+            ]
+          }
         }
       ]
     },
@@ -14068,6 +14191,8 @@
       "name": "awkward_ListArray_getitem_next_range_carrylength",
       "status": true,
       "tests": [
+      {"error": false, "message": "", "inputs": {"fromstarts": [5], "fromstops": [2], "lenstarts": 1, "start": 9223372036854775807, "stop": 9223372036854775807, "step": 1}, "outputs": {"carrylength": [0]}},
+      {"error": false, "message": "", "inputs": {"fromstarts": [2147483647], "fromstops": [-2147483648], "lenstarts": 1, "start": 9223372036854775807, "stop": 9223372036854775807, "step": 1}, "outputs": {"carrylength": [0]}},
         {
           "error": false,
           "message": "",
@@ -14164,6 +14289,8 @@
       "name": "awkward_ListArray_getitem_next_range",
       "status": true,
       "tests": [
+      {"error": false, "message": "", "inputs": {"fromstarts": [5], "fromstops": [2], "lenstarts": 1, "start": 9223372036854775807, "stop": 9223372036854775807, "step": 1}, "outputs": {"tooffsets": [0, 0], "tocarry": []}},
+      {"error": false, "message": "", "inputs": {"fromstarts": [2147483647], "fromstops": [-2147483648], "lenstarts": 1, "start": 9223372036854775807, "stop": 9223372036854775807, "step": 1}, "outputs": {"tooffsets": [0, 0], "tocarry": []}},
         {
           "error": false,
           "message": "",
@@ -14306,6 +14433,192 @@
           "outputs": {
             "tooffsets": [0,1,1,1,2,3],
             "tocarry": [1,4,6]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              2,
+              0
+            ],
+            "fromstops": [
+              7,
+              0
+            ],
+            "lenstarts": 2,
+            "start": 9223372036854775807,
+            "stop": 9223372036854775807,
+            "step": -9223372036854775808
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              1,
+              1
+            ],
+            "tocarry": [
+              6,
+              123,
+              123,
+              123,
+              123
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              2,
+              0
+            ],
+            "fromstops": [
+              7,
+              0
+            ],
+            "lenstarts": 2,
+            "start": 9223372036854775807,
+            "stop": 9223372036854775807,
+            "step": 9223372036854775807
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              1,
+              1
+            ],
+            "tocarry": [
+              2,
+              123,
+              123,
+              123,
+              123
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              2,
+              0
+            ],
+            "fromstops": [
+              7,
+              0
+            ],
+            "lenstarts": 2,
+            "start": 9223372036854775807,
+            "stop": 9223372036854775807,
+            "step": -2
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              3,
+              3
+            ],
+            "tocarry": [
+              6,
+              4,
+              2,
+              123,
+              123
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              2,
+              0
+            ],
+            "fromstops": [
+              7,
+              0
+            ],
+            "lenstarts": 2,
+            "start": 9223372036854775807,
+            "stop": 9223372036854775807,
+            "step": 3
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              2,
+              2
+            ],
+            "tocarry": [
+              2,
+              5,
+              123,
+              123,
+              123
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              5
+            ],
+            "lenstarts": 1,
+            "start": -4,
+            "stop": -1,
+            "step": 1
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              3
+            ],
+            "tocarry": [
+              1,
+              2,
+              3,
+              123,
+              123
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              5
+            ],
+            "lenstarts": 1,
+            "start": -1,
+            "stop": -6,
+            "step": -1
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              5
+            ],
+            "tocarry": [
+              4,
+              3,
+              2,
+              1,
+              0
+            ]
           }
         }
       ]
@@ -14457,6 +14770,160 @@
             "toadvanced": [0,1,2,3],
             "tocarry": [8,7,7,6]
           }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "fromstarts": [
+              0,
+              3
+            ],
+            "fromstops": [
+              2,
+              5
+            ],
+            "fromarray": [
+              0,
+              2,
+              -1
+            ],
+            "lenstarts": 2,
+            "lenarray": 3,
+            "lencontent": 5
+          },
+          "outputs": {
+            "tocarry": [
+              0,
+              123,
+              123,
+              123,
+              123,
+              123
+            ],
+            "toadvanced": [
+              0,
+              123,
+              123,
+              123,
+              123,
+              123
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "stops[i] < starts[i]",
+          "inputs": {
+            "fromstarts": [
+              2
+            ],
+            "fromstops": [
+              1
+            ],
+            "fromarray": [],
+            "lenstarts": 1,
+            "lenarray": 0,
+            "lencontent": 5
+          },
+          "outputs": {
+            "tocarry": [],
+            "toadvanced": []
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              0,
+              1
+            ],
+            "fromstops": [
+              1,
+              5
+            ],
+            "fromarray": [
+              0
+            ],
+            "lenstarts": 2,
+            "lenarray": 1,
+            "lencontent": 5
+          },
+          "outputs": {
+            "tocarry": [
+              0,
+              1
+            ],
+            "toadvanced": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              0,
+              2
+            ],
+            "fromstops": [
+              2,
+              2
+            ],
+            "fromarray": [],
+            "lenstarts": 2,
+            "lenarray": 0,
+            "lencontent": 5
+          },
+          "outputs": {
+            "tocarry": [],
+            "toadvanced": []
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [],
+            "fromstops": [],
+            "fromarray": [],
+            "lenstarts": 0,
+            "lenarray": 0,
+            "lencontent": 0
+          },
+          "outputs": {
+            "tocarry": [],
+            "toadvanced": []
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              3
+            ],
+            "fromarray": [
+              -1
+            ],
+            "lenstarts": 1,
+            "lenarray": 1,
+            "lencontent": 3
+          },
+          "outputs": {
+            "tocarry": [
+              2
+            ],
+            "toadvanced": [
+              0
+            ]
+          }
         }
       ]
     },
@@ -14530,6 +14997,8 @@
       "name": "awkward_ListArray_rpad_and_clip_length_axis1",
       "status": true,
       "tests": [
+      {"error": false, "message": "", "inputs": {"fromstarts": [5], "fromstops": [2], "lenstarts": 1, "target": 2}, "outputs": {"tomin": [2]}},
+      {"error": false, "message": "", "inputs": {"fromstarts": [2147483647], "fromstops": [-2147483648], "lenstarts": 1, "target": 2}, "outputs": {"tomin": [2]}},
         {
           "error": false,
           "message": "",
@@ -15439,6 +15908,57 @@
             "stops": [7,3,999,4,6,12]
           },
           "outputs": {}
+        },
+        {
+          "error": true,
+          "message": "stop[i] > len(content)",
+          "inputs": {
+            "starts": [
+              3,
+              -1
+            ],
+            "stops": [
+              4,
+              2
+            ],
+            "length": 2,
+            "lencontent": 2
+          },
+          "outputs": {}
+        },
+        {
+          "error": true,
+          "message": "start[i] < 0",
+          "inputs": {
+            "starts": [
+              -1,
+              4
+            ],
+            "stops": [
+              2,
+              3
+            ],
+            "length": 2,
+            "lencontent": 2
+          },
+          "outputs": {}
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "starts": [
+              -9,
+              -4
+            ],
+            "stops": [
+              -9,
+              -4
+            ],
+            "length": 2,
+            "lencontent": 2
+          },
+          "outputs": {}
         }
       ]
     },
@@ -15894,6 +16414,287 @@
           "outputs": {
             "tocarry": [3,2,1,1,0,5,7,7,9,10],
             "tooffsets": [0,5,5,6,8,10]
+          }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "sliceindex": [
+              1,
+              2,
+              0
+            ],
+            "fromstarts": [
+              0,
+              2,
+              5
+            ],
+            "fromstops": [
+              2,
+              5,
+              6
+            ],
+            "slicestarts": [
+              0,
+              2,
+              2
+            ],
+            "slicestops": [
+              2,
+              2,
+              3
+            ],
+            "sliceouterlen": 3,
+            "sliceinnerlen": 3,
+            "contentlen": 6
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              123,
+              123,
+              123
+            ],
+            "tocarry": [
+              1,
+              123,
+              123
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "sliceindex": [
+              0
+            ],
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              0
+            ],
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ],
+            "sliceouterlen": 1,
+            "sliceinnerlen": 1,
+            "contentlen": 6
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              123
+            ],
+            "tocarry": [
+              123
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "jagged slice's offsets extend beyond its content",
+          "inputs": {
+            "sliceindex": [
+              0
+            ],
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              2
+            ],
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              2
+            ],
+            "sliceouterlen": 1,
+            "sliceinnerlen": 1,
+            "contentlen": 6
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              123
+            ],
+            "tocarry": [
+              123
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "sliceindex": [],
+            "fromstarts": [
+              9
+            ],
+            "fromstops": [
+              3
+            ],
+            "slicestarts": [
+              -1
+            ],
+            "slicestops": [
+              -1
+            ],
+            "sliceouterlen": 1,
+            "sliceinnerlen": 0,
+            "contentlen": 6
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              0
+            ],
+            "tocarry": []
+          }
+        },
+        {
+          "error": true,
+          "message": "jagged slice's stops[i] < starts[i]",
+          "inputs": {
+            "sliceindex": [
+              0,
+              1
+            ],
+            "fromstarts": [
+              0,
+              2
+            ],
+            "fromstops": [
+              2,
+              4
+            ],
+            "slicestarts": [
+              0,
+              2
+            ],
+            "slicestops": [
+              1,
+              1
+            ],
+            "sliceouterlen": 2,
+            "sliceinnerlen": 2,
+            "contentlen": 6
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              1,
+              123
+            ],
+            "tocarry": [
+              0,
+              123
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "stops[i] < starts[i]",
+          "inputs": {
+            "sliceindex": [
+              0
+            ],
+            "fromstarts": [
+              2
+            ],
+            "fromstops": [
+              1
+            ],
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ],
+            "sliceouterlen": 1,
+            "sliceinnerlen": 1,
+            "contentlen": 3
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              123
+            ],
+            "tocarry": [
+              123
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "stops[i] > len(content)",
+          "inputs": {
+            "sliceindex": [
+              0
+            ],
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              7
+            ],
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ],
+            "sliceouterlen": 1,
+            "sliceinnerlen": 1,
+            "contentlen": 3
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              123
+            ],
+            "tocarry": [
+              123
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "sliceindex": [
+              -1
+            ],
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              3
+            ],
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ],
+            "sliceouterlen": 1,
+            "sliceinnerlen": 1,
+            "contentlen": 3
+          },
+          "outputs": {
+            "tooffsets": [
+              0,
+              1
+            ],
+            "tocarry": [
+              2
+            ]
           }
         }
       ]
@@ -18219,6 +19020,40 @@
             "toadvanced": [0,1,2,3],
             "tocarry": [9,4,4,9]
           }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "fromstarts": [
+              0,
+              2
+            ],
+            "fromstops": [
+              2,
+              2
+            ],
+            "fromarray": [
+              -1,
+              0
+            ],
+            "fromadvanced": [
+              1,
+              0
+            ],
+            "lenstarts": 2,
+            "lencontent": 2
+          },
+          "outputs": {
+            "tocarry": [
+              0,
+              123
+            ],
+            "toadvanced": [
+              0,
+              123
+            ]
+          }
         }
       ]
     },
@@ -18927,6 +19762,88 @@
           "outputs": {
             "tocarry": [9]
           }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "fromstarts": [
+              0,
+              2,
+              5
+            ],
+            "fromstops": [
+              2,
+              2,
+              7
+            ],
+            "lenstarts": 3,
+            "at": 0
+          },
+          "outputs": {
+            "tocarry": [
+              0,
+              123,
+              123
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "fromstarts": [
+              2
+            ],
+            "fromstops": [
+              1
+            ],
+            "lenstarts": 1,
+            "at": 0
+          },
+          "outputs": {
+            "tocarry": [
+              123
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              2
+            ],
+            "lenstarts": 1,
+            "at": -9223372036854775808
+          },
+          "outputs": {
+            "tocarry": [
+              123
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              2
+            ],
+            "lenstarts": 1,
+            "at": 9223372036854775807
+          },
+          "outputs": {
+            "tocarry": [
+              123
+            ]
+          }
         }
       ]
     },
@@ -19133,6 +20050,8 @@
       "name": "awkward_ListArray_rpad_axis1",
       "status": true,
       "tests": [
+      {"error": false, "message": "", "inputs": {"fromstarts": [5], "fromstops": [2], "length": 1, "target": 2}, "outputs": {"toindex": [-1, -1], "tostarts": [0], "tostops": [2]}},
+      {"error": false, "message": "", "inputs": {"fromstarts": [2147483647], "fromstops": [-2147483648], "length": 1, "target": 2}, "outputs": {"toindex": [-1, -1], "tostarts": [0], "tostops": [2]}},
         {
           "error": false,
           "message": "",
@@ -19341,6 +20260,47 @@
             "toindex": [6,7,8,9,5,3,4,0,1,2],
             "tostarts": [0,4,5,7],
             "tostops": [4,5,7,10]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "fromstarts": [
+              2,
+              0,
+              4
+            ],
+            "fromstops": [
+              5,
+              0,
+              6
+            ],
+            "target": 3,
+            "length": 3
+          },
+          "outputs": {
+            "toindex": [
+              2,
+              3,
+              4,
+              -1,
+              -1,
+              -1,
+              4,
+              5,
+              -1
+            ],
+            "tostarts": [
+              0,
+              3,
+              6
+            ],
+            "tostops": [
+              3,
+              6,
+              9
+            ]
           }
         }
       ]
@@ -22101,6 +23061,51 @@
             "tocarry": [0,1,2,3,4,5],
             "tolargeoffsets": [0,2,3,3,6],
             "tosmalloffsets": [0,2,3,3,6]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "slicestarts": [
+              2,
+              2,
+              5
+            ],
+            "slicestops": [
+              2,
+              5,
+              7
+            ],
+            "length": 3,
+            "missing": [
+              -1,
+              0,
+              1,
+              -1,
+              2,
+              -1,
+              4
+            ]
+          },
+          "outputs": {
+            "tocarry": [
+              2,
+              4,
+              6
+            ],
+            "tosmalloffsets": [
+              2,
+              2,
+              4,
+              5
+            ],
+            "tolargeoffsets": [
+              2,
+              2,
+              5,
+              7
+            ]
           }
         }
       ]
