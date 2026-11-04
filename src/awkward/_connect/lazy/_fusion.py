@@ -381,10 +381,18 @@ def py_scalar_literal(value) -> str:
 
     Returns a string of Python source that evaluates to ``value``.
     """
-    if isinstance(value, float):
+    if isinstance(value, (float, np.floating)):
         if math.isinf(value):
+            if isinstance(value, np.floating):
+                return (
+                    f"np.{type(value).__name__}('inf')"
+                    if value > 0
+                    else f"np.{type(value).__name__}('-inf')"
+                )
             return "float('inf')" if value > 0 else "float('-inf')"
         if math.isnan(value):
+            if isinstance(value, np.floating):
+                return f"np.{type(value).__name__}('nan')"
             return "float('nan')"
     return repr(value)
 
