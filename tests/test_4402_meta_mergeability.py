@@ -76,6 +76,11 @@ def test_virtual_numpy_metadata_only(shape, policy, monkeypatch):
         ([[1]], [2], False),
         ([{"x": [1], "y": 2}], [{"y": 3.5, "x": [4.5]}], True),
         ([{"x": 1}], [{"y": 2}], False),
+        ([[{"x": 1, "y": 2.0}]], [[{"x": 3, "y": 4.0}]], True),
+        ([[{"x": 1, "y": 2.0}]], [[{"y": 4.0, "x": 3}]], True),
+        ([[{"x": 1, "y": 2.0}]], [[{"y": 4.0, "z": 3}]], False),
+        ([[(1, 2.0)]], [[(3, 4.0)]], True),
+        ([[{"x": [1]}]], [[{"x": [2.0]}]], True),
         ([(1, 2)], [(3,)], False),
         ([1, "two"], [{"x": 3}], True),
         (["one"], [[1]], False),
@@ -137,3 +142,29 @@ def test_merging_still_materializes_and_preserves_values():
     result = ak.concatenate([left, right])
     assert result.to_list() == [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10, 11]]
     assert calls
+
+
+@pytest.mark.parametrize("reorder", [False, True])
+def test_record_compatibility_does_not_slice_fields(reorder, monkeypatch):
+    # A record's unused trailing field data does not affect compatibility. No
+    # RecordArray.content call should trim it or inspect a virtual record length.
+    left = ak.contents.RecordArray(
+        [
+            ak.contents.NumpyArray(np.array([1, 2, 3])),
+            ak.contents.NumpyArray(np.array([1.0, 2.0, 3.0])),
+        ],
+        ["x", "y"],
+        length=1,
+    )
+    right_contents = [
+        ak.contents.NumpyArray(np.array([4, 5, 6])),
+        ak.contents.NumpyArray(np.array([4.0, 5.0, 6.0])),
+    ]
+    right_fields = ["x", "y"]
+    if reorder:
+        right_contents.reverse()
+        right_fields.reverse()
+    right = ak.contents.RecordArray(right_contents, right_fields, length=2)
+    monkeypatch.setattr(ak.contents.RecordArray, "content", forbidden)
+    assert ak._do.mergeable(left, right)
+    assert ak._do.mergeable(right, left)

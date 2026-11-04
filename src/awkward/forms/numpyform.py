@@ -101,7 +101,7 @@ class NumpyForm(NumpyMeta, Form):
         return cls(primitive, inner_shape, parameters=parameters, form_key=form_key)
 
     @property
-    def dtype(self) -> DType:
+    def _mergeable_dtype(self) -> DType:
         return ak.types.numpytype.primitive_to_dtype(self._primitive)
 
     @property
