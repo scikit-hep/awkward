@@ -131,7 +131,6 @@ cuda_kernels_impl = [
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     # "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
-    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
@@ -144,8 +143,6 @@ cuda_kernels_impl = [
     # helpers in awkward._connect.cuda._compute. Their signature-table entries
     # are emitted as None (this kernel name is absent from cuda_kernels_impl),
     # which routes CupyBackend.__getitem__ to the CudaComputeKernel path.
-    "awkward_sorting_ranges",
-    "awkward_sorting_ranges_length",
 ]
 
 
