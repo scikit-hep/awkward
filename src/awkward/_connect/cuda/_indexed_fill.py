@@ -8,21 +8,11 @@ from threading import RLock
 from cuda.compute import make_unary_transform
 from cuda.compute.op import make_op_adapter
 
-from awkward._connect.cuda._compute_cache import load_or_build
 from awkward._nplikes.cupy import Cupy
 from awkward._nplikes.numpy import Numpy
 
 cp = Cupy.instance()._module
 np = Numpy.instance()._module
-_lock = RLock()
-
-
-class _Stream:
-    def __init__(self):
-        self.stream = cp.cuda.get_current_stream()
-
-    def __cuda_stream__(self):
-        return (0, self.stream.ptr)
 
 
 class _BaseState:
@@ -48,6 +38,7 @@ class _BaseState:
 
 class _PreparedFill:
     def __init__(self, output_dtype):
+        self.lock = RLock()
         self.base = _BaseState()
         base = self.base
         out_dtype = np.dtype(output_dtype).type
@@ -59,29 +50,27 @@ class _PreparedFill:
         self.transform = None
 
     def __call__(self, source, output, base):
-        # Keep the parameter array alive until the launch is enqueued. CuPy's
-        # stream-local allocator orders reuse after the dependent device work.
-        # Each invocation owns its parameter storage, including concurrent streams.
-        parameter = cp.asarray([base], dtype=cp.int64)
-        self.base.bind(parameter)
-        try:
-            if self.transform is None:
-                self.transform = load_or_build(
-                    make_unary_transform,
-                    source_path=__file__,
+        # Keep the existing cuda.compute legacy-default-stream policy. Parameter
+        # upload and allocation must use that same stream, even if the caller's
+        # CuPy current stream is non-blocking. A backend-wide stream change is
+        # separate from runtime-state reuse.
+        with self.lock, cp.cuda.Stream.null:
+            parameter = cp.asarray([base], dtype=cp.int64)
+            self.base.bind(parameter)
+            try:
+                if self.transform is None:
+                    self.transform = make_unary_transform(
+                        d_in=source, d_out=output, op=self.operation
+                    )
+                self.transform(
                     d_in=source,
                     d_out=output,
                     op=self.operation,
+                    num_items=source.size,
+                    stream=None,
                 )
-            self.transform(
-                d_in=source,
-                d_out=output,
-                op=self.operation,
-                num_items=source.size,
-                stream=_Stream(),
-            )
-        finally:
-            self.base.clear()
+            finally:
+                self.base.clear()
 
 
 @lru_cache(maxsize=32)
@@ -92,12 +81,10 @@ def _setup(device, context, input_dtype, output_dtype):
 def fill(toindex, offset, fromindex, length, base):
     if length == 0:
         return
-    # Protect host descriptor rebinding/launch, without waiting for the GPU.
-    with _lock:
-        prepared = _setup(
-            cp.cuda.runtime.getDevice(),
-            cp.cuda.driver.ctxGetCurrent(),
-            fromindex.dtype.str,
-            toindex.dtype.str,
-        )
-        prepared(fromindex[:length], toindex[offset : offset + length], base)
+    prepared = _setup(
+        cp.cuda.runtime.getDevice(),
+        cp.cuda.driver.ctxGetCurrent(),
+        fromindex.dtype.str,
+        toindex.dtype.str,
+    )
+    prepared(fromindex[:length], toindex[offset : offset + length], base)

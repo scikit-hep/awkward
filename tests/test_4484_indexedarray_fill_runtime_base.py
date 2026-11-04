@@ -1,20 +1,42 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-"""Host execution of actual callback bodies; device compilation tested in tests-cuda."""
+"""Import the helper with host CUDA doubles; device compilation is in tests-cuda."""
 
-import ast
-from functools import lru_cache
+import importlib.util
+import sys
 from pathlib import Path
-from threading import RLock
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 import numpy as np
 import pytest
 
+# Dependency replacement and prepared caches are process-wide test state.
+pytestmark = pytest.mark.thread_unsafe
+
 
 @pytest.fixture
-def implementation():
+def implementation(monkeypatch):
+    from awkward._nplikes.cupy import Cupy
+
     registry, events = {}, []
+
+    from threading import local
+
+    class DefaultStream:
+        def __init__(self):
+            self.state = local()
+
+        @property
+        def active(self):
+            return getattr(self.state, "active", False)
+
+        def __enter__(self):
+            self.state.active = True
+
+        def __exit__(self, *args):
+            self.state.active = False
+
+    stream = DefaultStream()
 
     class Array(np.ndarray):
         @property
@@ -29,13 +51,15 @@ def implementation():
             }
 
     def asarray(value, dtype):
+        assert stream.active, "parameter upload must use the legacy stream"
         return np.asarray(value, dtype=dtype).view(Array)
 
     def prepare(**options):
         events.append("prepare")
 
         def launch(**kw):
-            assert kw["stream"].__cuda_stream__() == (0, 123)
+            assert kw["stream"] is None
+            assert stream.active
             for i in range(kw["num_items"]):
                 kw["d_out"][i] = kw["op"](kw["d_in"][i])
 
@@ -47,29 +71,30 @@ def implementation():
         cuda=SimpleNamespace(
             runtime=SimpleNamespace(getDevice=lambda: 0),
             driver=SimpleNamespace(ctxGetCurrent=lambda: 42),
-            get_current_stream=lambda: SimpleNamespace(ptr=123),
+            Stream=SimpleNamespace(null=stream),
         ),
     )
-    namespace = {
-        "cp": cp,
-        "np": np,
-        "lru_cache": lru_cache,
-        "RLock": RLock,
-        "make_op_adapter": lambda op: op,
-        "make_unary_transform": prepare,
-        "load_or_build": lambda factory, source_path, **kw: factory(**kw),
-        "__file__": __file__,
-    }
+    cuda = ModuleType("cuda")
+    cuda.__path__ = []
+    compute = ModuleType("cuda.compute")
+    compute.make_unary_transform = prepare
+    operation = ModuleType("cuda.compute.op")
+    operation.make_op_adapter = lambda op: op
+    for name, module in (
+        ("cuda", cuda),
+        ("cuda.compute", compute),
+        ("cuda.compute.op", operation),
+    ):
+        monkeypatch.setitem(sys.modules, name, module)
+    monkeypatch.setattr(Cupy, "instance", lambda: SimpleNamespace(_module=cp))
     source = (
         Path(__file__).resolve().parents[1]
         / "src/awkward/_connect/cuda/_indexed_fill.py"
     )
-    tree = ast.parse(source.read_text())
-    nodes = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
-    exec(
-        compile(ast.Module(body=nodes, type_ignores=[]), str(source), "exec"), namespace
-    )
-    namespace["_lock"] = RLock()
+    spec = importlib.util.spec_from_file_location("indexed_fill_test", source)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    namespace = vars(module)
     namespace["_BaseState"].__getitem__ = lambda self, i: registry[
         self.__cuda_array_interface__["data"][0]
     ][i]
@@ -131,3 +156,43 @@ def test_descriptor_is_cleared_when_launch_fails(implementation):
     with pytest.raises(RuntimeError, match="launch failed"):
         namespace["fill"](output, 0, source, 2, 11)
     assert setup.base.__cuda_array_interface__["data"][0] == 0
+
+
+def test_descriptor_is_cleared_when_preparation_fails(implementation):
+    namespace, array, _ = implementation
+    source = np.arange(2, dtype=np.int64).view(array)
+    output = np.zeros(2, dtype=np.int64).view(array)
+
+    def fail(**kwargs):
+        raise RuntimeError("build failed")
+
+    namespace["make_unary_transform"] = fail
+    with pytest.raises(RuntimeError, match="build failed"):
+        namespace["fill"](output, 0, source, 2, 7)
+    setup = namespace["_setup"](0, 42, source.dtype.str, output.dtype.str)
+    assert setup.transform is None
+    assert setup.base.__cuda_array_interface__["data"][0] == 0
+
+
+def test_unrelated_prepared_objects_can_build_concurrently(implementation):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    namespace, array, _ = implementation
+    prepare = namespace["make_unary_transform"]
+    barrier = Barrier(2)
+
+    def concurrent_prepare(**kwargs):
+        barrier.wait(timeout=5)
+        return prepare(**kwargs)
+
+    namespace["make_unary_transform"] = concurrent_prepare
+
+    def run(dtype):
+        source = np.arange(3, dtype=dtype).view(array)
+        output = np.zeros(3, dtype=np.int64).view(array)
+        namespace["fill"](output, 0, source, 3, 10)
+        np.testing.assert_array_equal(output, [10, 11, 12])
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        list(pool.map(run, [np.int32, np.int64]))
