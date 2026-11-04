@@ -48,7 +48,7 @@ from awkward.errors import AxisError
 from awkward.forms.form import Form, FormKeyPathT
 from awkward.forms.numpyform import NumpyForm
 from awkward.index import Index
-from awkward.types.numpytype import primitive_to_dtype
+from awkward.types.numpytype import dtype_to_primitive, primitive_to_dtype
 
 if TYPE_CHECKING:
     from awkward._slicing import SliceItem
@@ -257,12 +257,14 @@ class NumpyArray(NumpyMeta, Content):
         if backend is None:
             backend = backend_of_obj(data, default=NumpyBackend.instance())
 
-        self._data = backend.nplike.asarray(data)
+        nplike = backend.nplike
+        self._data = nplike.asarray(data)
 
-        if not isinstance(backend.nplike, Jax):
-            ak.types.numpytype.dtype_to_primitive(self._data.dtype)
+        if not isinstance(nplike, Jax):
+            dtype_to_primitive(self._data.dtype)
 
-        if len(ak._util.maybe_shape_of(self._data)) == 0:
+        # `ndim` rather than the shape: a virtual array's shape may be unknown
+        if self._data.ndim == 0:
             raise TypeError(
                 f"{type(self).__name__} 'data' must be an array, not a scalar: {data!r}"
             )
@@ -863,7 +865,7 @@ class NumpyArray(NumpyMeta, Content):
                 )._data
                 counts = offsets.data[1:] - offsets.data[:-1]
                 parents = _numpy.repeat(
-                    _numpy.arange(outlength, dtype=np.int64), counts
+                    _numpy.arange(outlength, dtype=np.int64), counts.astype(np.intp)
                 )
                 covered = parents.shape[0]
                 values = sorted_[:covered]
@@ -951,9 +953,9 @@ class NumpyArray(NumpyMeta, Content):
             # consecutive equal values (e.g. [0, 3, 3, 5, 6, 10, 10]).
             # `awkward_unique_ranges` and `awkward_unique_offsets` are still
             # parents-era kernels that expect a *compact* offsets array (one
-            # entry per non-empty bin, like the original `awkward_sorting_ranges`
-            # output). Compact the offsets here, run the unchanged kernels on
-            # the compact form, then let `awkward_unique_offsets` re-expand to
+            # entry per non-empty bin). Compact the offsets here, run the
+            # unchanged kernels on the compact form, then let
+            # `awkward_unique_offsets` re-expand to
             # the full outlength+1 outoffsets using `starts`.
             nplike = self._backend.nplike
             keep = nplike.empty(offsets.length, dtype=np.bool_)

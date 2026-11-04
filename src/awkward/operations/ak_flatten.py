@@ -12,6 +12,7 @@ from awkward._namedaxis import (
 )
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._regularize import regularize_axis
+from awkward._typing import Any, Mapping
 
 __all__ = ("flatten",)
 
@@ -19,7 +20,14 @@ np = NumpyMetadata.instance()
 
 
 @high_level_function()
-def flatten(array, axis=1, *, highlevel=True, behavior=None, attrs=None):
+def flatten(
+    array: Any,
+    axis: int | str | None = 1,
+    *,
+    highlevel: bool = True,
+    behavior: Mapping | None = None,
+    attrs: Mapping | None = None,
+) -> Any:
     """Returns an array with one or all levels of nesting removed.
 
     Args:
