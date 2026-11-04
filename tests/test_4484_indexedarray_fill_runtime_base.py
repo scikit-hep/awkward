@@ -74,6 +74,11 @@ def implementation(monkeypatch):
             Stream=SimpleNamespace(null=stream),
         ),
     )
+    cache = ModuleType("awkward._connect.cuda._compute_cache")
+    cache.load_or_build = lambda factory, **kwargs: factory(
+        **{key: value for key, value in kwargs.items() if key != "source_path"}
+    )
+    monkeypatch.setitem(sys.modules, "awkward._connect.cuda._compute_cache", cache)
     cuda = ModuleType("cuda")
     cuda.__path__ = []
     compute = ModuleType("cuda.compute")
