@@ -325,6 +325,10 @@ class NumpyArray(NumpyMeta, Content):
         return inner_shape
 
     @property
+    def _mergeable_dtype(self) -> np.dtype:
+        return self._data.dtype
+
+    @property
     def _mergeable_ndim(self) -> int:
         # ndim is known even when a virtual buffer's shape needs materialization.
         return self._data.ndim

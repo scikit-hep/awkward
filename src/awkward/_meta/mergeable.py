@@ -23,6 +23,15 @@ from awkward._typing import Literal
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
 
+_OPTION_WRAPPERS = (
+    IndexedMeta,
+    IndexedOptionMeta,
+    ByteMaskedMeta,
+    BitMaskedMeta,
+    UnmaskedMeta,
+)
+_LIST_TYPES = (RegularMeta, ListMeta, ListOffsetMeta)
+
 
 def mergeable(
     one: Meta,
@@ -41,21 +50,14 @@ def mergeable(
     if two.is_identity_like or two.is_union:
         return True
 
-    wrappers = (
-        IndexedMeta,
-        IndexedOptionMeta,
-        ByteMaskedMeta,
-        BitMaskedMeta,
-        UnmaskedMeta,
-    )
-    if isinstance(one, wrappers):
+    if isinstance(one, _OPTION_WRAPPERS):
         return mergeable(
             one.content,
-            two.content if isinstance(two, wrappers) else two,
+            two.content if isinstance(two, _OPTION_WRAPPERS) else two,
             mergebool,
             mergecastable,
         )
-    if isinstance(two, wrappers):
+    if isinstance(two, _OPTION_WRAPPERS):
         return mergeable(one, two.content, mergebool, mergecastable)
     if not type_parameters_equal(one._parameters, two._parameters):
         return False
@@ -65,8 +67,8 @@ def mergeable(
             return mergeable(one._mergeable_regular(), two, mergebool, mergecastable)
         if not isinstance(two, NumpyMeta) or two._mergeable_ndim > 1:
             return False
-        left = one.dtype
-        right = two.dtype
+        left = one._mergeable_dtype
+        right = two._mergeable_dtype
         if left == right:
             return True
         if (np.issubdtype(left, np.bool_) and np.issubdtype(right, np.number)) or (
@@ -90,19 +92,28 @@ def mergeable(
             )
         raise TypeError(f"unrecognized mergecastable option: {mergecastable}")
 
-    lists = (RegularMeta, ListMeta, ListOffsetMeta)
-    if isinstance(one, lists):
-        if isinstance(two, lists):
+    if isinstance(one, _LIST_TYPES):
+        if isinstance(two, _LIST_TYPES):
             return mergeable(one.content, two.content, mergebool, mergecastable)
         if isinstance(two, NumpyMeta) and two._mergeable_ndim > 1:
             return mergeable(one, two._mergeable_regular(), mergebool, mergecastable)
         return False
 
     if isinstance(one, RecordMeta) and isinstance(two, RecordMeta):
-        if one.is_tuple != two.is_tuple or set(one.fields) != set(two.fields):
+        if one.is_tuple != two.is_tuple:
+            return False
+        left_fields, right_fields = one.fields, two.fields
+        if left_fields == right_fields:
+            # Raw child metadata avoids RecordArray.content's length resolution
+            # and slicing. Matching field order also needs no name lookup.
+            return all(
+                mergeable(left, right, mergebool, mergecastable)
+                for left, right in zip(one.contents, two.contents, strict=True)
+            )
+        if set(left_fields) != set(right_fields):
             return False
         return all(
-            mergeable(content, two.content(field), mergebool, mergecastable)
-            for field, content in zip(one.fields, one.contents, strict=True)
+            mergeable(content, RecordMeta.content(two, field), mergebool, mergecastable)
+            for field, content in zip(left_fields, one.contents, strict=True)
         )
     return False

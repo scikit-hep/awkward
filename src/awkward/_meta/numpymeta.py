@@ -20,7 +20,8 @@ class NumpyMeta(Meta):
     inner_shape: tuple[ShapeItem, ...]
 
     @property
-    def dtype(self) -> DType:
+    def _mergeable_dtype(self) -> DType:
+        """Primitive dtype for internal compatibility checks, without buffers."""
         raise NotImplementedError
 
     @property
@@ -34,7 +35,7 @@ class NumpyMeta(Meta):
         from awkward.types.numpytype import dtype_to_primitive
 
         return NumpyForm(
-            dtype_to_primitive(self.dtype),
+            dtype_to_primitive(self._mergeable_dtype),
             (1,) * (self._mergeable_ndim - 1),
             parameters=self._parameters,
         ).to_RegularForm()
