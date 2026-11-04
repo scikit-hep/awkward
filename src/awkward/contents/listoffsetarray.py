@@ -925,7 +925,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             ) = self._rearrange_prepare_next(outlength, offsets)
 
             nummissing = Index64.empty(maxcount, self._backend.nplike)
-            missing = Index64.empty(self._offsets[-1], self._backend.nplike)
+            missing = Index64.empty(
+                nplike.index_as_shape_item(self._offsets[-1]), nplike
+            )
             nextshifts = Index64.empty(nextcarry.length, self._backend.nplike)
             assert (
                 nummissing.nplike is self._backend.nplike
