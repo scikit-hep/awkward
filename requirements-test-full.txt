@@ -2,9 +2,9 @@ fsspec>=2022.11.0;sys_platform != "win32"
 hypothesis-awkward==0.20.3
 jax[cpu]>=0.2.15;sys_platform != "win32"
 numba>=0.50.0;sys_platform != "win32"
-numexpr>=2.7
+numexpr>=2.7;python_version < "3.15"
 pandas>=0.24.0;sys_platform != "win32"
-pyarrow>=17.0.0;sys_platform != "win32"
+pyarrow>=17.0.0;sys_platform != "win32" and python_version < "3.15"
 pytest>=6
 pytest-cov
 pytest-xdist

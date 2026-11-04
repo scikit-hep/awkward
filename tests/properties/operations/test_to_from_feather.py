@@ -10,10 +10,17 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
+from packaging.version import parse as parse_version
 
 import awkward as ak
 
+pyarrow = pytest.importorskip("pyarrow")
 pytest.importorskip("pyarrow.feather")
+
+# pyarrow < 26 drops the buffers of a union wrapped in an extension type
+# when writing the IPC file format, so `from_feather` crashes reading the
+# invalid file that `to_feather` writes (apache/arrow#50623, #4238)
+ALLOW_UNION = parse_version(pyarrow.__version__) >= parse_version("26.0.0")
 
 # The first example pays one-time lazy initialization inside the first
 # `to_feather` call (~320 ms: pyarrow conversion setup and the zstd
@@ -92,7 +99,22 @@ def feather_compatible(a: ak.Array) -> bool:
             # a valid row whose fields are all null reads back as a null
             # row (outermost struct validity is not stored)
             return False
+    if _has_mergeable_union(a.layout):
+        # `from_arrow` builds unions with `UnionArray.simplified`, which
+        # merges mergeable contents (e.g. `union[int32, int64]` reads back
+        # as `int64`); the values are kept but not the layout
+        return False
     return True
+
+
+def _has_mergeable_union(layout: ak.contents.Content) -> bool:
+    if layout.is_union:
+        contents = layout.contents
+        for i, x in enumerate(contents):
+            for y in contents[i + 1 :]:
+                if x._mergeable_next(y, False, "same_kind"):
+                    return True
+    return any(_has_mergeable_union(x) for x in _children(layout))
 
 
 def has_issues(a: ak.Array) -> bool:
@@ -104,7 +126,7 @@ def has_issues(a: ak.Array) -> bool:
     """
     if _has_issue_4221(a.layout):
         return True
-    if _has_issue_4222(a.layout):
+    if _has_issue_4228(a.layout):
         return True
     if _has_issue_4229(a.layout):
         return True
@@ -125,44 +147,78 @@ def _has_issue_4221(layout: ak.contents.Content) -> bool:
     return any(_has_issue_4221(x) for x in _children(layout))
 
 
-def _has_issue_4222(
+def _has_issue_4228(
     layout: ak.contents.Content,
     nullable: bool = False,
     sliced: bool = False,
 ) -> bool:
-    """A nullable var-length list whose offsets do not start at zero is
-    compacted against unshifted content in `ListOffsetArray._to_arrow`,
-    shifting every list by `offsets[0]` (data corruption, #4222).
+    """`UnionArray._to_arrow` converts each child whole but sizes it by
+    the tag's highest index plus one, so an option-type child holding
+    more nulls than that length fails in `pyarrow.Array.from_buffers`
+    (`ArrowInvalid`, "Null count exceeds array length"), a masked child
+    longer than that length fails in `ListOffsetArray._to_arrow` when a
+    list or string lies below the option (`IndexError` or `ValueError`,
+    with or without nulls; an `UnmaskedArray` passes no validity bytes
+    and is exempt), and it scatters incoming validity bytes with a
+    per-child index that it misapplies when the index skips values
+    (`IndexError`, #4228). Any operation that drops union elements
+    without trimming the children creates the first two conditions from
+    a valid union.
 
-    `nullable` tracks whether Arrow validity bytes flow into this node
-    from an enclosing option: they start at option nodes, pass through
-    records and indexed nodes, and stop below lists.
+    `nullable` tracks whether enclosing option validity reaches this node.
 
     `sliced` tracks whether `to_arrow` reaches this node through a
-    transformation that can move list offsets away from zero even if
-    they were constructed zero-based: a list trims its content to
-    `offsets[0]:offsets[length]`, an indexed node projects its content,
-    and a `ListArray` may be compacted from anywhere; such nodes can
-    present any list below an option with nonzero offsets.
+    transformation that can drop union elements. A list or regular node
+    counts only when it does not span its whole content, and a record
+    field only when it is longer than the record. Under such a node any null in a masked child of a union, or
+    any masked child with a list below, triggers; at an unsliced union
+    the counts and lengths are compared.
     """
-    if layout.is_record:
-        return any(_has_issue_4222(x, nullable, sliced) for x in layout.contents)
-    if layout.is_regular:
-        return _has_issue_4222(layout.content, False, sliced)
-    if layout.is_option:
-        if isinstance(layout, ak.contents.IndexedOptionArray):
-            return _has_issue_4222(layout.content, True, True)
-        return _has_issue_4222(layout.content, True, sliced)
-    if layout.is_indexed:
-        return _has_issue_4222(layout.content, nullable, True)
-    if layout.is_list:
-        if nullable and layout.length > 0 and (sliced or layout.starts[0] != 0):
+    if layout.is_union:
+        if nullable:
             return True
+        tags = layout.tags.data
+        index = layout.index.data[: len(tags)]
+        for tag, x in enumerate(layout.contents):
+            if not x.is_option or isinstance(x, ak.contents.UnmaskedArray):
+                continue
+            masked_list = _contains_list(x.content)
+            if _null_count(x) == 0 and not masked_list:
+                continue
+            if sliced:
+                return True
+            used = index[tags == tag]
+            length = int(used.max()) + 1 if len(used) else 0
+            if _null_count(x) > length or (masked_list and x.length > length):
+                return True
+        return any(_has_issue_4228(x, False, True) for x in layout.contents)
+    if layout.is_record:
+        return any(
+            _has_issue_4228(x, nullable, sliced or x.length > layout.length)
+            for x in layout.contents
+        )
+    if layout.is_regular:
+        return _has_issue_4228(
+            layout.content,
+            False,
+            sliced or layout.length * layout.size != layout.content.length,
+        )
+    if layout.is_option:
+        return _has_issue_4228(
+            layout.content,
+            True,
+            sliced or isinstance(layout, ak.contents.IndexedOptionArray),
+        )
+    if layout.is_indexed:
+        return _has_issue_4228(layout.content, nullable, True)
+    if layout.is_list:
         if isinstance(layout, ak.contents.ListOffsetArray):
-            child_sliced = sliced or bool(layout.offsets[0] != 0)
+            child_sliced = sliced or bool(
+                layout.offsets[0] != 0 or layout.offsets[-1] != layout.content.length
+            )
         else:
             child_sliced = True
-        return _has_issue_4222(layout.content, False, child_sliced)
+        return _has_issue_4228(layout.content, False, child_sliced)
     return False
 
 
@@ -198,6 +254,19 @@ def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
     return []
 
 
+def _null_count(layout: ak.contents.Content) -> int:
+    """The number of missing values in an option node."""
+    return int(np.count_nonzero(layout.mask_as_bool(valid_when=False)))
+
+
+def _contains_list(layout: ak.contents.Content) -> bool:
+    """Whether a list node (a string or regular list included) is the
+    node or lies below it."""
+    if layout.is_list:
+        return True
+    return any(_contains_list(x) for x in _children(layout))
+
+
 def _strip_options(
     layout: ak.contents.Content,
 ) -> tuple[ak.contents.Content, bool]:
@@ -218,10 +287,7 @@ def _strip_options(
         # `form_remove_optiontype`, #4230), and one nested in a record
         # reads back as an option
         allow_empty=False,
-        # pyarrow's IPC file format drops the buffers of a union wrapped
-        # in an extension type, so `from_feather` crashes reading the
-        # invalid file that `to_feather` writes (#4238)
-        allow_union=False,
+        allow_union=ALLOW_UNION,
         allow_indexed_option=False,
         allow_byte_masked=False,
         allow_bit_masked=False,
@@ -241,7 +307,7 @@ def test_roundtrip(feather_dir, a: ak.Array) -> None:
     a=st_ak.constructors.arrays(
         dtypes=feather_dtypes(),
         allow_empty=False,
-        allow_union=False,
+        allow_union=ALLOW_UNION,
     ).filter(lambda a: feather_compatible(a) and not has_issues(a))
 )
 def test_roundtrip_masked(feather_dir, a: ak.Array) -> None:
@@ -263,6 +329,10 @@ def feather_stable(a: ak.Array) -> bool:
     table representation itself and stays even when every cited issue is
     fixed.
     """
+    if _has_mergeable_union(a.layout):
+        # merging the contents of a union can change the list offsets'
+        # width, which only settles on the second roundtrip
+        return False
     layout, _ = _strip_options(a.layout)
     if layout.is_record and layout.fields == [""]:
         inner, _ = _strip_options(layout.contents[0])
@@ -287,7 +357,7 @@ def feather_stable(a: ak.Array) -> bool:
         allow_nan=False,
         # `?{x: unknown}` crashes on the first read at the #4230 site
         allow_empty=False,
-        allow_union=False,
+        allow_union=ALLOW_UNION,
     ).filter(lambda a: feather_stable(a) and not has_issues(a))
 )
 def test_roundtrip_stable(feather_dir, a: ak.Array) -> None:
@@ -299,7 +369,7 @@ def test_roundtrip_stable(feather_dir, a: ak.Array) -> None:
     option reads back null. After one full roundtrip these normalizations
     have happened: converting the reconstruction again writes an identical
     Arrow table. Layouts that the conversion crashes on or corrupts
-    (#4221, #4222) are still excluded: this test does not vouch for them.
+    (#4221) are still excluded: this test does not vouch for them.
     """
     path = feather_path(feather_dir)
     ak.to_feather(a, path)

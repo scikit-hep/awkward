@@ -128,10 +128,14 @@ py::object output_buffer_to_numpy(std::shared_ptr<ak::ForthOutputBuffer> output)
   // `new auto(ptr)` creates long-lived pointer to a shared_ptr that shares
   // ownership with the shared-ptr `ptr`
   auto lifetime = capsule_for_shared_pointer(ptr);
-  return py::array(py::dtype(ak::util::dtype_to_format(output->dtype())),
-                        output->len(),
-                        ptr.get(),
-                        lifetime);
+  py::dtype dtype(ak::util::dtype_to_format(output->dtype()));
+  // not dtype.itemsize(): it reads NumPy's struct layout, which can differ (#4359)
+  auto itemsize = dtype.attr("itemsize").cast<py::ssize_t>();
+  return py::array(dtype,
+                   {output->len()},
+                   {itemsize},
+                   ptr.get(),
+                   lifetime);
 }
 
 
@@ -146,7 +150,10 @@ py::object machine_bytecodes_at_to_python_content(std::shared_ptr<ak::ForthMachi
   auto bytecodes_capsule = capsule_for_shared_pointer(bytecodes_holder);
 
   // Create buffer from typed pointer and lifetime capsule
-  auto bytecodes_array = py::array_t<I>(bytecodes_holder->size(), bytecodes_holder->data(), bytecodes_capsule);
+  auto bytecodes_array = py::array_t<I>({(py::ssize_t)bytecodes_holder->size()},
+                                        {(py::ssize_t)sizeof(I)},
+                                        bytecodes_holder->data(),
+                                        bytecodes_capsule);
   if (index >= length || index < 0) {
     throw std::invalid_argument(
         std::string("out of bounds index in ForthMachineOf.__getitem__: ")

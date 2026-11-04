@@ -54,7 +54,7 @@ class Index:
         assert not isinstance(data, Index)
         if nplike is None:
             self._nplike = cast(
-                "NumpyLike[ArrayLike]", nplike_of_obj(data, default=Numpy.instance())
+                "NumpyLike[ArrayLike]", nplike_of_obj(data, default=numpy)
             )
         else:
             self._nplike = nplike
@@ -68,32 +68,26 @@ class Index:
             self._nplike.asarray(data, dtype=self._expected_dtype)
         )
 
-        if len(ak._util.maybe_shape_of(self._data)) != 1:
+        if self._data.ndim != 1:
             raise TypeError("Index data must be one-dimensional")
 
-        if np.issubdtype(self._data.dtype, np.longlong):
+        dtype = self._data.dtype
+        if dtype.num == _longlong_num:
             assert np.dtype(np.longlong).itemsize == 8, (
                 "longlong is always 64-bit, right?"
             )
 
             self._data = self._data.view(np.int64)
+            dtype = self._data.dtype
 
         if self._expected_dtype is None:
-            if self._data.dtype == np.dtype(np.int8):
-                self.__class__ = Index8
-            elif self._data.dtype == np.dtype(np.uint8):
-                self.__class__ = IndexU8
-            elif self._data.dtype == np.dtype(np.int32):
-                self.__class__ = Index32
-            elif self._data.dtype == np.dtype(np.uint32):
-                self.__class__ = IndexU32
-            elif self._data.dtype == np.dtype(np.int64):
-                self.__class__ = Index64
-            else:
+            try:
+                self.__class__ = _dtype_key_to_index_cls[dtype.kind, dtype.itemsize]
+            except KeyError:
                 raise TypeError(
                     "Index data must be int8, uint8, int32, uint32, int64, not "
-                    + repr(self._data.dtype)
-                )
+                    + repr(dtype)
+                ) from None
         else:
             if self._data.dtype != self._expected_dtype:
                 # self._data = self._data.astype(self._expected_dtype)   # copy/convert
@@ -237,19 +231,23 @@ class Index:
 
     def __getitem__(self, where):
         if isinstance(where, slice):
-            where = normalize_slice(where, nplike=self.nplike)
-
-            # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
-            # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
-            if self._nplike.known_data and (
-                where.step == 1 and where.start == 0 and where.stop == self.length
-            ):
-                return self
+            if self._nplike.known_data:
+                # in non-typetracer mode (and if all lengths are known) we can check if the slice is a no-op
+                # (i.e. slicing the full array) and shortcut to avoid noticeable python overhead
+                if (
+                    where.step == 1
+                    and where.start == 0
+                    and where.stop == self._data.shape[0]
+                ):
+                    return self
+            else:
+                where = normalize_slice(where, nplike=self._nplike)
 
         out = self._data[where]
 
         if hasattr(out, "shape") and len(out.shape) != 0:
-            return Index(out, metadata=self.metadata, nplike=self._nplike)
+            # indexing never changes the dtype, so the concrete subclass is known
+            return type(self)(out, metadata=self._metadata, nplike=self._nplike)
         elif (Jax.is_own_array(out) or Cupy.is_own_array(out)) and len(out.shape) == 0:
             return out.item()
         else:
@@ -324,3 +322,13 @@ class IndexU32(Index):
 
 class Index64(Index):
     _expected_dtype = np.dtype(np.int64)
+
+
+_longlong_num: Final[int] = np.dtype(np.longlong).num
+# keyed by kind and width rather than by dtype, because `int64` and `longlong`
+# compare (and hash) equal, and rather than by `dtype.num`, because the same width
+# has different numbers across platforms (`int32` is NPY_INT or NPY_LONG)
+_dtype_key_to_index_cls: Final[dict[tuple[str, int], type[Index]]] = {
+    (cls._expected_dtype.kind, cls._expected_dtype.itemsize): cls
+    for cls in (Index8, IndexU8, Index32, IndexU32, Index64)
+}
