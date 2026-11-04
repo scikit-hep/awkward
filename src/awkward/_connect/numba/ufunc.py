@@ -5,21 +5,12 @@
 import numba
 import numpy
 from numba.core import ir, ir_utils, rewrites
+from numba.np import ufunc_db
 
 # Register Numba's array-expression rewrite before the conversion rewrite below.
 from numba.np.ufunc import array_exprs  # noqa: F401
 
-from awkward._connect.numba.arrayview import ArrayViewType, array_supported
-from awkward._connect.numba.layout import NumpyArrayType
-
-
-def _is_flat(value):
-    return (
-        isinstance(value, ArrayViewType)
-        and isinstance(value.type, NumpyArrayType)
-        and value.type.ndim == 1
-        and array_supported(value.type.inner_dtype)
-    )
+from awkward._connect.numba.arrayview import is_flat_numpy_view
 
 
 def _as_numpy(value):
@@ -28,7 +19,7 @@ def _as_numpy(value):
 
 @numba.extending.overload(_as_numpy)
 def _overload_as_numpy(value):
-    if _is_flat(value):
+    if is_flat_numpy_view(value):
 
         def impl(value):
             return numpy.asarray(value)
@@ -45,16 +36,19 @@ def _overload_as_numpy(value):
 def _register_unary(function):
     @numba.extending.overload(function)
     def overload(a, out=None):
-        if _is_flat(a) and not _is_flat(out):
-            if out is None or isinstance(out, numba.types.NoneType):
+        if is_flat_numpy_view(a) and not is_flat_numpy_view(out):
+            if out is None:
 
                 def impl(a, out=None):
                     return function(_as_numpy(a))
 
-            else:
+            elif isinstance(out, numba.types.Array):
 
                 def impl(a, out=None):
                     return function(_as_numpy(a), _as_numpy(out))
+
+            else:
+                return None
 
             return impl
 
@@ -62,28 +56,63 @@ def _register_unary(function):
 def _register_binary(function):
     @numba.extending.overload(function)
     def overload(a, b, out=None):
-        if (_is_flat(a) or _is_flat(b)) and not _is_flat(out):
-            if out is None or isinstance(out, numba.types.NoneType):
+        if (is_flat_numpy_view(a) or is_flat_numpy_view(b)) and not is_flat_numpy_view(
+            out
+        ):
+            if out is None:
 
                 def impl(a, b, out=None):
                     return function(_as_numpy(a), _as_numpy(b))
 
-            else:
+            elif isinstance(out, numba.types.Array):
 
                 def impl(a, b, out=None):
                     return function(_as_numpy(a), _as_numpy(b), _as_numpy(out))
 
+            else:
+                return None
+
             return impl
 
 
-_seen = set()
-for _function in tuple(vars(numpy).values()):
-    if isinstance(_function, numpy.ufunc) and _function not in _seen:
-        _seen.add(_function)
-        if _function.nin == 1:
-            _register_unary(_function)
-        elif _function.nin == 2:
-            _register_binary(_function)
+def _register_binary_two_outputs(function):
+    @numba.extending.overload(function)
+    def overload(a, b, *outputs):
+        if not (is_flat_numpy_view(a) or is_flat_numpy_view(b)):
+            return None
+        if len(outputs) == 0:
+
+            def impl(a, b, *outputs):
+                return function(_as_numpy(a), _as_numpy(b))
+
+            return impl
+        elif len(outputs) == 2 and all(
+            isinstance(output, numba.types.Array) for output in outputs
+        ):
+
+            def impl(a, b, *outputs):
+                return function(_as_numpy(a), _as_numpy(b), outputs[0], outputs[1])
+
+            return impl
+        return None
+
+
+def _register_ufuncs():
+    # Register only native implementations, not unsupported NumPy ufuncs or
+    # generalized ufuncs. Aliases share the same ufunc object.
+    for function in ufunc_db.get_ufuncs():
+        if function.signature is not None:
+            continue
+        if function.nout == 1:
+            if function.nin == 1:
+                _register_unary(function)
+            elif function.nin == 2:
+                _register_binary(function)
+        elif function.nin == 2 and function.nout == 2:
+            _register_binary_two_outputs(function)
+
+
+_register_ufuncs()
 
 
 def _replace_variables(expression, replacements):
@@ -108,8 +137,14 @@ class ConvertUfuncArrayViews(rewrites.Rewrite):
 
     def __init__(self, state=None):
         self.typingctx = state.typingctx
+        self.has_flat_views = any(
+            is_flat_numpy_view(value) for value in state.typemap.values()
+        )
 
     def match(self, func_ir, block, typemap, calltypes):
+        if not self.has_flat_views:
+            return False
+        self.func_ir = func_ir
         self.block = block
         self.typemap = typemap
         self.calltypes = calltypes
@@ -120,7 +155,7 @@ class ConvertUfuncArrayViews(rewrites.Rewrite):
                 variables = {
                     var.name: var
                     for var in expression.list_vars()
-                    if _is_flat(typemap[var.name])
+                    if is_flat_numpy_view(typemap[var.name])
                 }
                 if variables:
                     self.matches[instruction.target.name] = variables
@@ -150,18 +185,27 @@ class ConvertUfuncArrayViews(rewrites.Rewrite):
                     )
                     self.typemap[converted.name] = signature.return_type
                     self.calltypes[call] = signature
+                    global_value = ir.Global("asarray", numpy.asarray, loc)
                     block.body.extend(
                         [
-                            ir.Assign(
-                                ir.Global("asarray", numpy.asarray, loc), function, loc
-                            ),
+                            ir.Assign(global_value, function, loc),
                             ir.Assign(call, converted, loc),
                         ]
                     )
+                    self.func_ir._definitions[function.name] = [global_value]
+                    self.func_ir._definitions[converted.name] = [call]
                     replacements[name] = converted
 
-                instruction.value.expr = _replace_variables(
+                # Keep the input block intact and register the replacement's
+                # definition for subsequent inlining and parallel passes.
+                keywords = dict(instruction.value._kws)
+                keywords["expr"] = _replace_variables(
                     instruction.value.expr, replacements
                 )
+                expression = ir.Expr(
+                    instruction.value.op, instruction.value.loc, **keywords
+                )
+                instruction = ir.Assign(expression, instruction.target, instruction.loc)
+                self.func_ir._definitions[instruction.target.name] = [expression]
             block.body.append(instruction)
         return block

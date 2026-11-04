@@ -227,38 +227,169 @@ def test_control_flow():
         )
 
 
-def test_python_overload_implementation_bodies(monkeypatch):
-    from awkward._connect.numba import ufunc as overloads
+@pytest.mark.parametrize("function", [np.sin, np.add])
+@pytest.mark.parametrize("keyword", [False, True])
+def test_explicit_none_output_is_rejected(function, keyword):
+    if function.nin == 1:
 
-    factories = []
+        @numba.njit
+        def evaluate(a):
+            if keyword:
+                return function(a, out=None)
+            return function(a, None)
 
-    def capture(function):
-        def register(factory):
-            factories.append(factory)
-            return factory
+    else:
 
-        return register
+        @numba.njit
+        def evaluate(a):
+            if keyword:
+                return function(a, 2.0, out=None)
+            return function(a, 2.0, None)
 
-    monkeypatch.setattr(numba.extending, "overload", capture)
-    overloads._register_unary(np.sin)
-    overloads._register_binary(np.add)
-    array = ak.Array([1.0, 2.0])
-    viewtype = array.numba_type
-    output = np.empty(2)
-    outtype = numba.typeof(output)
-    for out in (None, numba.types.none):
-        unary = factories[0](viewtype, out)
-        binary = factories[1](viewtype, numba.types.float64, out)
-        np.testing.assert_allclose(np.asarray(unary(array)), np.sin([1, 2]))
-        np.testing.assert_allclose(np.asarray(binary(array, 2)), [3, 4])
-    unary = factories[0](viewtype, outtype)
-    binary = factories[1](viewtype, numba.types.float64, outtype)
-    assert unary(np.asarray(array), output) is output
-    assert binary(np.asarray(array), 2, output) is output
-    np.testing.assert_array_equal(output, [3, 4])
-    convert = overloads._overload_as_numpy(viewtype)
-    np.testing.assert_array_equal(convert(array), [1, 2])
-    unchanged = overloads._overload_as_numpy(outtype)
-    assert unchanged(output) is output
-    assert overloads._as_numpy(output) is output
-    assert overloads._replace_variables(42, {}) == 42
+    values = np.array([1.0, 2.0])
+    for value in (values, ak.Array(values)):
+        with pytest.raises((numba.core.errors.TypingError, NotImplementedError)):
+            evaluate(value)
+
+
+@pytest.mark.parametrize("explicit_outputs", [False, True])
+@pytest.mark.parametrize("no_rewrites", [False, True])
+@pytest.mark.parametrize("kind", ["left", "right", "both", "numpy_left", "numpy_right"])
+def test_divmod_outputs(explicit_outputs, no_rewrites, kind):
+    @numba.njit(no_rewrites=no_rewrites)
+    def evaluate(a, b, quotient, remainder):
+        if explicit_outputs:
+            return np.divmod(a, b, quotient, remainder)
+        return np.divmod(a, b)
+
+    values = np.array([-3.5, 1.5, 8.0])
+    left, right = values, np.array([2.0, 3.0, 4.0])
+    a, b = ak.Array(left), ak.Array(right)
+    if kind == "left":
+        b, right = 2.0, 2.0
+    elif kind == "right":
+        a, left = 2.0, 2.0
+    elif kind == "numpy_left":
+        a = left
+    elif kind == "numpy_right":
+        b = right
+    quotient, remainder = np.empty(3), np.empty(3)
+    expected = evaluate(left, right, np.empty(3), np.empty(3))
+    actual = evaluate(a, b, quotient, remainder)
+    for result, reference in zip(actual, expected, strict=True):
+        np.testing.assert_array_equal(result, reference)
+    if explicit_outputs:
+        assert np.shares_memory(actual[0], quotient)
+        assert np.shares_memory(actual[1], remainder)
+
+
+@pytest.mark.parametrize("function", [np.modf, np.frexp, np.matmul])
+def test_unsupported_ufunc_does_not_gain_awkward_overload(function):
+    from numba.np import ufunc_db
+
+    if function in ufunc_db.get_ufuncs():
+        pytest.skip("Numba now implements this ufunc")
+    if function.nin == 1:
+
+        @numba.njit
+        def evaluate(a):
+            return function(a)
+
+    else:
+
+        @numba.njit
+        def evaluate(a):
+            return function(a, a)
+
+    with pytest.raises(numba.core.errors.TypingError) as error:
+        evaluate(np.array([1.0, 2.0]))
+    assert "awkward/_connect/numba/ufunc.py" not in str(error.value).replace("\\", "/")
+
+
+def test_parallel_control_flow_and_multiple_expressions():
+    @numba.njit(parallel=True)
+    def evaluate(a):
+        sine = np.sin(a)
+        cosine = np.cos(a)
+        result = sine + cosine
+        for i in numba.prange(len(result)):
+            if i % 2:
+                result[i] *= 2
+        return result + np.sqrt(a)
+
+    values = np.arange(1.0, 33.0)
+    np.testing.assert_allclose(evaluate(ak.Array(values)), evaluate(values))
+
+
+def test_rewrite_preserves_input_ir_and_definitions(monkeypatch):
+    from numba.core import ir
+
+    from awkward._connect.numba.ufunc import ConvertUfuncArrayViews
+
+    apply = ConvertUfuncArrayViews.apply
+    checked = []
+
+    def inspect_rewrite(self):
+        originals = [
+            (instruction, instruction.value, instruction.value.expr)
+            for instruction in self.block.find_insts(ir.Assign)
+            if isinstance(instruction.value, ir.Expr)
+            and instruction.value.op == "arrayexpr"
+        ]
+        rewritten = apply(self)
+        for instruction, value, expression in originals:
+            assert instruction.value is value
+            assert instruction.value.expr is expression
+        for instruction in rewritten.find_insts(ir.Assign):
+            if instruction.target.name.startswith(("ak_asarray", "ak_numpy_view")):
+                assert (
+                    self.func_ir.get_definition(instruction.target) is instruction.value
+                )
+                checked.append(instruction.target.name)
+            elif instruction.target.name in self.matches:
+                assert (
+                    self.func_ir.get_definition(instruction.target) is instruction.value
+                )
+        return rewritten
+
+    monkeypatch.setattr(ConvertUfuncArrayViews, "apply", inspect_rewrite)
+
+    @numba.njit
+    def evaluate(a):
+        return np.sin(a) + np.cos(a)
+
+    values = np.arange(1.0, 5.0)
+    np.testing.assert_allclose(
+        evaluate(ak.Array(values)), np.sin(values) + np.cos(values)
+    )
+    assert checked
+
+
+@pytest.mark.parametrize("awkward_output", [False, True])
+def test_divmod_invalid_outputs(awkward_output):
+    @numba.njit
+    def evaluate(a, output):
+        if awkward_output:
+            return np.divmod(a, 2.0, output, np.empty(2))
+        return np.divmod(a, 2.0, output)
+
+    values = ak.Array([1.0, 2.0])
+    output = ak.Array(np.empty(2)) if awkward_output else np.empty(2)
+    with pytest.raises(numba.core.errors.TypingError):
+        evaluate(values, output)
+
+
+def test_numpy_only_expression_does_not_apply_conversion(monkeypatch):
+    from awkward._connect.numba.ufunc import ConvertUfuncArrayViews
+
+    def unexpected_conversion(self):
+        pytest.fail("NumPy-only IR must not use the Awkward conversion rewrite")
+
+    monkeypatch.setattr(ConvertUfuncArrayViews, "apply", unexpected_conversion)
+
+    @numba.njit
+    def evaluate(a):
+        return np.sin(a) + np.cos(a)
+
+    values = np.arange(1.0, 5.0)
+    np.testing.assert_allclose(evaluate(values), np.sin(values) + np.cos(values))

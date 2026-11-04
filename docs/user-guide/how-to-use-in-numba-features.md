@@ -140,13 +140,17 @@ trig_expression(ak.Array([1.0, 2.0, 3.0]))
 These calls reuse zero-copy NumPy views, including sliced views and flat
 subarrays inside ragged data. Numba's fused array expressions and
 `parallel=True` are supported. Results are NumPy arrays. Explicit output
-arrays must be NumPy arrays; their buffers are updated in place. Other keyword arguments and ufunc signatures are limited to those
-supported by Numba itself.
+arrays must be NumPy arrays; their buffers are updated in place. Supported
+single-output unary and binary ufuncs accept positional outputs or `out=`.
+The native two-output binary ufunc `np.divmod` also accepts two positional
+NumPy output arrays, or returns two new arrays when outputs are omitted.
+Other multi-output ufuncs and generalized ufuncs are not enabled by this
+integration. Explicit `out=None` is rejected, as it is for NumPy inputs in
+Numba. Other keyword arguments and signatures remain limited by Numba.
 
 This does not implicitly convert whole ragged arrays, optional arrays,
 records, or strings. It also does not introduce arithmetic operators on
 Awkward views inside Numba: use `np.add(a, b)`, for example, or cast explicitly.
-
 
 ```{code-cell} ipython3
 @nb.jit
