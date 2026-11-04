@@ -1,4 +1,4 @@
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 from collections.abc import MutableMapping
 
@@ -41,6 +41,19 @@ def attrs_of(*arrays, attrs: MutableMapping | None = None) -> MutableMapping:
 
 def without_transient_attrs(attrs: dict[str, Any]) -> JSONMapping:
     return {k: v for k, v in attrs.items() if not k.startswith("@")}
+
+
+def serializable_attrs_of(obj) -> "JSONMapping | None":
+    """
+    The attrs of a high-level object that should be written out when it is
+    serialized: transient attrs (those whose key starts with `"@"`) are dropped,
+    as they may hold arbitrary, non-serializable objects. Returns None if there
+    is nothing to write.
+    """
+    attrs = attrs_of_obj(obj)
+    if not attrs:
+        return None
+    return without_transient_attrs(dict(attrs)) or None
 
 
 class Attrs(MutableMapping):
