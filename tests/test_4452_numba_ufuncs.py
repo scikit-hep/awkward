@@ -8,6 +8,20 @@ import awkward as ak
 numba = pytest.importorskip("numba")
 ak.numba.register_and_check()
 
+# The fixture temporarily changes Numba's process-wide compiler configuration.
+pytestmark = pytest.mark.thread_unsafe
+
+
+@pytest.fixture(autouse=True)
+def report_compiled_coverage(monkeypatch):
+    # Python's tracer cannot see overload bodies executed as native code. Let
+    # Numba report lowered source lines when coverage is active. The tests still
+    # execute and check the compiled results; this is not runtime branch coverage.
+    from numba.core import config
+
+    if hasattr(config, "JIT_COVERAGE"):
+        monkeypatch.setattr(config, "JIT_COVERAGE", True)
+
 
 @pytest.mark.parametrize(
     "function",
@@ -393,3 +407,30 @@ def test_numpy_only_expression_does_not_apply_conversion(monkeypatch):
 
     values = np.arange(1.0, 5.0)
     np.testing.assert_allclose(evaluate(values), np.sin(values) + np.cos(values))
+
+
+@pytest.mark.parametrize("keyword", [False, True])
+@pytest.mark.parametrize("no_rewrites", [False, True])
+def test_binary_numpy_output(keyword, no_rewrites):
+    @numba.njit(no_rewrites=no_rewrites)
+    def evaluate(a, b, output):
+        if keyword:
+            return np.add(a, b, out=output)
+        return np.add(a, b, output)
+
+    values = np.array([1.0, 2.0, 3.0])
+    output = np.full(5, -99.0)
+    result = evaluate(ak.Array(values), 2.0, output[1:4])
+    np.testing.assert_array_equal(result, values + 2)
+    np.testing.assert_array_equal(output, [-99, 3, 4, 5, -99])
+    assert np.shares_memory(result, output)
+
+
+@pytest.mark.parametrize("data", [[[1], [2]], [1, None], ["a", "b"]])
+def test_divmod_unsupported_layouts(data):
+    @numba.njit
+    def evaluate(a):
+        return np.divmod(a, 2.0)
+
+    with pytest.raises(numba.core.errors.TypingError):
+        evaluate(ak.Array(data))
