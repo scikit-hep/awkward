@@ -269,6 +269,12 @@
     generated/ak.str.starts_with
 
 .. toctree::
+    :caption: Unique strings and counts
+
+    generated/ak.str.uniques
+    generated/ak.str.distinct_counts
+
+.. toctree::
     :caption: Value and type conversions
 
     generated/ak.enforce_type
