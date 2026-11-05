@@ -2,7 +2,7 @@
 # fmt: off
 # pylint: skip-file
 
-# BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+# BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 # v2: keep this file, but drop the two *_v1 functions
 

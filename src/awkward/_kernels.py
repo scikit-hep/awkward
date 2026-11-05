@@ -229,7 +229,7 @@ class CupyKernel(BaseKernel):
         ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak_cuda.Invocation(
                 name=self.key[0],
-                error_context=ak._errors.ErrorContext.primary(),
+                error_context=ak._errors.ErrorContext.frozen_primary(),
             )
         )
 
@@ -273,7 +273,7 @@ class CudaComputeKernel(BaseKernel):
         ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak_cuda.Invocation(
                 name=self.key[0],
-                error_context=ak._errors.ErrorContext.primary(),
+                error_context=ak._errors.ErrorContext.frozen_primary(),
             )
         )
 
