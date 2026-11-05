@@ -23,6 +23,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 # this set must be updated to match, or the generated CUDA unit tests will
 # wrap `pytest.raises` around the wrong statement.
 CUDA_COMPUTE_KERNELS = {
+    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListArray_compact_offsets",
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_RegularArray_getitem_next_at",
@@ -1005,8 +1006,6 @@ cuda_kernels_tests = [
     "awkward_reduce_prod_complex",
     "awkward_reduce_countnonzero",
     "awkward_reduce_countnonzero_complex",
-    "awkward_sorting_ranges",
-    "awkward_sorting_ranges_length",
 ]
 
 
