@@ -81,7 +81,9 @@ class Cupy(ArrayModuleNumpyLike):
             # mark where each element's run ends; the extra slot absorbs the
             # boundaries that trailing zero repeats leave at `total`
             marks = self._module.zeros(total + 1, dtype=np.intp)
-            self._module.add.at(marks, stops[:-1], 1)
+            # older CuPy has no int64 `add.at`, and adding through an unsigned
+            # view gives the same bits
+            self._module.add.at(marks.view(np.uint64), stops[:-1], 1)
             return x[self._module.cumsum(marks[:-1])]
         else:
             return self._module.repeat(x, repeats=repeats)

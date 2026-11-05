@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to find all combinations of elements with a Cartesian (cross) product or \"n choose k\"."
 ---
 
 How to find all combinations of elements: Cartesian (cross) product and "n choose k"
