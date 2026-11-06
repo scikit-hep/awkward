@@ -39,7 +39,7 @@ if(AWKWARD_O2)
   message(STATUS "AWKWARD_O2 enabled: compiling with -O2 (overrides the default -O3)")
 endif()
 
-find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+find_package(Python 3.11 REQUIRED COMPONENTS Interpreter Development.Module)
 
 # Generated artefacts (header-only copies, kernels.h, kernel signature tables, and kernel tests)
 # are produced from sources at the repository root. A git checkout has the sources but not the
