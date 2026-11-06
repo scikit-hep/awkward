@@ -182,9 +182,11 @@ def _impl(
         ) from None
 
     with warnings.catch_warnings():
+        # PyArrow 24.0.0 through 25.0.0 warn even for supported Feather V2.
+        # Do not suppress the distinct Feather V1 DeprecationWarning.
         warnings.filterwarnings(
             "ignore",
-            message="pyarrow.feather.write_feather is deprecated.*",
+            message=r"pyarrow\.feather\.write_feather is deprecated as of 24\.0\.0\.",
             category=FutureWarning,
         )
         pyarrow.feather.write_feather(
