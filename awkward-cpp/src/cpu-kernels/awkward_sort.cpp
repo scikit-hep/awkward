@@ -108,6 +108,7 @@ ERROR awkward_sort(
 
   // In the offsets representation, the number of elements to copy out is
   // simply the end of the last bin (offsets[0] == 0 by contract).
+  // The output suffix beyond that boundary is intentionally left untouched.
   int64_t total = (offsetslength > 0) ? offsets[offsetslength - 1] : 0;
   int64_t copy_length = (total < length) ? total : length;
   for (int64_t i = 0; i < copy_length; i++) {

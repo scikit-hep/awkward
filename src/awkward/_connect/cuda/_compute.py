@@ -383,6 +383,9 @@ def segmented_sort(
     cupy_nplike = Cupy.instance()
     cp = cupy_nplike._module
 
+    # Only the declared prefix of the offsets buffer belongs to this call.
+    offsets = offsets[:offsetslength]
+
     # Ensure offsets are int64 as expected by segmented_sort
     if offsets.dtype != cp.int64:
         offsets = offsets.astype(cp.int64, copy=False)
@@ -390,6 +393,12 @@ def segmented_sort(
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
 
+    if num_items == 0:
+        return
+
+    # Match CPU prefix-only writes; the destination suffix must stay untouched.
+    fromptr = fromptr[:num_items]
+    toptr = toptr[:num_items]
     start_o, end_o = make_segment_views(offsets)
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
@@ -463,14 +472,23 @@ def segmented_argsort(
     cupy_nplike = Cupy.instance()
     cp = cupy_nplike._module
 
+    # Only the declared prefix of the offsets buffer belongs to this call.
+    offsets = offsets[:offsetslength]
+
     # Ensure offsets are int64 as expected by segmented_sort
     if offsets.dtype != cp.int64:
         offsets = offsets.astype(cp.int64, copy=False)
 
+    # CPU argsort initializes every carry entry, even with no covered items.
+    values_in = cp.arange(length, dtype=cp.int64)
+    toptr[:length] = values_in
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
     if num_items == 0:
         return
+    fromptr = fromptr[:num_items]
+    toptr = toptr[:num_items]
+    values_in = values_in[:num_items]
 
     start_o, end_o = make_segment_views(offsets)
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
@@ -486,9 +504,6 @@ def segmented_argsort(
         keys_in = keys_in.view(cp.int64)
     elif keys_in.dtype.kind == "f":
         keys_in = _float_order_keys(cp, keys_in, ascending)
-
-    # Values = global indices; after the sort these are the argsort carry.
-    values_in = cp.arange(num_items, dtype=cp.int64)
 
     # segmented_sort also emits sorted keys, which we discard; the API still
     # requires an output buffer, so hand it scratch.
