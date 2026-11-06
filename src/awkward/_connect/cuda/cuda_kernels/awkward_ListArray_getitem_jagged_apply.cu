@@ -105,7 +105,7 @@ awkward_ListArray_getitem_jagged_apply_b(
         int64_t count = stop - start;
         for (int64_t j = slicestart + threadIdx.y;  j < slicestop;  j += blockDim.y) {
           int64_t index = (int64_t) sliceindex[j];
-          if (index < -count || index > count) {
+          if (index < -count || index >= count) {
             RAISE_ERROR(LISTARRAY_GETITEM_JAGGED_APPLY_ERRORS::IND_OUT_OF_RANGE)
           }
           if (index < 0) {

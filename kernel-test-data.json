@@ -15447,6 +15447,171 @@
       "status": true,
       "tests": [
         {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "contentlen": 4,
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              1
+            ],
+            "sliceindex": [
+              1
+            ],
+            "sliceinnerlen": 1,
+            "sliceouterlen": 1,
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ]
+          },
+          "outputs": {
+            "tocarry": [
+              0
+            ],
+            "tooffsets": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "contentlen": 4,
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              0
+            ],
+            "sliceindex": [
+              0
+            ],
+            "sliceinnerlen": 1,
+            "sliceouterlen": 1,
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ]
+          },
+          "outputs": {
+            "tocarry": [
+              0
+            ],
+            "tooffsets": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "error": true,
+          "message": "index out of range",
+          "inputs": {
+            "contentlen": 4,
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              1
+            ],
+            "sliceindex": [
+              -2
+            ],
+            "sliceinnerlen": 1,
+            "sliceouterlen": 1,
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ]
+          },
+          "outputs": {
+            "tocarry": [
+              0
+            ],
+            "tooffsets": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "contentlen": 4,
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              1
+            ],
+            "sliceindex": [
+              -1
+            ],
+            "sliceinnerlen": 1,
+            "sliceouterlen": 1,
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ]
+          },
+          "outputs": {
+            "tocarry": [
+              0
+            ],
+            "tooffsets": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "error": false,
+          "message": "",
+          "inputs": {
+            "contentlen": 4,
+            "fromstarts": [
+              0
+            ],
+            "fromstops": [
+              1
+            ],
+            "sliceindex": [
+              0
+            ],
+            "sliceinnerlen": 1,
+            "sliceouterlen": 1,
+            "slicestarts": [
+              0
+            ],
+            "slicestops": [
+              1
+            ]
+          },
+          "outputs": {
+            "tocarry": [
+              0
+            ],
+            "tooffsets": [
+              0,
+              1
+            ]
+          }
+        },
+        {
           "error": false,
           "message": "",
           "inputs": {
