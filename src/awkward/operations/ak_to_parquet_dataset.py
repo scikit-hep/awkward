@@ -22,13 +22,16 @@ def to_parquet_dataset(
     Args:
         directory (str or Path): A directory in which to write `_common_metadata`
             and `_metadata`, making the directory of Parquet files into a dataset.
-        filenames (None or list of str or Path): If None, the `directory` will be
-            recursively searched for files ending in `filename_extension` and
-            sorted lexicographically. Otherwise, this explicit list of files is
-            taken and row-groups are concatenated in its given order. If any
-            filenames are relative, they are interpreted relative to `directory`.
-        filename_extension (str): Filename extension (including `.`) to use to
-            search for files recursively. Ignored if `filenames` is None.
+        filenames (None, str, or list of str or Path): If None, the `directory`
+            will be recursively searched for files ending in `.parquet` or
+            `.parq` and sorted lexicographically. Otherwise, each entry is
+            treated as a glob pattern, matches that do not end in `.parquet`
+            or `.parq` are ignored, and row-groups are concatenated in the
+            resulting order. If any filenames are relative, they are
+            interpreted relative to `directory`.
+        storage_options (None or dict): Any additional options to pass to
+            [fsspec.core.url_to_fs](https://filesystem-spec.readthedocs.io/en/latest/api.html#fsspec.core.url_to_fs)
+            to open the `directory`.
 
     Returns:
         A 2-tuple `(common_metadata_path, metadata_path)` with the paths to the
