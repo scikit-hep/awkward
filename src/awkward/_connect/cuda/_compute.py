@@ -369,6 +369,374 @@ def _float_order_keys(cp, values, ascending):
     return _float_order_key_kernel(cp, width)(u, nan_sentinel)
 
 
+def _string_order(stringdata, stringstarts, stringstops, run_starts, length, ascending):
+    from cuda.compute import merge_sort
+
+    order = cp.empty(length, dtype=cp.int64)
+    if length == 0:
+        return order
+
+    def less(left, right):
+        # Group runs by position, not parent value: a parent may reappear later.
+        if run_starts[left] != run_starts[right]:
+            return np.int8(run_starts[left] < run_starts[right])
+        left_start = stringstarts[left]
+        right_start = stringstarts[right]
+        left_length = stringstops[left] - left_start
+        right_length = stringstops[right] - right_start
+        common = min(left_length, right_length)
+        i = 0
+        while i < common:
+            a = stringdata[left_start + i]
+            b = stringdata[right_start + i]
+            if a != b:
+                return np.int8(a < b if ascending else a > b)
+            i += 1
+        if left_length != right_length:
+            return np.int8(
+                left_length < right_length if ascending else left_length > right_length
+            )
+        # A total order makes ties stable even if the underlying sort is not.
+        # Providing stable ties also satisfies the unstable kernel contract.
+        return np.int8(left < right)
+
+    merge_sort(
+        d_in_keys=CountingIterator(np.int64(0)),
+        d_out_keys=order,
+        num_items=length,
+        op=less,
+    )
+    return order
+
+
+def awkward_ListOffsetArray_argsort_strings(
+    tocarry,
+    fromparents,
+    length,
+    stringdata,
+    stringstarts,
+    stringstops,
+    is_stable,
+    is_ascending,
+    is_local,
+):
+    if length == 0:
+        return
+    indices = cp.arange(length, dtype=cp.int64)
+    boundaries = cp.empty(length, dtype=cp.bool_)
+    boundaries[0] = True
+    boundaries[1:] = fromparents[1:length] != fromparents[: length - 1]
+    markers = cp.where(boundaries, indices, np.int64(0))
+    run_starts = cp.empty(length, dtype=cp.int64)
+    inclusive_scan(
+        d_in=markers,
+        d_out=run_starts,
+        op=OpKind.MAXIMUM,
+        init_value=np.asarray(0, dtype=np.int64),
+        num_items=length,
+    )
+    order = _string_order(
+        stringdata, stringstarts, stringstops, run_starts, length, is_ascending
+    )
+    tocarry[:length] = order - run_starts if is_local else order
+
+
+def awkward_NumpyArray_sort_asstrings_uint8(
+    toptr,
+    fromptr,
+    offsets,
+    offsetslength,
+    outoffsets,
+    ascending,
+    stable,
+):
+    outoffsets[0] = 0
+    length = max(0, offsetslength - 1)
+    if length == 0:
+        return
+    starts = offsets[:length]
+    stops = offsets[1:offsetslength]
+    run_starts = cp.zeros(length, dtype=cp.int64)
+    order = _string_order(fromptr, starts, stops, run_starts, length, ascending)
+    lengths = (stops - starts)[order]
+    inclusive_scan(
+        d_in=lengths,
+        d_out=outoffsets[1:offsetslength],
+        op=OpKind.PLUS,
+        init_value=np.asarray(0, dtype=np.int64),
+        num_items=length,
+    )
+
+    def copy_string(i):
+        source = order[i]
+        start = starts[source]
+        stop = stops[source]
+        destination = outoffsets[i]
+        j = start
+        while j < stop:
+            toptr[destination + j - start] = fromptr[j]
+            j += 1
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=copy_string,
+        num_items=length,
+    )
+
+
+def awkward_NumpyArray_unique_strings(
+    toptr, offsets, offsetslength, outoffsets, tolength
+):
+    length = max(0, offsetslength - 1)
+    outoffsets[0] = offsets[0]
+    tolength[0] = 1
+    if length == 0:
+        return
+    # Snapshot before scattering: an earlier output may overlap a later input.
+    source = toptr.copy()
+    keep = cp.empty(length, dtype=cp.int64)
+
+    def different(i):
+        if i == 0:
+            return np.int64(1)
+        start = offsets[i]
+        previous = offsets[i - 1]
+        size = offsets[i + 1] - start
+        if size != start - previous:
+            return np.int64(1)
+        j = 0
+        while j < size:
+            if source[start + j] != source[previous + j]:
+                return np.int64(1)
+            j += 1
+        return np.int64(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)), d_out=keep, op=different, num_items=length
+    )
+    ranks = cp.empty(length, dtype=cp.int64)
+    inclusive_scan(
+        d_in=keep,
+        d_out=ranks,
+        op=OpKind.PLUS,
+        init_value=np.asarray(0, dtype=np.int64),
+        num_items=length,
+    )
+    lengths = cp.where(
+        keep != 0, offsets[1:offsetslength] - offsets[:length], np.int64(0)
+    )
+    positions = cp.zeros(length + 1, dtype=cp.int64)
+    inclusive_scan(
+        d_in=lengths,
+        d_out=positions[1:],
+        op=OpKind.PLUS,
+        init_value=np.asarray(0, dtype=np.int64),
+        num_items=length,
+    )
+    tolength[0] = ranks[-1] + 1
+
+    def copy_unique(i):
+        if keep[i] != 0:
+            start = offsets[i]
+            stop = offsets[i + 1]
+            destination = positions[i]
+            j = start
+            while j < stop:
+                toptr[destination + j - start] = source[j]
+                j += 1
+            outoffsets[ranks[i]] = positions[i + 1]
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=copy_unique,
+        num_items=length,
+    )
+
+
+def _unique_ranges(toptr, fromoffsets, offsetslength, tooffsets, is_bool):
+    if offsetslength == 1:
+        tooffsets[0] = 0
+        return
+    # Avoid the i1*/i8* mismatch when CCCL reconstructs captured bool arrays.
+    # Keep boolean data byte-addressed without copying or changing the kernel ABI.
+    if is_bool:
+        toptr = toptr.view(cp.uint8)
+    source = toptr.copy()
+    offsets = fromoffsets[:offsetslength]
+    # Empty ranges and first-element NaNs have stateful legacy semantics.
+    # Keep this decision on the device and preserve the CPU write order there.
+    exceptional = offsets[1:] <= offsets[:-1]
+    if toptr.dtype.kind == "f":
+        exceptional = exceptional | cp.isnan(source[offsets[:-1]])
+    legacy = cp.any(exceptional).astype(cp.uint8).reshape(1)
+    keep = cp.zeros(source.size, dtype=cp.int64)
+
+    def classify(row):
+        if legacy[0]:
+            return np.int8(0)
+        start = offsets[row]
+        stop = offsets[row + 1]
+        keep[start] = 1
+        j = start + 1
+        while j < stop:
+            if is_bool:
+                changed = np.int8(source[j]) != np.int8(source[j - 1])
+            else:
+                changed = source[j] != source[j - 1]
+            keep[j] = np.int64(changed)
+            j += 1
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=classify,
+        num_items=offsetslength - 1,
+    )
+    positions = cp.zeros(source.size + 1, dtype=cp.int64)
+    if source.size != 0:
+        inclusive_scan(
+            d_in=keep,
+            d_out=positions[1:],
+            op=OpKind.PLUS,
+            init_value=np.asarray(0, dtype=np.int64),
+            num_items=source.size,
+        )
+
+    def scatter(i):
+        if keep[i] != 0:
+            toptr[positions[i]] = source[i]
+        return np.int8(0)
+
+    if source.size != 0:
+        unary_transform(
+            d_in=CountingIterator(np.int64(0)),
+            d_out=DiscardIterator(),
+            op=scatter,
+            num_items=source.size,
+        )
+
+    def finish(i):
+        if not legacy[0]:
+            tooffsets[i] = positions[offsets[i]]
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=finish,
+        num_items=offsetslength,
+    )
+
+    def legacy_compact(_):
+        if legacy[0]:
+            m = 0
+            row = 0
+            while row < offsets.size - 1:
+                tooffsets[row] = m
+                toptr[m] = toptr[offsets[row]]
+                m += 1
+                j = offsets[row]
+                while j < offsets[row + 1]:
+                    if is_bool:
+                        changed = np.int8(toptr[m - 1]) != np.int8(toptr[j])
+                    else:
+                        changed = toptr[m - 1] != toptr[j]
+                    if changed:
+                        toptr[m] = toptr[j]
+                        m += 1
+                    j += 1
+                row += 1
+            tooffsets[offsets.size - 1] = m
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=legacy_compact,
+        num_items=1,
+    )
+
+
+def awkward_unique_ranges(toptr, fromoffsets, offsetslength, tooffsets):
+    _unique_ranges(toptr, fromoffsets, offsetslength, tooffsets, False)
+
+
+def awkward_unique_ranges_bool(toptr, fromoffsets, offsetslength, tooffsets):
+    _unique_ranges(toptr, fromoffsets, offsetslength, tooffsets, True)
+
+
+def awkward_unique_offsets(tooffsets, length, fromoffsets, starts, startslength):
+    # This legacy recurrence can write beyond the logical offsets prefix.
+    # One device work item preserves that order without a host metadata read.
+    compact = fromoffsets[:length]
+    rows = starts[:startslength]
+
+    def expand(_):
+        j = 0
+        i = 0
+        while i < compact.size:
+            tooffsets[j] = compact[i]
+            k = j
+            while k < rows.size - 1:
+                if rows[j] == rows[j + 1]:
+                    tooffsets[j + 1] = compact[i]
+                    j += 1
+                k += 1
+            j += 1
+            i += 1
+        tooffsets[rows.size] = compact[compact.size - 1]
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=expand,
+        num_items=1,
+    )
+
+
+def awkward_IndexedArray_unique_next_index_and_offsets_64(
+    toindex, tooffsets, fromoffsets, fromnulls, startslength
+):
+    # The null marker is indexed by the evolving output position, so its
+    # recurrence must not be replaced by an independent per-row null count.
+    offsets = fromoffsets[: startslength + 1]
+
+    def build(_):
+        k = 0
+        value = 0
+        shift = 0
+        toindex[0] = 0
+        tooffsets[0] = offsets[0]
+        i = 0
+        while i < offsets.size - 1:
+            j = offsets[i]
+            while j < offsets[i + 1]:
+                toindex[k] = value
+                k += 1
+                value += 1
+                j += 1
+            if fromnulls[k] == 1:
+                toindex[k] = -1
+                k += 1
+                shift += 1
+            tooffsets[i + 1] = offsets[i + 1] + shift
+            i += 1
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=build,
+        num_items=1,
+    )
+
+
 def segmented_sort(
     toptr,
     fromptr,
