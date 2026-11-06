@@ -143,8 +143,8 @@ def string_numba_lower(
     startspos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.STARTS
     )
-    startsptr = ak._connect.numba.layout.getat(
-        context, builder, viewproxy.arrayptrs, startspos
+    startsptr = ak._connect.numba.layout.getbuffer(
+        context, builder, viewproxy.bufferptrs, startspos
     )
     startsarraypos = builder.add(viewproxy.start, atval)
     start = ak._connect.numba.layout.getat(
@@ -154,16 +154,16 @@ def string_numba_lower(
     stopspos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.STOPS
     )
-    stopsptr = ak._connect.numba.layout.getat(
-        context, builder, viewproxy.arrayptrs, stopspos
+    stopsptr = ak._connect.numba.layout.getbuffer(
+        context, builder, viewproxy.bufferptrs, stopspos
     )
     stopsarraypos = builder.add(viewproxy.start, atval)
     stop = ak._connect.numba.layout.getat(
         context, builder, stopsptr, stopsarraypos, viewtype.type.indextype.dtype
     )
 
-    baseptr = ak._connect.numba.layout.getat(
-        context, builder, viewproxy.arrayptrs, whichnextpos
+    baseptr = ak._connect.numba.layout.getbuffer(
+        context, builder, viewproxy.bufferptrs, whichnextpos
     )
     start_cast = ak._connect.numba.layout.castint(
         context,
@@ -180,11 +180,10 @@ def string_numba_lower(
         builder.sub(stop, start),
     )
 
-    raw_address = builder.add(baseptr, start_cast)
     uint8_pointer_type = numba.types.CPointer(numba.types.uint8)
-    uint8_pointer = builder.inttoptr(
-        raw_address,
-        context.get_value_type(uint8_pointer_type),
+    uint8_pointer = builder.gep(
+        builder.bitcast(baseptr, context.get_value_type(uint8_pointer_type)),
+        [start_cast],
     )
 
     if viewtype.type.parameters["__array__"] == "string":
@@ -447,6 +446,7 @@ class ContentType(numba.types.Type):
         proxyout.start = builder.add(viewproxy.start, builder.load(regular_start))
         proxyout.stop = builder.add(viewproxy.start, builder.load(regular_stop))
         proxyout.arrayptrs = viewproxy.arrayptrs
+        proxyout.bufferptrs = viewproxy.bufferptrs
         proxyout.pylookup = viewproxy.pylookup
         return proxyout._getvalue()
 
@@ -491,30 +491,23 @@ def posat(context, builder, pos, offset):
     return builder.add(pos, context.get_constant(numba.intp, offset))
 
 
+def getbuffer(context, builder, buffers, offset):
+    """Load a buffer pointer without passing its address through an integer."""
+    return builder.load(builder.gep(buffers, [offset]))
+
+
 def getat(context, builder, baseptr, offset, rettype=None):
-    if rettype is not None:
-        ptrtype = context.get_value_type(numba.types.CPointer(rettype))
-        bitwidth = type_bitwidth(rettype)
-    else:
-        ptrtype = context.get_value_type(numba.types.CPointer(numba.intp))
-        bitwidth = numba.intp.bitwidth
-    if isinstance(baseptr.type, llvmlite.ir.IntType):
-        # Entries of `arrayptrs` are raw addresses held as intp, but
-        # cgutils.pointer_add byte-GEPs from its argument, so it needs a
-        # pointer: numba >=0.67 no longer accepts the integer.
-        baseptr = builder.inttoptr(baseptr, ptrtype)
-    byteoffset = builder.mul(offset, context.get_constant(numba.intp, bitwidth // 8))
-    out = builder.load(
-        numba.core.cgutils.pointer_add(builder, baseptr, byteoffset, ptrtype)
+    element_type = numba.intp if rettype is None else rettype
+    # Booleans occupy one byte in a NumPy buffer, rather than LLVM's i1.
+    storage_type = (
+        numba.int8 if isinstance(element_type, numba.types.Boolean) else element_type
     )
+    ptrtype = context.get_value_type(numba.types.CPointer(storage_type))
+    typed_baseptr = builder.bitcast(baseptr, ptrtype)
+    out = builder.load(builder.gep(typed_baseptr, [offset]))
     if rettype is not None and isinstance(rettype, numba.types.Boolean):
-        return builder.icmp_signed(
-            "!=",
-            out,
-            context.get_constant(numba.int8, 0),
-        )
-    else:
-        return out
+        return builder.icmp_signed("!=", out, context.get_constant(numba.int8, 0))
+    return out
 
 
 def regularize_atval(context, builder, viewproxy, attype, atval, wrapneg, checkbounds):
@@ -589,7 +582,7 @@ class NumpyArrayType(ContentType, ak._lookup.NumpyLookup):
         checkbounds,
     ):
         whichpos = posat(context, builder, viewproxy.pos, self.ARRAY)
-        arrayptr = getat(context, builder, viewproxy.arrayptrs, whichpos)
+        arrayptr = getbuffer(context, builder, viewproxy.bufferptrs, whichpos)
         atval = regularize_atval(
             context, builder, viewproxy, attype, atval, wrapneg, checkbounds
         )
@@ -667,6 +660,7 @@ class RegularArrayType(ContentType, ak._lookup.RegularLookup):
         proxyout.start = start
         proxyout.stop = stop
         proxyout.arrayptrs = viewproxy.arrayptrs
+        proxyout.bufferptrs = viewproxy.bufferptrs
         proxyout.pylookup = viewproxy.pylookup
         return proxyout._getvalue()
 
@@ -736,14 +730,14 @@ class ListArrayType(ContentType, ak._lookup.ListLookup):
         )
 
         startspos = posat(context, builder, viewproxy.pos, self.STARTS)
-        startsptr = getat(context, builder, viewproxy.arrayptrs, startspos)
+        startsptr = getbuffer(context, builder, viewproxy.bufferptrs, startspos)
         startsarraypos = builder.add(viewproxy.start, atval)
         start = getat(
             context, builder, startsptr, startsarraypos, rettype=self.indextype.dtype
         )
 
         stopspos = posat(context, builder, viewproxy.pos, self.STOPS)
-        stopsptr = getat(context, builder, viewproxy.arrayptrs, stopspos)
+        stopsptr = getbuffer(context, builder, viewproxy.bufferptrs, stopspos)
         stopsarraypos = builder.add(viewproxy.start, atval)
         stop = getat(
             context, builder, stopsptr, stopsarraypos, rettype=self.indextype.dtype
@@ -758,6 +752,7 @@ class ListArrayType(ContentType, ak._lookup.ListLookup):
             context, builder, self.indextype.dtype, numba.intp, stop
         )
         proxyout.arrayptrs = viewproxy.arrayptrs
+        proxyout.bufferptrs = viewproxy.bufferptrs
         proxyout.pylookup = viewproxy.pylookup
         return proxyout._getvalue()
 
@@ -823,7 +818,7 @@ class IndexedArrayType(ContentType, ak._lookup.IndexedLookup):
         )
 
         indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
-        indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
+        indexptr = getbuffer(context, builder, viewproxy.bufferptrs, indexpos)
         indexarraypos = builder.add(viewproxy.start, atval)
         nextat = getat(
             context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
@@ -840,6 +835,7 @@ class IndexedArrayType(ContentType, ak._lookup.IndexedLookup):
             context.get_constant(numba.intp, 1),
         )
         proxynext.arrayptrs = viewproxy.arrayptrs
+        proxynext.bufferptrs = viewproxy.bufferptrs
         proxynext.pylookup = viewproxy.pylookup
 
         return self.contenttype.lower_getitem_at_check(
@@ -917,7 +913,7 @@ class IndexedOptionArrayType(ContentType, ak._lookup.IndexedOptionLookup):
         )
 
         indexpos = posat(context, builder, viewproxy.pos, self.INDEX)
-        indexptr = getat(context, builder, viewproxy.arrayptrs, indexpos)
+        indexptr = getbuffer(context, builder, viewproxy.bufferptrs, indexpos)
         indexarraypos = builder.add(viewproxy.start, atval)
         nextat = getat(
             context, builder, indexptr, indexarraypos, rettype=self.indextype.dtype
@@ -946,6 +942,7 @@ class IndexedOptionArrayType(ContentType, ak._lookup.IndexedOptionLookup):
                     context.get_constant(numba.intp, 1),
                 )
                 proxynext.arrayptrs = viewproxy.arrayptrs
+                proxynext.bufferptrs = viewproxy.bufferptrs
                 proxynext.pylookup = viewproxy.pylookup
 
                 outdata = self.contenttype.lower_getitem_at_check(
@@ -1030,7 +1027,7 @@ class ByteMaskedArrayType(ContentType, ak._lookup.ByteMaskedLookup):
         )
 
         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
-        maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
+        maskptr = getbuffer(context, builder, viewproxy.bufferptrs, maskpos)
         maskarraypos = builder.add(viewproxy.start, atval)
         byte = getat(
             context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
@@ -1054,6 +1051,7 @@ class ByteMaskedArrayType(ContentType, ak._lookup.ByteMaskedLookup):
                 proxynext.start = viewproxy.start
                 proxynext.stop = viewproxy.stop
                 proxynext.arrayptrs = viewproxy.arrayptrs
+                proxynext.bufferptrs = viewproxy.bufferptrs
                 proxynext.pylookup = viewproxy.pylookup
 
                 outdata = self.contenttype.lower_getitem_at_check(
@@ -1153,7 +1151,7 @@ class BitMaskedArrayType(ContentType, ak._lookup.BitMaskedLookup):
         )
 
         maskpos = posat(context, builder, viewproxy.pos, self.MASK)
-        maskptr = getat(context, builder, viewproxy.arrayptrs, maskpos)
+        maskptr = getbuffer(context, builder, viewproxy.bufferptrs, maskpos)
         maskarraypos = bitatval
         byte = getat(
             context, builder, maskptr, maskarraypos, rettype=self.masktype.dtype
@@ -1187,6 +1185,7 @@ class BitMaskedArrayType(ContentType, ak._lookup.BitMaskedLookup):
                 proxynext.start = viewproxy.start
                 proxynext.stop = viewproxy.stop
                 proxynext.arrayptrs = viewproxy.arrayptrs
+                proxynext.bufferptrs = viewproxy.bufferptrs
                 proxynext.pylookup = viewproxy.pylookup
 
                 outdata = self.contenttype.lower_getitem_at_check(
@@ -1280,6 +1279,7 @@ class UnmaskedArrayType(ContentType, ak._lookup.UnmaskedLookup):
         proxynext.start = viewproxy.start
         proxynext.stop = viewproxy.stop
         proxynext.arrayptrs = viewproxy.arrayptrs
+        proxynext.bufferptrs = viewproxy.bufferptrs
         proxynext.pylookup = viewproxy.pylookup
 
         outdata = self.contenttype.lower_getitem_at_check(
@@ -1501,6 +1501,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
                 atval, builder.add(viewproxy.start, context.get_constant(numba.intp, 1))
             )
             proxynext.arrayptrs = viewproxy.arrayptrs
+            proxynext.bufferptrs = viewproxy.bufferptrs
             proxynext.pylookup = viewproxy.pylookup
 
             return contenttype.lower_getitem_at_check(
@@ -1530,6 +1531,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
         proxynext.start = viewproxy.start
         proxynext.stop = viewproxy.stop
         proxynext.arrayptrs = viewproxy.arrayptrs
+        proxynext.bufferptrs = viewproxy.bufferptrs
         proxynext.pylookup = viewproxy.pylookup
 
         return proxynext._getvalue()
@@ -1558,6 +1560,7 @@ class RecordArrayType(ContentType, ak._lookup.RecordLookup):
             builder.add(arrayviewproxy.start, context.get_constant(numba.intp, 1)),
         )
         proxynext.arrayptrs = arrayviewproxy.arrayptrs
+        proxynext.bufferptrs = arrayviewproxy.bufferptrs
         proxynext.pylookup = arrayviewproxy.pylookup
 
         nextviewtype = ak._connect.numba.arrayview.wrap(

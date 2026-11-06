@@ -20,8 +20,8 @@ class ArrayViewArgHandler:
                         f"the kernel signature type: {ty}"
                     )
 
-                # Use uint64 for pos, start, stop, the array pointers values, and the pylookup value
-                tys = numba.types.UniTuple(numba.types.uint64, 5)
+                # Match ArrayViewModel: metadata and buffer tables are separate pointers.
+                tys = numba.types.UniTuple(numba.types.uint64, 6)
 
                 view = val._numbaview
                 assert view is not None
@@ -30,9 +30,10 @@ class ArrayViewArgHandler:
                 stop = view.stop
                 pos = view.pos
                 arrayptrs = view.lookup.arrayptrs.data.ptr
+                bufferptrs = view.lookup.bufferptrs.data.ptr
                 pylookup = 0
 
-                return tys, (pos, start, stop, arrayptrs, pylookup)
+                return tys, (pos, start, stop, arrayptrs, bufferptrs, pylookup)
             else:
                 raise NumbaTypeError(
                     '`ak.to_backend` should be called with `backend="cuda"` to put '

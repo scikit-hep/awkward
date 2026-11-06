@@ -154,7 +154,18 @@ def to_numbatype(form):
 
 class NumbaLookup(Lookup):
     def __init__(self, layout, attrs, generator=None):
-        super().__init__(layout, generator=generator)
+        # Keep metadata and buffer pointers separate in the Numba ABI. The
+        # generic Lookup retains its legacy representation for C++ consumers.
+        self.nplike = layout.backend.nplike
+        self.generator = generator
+        self.positions = []
+        ak._lookup.tolookup(layout, self.positions)
+        self.arrayptrs = self.nplike.asarray(
+            [x if isinstance(x, int) else 0 for x in self.positions], dtype=np.intp
+        )
+        from awkward._connect.numba._lookup import make_buffer_table
+
+        self.bufferptrs = make_buffer_table(self.positions, self.nplike)
         self._attrs = attrs
 
     @property
@@ -169,15 +180,16 @@ def typeof_Lookup(obj, c):
 
 class LookupType(numba.types.Type):
     arraytype = numba.types.Array(numba.intp, 1, "C")
+    buffertype = numba.types.Array(numba.uint8, 1, "C")
 
     def __init__(self):
-        super().__init__(name="ak.LookupType()")
+        super().__init__(name="ak.LookupType(lookup_abi=2)")
 
 
 @numba.extending.register_model(LookupType)
 class LookupModel(numba.core.datamodel.models.StructModel):
     def __init__(self, dmm, fe_type):
-        members = [("arrayptrs", fe_type.arraytype)]
+        members = [("arrayptrs", fe_type.arraytype), ("bufferptrs", fe_type.buffertype)]
         super().__init__(dmm, fe_type, members)
 
 
@@ -191,6 +203,11 @@ def unbox_Lookup(lookuptype, lookupobj, c):
     ).value
 
     c.pyapi.decref(arrayptrs_obj)
+    bufferptrs_obj = c.pyapi.object_getattr_string(lookupobj, "bufferptrs")
+    proxyout.bufferptrs = c.pyapi.to_native_value(
+        lookuptype.buffertype, bufferptrs_obj
+    ).value
+    c.pyapi.decref(bufferptrs_obj)
 
     is_error = numba.core.cgutils.is_not_null(c.builder, c.pyapi.err_occurred())
     return numba.extending.NativeValue(proxyout._getvalue(), is_error)
@@ -257,7 +274,9 @@ def repr_behavior(behavior):
 class ArrayViewType(numba.types.IterableType, numba.types.Sized):
     def __init__(self, type, behavior, fields):
         super().__init__(
-            name=f"ak.ArrayView({type.name}, {repr_behavior(behavior)}, {fields!r})"
+            # Include the lookup ABI in Numba's type/cache key: cached code using
+            # the previous five-field view must not consume this six-field view.
+            name=f"ak.ArrayView({type.name}, {repr_behavior(behavior)}, {fields!r}, lookup_abi=2)"
         )
         self.type = type
         self.behavior = behavior
@@ -276,6 +295,7 @@ class ArrayViewModel(numba.core.datamodel.models.StructModel):
             ("start", numba.intp),
             ("stop", numba.intp),
             ("arrayptrs", numba.types.CPointer(numba.intp)),
+            ("bufferptrs", numba.types.CPointer(numba.types.voidptr)),
             ("pylookup", numba.types.pyobject),
         ]
         super().__init__(dmm, fe_type, members)
@@ -304,6 +324,15 @@ def lower_const_view(context, builder, viewtype, view):
     proxyout.arrayptrs = context.make_helper(
         builder, numba.typeof(arrayptrs), arrayptrs_val
     ).data
+    bufferptrs = lookup.bufferptrs
+    # A pointer table contains process-local addresses and must not be embedded
+    # as integer constants in a compiled module.
+    proxyout.bufferptrs = builder.bitcast(
+        context.add_dynamic_addr(
+            builder, bufferptrs.ctypes.data, info="Numba buffer table"
+        ),
+        context.get_value_type(numba.types.CPointer(numba.types.voidptr)),
+    )
     proxyout.pylookup = context.add_dynamic_addr(
         builder, id(lookup), info=str(type(lookup))
     )
@@ -335,6 +364,12 @@ def unbox_ArrayView(viewtype, view_obj, c):
     proxyout.arrayptrs = c.context.make_helper(
         c.builder, LookupType.arraytype, lookup_proxy.arrayptrs
     ).data
+    proxyout.bufferptrs = c.builder.bitcast(
+        c.context.make_helper(
+            c.builder, LookupType.buffertype, lookup_proxy.bufferptrs
+        ).data,
+        c.context.get_value_type(numba.types.CPointer(numba.types.voidptr)),
+    )
     proxyout.pylookup = lookup_obj
 
     c.pyapi.decref(pos_obj)
@@ -1067,8 +1102,8 @@ def lower_asarray(context, builder, sig, args):
     whichpos = ak._connect.numba.layout.posat(
         context, builder, viewproxy.pos, viewtype.type.ARRAY
     )
-    arrayptr = ak._connect.numba.layout.getat(
-        context, builder, viewproxy.arrayptrs, whichpos
+    arrayptr = ak._connect.numba.layout.getbuffer(
+        context, builder, viewproxy.bufferptrs, whichpos
     )
 
     bitwidth = ak._connect.numba.layout.type_bitwidth(rettype.dtype)
@@ -1077,9 +1112,7 @@ def lower_asarray(context, builder, sig, args):
     dataptrtype = context.get_value_type(numba.types.CPointer(rettype.dtype))
     data = numba.core.cgutils.pointer_add(
         builder,
-        # `arrayptr` is a raw address held as intp; pointer_add byte-GEPs
-        # from its argument, so it needs a pointer.
-        builder.inttoptr(arrayptr, dataptrtype),
+        builder.bitcast(arrayptr, dataptrtype),
         builder.mul(viewproxy.start, itemsize),
         dataptrtype,
     )
