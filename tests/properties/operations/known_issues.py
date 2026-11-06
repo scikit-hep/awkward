@@ -53,48 +53,6 @@ def has_issue_4260(a: ak.Array) -> bool:
     return False
 
 
-def has_issue_4261(a: ak.Array) -> bool:
-    """Return `True` if flattening all levels would merge non-promotable leaves.
-
-    `ak.flatten(axis=None)` and `ak.ravel` flatten every branch to
-    its leaves and merge them with `ak._do.mergemany`. A record or
-    union in the form can combine leaves from different families:
-    integers (with bool, without `uint64`), `uint64` on its own,
-    floats (with complex), linear-unit timedeltas, calendar-unit
-    timedeltas (months, years), datetimes (all units), and strings
-    (with bytestrings). Integers promote with floats and with either
-    timedelta family; `uint64` promotes with the integers and the
-    floats but with neither timedelta family; any other
-    combination of two or more families makes the merge fail with a
-    bare `AssertionError` ("cannot merge NumpyArray with
-    ListOffsetArray"), an `AttributeError`, NumPy's
-    `DTypePromotionError`, or a `TypeError` from datetime-unit
-    metadata, depending on the layout, instead of building a union or
-    raising a documented error.
-
-    The families are modeled on NumPy's documented promotion rules,
-    not on the current implementation, except that datetimes with
-    timedeltas, which NumPy promotes but the merge rejects with
-    `TypeError`, are grouped as non-promotable; that divergence is
-    why `np.result_type` is not a substitute. A unit pair of one
-    family that NumPy itself cannot convert is `has_issue_4278`'s
-    trigger, not this one. Unprobed combinations may still fail the
-    tests; such a failure indicates this trigger is missing a
-    combination.
-    Reported: https://github.com/scikit-hep/awkward/issues/4261
-    """
-    form = a.layout.form
-    if not _contains_record_or_union(form):
-        return False
-    families = _leaf_families(form)
-    promotable_pairs = (
-        {"integer", "uint64", "float"},
-        {"integer", "timedelta"},
-        {"integer", "timedelta-calendar"},
-    )
-    return len(families) > 1 and not any(families <= pair for pair in promotable_pairs)
-
-
 def has_issue_4262(a: ak.Array) -> bool:
     """Return `True` if a regular list of variable-length lists is under a union.
 
@@ -190,8 +148,10 @@ def has_issue_4278(a: ak.Array) -> bool:
     not prevent the failure (`int64` beside such a pair, a
     promotable mix, still fails). The trigger computes the factor
     between the extreme base units present, per family, exactly in
-    attoseconds (`_overflowing_unit_span`); merge failures across
-    families are `has_issue_4261`'s. Reported:
+    attoseconds (`_overflowing_unit_span`). `ak.flatten(axis=None)`
+    and `ak.ravel` refuse leaves that `ak._do.mergeable` rejects,
+    unequal units included, before merging (see
+    `util.merges_unmergeable_leaves`). Reported:
     https://github.com/scikit-hep/awkward/issues/4278
     """
     form = a.layout.form
@@ -337,40 +297,6 @@ def _contains_record_or_union(form: ak.forms.Form) -> bool:
     return False
 
 
-def _leaf_families(form: ak.forms.Form) -> set[str]:
-    """Return the merge families of the leaf types.
-
-    The family names and their groupings are described in
-    `has_issue_4261`. A string counts as one leaf, not as a list of
-    characters.
-    """
-    families = set()
-    stack = [form]
-    while stack:
-        node = stack.pop()
-        if node.parameter("__array__") in ("string", "bytestring"):
-            families.add("string")
-        elif node.is_record or node.is_union:
-            stack.extend(node.contents)
-        elif node.is_numpy:
-            if node.primitive == "uint64":
-                families.add("uint64")
-            elif node.primitive.startswith("datetime64"):
-                families.add("datetime")
-            elif node.primitive.startswith("timedelta64"):
-                if node.primitive.endswith(("[M]", "[Y]")):
-                    families.add("timedelta-calendar")
-                else:
-                    families.add("timedelta")
-            elif node.primitive.startswith(("float", "complex")):
-                families.add("float")
-            else:
-                families.add("integer")
-        elif not node.is_unknown:
-            stack.append(node.content)
-    return families
-
-
 # The linear datetime units, as exact attosecond multiples; the
 # calendar units month and year are separate, because only datetimes
 # convert with them.
@@ -408,15 +334,15 @@ _UNIT_FACTOR_BOUND = 2**56
 def _overflowing_unit_span(form: ak.forms.Form) -> bool:
     """Return `True` if one family's extreme temporal units would fail to convert.
 
-    Judged per family — datetimes and timedeltas separately, matching
-    the grouping in `_leaf_families` — although a form containing
-    both datetimes and timedeltas already matches the family check in
-    `has_issue_4261`, so the split never decides. The factor between
+    Judged per family — datetimes and timedeltas separately — although
+    a form containing both datetimes and timedeltas has leaves that
+    cannot merge (see `util.merges_unmergeable_leaves`), so the split
+    never decides. The factor between
     the extreme base units present is computed exactly in attoseconds
     and compared against `_UNIT_FACTOR_BOUND`; a unit multiplier is
     ignored, as NumPy's check ignores it. A timedelta calendar unit
     (month, year) does not convert to a linear unit and is left to
-    the family grouping; a datetime calendar unit is counted at its
+    `util.merges_unmergeable_leaves`; a datetime calendar unit is counted at its
     average length (`_DATETIME_CALENDAR_ATTOSECONDS`), which
     reproduces the observed boundary. A string's character content
     is not walked.

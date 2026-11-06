@@ -106,12 +106,13 @@ def _should_not_raise(form: ak.forms.Form, kwargs: Kwargs) -> bool:
 
     Conservative: `False` makes no statement — the call may still
     succeed; a rule shown too permissive by a failure is narrowed
-    toward `False`. `ak.ravel` has no rule to state: it accepts every
-    array — its deliberate rejections (a scalar primitive, an
-    `ak.Record`) are not arrays — and no option affects whether it
-    raises, so every draw is expected to succeed.
+    toward `False`. `ak.ravel` accepts every array — its deliberate
+    rejections (a scalar primitive, an `ak.Record`) are not arrays —
+    and no option affects whether it raises, so only the leaves it
+    merges decide: leaves that cannot merge are refused (see
+    `util.merges_unmergeable_leaves`).
     """
-    return True
+    return not util.merges_unmergeable_leaves(form, drop_nones=False)
 
 
 def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
@@ -121,8 +122,6 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
     in `known_issues`, and this function applies any option
     conditions — for `ak.ravel`, none.
     """
-    if known_issues.has_issue_4261(a):
-        return True
     if known_issues.has_issue_4278(a):
         return True
     if known_issues.has_issue_4280(a):
