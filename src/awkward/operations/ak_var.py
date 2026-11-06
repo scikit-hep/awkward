@@ -26,7 +26,7 @@ np = NumpyMetadata.instance()
 
 
 def _has_complex_leaf(layout) -> bool:
-    """True if any NumpyArray leaf is complex (dtype kind 'c')."""
+    """Identify complex inputs for variance's squared-magnitude semantics."""
     found = False
 
     def action(node, **kwargs):
@@ -251,7 +251,6 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
         posaxis = maybe_posaxis(x.layout, axis, 1) if axis is not None else None
         if (
             weight is None
-            and not is_complex
             and axis is not None
             and depth_min == depth_max
             and posaxis == depth_max - 1
@@ -285,7 +284,7 @@ def _impl(x, weight, ddof, axis, keepdims, mask_identity, highlevel, behavior, a
             # Two-pass, like NumPy and ak.covar: centre on the (float64) mean, then
             # sum the squared deviations. Numerically stable (the one-pass
             # E[x**2]-E[x]**2 form catastrophically cancels) and overflow-safe.
-            # Used for weighted, complex, axis=None, a non-innermost axis, and
+            # Used for weighted data, axis=None, a non-innermost axis, and
             # non-cpu/cuda backends (typetracer, jax).
             # Centring needs `x - xmean` to broadcast, which is undefined when the
             # reduced axis is not the innermost one of a *ragged* array; there the

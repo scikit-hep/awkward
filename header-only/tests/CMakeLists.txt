@@ -32,3 +32,8 @@ target_link_libraries(test_4087-bitmasked-growablebuffer
                       PRIVATE awkward::layout-builder)
 target_link_libraries(test_4088-layoutbuilder-form-fixes
                       PRIVATE awkward::layout-builder)
+
+addtest_nolibs(test_4270-extended-layout-types
+               test_4270-extended-layout-types.cpp)
+target_link_libraries(test_4270-extended-layout-types
+                      PRIVATE awkward::layout-builder)

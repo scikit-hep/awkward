@@ -212,13 +212,13 @@ class NumpyForm(NumpyMeta, Form):
             elif format == "d":
                 dtype = np.dtype(np.float64)
             elif format == "g":
-                dtype = np.dtype(np.float128)
+                dtype = ak.types.numpytype.primitive_to_dtype("float128")
             elif format == "Zf":
                 dtype = np.dtype(np.complex64)
             elif format == "Zd":
                 dtype = np.dtype(np.complex128)
             elif format == "Zg":
-                dtype = np.dtype(np.complex256)
+                dtype = ak.types.numpytype.primitive_to_dtype("complex256")
             else:
                 dtype = np.dtype(format)  # datetime or timedelta with units
 

@@ -159,6 +159,50 @@ jobs:
           awkward-cpp/tests-spec awkward-cpp/tests-spec-explicit
           awkward-cpp/tests-cpu-kernels awkward-cpp/tests-cpu-kernels-explicit
 
+      - name: Build the Windows layout exporter with NumPy-compatible MSVC
+        if: runner.os == 'Windows'
+        shell: python {0}
+        run: |
+          import json
+          import os
+          import pathlib
+          import struct
+          import subprocess
+
+          # Match the Python/NumPy architecture, including the x86 jobs.
+          architecture = "x64" if struct.calcsize("P") == 8 else "Win32"
+          vswhere = pathlib.Path(os.environ["ProgramFiles(x86)"]) / "Microsoft Visual Studio/Installer/vswhere.exe"
+          installations = json.loads(subprocess.check_output([
+              str(vswhere), "-latest", "-products", "*",
+              "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+              "-format", "json", "-utf8",
+          ], text=True, encoding="utf-8"))
+          if not installations:
+              raise RuntimeError("No Visual Studio installation with MSVC x86/x64 tools found")
+          installation = installations[0]
+          major = installation["installationVersion"].split(".")[0]
+          capabilities = json.loads(subprocess.check_output([
+              "cmake", "-E", "capabilities",
+          ], text=True))
+          generator = next(
+              entry["name"] for entry in capabilities["generators"]
+              if entry["name"].startswith(f"Visual Studio {major} ")
+          )
+          build = pathlib.Path("build-layout-roundtrip")
+          subprocess.run([
+              "cmake", "-S", "header-only", "-B", str(build),
+              "-G", generator, "-A", architecture,
+              f"-DCMAKE_GENERATOR_INSTANCE={installation['installationPath']}",
+              "-DBUILD_TESTS=ON",
+          ], check=True)
+          subprocess.run([
+              "cmake", "--build", str(build), "--config", "Debug",
+              "--target", "test_4270-extended-layout-types",
+          ], check=True)
+          executable = build / "tests/Debug/test_4270-extended-layout-types.exe"
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as stream:
+              stream.write(f"AWKWARD_EXTENDED_LAYOUT_TEST_EXECUTABLE={executable.resolve()}\n")
+
       - name: Test non-kernels (Python)
         run: >-
           python -m pytest -n auto -vv -rs tests

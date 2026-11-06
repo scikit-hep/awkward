@@ -37,3 +37,5 @@ ERROR awkward_reduce_argmin_complex(
 
 WRAPPER(awkward_reduce_argmin_complex64_64, int64_t, float)
 WRAPPER(awkward_reduce_argmin_complex128_64, int64_t, double)
+
+WRAPPER(awkward_reduce_argmin_complex256_64, int64_t, long double)

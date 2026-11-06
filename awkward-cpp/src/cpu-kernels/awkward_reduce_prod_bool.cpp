@@ -42,3 +42,5 @@ REDUCE_PROD_BOOL(awkward_reduce_prod_bool_int64_64, int64_t)
 REDUCE_PROD_BOOL(awkward_reduce_prod_bool_uint64_64, uint64_t)
 REDUCE_PROD_BOOL(awkward_reduce_prod_bool_float32_64, float)
 REDUCE_PROD_BOOL(awkward_reduce_prod_bool_float64_64, double)
+
+REDUCE_PROD_BOOL(awkward_reduce_prod_bool_float128_64, long double)

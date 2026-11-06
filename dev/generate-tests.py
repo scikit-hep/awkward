@@ -277,7 +277,7 @@ def gettype(arg, args):
     typename = remove_const(
         next(argument for argument in args if argument.name == arg).typename
     )
-    return typename
+    return typename.replace(" ", "")
 
 
 def checkuint(test_args, args):
@@ -332,7 +332,7 @@ def gettypename(spectype):
     typename = spectype.replace("List", "").replace("[", "").replace("]", "")
     if typename.endswith("_t"):
         typename = typename[:-2]
-    return typename
+    return typename.replace(" ", "")
 
 
 def genpykernels():
@@ -527,7 +527,7 @@ def genspectests(specdict):
 def remove_const(typename):
     if "Const[" in typename:
         typename = typename.replace("Const[", "", 1).rstrip("]")
-    return typename
+    return typename.replace(" ", "")
 
 
 def gencpukerneltests(specdict):
@@ -884,6 +884,12 @@ def gencpuunittests(specdict):
 
 
 cuda_kernels_tests = [
+    "awkward_reduce_sumofsquares",
+    "awkward_reduce_centered_sumofsquares",
+    "awkward_reduce_sumofpowers",
+    "awkward_reduce_sumofsquares_complex",
+    "awkward_reduce_centered_sumofsquares_complex",
+    "awkward_reduce_sumofpowers_complex",
     "awkward_Index_nones_as_index",
     "awkward_ListArray_min_range",
     "awkward_ListArray_validity",
@@ -1032,6 +1038,9 @@ def gencudakerneltests(specdict):
         )
 
     for spec in specdict.values():
+        # CUDA cannot represent extended-precision floating buffers.
+        if any("long double" in arg.typename for arg in spec.args):
+            continue
         if spec.templatized_kernel_name in cuda_kernels_tests:
             with open(
                 os.path.join(tests_cuda_kernels, "test_cuda" + spec.name + ".py"), "w"
@@ -1158,6 +1167,9 @@ def gencudaunittests_new(specdict):
         )
 
     for spec in specdict.values():
+        # CUDA cannot represent extended-precision floating buffers.
+        if any("long double" in arg.typename for arg in spec.args):
+            continue
         if (
             spec.templatized_kernel_name not in cuda_kernels_tests
             or spec.templatized_kernel_name not in unit_test_map
@@ -1464,6 +1476,9 @@ def gencudaunittests(specdict):
         )
 
     for spec in specdict.values():
+        # CUDA cannot represent extended-precision floating buffers.
+        if any("long double" in arg.typename for arg in spec.args):
+            continue
         if (
             spec.templatized_kernel_name in cuda_kernels_tests
             and spec.templatized_kernel_name in list(unit_test_map.keys())

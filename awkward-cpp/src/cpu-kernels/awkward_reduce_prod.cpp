@@ -47,3 +47,5 @@ REDUCE_PROD(awkward_reduce_prod_int32_int16_64, int32_t, int16_t)
 REDUCE_PROD(awkward_reduce_prod_uint32_uint16_64, uint32_t, uint16_t)
 REDUCE_PROD(awkward_reduce_prod_int32_int32_64, int32_t, int32_t)
 REDUCE_PROD(awkward_reduce_prod_uint32_uint32_64, uint32_t, uint32_t)
+
+REDUCE_PROD(awkward_reduce_prod_float128_float128_64, long double, long double)
