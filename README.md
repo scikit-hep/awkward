@@ -165,6 +165,8 @@ Support for this work was provided by NSF cooperative agreement [OAC-1836650](ht
 
 We also thank [Erez Shinan](https://github.com/erezsh) and the developers of the [Lark standalone parser](https://github.com/lark-parser/lark), which is used to parse type strings as type objects.
 
+“The Awkward Array developers” refers collectively to the project’s contributors, acknowledged in the table below and in [`.all-contributorsrc`](.all-contributorsrc). The [Git history](https://github.com/scikit-hep/awkward/commits/main/) records individual contributions.
+
 Thanks especially to the gracious help of Awkward Array contributors (including the [original repository](https://github.com/scikit-hep/awkward-0.x)).
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -266,6 +268,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/aaronj0"><img src="https://avatars.githubusercontent.com/u/75925957?v=4?s=100" width="100px;" alt="Aaron  Jomy"/><br /><sub><b>Aaron  Jomy</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=aaronj0" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://aes-smoky.vercel.app/"><img src="https://avatars.githubusercontent.com/u/155875516?v=4?s=100" width="100px;" alt="Paramveer singh"/><br /><sub><b>Paramveer singh</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Paramveersingh-S" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/renta0426"><img src="https://avatars.githubusercontent.com/u/71638068?v=4?s=100" width="100px;" alt="renta0426"/><br /><sub><b>renta0426</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=renta0426" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/vepadulano"><img src="https://avatars.githubusercontent.com/u/15638895?v=4?s=100" width="100px;" alt="Vincenzo Eduardo Padulano"/><br /><sub><b>Vincenzo Eduardo Padulano</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=vepadulano" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
