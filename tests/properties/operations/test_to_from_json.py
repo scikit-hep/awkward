@@ -140,8 +140,6 @@ def has_issues(a: ak.Array) -> bool:
     """
     if _has_issue_4241(a.layout):
         return True
-    if _has_issue_4242(a.layout):
-        return True
     return False
 
 
@@ -179,60 +177,6 @@ def _has_issue_4241(layout: ak.contents.Content) -> bool:
         layout = layout.to_ListOffsetArray64(False)
         return _has_issue_4241(layout.content[layout.offsets[0] : layout.offsets[-1]])
     return False
-
-
-def _has_issue_4242(layout: ak.contents.Content) -> bool:
-    """`from_json` crashes on a null alongside heterogeneous values: the
-    builder emits an option-of-union form that `from_buffers` rebuilds
-    with the `IndexedOptionArray` constructor, which refuses a union
-    content, instead of with `IndexedOptionArray.simplified` (TypeError,
-    #4242).
-
-    A union whose elements mix a visible null with two or more builder
-    kinds (bool, number, string, list, record) is affected; with one
-    kind the builder merges instead (numbers of any dtype are one kind,
-    and records merge across field names).
-    """
-    if layout.is_union:
-        kinds = set()
-        has_null = False
-        for i in range(len(layout.contents)):
-            child = layout.project(i)
-            while child.is_option or child.is_indexed:
-                if child.is_option:
-                    has_null = has_null or child.project().length < child.length
-                child = child.project()
-            if child.length == 0 or child.is_unknown:
-                continue
-            if _has_issue_4242(child):
-                return True
-            kinds.add(_builder_kind(child))
-        return has_null and len(kinds) >= 2
-    if layout.is_record:
-        return any(_has_issue_4242(c[: layout.length]) for c in layout.contents)
-    if layout.is_option or layout.is_indexed:
-        return _has_issue_4242(layout.project())
-    if layout.is_regular:
-        return _has_issue_4242(layout.content[: layout.length * layout.size])
-    if layout.parameter("__array__") == "string":
-        return False
-    if layout.is_list:
-        layout = layout.to_ListOffsetArray64(False)
-        return _has_issue_4242(layout.content[layout.offsets[0] : layout.offsets[-1]])
-    return False
-
-
-def _builder_kind(layout: ak.contents.Content) -> str:
-    """The builder slot a value of this (non-option) layout lands in."""
-    if layout.parameter("__array__") == "string":
-        return "string"
-    if layout.is_record:
-        return "record"
-    if layout.is_list or layout.is_regular:
-        return "list"
-    if layout.dtype == np.dtype(np.bool_):
-        return "bool"
-    return "number"
 
 
 def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:

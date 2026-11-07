@@ -3,8 +3,11 @@
 import os
 import warnings
 
+from packaging.version import parse as parse_version
+
 import awkward as ak
 from awkward._dispatch import high_level_function
+from awkward._experimental import _find_stack_level
 from awkward._nplikes.numpy_like import NumpyMetadata
 
 __all__ = ("to_feather",)
@@ -140,6 +143,21 @@ def _impl(
         string_policy="as-characters",
     )
 
+    if (
+        extensionarray
+        and parse_version(pyarrow.__version__) < parse_version("26.0.0")
+        and _contains_union(
+            (layout.array if isinstance(layout, ak.record.Record) else layout).form
+        )
+    ):
+        warnings.warn(
+            "pyarrow < 26 writes unions wrapped in Arrow extension types as invalid "
+            "Feather files that cannot be read back (apache/arrow#50623); upgrade "
+            "to pyarrow 26 or later, or pass extensionarray=False",
+            UserWarning,
+            stacklevel=_find_stack_level(),
+        )
+
     table = ak.operations.ak_to_arrow_table._impl(
         layout,
         list_to32,
@@ -177,3 +195,13 @@ def _impl(
             chunksize,
             feather_version,
         )
+
+
+def _contains_union(form):
+    if form.is_union:
+        return True
+    if form.is_record:
+        return any(_contains_union(x) for x in form.contents)
+    if form.is_list or form.is_option or form.is_indexed:
+        return _contains_union(form.content)
+    return False
