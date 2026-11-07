@@ -3,13 +3,9 @@
 
 import numpy as np
 import pytest
+from numpy._core.overrides import array_function_dispatch
 
 import awkward as ak
-
-try:
-    from numpy._core.overrides import array_function_dispatch
-except ImportError:
-    from numpy.core.overrides import array_function_dispatch
 
 
 def test_tuple_of_arrays():

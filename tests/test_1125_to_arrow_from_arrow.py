@@ -5,7 +5,6 @@ import os
 
 import numpy as np
 import pytest
-from packaging.version import parse as parse_version
 
 import awkward as ak
 
@@ -591,10 +590,6 @@ def test_indexedoption_recordarray_bytemasked_listoffset(
         parquet_round_trip(akarray, paarray, extensionarray, tmp_path)
 
 
-@pytest.mark.skipif(
-    parse_version(np.__version__) < parse_version("1.20.0"),
-    reason="NumPy >= 1.20 required for dates",
-)
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_numpyarray_datetime(tmp_path, extensionarray):
     akarray = ak.contents.NumpyArray(

@@ -1222,8 +1222,8 @@ class NumpyArray(NumpyMeta, Content):
                 nplike = self._backend.nplike
                 # Cast `counts` to np.intp because np.repeat enforces the
                 # 'safe' casting rule on its `repeats` parameter, and on
-                # platforms where np.intp is int32 (Windows 64-bit numpy <2.0,
-                # 32-bit numpy 2.x) an int64 counts array would raise
+                # platforms where np.intp is int32 (32-bit platforms) an int64
+                # counts array would raise
                 # "Cannot cast array data from dtype('int64') to dtype('int32')
                 # according to the rule 'safe'".
                 counts = offsets.data[1:] - offsets.data[:-1]

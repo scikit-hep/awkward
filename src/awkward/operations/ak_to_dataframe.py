@@ -209,7 +209,7 @@ or
             offsets, flattened = layout._offsets_and_flattened(axis=1, depth=1)
             starts, stops = offsets.data[:-1], offsets.data[1:]
             counts = stops - starts
-            if ak._util.win or ak._util.bits32:
+            if ak._util.bits32:
                 counts = layout.backend.nplike.astype(counts, np.int32)
             if len(row_arrays) == 0:
                 newrows = [

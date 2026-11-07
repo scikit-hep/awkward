@@ -79,10 +79,7 @@ def test_from_jax_attrs_none():
 
 def test_from_dlpack_attrs():
     """Test that ak.from_dlpack correctly passes attrs parameter."""
-    # DLPack is supported by NumPy 1.22+
     array = np.array([1, 2, 3])
-    if not hasattr(array, "__dlpack__"):
-        pytest.skip("NumPy version doesn't support DLPack")
 
     result = ak.from_dlpack(array, attrs={"dlpack": "test"})
     assert result.attrs == {"dlpack": "test"}
@@ -92,8 +89,6 @@ def test_from_dlpack_attrs():
 def test_from_dlpack_attrs_none():
     """Test that ak.from_dlpack works with attrs=None."""
     array = np.array([1, 2, 3])
-    if not hasattr(array, "__dlpack__"):
-        pytest.skip("NumPy version doesn't support DLPack")
 
     result = ak.from_dlpack(array, attrs=None)
     assert result.attrs == {}

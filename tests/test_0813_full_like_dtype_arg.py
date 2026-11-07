@@ -146,31 +146,16 @@ def test():
 
 
 def test_numpy2_changes():
-    numpy2_behavior = np.asarray(["0"]).astype(np.bool_)[0]
-
-    if numpy2_behavior:
-        assert ak.full_like([[True, False], [], [True]], b"0").to_list() == [
-            [True, True],
-            [],
-            [True],
-        ]
-        assert ak.full_like([[True, False], [], [True]], "0").to_list() == [
-            [True, True],
-            [],
-            [True],
-        ]
-
-    else:
-        assert ak.full_like([[True, False], [], [True]], b"0").to_list() == [
-            [False, False],
-            [],
-            [False],
-        ]
-        assert ak.full_like([[True, False], [], [True]], "0").to_list() == [
-            [False, False],
-            [],
-            [False],
-        ]
+    assert ak.full_like([[True, False], [], [True]], b"0").to_list() == [
+        [True, True],
+        [],
+        [True],
+    ]
+    assert ak.full_like([[True, False], [], [True]], "0").to_list() == [
+        [True, True],
+        [],
+        [True],
+    ]
 
     assert ak.full_like(
         [["one", "two"], [], ["three"]], 0, dtype=np.bool_

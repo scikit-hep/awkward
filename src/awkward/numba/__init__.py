@@ -30,9 +30,9 @@ conda install numba"""
         ) from err
 
     if not _has_checked_version:
-        if parse_version(numba.__version__) < parse_version("0.50"):
+        if parse_version(numba.__version__) < parse_version("0.60"):
             raise ImportError(
-                "Awkward Array can only work with numba 0.50 or later "
+                "Awkward Array can only work with numba 0.60 or later "
                 f"(you have version {numba.__version__})"
             )
         _has_checked_version = True
