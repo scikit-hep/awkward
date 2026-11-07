@@ -249,7 +249,7 @@ def filter_lists(array, cond):
 
     Args:
         array (ak.Array): A cuda-backed list array.
-        cond (callable): A predicate compiled for the device (numba.cuda),
+        cond (callable): A predicate compiled for the device (numba_cuda_mlir.cuda),
             applied to each element.
 
     Returns a new ``ak.Array`` with the kept elements and updated offsets.
