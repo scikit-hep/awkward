@@ -277,8 +277,11 @@ class IndexedArray(IndexedMeta[Content], Content):
         return "".join(out)
 
     def to_IndexedOptionArray64(self) -> IndexedOptionArray:
+        index = self._index
+        if index.dtype != np.dtype(np.int64):
+            index = index.to64()
         return ak.contents.IndexedOptionArray(
-            self._index, self._content, parameters=self._parameters
+            index, self._content, parameters=self._parameters
         )
 
     def mask_as_bool(self, valid_when: bool = True) -> ArrayLike:
