@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to combine arrays into records with zip, split them with unzip, and select fields with projection."
 ---
 
 How to restructure arrays with zip/unzip and project

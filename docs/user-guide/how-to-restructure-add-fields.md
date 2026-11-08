@@ -9,6 +9,9 @@ kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
+myst:
+  html_meta:
+    description: "How to add fields to an array of records."
 ---
 
 How to restructure arrays by adding fields
@@ -44,8 +47,8 @@ array.show()
 This might seem strange, given that we describe Awkward Arrays as _immutable_. A more detailed explaination is given in the {ref}`Advanced Users<admonition:immutable-arrays>` call-out, but it suffices to say that the _fields_ of an array can be replaced, but individual values within an array cannot.
 
 (admonition:immutable-arrays)=
-:::{admonition} Advanced Users
-An {class}`ak.Array` doesn't itself contain any data; it wraps a low-level {class}`ak.contents.Content` object that defines the structure of the array. Assigning to a field just replaces the existing {class}`ak.contents.Content` with a new {class}`ak.contents.Content`. Therefore, the {class}`ak.contents.Content` objects are immutable, whilst {class}`ak.Array` is not.
+:::{note}
+**Advanced Users:** An {class}`ak.Array` doesn't itself contain any data; it wraps a low-level {class}`ak.contents.Content` object that defines the structure of the array. Assigning to a field just replaces the existing {class}`ak.contents.Content` with a new {class}`ak.contents.Content`. Therefore, the {class}`ak.contents.Content` objects are immutable, whilst {class}`ak.Array` is not.
 :::
 
 +++

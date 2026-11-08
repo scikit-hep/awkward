@@ -26,22 +26,10 @@ numpytype_name: DTYPE
               | DATETIME64
               | TIMEDELTA64
 
-DTYPE.2: "bool"
-       | "int8"
-       | "uint8"
-       | "int16"
-       | "uint16"
-       | "int32"
-       | "uint32"
-       | "int64"
-       | "uint64"
-       | "float32"
-       | "float64"
-       | "complex64"
-       | "complex128"
+DTYPE.2: /(bool|int8|uint8|int16|uint16|int32|uint32|int64|uint64|float16|float32|float64|float128|complex64|complex128|complex256)(?![A-Za-z0-9_])/
 
-DATETIME64:  /datetime64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?/
-TIMEDELTA64: /timedelta64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?/
+DATETIME64:  /datetime64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?(?![A-Za-z0-9_])/
+TIMEDELTA64: /timedelta64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?(?![A-Za-z0-9_])/
 
 unknowntype: "unknown" ("[" "parameters" "=" json_object "]")?
 
@@ -83,6 +71,9 @@ named_pairs: named_pair ("," (named_pairs | "parameters" "=" json_object))?
 named_pair:  named_key ":" type
 named_key:   ESCAPED_STRING -> string
            | CNAME          -> identifier
+           | DTYPE          -> identifier
+           | DATETIME64     -> identifier
+           | TIMEDELTA64    -> identifier
 
 union: "union" "[" named_types? "]"
 

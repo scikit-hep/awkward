@@ -61,16 +61,6 @@ def parquet_dtypes() -> st.SearchStrategy[np.dtype]:
 
 
 def parquet_writable(a: ak.Array) -> bool:
-    if isinstance(a.layout, ak.contents.UnmaskedArray) and a.layout.content.is_record:
-        if any(
-            isinstance(x, ak.contents.IndexedArray)
-            and x.index.dtype == np.dtype(np.uint32)
-            for x in a.layout.content.contents
-        ):
-            # `to_parquet` projects each record field through the root
-            # `UnmaskedArray` with `to_IndexedOptionArray64`, which passes
-            # the uint32 index through unconverted (TypeError, #4274)
-            return False
     layout, is_option = a.layout, False
     while layout.is_option or layout.is_indexed:
         is_option = is_option or layout.is_option
@@ -84,9 +74,21 @@ def parquet_writable(a: ak.Array) -> bool:
             # a valid row whose fields are all null reads back as a null
             # row (outermost struct validity is not stored)
             return False
-    if _has_issue_4305(a.layout):
-        return False
     return _nodes_writable(a.layout)
+
+
+def _nodes_writable(layout: ak.contents.Content, nullable: bool = False) -> bool:
+    """Exclude layouts that `to_arrow` currently mishandles.
+
+    `nullable` tracks whether Arrow validity bytes flow into this node from
+    an enclosing option: they start at option nodes, pass through records
+    and indexed nodes, and stop below lists. A var-length list receiving
+    validity bytes whose offsets do not start at zero is compacted against
+    unshifted content in `ListOffsetArray._to_arrow`, shifting every list
+    by `offsets[0]` (data corruption, #4222); indexed nodes can recreate such
+    offsets from anywhere in their content, so they are excluded outright
+    when nullable.
+    """
 
 
 def _has_issue_4305(layout: ak.contents.Content, nullable: bool = False) -> bool:

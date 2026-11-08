@@ -169,6 +169,35 @@ kernels:
                   k = k + 1
     automatic-tests: true
 
+  - name: awkward_ListOffsetArray_getitem_boolmask
+    specializations:
+      - name: awkward_ListOffsetArray_getitem_boolmask_64
+        args:
+          - {name: tooffsets, type: "List[int64_t]", dir: out}
+          - {name: tocarry, type: "List[int64_t]", dir: out}
+          - {name: mask, type: "Const[List[int8_t]]", dir: in, role: ByteMaskedArray-mask}
+          - {name: fromoffsets, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray-offsets}
+          - {name: length, type: "int64_t", dir: in, role: default}
+          - {name: carrylength, type: "int64_t", dir: in, role: default}
+    description: null
+    definition: |
+      def awkward_ListOffsetArray_getitem_boolmask(tooffsets, tocarry, mask, fromoffsets, length, carrylength):
+          k = 0
+          tooffsets[0] = 0
+          for i in range(length):
+              start = fromoffsets[i]
+              stop = fromoffsets[i + 1]
+              if stop < start:
+                  raise ValueError("offsets must be monotonically increasing")
+              for j in range(start, stop):
+                  if k < carrylength:
+                      tocarry[k] = j - start
+                  k = k + (1 if mask[j] != 0 else 0)
+              tooffsets[i + 1] = k
+          if k != carrylength:
+              raise ValueError("carrylength must be the number of selected elements")
+    automatic-tests: true
+
   - name: awkward_ByteMaskedArray_getitem_nextcarry_outindex
     specializations:
       - name: awkward_ByteMaskedArray_getitem_nextcarry_outindex_64
@@ -2262,7 +2291,10 @@ kernels:
           - {name: distincts, type: "Const[List[int64_t]]", dir: in, role: reducer-distincts}
           - {name: lendistincts, type: "int64_t", dir: in, role: reducer-lendistincts}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    description: >
+      For each fixed-width group in distincts, return its start and one past its
+      last nonmissing slot. Missing (-1) slots may occur inside a group; empty
+      groups have stop equal to start. Empty input produces zero starts/stops.
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
           outstarts, outstops, distincts, lendistincts, outlength
@@ -5879,42 +5911,4 @@ kernels:
               toptr[m] = toptr[k]
               m += 1
         tooffsets[offsetslength - 1] = m
-    automatic-tests: false
-
-  - name: awkward_sorting_ranges
-    specializations:
-      - name: awkward_sorting_ranges
-        args:
-          - {name: toindex, type: "List[int64_t]", dir: out}
-          - {name: tolength, type: "int64_t", dir: in, role: default}
-          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: parentslength, type: "int64_t", dir: in, role: default}
-    description: "DEPRECATED: parents -> offsets converter. The offsets-pipeline migration no longer calls this. Kept for ABI compatibility."
-    definition: |
-      def awkward_sorting_ranges(toindex, tolength, parents, parentslength):
-          toindex[0] = 0
-          j = 1
-          k = 1
-          for i in range(1, parentslength):
-              if parents[i - 1] != parents[i]:
-                  toindex[j] = k
-                  j += 1
-              k += 1
-          toindex[tolength - 1] = parentslength
-    automatic-tests: false
-
-  - name: awkward_sorting_ranges_length
-    specializations:
-      - name: awkward_sorting_ranges_length
-        args:
-          - {name: tolength, type: "List[int64_t]", dir: out}
-          - {name: parents, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-          - {name: parentslength, type: "int64_t", dir: in, role: default}
-    description: "DEPRECATED: parents -> offsets length helper. The offsets-pipeline migration no longer calls this. Kept for ABI compatibility."
-    definition: |
-      def awkward_sorting_ranges_length(tolength, parents, parentslength):
-          tolength[0] = 2
-          for i in range(1, parentslength):
-              if parents[i - 1] != parents[i]:
-                  tolength[0] = tolength[0] + 1
     automatic-tests: false

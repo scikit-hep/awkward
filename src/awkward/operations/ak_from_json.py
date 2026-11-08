@@ -462,8 +462,14 @@ def _no_schema(
 
     formstr, length, buffers = builder.to_buffers()
     form = ak.forms.from_json(formstr)
+    # the builder can emit non-canonical forms, such as an option of a union
     layout = ak.operations.from_buffers(
-        form, length, buffers, byteorder=ak._util.native_byteorder, highlevel=False
+        form,
+        length,
+        buffers,
+        byteorder=ak._util.native_byteorder,
+        allow_noncanonical_form=True,
+        highlevel=False,
     )
 
     layout = _record_to_complex(layout, complex_record_fields)
