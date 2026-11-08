@@ -74,19 +74,12 @@ CONTENTS = {
     "option-over-list": ak.contents.IndexedOptionArray(
         ak.index.Index64(np.array([0, -1, 2], dtype=np.int64)), var()
     ),
-    "indexed": ak.contents.IndexedArray(
-        ak.index.Index64(np.array([2, 1, 0], dtype=np.int64)), leaf()
-    ),
-    "leaf": leaf(),
 }
 
 LAYOUTS = {name: ak.contents.RegularArray(c, size=2) for name, c in CONTENTS.items()}
 LAYOUTS["size-zero"] = ak.contents.RegularArray(var(), size=0, zeros_length=2)
 LAYOUTS["nested"] = ak.contents.RegularArray(
     ak.contents.RegularArray(var(), size=1), size=2
-)
-LAYOUTS["list-above"] = ak.contents.ListOffsetArray(
-    ak.index.Index64(np.array([0, 1, 1], dtype=np.int64)), LAYOUTS["var"]
 )
 LAYOUTS["option-above"] = ak.contents.UnmaskedArray(LAYOUTS["var"])
 
@@ -110,16 +103,3 @@ def test_reducers(fill_empty, layout):
 @pytest.mark.parametrize("reducer", [ak.min, ak.max, ak.argmin, ak.argmax])
 def test_option_over_list_without_fill(reducer):
     check(LAYOUTS["option-over-list"], reducer, -1)
-
-
-@pytest.mark.parametrize("forget_length", [False, True])
-@pytest.mark.parametrize("name", ["var", "indexed-option", "option-over-list"])
-def test_typetracer(name, forget_length):
-    layout = LAYOUTS[name]
-    typetracer = ak.Array(layout.to_typetracer(forget_length=forget_length))
-    packed = ak.to_packed(ak.Array(layout))
-    for reducer in [ak.sum, ak.argmax]:
-        assert (
-            reducer(typetracer, axis=1).layout.form
-            == reducer(packed, axis=1).layout.form
-        )

@@ -1126,9 +1126,11 @@ class RegularArray(RegularMeta[Content], Content):
 
             # the content may be longer than size * length and nodes below expect
             # their offsets to cover every row
-            outcontent = self._content._getitem_range(
-                0, nplike.shape_item_as_index(nextlen)
-            )._reduce_next(
+            content = self._content
+            if nplike.known_data and content.length != nextlen:
+                content = content._getitem_range(0, nextlen)
+
+            outcontent = content._reduce_next(
                 reducer,
                 negaxis,
                 nextstarts,
