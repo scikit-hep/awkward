@@ -28,8 +28,12 @@ class ListMeta(Meta, Generic[T]):
     def purelist_depth(self) -> int:
         if self.parameter("__array__") in ("string", "bytestring"):
             return 1
-        else:
-            return self._content.purelist_depth + 1
+        depth = self._content.purelist_depth
+        # -1 means "union of contents with different depths"; it is not a
+        # number of dimensions, so propagate it instead of adding to it.
+        if depth < 0:
+            return depth
+        return depth + 1
 
     @property
     def is_identity_like(self) -> bool:
