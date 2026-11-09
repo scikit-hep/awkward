@@ -3,60 +3,11 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_sort.cpp", line)
 
 #include "awkward/kernels.h"
+#include "awkward/numeric-sort.h"
 
 #include <algorithm>
-#include <cmath>
 #include <numeric>
-#include <type_traits>
 #include <vector>
-
-// Per-segment sort by value. Integer types compare directly (no isnan, no
-// conversion to double — casting int64/uint64 through double would round
-// values beyond 2^53 and break strict weak ordering). Floating-point types
-// keep the NaN-aware path: NaNs compare "less" than everything, regardless
-// of direction, so they are pushed to the low end (same behavior as the
-// older hand-rolled comparator; note this differs from NumPy, which sorts
-// NaNs to the high end).
-//
-// Explicit specializations must appear before implicit instantiations.
-// sort_order_ascending/descending for bool: no NaN, just direct comparison.
-template <typename T>
-bool sort_order_ascending(T l, T r);
-
-template <typename T>
-bool sort_order_descending(T l, T r);
-
-template <>
-bool sort_order_ascending(bool l, bool r)
-{
-  return l < r;
-}
-
-template <>
-bool sort_order_descending(bool l, bool r)
-{
-  return l > r;
-}
-
-template <typename T>
-bool sort_order_ascending(T l, T r)
-{
-  if constexpr (std::is_integral_v<T>) {
-    return l < r;
-  } else {
-    return !std::isnan(r) && (std::isnan(l) || l < r);
-  }
-}
-
-template <typename T>
-bool sort_order_descending(T l, T r)
-{
-  if constexpr (std::is_integral_v<T>) {
-    return l > r;
-  } else {
-    return !std::isnan(r) && (std::isnan(l) || l > r);
-  }
-}
 
 template <typename T>
 ERROR awkward_sort(
@@ -86,21 +37,21 @@ ERROR awkward_sort(
     if (stable) {
       if (ascending) {
         std::stable_sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
-          return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+          return awkward::kernel::NumericOrder<T, true>{}(fromptr[i1], fromptr[i2]);
         });
       } else {
         std::stable_sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
-          return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
+          return awkward::kernel::NumericOrder<T, false>{}(fromptr[i1], fromptr[i2]);
         });
       }
     } else {
       if (ascending) {
         std::sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
-          return sort_order_ascending<T>(fromptr[i1], fromptr[i2]);
+          return awkward::kernel::NumericOrder<T, true>{}(fromptr[i1], fromptr[i2]);
         });
       } else {
         std::sort(start, stop, [fromptr](int64_t i1, int64_t i2) {
-          return sort_order_descending<T>(fromptr[i1], fromptr[i2]);
+          return awkward::kernel::NumericOrder<T, false>{}(fromptr[i1], fromptr[i2]);
         });
       }
     }
