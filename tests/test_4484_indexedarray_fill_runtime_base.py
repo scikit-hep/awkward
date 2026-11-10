@@ -10,6 +10,8 @@ from types import ModuleType, SimpleNamespace
 import numpy as np
 import pytest
 
+import awkward as ak
+
 # Dependency replacement and prepared caches are process-wide test state.
 pytestmark = pytest.mark.thread_unsafe
 
@@ -92,11 +94,10 @@ def implementation(monkeypatch):
     ):
         monkeypatch.setitem(sys.modules, name, module)
     monkeypatch.setattr(Cupy, "instance", lambda: SimpleNamespace(_module=cp))
-    source = (
-        Path(__file__).resolve().parents[1]
-        / "src/awkward/_connect/cuda/_indexed_fill.py"
+    source = Path(ak.__file__).parent / "_connect/cuda/_indexed_fill.py"
+    spec = importlib.util.spec_from_file_location(
+        "awkward._connect.cuda._indexed_fill", source
     )
-    spec = importlib.util.spec_from_file_location("indexed_fill_test", source)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     namespace = vars(module)

@@ -5,17 +5,18 @@ from pathlib import Path
 
 import pytest
 
+import awkward as ak
+
 # These tests mutate environment/module state and share fixture paths.
 pytestmark = pytest.mark.thread_unsafe
 
 
 @pytest.fixture
 def cache():
-    path = (
-        Path(__file__).resolve().parents[1]
-        / "src/awkward/_connect/cuda/_compute_cache.py"
+    path = Path(ak.__file__).parent / "_connect/cuda/_compute_cache.py"
+    spec = importlib.util.spec_from_file_location(
+        "awkward._connect.cuda._compute_cache", path
     )
-    spec = importlib.util.spec_from_file_location("compute_cache_test", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -191,3 +192,57 @@ def test_api_discovery_failure_falls_back_to_factory(cache, monkeypatch, tmp_pat
 
     monkeypatch.setattr(cache, "_serialization_api", unavailable)
     assert invoke(cache, lambda **kwargs: 42) == 42
+
+
+def test_cache_path_separates_device_capability(cache, monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    import numpy as np
+
+    from awkward._nplikes.cupy import Cupy
+
+    capability = {"major": 8, "minor": 0}
+    runtime = SimpleNamespace(
+        getDevice=lambda: 0,
+        getDeviceProperties=lambda device: capability,
+        runtimeGetVersion=lambda: 12090,
+    )
+    monkeypatch.setattr(
+        Cupy,
+        "instance",
+        lambda: SimpleNamespace(
+            _module=SimpleNamespace(cuda=SimpleNamespace(runtime=runtime))
+        ),
+    )
+    monkeypatch.setattr(cache, "_version", lambda name: "1.3.0")
+    array = np.arange(3, dtype=np.int64)
+    first = cache._cache_path(tmp_path, __file__, array, array)
+    assert first.parent == tmp_path / "indexed-fill-v1"
+    assert first.suffix == ".bin"
+    assert first == cache._cache_path(tmp_path, __file__, array.copy(), array.copy())
+    capability["major"] = 9
+    assert first != cache._cache_path(tmp_path, __file__, array, array)
+
+
+@pytest.mark.parametrize("top_level", [True, False])
+def test_serialization_api_locations(cache, monkeypatch, top_level):
+    import sys
+    from types import ModuleType
+
+    parent = ModuleType("cuda")
+    parent.__path__ = []
+    compute = ModuleType("cuda.compute")
+    compute.__path__ = []
+    algorithms = ModuleType("cuda.compute.algorithms")
+    serialize, deserialize = object(), object()
+    target = compute if top_level else algorithms
+    target.serialize, target.deserialize = serialize, deserialize
+    parent.compute = compute
+    compute.algorithms = algorithms
+    for name, module in (
+        ("cuda", parent),
+        ("cuda.compute", compute),
+        ("cuda.compute.algorithms", algorithms),
+    ):
+        monkeypatch.setitem(sys.modules, name, module)
+    assert cache._serialization_api() == (serialize, deserialize)
