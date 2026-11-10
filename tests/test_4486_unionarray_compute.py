@@ -10,12 +10,13 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
+import awkward as ak
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
-@pytest.fixture
 def kernels():
-    source = ROOT / "src/awkward/_connect/cuda/_unionarray.py"
+    source = Path(ak.__file__).parent / "_connect/cuda/_unionarray.py"
     tree = ast.parse(source.read_text())
     tree.body = [
         n
@@ -113,8 +114,8 @@ def kernels():
 @pytest.mark.parametrize(
     "offsets", [[[2, 4, 4, 7]], [[4, 2, 5, 5], [1, 1, 3, 6], [0, 2, 3, 5]]]
 )
-def test_flatten(kernels, dtype, rows, offsets):
-    module, pointers = kernels
+def test_flatten(dtype, rows, offsets):
+    module, pointers = kernels()
     for i, values in enumerate(offsets):
         pointers[i + 100] = np.array(values, dtype=np.int64)
     table = np.array(list(pointers), dtype=np.intp)
@@ -159,8 +160,8 @@ def test_flatten(kernels, dtype, rows, offsets):
         (np.int8, np.uint32),
     ],
 )
-def test_nested(kernels, starts, counts, tag_dtype, index_dtype):
-    module, _ = kernels
+def test_nested(starts, counts, tag_dtype, index_dtype):
+    module, _ = kernels()
     tags = np.full(20, 99, dtype=tag_dtype)
     index = np.full(20, 99, dtype=index_dtype)
     expected_tags, expected_index = tags.copy(), index.copy()
@@ -182,7 +183,7 @@ def test_nested(kernels, starts, counts, tag_dtype, index_dtype):
 
 
 def test_pointer_load_native():
-    source = ROOT / "src/awkward/_connect/cuda/_unionarray.py"
+    source = Path(ak.__file__).parent / "_connect/cuda/_unionarray.py"
     node = next(
         n
         for n in ast.parse(source.read_text()).body
@@ -202,8 +203,8 @@ def test_pointer_load_native():
         assert read(values.ctypes.data, i) == value
 
 
-def test_prepared_flatten_rebinding_and_workspace_reuse(kernels):
-    module, pointers = kernels
+def test_prepared_flatten_rebinding_and_workspace_reuse():
+    module, pointers = kernels()
     previous = []
     for address, offset_values in ((100, [2, 4, 4]), (200, [1, 2, 5])):
         pointers[address] = np.array(offset_values, dtype=np.int64)
@@ -246,8 +247,8 @@ def test_prepared_flatten_rebinding_and_workspace_reuse(kernels):
 
 @pytest.mark.parametrize("length", [3, 64, 65, 1024])
 @pytest.mark.parametrize("overlap", [False, True])
-def test_prepared_nested_rebinding_workspace_and_no_upload(kernels, length, overlap):
-    module, _ = kernels
+def test_prepared_nested_rebinding_workspace_and_no_upload(length, overlap):
+    module, _ = kernels()
     retained = []
 
     def forbidden(*args, **kwargs):
