@@ -566,6 +566,7 @@ def _unique_ranges(toptr, fromoffsets, offsetslength, tooffsets, is_bool):
     if is_bool:
         toptr = toptr.view(cp.uint8)
     source = toptr.copy()
+    is_float = toptr.dtype.kind == "f"
     offsets = fromoffsets[:offsetslength]
     # Empty ranges and first-element NaNs have stateful legacy semantics.
     # Keep this decision on the device and preserve the CPU write order there.
@@ -587,6 +588,9 @@ def _unique_ranges(toptr, fromoffsets, offsetslength, tooffsets, is_bool):
                 changed = np.int8(source[j]) != np.int8(source[j - 1])
             else:
                 changed = source[j] != source[j - 1]
+                if is_float:
+                    # Spell out unordered inequality for CUDA MLIR lowering.
+                    changed = changed or np.isnan(source[j]) or np.isnan(source[j - 1])
             keep[j] = np.int64(changed)
             j += 1
         return np.int8(0)
@@ -646,6 +650,10 @@ def _unique_ranges(toptr, fromoffsets, offsetslength, tooffsets, is_bool):
                         changed = np.int8(toptr[m - 1]) != np.int8(toptr[j])
                     else:
                         changed = toptr[m - 1] != toptr[j]
+                        if is_float:
+                            changed = (
+                                changed or np.isnan(toptr[m - 1]) or np.isnan(toptr[j])
+                            )
                     if changed:
                         toptr[m] = toptr[j]
                         m += 1
