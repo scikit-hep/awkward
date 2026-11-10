@@ -106,7 +106,6 @@ def test_public_wrapping(dtype, op):
     )
 
 
-@pytest.fixture(scope="module")
 def cuda_host_callbacks():
     """Execute real CUDA orchestration/cast bodies; this does not test GPU JIT."""
     import ast
@@ -166,15 +165,16 @@ def cuda_host_callbacks():
 
 @pytest.mark.parametrize("out,inp", PAIRS)
 @pytest.mark.parametrize("op", ["sum", "prod"])
-def test_cuda_host_unsigned_accumulation(cuda_host_callbacks, out, inp, op):
+def test_cuda_host_unsigned_accumulation(out, inp, op):
+    callbacks = cuda_host_callbacks()
     rows, values, offsets = inputs(inp)
     output = np.full(len(rows) + 2, 77, dtype=out)
     target = output[: len(rows)]
-    function = getattr(cuda_host_callbacks, f"awkward_reduce_{op}")
+    function = getattr(callbacks, f"awkward_reduce_{op}")
     function(target, values, offsets, len(rows))
     np.testing.assert_array_equal(target, expected(rows, out, op))
     np.testing.assert_array_equal(output[-2:], [77, 77])
-    submitted = cuda_host_callbacks.calls[-1]
+    submitted = callbacks.calls[-1]
     assert submitted["d_out"].dtype.kind == "u"
     assert np.shares_memory(submitted["d_out"], output)
     assert submitted["num_segments"] == len(rows)
@@ -182,13 +182,14 @@ def test_cuda_host_unsigned_accumulation(cuda_host_callbacks, out, inp, op):
 
 
 @pytest.mark.parametrize("op", ["sum", "prod"])
-def test_cuda_host_float_accumulation_unchanged(cuda_host_callbacks, op):
+def test_cuda_host_float_accumulation_unchanged(op):
+    callbacks = cuda_host_callbacks()
     values = np.array([1.5, 2.0, -3.0], dtype=np.float32)
     offsets = np.array([0, 2, 2, 3], dtype=np.int64)
     result = np.empty(3, dtype=np.float64)
-    getattr(cuda_host_callbacks, f"awkward_reduce_{op}")(result, values, offsets, 3)
+    getattr(callbacks, f"awkward_reduce_{op}")(result, values, offsets, 3)
     np.testing.assert_array_equal(result, [3.5, 0, -3] if op == "sum" else [3, 1, -3])
-    assert cuda_host_callbacks.calls[-1]["d_out"] is result
-    cast = cuda_host_callbacks._make_widening_cast(np.float32, np.float64)
-    assert cast is cuda_host_callbacks._make_widening_cast(np.float32, np.float64)
+    assert callbacks.calls[-1]["d_out"] is result
+    cast = callbacks._make_widening_cast(np.float32, np.float64)
+    assert cast is callbacks._make_widening_cast(np.float32, np.float64)
     assert cast.__annotations__ == {"x": np.float32, "return": np.float64}
