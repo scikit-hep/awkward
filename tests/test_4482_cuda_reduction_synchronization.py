@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pytest
 
+import awkward as ak
+
 
 class DeviceOffsets:
     def __getitem__(self, index):
@@ -14,9 +16,7 @@ class DeviceOffsets:
 @pytest.mark.parametrize("segments", [0, 1, 100])
 @pytest.mark.parametrize("hint", ["omitted", None, 0, 32, 1024])
 def test_reductions_do_not_inspect_device_offsets(segments, hint):
-    source = (
-        Path(__file__).resolve().parents[1] / "src/awkward/_connect/cuda/_compute.py"
-    )
+    source = Path(ak.__file__).parent / "_connect/cuda/_compute.py"
     tree = ast.parse(source.read_text())
     function = next(
         node
