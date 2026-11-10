@@ -41,9 +41,12 @@ def test_reductions(dtype, axis, name):
 def test_order_and_subrange_equality(dtype):
     data = np.array([3, 1, 2, 1], dtype=dtype)
     array = ak.Array(data)
+    # Use the known ordering: NumPy's float16 sort on Windows x86 can return
+    # infinities for this finite input, so it cannot serve as the reference.
+    expected = np.array([1, 1, 2, 3], dtype=dtype)
     for stable in (False, True):
         np.testing.assert_array_equal(
-            ak.to_numpy(ak.sort(array, stable=stable)), np.sort(data)
+            ak.to_numpy(ak.sort(array, stable=stable)), expected
         )
     assert ak.to_list(ak.argsort(array, stable=True)) == [1, 3, 2, 0]
     assert ak.to_list(ak._do.unique(array.layout, axis=None)) == [1, 2, 3]
