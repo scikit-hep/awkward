@@ -151,3 +151,18 @@ def test_fused_dtype_stream_and_rebinding(outer_dtype, inner_dtype, length, nond
                 contract.assert_error(actual, error)
                 np.testing.assert_array_equal(cp.asnumpy(output), expected)
         ak._connect.cuda.synchronize_cuda(stream)
+
+
+@pytest.mark.parametrize("values", [[], [0, -1, 2, -3]])
+def test_null_count_reduction_on_nondefault_stream(values):
+    with cp.cuda.Stream(non_blocking=True):
+        source = cp.asarray(values, dtype=cp.int64)
+        output = cp.full(3, 0x1234567800000000, dtype=cp.int64)
+        kernel = CupyBackend.instance()[
+            "awkward_IndexedArray_numnull", np.int64, np.int64
+        ]
+        kernel(output[1:2], source, len(values))
+        np.testing.assert_array_equal(
+            cp.asnumpy(output),
+            [0x1234567800000000, sum(x < 0 for x in values), 0x1234567800000000],
+        )

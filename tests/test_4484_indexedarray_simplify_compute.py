@@ -600,3 +600,39 @@ def test_actual_fused_operator_is_associative(dtype, prepared_implementation):
             assert op(a, b) == op(b, a)
     finally:
         setup.outer.clear()
+
+
+@pytest.mark.parametrize("values", [[], [0, -1, 2, -3]])
+def test_null_count_reduction_uses_current_stream_and_output_width(values):
+    source = Path(ak.__file__).parent / "_connect/cuda/_compute.py"
+    node = next(
+        x
+        for x in ast.parse(source.read_text()).body
+        if isinstance(x, ast.FunctionDef) and x.name == "awkward_IndexedArray_numnull"
+    )
+    node.body = [x for x in node.body if not isinstance(x, ast.ImportFrom)]
+    stream = object()
+
+    def transform(array, op):
+        result = [op(x) for x in array]
+        assert all(isinstance(x, np.int64) for x in result)
+        return result
+
+    def reduce(**kwargs):
+        assert kwargs["stream"] is stream
+        kwargs["d_out"][0] = sum(kwargs["d_in"])
+
+    namespace = {
+        "np": np,
+        "TransformIterator": transform,
+        "reduce_into": reduce,
+        "OpKind": SimpleNamespace(PLUS=0),
+        "_Stream": lambda: stream,
+    }
+    exec(
+        compile(ast.Module(body=[node], type_ignores=[]), str(source), "exec"),
+        namespace,
+    )
+    output = np.full(2, 0x1234567800000000, dtype=np.int64)
+    namespace[node.name](output[:1], np.array(values, dtype=np.int64), len(values))
+    assert output.tolist() == [sum(x < 0 for x in values), 0x1234567800000000]
