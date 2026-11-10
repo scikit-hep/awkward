@@ -103,17 +103,23 @@ Because of the two packages (`awkward-cpp` may be updated in GitHub but not on P
 
 # Installation for developers
 
-Clone this repository _recursively_ to get the header-only C++ dependencies, then generate sources with [nox](https://nox.thea.codes/), compile and install `awkward-cpp`, and finally install `awkward` as an editable installation:
+Clone this repository _recursively_ to get the header-only C++ dependencies. The repository is a [uv](https://docs.astral.sh/uv/) workspace, so `uv sync` (or any `uv run` command) compiles `awkward-cpp` and installs both packages as editable installations:
 
 ```bash
 git clone --recursive https://github.com/scikit-hep/awkward.git
 cd awkward
 
+uv sync
+```
+
+Without uv, compile and install `awkward-cpp`, then install `awkward` as an editable installation:
+
+```bash
 python -m pip install -v ./awkward-cpp
 python -m pip install -e .
 ```
 
-Tests can be run in parallel with [pytest](https://docs.pytest.org/):
+Tests can be run in parallel with [pytest](https://docs.pytest.org/) (prefix with `uv run` if you use uv):
 
 ```bash
 python -m pytest -n auto tests
@@ -158,6 +164,8 @@ Support for this work was provided by NSF cooperative agreement [OAC-1836650](ht
 ``Awkward Array`` is a [NumFOCUS Affiliated Project](<https://numfocus.org/sponsored-projects/affiliated-projects>).
 
 We also thank [Erez Shinan](https://github.com/erezsh) and the developers of the [Lark standalone parser](https://github.com/lark-parser/lark), which is used to parse type strings as type objects.
+
+“The Awkward Array developers” refers collectively to the project’s contributors, acknowledged in the table below and in [`.all-contributorsrc`](.all-contributorsrc). The [Git history](https://github.com/scikit-hep/awkward/commits/main/) records individual contributions.
 
 Thanks especially to the gracious help of Awkward Array contributors (including the [original repository](https://github.com/scikit-hep/awkward-0.x)).
 
@@ -260,6 +268,7 @@ Thanks especially to the gracious help of Awkward Array contributors (including 
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/aaronj0"><img src="https://avatars.githubusercontent.com/u/75925957?v=4?s=100" width="100px;" alt="Aaron  Jomy"/><br /><sub><b>Aaron  Jomy</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=aaronj0" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://aes-smoky.vercel.app/"><img src="https://avatars.githubusercontent.com/u/155875516?v=4?s=100" width="100px;" alt="Paramveer singh"/><br /><sub><b>Paramveer singh</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=Paramveersingh-S" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/renta0426"><img src="https://avatars.githubusercontent.com/u/71638068?v=4?s=100" width="100px;" alt="renta0426"/><br /><sub><b>renta0426</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=renta0426" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/vepadulano"><img src="https://avatars.githubusercontent.com/u/15638895?v=4?s=100" width="100px;" alt="Vincenzo Eduardo Padulano"/><br /><sub><b>Vincenzo Eduardo Padulano</b></sub></a><br /><a href="https://github.com/scikit-hep/awkward/commits?author=vepadulano" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
