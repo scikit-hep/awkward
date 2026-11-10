@@ -177,13 +177,19 @@ or
 
         # Fill missing values in extra levels and convert to int
         for n in df1_extra:
-            merged[n] = merged[n].fillna(0).astype(int)
+            merged[n] = merged[n].fillna(0).astype(np.int64)
         for n in df2_extra:
-            merged[n] = merged[n].fillna(0).astype(int)
+            merged[n] = merged[n].fillna(0).astype(np.int64)
 
         # Set index back with extra levels
         if df1_extra or df2_extra:
             merged = merged.set_index(list(df1_extra) + list(df2_extra), append=True)
+
+        # Keep all index levels int64, whatever dtype the merge produced
+        if isinstance(merged.index, pandas.MultiIndex):
+            merged.index = merged.index.set_levels(
+                [level.astype(np.int64) for level in merged.index.levels]
+            )
 
         return merged
 
@@ -208,18 +214,16 @@ or
         elif layout.purelist_depth > 1:
             offsets, flattened = layout._offsets_and_flattened(axis=1, depth=1)
             starts, stops = offsets.data[:-1], offsets.data[1:]
-            counts = stops - starts
-            if ak._util.win or ak._util.bits32:
-                counts = layout.backend.nplike.astype(counts, np.int32)
+            # numpy.repeat needs counts that safely cast to intp (int32 on 32-bit)
+            counts = layout.backend.nplike.astype(stops - starts, np.intp, copy=False)
             if len(row_arrays) == 0:
                 newrows = [
-                    numpy.repeat(numpy.arange(len(counts), dtype=counts.dtype), counts)
+                    numpy.repeat(numpy.arange(len(counts), dtype=np.int64), counts)
                 ]
             else:
                 newrows = [numpy.repeat(x, counts) for x in row_arrays]
             newrows.append(
-                numpy.arange(offsets[-1], dtype=counts.dtype)
-                - numpy.repeat(starts, counts)
+                numpy.arange(offsets[-1], dtype=np.int64) - numpy.repeat(starts, counts)
             )
             return recurse(flattened, newrows, col_names)
 
