@@ -4,6 +4,7 @@
 import json
 
 import awkward as ak
+from awkward._attrs import serializable_attrs_of
 from awkward._dispatch import high_level_function
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._typing import Any
@@ -37,6 +38,11 @@ def to_arrow_table(
     even through Parquet, making Parquet a good way to save Awkward Arrays for later
     use. If any third-party tools don't recognize Arrow's extension arrays, set this
     option to False for plain Arrow arrays.
+
+    The array's #ak.Array.attrs are stored in the table's schema metadata, so that
+    #ak.from_arrow can restore them; they must therefore be JSON-compatible.
+    Transient attrs (those whose keys start with `"@"`) are dropped, as they are
+    when pickling.
 
     See also #ak.from_arrow, #ak.to_arrow, #ak.to_parquet.
 
@@ -98,7 +104,11 @@ def _impl(
     extensionarray,
     count_nulls,
 ):
-    from awkward._connect.pyarrow import direct_Content_subclass, pyarrow
+    from awkward._connect.pyarrow import (
+        direct_Content_subclass,
+        pyarrow,
+        table_with_attrs,
+    )
 
     layout = ak.operations.to_layout(array, allow_record=True, primitive_policy="error")
     if isinstance(layout, ak.record.Record):
@@ -187,9 +197,15 @@ def _impl(
     )
     out = pyarrow.Table.from_batches([batch])
 
-    if schema_parameters is None:
-        return out
-    else:
-        return out.replace_schema_metadata(
+    if schema_parameters is not None:
+        out = out.replace_schema_metadata(
             {"ak:parameters": json.dumps(schema_parameters)}
         )
+
+    # unlike a bare Arrow array, a Table can hold the attrs in its schema metadata,
+    # which is where Parquet expects to find them too
+    attrs = serializable_attrs_of(array)
+    if attrs is not None:
+        out = table_with_attrs(out, attrs)
+
+    return out

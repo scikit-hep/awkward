@@ -14,6 +14,32 @@ from .extn_types import (
 )
 
 AWKWARD_INFO_KEY = b"awkward_array_metadata"  # metadata field in Table schema
+AWKWARD_ATTRS_KEY = b"AWKWARD_ATTRS"  # array attrs in the Table schema metadata
+PANDAS_ATTRS_KEY = b"PANDAS_ATTRS"  # the same, for tables written by pandas
+
+
+def table_with_attrs(table: pyarrow.Table, attrs: dict) -> pyarrow.Table:
+    """
+    Returns `table` with `attrs` (which must be JSON-compatible) stored in its
+    schema metadata, alongside any metadata the table already has.
+    """
+    metadata = {} if table.schema.metadata is None else table.schema.metadata.copy()
+    metadata[AWKWARD_ATTRS_KEY] = json.dumps(attrs).encode(errors="surrogatescape")
+    return table.replace_schema_metadata(metadata)
+
+
+def attrs_from_schema_metadata(metadata: dict | None) -> dict:
+    """
+    Extracts the array attrs from a Table or RecordBatch schema's metadata,
+    accepting those written by pandas as well as by Awkward. Returns an empty
+    dict if there are none.
+    """
+    if not metadata:
+        return {}
+    for key in (PANDAS_ATTRS_KEY, AWKWARD_ATTRS_KEY):
+        if key in metadata:
+            return json.loads(metadata[key].decode(errors="surrogatescape"))
+    return {}
 
 
 def convert_awkward_arrow_table_to_native(aatable: pyarrow.Table) -> pyarrow.Table:
@@ -188,13 +214,6 @@ def _fields_of_strg_type(typ: pyarrow.Type) -> list[pyarrow.Field]:
         ]  # Wrap in a field for consistency
     elif typ.num_fields == 0:
         return []
-    elif not hasattr(typ, "field"):
-        # Old versions of pyarrow have this quirk.
-        if hasattr(typ, "value_field"):
-            return [typ.value_field]
-        elif hasattr(typ, "__iter__"):
-            return list(typ)
-        raise TypeError(f"Cannot handle arrow type {typ}")
     else:
         return [typ.field(i) for i in range(typ.num_fields)]
 
@@ -263,15 +282,6 @@ def array_with_replacement_type(
     ]
     own_buffers = orig_array.buffers()[: orig_array.type.num_buffers]
     if isinstance(native_type, pyarrow.lib.DictionaryType):
-        # The following works with newer pyarrow versions, but not 7.0:
-        # native_dict = pyarrow.DictionaryArray.from_buffers(
-        #     type=native_type,
-        #     length=len(orig_array),
-        #     buffers=own_buffers,
-        #     dictionary=children_new[0],
-        #     null_count=orig_array.null_count,
-        #     offset=orig_array.offset,
-        # )
         if isinstance(orig_array, AwkwardArrowArray):
             native_orig = orig_array.storage
         else:

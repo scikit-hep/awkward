@@ -23,6 +23,7 @@ CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 # this set must be updated to match, or the generated CUDA unit tests will
 # wrap `pytest.raises` around the wrong statement.
 CUDA_COMPUTE_KERNELS = {
+    "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64",
     "awkward_ListArray_compact_offsets",
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_RegularArray_getitem_next_at",
@@ -45,16 +46,8 @@ else:
 
 
 def reproducible_datetime():
-    import sys
-
     timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-
-    if sys.version_info >= (3, 11):
-        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
-    else:
-        build_date = datetime.datetime.utcfromtimestamp(
-            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-        )
+    build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 
@@ -337,6 +330,7 @@ def gettypename(spectype):
 def genpykernels():
     print("Generating Python kernels")
     prefix = """
+import functools
 import numpy
 from numpy import uint8
 kMaxInt64  = 9223372036854775806
@@ -423,9 +417,21 @@ def awkward_ListArray_combinations_step(
                 if "def " in spec["definition"]:
                     outfile.write(spec["definition"] + "\n")
                     for childfunc in spec["specializations"]:
-                        outfile.write(
-                            "{} = {}\n".format(childfunc["name"], spec["name"])
-                        )
+                        if spec.get("reference-output-type", False):
+                            # Preserve the typed output semantics in the Python
+                            # oracle without adding an argument to the C ABI.
+                            output_type = childfunc["args"][0]["type"]
+                            output_type = output_type.removeprefix(
+                                "List["
+                            ).removesuffix("]")
+                            outfile.write(
+                                f"{childfunc['name']} = functools.partial("
+                                f"{spec['name']}, output_type={output_type!r})\n"
+                            )
+                        else:
+                            outfile.write(
+                                "{} = {}\n".format(childfunc["name"], spec["name"])
+                            )
                     outfile.write("\n\n")
 
     unit_tests = os.path.join(CURRENT_DIR, "..", "awkward-cpp", "tests-spec-explicit")
@@ -889,6 +895,7 @@ cuda_kernels_tests = [
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_ListArray_compact_offsets",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
     "awkward_ByteMaskedArray_numnull",
@@ -1005,8 +1012,6 @@ cuda_kernels_tests = [
     "awkward_reduce_prod_complex",
     "awkward_reduce_countnonzero",
     "awkward_reduce_countnonzero_complex",
-    "awkward_sorting_ranges",
-    "awkward_sorting_ranges_length",
 ]
 
 
