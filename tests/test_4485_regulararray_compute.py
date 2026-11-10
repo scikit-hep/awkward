@@ -24,6 +24,7 @@ from awkward._backends.numpy import NumpyBackend
 
 yaml = pytest.importorskip("yaml")
 ROOT = Path(__file__).resolve().parents[1]
+CUDA_SOURCE = Path(ak.__file__).parent / "_connect/cuda/_regulararray.py"
 FUNCTIONS = {
     "awkward_RegularArray_getitem_next_array_regularize": "regularize",
     "awkward_RegularArray_reduce_local_nextparents_64": "local_parents",
@@ -165,7 +166,7 @@ def host_implementation():
         assert 0 <= index < output.size
         output[index] = value
 
-    tree = ast.parse((ROOT / "src/awkward/_connect/cuda/_regulararray.py").read_text())
+    tree = ast.parse(CUDA_SOURCE.read_text())
     body = [
         node
         for node in tree.body
@@ -197,7 +198,7 @@ def host_implementation():
     exec(
         compile(
             ast.Module(body=body, type_ignores=[]),
-            str(ROOT / "src/awkward/_connect/cuda/_regulararray.py"),
+            str(CUDA_SOURCE),
             "exec",
         ),
         namespace,
@@ -306,7 +307,7 @@ def test_empty_combinations(implementation):
 
 
 def test_pointer_store_uses_mlir_device_registration():
-    tree = ast.parse((ROOT / "src/awkward/_connect/cuda/_regulararray.py").read_text())
+    tree = ast.parse(CUDA_SOURCE.read_text())
     helpers = {
         node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)
     }
@@ -327,7 +328,7 @@ def test_binomial_native_lowering():
     numba = pytest.importorskip("numba")
     from numba.extending import register_jitable
 
-    source = ROOT / "src/awkward/_connect/cuda/_regulararray.py"
+    source = CUDA_SOURCE
     node = next(
         n
         for n in ast.parse(source.read_text()).body
