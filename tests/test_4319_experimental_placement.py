@@ -18,7 +18,7 @@ def _experimental_warnings(caught):
 
 
 def test_above_staticmethod_rejected():
-    # staticmethod objects are callable on every supported Python (3.10+), so
+    # staticmethod objects are callable on every supported Python (3.11+), so
     # a callable() guard accepted this and returned a plain function: the
     # staticmethod was silently dropped, and the mark only broke later, at
     # instance access, where self was passed to a function not expecting it.

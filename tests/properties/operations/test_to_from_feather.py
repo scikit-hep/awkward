@@ -9,10 +9,10 @@ import numpy as np
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
 from packaging.version import parse as parse_version
 
 import awkward as ak
+from tests.properties.operations import known_issues
 
 pyarrow = pytest.importorskip("pyarrow")
 pytest.importorskip("pyarrow.feather")
@@ -72,12 +72,9 @@ def feather_dtype(dtype: np.dtype) -> bool:
     return True
 
 
-SUPPORTED_FEATHER_DTYPES = tuple(d for d in SUPPORTED_DTYPES if feather_dtype(d))
-
-
 def feather_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for dtypes that survive the feather roundtrip."""
-    return st.sampled_from(SUPPORTED_FEATHER_DTYPES)
+    return st_ak.numpy.supported_dtypes().filter(feather_dtype)
 
 
 def feather_compatible(a: ak.Array) -> bool:
@@ -124,66 +121,13 @@ def has_issues(a: ak.Array) -> bool:
     released fix deletes it; with all of them gone the test filters
     reduce to `feather_compatible` and `feather_stable`.
     """
-    if _has_issue_4221(a.layout):
+    if known_issues.has_issue_4221(a):
         return True
-    if _has_issue_4228(a.layout):
+    if known_issues.has_issue_4228(a):
         return True
-    if _has_issue_4229(a.layout):
-        return True
-    if _has_issue_4274(a.layout):
+    if known_issues.has_issue_4229(a):
         return True
     return False
-
-
-def _has_issue_4221(layout: ak.contents.Content) -> bool:
-    """`to_arrow` crashes projecting nulls over a zero-length content
-    (IndexError in `ListOffsetArray._to_arrow`, #4221)."""
-    if (
-        isinstance(layout, ak.contents.IndexedOptionArray)
-        and layout.length > 0
-        and layout.content.length == 0
-    ):
-        return True
-    return any(_has_issue_4221(x) for x in _children(layout))
-
-
-def _has_issue_4228(layout: ak.contents.Content, in_list: bool = False) -> bool:
-    """`UnionArray._to_arrow` passes option-type data a length that
-    disagrees with its validity bytes: a union with an option-type child,
-    or an option-type node over a union inside a list, raises IndexError or
-    `ArrowInvalid: Null count exceeds array length` (#4228)."""
-    if layout.is_union and any(x.is_option for x in layout.contents):
-        return True
-    if layout.is_option and in_list and _has_union(layout.content):
-        return True
-    return any(_has_issue_4228(x, in_list or layout.is_list) for x in _children(layout))
-
-
-def _has_union(layout: ak.contents.Content) -> bool:
-    return layout.is_union or any(_has_union(x) for x in _children(layout))
-
-
-def _has_issue_4229(layout: ak.contents.Content) -> bool:
-    """`from_feather` loses the length of a size-0 fixed-size list (a
-    `3 * 0 * float64` array reads back with length 0, #4229)."""
-    if layout.is_regular and layout.size == 0:
-        return True
-    return any(_has_issue_4229(x) for x in _children(layout))
-
-
-def _has_issue_4274(layout: ak.contents.Content) -> bool:
-    """`to_arrow_table` projects each record field through a root
-    `UnmaskedArray` with `to_IndexedOptionArray64`, which passes an
-    `IndexedArray`'s uint32 index into `IndexedOptionArray` unconverted
-    (TypeError, #4274). Only the root takes this path: nested layouts
-    convert through `_to_arrow`, which projects the indexed node away.
-    """
-    if not (isinstance(layout, ak.contents.UnmaskedArray) and layout.content.is_record):
-        return False
-    return any(
-        isinstance(x, ak.contents.IndexedArray) and x.index.dtype == np.dtype(np.uint32)
-        for x in layout.content.contents
-    )
 
 
 def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
@@ -210,6 +154,7 @@ def _strip_options(
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=feather_dtypes(),
         # a bare unknown type crashes `from_feather` (AttributeError in
         # `form_remove_optiontype`, #4230), and one nested in a record
@@ -233,6 +178,7 @@ def test_roundtrip(feather_dir, a: ak.Array) -> None:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=feather_dtypes(),
         allow_empty=False,
         allow_union=ALLOW_UNION,
@@ -279,6 +225,7 @@ def feather_stable(a: ak.Array) -> bool:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=feather_dtypes(),
         # pyarrow table equality counts NaN as unequal to itself and has
         # no `equal_nan` option; NaN coverage lives in the tests above

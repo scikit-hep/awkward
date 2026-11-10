@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
 
 import awkward as ak
-from awkward._kernels import KernelError
+from awkward._kernels import KernelError, KernelKeyType
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyLike, NumpyMetadata
 from awkward._singleton import PublicSingleton
@@ -17,7 +16,6 @@ numpy = Numpy.instance()
 
 
 T_co = TypeVar("T_co", covariant=True)
-KernelKeyType: TypeAlias = tuple[Any, ...]
 KernelType: TypeAlias = "Callable[..., KernelError | None]"
 
 
