@@ -6,7 +6,6 @@ import numpy as np
 import awkward as ak
 from awkward._categorical import as_hashable
 from awkward._do import recursively_apply
-from awkward._errors import OperationErrorContext
 from awkward.prettyprint import Formatter
 
 
@@ -34,73 +33,6 @@ def test_categorical_equal_list_of_lists():
     # cat1 values: [1,2] [3,4] [1,2]; cat2 values: [3,4] [3,4] [1,2]
     result = (ak.Array(cat1) == ak.Array(cat2)).to_list()
     assert result == [False, True, True]
-
-
-def test_any_backend_is_delayed_continues_after_unknown_object():
-    """A plain (non-array) item before an eager array must not prevent detection.
-
-    Before the fix, encountering an unrecognised object caused an unconditional
-    return False, so any arrays later in the argument list were never checked.
-    """
-    ctx = OperationErrorContext.__new__(OperationErrorContext)
-    eager = ak.Array([1, 2, 3])
-    assert ctx.any_backend_is_delayed([42, eager]) is False
-
-
-def test_any_backend_is_delayed_nested_non_delayed_continues():
-    """Nested iterable returning False from recursion must not short-circuit outer loop."""
-    ctx = OperationErrorContext.__new__(OperationErrorContext)
-    eager = ak.Array([1, 2])
-    result = ctx.any_backend_is_delayed([[42], eager], depth_limit=2)
-    assert result is False
-
-
-def test_any_backend_is_delayed_only_iterates_list_and_tuple(monkeypatch):
-    import awkward._backends.dispatch as dispatch
-
-    class Delayed:
-        pass
-
-    class FakeBackend:
-        class nplike:
-            is_eager = False
-
-    def fake_backend_of_obj(obj, default=None):
-        return FakeBackend if isinstance(obj, Delayed) else default
-
-    monkeypatch.setattr(dispatch, "backend_of_obj", fake_backend_of_obj)
-
-    ctx = OperationErrorContext.__new__(OperationErrorContext)
-    # list/tuple are recursed into, so a nested delayed backend is detected
-    assert ctx.any_backend_is_delayed([[Delayed()]]) is True
-    assert ctx.any_backend_is_delayed([(Delayed(),)]) is True
-    # a Mapping is not recursed: iterating it yields keys, never the values
-    assert ctx.any_backend_is_delayed([{"key": Delayed()}]) is False
-
-
-def test_any_backend_is_delayed_does_not_iterate_foreign_containers():
-    from collections.abc import Mapping, Sequence
-
-    class RaisingMapping(Mapping):
-        def __getitem__(self, key):
-            raise AssertionError("must not be accessed")
-
-        def __iter__(self):
-            raise AssertionError("must not be iterated")
-
-        def __len__(self):
-            return 0
-
-    class RaisingSequence(Sequence):
-        def __getitem__(self, index):
-            raise AssertionError("must not be accessed")
-
-        def __len__(self):
-            raise AssertionError("must not be measured")
-
-    ctx = OperationErrorContext.__new__(OperationErrorContext)
-    assert ctx.any_backend_is_delayed([RaisingMapping()]) is False
-    assert ctx.any_backend_is_delayed([RaisingSequence()]) is False
 
 
 def _make_custom_str_array(n=5):

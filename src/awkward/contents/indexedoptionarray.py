@@ -28,7 +28,6 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
-    Literal,
     Self,
     SupportsIndex,
     final,
@@ -112,7 +111,7 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
             )
         ):
             raise TypeError(
-                f"{type(self).__name__} 'index' must be an Index with dtype in (int32, uint32, int64), "
+                f"{type(self).__name__} 'index' must be an Index with dtype in (int32, int64), "
                 f"not {index!r}"
             )
         if not isinstance(content, Content):
@@ -663,23 +662,6 @@ class IndexedOptionArray(IndexedOptionMeta[Content], Content):
                     )
                 )
                 return (outoffsets, flattened)
-
-    def _mergeable_next(
-        self,
-        other: Content,
-        mergebool: bool,
-        mergecastable: Literal["same_kind", "equiv", "family"],
-    ) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # Is the other array indexed or optional?
-        elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(
-                other.content, mergebool, mergecastable
-            )
-        else:
-            return self._content._mergeable_next(other, mergebool, mergecastable)
 
     def _merging_strategy(self, others):
         if len(others) == 0:

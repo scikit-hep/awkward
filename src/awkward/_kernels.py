@@ -17,12 +17,10 @@ from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.typetracer import try_touch_data
 from awkward._typing import Protocol, TypeAlias
 
-# Tuple[str, Unpack[Tuple[metadata.dtype, ...]]]
-KernelKeyType: TypeAlias = tuple
-
-
 numpy = Numpy.instance()
 metadata = NumpyMetadata.instance()
+
+KernelKeyType: TypeAlias = tuple[str, *tuple[metadata.dtype, ...]]
 
 
 class KernelError(Protocol):
@@ -231,7 +229,7 @@ class CupyKernel(BaseKernel):
         ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak_cuda.Invocation(
                 name=self.key[0],
-                error_context=ak._errors.ErrorContext.primary(),
+                error_context=ak._errors.ErrorContext.frozen_primary(),
             )
         )
 
@@ -275,7 +273,7 @@ class CudaComputeKernel(BaseKernel):
         ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak_cuda.Invocation(
                 name=self.key[0],
-                error_context=ak._errors.ErrorContext.primary(),
+                error_context=ak._errors.ErrorContext.frozen_primary(),
             )
         )
 

@@ -28,7 +28,6 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
-    Literal,
     Self,
     SupportsIndex,
     final,
@@ -1098,14 +1097,6 @@ class UnionArray(UnionMeta[Content], Content):
                     ),
                 )
 
-    def _mergeable_next(
-        self,
-        other: Content,
-        mergebool: bool,
-        mergecastable: Literal["same_kind", "equiv", "family"],
-    ) -> bool:
-        return True
-
     def _merging_strategy(self, others):
         if len(others) == 0:
             raise ValueError(
@@ -1556,12 +1547,16 @@ class UnionArray(UnionMeta[Content], Content):
             selected_tags = nptags == tag
             this_index = npindex[selected_tags]
 
+            this_length = 0
+            if len(this_index) != 0:
+                this_length = int(this_index.max()) + 1
+
             # Arrow unions can't have masks; propagate validbytes down to the content.
             if validbytes is not None:
                 # If this_index is a filtered permutation, we can just filter-permute
                 # the mask to have the same order the content.
                 if numpy.unique_values(this_index).shape[0] == this_index.shape[0]:
-                    this_validbytes = numpy.zeros(this_index.shape[0], dtype=np.int8)
+                    this_validbytes = numpy.zeros(this_length, dtype=np.int8)
                     this_validbytes[this_index] = validbytes[selected_tags]
 
                 # If this_index is not a filtered permutation, then we can't modify
@@ -1579,13 +1574,15 @@ class UnionArray(UnionMeta[Content], Content):
                     npindex[selected_tags] = numpy.arange(
                         this_index.shape[0], dtype=npindex.dtype
                     )
+                    this_length = this_index.shape[0]
 
             else:
                 this_validbytes = None
 
-            this_length = 0
-            if len(this_index) != 0:
-                this_length = this_index.max() + 1
+            # Children may be longer than the union uses; option nodes build
+            # validity bytes at their own length, which must match this_length.
+            if content.length > this_length:
+                content = content[:this_length]
 
             values.append(
                 content._to_arrow(
