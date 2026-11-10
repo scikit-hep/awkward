@@ -75,94 +75,20 @@ def fetch_specialization(keys):
     return specialized_name
 
 
-def fetch_template_specializations(kernel_dict):
-    # These cuda kernels consist of multiple kernels that don't have templated
-    # specializations of the same name (e.g. '_a', '_b').
-    kernel_exclusions = [
-        "awkward_Index_nones_as_index",
-        "awkward_ByteMaskedArray_getitem_nextcarry",
-        "awkward_ByteMaskedArray_numnull",
-        "awkward_IndexedArray_numnull",
-        "awkward_IndexedArray_numnull_parents",
-        "awkward_ByteMaskedArray_getitem_nextcarry_outindex",
-        "awkward_ByteMaskedArray_reduce_next_64",
-        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_64",
-        "awkward_ByteMaskedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
-        "awkward_Content_getitem_next_missing_jagged_getmaskstartstop",
-        "awkward_IndexedArray_flatten_nextcarry",
-        "awkward_IndexedArray_flatten_none2empty",
-        "awkward_IndexedArray_getitem_nextcarry",
-        "awkward_IndexedArray_getitem_nextcarry_outindex",
-        "awkward_IndexedArray_index_of_nulls",
-        "awkward_IndexedArray_local_preparenext_64",
-        "awkward_IndexedArray_ranges_next_64",
-        "awkward_IndexedArray_ranges_carry_next_64",
-        "awkward_IndexedArray_reduce_next_64",
-        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_64",
-        "awkward_IndexedArray_reduce_next_nonlocal_nextshifts_fromshifts_64",
-        "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
-        "awkward_ListArray_broadcast_tooffsets",
-        "awkward_ListArray_combinations_length",
-        "awkward_ListArray_combinations",
-        "awkward_RegularArray_combinations_64",
-        "awkward_ListArray_compact_offsets",
-        "awkward_ListArray_getitem_jagged_apply",
-        "awkward_ListArray_getitem_jagged_carrylen",
-        "awkward_ListArray_getitem_jagged_descend",
-        "awkward_ListArray_getitem_jagged_numvalid",
-        "awkward_ListArray_getitem_jagged_shrink",
-        "awkward_ListArray_getitem_next_range",
-        "awkward_ListArray_getitem_next_range_carrylength",
-        "awkward_ListArray_getitem_next_range_counts",
-        "awkward_ListArray_min_range",
-        "awkward_ListArray_rpad_and_clip_length_axis1",
-        "awkward_ListArray_rpad_axis1",
-        "awkward_ListOffsetArray_reduce_nonlocal_maxcount_offsetscopy_64",
-        "awkward_UnionArray_regular_index",
-        "awkward_ListOffsetArray_rpad_length_axis1",
-        "awkward_MaskedArray_getitem_next_jagged_project",
-        "awkward_NumpyArray_rearrange_shifted",
-        # "awkward_reduce_count_64",
-        # "awkward_reduce_sum",
-        # "awkward_reduce_sum_bool",
-        "awkward_reduce_sum_bool_complex",
-        "awkward_reduce_sum_complex",
-        # "awkward_reduce_sum_int32_bool_64",
-        # "awkward_reduce_sum_int64_bool_64",
-        # "awkward_reduce_prod",
-        # "awkward_reduce_prod_bool",
-        "awkward_reduce_prod_bool_complex",
-        "awkward_reduce_prod_complex",
-        # "awkward_reduce_countnonzero",
-        "awkward_reduce_countnonzero_complex",
-        # "awkward_reduce_max",
-        "awkward_reduce_max_complex",
-        # "awkward_reduce_min",
-        "awkward_reduce_min_complex",
-        # "awkward_reduce_argmin",
-        "awkward_reduce_argmin_complex",
-        # "awkward_reduce_argmax",
-        "awkward_reduce_argmax_complex",
-        "awkward_sorting_ranges",
-        "awkward_sorting_ranges_length",
-        "awkward_UnionArray_flatten_length",
-        "awkward_UnionArray_flatten_combine",
-        "awkward_UnionArray_nestedfill_tags_index",
-        "awkward_UnionArray_project",
-    ]
-    template_specializations = []
+def fetch_template_specializations(kernel_dict, cuda_src):
+    # Only signatures whose name matches a __global__ template in the CUDA
+    # sources get specialized. This skips kernels dispatched to cuda.compute
+    # and launchers built from several sub-kernels (e.g. '_a', '_b'), while
+    # including those sub-kernels' own signatures.
     import re
 
-    for keys, value in kernel_dict.items():
-        pattern = re.compile("_[a-z]$")
-        if keys[0] not in kernel_exclusions:
-            if value is None:
-                if pattern.search(keys[0]):
-                    template_specializations.append(fetch_specialization(list(keys)))
-            else:
-                template_specializations.append(fetch_specialization(list(keys)))
+    kernel_templates = set(re.findall(r"__global__\s+void\s+(\w+)\s*\(", cuda_src))
 
-    return template_specializations
+    return [
+        fetch_specialization(list(keys))
+        for keys in kernel_dict
+        if keys[0] in kernel_templates
+    ]
 
 
 def populate_kernel_errors(kernel_name, cu_file):
@@ -232,7 +158,7 @@ def initialize_cuda_kernels(cupy):
 
             # Pass an empty Raw Module to fetch all template specializations
             template_specializations = fetch_template_specializations(
-                awkward._connect.cuda._kernel_signatures.by_signature(None)
+                awkward._connect.cuda._kernel_signatures.by_signature(None), cuda_src
             )
             cuda_kernel_templates = cupy.RawModule(
                 code=cuda_src,
