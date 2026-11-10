@@ -123,6 +123,32 @@ is not allowed. Unpack the data structures one level at a time.
 
 One-dimensional Awkward Arrays of numbers, which are completely equivalent to NumPy arrays, can be _cast_ as NumPy arrays within the compiled function.
 
+For flat numeric layouts, common NumPy functions perform this conversion
+implicitly: `np.sum`, `np.prod`, `np.min`, `np.max`, `np.mean`, `np.std`,
+`np.var`, `np.median`, `np.argmin`, `np.argmax`, `np.all`, `np.any`,
+`np.cumsum`, `np.cumprod`, `np.sort`, and `np.argsort`. This also applies to
+flat subarrays encountered while iterating through ragged data:
+
+```{code-cell} ipython3
+@nb.njit
+def sum_each_row(array):
+    result = np.empty(len(array))
+    for i, row in enumerate(array):
+        result[i] = np.sum(row)
+    return result
+
+sum_each_row(ak.Array([[1, 2], [], [3]]))
+```
+
+These overloads reuse the zero-copy `np.asarray` view and follow Numba's
+NumPy implementation, including its dtype rules and supported operations.
+`np.sum` accepts Numba-supported `axis` and `dtype` arguments; the other
+functions above currently support their default arguments. Array results are
+NumPy arrays. Ragged arrays, records, strings, and missing values are not
+implicitly converted. Other NumPy functions, including ufuncs such as `np.sin`,
+still require an explicit `np.asarray` conversion.
+
+
 ```{code-cell} ipython3
 @nb.jit
 def return_last_y_list_squared(array):
