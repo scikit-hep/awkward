@@ -292,7 +292,11 @@ def test_compute_closures_use_byte_sized_state(dtype, offsets):
     name = (
         "awkward_unique_ranges_bool" if dtype == np.bool_ else "awkward_unique_ranges"
     )
-    call(name, [expected, np.asarray(offsets), expected_offsets], [(2, len(offsets))])
+    call(
+        name,
+        [expected, np.asarray(offsets, dtype=np.int64), expected_offsets],
+        [(2, len(offsets))],
+    )
     namespace["_unique_ranges"](
         values, np.asarray(offsets), len(offsets), result_offsets, dtype == np.bool_
     )
@@ -316,3 +320,45 @@ def exercise_native_and_actual_cuda_callbacks(request, monkeypatch):
             getattr(callbacks, name)(*arguments)
 
         monkeypatch.setattr(sys.modules[__name__], "call", host_call)
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize(
+    "values,offsets,expected,expected_offsets",
+    [
+        (
+            [0.0, -0.0, 1.0, np.nan, np.nan, 99.0],
+            [0, 5],
+            [0.0, 1.0, np.nan, np.nan, np.nan, 99.0],
+            [0, 4],
+        ),
+        ([np.nan, 1.0, 77.0, 88.0], [0, 2], [np.nan, np.nan, np.nan, 88.0], [0, 3]),
+    ],
+)
+def test_unordered_float_values_survive_ordered_inequality(
+    monkeypatch, dtype, values, offsets, expected, expected_offsets
+):
+    from tests.test_4478_cuda_callbacks import load_callbacks
+
+    class OrderedFloat(float):
+        def __ne__(self, other):
+            # Model an ordered device comparison: NaNs do not compare unequal.
+            return bool(
+                not np.isnan(self) and not np.isnan(other) and float.__ne__(self, other)
+            )
+
+    class OrderedArray(np.ndarray):
+        def __getitem__(self, index):
+            value = super().__getitem__(index)
+            return OrderedFloat(value) if isinstance(value, np.floating) else value
+
+    callbacks = load_callbacks(monkeypatch)
+    output = np.asarray(values, dtype=dtype).view(OrderedArray)
+    result_offsets = np.full(len(offsets), -99, dtype=np.int64)
+    callbacks._unique_ranges(
+        output, np.asarray(offsets, dtype=np.int64), len(offsets), result_offsets, False
+    )
+    np.testing.assert_array_equal(
+        output.view(np.ndarray), np.asarray(expected, dtype=dtype)
+    )
+    np.testing.assert_array_equal(result_offsets, expected_offsets)
