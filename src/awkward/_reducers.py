@@ -1124,7 +1124,7 @@ class AxisNoneMax(Max):
             )
             result_scalar = nplike.asarray(val, dtype=data.dtype)
         else:
-            result_scalar = nplike.max(data, axis=None)
+            result_scalar = nplike.max(data, axis=None, keepdims=True)
             if self.initial is not None:
                 initial_val = nplike.asarray(self.initial, dtype=data.dtype)
                 result_scalar = nplike.maximum(result_scalar, initial_val)
