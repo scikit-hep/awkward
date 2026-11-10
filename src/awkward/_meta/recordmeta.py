@@ -1,12 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+from __future__ import annotations
+
 from functools import cached_property
 
 from awkward._meta.meta import Meta
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import Generic, JSONSerializable, TypeVar
+from awkward._typing import TYPE_CHECKING, Generic, JSONSerializable, Literal, TypeVar
 from awkward.errors import FieldNotFoundError
+
+if TYPE_CHECKING:
+    from awkward._meta.mergeable import _Wrapper
 
 T = TypeVar("T", bound=Meta)
 
@@ -16,6 +22,69 @@ class RecordMeta(Meta, Generic[T]):
 
     _contents: list[T]
     _fields: list[str] | None
+
+    def _mergeable_next(
+        self,
+        other: Meta,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
+        if other.is_identity_like or other.is_union:
+            return True
+        if other.is_indexed or other.is_option:
+            if TYPE_CHECKING:
+                assert isinstance(other, _Wrapper)
+            return self._mergeable_next(other.content, mergebool, mergecastable)
+        if not type_parameters_equal(self._parameters, other._parameters):
+            return False
+        if not isinstance(other, RecordMeta):
+            return False
+        left_fields, right_fields = self._fields, other._fields
+        if left_fields is None:
+            if right_fields is not None or len(self._contents) != len(other._contents):
+                return False
+        elif right_fields is None:
+            return False
+        # Named merging resolves duplicate names to the first matching field.
+        if left_fields == right_fields and (
+            left_fields is None
+            or (
+                left_fields[0] != left_fields[1]
+                if len(left_fields) == 2
+                else len(set(left_fields)) == len(left_fields)
+            )
+        ):
+            # Compare stored metadata directly: no generated tuple names,
+            # length resolution, field slicing, or generator allocation.
+            for left, right in zip(self._contents, other._contents, strict=True):
+                if not left._mergeable_next(right, mergebool, mergecastable):
+                    return False
+            return True
+        # Resolve reordered names once. Reverse traversal preserves the first
+        # matching field when duplicate names are present.
+        assert left_fields is not None and right_fields is not None
+        if (
+            len(left_fields) == len(right_fields) == 2
+            and left_fields[0] != left_fields[1]
+            and left_fields[0] == right_fields[1]
+            and left_fields[1] == right_fields[0]
+        ):
+            return self._contents[0]._mergeable_next(
+                other._contents[1], mergebool, mergecastable
+            ) and self._contents[1]._mergeable_next(
+                other._contents[0], mergebool, mergecastable
+            )
+        other_contents = dict(
+            zip(reversed(right_fields), reversed(other._contents), strict=True)
+        )
+        if other_contents.keys() != set(left_fields):
+            return False
+        for field, content in zip(left_fields, self._contents, strict=True):
+            if not content._mergeable_next(
+                other_contents[field], mergebool, mergecastable
+            ):
+                return False
+        return True
 
     @property
     def is_tuple(self) -> bool:

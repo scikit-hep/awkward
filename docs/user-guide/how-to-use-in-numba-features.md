@@ -31,6 +31,17 @@ import numba as nb
 
 The main use is to pass an Awkward Array into a function that has been JIT-compiled by Numba. As many arguments as you want can be Awkward Arrays, and they don't have to have the same length or shape.
 
+For disk caching with `@numba.njit(cache=True)`, pass Awkward Arrays as arguments.
+Capturing an Awkward Array as a global or closure constant requires process-local
+buffer pointers. Numba warns that the function uses dynamic globals and does not
+write its compiled implementation to the disk cache. The function still runs,
+but a fresh process must compile it again. This prevents reusing buffer addresses
+from a previous process. Functions that receive Awkward Arrays as arguments can
+reuse their compiled code from the disk cache with the new process's buffers.
+Compiled functions retain the lookup and buffers for a captured array, even if
+the Python array is later modified or its behavior is replaced. Its compiled
+layout type remains the one selected during compilation.
+
 ```{code-cell} ipython3
 array1 = ak.Array([[0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
 array2 = ak.Array([
@@ -122,6 +133,66 @@ is not allowed. Unpack the data structures one level at a time.
 ## Casting one-dimensional arrays as NumPy
 
 One-dimensional Awkward Arrays of numbers, which are completely equivalent to NumPy arrays, can be _cast_ as NumPy arrays within the compiled function.
+
+For flat numeric layouts, common NumPy functions perform this conversion
+implicitly: `np.sum`, `np.prod`, `np.min`, `np.max`, `np.mean`, `np.std`,
+`np.var`, `np.median`, `np.argmin`, `np.argmax`, `np.all`, `np.any`,
+`np.cumsum`, `np.cumprod`, `np.sort`, and `np.argsort`. This also applies to
+flat subarrays encountered while iterating through ragged data:
+
+```{code-cell} ipython3
+@nb.njit
+def sum_each_row(array):
+    result = np.empty(len(array))
+    for i, row in enumerate(array):
+        result[i] = np.sum(row)
+    return result
+
+sum_each_row(ak.Array([[1, 2], [], [3]]))
+```
+
+These overloads reuse the zero-copy `np.asarray` view and follow Numba's
+NumPy implementation, including its dtype rules and supported operations.
+`np.sum` accepts Numba-supported `axis` and `dtype` arguments; the other
+functions above currently support their default arguments. Array results are
+NumPy arrays. Ragged arrays, records, strings, and missing values are not
+implicitly converted.
+
+
+NumPy ufuncs supported by Numba also accept flat numeric Awkward Arrays
+directly, without an explicit cast. This includes unary functions such as
+`np.sin` and `np.sqrt`, and binary functions such as `np.add` and `np.maximum`.
+Inputs may combine flat Awkward views, NumPy arrays, and scalars, using the
+same broadcasting and dtype rules as Numba's NumPy implementation.
+
+```{code-cell} ipython3
+@nb.njit
+def trig_expression(array):
+    return np.sin(array) * 2 + np.cos(array)
+
+trig_expression(ak.Array([1.0, 2.0, 3.0]))
+```
+
+These calls reuse zero-copy NumPy views, including sliced views and flat
+subarrays inside ragged data. Numba's fused array expressions and
+`parallel=True` are supported. Results are NumPy arrays. Explicit output
+arrays must be NumPy arrays; their buffers are updated in place. Supported
+single-output unary and binary ufuncs accept positional outputs or `out=`.
+The native two-output binary ufunc `np.divmod` also accepts one or two
+positional NumPy output arrays; omitted outputs are returned as new arrays.
+Other multi-output ufuncs and generalized ufuncs are not enabled by this
+integration. Explicit `out=None` is rejected, as it is for NumPy inputs in
+Numba. Other keyword arguments and signatures remain limited by Numba.
+
+Numba discovers this integration through Awkward's installed
+`numba_extensions` entry point, so registration can occur during compilation
+without an explicit call to `ak.numba.register_and_check()`. The registered
+array-expression rewrite skips block inspection for functions without
+eligible Awkward views.
+
+This does not implicitly convert whole ragged arrays, optional arrays,
+records, or strings. It also does not introduce arithmetic operators on
+Awkward views inside Numba: use `np.add(a, b)`, for example, or cast explicitly.
 
 ```{code-cell} ipython3
 @nb.jit
