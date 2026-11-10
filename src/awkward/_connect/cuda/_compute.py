@@ -1402,76 +1402,6 @@ def awkward_RegularArray_getitem_jagged_expand(
     ]
 
 
-# THIS KERNEL IS NOT USED (just for archive)
-# Fills a tagged index for one union type: assigns a constant tag and
-# sequential index into each segment defined by the starts/counts ranges
-# Example input:
-# tmpstarts = [0, 3], tag = 1, fromcounts = [3, 2]
-# Example output:
-# totags  = [1, 1, 1, 1, 1]
-# toindex = [0, 1, 2, 0, 1]
-# also, the tmpstarts get rewritten with stops: tmpstarts = [3, 5]
-def awkward_UnionArray_nestedfill_tags_index(
-    totags, toindex, tmpstarts, tag, fromcounts, length
-):
-    if length == 0:
-        return
-
-    starts = tmpstarts[:length]
-    counts = fromcounts[:length]
-
-    # Total span of the output arrays we need to touch:
-    # the last segment's start + its count gives the furthest written position
-    total_size = int(starts[length - 1]) + int(counts[length - 1])
-
-    if total_size == 0:
-        return
-
-    # +1 at each segment start, -1 just past each segment end.
-    # cumsum of this will later yield 1 inside any covered range, 0 in gaps.
-    diff = cp.zeros(total_size + 1, dtype=cp.int8)
-
-    def scatter_and_update(i):
-        start = starts[i]
-        count = counts[i]
-        # Mark this segment's range in the difference array
-        diff[start] += cp.int8(1)
-        diff[start + count] -= cp.int8(1)
-        # update tmpstarts (for the next call of this kernel (for a different union type))?
-        tmpstarts[i] = start + count
-        return 0
-
-    # Scatter segment's ranges and update tmpstarts
-    unary_transform(
-        d_in=CountingIterator(cp.int64(0)),
-        d_out=DiscardIterator(),
-        op=scatter_and_update,
-        num_items=length,
-    )
-
-    # coverage[j] == 1 if position j falls inside any segment's range, 0 otherwise
-    coverage = cp.cumsum(diff[:total_size])
-
-    # scan[j] == local index of element j within its segment
-    # Since it's a cumsum, the first index starts from 1, 2, 3 ...
-    # so we'll have to -1 before writing it in toindex
-    scan = cp.cumsum(coverage, dtype=cp.int64)
-
-    def fill(j):
-        if coverage[j]:
-            # Mark this position as belonging to the current tag
-            totags[j] = tag
-            toindex[j] = scan[j] - 1
-        return 0
-
-    unary_transform(
-        d_in=CountingIterator(cp.int64(0)),
-        d_out=DiscardIterator(),
-        op=fill,
-        num_items=total_size,
-    )
-
-
 # For each position i where fromtags[i] == fromwhich, sets totags[i] = towhich and
 # toindex[i] = fromindex[i] + base. Other positions are left unchanged.
 # Example:
@@ -2209,34 +2139,6 @@ def awkward_RegularArray_rpad_and_clip_axis1(toindex, target, size, length):
     toindex[: length * target] = cp.where(j < shorter, i * dtype(size) + j, dtype(-1))
 
 
-# IS NOT USED (keep for archive). Takes too long to check for error cases.
-# Normalizes indices for a regular array of size `size`:
-# adds size to negative values, then checks bounds.
-# Raises ValueError immediately if any index is still out of [0, size).
-#
-# Example (size=5): fromarray=[-1, 2, 0] → toarray=[4, 2, 0]
-def awkward_RegularArray_getitem_next_array_regularize(
-    toarray, fromarray, lenarray, size
-):
-    if lenarray == 0:
-        return
-    dtype = toarray.dtype.type
-
-    def _regularize(v):
-        return dtype(v + size) if v < 0 else dtype(v)
-
-    unary_transform(
-        d_in=fromarray[:lenarray],
-        d_out=toarray[:lenarray],
-        op=_regularize,
-        num_items=lenarray,
-    )
-    if cp.any((toarray[:lenarray] < 0) | (toarray[:lenarray] >= size)):
-        raise ValueError(
-            "index out of range in compiled CUDA code (awkward_RegularArray_getitem_next_array_regularize)"
-        )
-
-
 # Builds a gather index for selecting one element per row from a RegularArray.
 # A RegularArray stores `length` rows of exactly `size` elements in a flat buffer,
 # so row i occupies flat positions [i*size, (i+1)*size).
@@ -2260,28 +2162,6 @@ def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
     # unary_transform's op-identity-keyed cache. See test_4056_cuda_kernel_memory.
     dtype = tocarry.dtype.type
     tocarry[:length] = cp.arange(length, dtype=dtype) * dtype(size) + dtype(regular_at)
-
-
-# IS NOT USED (keep for archive). Takes too long to check for error cases.
-# Checks that all sublists have equal length and writes that length to size[0].
-# Raises ValueError immediately if offsets decrease or sublists have different lengths.
-#
-# Example: fromoffsets=[0, 2, 4, 6] → size[0]=2
-def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
-    if offsetslength <= 1:
-        size[:1] = cp.zeros(1, dtype=size.dtype)
-        return
-    n = offsetslength - 1
-    counts = fromoffsets[1:offsetslength] - fromoffsets[:n]
-    if cp.any(counts < 0):
-        raise ValueError(
-            "offsets must be monotonically increasing in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
-        )
-    if not cp.all(counts == counts[0]):
-        raise ValueError(
-            "cannot convert to RegularArray because subarray lengths are not regular in compiled CUDA code (awkward_ListOffsetArray_toRegularArray)"
-        )
-    size[:1] = counts[:1].astype(size.dtype, copy=False)  # GPU→GPU
 
 
 # Pads each sublist to at least target length (longer sublists kept as-is).
@@ -2308,60 +2188,6 @@ def awkward_ListOffsetArray_rpad_length_axis1(
     tolength[:1] = tooffsets[fromlength : fromlength + 1].astype(
         tolength.dtype, copy=False
     )  # GPU→GPU, no sync
-
-
-## NOT USED (revisit later)
-# Builds a flat gather index for padding each sublist to at least `target` elements.
-# The output size per row is max(len_i, target): longer sublists are kept in full,
-# shorter ones are extended with -1 (missing).  toindex is sized to sum(max(len_i, target)).
-# For output element q in row i at intra-row position j:
-#   j < len_i  →  fromoffsets[i] + j   (copy actual element)
-#   j >= len_i →  -1                    (pad with missing)
-#
-# Example (target=3): fromoffsets=[0,1,5,7], fromlength=3
-#   row lengths: [1, 4, 2], padded: [3, 4, 3]
-#   toindex = [0,-1,-1, 1,2,3,4, 5,6,-1]
-def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target):
-    if fromlength == 0 or len(toindex) == 0:
-        return
-    counts = fromoffsets[1 : fromlength + 1] - fromoffsets[:fromlength]
-    starts = cp.empty(fromlength + 1, dtype=fromoffsets.dtype)
-    padded = cp.maximum(counts, target).astype(starts.dtype, copy=False)
-    starts[0] = 0
-    inclusive_scan(
-        d_in=padded,
-        d_out=starts[1 : fromlength + 1],
-        op=OpKind.PLUS,
-        init_value=None,
-        num_items=fromlength,
-    )
-    dtype = toindex.dtype.type
-
-    # For each flat output index q, binary-searches starts to find which row i that position belongs to.
-    # Computes the intra-row offset j = q - starts[i], and returns
-    # either the source index (fromoffsets[i] + j) if within the original sublist length,
-    # or -1 if it's a padding slot.
-    def fill(q):
-        lo = 0
-        hi = fromlength - 1
-        while lo < hi:
-            mid = (lo + hi + 1) >> 1
-            if starts[mid] <= q:
-                lo = mid
-            else:
-                hi = mid - 1
-        i = lo
-        j = q - starts[i]
-        if j < counts[i]:
-            return dtype(fromoffsets[i] + j)
-        return dtype(-1)
-
-    unary_transform(
-        d_in=CountingIterator(dtype(0)),
-        d_out=toindex,
-        op=fill,
-        num_items=len(toindex),
-    )
 
 
 # Builds a flat gather index for padding/clipping each sublist to exactly `target` elements.
@@ -2417,66 +2243,12 @@ def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
     tocarry[:length] = cp.argsort(fromindex[:length])
 
 
-## NOT USED (revisit later)
-# Gathers inneroffsets at positions given by outeroffsets:
-# tooffsets[i] = inneroffsets[outeroffsets[i]] for i in [0, outeroffsetslen).
-# Used when flattening a nested ListOffsetArray: the outer offsets index into
-# the inner offset array to produce the combined flat offsets.
-#
-# Example: outeroffsets=[0,2,3], inneroffsets=[0,4,7,9,11]
-#   tooffsets = [inneroffsets[0], inneroffsets[2], inneroffsets[3]] = [0, 9, 11]
-def awkward_ListOffsetArray_flatten_offsets(
-    tooffsets, outeroffsets, outeroffsetslen, inneroffsets
-):
-    if outeroffsetslen == 0:
-        return
-    tooffsets[:outeroffsetslen] = inneroffsets[outeroffsets[:outeroffsetslen]]
-
-
-## NOT USED (revisit later)
-# Rewrites fromoffsets to exclude None entries counted by noneindexes.
-# tooffsets[i] = fromoffsets[i] - (number of nones in noneindexes[0:fromoffsets[i]])
-# which equals the number of non-None elements before position fromoffsets[i].
-#
-# Computed via a single inclusive scan over the None mask, then indexed at each fromoffsets value.
-#
-# Example: noneindexes=[-1, 0, -1, 0, 0, -1, 0], fromoffsets=[0,2,3,5,7], length_offsets=5
-#   none mask:        [1, 0, 1, 0, 0, 1, 0]
-#   cumulative_nones: [0, 1, 1, 2, 2, 2, 3, 3]
-#   tooffsets = fromoffsets - cumulative_nones[fromoffsets] = [0,2,3,5,7] - [0,1,2,2,3] = [0,1,1,3,4]
-def awkward_ListOffsetArray_drop_none_indexes(
-    tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes
-):
-    if length_offsets == 0:
-        return
-    # cumulative_nones[k] = number of nones in noneindexes[0:k]
-    cumulative_nones = cp.empty(length_indexes + 1, dtype=tooffsets.dtype)
-    cumulative_nones[0] = 0
-    if length_indexes > 0:
-        none_mask = (noneindexes[:length_indexes] < 0).astype(
-            cumulative_nones.dtype, copy=False
-        )
-        inclusive_scan(
-            d_in=none_mask,
-            d_out=cumulative_nones[1 : length_indexes + 1],
-            op=OpKind.PLUS,
-            init_value=None,
-            num_items=length_indexes,
-        )
-    idx = fromoffsets[:length_offsets]
-    tooffsets[:length_offsets] = (idx - cumulative_nones[idx]).astype(
-        tooffsets.dtype, copy=False
-    )
-
-
-# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_validity(starts, stops, length, lencontent):
     from awkward._connect.cuda import _listarray
 
     return _listarray.validity(starts, stops, length, lencontent)
 
 
-# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_rpad_axis1(
     toindex, fromstarts, fromstops, tostarts, tostops, target, length
 ):
@@ -2542,7 +2314,6 @@ def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
         tomin[:1] = result.astype(tomin.dtype, copy=False)
 
 
-# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_range_spreadadvanced(
     toadvanced, fromadvanced, fromoffsets, lenstarts
 ):
@@ -2563,7 +2334,6 @@ def awkward_ListArray_getitem_next_range_counts(total, fromoffsets, lenstarts):
     ].astype(total.dtype, copy=False)
 
 
-# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_at(tocarry, fromstarts, fromstops, lenstarts, at):
     from awkward._connect.cuda import _listarray
 
@@ -2666,7 +2436,6 @@ def awkward_ListArray_getitem_next_range_carrylength(
     )
 
 
-# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_range(
     tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step
 ):
@@ -2677,7 +2446,6 @@ def awkward_ListArray_getitem_next_range(
     )
 
 
-# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_array_advanced(
     tocarry,
     toadvanced,
@@ -2702,7 +2470,6 @@ def awkward_ListArray_getitem_next_array_advanced(
     )
 
 
-# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_next_array(
     tocarry,
     toadvanced,
@@ -2727,7 +2494,6 @@ def awkward_ListArray_getitem_next_array(
     )
 
 
-# CPU-compatible ListArray kernel; see kernel-specification.yml.
 def awkward_ListArray_getitem_jagged_expand(
     multistarts,
     multistops,
@@ -3919,39 +3685,6 @@ def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
     )
 
 
-# KERNEL IS NOT USED: checking for out of range errors takes too much time if I take it outside the closure
-# composes two index arrays into one by resolving outerindex through innerindex:
-# toindex[i] = innerindex[outerindex[i]], preserving -1 (missing) entries from outerindex
-def awkward_IndexedArray_simplify(
-    toindex, outerindex, outerlength, innerindex, innerlength
-):
-    if outerlength == 0:
-        return
-
-    def simplify_op(j):
-        if j < 0:
-            return -1
-        if j >= innerlength:
-            # raise inside a JIT closure is silently swallowed
-            raise IndexError(
-                "index out of range in compiled CUDA code (awkward_IndexedArray_simplify)"
-            )
-        return innerindex[j]
-
-    # to prevent out-of-bounds error
-    out_buf = (
-        toindex[:outerlength]
-        if len(toindex) >= outerlength
-        else cp.empty(outerlength, dtype=toindex.dtype)
-    )
-    unary_transform(
-        d_in=outerindex[:outerlength],
-        d_out=out_buf,
-        op=simplify_op,
-        num_items=outerlength,
-    )
-
-
 # filters an indexed array by collecting all valid (non-negative) indices into a carry array
 def awkward_IndexedArray_flatten_nextcarry(
     tocarry: cp.ndarray, fromindex: cp.ndarray, lenindex: int, lencontent: int
@@ -4076,145 +3809,6 @@ def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
         op=fill_const,
         num_items=length,
     )
-
-
-# THIS KERNEL IS NOT USED (just for archive)
-# Computes the total number of output elements when flattening a UnionArray.
-# For each element i: adds offsetsraws[fromtags[i]][fromindex[i]+1]
-#                              - offsetsraws[fromtags[i]][fromindex[i]]
-# to the total.  offsetsraws is a Python list of per-content offset GPU arrays.
-# Stores the result in total_length[0].
-#
-# Example: fromtags=[0,1,0], fromindex=[0,0,1], length=3
-#   offsetsraws[0]=[0,3,5], offsetsraws[1]=[0,2]
-#   sizes: [3-0, 2-0, 5-3] = [3, 2, 2] → total_length[0] = 7
-def awkward_UnionArray_flatten_length(
-    total_length, fromtags, fromindex, length, offsetsraws
-):
-    if length == 0:
-        total_length[0] = 0
-        return
-    tags = fromtags[:length]
-    idxs = fromindex[:length]
-
-    type_starts = cp.array(
-        [0]
-        + [sum(len(o) for o in offsetsraws[: k + 1]) for k in range(len(offsetsraws))],
-        dtype=cp.int64,
-    )
-    all_offsets = cp.concatenate(offsetsraws)
-
-    flat_idx = type_starts[tags] + idxs
-    sizes = all_offsets[flat_idx + 1] - all_offsets[flat_idx]
-    total_length[0] = int(cp.sum(sizes))
-
-
-# THIS KERNEL IS NOT USED (just for archive)
-# Flattens a UnionArray, combining all sublists into a flat output.
-# Writes tooffsets (length+1), totags (total_length), and toindex (total_length).
-# offsetsraws is a Python list of per-content offset GPU arrays.
-#
-# For each element i:
-#   tag = fromtags[i], idx = fromindex[i]
-#   start = offsetsraws[tag][idx], stop = offsetsraws[tag][idx+1]
-#   tooffsets[i+1] = tooffsets[i] + (stop - start)
-#   for j in [start, stop): totags[k] = tag, toindex[k] = j
-#
-# Example: fromtags=[0,1], fromindex=[0,0], offsetsraws[0]=[0,3], offsetsraws[1]=[0,2]
-#   tooffsets=[0,3,5], totags=[0,0,0,1,1], toindex=[0,1,2,0,1]
-def awkward_UnionArray_flatten_combine(
-    totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws
-):
-    tooffsets[0] = 0
-    if length == 0:
-        return
-    if len(offsetsraws) == 2:
-        offsets0, offsets1 = offsetsraws[0], offsetsraws[1]
-
-        # Phase 1: compute per-element sublist sizes → inclusive scan → tooffsets
-        sizes = cp.empty(length, dtype=tooffsets.dtype)
-
-        def compute_size(i):
-            j = fromindex.dtype.type(fromindex[i])
-            if fromtags[i] == fromtags.dtype.type(0):
-                return offsets0.dtype.type(offsets0[j + 1] - offsets0[j])
-            return offsets1.dtype.type(offsets1[j + 1] - offsets1[j])
-
-        unary_transform(
-            d_in=CountingIterator(fromindex.dtype.type(0)),
-            d_out=sizes,
-            op=compute_size,
-            num_items=length,
-        )
-        inclusive_scan(
-            d_in=sizes,
-            d_out=tooffsets[1 : length + 1],
-            op=OpKind.PLUS,
-            init_value=None,
-            num_items=length,
-        )
-
-        total_len = int(tooffsets[length])
-        if total_len == 0:
-            return
-
-        # Phase 2: binary-search each output position back to its parent row,
-        # then write totags/toindex — no flat_pos or parent_ids temporaries
-        def fill_out(q):
-            lo = tooffsets.dtype.type(0)
-            hi = tooffsets.dtype.type(length - 1)
-            while lo < hi:
-                mid = (lo + hi + tooffsets.dtype.type(1)) >> tooffsets.dtype.type(1)
-                if tooffsets[mid] <= q:
-                    lo = mid
-                else:
-                    hi = mid - tooffsets.dtype.type(1)
-            i = lo
-            j = fromindex.dtype.type(fromindex[i])
-            local_offset = q - tooffsets[i]
-            totags[q] = fromtags[i]
-            if fromtags[i] == fromtags.dtype.type(0):
-                toindex[q] = offsets0.dtype.type(offsets0[j]) + local_offset
-            else:
-                toindex[q] = offsets1.dtype.type(offsets1[j]) + local_offset
-            return tooffsets.dtype.type(0)
-
-        unary_transform(
-            d_in=CountingIterator(tooffsets.dtype.type(0)),
-            d_out=DiscardIterator(),
-            op=fill_out,
-            num_items=total_len,
-        )
-    else:
-        tags = fromtags[:length]
-        idxs = fromindex[:length]
-        sizes = cp.zeros(length, dtype=tooffsets.dtype)
-        global_start = cp.zeros(length, dtype=tooffsets.dtype)
-        for k, offsets_k in enumerate(offsetsraws):
-            pos = cp.where(tags == k)[0]
-            if pos.size > 0:
-                local_idxs = idxs[pos]
-                starts = offsets_k[local_idxs]
-                sizes[pos] = offsets_k[local_idxs + 1] - starts
-                global_start[pos] = starts
-        inclusive_scan(
-            d_in=sizes,
-            d_out=tooffsets[1 : length + 1],
-            op=OpKind.PLUS,
-            init_value=None,
-            num_items=length,
-        )
-        total_len = int(tooffsets[length])
-        if total_len == 0:
-            return
-        flat_pos = cp.arange(total_len, dtype=tooffsets.dtype)
-        parent_ids = (
-            cp.searchsorted(tooffsets[: length + 1], flat_pos, side="right") - 1
-        )
-        totags[:total_len] = tags[parent_ids].astype(totags.dtype, copy=False)
-        toindex[:total_len] = (
-            global_start[parent_ids] + flat_pos - tooffsets[parent_ids]
-        ).astype(toindex.dtype, copy=False)
 
 
 # Filters fromindex by fromtags == which, scattering matching entries compactly
