@@ -8,6 +8,7 @@
 
 #include "awkward/kernels.h"
 #include "awkward/numeric-sort.h"
+#include "awkward/kernel-utils.h"
 
 template <typename T, typename U>
 ERROR awkward_argsort(
