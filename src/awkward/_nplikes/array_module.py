@@ -460,7 +460,7 @@ class ArrayModuleNumpyLike(NumpyLike[ArrayLikeT], metaclass=NominalMeta):
             else self.index_as_shape_item(slice_.step),
         )
         start, stop, step = slice_as_shape.indices(length)
-        slice_length = math.ceil((stop - start) / step)
+        slice_length = len(range(start, stop, step))
 
         # Shape items are already valid indices, so we don't need to invoke
         # `shape_item_as_index`
