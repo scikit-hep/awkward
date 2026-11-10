@@ -75,17 +75,14 @@ def test_form_content_typetracer_parity(mergebool, mergecastable):
     layouts = [form.length_zero_array(highlevel=False) for form in forms]
     tracers = [layout.to_typetracer(forget_length=True) for layout in layouts]
     for i, j in itertools.product(range(len(forms)), repeat=2):
-        # Existing Content predicates can fall through to None for unequal
-        # tuple arities; compare their boolean compatibility decision.
-        expected = bool(
-            ak._do.mergeable(layouts[i], layouts[j], mergebool, mergecastable)
-        )
+        expected = ak._do.mergeable(layouts[i], layouts[j], mergebool, mergecastable)
+        assert type(expected) is bool
         assert (
             ak._do.mergeable(forms[i], forms[j], mergebool, mergecastable) == expected
         ), (forms[i], forms[j], mergebool, mergecastable)
         assert (
-            bool(ak._do.mergeable(tracers[i], tracers[j], mergebool, mergecastable))
-            == expected
+            ak._do.mergeable(tracers[i], tracers[j], mergebool, mergecastable)
+            is expected
         )
         assert (
             ak._do.mergeable(forms[i], layouts[j], mergebool, mergecastable) == expected
