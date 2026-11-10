@@ -138,19 +138,16 @@ type: 50000 * var * float64
 
 Just as Awkward Arrays in main memory can be iterated over in functions that have been JIT-compiled by [Numba](https://numba.pydata.org/), Awkward Arrays on GPUs can be iterated over in functions JIT-compiled by `@numba.cuda.jit`. The same restrictions apply (iteration only; no `ak.*` functions); see {doc}`how-to-use-in-numba-cuda.md`.
 
-## IndexedArray fill preparation
+## Reusing CUDA compilation
 
-`IndexedArray_fill` reuses a prepared cuda.compute transform while keeping its
-base-offset parameter in invocation-local device storage. Changing the offset,
-input buffer or length does not require another prepared transform for the same
-device, CUDA context and input/output dtypes.
+Repeated concatenation and indexing can reuse compiled CUDA operations even
+when offsets, buffer addresses or input lengths change. Compatible device,
+CUDA context and input/output dtypes are still required; the first use of a new
+signature can incur compilation cost.
 
-This optimization retains the existing cuda.compute legacy-default-stream
-policy. The parameter upload and fill run on that stream, including when a
-non-blocking CuPy stream is current. Applications using non-blocking streams must
-explicitly order their producers and consumers with the legacy stream; this
-does not introduce backend-wide support for such streams. Disk artifact caching
-is developed separately.
+The cuda.compute backend uses the legacy default stream. Applications using
+non-blocking CuPy streams must explicitly order their producers and consumers
+with that stream.
 
 ## Optional persistent compilation artifacts
 
@@ -171,9 +168,8 @@ loading still occur.
 Entries are keyed by implementation source, input/output dtypes, GPU compute
 capability, Python and CUDA runtime versions, and relevant compiler/package
 versions. Changing runtime values, lengths or buffer pointers does not create
-new entries. Noncontiguous arrays use normal compilation. Each invocation
-retains its own parameter storage; access to a
-shared prepared transform remains serialized by Awkward's host lock.
+new entries. Noncontiguous arrays use normal compilation. Each prepared transform retains one device parameter; updates and launches
+are serialized on the legacy default stream by Awkward's host lock.
 
 Missing artifacts, immediate deserialization failures, and cache filesystem
 errors fall back to normal compilation. Deferred loading errors raised on the
