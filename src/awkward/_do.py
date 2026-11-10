@@ -209,11 +209,16 @@ def num(layout, axis):
 
 
 def mergeable(
-    one: Content,
-    two: Content,
+    one: Content | form.Form,
+    two: Content | form.Form,
     mergebool: bool = True,
     mergecastable: Literal["same_kind", "equiv", "family"] = "same_kind",
 ) -> bool:
+    """Whether two layouts or forms can merge, under the requested casting policy.
+
+    Compare metadata only, including for virtual layouts. This does not construct
+    layouts or read buffers; data-dependent merging remains in Content.
+    """
     return one._mergeable_next(two, mergebool=mergebool, mergecastable=mergecastable)
 
 
