@@ -27,7 +27,6 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
-    Literal,
     Self,
     SupportsIndex,
     final,
@@ -277,8 +276,11 @@ class IndexedArray(IndexedMeta[Content], Content):
         return "".join(out)
 
     def to_IndexedOptionArray64(self) -> IndexedOptionArray:
+        index = self._index
+        if index.dtype != np.dtype(np.int64):
+            index = index.to64()
         return ak.contents.IndexedOptionArray(
-            self._index, self._content, parameters=self._parameters
+            index, self._content, parameters=self._parameters
         )
 
     def mask_as_bool(self, valid_when: bool = True) -> ArrayLike:
@@ -514,23 +516,6 @@ class IndexedArray(IndexedMeta[Content], Content):
 
         else:
             return self.project()._offsets_and_flattened(axis, depth)
-
-    def _mergeable_next(
-        self,
-        other: Content,
-        mergebool: bool,
-        mergecastable: Literal["same_kind", "equiv", "family"],
-    ) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # Is the other array indexed or optional?
-        elif other.is_option or other.is_indexed:
-            return self._content._mergeable_next(
-                other.content, mergebool, mergecastable
-            )
-        else:
-            return self._content._mergeable_next(other, mergebool, mergecastable)
 
     def _merging_strategy(self, others):
         if len(others) == 0:

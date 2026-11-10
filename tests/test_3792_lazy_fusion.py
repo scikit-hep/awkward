@@ -319,12 +319,9 @@ def test_fused_op_is_cache_stable():
     # Plan's hard constraint: a stable program compiles its fused op ONCE and
     # reuses it -- no per-call recompile (the 1.8 s/call regression).
     #
-    # The cache is unbounded (functools.cache, never evicted/cleared here), so
-    # the robust invariant is: the same generated source always maps to the
-    # SAME compiled callable -- every call site, including each compute(),
-    # reuses it. Asserted via object identity, which (unlike the global
-    # hit/miss counters) is immune to parallel / free-threaded test execution
-    # where other tests share this process-global cache.
+    # The bounded cache reuses a callable while its entry remains resident.
+    # Concurrent cold misses are covered separately; cache eviction legitimately
+    # allows a source to be compiled again.
     from awkward._connect.cpu import _fusion_codegen as cfc
 
     a = ak.Array([[1.0, 2, 3], [4, 5], [6, 7]])
