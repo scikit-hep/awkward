@@ -2,4 +2,4 @@ blank_issues_enabled: true
 contact_links:
     - name: "Start a discussion (GitHub)"
       about: "How do I…?"
-      url: https://github.com/scikit-hep/awkward-1.0/discussions
+      url: https://github.com/scikit-hep/awkward/discussions
