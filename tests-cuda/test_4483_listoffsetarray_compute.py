@@ -61,6 +61,21 @@ def test_highlevel_operations(dtype):
             ak.to_regular(array)
 
 
+@pytest.mark.parametrize("values", [[], [0, -1, 2, -3]])
+def test_null_count_reduction_on_nondefault_stream(values):
+    with cp.cuda.Stream(non_blocking=True):
+        source = cp.asarray(values, dtype=cp.int64)
+        output = cp.full(3, 0x1234567800000000, dtype=cp.int64)
+        kernel = CupyBackend.instance()[
+            "awkward_IndexedArray_numnull", np.int64, np.int64
+        ]
+        kernel(output[1:2], source, len(values))
+        np.testing.assert_array_equal(
+            cp.asnumpy(output),
+            [0x1234567800000000, sum(x < 0 for x in values), 0x1234567800000000],
+        )
+
+
 @pytest.mark.parametrize("groups,width", [(1, 1), (17, 33), (257, 513)])
 def test_nonlocal_ranges_across_block_boundaries(groups, width):
     rng = np.random.default_rng(2026)
