@@ -41,8 +41,8 @@ def test_reductions(dtype, axis, name):
 def test_order_and_subrange_equality(dtype):
     data = np.array([3, 1, 2, 1], dtype=dtype)
     array = ak.Array(data)
-    # Not np.sort(data): NumPy's native float16 sort returns garbage on
-    # 32-bit Windows (numpy 2.2.6 win32 gives [inf, inf, inf, inf]).
+    # Use the known ordering: NumPy's float16 sort on Windows x86 can return
+    # infinities for this finite input, so it cannot serve as the reference.
     expected = np.array([1, 1, 2, 3], dtype=dtype)
     for stable in (False, True):
         np.testing.assert_array_equal(
