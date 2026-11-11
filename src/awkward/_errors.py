@@ -175,7 +175,10 @@ class _ArgumentRepr(reprlib.Repr):
         # cycles or shared subtrees. Share one visit budget across the whole
         # argument, and stop cycles along the current traversal path.
         identity = id(x)
-        if identity in self._active or self._remaining <= 0:
+        if identity in self._active:
+            # Level 0 gives repr()'s own placeholder for a cycle, e.g. "[...]".
+            return super().repr1(x, 0)
+        if self._remaining <= 0:
             return "..."
         self._remaining -= 1
         self._active.add(identity)

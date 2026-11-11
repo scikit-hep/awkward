@@ -143,6 +143,12 @@ def test_bounded_recursion():
     assert str(ak.from_iter(x).type) == "1 * " + "var * " * 199 + "int64"
 
 
+SELF_LIST = []
+SELF_LIST.append(SELF_LIST)
+SELF_DICT = {}
+SELF_DICT["k"] = SELF_DICT
+
+
 @pytest.mark.parametrize(
     "value",
     [
@@ -153,6 +159,8 @@ def test_bounded_recursion():
         ["x" * 100],
         list(range(100)),
         functools.reduce(lambda x, _: {"a": x}, range(100), 1),
+        SELF_LIST,
+        ([SELF_DICT],),
     ],
 )
 def test_argument_text_matches_repr(value):
