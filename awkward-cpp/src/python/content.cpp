@@ -19,6 +19,15 @@ builder_fromiter_iscomplex(const py::handle& obj) {
   return PyComplex_Check(obj.ptr());
 }
 
+// Looked up once, because every iterable element is checked against it.
+static PyTypeObject*
+builder_fromiter_numpy_void() {
+  PYBIND11_CONSTINIT static py::gil_safe_call_once_and_store<py::object> storage;
+  return reinterpret_cast<PyTypeObject*>(storage.call_once_and_store_result([]() {
+    return py::module::import("numpy").attr("void");
+  }).get_stored().ptr());
+}
+
 void
 builder_datetime(ak::ArrayBuilder& self, const py::handle& obj) {
   if (py::isinstance<py::str>(obj)) {
@@ -160,9 +169,8 @@ builder_fromiter(ak::ArrayBuilder& self, const py::handle& obj) {
     }
     self.endrecord();
   }
-  // np.void is iterable, so it goes before the iterable branch; lists skip the numpy lookup.
-  else if (!PyList_Check(obj.ptr())
-           && py::isinstance(obj, py::module::import("numpy").attr("void"))) {
+  // np.void is iterable, so it goes before the iterable branch.
+  else if (PyObject_TypeCheck(obj.ptr(), builder_fromiter_numpy_void())) {
     py::object names = obj.attr("dtype").attr("names");
     if (names.is_none()) {
       self.bytestring(obj.attr("tolist")().cast<std::string>());
