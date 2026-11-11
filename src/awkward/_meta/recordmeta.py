@@ -39,27 +39,41 @@ class RecordMeta(Meta, Generic[T]):
             return False
         if not isinstance(other, RecordMeta):
             return False
-        if self.is_tuple != other.is_tuple:
+        left_fields, right_fields = self._fields, other._fields
+        if left_fields is None:
+            if right_fields is not None or len(self._contents) != len(other._contents):
+                return False
+        elif right_fields is None:
             return False
-        left_fields, right_fields = self.fields, other.fields
         if left_fields == right_fields:
-            # Raw child metadata avoids RecordArray.content's length resolution
-            # and slicing. Matching field order also needs no name lookup.
-            return all(
-                left._mergeable_next(right, mergebool, mergecastable)
-                for left, right in zip(self.contents, other.contents, strict=True)
-            )
-        if set(left_fields) != set(right_fields):
-            return False
-        # Resolve reordered names once, without slicing or resolving lengths.
-        # Reverse traversal preserves content(field)'s first-match semantics.
+            # Compare stored metadata directly: no generated tuple names,
+            # length resolution, field slicing, or generator allocation.
+            for left, right in zip(self._contents, other._contents, strict=True):
+                if not left._mergeable_next(right, mergebool, mergecastable):
+                    return False
+            return True
+        # Resolve reordered names once. Reverse traversal preserves the first
+        # matching field when duplicate names are present.
+        assert left_fields is not None and right_fields is not None
+        if len(left_fields) <= 2 and len(right_fields) <= 2:
+            if set(left_fields) != set(right_fields):
+                return False
+            for field, content in zip(left_fields, self._contents, strict=True):
+                other_content = other._contents[right_fields.index(field)]
+                if not content._mergeable_next(other_content, mergebool, mergecastable):
+                    return False
+            return True
         other_contents = dict(
-            zip(reversed(right_fields), reversed(other.contents), strict=True)
+            zip(reversed(right_fields), reversed(other._contents), strict=True)
         )
-        return all(
-            content._mergeable_next(other_contents[field], mergebool, mergecastable)
-            for field, content in zip(left_fields, self.contents, strict=True)
-        )
+        if other_contents.keys() != set(left_fields):
+            return False
+        for field, content in zip(left_fields, self._contents, strict=True):
+            if not content._mergeable_next(
+                other_contents[field], mergebool, mergecastable
+            ):
+                return False
+        return True
 
     @property
     def is_tuple(self) -> bool:

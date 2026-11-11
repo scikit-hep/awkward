@@ -207,3 +207,41 @@ def test_reordered_record_duplicate_names_keep_first_match():
     wrapped_right = ak.forms.IndexedForm("i64", right)
     assert ak._do.mergeable(left, wrapped_right) is True
     assert ak._do.mergeable(right, wrapped_left) is False
+
+
+@pytest.mark.parametrize("width", [2, 10, 100])
+@pytest.mark.parametrize("reorder", [False, True])
+def test_wide_record_field_compatibility(width, reorder):
+    fields = [f"f{i}" for i in range(width)]
+    integer = ak.forms.NumpyForm("int64")
+    left = ak.forms.RecordForm([integer] * width, fields)
+    right_fields = fields[::-1] if reorder else fields
+    right = ak.forms.RecordForm([integer] * width, right_fields)
+    assert ak._do.mergeable(left, right) is True
+    assert ak._do.mergeable(right, left) is True
+    missing = ak.forms.RecordForm([integer] * (width - 1), right_fields[:-1])
+    assert ak._do.mergeable(left, missing) is False
+    assert ak._do.mergeable(missing, left) is False
+    changed = ak.forms.RecordForm(
+        [ak.forms.RecordForm([integer], ["nested"]), *([integer] * (width - 1))],
+        right_fields,
+    )
+    assert ak._do.mergeable(left, changed) is False
+    assert ak._do.mergeable(changed, left) is False
+
+
+def test_reordered_duplicate_fields_with_unequal_counts():
+    integer = ak.forms.NumpyForm("int64")
+    one = ak.forms.RecordForm([integer], ["x"])
+    two = ak.forms.RecordForm([integer, integer], ["x", "x"])
+    # Named compatibility uses field names, rather than the raw child count.
+    assert ak._do.mergeable(one, two) is True
+    assert ak._do.mergeable(two, one) is True
+    # Positional tuples must retain the explicit arity check.
+    assert (
+        ak._do.mergeable(
+            ak.forms.RecordForm([integer], None),
+            ak.forms.RecordForm([integer, integer], None),
+        )
+        is False
+    )
