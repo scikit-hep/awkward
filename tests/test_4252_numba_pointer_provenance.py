@@ -101,6 +101,7 @@ def test_nested_records_masks_and_strings():
 
 
 @pytest.mark.skipif(sys.platform == "emscripten", reason="requires fresh subprocesses")
+@pytest.mark.thread_unsafe
 def test_disk_cache_with_global_and_argument_arrays(tmp_path):
     script = tmp_path / "cached_arrays.py"
     script.write_text(
