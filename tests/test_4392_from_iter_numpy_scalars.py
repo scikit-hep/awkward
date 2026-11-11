@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import collections
 import functools
 import subprocess
 import sys
@@ -149,6 +150,21 @@ SELF_DICT = {}
 SELF_DICT["k"] = SELF_DICT
 
 
+class L(list): ...
+
+
+class D(dict): ...
+
+
+class T(tuple): ...
+
+
+class S(set): ...
+
+
+class F(frozenset): ...
+
+
 @pytest.mark.parametrize(
     "value",
     [
@@ -163,6 +179,12 @@ SELF_DICT["k"] = SELF_DICT
         ([SELF_DICT],),
         {8, 1},
         [frozenset({8, 1})],
+        L([1, L([2])]),
+        D(a=D(b=1)),
+        T((1,)),
+        [S({8, 1}), S(), F({8, 1}), F()],
+        collections.OrderedDict(a=1),
+        collections.namedtuple("P", "a")(1),
     ],
 )
 def test_argument_text_matches_repr(value):
@@ -176,8 +198,6 @@ def test_argument_whose_repr_raises():
         def items(self):
             raise ValueError
 
-    # reprlib picks its formatter by the type's name (and, in newer Pythons, its module)
-    Items.__name__, Items.__module__ = "dict", "builtins"
     assert (
         ak._errors.ErrorContext().format_argument(72, Items(a=1))
         == "repr-raised-ValueError"
@@ -191,6 +211,7 @@ def test_argument_whose_repr_raises():
         "x = []; x.extend([x, x])",
         "x = {}; x['a'] = x; x['b'] = x",
         "x = 0\nfor _ in range(72):\n    x = [x, x]",
+        "class L(list): ...\nx = L()\nfor _ in range(72):\n    x = L([x, x])",
     ],
 )
 def test_branching_container_error_formatting_is_bounded(make_x):

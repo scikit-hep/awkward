@@ -177,15 +177,23 @@ class _ArgumentRepr(reprlib.Repr):
         identity = id(x)
         if identity in self._active:
             # Level 0 gives repr()'s own placeholder for a cycle, e.g. "[...]".
-            return super().repr1(x, 0)
+            return self._dispatch(x, 0)
         if self._remaining <= 0:
             return "..."
         self._remaining -= 1
         self._active.add(identity)
         try:
-            return super().repr1(x, level)
+            return self._dispatch(x, level)
         finally:
             self._active.remove(identity)
+
+    def _dispatch(self, x, level):
+        # reprlib dispatches by type name, which would send a subclass to the
+        # unbounded builtin repr(); route any subclass whose repr() is the builtin's.
+        for base in (list, tuple, dict, set, frozenset):
+            if isinstance(x, base) and type(x).__repr__ is base.__repr__:
+                return getattr(self, "repr_" + base.__name__)(x, level)
+        return super().repr1(x, level)
 
     def repr_dict(self, x, level):
         # reprlib sorts keys; repr() keeps insertion order.
@@ -203,14 +211,14 @@ class _ArgumentRepr(reprlib.Repr):
 
     def repr_set(self, x, level):
         # reprlib sorts members; repr() keeps iteration order.
+        name = type(x).__name__
         if not x:
-            return "set()"
-        return self._repr_iterable(x, level, "{", "}", self.maxset)
+            return f"{name}()"
+        if type(x) is set:
+            return self._repr_iterable(x, level, "{", "}", self.maxset)
+        return self._repr_iterable(x, level, f"{name}({{", "})", self.maxset)
 
-    def repr_frozenset(self, x, level):
-        if not x:
-            return "frozenset()"
-        return self._repr_iterable(x, level, "frozenset({", "})", self.maxfrozenset)
+    repr_frozenset = repr_set
 
 
 class OperationErrorContext(ErrorContext):
