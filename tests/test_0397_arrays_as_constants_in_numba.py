@@ -47,10 +47,12 @@ def test_Array():
         return 3.14
 
     f1()
+    # Each compiled environment owns one lookup reference, independently of
+    # Array._numbaview; repeated uses within one function share that owner.
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
-    ) == (2, 2)
+    ) == (2, 3)
 
     @numba.njit
     def f2():
@@ -61,7 +63,7 @@ def test_Array():
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
-    ) == (2, 2)
+    ) == (2, 4)
 
     @numba.njit
     def f3():
@@ -73,25 +75,25 @@ def test_Array():
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
-    ) == (2, 2)
+    ) == (2, 5)
 
     del a
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
-    ) == (2, 2)
+    ) == (2, 5)
 
     del b
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
-    ) == (2, 2)
+    ) == (2, 5)
 
     del c
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
-    ) == (2, 2)
+    ) == (2, 5)
 
     @numba.njit
     def f4():
@@ -101,7 +103,7 @@ def test_Array():
     assert (
         sys.getrefcount(array._numbaview),
         sys.getrefcount(array._numbaview.lookup),
-    ) == (2, 2)
+    ) == (2, 6)
 
 
 def test_Record():

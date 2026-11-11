@@ -491,6 +491,12 @@ def posat(context, builder, pos, offset):
     return builder.add(pos, context.get_constant(numba.intp, offset))
 
 
+def cast_buffer_table(context, builder, pointer):
+    return builder.bitcast(
+        pointer, context.get_value_type(numba.types.CPointer(numba.types.voidptr))
+    )
+
+
 def getbuffer(context, builder, buffers, offset):
     """Load a buffer pointer without passing its address through an integer."""
     return builder.load(builder.gep(buffers, [offset]))

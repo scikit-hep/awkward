@@ -38,6 +38,9 @@ write its compiled implementation to the disk cache. The function still runs,
 but a fresh process must compile it again. This prevents reusing buffer addresses
 from a previous process. Functions that receive Awkward Arrays as arguments can
 reuse their compiled code from the disk cache with the new process's buffers.
+Compiled functions retain the lookup and buffers for a captured array, even if
+the Python array is later modified or its behavior is replaced. Its compiled
+layout type remains the one selected during compilation.
 
 ```{code-cell} ipython3
 array1 = ak.Array([[0, 1.1, 2.2], [], [3.3, 4.4], [5.5], [6.6, 7.7, 8.8, 9.9]])
