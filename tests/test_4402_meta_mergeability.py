@@ -168,3 +168,26 @@ def test_record_compatibility_does_not_slice_fields(reorder, monkeypatch):
     monkeypatch.setattr(ak.contents.RecordArray, "content", forbidden)
     assert ak._do.mergeable(left, right)
     assert ak._do.mergeable(right, left)
+
+
+@pytest.mark.parametrize("policy", ["same_kind", "equiv"])
+def test_jax_casting_matches_numpy_metadata(policy):
+    jnp = pytest.importorskip("jax.numpy")
+    dtypes = [
+        np.dtype(x)
+        for x in (
+            "bool",
+            "int8",
+            "int32",
+            "int64",
+            "uint32",
+            "float32",
+            "float64",
+            "complex64",
+            "complex128",
+        )
+    ]
+    for left, right in itertools.product(dtypes, repeat=2):
+        assert bool(jnp.can_cast(left, right, casting=policy)) is bool(
+            np.can_cast(left, right, casting=policy)
+        )

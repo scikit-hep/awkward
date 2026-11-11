@@ -2,35 +2,35 @@
 
 from __future__ import annotations
 
-from awkward._meta.bitmaskedmeta import BitMaskedMeta
-from awkward._meta.bytemaskedmeta import ByteMaskedMeta
-from awkward._meta.emptymeta import EmptyMeta
-from awkward._meta.indexedmeta import IndexedMeta
-from awkward._meta.indexedoptionmeta import IndexedOptionMeta
-from awkward._meta.listmeta import ListMeta
-from awkward._meta.listoffsetmeta import ListOffsetMeta
 from awkward._meta.meta import Meta
-from awkward._meta.numpymeta import NumpyMeta
 from awkward._meta.recordmeta import RecordMeta
-from awkward._meta.regularmeta import RegularMeta
-from awkward._meta.unionmeta import UnionMeta
-from awkward._meta.unmaskedmeta import UnmaskedMeta
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._parameters import type_parameters_equal
-from awkward._typing import Literal
+from awkward._typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from awkward._meta.bitmaskedmeta import BitMaskedMeta
+    from awkward._meta.bytemaskedmeta import ByteMaskedMeta
+    from awkward._meta.indexedmeta import IndexedMeta
+    from awkward._meta.indexedoptionmeta import IndexedOptionMeta
+    from awkward._meta.listmeta import ListMeta
+    from awkward._meta.listoffsetmeta import ListOffsetMeta
+    from awkward._meta.numpymeta import NumpyMeta
+    from awkward._meta.regularmeta import RegularMeta
+    from awkward._meta.unmaskedmeta import UnmaskedMeta
+
+    _Wrappers = (
+        IndexedMeta,
+        IndexedOptionMeta,
+        ByteMaskedMeta,
+        BitMaskedMeta,
+        UnmaskedMeta,
+    )
+    _Lists = (RegularMeta, ListMeta, ListOffsetMeta)
 
 np = NumpyMetadata.instance()
 numpy = Numpy.instance()
-
-_OPTION_WRAPPERS = (
-    IndexedMeta,
-    IndexedOptionMeta,
-    ByteMaskedMeta,
-    BitMaskedMeta,
-    UnmaskedMeta,
-)
-_LIST_TYPES = (RegularMeta, ListMeta, ListOffsetMeta)
 
 
 def mergeable(
@@ -45,27 +45,36 @@ def mergeable(
     absorb another form, and regular lists of different sizes can become jagged.
     Data-dependent merging is implemented separately by Content.
     """
-    if isinstance(one, (EmptyMeta, UnionMeta)):
+    if one.is_unknown or one.is_union:
         return True
     if two.is_identity_like or two.is_union:
         return True
 
-    if isinstance(one, _OPTION_WRAPPERS):
-        return mergeable(
-            one.content,
-            two.content if isinstance(two, _OPTION_WRAPPERS) else two,
-            mergebool,
-            mergecastable,
-        )
-    if isinstance(two, _OPTION_WRAPPERS):
+    if one.is_indexed or one.is_option:
+        if TYPE_CHECKING:
+            assert isinstance(one, _Wrappers)
+        if two.is_indexed or two.is_option:
+            if TYPE_CHECKING:
+                assert isinstance(two, _Wrappers)
+            return mergeable(one.content, two.content, mergebool, mergecastable)
+        return mergeable(one.content, two, mergebool, mergecastable)
+    if two.is_indexed or two.is_option:
+        if TYPE_CHECKING:
+            assert isinstance(two, _Wrappers)
         return mergeable(one, two.content, mergebool, mergecastable)
     if not type_parameters_equal(one._parameters, two._parameters):
         return False
 
-    if isinstance(one, NumpyMeta):
+    if one.is_numpy:
+        if TYPE_CHECKING:
+            assert isinstance(one, NumpyMeta)
         if one._mergeable_ndim > 1:
             return mergeable(one._mergeable_regular(), two, mergebool, mergecastable)
-        if not isinstance(two, NumpyMeta) or two._mergeable_ndim > 1:
+        if not two.is_numpy:
+            return False
+        if TYPE_CHECKING:
+            assert isinstance(two, NumpyMeta)
+        if two._mergeable_ndim > 1:
             return False
         left = one._mergeable_dtype
         right = two._mergeable_dtype
@@ -87,19 +96,32 @@ def mergeable(
                 for family in (np.integer, np.floating, np.complexfloating)
             )
         if mergecastable in ("same_kind", "equiv"):
+            # Casting compares dtype descriptors, never device buffers. Use the
+            # same NumPy rule for forms, layouts and mixed-backend metadata.
             return numpy.can_cast(left, right, casting=mergecastable) or numpy.can_cast(
                 right, left, casting=mergecastable
             )
         raise TypeError(f"unrecognized mergecastable option: {mergecastable}")
 
-    if isinstance(one, _LIST_TYPES):
-        if isinstance(two, _LIST_TYPES):
+    if one.is_list:
+        if TYPE_CHECKING:
+            assert isinstance(one, _Lists)
+        if two.is_list:
+            if TYPE_CHECKING:
+                assert isinstance(two, _Lists)
             return mergeable(one.content, two.content, mergebool, mergecastable)
-        if isinstance(two, NumpyMeta) and two._mergeable_ndim > 1:
-            return mergeable(one, two._mergeable_regular(), mergebool, mergecastable)
+        if two.is_numpy:
+            if TYPE_CHECKING:
+                assert isinstance(two, NumpyMeta)
+            if two._mergeable_ndim > 1:
+                return mergeable(
+                    one, two._mergeable_regular(), mergebool, mergecastable
+                )
         return False
 
-    if isinstance(one, RecordMeta) and isinstance(two, RecordMeta):
+    if one.is_record and two.is_record:
+        if TYPE_CHECKING:
+            assert isinstance(one, RecordMeta) and isinstance(two, RecordMeta)
         if one.is_tuple != two.is_tuple:
             return False
         left_fields, right_fields = one.fields, two.fields
