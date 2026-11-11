@@ -12,17 +12,18 @@ class Lookup:
         positions = []
         tolookup(layout, positions)
 
+        self.nplike = layout.backend.nplike
+        self.generator = generator
+        self.positions = positions
+        self.arrayptrs = self._make_arrayptrs(positions)
+
+    def _make_arrayptrs(self, positions):
         def arrayptr(x):
             if isinstance(x, int):
                 return x
             return self.nplike.memory_ptr(x)
 
-        self.nplike = layout.backend.nplike
-        self.generator = generator
-        self.positions = positions
-        self.arrayptrs = self.nplike.asarray(
-            [arrayptr(x) for x in positions], dtype=np.intp
-        )
+        return self.nplike.asarray([arrayptr(x) for x in positions], dtype=np.intp)
 
 
 def tolookup(layout, positions):
