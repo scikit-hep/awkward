@@ -177,6 +177,14 @@ SELF_DEQUE = collections.deque()
 SELF_DEQUE.append(SELF_DEQUE)
 
 
+class HashableSet(set):
+    __hash__ = object.__hash__
+
+
+SELF_SET = HashableSet()
+SELF_SET.add(SELF_SET)
+
+
 @pytest.mark.parametrize(
     "value",
     [
@@ -199,6 +207,7 @@ SELF_DEQUE.append(SELF_DEQUE)
         collections.namedtuple("P", "a")(1),
         [Q([1]), Q(), collections.deque([1], maxlen=3)],
         SELF_DEQUE,
+        SELF_SET,
         Reordered([1, 2]),
     ],
 )

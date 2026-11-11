@@ -166,7 +166,7 @@ class _ArgumentRepr(reprlib.Repr):
     def __init__(self, width):
         super().__init__()
         self.maxlevel = self.maxlist = self.maxtuple = self.maxdict = width
-        self.maxset = self.maxfrozenset = self.maxdeque = self.maxarray = width
+        self.maxset = self.maxdeque = self.maxarray = width
         self.maxstring = self.maxother = self.maxlong = sys.maxsize
         self._active = set()
         self._remaining = max(width, 1) * 4
@@ -177,22 +177,21 @@ class _ArgumentRepr(reprlib.Repr):
         # argument, and stop cycles along the current traversal path.
         identity = id(x)
         if identity in self._active:
-            # Level 0 gives repr()'s own placeholder for a cycle, e.g. "[...]",
-            # except that repr() writes a deque's as a list's.
-            return "[...]" if isinstance(x, deque) else self._dispatch(x, 0)
+            # Level 0 gives repr()'s own placeholder for a cycle, e.g. "[...]".
+            return super().repr1(x, 0)
         if self._remaining <= 0:
             return "..."
         self._remaining -= 1
         self._active.add(identity)
         try:
-            return self._dispatch(x, level)
+            return super().repr1(x, level)
         finally:
             self._active.remove(identity)
 
-    def _dispatch(self, x, level):
-        # reprlib dispatches by type name, which would send a subclass to the
-        # unbounded builtin repr(); route a subclass when everything this walk
-        # calls is inherited, so it reads what the builtin repr() reads.
+    def repr_instance(self, x, level):
+        # reprlib dispatches by exact type name, so subclasses land here, in the
+        # unbounded builtin repr(); route one when everything the walk calls is
+        # inherited, so it reads what the builtin repr() reads.
         cls = type(x)
         for base in (list, tuple, dict, set, frozenset, deque):
             if isinstance(x, base) and all(
@@ -200,7 +199,7 @@ class _ArgumentRepr(reprlib.Repr):
                 for name in ("__repr__", "__iter__", "__len__", "__bool__", "items")
             ):
                 return getattr(self, "repr_" + base.__name__)(x, level)
-        return super().repr1(x, level)
+        return super().repr_instance(x, level)
 
     def repr_dict(self, x, level):
         # reprlib sorts keys; repr() keeps insertion order.
@@ -221,6 +220,8 @@ class _ArgumentRepr(reprlib.Repr):
         name = type(x).__name__
         if not x:
             return f"{name}()"
+        if level <= 0:
+            return f"{name}(...)"
         if type(x) is set:
             return self._repr_iterable(x, level, "{", "}", self.maxset)
         return self._repr_iterable(x, level, f"{name}({{", "})", self.maxset)
@@ -228,6 +229,8 @@ class _ArgumentRepr(reprlib.Repr):
     repr_frozenset = repr_set
 
     def repr_deque(self, x, level):
+        if level <= 0:
+            return "[...]"
         right = "])" if x.maxlen is None else f"], maxlen={x.maxlen})"
         return self._repr_iterable(
             x, level, f"{type(x).__name__}([", right, self.maxdeque
