@@ -2138,6 +2138,14 @@ def awkward_RegularArray_rpad_and_clip_axis1(toindex, target, size, length):
     toindex[: length * target] = cp.where(j < shorter, i * dtype(size) + j, dtype(-1))
 
 
+def awkward_RegularArray_getitem_next_array_regularize(
+    toarray, fromarray, lenarray, size
+):
+    from awkward._connect.cuda import _regulararray
+
+    return _regulararray.regularize(toarray, fromarray, lenarray, size)
+
+
 # Builds a gather index for selecting one element per row from a RegularArray.
 # A RegularArray stores `length` rows of exactly `size` elements in a flat buffer,
 # so row i occupies flat positions [i*size, (i+1)*size).
@@ -3934,6 +3942,22 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
         )
     raise ValueError(
         "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
+    )
+
+
+def awkward_RegularArray_reduce_local_nextparents_64(nextparents, size, length):
+    from awkward._connect.cuda import _regulararray
+
+    return _regulararray.local_parents(nextparents, size, length)
+
+
+def awkward_RegularArray_combinations_64(
+    tocarry, toindex, fromindex, n, replacement, size, length
+):
+    from awkward._connect.cuda import _regulararray
+
+    return _regulararray.combinations(
+        tocarry, toindex, fromindex, n, replacement, size, length
     )
 
 

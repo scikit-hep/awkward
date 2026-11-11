@@ -38,9 +38,6 @@ cuda_kernels_impl = [
     "awkward_ListArray_validity",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_simplify",
-    "awkward_RegularArray_getitem_next_array_regularize",
-    "awkward_RegularArray_reduce_local_nextparents_64",
-    "awkward_RegularArray_combinations_64",
     "awkward_ListArray_getitem_jagged_apply",
     "awkward_ListArray_getitem_jagged_expand",
     "awkward_ListArray_getitem_jagged_shrink",
@@ -57,12 +54,6 @@ cuda_kernels_impl = [
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
-    # The awkward_reduce_* value reducers (sum/prod/min/max/argmin/argmax/
-    # count/countnonzero and their bool/complex variants) have no compiled
-    # CUDA kernel: the CUDA backend dispatches them to the cuda.cccl-based
-    # helpers in awkward._connect.cuda._compute. Their signature-table entries
-    # are emitted as None (this kernel name is absent from cuda_kernels_impl),
-    # which routes CupyBackend.__getitem__ to the CudaComputeKernel path.
 ]
 
 
