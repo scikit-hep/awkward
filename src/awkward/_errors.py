@@ -5,6 +5,7 @@ import reprlib
 import sys
 import threading
 import warnings
+from collections import deque
 from collections.abc import Callable, Collection, Iterable, Mapping
 from functools import cached_property, wraps
 from itertools import islice
@@ -176,8 +177,9 @@ class _ArgumentRepr(reprlib.Repr):
         # argument, and stop cycles along the current traversal path.
         identity = id(x)
         if identity in self._active:
-            # Level 0 gives repr()'s own placeholder for a cycle, e.g. "[...]".
-            return self._dispatch(x, 0)
+            # Level 0 gives repr()'s own placeholder for a cycle, e.g. "[...]",
+            # except that repr() writes a deque's as a list's.
+            return "[...]" if isinstance(x, deque) else self._dispatch(x, 0)
         if self._remaining <= 0:
             return "..."
         self._remaining -= 1
@@ -189,9 +191,14 @@ class _ArgumentRepr(reprlib.Repr):
 
     def _dispatch(self, x, level):
         # reprlib dispatches by type name, which would send a subclass to the
-        # unbounded builtin repr(); route any subclass whose repr() is the builtin's.
-        for base in (list, tuple, dict, set, frozenset):
-            if isinstance(x, base) and type(x).__repr__ is base.__repr__:
+        # unbounded builtin repr(); route a subclass when everything this walk
+        # calls is inherited, so it reads what the builtin repr() reads.
+        cls = type(x)
+        for base in (list, tuple, dict, set, frozenset, deque):
+            if isinstance(x, base) and all(
+                getattr(cls, name, None) is getattr(base, name, None)
+                for name in ("__repr__", "__iter__", "__len__", "__bool__", "items")
+            ):
                 return getattr(self, "repr_" + base.__name__)(x, level)
         return super().repr1(x, level)
 
@@ -219,6 +226,12 @@ class _ArgumentRepr(reprlib.Repr):
         return self._repr_iterable(x, level, f"{name}({{", "})", self.maxset)
 
     repr_frozenset = repr_set
+
+    def repr_deque(self, x, level):
+        right = "])" if x.maxlen is None else f"], maxlen={x.maxlen})"
+        return self._repr_iterable(
+            x, level, f"{type(x).__name__}([", right, self.maxdeque
+        )
 
 
 class OperationErrorContext(ErrorContext):

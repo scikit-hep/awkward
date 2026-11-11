@@ -165,6 +165,18 @@ class S(set): ...
 class F(frozenset): ...
 
 
+class Q(collections.deque): ...
+
+
+class Reordered(list):
+    def __iter__(self):
+        return reversed(self)
+
+
+SELF_DEQUE = collections.deque()
+SELF_DEQUE.append(SELF_DEQUE)
+
+
 @pytest.mark.parametrize(
     "value",
     [
@@ -185,6 +197,9 @@ class F(frozenset): ...
         [S({8, 1}), S(), F({8, 1}), F()],
         collections.OrderedDict(a=1),
         collections.namedtuple("P", "a")(1),
+        [Q([1]), Q(), collections.deque([1], maxlen=3)],
+        SELF_DEQUE,
+        Reordered([1, 2]),
     ],
 )
 def test_argument_text_matches_repr(value):
@@ -194,13 +209,17 @@ def test_argument_text_matches_repr(value):
 
 
 def test_argument_whose_repr_raises():
-    class Items(dict):
-        def items(self):
-            raise ValueError
+    value = {}
 
+    class Grows:
+        def __repr__(self):
+            value["c"] = 2
+            return "g"
+
+    value.update(a=Grows(), b=1)
     assert (
-        ak._errors.ErrorContext().format_argument(72, Items(a=1))
-        == "repr-raised-ValueError"
+        ak._errors.ErrorContext().format_argument(72, value)
+        == "repr-raised-RuntimeError"
     )
 
 
@@ -212,6 +231,7 @@ def test_argument_whose_repr_raises():
         "x = {}; x['a'] = x; x['b'] = x",
         "x = 0\nfor _ in range(72):\n    x = [x, x]",
         "class L(list): ...\nx = L()\nfor _ in range(72):\n    x = L([x, x])",
+        "import collections\nclass Q(collections.deque): ...\nx = Q()\nfor _ in range(72):\n    x = Q([x, x])",
     ],
 )
 def test_branching_container_error_formatting_is_bounded(make_x):
