@@ -1401,6 +1401,14 @@ def awkward_RegularArray_getitem_jagged_expand(
     ]
 
 
+def awkward_UnionArray_nestedfill_tags_index(
+    totags, toindex, tmpstarts, tag, fromcounts, length
+):
+    from awkward._connect.cuda._unionarray import nestedfill_tags_index
+
+    return nestedfill_tags_index(totags, toindex, tmpstarts, tag, fromcounts, length)
+
+
 # For each position i where fromtags[i] == fromwhich, sets totags[i] = towhich and
 # toindex[i] = fromindex[i] + base. Other positions are left unchanged.
 # Example:
@@ -3680,6 +3688,24 @@ def awkward_UnionArray_filltags_const(totags, totagsoffset, length, base):
         d_out=totags[totagsoffset : totagsoffset + length],
         op=fill_const,
         num_items=length,
+    )
+
+
+def awkward_UnionArray_flatten_length(
+    total_length, fromtags, fromindex, length, offsetsraws
+):
+    from awkward._connect.cuda._unionarray import flatten_length
+
+    return flatten_length(total_length, fromtags, fromindex, length, offsetsraws)
+
+
+def awkward_UnionArray_flatten_combine(
+    totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws
+):
+    from awkward._connect.cuda._unionarray import flatten_combine
+
+    return flatten_combine(
+        totags, toindex, tooffsets, fromtags, fromindex, length, offsetsraws
     )
 
 
