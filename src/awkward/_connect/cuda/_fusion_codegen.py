@@ -132,16 +132,18 @@ def _classify_leaf(value):
     if isinstance(value, ak.Array):
         return "column", value
     # numpy / cupy 0-d or python scalar
-    if isinstance(value, (int, float)):
+    if isinstance(value, (int, float, complex, np.generic)):
         return "scalar", value
     if hasattr(value, "ndim") and getattr(value, "ndim", None) == 0:
-        return "scalar", value.item()
+        if hasattr(value, "dtype") and hasattr(value, "item"):
+            return "scalar", np.dtype(value.dtype).type(value.item())
+        return "scalar", value[()]
     raise FusionUnsupported(f"unsupported fused leaf of type {type(value).__name__}")
 
 
 # ``inf``/``nan`` back the repr of non-finite folded constants; numba treats
 # op globals as frozen constants, so the generated source stays cache-stable.
-_EXEC_GLOBALS = {"inf": float("inf"), "nan": float("nan")}
+_EXEC_GLOBALS = {"np": np, "inf": float("inf"), "nan": float("nan")}
 
 
 @functools.lru_cache(maxsize=128)
