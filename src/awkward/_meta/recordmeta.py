@@ -1,12 +1,18 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+from __future__ import annotations
+
 from functools import cached_property
 
 from awkward._meta.meta import Meta
+from awkward._parameters import type_parameters_equal
 from awkward._regularize import is_integer
-from awkward._typing import Generic, JSONSerializable, TypeVar
+from awkward._typing import TYPE_CHECKING, Generic, JSONSerializable, Literal, TypeVar
 from awkward.errors import FieldNotFoundError
+
+if TYPE_CHECKING:
+    from awkward._meta.mergeable import _Wrapper
 
 T = TypeVar("T", bound=Meta)
 
@@ -16,6 +22,44 @@ class RecordMeta(Meta, Generic[T]):
 
     _contents: list[T]
     _fields: list[str] | None
+
+    def _mergeable_next(
+        self,
+        other: Meta,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
+        if other.is_identity_like or other.is_union:
+            return True
+        if other.is_indexed or other.is_option:
+            if TYPE_CHECKING:
+                assert isinstance(other, _Wrapper)
+            return self._mergeable_next(other.content, mergebool, mergecastable)
+        if not type_parameters_equal(self._parameters, other._parameters):
+            return False
+        if not isinstance(other, RecordMeta):
+            return False
+        if self.is_tuple != other.is_tuple:
+            return False
+        left_fields, right_fields = self.fields, other.fields
+        if left_fields == right_fields:
+            # Raw child metadata avoids RecordArray.content's length resolution
+            # and slicing. Matching field order also needs no name lookup.
+            return all(
+                left._mergeable_next(right, mergebool, mergecastable)
+                for left, right in zip(self.contents, other.contents, strict=True)
+            )
+        if set(left_fields) != set(right_fields):
+            return False
+        # Resolve reordered names once, without slicing or resolving lengths.
+        # Reverse traversal preserves content(field)'s first-match semantics.
+        other_contents = dict(
+            zip(reversed(right_fields), reversed(other.contents), strict=True)
+        )
+        return all(
+            content._mergeable_next(other_contents[field], mergebool, mergecastable)
+            for field, content in zip(left_fields, self.contents, strict=True)
+        )
 
     @property
     def is_tuple(self) -> bool:

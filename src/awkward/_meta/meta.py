@@ -33,9 +33,7 @@ class Meta:
         mergecastable: Literal["same_kind", "equiv", "family"],
     ) -> bool:
         """Compare metadata without reading, allocating, or merging data buffers."""
-        from awkward._meta.mergeable import mergeable
-
-        return mergeable(self, other, mergebool, mergecastable)
+        raise NotImplementedError
 
     @property
     def parameters(self) -> JSONMapping:

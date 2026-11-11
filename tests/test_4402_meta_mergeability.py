@@ -191,3 +191,19 @@ def test_jax_casting_matches_numpy_metadata(policy):
         assert bool(jnp.can_cast(left, right, casting=policy)) is bool(
             np.can_cast(left, right, casting=policy)
         )
+
+
+def test_reordered_record_duplicate_names_keep_first_match():
+    integer = ak.forms.NumpyForm("int64")
+    floating = ak.forms.NumpyForm("float64")
+    record = ak.forms.RecordForm([integer], ["z"])
+    left = ak.forms.RecordForm([integer, integer, floating], ["x", "x", "y"])
+    right = ak.forms.RecordForm([floating, integer, record], ["y", "x", "x"])
+    # RecordMeta.content("x") chooses the first matching field, not the last.
+    assert ak._do.mergeable(left, right) is True
+    assert ak._do.mergeable(right, left) is False
+
+    wrapped_left = ak.forms.IndexedForm("i64", left)
+    wrapped_right = ak.forms.IndexedForm("i64", right)
+    assert ak._do.mergeable(left, wrapped_right) is True
+    assert ak._do.mergeable(right, wrapped_left) is False

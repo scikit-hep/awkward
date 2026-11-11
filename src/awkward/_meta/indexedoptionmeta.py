@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+from awkward._meta.mergeable import mergeable_wrapper
 from awkward._meta.meta import Meta
 from awkward._typing import Generic, JSONSerializable, TypeVar
 
@@ -8,6 +9,8 @@ T = TypeVar("T", bound=Meta)
 
 
 class IndexedOptionMeta(Meta, Generic[T]):
+    _mergeable_next = mergeable_wrapper
+
     is_indexed = True
     is_option = True
 
