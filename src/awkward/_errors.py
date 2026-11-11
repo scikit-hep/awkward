@@ -170,17 +170,17 @@ class _ArgumentRepr(reprlib.Repr):
         self._active = set()
         self._remaining = max(width, 1) * 4
 
-    def repr1(self, value, level):
+    def repr1(self, x, level):
         # A depth bound alone still permits exponential work on branching
         # cycles or shared subtrees. Share one visit budget across the whole
         # argument, and stop cycles along the current traversal path.
-        identity = id(value)
+        identity = id(x)
         if identity in self._active or self._remaining <= 0:
             return "..."
         self._remaining -= 1
         self._active.add(identity)
         try:
-            return super().repr1(value, level)
+            return super().repr1(x, level)
         finally:
             self._active.remove(identity)
 
