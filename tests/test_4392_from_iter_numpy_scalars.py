@@ -161,6 +161,8 @@ SELF_DICT["k"] = SELF_DICT
         functools.reduce(lambda x, _: {"a": x}, range(100), 1),
         SELF_LIST,
         ([SELF_DICT],),
+        {8, 1},
+        [frozenset({8, 1})],
     ],
 )
 def test_argument_text_matches_repr(value):

@@ -201,6 +201,17 @@ class _ArgumentRepr(reprlib.Repr):
             pieces.append("...")
         return "{" + ", ".join(pieces) + "}"
 
+    def repr_set(self, x, level):
+        # reprlib sorts members; repr() keeps iteration order.
+        if not x:
+            return "set()"
+        return self._repr_iterable(x, level, "{", "}", self.maxset)
+
+    def repr_frozenset(self, x, level):
+        if not x:
+            return "frozenset()"
+        return self._repr_iterable(x, level, "frozenset({", "})", self.maxfrozenset)
+
 
 class OperationErrorContext(ErrorContext):
     _width = 80 - 8
