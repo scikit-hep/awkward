@@ -128,6 +128,8 @@ class RecordType(Type):
                         "categorical",
                     )
                     or name in ak.types.numpytype._primitive_to_dtype_dict
+                    # the grammar reserves these on every platform
+                    or name in ("float128", "complex256")
                 ):
                     if params is None:
                         params = 'parameters={"__record__": ' + json.dumps(name) + "}"
@@ -196,6 +198,8 @@ class RecordType(Type):
 
         # Both tuples
         if self.is_tuple and other.is_tuple:
+            if len(self._contents) != len(other._contents):
+                return False
             return all(
                 this._is_equal_to(that, all_parameters)
                 for this, that in zip(self._contents, other._contents, strict=True)

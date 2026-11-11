@@ -41,6 +41,14 @@ def test_unstructured_void(zero_d):
     assert result.to_list() == [b"ab"]
 
 
+@pytest.mark.parametrize("recarray", [False, True])
+def test_structured_array_preserves_fields(recarray):
+    source = STRUCTURED.view(np.recarray) if recarray else STRUCTURED
+    result = ak.from_iter([source])
+    assert result.to_list() == [ak.from_numpy(source).to_list()]
+    assert str(result.type) == "1 * var * {a: int64, b: float64}"
+
+
 # A stack overflow kills the interpreter, so it must fail the test rather than pytest.
 needs_subprocess = pytest.mark.skipif(
     sys.platform.startswith("emscripten"), reason="no subprocess on emscripten"
@@ -53,6 +61,7 @@ def run(code):
         capture_output=True,
         text=True,
         check=False,
+        timeout=30,
     )
 
 
@@ -163,3 +172,36 @@ def test_argument_whose_repr_raises():
         ak._errors.ErrorContext().format_argument(72, Items(a=1))
         == "repr-raised-ValueError"
     )
+
+
+@needs_subprocess
+@pytest.mark.parametrize(
+    "make_x",
+    [
+        "x = []; x.extend([x, x])",
+        "x = {}; x['a'] = x; x['b'] = x",
+        "x = 0\nfor _ in range(72):\n    x = [x, x]",
+    ],
+)
+def test_branching_container_error_formatting_is_bounded(make_x):
+    out = run(
+        f"{make_x}\n"
+        "text = ak._errors.ErrorContext().format_argument(72, x)\n"
+        "assert len(text) <= 72\n"
+        "print('formatted')"
+    )
+    assert out.returncode == 0, out.stderr[-2000:]
+    assert out.stdout.strip() == "formatted"
+
+
+@needs_subprocess
+def test_branching_cycle_from_iter_raises_promptly():
+    out = run(
+        "x = []; x.extend([x, x])\n"
+        "try:\n"
+        "    ak.from_iter(x)\n"
+        "except RecursionError:\n"
+        "    print('RecursionError')"
+    )
+    assert out.returncode == 0, out.stderr[-2000:]
+    assert out.stdout.strip() == "RecursionError"

@@ -13,7 +13,7 @@ runs:
   using: composite
   steps:
     - name: Get micromamba
-      uses: mamba-org/setup-micromamba@d7c9bd84e824b79d2af72a2d4196c7f4300d3476 # v3.0.0
+      uses: mamba-org/setup-micromamba@f457c30a868e4760d3a6fcea5f25dc655b8edf39 # v3.2.1
       with:
         environment-name: test-env
         init-shell: bash
@@ -22,16 +22,20 @@ runs:
         # TODO: drop the numpy pin when a numba-cuda release supports
         # numpy 2.5 (NVIDIA/numba-cuda#907): numba-cuda 0.30.4 references
         # the removed np.row_stack at import time
+        # cccl-python>=1.3.0 is the minimum cuda-cccl version that allows
+        # numba-cuda-mlir 0.6.x (see cuda-cccl's own pin, which this mirrors)
+        # numba-cuda-mlir 0.5.3 is broken (cuda-cccl itself excludes it)
         create-args: >-
           -c rapidsai
           python=3.13
           pandas>=0.24
-          cccl-python>=1.0.2,<=1.1.1
+          cccl-python>=1.3.0
           cudf>=25.02
           cupy>=14
           cuda-version=${{ inputs.cuda-version }}
           cxx-compiler
           numba-cuda
+          numba-cuda-mlir>=0.5.2,!=0.5.3,<0.7
           numpy<2.5
 
     - name: Generate build files
@@ -42,7 +46,7 @@ runs:
 
     - name: Cache awkward-cpp wheel
       id: cache-awkward-cpp-wheel
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: awkward-cpp/dist
         key: ${{ github.job }}-${{ hashFiles('awkward-cpp/**') }}

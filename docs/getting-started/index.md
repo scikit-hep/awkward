@@ -1,3 +1,9 @@
+---
+myst:
+  html_meta:
+    description: "How to install Awkward Array with pip or conda, with links to tutorials and frequently asked questions."
+---
+
 # Getting started
 
 ## Installation

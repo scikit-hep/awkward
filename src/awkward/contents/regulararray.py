@@ -374,6 +374,7 @@ class RegularArray(RegularMeta[Content], Content):
             self._touch_shape(recursive=False)
             return self
 
+        stop = max(start, stop)
         zeros_length = nplike.index_as_shape_item(stop - start)
         substart, substop = (
             start * nplike.shape_item_as_index(self._size),
@@ -1081,9 +1082,19 @@ class RegularArray(RegularMeta[Content], Content):
             nextstarts = nextoffsets[:-1]
 
             if reducer.needs_position:
-                # Regular arrays have the same length rows, so there can be no "missing" values
-                # unlike ragged list types
+                # Regular rows introduce no shifts, but option parents may do so.
                 nextshifts = ak.index.Index64.zeros(nextcarry.length, nplike=nplike)
+                if shifts is not None and self._size != 0:
+                    nextrows = nextcarry.data // self._size
+                    nextparents = (
+                        nplike.searchsorted(offsets.data, nextrows, side="right") - 1
+                    )
+                    nextshifts = ak.index.Index64(
+                        shifts.data[nextrows]
+                        + offsets.data[nextparents]
+                        - starts.data[nextparents],
+                        nplike=nplike,
+                    )
             else:
                 nextshifts = None
 

@@ -910,8 +910,12 @@ class RecordArray(RecordMeta[Content], Content):
 
         contents = []
         for content in self._contents:
+            # Fields may extend past the record. Option layouts allocate carries
+            # from their length, while the sorting offsets cover only records;
+            # trim first so those carries have no unwritten trailing entries.
+            trimmed = content._getitem_range(0, self.length)
             contents.append(
-                content._sort_next(
+                trimmed._sort_next(
                     negaxis, starts, offsets, outlength, ascending, stable
                 )
             )

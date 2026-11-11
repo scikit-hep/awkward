@@ -20,7 +20,7 @@ jobs:
   determine-source-date-epoch:
     name: "Determine SOURCE_DATE_EPOCH"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       source-date-epoch: ${{ steps.log.outputs.source-date-epoch }}
 
@@ -41,7 +41,7 @@ jobs:
   make_sdist:
     name: "Build awkward-cpp sdist"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -58,7 +58,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check awkward-cpp/dist/*
 
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: awkward-cpp-sdist
         path: awkward-cpp/dist/*.tar.gz
@@ -95,14 +95,14 @@ jobs:
         persist-credentials: false
 
     - name: Python 3.12
-      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: '3.12'
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
-    - uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
+    - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e  # v4.3.5
       env:
         CIBW_ARCHS: ${{ matrix.arch }}
       with:
@@ -112,7 +112,7 @@ jobs:
       run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: awkward-cpp-wheels-${{ matrix.os }}-${{ matrix.arch }}
         path: wheelhouse/*.whl
@@ -132,13 +132,13 @@ jobs:
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
     # The pyodide cross-build cannot generate the kernel tests (no host numpy)
     - name: Generate kernel tests for the wheel test suite
       run: pipx run nox -s prepare -- --tests
 
-    - uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
+    - uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e  # v4.3.5
       env:
         CIBW_PLATFORM: pyodide
       with:
@@ -148,7 +148,7 @@ jobs:
       run: pipx run twine check wheelhouse/*.whl
 
     - name: Upload wheels
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: awkward-cpp-wheels-pyodide
         path: wheelhouse/*.whl
@@ -156,7 +156,7 @@ jobs:
   build_awkward_wheel:
     name: "Build awkward sdist and wheel"
     if: github.event_name != 'schedule' || github.repository_owner == 'scikit-hep'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: [determine-source-date-epoch]
     env:
       SOURCE_DATE_EPOCH: ${{ needs.determine-source-date-epoch.outputs.source-date-epoch }}
@@ -167,7 +167,7 @@ jobs:
         persist-credentials: false
 
     - name: Setup uv
-      uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
 
     - name: Prepare build files
       run: pipx run nox -s prepare
@@ -178,7 +178,7 @@ jobs:
     - name: Check metadata
       run: pipx run twine check dist/*
 
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: awkward-wheel
         path: dist/*

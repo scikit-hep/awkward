@@ -36,9 +36,7 @@ docs/.jupyter_cache
 docs/jupyter_execute
 docs/environment.yml
 
-# Pyodide / JupyterLite
-docs/lite/
-docs/_contents/
+# Pyodide
 **/.pyodide-xbuildenv
 
 docs/_static/doxygen

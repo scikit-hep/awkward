@@ -33,7 +33,7 @@ NamedAxis = _NamedAxisLocal()
 def _prettify_named_axes(
     named_axis: AxisMapping,
     delimiter: str = ", ",
-    maxlen: None | int = None,
+    maxlen: int | None = None,
 ) -> str:
     """
     This function takes a named axis mapping and returns a string representation of the mapping.
