@@ -170,27 +170,20 @@ def test_record_compatibility_does_not_slice_fields(reorder, monkeypatch):
     assert ak._do.mergeable(right, left)
 
 
-@pytest.mark.parametrize("policy", ["same_kind", "equiv"])
-def test_jax_casting_matches_numpy_metadata(policy):
-    jnp = pytest.importorskip("jax.numpy")
-    dtypes = [
-        np.dtype(x)
-        for x in (
-            "bool",
-            "int8",
-            "int32",
-            "int64",
-            "uint32",
-            "float32",
-            "float64",
-            "complex64",
-            "complex128",
-        )
+@pytest.mark.parametrize("policy", ["same_kind", "equiv", "family"])
+@pytest.mark.parametrize("mergebool", [False, True])
+def test_jax_form_and_layout_mergeability(policy, mergebool):
+    pytest.importorskip("jax.numpy")
+    ak.jax.register_and_check()
+    layouts = [
+        ak.to_backend(np.empty(0, dtype=dtype), "jax", highlevel=False)
+        for dtype in ("bool", "int8", "int32", "uint32", "float32", "complex64")
     ]
-    for left, right in itertools.product(dtypes, repeat=2):
-        assert bool(jnp.can_cast(left, right, casting=policy)) is bool(
-            np.can_cast(left, right, casting=policy)
-        )
+    for left, right in itertools.product(layouts, repeat=2):
+        expected = ak._do.mergeable(left.form, right.form, mergebool, policy)
+        assert ak._do.mergeable(left, right, mergebool, policy) is expected
+        assert ak._do.mergeable(left.form, right, mergebool, policy) is expected
+        assert ak._do.mergeable(left, right.form, mergebool, policy) is expected
 
 
 def test_reordered_record_duplicate_names_keep_first_match():
@@ -245,3 +238,24 @@ def test_reordered_duplicate_fields_with_unequal_counts():
         )
         is False
     )
+
+
+def test_matching_duplicate_record_names_use_first_match():
+    leaf = ak.contents.NumpyArray(np.arange(3))
+    record = ak.contents.RecordArray(
+        [leaf, ak.contents.RecordArray([leaf], ["z"])], ["x", "x"]
+    )
+    assert ak._do.mergeable(record, record) is False
+    assert ak._do.mergeable(record.form, record.form) is False
+    result = ak.concatenate([record, record], highlevel=False)
+    assert len(result) == 6
+
+
+def test_concatenate_arrow_struct_with_duplicate_names():
+    pa = pytest.importorskip("pyarrow")
+    source = pa.StructArray.from_arrays(
+        [pa.array([1, 2]), pa.array([[1.0], [2.0]])], names=["x", "x"]
+    )
+    array = ak.from_arrow(source)
+    result = ak.concatenate([array, array], highlevel=False)
+    assert len(result) == 4

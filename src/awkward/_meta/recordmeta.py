@@ -45,7 +45,10 @@ class RecordMeta(Meta, Generic[T]):
                 return False
         elif right_fields is None:
             return False
-        if left_fields == right_fields:
+        # Named merging resolves duplicate names to the first matching field.
+        if left_fields == right_fields and (
+            left_fields is None or len(set(left_fields)) == len(left_fields)
+        ):
             # Compare stored metadata directly: no generated tuple names,
             # length resolution, field slicing, or generator allocation.
             for left, right in zip(self._contents, other._contents, strict=True):
@@ -55,14 +58,6 @@ class RecordMeta(Meta, Generic[T]):
         # Resolve reordered names once. Reverse traversal preserves the first
         # matching field when duplicate names are present.
         assert left_fields is not None and right_fields is not None
-        if len(left_fields) <= 2 and len(right_fields) <= 2:
-            if set(left_fields) != set(right_fields):
-                return False
-            for field, content in zip(left_fields, self._contents, strict=True):
-                other_content = other._contents[right_fields.index(field)]
-                if not content._mergeable_next(other_content, mergebool, mergecastable):
-                    return False
-            return True
         other_contents = dict(
             zip(reversed(right_fields), reversed(other._contents), strict=True)
         )
