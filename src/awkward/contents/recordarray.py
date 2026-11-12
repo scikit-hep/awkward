@@ -17,6 +17,7 @@ from awkward._nplikes.array_like import ArrayLike
 from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.numpy_like import IndexType, NumpyMetadata
 from awkward._nplikes.shape import ShapeItem, unknown_length
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._parameters import (
     parameters_intersect,
     type_parameters_equal,
@@ -732,6 +733,20 @@ class RecordArray(RecordMeta[Content], Content):
         else:
             return False
 
+    @staticmethod
+    def _trim_merge_field(field: Content, length: ShapeItem) -> Content:
+        # Reading a virtual buffer's shape can run a generator. Keep the
+        # existing slicing path unless the no-op is cheap to establish.
+        if (
+            type(field) is ak.contents.NumpyArray
+            and length is not unknown_length
+            and field.backend.nplike.known_data
+            and not isinstance(field.data, VirtualNDArray)
+            and field.length == length
+        ):
+            return field
+        return field[:length]
+
     def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
@@ -743,7 +758,7 @@ class RecordArray(RecordMeta[Content], Content):
 
         for_each_field = []
         for field in self.contents:
-            trimmed = field[0 : self.length]
+            trimmed = self._trim_merge_field(field, self.length)
             for_each_field.append([trimmed])
 
         if self.is_tuple:
@@ -758,7 +773,9 @@ class RecordArray(RecordMeta[Content], Content):
                         if len(self.contents) == len(array.contents):
                             for i in range(len(self.contents)):
                                 field = array[self.index_to_field(i)]
-                                for_each_field[i].append(field[0 : array.length])
+                                for_each_field[i].append(
+                                    self._trim_merge_field(field, array.length)
+                                )
                         else:
                             raise ValueError(
                                 "cannot merge tuples with different numbers of fields"
@@ -789,7 +806,7 @@ class RecordArray(RecordMeta[Content], Content):
                             for i in range(len(self.contents)):
                                 field = array[self.index_to_field(i)]
 
-                                trimmed = field[0 : array.length]
+                                trimmed = self._trim_merge_field(field, array.length)
                                 for_each_field[i].append(trimmed)
                         else:
                             raise AssertionError(
