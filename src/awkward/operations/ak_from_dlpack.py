@@ -62,18 +62,22 @@ def from_dlpack(
 
     # Only a subset of known devices are supported.
     nplike: NumpyLike
-    match device_type:
-        # TODO: CUDA_PINNED should support GPU
-        case DLPackDevice.CPU | DLPackDevice.CUDA_PINNED:
-            nplike = Numpy.instance()
-        case DLPackDevice.CUDA | DLPackDevice.ROCM:
-            nplike = Cupy.instance()
-        case DLPackDevice.ROCM_PINNED | DLPackDevice.CUDA_MANAGED:
-            nplike = (Numpy if prefer_cpu else Cupy).instance()
-        case _:
-            raise NotImplementedError(
-                f"DLPack device type {DLPackDevice(device_type).name} is not supported"
-            )
+    if device_type == DLPackDevice.CPU:
+        nplike = Numpy.instance()
+    elif device_type == DLPackDevice.CUDA:
+        nplike = Cupy.instance()
+    elif device_type == DLPackDevice.CUDA_PINNED:
+        # TODO: this should support GPU
+        # nplike = (Numpy if prefer_cpu else Cupy).instance()
+        nplike = Numpy.instance()
+    elif device_type == DLPackDevice.ROCM:
+        nplike = Cupy.instance()
+    elif device_type == DLPackDevice.ROCM_PINNED:
+        nplike = (Numpy if prefer_cpu else Cupy).instance()
+    elif device_type == DLPackDevice.CUDA_MANAGED:
+        nplike = (Numpy if prefer_cpu else Cupy).instance()
+    else:
+        raise AssertionError
 
     array = nplike.from_dlpack(array)
     return wrap_layout(
