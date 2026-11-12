@@ -259,3 +259,14 @@ def test_concatenate_arrow_struct_with_duplicate_names():
     array = ak.from_arrow(source)
     result = ak.concatenate([array, array], highlevel=False)
     assert len(result) == 4
+
+
+def test_two_reordered_fields_with_different_child_layouts():
+    integer = ak.forms.NumpyForm("int64")
+    nested = ak.forms.ListOffsetForm("i64", integer)
+    left = ak.forms.RecordForm([integer, nested], ["x", "y"])
+    right = ak.forms.RecordForm([nested, integer], ["y", "x"])
+    wrong = ak.forms.RecordForm([integer, nested], ["y", "x"])
+    assert ak._do.mergeable(left, right) is True
+    assert ak._do.mergeable(right, left) is True
+    assert ak._do.mergeable(left, wrong) is False
