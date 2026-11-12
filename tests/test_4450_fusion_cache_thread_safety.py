@@ -1,13 +1,17 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 import inspect
+import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+import pytest
+
 from awkward._connect.cpu import _fusion_codegen as cfc
 
 
+@pytest.mark.skipif(sys.platform == "emscripten", reason="requires threads")
 def test_concurrent_cold_miss():
     # Use an isolated cache so parallel tests cannot warm or evict this entry.
     compile_op = inspect.unwrap(cfc._compile_op)
