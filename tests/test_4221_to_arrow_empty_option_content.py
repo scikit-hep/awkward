@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from packaging.version import parse as parse_version
 
 import awkward as ak
 
@@ -24,6 +25,14 @@ def empty_content(kind):
     if kind == "unknown":
         return ak.contents.EmptyArray()
     raise AssertionError(kind)
+
+
+def validate_full(array):
+    # pyarrow < 18 aborts on full validation of string-backed extension arrays.
+    full = parse_version(pyarrow.__version__) >= parse_version("18") or not isinstance(
+        array.type, pyarrow.ExtensionType
+    )
+    array.validate(full=full)
 
 
 def all_null(kind, length, dtype=np.int64, parameters=None):
@@ -178,7 +187,7 @@ def test_empty_categorical_content(
         "categorical_as_dictionary": categorical_as_dictionary,
     }
     out = ak.to_arrow(array, **options)
-    out.validate(full=True)
+    validate_full(out)
     assert len(out) == out.null_count == length
     assert out.to_pylist() == [None] * length
     reference = ak.to_arrow(all_null(kind, 0), extensionarray=extensionarray)
@@ -230,7 +239,7 @@ def test_nonempty_dictionary_controls(kind, extensionarray, categorical_as_dicti
     )
     storage_type = out.type.storage_type if extensionarray else out.type
     assert pyarrow.types.is_dictionary(storage_type) == categorical_as_dictionary
-    out.validate(full=True)
+    validate_full(out)
     assert out.to_pylist() == ak.to_list(array)
     if not extensionarray or categorical_as_dictionary:
         assert ak.to_list(ak.from_arrow(out)) == ak.to_list(array)
