@@ -6352,16 +6352,7 @@ def test_recordarray_with_custom_generator(numpy_like):
     # Create the expected array for comparison
     offsets = np.array([0, 2, 5, 9, 10], dtype=np.int64)
     content = np.array([0, 1, 4, 9, 16, 25, 36, 49, 64, 81], dtype=np.float64)
-    y_values = np.array(
-        [
-            0.0,
-            0.8414709848078965,
-            0.9092974268256817,
-            0.1411200080598672,
-            -0.7568024953079282,
-        ],
-        dtype=np.float64,
-    )
+    y_values = np.array([np.sin(i) for i in range(5)], dtype=np.float64)
 
     x_field_regular = ak.contents.ListOffsetArray(
         ak.index.Index(offsets), ak.contents.NumpyArray(content)
