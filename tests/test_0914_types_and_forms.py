@@ -987,7 +987,7 @@ def test_OptionType():
                 ak.types.unknowntype.UnknownType(), parameters={"__categorical__": True}
             )
         )
-        == "?categorical[type=unknown]"
+        == "categorical[type=?unknown]"
     )
     assert (
         str(
@@ -996,7 +996,7 @@ def test_OptionType():
                 parameters={"__categorical__": True},
             )
         )
-        == "option[categorical[type=var * unknown]]"
+        == "categorical[type=option[var * unknown]]"
     )
     assert (
         str(
@@ -1007,7 +1007,7 @@ def test_OptionType():
                 parameters={"__categorical__": True},
             )
         )
-        == "option[categorical[type=10 * unknown]]"
+        == "categorical[type=option[10 * unknown]]"
     )
     assert (
         str(
@@ -1016,7 +1016,7 @@ def test_OptionType():
                 parameters={"x": 123, "__categorical__": True},
             )
         )
-        == 'option[categorical[type=unknown], parameters={"x": 123}]'
+        == 'categorical[type=option[unknown, parameters={"x": 123}]]'
     )
     assert (
         str(
@@ -1025,7 +1025,7 @@ def test_OptionType():
                 parameters={"x": 123, "__categorical__": True},
             )
         )
-        == 'option[categorical[type=var * unknown], parameters={"x": 123}]'
+        == 'categorical[type=option[var * unknown, parameters={"x": 123}]]'
     )
     assert (
         str(
@@ -1036,7 +1036,7 @@ def test_OptionType():
                 parameters={"x": 123, "__categorical__": True},
             )
         )
-        == 'option[categorical[type=10 * unknown], parameters={"x": 123}]'
+        == 'categorical[type=option[10 * unknown, parameters={"x": 123}]]'
     )
 
     assert (
