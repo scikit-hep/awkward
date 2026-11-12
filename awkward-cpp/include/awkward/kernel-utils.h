@@ -20,6 +20,8 @@ namespace awkward::kernel {
     return T{-1} - static_cast<T>(static_cast<U>(~value));
   }
 
+  /// Normalize a scalar Python index; callers retain their own error context.
+  /// As with the kernel specification, length is a nonnegative list size.
   [[nodiscard]] constexpr std::optional<int64_t>
   normalize_index(int64_t index, int64_t length) noexcept {
     if (index < 0) {
