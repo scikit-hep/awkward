@@ -143,11 +143,6 @@ def _nodes_writable(layout: ak.contents.Content) -> bool:
         # (pyarrow: "Expected all lists to be of size=0")
         return layout.size > 0 and _nodes_writable(layout.content)
     if layout.is_option:
-        if isinstance(layout, ak.contents.IndexedOptionArray):
-            if layout.length > 0 and layout.content.length == 0:
-                # `to_arrow` crashes projecting nulls over a zero-length
-                # content (IndexError in `ListOffsetArray._to_arrow`, #4221)
-                return False
         return _nodes_writable(layout.content)
     if layout.is_indexed:
         return _nodes_writable(layout.content)

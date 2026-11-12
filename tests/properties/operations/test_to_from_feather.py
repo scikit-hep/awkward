@@ -124,25 +124,11 @@ def has_issues(a: ak.Array) -> bool:
     released fix deletes it; with all of them gone the test filters
     reduce to `feather_compatible` and `feather_stable`.
     """
-    if _has_issue_4221(a.layout):
-        return True
     if _has_issue_4228(a.layout):
         return True
     if _has_issue_4229(a.layout):
         return True
     return False
-
-
-def _has_issue_4221(layout: ak.contents.Content) -> bool:
-    """`to_arrow` crashes projecting nulls over a zero-length content
-    (IndexError in `ListOffsetArray._to_arrow`, #4221)."""
-    if (
-        isinstance(layout, ak.contents.IndexedOptionArray)
-        and layout.length > 0
-        and layout.content.length == 0
-    ):
-        return True
-    return any(_has_issue_4221(x) for x in _children(layout))
 
 
 def _has_issue_4228(
@@ -351,8 +337,8 @@ def test_roundtrip_stable(feather_dir, a: ak.Array) -> None:
     record loses its length, and a valid all-null-fields row under an
     option reads back null. After one full roundtrip these normalizations
     have happened: converting the reconstruction again writes an identical
-    Arrow table. Layouts that the conversion crashes on or corrupts
-    (#4221) are still excluded: this test does not vouch for them.
+    Arrow table. Layouts affected by the remaining known conversion issues
+    are still excluded.
     """
     path = feather_path(feather_dir)
     ak.to_feather(a, path)
