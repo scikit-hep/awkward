@@ -81,7 +81,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install build and test dependencies
-        run: python -m pip install "scikit-build-core>=1.0" "pybind11>=3" "cmake>=3.29" ninja numpy pyyaml pytest
+        run: python -m pip install "scikit-build-core>=1.0" "pybind11>=3" "cmake>=3.29" ninja numpy pyyaml pytest numba pyarrow
 
       - name: Build and install awkward-cpp in C++23 mode
         shell: python {0}
@@ -111,6 +111,10 @@ jobs:
           tests/test_3209_awkwardforth_read_negative_number_of_items.py
           tests/test_4105_forth_vm_and_libawkward_fixes.py
           tests/test_4359_forth_output_strides.py
+          tests/test_4270_extended_precision_operations.py
+          tests/test_4270_float16_float128_complex256_reducers.py
+          tests/test_4270_complex_nan_reducers.py
+          tests/test_4270_fused_statistics.py
 
       - name: Configure header-only tests in C++23 mode
         shell: python {0}
@@ -133,3 +137,21 @@ jobs:
 
       - name: Run header-only tests
         run: ctest --test-dir build-cxx23-headers -C Debug --output-on-failure --no-tests=error
+
+      - name: Round-trip extended layout buffers through Python
+        shell: python {0}
+        run: |
+          import os
+          import pathlib
+          import subprocess
+          import sys
+
+          executable = pathlib.Path("build-cxx23-headers/tests")
+          if os.name == "nt":
+              executable /= "Debug/test_4270-extended-layout-types.exe"
+          else:
+              executable /= "test_4270-extended-layout-types"
+          env = dict(os.environ, AWKWARD_EXTENDED_LAYOUT_TEST_EXECUTABLE=str(executable.resolve()))
+          subprocess.run([
+              sys.executable, "-m", "pytest", "-q", "tests/test_4270_cpp_layout_types.py",
+          ], check=True, env=env)
