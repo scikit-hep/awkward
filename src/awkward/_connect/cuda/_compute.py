@@ -176,8 +176,8 @@ def _make_widening_cast(in_type, out_type):
 
     Returned with a stable identity (cached per dtype pair) so cuda.compute
     builds one kernel per pair instead of recompiling a fresh closure each call.
-    The op only needs to widen; cuda.compute uses the return annotation to pick
-    the output type, so an `int()` / `float()` body suffices.
+    cuda.compute uses the return annotation to pick the output type. Explicit
+    integer casts preserve modular signed-to-unsigned conversion when widening.
     """
     if np.dtype(out_type).kind == "f":
 
@@ -187,7 +187,7 @@ def _make_widening_cast(in_type, out_type):
     else:
 
         def _cast(x):
-            return int(x)
+            return out_type(x)
 
     _cast.__annotations__ = {"x": in_type, "return": out_type}
     return _cast
@@ -694,13 +694,24 @@ def awkward_reduce_argmin_complex(
     )
 
 
+def _integer_reduction_buffers(input_data, result):
+    # cuda.compute must accumulate in an unsigned type, not just reinterpret
+    # the result after overflowing a signed accumulator. Views allocate no data.
+    if result.dtype.kind == "i":
+        unsigned = np.dtype(f"u{result.dtype.itemsize}")
+        result = result.view(unsigned)
+        if input_data.dtype.itemsize == unsigned.itemsize:
+            input_data = input_data.view(unsigned)
+    return _widen_for_reduce(input_data, result.dtype), result
+
+
 def awkward_reduce_sum(
     result,
     input_data,
     offsets_data,
     outlength,
 ):
-    d_input = _widen_for_reduce(input_data, result.dtype)
+    d_input, result = _integer_reduction_buffers(input_data, result)
     start_o, end_o = make_segment_views(offsets_data)
 
     h_init = np.asarray(0, dtype=result.dtype)
@@ -959,7 +970,7 @@ def awkward_reduce_prod(
     offsets_data,
     outlength,
 ):
-    d_input = _widen_for_reduce(input_data, result.dtype)
+    d_input, result = _integer_reduction_buffers(input_data, result)
 
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(1, dtype=result.dtype)
