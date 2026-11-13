@@ -1083,15 +1083,20 @@ def array_impl(array, dtype=None):
             )
 
 
+def is_flat_numpy_view(value):
+    """Whether a Numba view supports the zero-copy np.asarray conversion."""
+    return (
+        isinstance(value, ArrayViewType)
+        and isinstance(value.type, ak._connect.numba.layout.NumpyArrayType)
+        and value.type.ndim == 1
+        and array_supported(value.type.inner_dtype)
+    )
+
+
 @numba.extending.type_callable(numpy.asarray)
 def type_asarray(context):
     def typer(arrayview):
-        if (
-            isinstance(arrayview, ArrayViewType)
-            and isinstance(arrayview.type, ak._connect.numba.layout.NumpyArrayType)
-            and arrayview.type.ndim == 1
-            and array_supported(arrayview.type.inner_dtype)
-        ):
+        if is_flat_numpy_view(arrayview):
             return numba.types.Array(arrayview.type.inner_dtype, 1, "C")
 
     return typer

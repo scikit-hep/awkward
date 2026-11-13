@@ -177,6 +177,7 @@ def _register():
     import awkward._connect.numba.layout
     import awkward._connect.numba.layoutbuilder
     import awkward._connect.numba.numpy
+    import awkward._connect.numba.ufunc
 
     n = ak.numba
     n.ArrayViewType = awkward._connect.numba.arrayview.ArrayViewType
