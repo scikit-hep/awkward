@@ -97,8 +97,6 @@ def has_issues(a: ak.Array) -> bool:
     released fix deletes it; with all of them gone the test filters
     reduce to `arrow_compatible` and `table_compatible`.
     """
-    if _has_issue_4221(a.layout):
-        return True
     if _has_issue_4228(a.layout):
         return True
     if _has_issue_4229(a.layout):
@@ -106,18 +104,6 @@ def has_issues(a: ak.Array) -> bool:
     if _has_issue_4255(a.layout):
         return True
     return False
-
-
-def _has_issue_4221(layout: ak.contents.Content) -> bool:
-    """`to_arrow` crashes projecting nulls over a zero-length content
-    (IndexError in `ListOffsetArray._to_arrow`, #4221)."""
-    if (
-        isinstance(layout, ak.contents.IndexedOptionArray)
-        and layout.length > 0
-        and layout.content.length == 0
-    ):
-        return True
-    return any(_has_issue_4221(x) for x in _children(layout))
 
 
 def _has_issue_4228(
