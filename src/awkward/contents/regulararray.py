@@ -1090,7 +1090,13 @@ class RegularArray(RegularMeta[Content], Content):
             nextoffsets = self._compact_offsets64(True)
             nextstarts = nextoffsets[:-1]
 
-            outcontent = self._content._reduce_next(
+            # the content may be longer than size * length and nodes below expect
+            # their offsets to cover every row
+            content = self._content
+            if nplike.known_data and content.length != nextlen:
+                content = content._getitem_range(0, nextlen)
+
+            outcontent = content._reduce_next(
                 reducer,
                 negaxis,
                 nextstarts,
