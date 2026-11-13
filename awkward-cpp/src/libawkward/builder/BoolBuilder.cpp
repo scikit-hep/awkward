@@ -17,7 +17,7 @@ namespace awkward {
   }
 
   BoolBuilder::BoolBuilder(const BuilderOptions& options,
-                           GrowableBuffer<uint8_t> buffer)
+                           GrowableBuffer<std::uint8_t> buffer)
       : options_(options)
       , buffer_(std::move(buffer)) { }
 
@@ -27,22 +27,22 @@ namespace awkward {
   };
 
   const std::string
-  BoolBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  BoolBuilder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     std::stringstream form_key;
     form_key << "node" << (form_key_id++);
 
     buffer_.concatenate(
-      reinterpret_cast<uint8_t*>(
+      reinterpret_cast<std::uint8_t*>(
         container.empty_buffer(form_key.str() + "-data",
-        (int64_t)buffer_.length() * (int64_t)sizeof(bool))));
+        (std::int64_t)buffer_.length() * (std::int64_t)sizeof(bool))));
 
     return "{\"class\": \"NumpyArray\", \"primitive\": \"bool\", \"form_key\": \""
            + form_key.str() + "\"}";
   }
 
-  int64_t
+  std::int64_t
   BoolBuilder::length() const {
-    return (int64_t)buffer_.length();
+    return (std::int64_t)buffer_.length();
   }
 
   void
@@ -69,7 +69,7 @@ namespace awkward {
   }
 
   const BuilderPtr
-  BoolBuilder::integer(int64_t x) {
+  BoolBuilder::integer(std::int64_t x) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->integer(x);
     return out;
@@ -90,21 +90,21 @@ namespace awkward {
   }
 
   const BuilderPtr
-  BoolBuilder::datetime(int64_t x, const std::string& unit) {
+  BoolBuilder::datetime(std::int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->datetime(x, unit);
     return out;
   }
 
   const BuilderPtr
-  BoolBuilder::timedelta(int64_t x, const std::string& unit) {
+  BoolBuilder::timedelta(std::int64_t x, const std::string& unit) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->timedelta(x, unit);
     return out;
   }
 
   const BuilderPtr
-  BoolBuilder::string(const char* x, int64_t length, const char* encoding) {
+  BoolBuilder::string(const char* x, std::int64_t length, const char* encoding) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->string(x, length, encoding);
     return out;
@@ -125,14 +125,14 @@ namespace awkward {
   }
 
   const BuilderPtr
-  BoolBuilder::begintuple(int64_t numfields) {
+  BoolBuilder::begintuple(std::int64_t numfields) {
     BuilderPtr out = UnionBuilder::fromsingle(options_, shared_from_this());
     out.get()->begintuple(numfields);
     return out;
   }
 
   const BuilderPtr
-  BoolBuilder::index(int64_t /* index */) {
+  BoolBuilder::index(std::int64_t /* index */) {
     throw std::invalid_argument(
       std::string("called 'index' without 'begintuple' at the same level before it")
       + FILENAME(__LINE__));
