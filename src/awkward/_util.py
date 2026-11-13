@@ -8,7 +8,7 @@ import os
 import re
 import struct
 import sys
-from collections.abc import Collection
+from collections.abc import Collection, Iterable
 
 import numpy as np  # noqa: TID251
 import packaging.version
@@ -151,6 +151,22 @@ def unique_list(items: Collection[T]) -> list[T]:
         seen.add(item)
         result.append(item)
     return result
+
+
+def contents_by_field(
+    fields: Iterable[str], contents: Iterable[T]
+) -> dict[str, list[T]]:
+    """
+    Collect a record's children under their names, keeping their order per name.
+
+    A record may have several fields with the same name. Two records are equal
+    when each name has the same contents in the same order, because a field name
+    selects its first occurrence.
+    """
+    out: dict[str, list[T]] = {}
+    for field, content in zip(fields, contents, strict=True):
+        out.setdefault(field, []).append(content)
+    return out
 
 
 def copy_behaviors(from_name: str, to_name: str, behavior: dict):
