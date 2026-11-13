@@ -61,10 +61,10 @@ def dtype_to_primitive(dtype):
 
 
 _primitive_to_dtype_datetime = re.compile(
-    r"datetime64\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bcs|ns|ps|fs|as)\]"
+    r"datetime64\[([ \t\n\r\f\v]*[0-9]+)?(Y|M|W|D|h|m|s|ms|us|\u03bcs|ns|ps|fs|as)\]"
 )
 _primitive_to_dtype_timedelta = re.compile(
-    r"timedelta64\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bcs|ns|ps|fs|as)\]"
+    r"timedelta64\[([ \t\n\r\f\v]*[0-9]+)?(Y|M|W|D|h|m|s|ms|us|\u03bcs|ns|ps|fs|as)\]"
 )
 
 _primitive_to_dtype_dict = {
