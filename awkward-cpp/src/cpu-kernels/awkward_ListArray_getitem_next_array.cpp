@@ -23,7 +23,8 @@ ERROR awkward_ListArray_getitem_next_array(
         (fromstops[i] > lencontent)) {
       return failure("stops[i] > len(content)", i, kSliceNone, FILENAME(__LINE__));
     }
-    int64_t length = fromstops[i] - fromstarts[i];
+    int64_t length =
+      static_cast<int64_t>(fromstops[i]) - static_cast<int64_t>(fromstarts[i]);
     for (int64_t j = 0;  j < lenarray;  j++) {
       const auto regular_at = awkward::kernel::normalize_index(fromarray[j], length);
       if (!regular_at) {

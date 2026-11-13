@@ -2,6 +2,7 @@
 
 
 import functools
+from types import SimpleNamespace
 
 from cuda.compute import (
     CountingIterator,
@@ -2242,6 +2243,22 @@ def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
     tocarry[:length] = cp.argsort(fromindex[:length])
 
 
+def awkward_ListArray_validity(starts, stops, length, lencontent):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.validity(starts, stops, length, lencontent)
+
+
+def awkward_ListArray_rpad_axis1(
+    toindex, fromstarts, fromstops, tostarts, tostops, target, length
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.rpad(
+        toindex, fromstarts, fromstops, tostarts, tostops, target, length
+    )
+
+
 # Computes the total output length for rpad_axis1 on a ListArray:
 # tomin[0] = sum(max(target, stops[i] - starts[i])) for i in [0, lenstarts).
 #
@@ -2253,7 +2270,9 @@ def awkward_ListArray_rpad_and_clip_length_axis1(
     if lenstarts == 0:
         tomin[:1] = 0
         return
-    counts = fromstops[:lenstarts] - fromstarts[:lenstarts]
+    counts = fromstops[:lenstarts].astype(cp.int64) - fromstarts[:lenstarts].astype(
+        cp.int64
+    )
     tomin[:1] = cp.sum(cp.maximum(counts, target)).astype(tomin.dtype, copy=False)
 
 
@@ -2295,6 +2314,14 @@ def awkward_ListArray_min_range(tomin, fromstarts, fromstops, lenstarts):
         tomin[:1] = result.astype(tomin.dtype, copy=False)
 
 
+def awkward_ListArray_getitem_next_range_spreadadvanced(
+    toadvanced, fromadvanced, fromoffsets, lenstarts
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.spreadadvanced(toadvanced, fromadvanced, fromoffsets, lenstarts)
+
+
 # Computes the total number of elements across all rows: fromoffsets[lenstarts] - fromoffsets[0].
 #
 # Example: fromoffsets=[0,3,3,5]  →  total=[5]
@@ -2307,6 +2334,12 @@ def awkward_ListArray_getitem_next_range_counts(total, fromoffsets, lenstarts):
     ].astype(total.dtype, copy=False)
 
 
+def awkward_ListArray_getitem_next_at(tocarry, fromstarts, fromstops, lenstarts, at):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.next_at(tocarry, fromstarts, fromstops, lenstarts, at)
+
+
 # kSliceNone sentinel value (matches C++ kMaxInt64 + 1 = 2**63 - 1)
 # also used in raw CUDA (at src/awkward/_connect/cuda/cuda_kernels/cuda_common.cu#L60)
 _kSliceNone = 9223372036854775807
@@ -2315,7 +2348,7 @@ _kSliceNone = 9223372036854775807
 # an analogy of what is used in raw cuda kernels (awkward_regularize_rangeslice() inside cuda_common.cu)
 def _make_count_row(fromstarts, fromstops, start, stop, step, dtype):
     def count_row(i):
-        length = fromstops[i] - fromstarts[i]
+        length = np.int64(fromstops[i]) - np.int64(fromstarts[i])
         rs = start
         re = stop
         if step > 0:
@@ -2383,19 +2416,105 @@ def awkward_ListArray_getitem_next_range_carrylength(
         return
 
     # create an int64 type specifically, so that _make_count_row() doesn't break
+    current_stream = cp.cuda.get_current_stream()
+    stream = SimpleNamespace(__cuda_stream__=lambda: (0, current_stream.ptr))
     counts = cp.empty(lenstarts, dtype=cp.int64)
     unary_transform(
         d_in=CountingIterator(fromstarts.dtype.type(0)),
         d_out=counts,
         op=_make_count_row(fromstarts, fromstops, start, stop, step, cp.int64),
         num_items=lenstarts,
+        stream=stream,
     )
     reduce_into(
         d_in=counts,
         d_out=carrylength[:1],
         op=OpKind.PLUS,
         num_items=lenstarts,
+        stream=stream,
         h_init=np.array([0], dtype=counts.dtype),
+    )
+
+
+def awkward_ListArray_getitem_next_range(
+    tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.next_range(
+        tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step
+    )
+
+
+def awkward_ListArray_getitem_next_array_advanced(
+    tocarry,
+    toadvanced,
+    fromstarts,
+    fromstops,
+    fromarray,
+    fromadvanced,
+    lenstarts,
+    lencontent,
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.next_array_advanced(
+        tocarry,
+        toadvanced,
+        fromstarts,
+        fromstops,
+        fromarray,
+        fromadvanced,
+        lenstarts,
+        lencontent,
+    )
+
+
+def awkward_ListArray_getitem_next_array(
+    tocarry,
+    toadvanced,
+    fromstarts,
+    fromstops,
+    fromarray,
+    lenstarts,
+    lenarray,
+    lencontent,
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.next_array(
+        tocarry,
+        toadvanced,
+        fromstarts,
+        fromstops,
+        fromarray,
+        lenstarts,
+        lenarray,
+        lencontent,
+    )
+
+
+def awkward_ListArray_getitem_jagged_expand(
+    multistarts,
+    multistops,
+    singleoffsets,
+    tocarry,
+    fromstarts,
+    fromstops,
+    jaggedsize,
+    length,
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.jagged_expand(
+        multistarts,
+        multistops,
+        singleoffsets,
+        tocarry,
+        fromstarts,
+        fromstops,
+        jaggedsize,
+        length,
     )
 
 
@@ -3552,8 +3671,17 @@ def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
     null_iter = TransformIterator(fromindex[:lenindex], is_null)
 
     h_init = np.array([0], dtype=index_dtype)
+    # The caller immediately reads this scalar on the current CuPy stream.
+    # A nonblocking stream does not wait for CCCL's default stream.
+    current_stream = cp.cuda.get_current_stream()
+    stream = SimpleNamespace(__cuda_stream__=lambda: (0, current_stream.ptr))
     reduce_into(
-        d_in=null_iter, d_out=numnull, op=OpKind.PLUS, num_items=lenindex, h_init=h_init
+        d_in=null_iter,
+        d_out=numnull,
+        op=OpKind.PLUS,
+        num_items=lenindex,
+        h_init=h_init,
+        stream=stream,
     )
 
 
@@ -3934,6 +4062,52 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
         )
     raise ValueError(
         "index[i] >= len(content[tags[i]]) in compiled CUDA code (awkward_UnionArray_validity)"
+    )
+
+
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
+def awkward_ListArray_getitem_jagged_apply(
+    tooffsets,
+    tocarry,
+    slicestarts,
+    slicestops,
+    sliceouterlen,
+    sliceindex,
+    sliceinnerlen,
+    fromstarts,
+    fromstops,
+    contentlen,
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.jagged_apply(
+        tooffsets,
+        tocarry,
+        slicestarts,
+        slicestops,
+        sliceouterlen,
+        sliceindex,
+        sliceinnerlen,
+        fromstarts,
+        fromstops,
+        contentlen,
+    )
+
+
+# CPU-compatible ListArray kernel; see kernel-specification.yml.
+def awkward_ListArray_getitem_jagged_shrink(
+    tocarry, tosmalloffsets, tolargeoffsets, slicestarts, slicestops, length, missing
+):
+    from awkward._connect.cuda import _listarray
+
+    return _listarray.jagged_shrink(
+        tocarry,
+        tosmalloffsets,
+        tolargeoffsets,
+        slicestarts,
+        slicestops,
+        length,
+        missing,
     )
 
 

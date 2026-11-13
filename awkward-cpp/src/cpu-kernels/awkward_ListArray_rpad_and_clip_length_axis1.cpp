@@ -13,7 +13,8 @@ ERROR awkward_ListArray_rpad_and_clip_length_axis1(
   int64_t lenstarts) {
   int64_t length = 0;
   for (int64_t i = 0;  i < lenstarts;  i++) {
-    int64_t rangeval = fromstops[i] - fromstarts[i];
+    int64_t rangeval =
+      static_cast<int64_t>(fromstops[i]) - static_cast<int64_t>(fromstarts[i]);
     length += (target > rangeval) ? target : rangeval;
   }
   *tomin = length;

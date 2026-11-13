@@ -231,7 +231,7 @@ class CupyKernel(BaseKernel):
         ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak_cuda.Invocation(
                 name=self.key[0],
-                error_context=ak._errors.ErrorContext.frozen_primary(),
+                error_context=ak._errors.ErrorContext.cuda_primary(),
             )
         )
 
@@ -251,7 +251,7 @@ class CudaComputeKernel(BaseKernel):
         super().__init__(impl, key)
         self._cupy = Cupy.instance()
 
-    def __call__(self, *args) -> None:
+    def __call__(self, *args) -> KernelError | None:
         import awkward._connect.cuda as ak_cuda
 
         args = maybe_materialize(*args)
@@ -275,7 +275,7 @@ class CudaComputeKernel(BaseKernel):
         ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
             ak_cuda.Invocation(
                 name=self.key[0],
-                error_context=ak._errors.ErrorContext.frozen_primary(),
+                error_context=ak._errors.ErrorContext.cuda_primary(),
             )
         )
 
