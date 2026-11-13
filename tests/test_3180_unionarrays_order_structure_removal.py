@@ -45,8 +45,8 @@ def test_ravel_nested_ListOffsetArrays_typetracer():
 def test_ravel_incompatible_contents():
     a = ak.Array([1, "high", 2, "low"])
     with pytest.raises(
-        AssertionError,
-        match="cannot merge NumpyArray with ListOffsetArray",
+        ValueError,
+        match="cannot merge types int64 and string",
     ):
         ak.ravel(a)
 
@@ -54,7 +54,7 @@ def test_ravel_incompatible_contents():
 def test_ravel_incompatible_contents_typetracer():
     a = ak.Array([1, "high", 2, "low"], backend="typetracer")
     with pytest.raises(
-        AssertionError,
-        match="cannot merge NumpyArray with ListOffsetArray",
+        ValueError,
+        match="cannot merge types int64 and string",
     ):
         ak.ravel(a)
