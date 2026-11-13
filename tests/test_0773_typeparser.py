@@ -4,6 +4,7 @@
 import pytest
 
 import awkward as ak
+from awkward.types._awkward_datashape_parser import UnexpectedInput
 from awkward.types.listtype import ListType
 from awkward.types.numpytype import NumpyType
 from awkward.types.optiontype import OptionType
@@ -36,7 +37,7 @@ def test_unknown_1():
 
 def test_unknown_2():
     text = 'unknown[parameters={"wonky": ["parameter", 3.14]}]'
-    with pytest.raises(TypeError):
+    with pytest.raises(UnexpectedInput):
         ak.types.from_datashape(text, highlevel=False)
 
 
@@ -147,7 +148,7 @@ def test_option_unknown_1():
 
 def test_option_unknown_2():
     text = '?unknown[parameters={"foo": "bar"}]'
-    with pytest.raises(TypeError):
+    with pytest.raises(UnexpectedInput):
         ak.types.from_datashape(text, highlevel=False)
 
 

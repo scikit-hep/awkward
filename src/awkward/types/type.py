@@ -269,9 +269,8 @@ class _DataShapeTransformer(Transformer):
         return ak.types.UnionType(arguments, parameters=parameters)
 
     def list_parameters(self, args):
-        # modify recently created type object
-        args[0].parameters.update(args[1])
-        return args[0]
+        # copy, so that the constructor checks the parameters (UnknownType rejects them)
+        return args[0].copy(parameters={**args[0].parameters, **args[1]})
 
     def categorical(self, args):
         # modify recently created type object

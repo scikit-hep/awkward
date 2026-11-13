@@ -31,7 +31,7 @@ DTYPE.2: /(bool|int8|uint8|int16|uint16|int32|uint32|int64|uint64|float16|float3
 DATETIME64:  /datetime64(\[([ \t\n\r\f\v]*[0-9]+)?(Y|M|W|D|h|m|s|ms|us|\u03bcs|ns|ps|fs|as)\])?(?![A-Za-z0-9_])/
 TIMEDELTA64: /timedelta64(\[([ \t\n\r\f\v]*[0-9]+)?(Y|M|W|D|h|m|s|ms|us|\u03bcs|ns|ps|fs|as)\])?(?![A-Za-z0-9_])/
 
-unknowntype: "unknown" ("[" "parameters" "=" json_object "]")?
+unknowntype: "unknown" ("[" "parameters" "=" "{" "}" "]")?
 
 regulartype: INT "*" type
 
