@@ -210,6 +210,12 @@ jobs:
         with:
           cuda-version: ${{ matrix.cuda-version }}
 
+      - name: Test CUDA nonlocal ranges in a fresh process
+        env:
+          CUDA_LAUNCH_BLOCKING: "1"
+        run: >-
+          python -m pytest -x -vv -rs tests-cuda/test_4483_listoffsetarray_compute.py -k nonlocal
+
       - name: Test CUDA kernels
         if: ${{ fromJSON(inputs.run-gpu-kernel-tests) }}
         run: python -m pytest ${XDIST_ARGS} -vv -rs tests-cuda-kernels tests-cuda-kernels-explicit

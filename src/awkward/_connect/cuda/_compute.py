@@ -2163,6 +2163,12 @@ def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
     tocarry[:length] = cp.arange(length, dtype=dtype) * dtype(size) + dtype(regular_at)
 
 
+def awkward_ListOffsetArray_toRegularArray(size, fromoffsets, offsetslength):
+    from awkward._connect.cuda import _listoffsetarray
+
+    return _listoffsetarray.to_regular(size, fromoffsets, offsetslength)
+
+
 # Pads each sublist to at least target length (longer sublists kept as-is).
 # Writes new sublist boundaries to tooffsets and total output length to tolength[0].
 #
@@ -2170,6 +2176,8 @@ def awkward_RegularArray_getitem_next_at(tocarry, at, length, size):
 def awkward_ListOffsetArray_rpad_length_axis1(
     tooffsets, fromoffsets, fromlength, target, tolength
 ):
+    from awkward._connect.cuda._listoffsetarray import _Stream
+
     if fromlength == 0:
         tooffsets[:1] = cp.zeros(1, dtype=tooffsets.dtype)
         tolength[:1] = cp.zeros(1, dtype=tolength.dtype)
@@ -2183,10 +2191,17 @@ def awkward_ListOffsetArray_rpad_length_axis1(
         op=OpKind.PLUS,
         init_value=None,
         num_items=fromlength,
+        stream=_Stream(),
     )
     tolength[:1] = tooffsets[fromlength : fromlength + 1].astype(
         tolength.dtype, copy=False
     )  # GPU→GPU, no sync
+
+
+def awkward_ListOffsetArray_rpad_axis1(toindex, fromoffsets, fromlength, target):
+    from awkward._connect.cuda import _listoffsetarray
+
+    return _listoffsetarray.rpad(toindex, fromoffsets, fromlength, target)
 
 
 # Builds a flat gather index for padding/clipping each sublist to exactly `target` elements.
@@ -2240,6 +2255,26 @@ def awkward_ListOffsetArray_local_preparenext_64(tocarry, fromindex, length):
     if length == 0:
         return
     tocarry[:length] = cp.argsort(fromindex[:length])
+
+
+def awkward_ListOffsetArray_flatten_offsets(
+    tooffsets, outeroffsets, outeroffsetslen, inneroffsets
+):
+    from awkward._connect.cuda import _listoffsetarray
+
+    return _listoffsetarray.flatten_offsets(
+        tooffsets, outeroffsets, outeroffsetslen, inneroffsets
+    )
+
+
+def awkward_ListOffsetArray_drop_none_indexes(
+    tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes
+):
+    from awkward._connect.cuda import _listoffsetarray
+
+    return _listoffsetarray.drop_none(
+        tooffsets, noneindexes, fromoffsets, length_offsets, length_indexes
+    )
 
 
 # Computes the total output length for rpad_axis1 on a ListArray:
@@ -3544,16 +3579,24 @@ def awkward_ListArray_getitem_jagged_numvalid(
 
 # Counts the number of null (missing) entries in an indexed array.
 def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
+    from awkward._connect.cuda._listoffsetarray import _Stream
+
     index_dtype = numnull.dtype
+    scalar_type = index_dtype.type
 
     def is_null(x):
-        return 1 if x < 0 else 0
+        return scalar_type(1) if x < 0 else scalar_type(0)
 
     null_iter = TransformIterator(fromindex[:lenindex], is_null)
 
     h_init = np.array([0], dtype=index_dtype)
     reduce_into(
-        d_in=null_iter, d_out=numnull, op=OpKind.PLUS, num_items=lenindex, h_init=h_init
+        d_in=null_iter,
+        d_out=numnull,
+        op=OpKind.PLUS,
+        num_items=lenindex,
+        h_init=h_init,
+        stream=_Stream(),
     )
 
 
@@ -3940,19 +3983,8 @@ def awkward_UnionArray_validity(tags, index, length, numcontents, lencontents):
 def awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64(
     outstarts, outstops, distincts, lendistincts, outlength
 ):
-    if outlength == 0:
-        return
-    if lendistincts == 0:
-        outstarts[:outlength] = 0
-        outstops[:outlength] = 0
-        return
+    from awkward._connect.cuda import _listoffsetarray
 
-    maxcount = lendistincts // outlength
-    starts = cp.arange(outlength, dtype=cp.int64) * maxcount
-    # Stops extend to the last present slot, not the number of present slots:
-    # holes within a group must retain their coordinates, as in the reference.
-    columns = cp.arange(1, maxcount + 1, dtype=cp.int64)
-    present = distincts[:lendistincts].reshape(outlength, maxcount) != -1
-    last = cp.max(cp.where(present, columns, 0), axis=1)
-    outstarts[:outlength] = starts
-    outstops[:outlength] = starts + last
+    return _listoffsetarray.nonlocal_ranges(
+        outstarts, outstops, distincts, lendistincts, outlength
+    )

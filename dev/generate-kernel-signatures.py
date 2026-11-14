@@ -36,7 +36,6 @@ def write_if_changed(path):
 # dispatch through the canonical signature table to cuda.compute.
 cuda_kernels_impl = [
     "awkward_ListArray_validity",
-    "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_simplify",
     "awkward_RegularArray_getitem_next_array_regularize",
     "awkward_RegularArray_reduce_local_nextparents_64",
@@ -50,19 +49,10 @@ cuda_kernels_impl = [
     "awkward_ListArray_getitem_next_range",
     "awkward_ListArray_rpad_axis1",
     "awkward_ListArray_getitem_next_range_spreadadvanced",
-    "awkward_ListOffsetArray_toRegularArray",
-    "awkward_ListOffsetArray_rpad_axis1",
-    "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
-    # The awkward_reduce_* value reducers (sum/prod/min/max/argmin/argmax/
-    # count/countnonzero and their bool/complex variants) have no compiled
-    # CUDA kernel: the CUDA backend dispatches them to the cuda.cccl-based
-    # helpers in awkward._connect.cuda._compute. Their signature-table entries
-    # are emitted as None (this kernel name is absent from cuda_kernels_impl),
-    # which routes CupyBackend.__getitem__ to the CudaComputeKernel path.
 ]
 
 
