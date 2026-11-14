@@ -1960,17 +1960,21 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             and none_indexes.nplike is self._backend.nplike
         )
 
+        # The kernel is only specialized for matching index widths, so list
+        # offsets that are not int64 (e.g. int32 from Arrow) are widened first.
+        offsets = self._offsets.to64()
+
         self._backend.maybe_kernel_error(
             self._backend[
                 "awkward_ListOffsetArray_drop_none_indexes",
                 new_offsets.dtype.type,
                 none_indexes.dtype.type,
-                self._offsets.dtype.type,
+                offsets.dtype.type,
             ](
                 new_offsets.data,
                 none_indexes.data,
-                self._offsets.data,
-                self._offsets.length,
+                offsets.data,
+                offsets.length,
                 none_indexes.length,
             )
         )
