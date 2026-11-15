@@ -123,6 +123,15 @@ def popbuffers_finalize(
     if fix_offsets and (array.offset != 0 or len(array) != len(out)):
         out = out[array.offset : array.offset + len(array)]
 
+    # Arrow leaves the validity bitmap unsliced: bit 0 is the first unsliced element.
+    if validbits is not None and array.offset != 0:
+        byte, bit = divmod(array.offset, 8)
+        raw = numpy.frombuffer(validbits, dtype=np.uint8)[
+            byte : byte + (bit + len(array) + 7) // 8
+        ]
+        bits = numpy.unpackbits(raw, bitorder="little")[bit : bit + len(array)]
+        validbits = numpy.packbits(bits, bitorder="little")
+
     # Everything must leave popbuffers as option-type; the mask_node will be
     # removed by the next level up in popbuffers recursion if appropriate.
 
