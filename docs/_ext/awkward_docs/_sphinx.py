@@ -10,7 +10,14 @@ from autoapi._parser import Parser
 from docutils import nodes
 from sphinx.domains.python import PythonDomain
 
-from awkward_docs import docstrings, inventory, members, naming, source_links
+from awkward_docs import (
+    docstrings,
+    experimental,
+    inventory,
+    members,
+    naming,
+    source_links,
+)
 
 # -- Monkey-patch autoapi to produce ak.* file names -------------------------
 # autoapi generates paths from Python module structure (awkward.operations.ak_flatten.flatten).
@@ -31,18 +38,12 @@ def _ak_output_filename(self):
 _parse_functiondef = Parser.parse_functiondef
 
 
-def _is_experimental_decorator(decorator):
-    """Return whether an astroid decorator node applies ``@experimental``."""
-    if decorator.as_string() == "experimental":
-        return True
-    return decorator.as_string() == "experimental()"
-
-
 def _parse_functiondef_with_experimental(self, node):
     """Preserve the experimental marker for the AutoAPI templates."""
     parsed = _parse_functiondef(self, node)
     if node.decorators and any(
-        _is_experimental_decorator(decorator) for decorator in node.decorators.nodes
+        experimental.is_experimental(decorator.as_string())
+        for decorator in node.decorators.nodes
     ):
         for item in parsed:
             item["is_experimental"] = True
