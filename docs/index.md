@@ -48,51 +48,57 @@ Awkward Array is a library for **nested, variable-sized data**, including arbitr
 :link-type: doc
 :link: getting-started/index
 
+:::{card-header}
 {fas}`running`
 
 Getting started 
-^^^^^^^^^^^^^^^
+:::
+
 New to *Awkward Array*? Unsure what it can be used for? Check out the getting started guides. They contain an introduction to *Awkward Array's* features and links to additional help.
    
 
 ::::
 
-:::{grid-item-card}
+::::{grid-item-card}
 :link-type: doc
 :link: user-guide/index
 
+:::{card-header}
 {fas}`book-open`
 
 User guide
-^^^^^^^^^^
+:::
 
 The user guide provides in-depth information on the key concepts of Awkward Array with useful background information and explanation.
 
-:::
+::::
 
-:::{grid-item-card}
+::::{grid-item-card}
 :link-type: doc
 :link: reference/index
 
+:::{card-header}
 {fas}`code`
 
 API reference
-^^^^^^^^^^^^^
+:::
 
 The reference guide contains a detailed description of the functions, modules, and objects included in Awkward Array. The reference describes how the methods work and which parameters can be used. It assumes that you have an understanding of the key concepts.
 
-:::
+::::
 
-:::{grid-item-card}
+::::{grid-item-card}
 :link: https://github.com/scikit-hep/awkward/blob/main/CONTRIBUTING.md
 
+:::{card-header}
 {fas}`terminal`
 
 Contributor's guide
-^^^^^^^^^^^^^^^^^^^
+:::
+
 Spotted a typo in the documentation? Want to add to the codebase? The contributing guidelines will guide you through the process of improving Awkward Array.
 
-:::
+::::
 
 :::{grid-item-card} 
 :columns: 12
