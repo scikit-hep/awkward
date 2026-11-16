@@ -12,7 +12,7 @@ from autoapi._parser import Parser
 from docutils import nodes
 from sphinx.domains.python import PythonDomain
 
-from awkward_docs import docstrings, naming
+from awkward_docs import docstrings, naming, source_links
 
 # -- Monkey-patch autoapi to produce ak.* file names -------------------------
 # autoapi generates paths from Python module structure (awkward.operations.ak_flatten.flatten).
@@ -110,12 +110,8 @@ def _github_source_link(obj):
         return ""
     repo_root = os.path.dirname(os.path.abspath(obj.app.confdir))
     rel_path = os.path.relpath(file_path, repo_root)
-    module_name = rel_path.replace("/", ".").replace(".py", "").replace("src.", "")
     line_no = source_obj.obj.get("from_line_no")
-    base_url = f"https://github.com/scikit-hep/awkward/blob/{_latest_commit}/{rel_path}"
-    if line_no:
-        return f"Defined in `{module_name} <{base_url}>`__ on `line {line_no} <{base_url}#L{line_no}>`__."
-    return f"Defined in `{module_name} <{base_url}>`__."
+    return source_links.source_link(rel_path, line_no, _latest_commit)
 
 
 def _process_docstring_filter(docstring, obj):
