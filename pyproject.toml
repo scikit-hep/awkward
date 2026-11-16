@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awkward"
-version = "2.14.0"
+version = "2.15.0"
 description = "Manipulate JSON-like data with NumPy-like idioms."
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -42,7 +42,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "awkward_cpp==57",
+    "awkward_cpp==58",
     "numpy>=1.23.2",
     "packaging",
     "fsspec>=2022.11.0"
