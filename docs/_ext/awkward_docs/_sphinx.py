@@ -3,7 +3,6 @@
 
 import os
 import pathlib
-import re
 import subprocess
 import zlib
 
@@ -12,7 +11,7 @@ from autoapi._parser import Parser
 from docutils import nodes
 from sphinx.domains.python import PythonDomain
 
-from awkward_docs import docstrings, naming, source_links
+from awkward_docs import docstrings, members, naming, source_links
 
 # -- Monkey-patch autoapi to produce ak.* file names -------------------------
 # autoapi generates paths from Python module structure (awkward.operations.ak_flatten.flatten).
@@ -142,35 +141,7 @@ def prepare_jinja_env(jinja_env):
 
 def _skip_member(app, what, name, obj, skip, options):
     """Skip private modules/members but keep the top-level awkward package."""
-    # Keep the top-level awkward package
-    if name == "awkward":
-        return False
-    # Skip module-level dunder functions (e.g., awkward.__dir__); special-members
-    # is enabled for class methods but these should not be documented as top-level.
-    if what == "function":
-        short = name.rsplit(".", 1)[-1]
-        if short.startswith("__") and short.endswith("__"):
-            return True
-    # Skip private modules (awkward._*) but not private methods/attributes
-    # within public classes (those are controlled by the "private-members" option)
-    if what in ("module", "package"):
-        parts = name.split(".")
-        if any(part.startswith("_") for part in parts):
-            return True
-    # Skip internal submodules that would collide with class pages on
-    # case-insensitive filesystems (e.g., ak.contents.recordarray vs
-    # ak.contents.RecordArray). The class is re-exported at the package
-    # level, so the submodule page is redundant.
-    if what == "module":
-        parent_child = name.rsplit(".", 1)
-        if len(parent_child) == 2:
-            _parent, child = parent_child
-            if (
-                re.match(r"awkward\.(contents|types|forms)\.\w+$", name)
-                and child.islower()
-            ):
-                return True
-    return skip
+    return members.skip_member(what, name, skip)
 
 
 def _add_awkward_inventory_aliases(app, exception):
