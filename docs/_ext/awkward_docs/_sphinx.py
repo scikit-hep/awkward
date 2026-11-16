@@ -4,14 +4,13 @@
 import os
 import pathlib
 import subprocess
-import zlib
 
 from autoapi._objects import PythonObject, TopLevelPythonObject
 from autoapi._parser import Parser
 from docutils import nodes
 from sphinx.domains.python import PythonDomain
 
-from awkward_docs import docstrings, members, naming, source_links
+from awkward_docs import docstrings, inventory, members, naming, source_links
 
 # -- Monkey-patch autoapi to produce ak.* file names -------------------------
 # autoapi generates paths from Python module structure (awkward.operations.ak_flatten.flatten).
@@ -157,22 +156,11 @@ def _add_awkward_inventory_aliases(app, exception):
 
     inv_path = os.path.join(app.outdir, "objects.inv")
     with open(inv_path, "rb") as f:
-        # Read the 4-line header verbatim
-        header = b"".join(f.readline() for _ in range(4))
-        # Decompress the body
-        body = zlib.decompress(f.read()).decode("utf-8")
-
-    extra_lines = []
-    for line in body.splitlines():
-        name = line.split(" ", 1)[0]
-        if name.startswith("ak."):
-            extra_lines.append("awkward." + line[3:])
-
-    if extra_lines:
-        new_body = body.rstrip("\n") + "\n" + "\n".join(extra_lines) + "\n"
+        data = f.read()
+    new_data = inventory.add_awkward_aliases(data)
+    if new_data != data:
         with open(inv_path, "wb") as f:
-            f.write(header)
-            f.write(zlib.compress(new_body.encode("utf-8")))
+            f.write(new_data)
 
 
 def _visit_abbreviation_markdown(self, node):
