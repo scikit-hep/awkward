@@ -12,32 +12,11 @@ from autoapi._parser import Parser
 from docutils import nodes
 from sphinx.domains.python import PythonDomain
 
+from awkward_docs import naming
+
 # -- Monkey-patch autoapi to produce ak.* file names -------------------------
 # autoapi generates paths from Python module structure (awkward.operations.ak_flatten.flatten).
 # We remap to public API names (ak.flatten) to match existing URLs.
-
-
-def _awkward_to_ak(name):
-    """Map internal module paths to public API names.
-
-    Mirrors the mapping in the old prepare_docstrings.py:
-    - awkward.operations.ak_flatten.flatten -> ak.flatten
-    - awkward.operations.str.akstr_is_alnum.is_alnum -> ak.str.is_alnum
-    - awkward.contents.recordarray.RecordArray -> ak.contents.RecordArray
-    - awkward.highlevel.Array -> ak.Array
-    """
-    if not name.startswith("awkward"):
-        return name
-    name = re.sub(r"^awkward\.operations\.str\.akstr_\w+\.", "ak.str.", name)
-    name = re.sub(r"^awkward\.operations\.str\.", "ak.str.", name)
-    name = re.sub(r"^awkward\.operations\.ak_\w+\.", "ak.", name)
-    name = re.sub(r"^awkward\.operations\.", "ak.", name)
-    name = re.sub(r"^awkward\.highlevel\.", "ak.", name)
-    name = re.sub(
-        r"^awkward\.(contents|types|forms|index|record)\.\w+\.", r"ak.\1.", name
-    )
-    name = re.sub(r"^awkward\.", "ak.", name)
-    return name
 
 
 def _flat_output_dir(self, root):
@@ -47,22 +26,8 @@ def _flat_output_dir(self, root):
 
 def _ak_output_filename(self):
     """Use public API names: awkward.flatten -> ak.flatten."""
-    name = _awkward_to_ak(self.id)
-    if name == "index":
-        name = ".index"
-    # Avoid case collisions on case-insensitive filesystems:
-    # module "ak.record" would collide with class "ak.Record".
-    # Prefix module-only pages with "_module." when they'd collide.
-    if hasattr(self, "submodules"):  # TopLevelPythonObject (module/package)
-        parts = name.rsplit(".", 1)
-        if len(parts) == 2 and parts[-1].islower():
-            # Check if a class with the same name (different case) might exist
-            # This is conservative: prefix all lowercase leaf modules under
-            # contents, types, forms, record, highlevel
-            parent = parts[0]
-            if parent in ("ak", "ak.contents", "ak.types", "ak.forms"):
-                name = parts[0] + "._module." + parts[1]
-    return name
+    # TopLevelPythonObject (module/package) has submodules
+    return naming.output_filename(self.id, is_module=hasattr(self, "submodules"))
 
 
 _parse_functiondef = Parser.parse_functiondef
@@ -159,7 +124,7 @@ def _process_docstring_filter(docstring, obj):
     if hasattr(obj, "children"):
         for child in obj.children:
             member_names.add(child.name)
-    qualname = _awkward_to_ak(obj.id)
+    qualname = naming.public_name(obj.id)
 
     lines = docstring.split("\n")
     for i, line in enumerate(lines):
@@ -196,12 +161,12 @@ def _is_internal_module(obj):
     """Check if a module is an internal submodule that should be suppressed."""
     # Modules renamed with _module. prefix are internal submodules kept only
     # to avoid case collisions; they should not generate visible pages.
-    return "._module." in obj.output_filename()
+    return naming.is_internal_module(obj.output_filename())
 
 
 def prepare_jinja_env(jinja_env):
     """Register custom filters and globals for autoapi templates."""
-    jinja_env.filters["ak_name"] = _awkward_to_ak
+    jinja_env.filters["ak_name"] = naming.public_name
     jinja_env.filters["process_docstring"] = _process_docstring_filter
     jinja_env.globals["github_source_link"] = _github_source_link
     jinja_env.globals["is_internal_module"] = _is_internal_module
