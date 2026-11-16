@@ -1,0 +1,2 @@
+# Browser check of the shared sidebar: python docs/_ext/check_sidebar.py docs/_build/html
+playwright==1.65.0
