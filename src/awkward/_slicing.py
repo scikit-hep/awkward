@@ -204,6 +204,34 @@ def normalize_integer_like(x) -> int | ArrayLike:
         return operator.index(x)
 
 
+def check_index_dtype(item, nplike) -> None:
+    """
+    Args:
+        item: slice item to check
+        nplike: nplike of `item`, or None if it has none
+
+    Raises a TypeError for an array-like slice item whose dtype cannot be used
+    as an index: one that NumPy does not know, like pandas extension dtypes,
+    or an object or StringDType array.
+    """
+    if is_array_like(item) and not isinstance(item.dtype, np.dtype):
+        raise TypeError(
+            f"cannot slice with an object of type {type(item).__name__} whose "
+            f"dtype {item.dtype!r} is not a NumPy dtype; convert it first, such as "
+            "with `list(...)` for field names or `numpy.asarray(...)` for an "
+            "integer or boolean array"
+        )
+    if (
+        nplike is not None
+        and nplike.is_own_array(item)
+        and item.dtype.kind in ("O", "T")
+    ):
+        raise TypeError(
+            f"cannot slice with an array of dtype {item.dtype!r}; to select "
+            "fields, pass a `list` of str or an array of dtype 'U'"
+        )
+
+
 def normalise_item(item, backend: Backend) -> SliceItem:
     """
     Args:
@@ -271,6 +299,7 @@ def normalise_item(item, backend: Backend) -> SliceItem:
     elif is_sized_iterable(item):
         # Do we have an array
         nplike = nplike_of_obj(item, default=None)
+        check_index_dtype(item, nplike)
         # We can end up with non-array objects associated with an nplike
         if nplike is not None and nplike.is_own_array(item):
             layout = ak.operations.ak_to_layout._impl(

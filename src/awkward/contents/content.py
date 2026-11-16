@@ -41,7 +41,7 @@ from awkward._regularize import (
     is_integer_like,
     is_sized_iterable,
 )
-from awkward._slicing import normalize_slice
+from awkward._slicing import check_index_dtype, normalize_slice
 from awkward._typing import (
     TYPE_CHECKING,
     Any,
@@ -740,24 +740,12 @@ class Content(Meta):
         elif isinstance(where, Content):
             return self._getitem((where,), named_axis)
 
-        elif is_array_like(where) and not isinstance(where.dtype, np.dtype):
-            raise TypeError(
-                f"cannot slice with an object of type {type(where).__name__} whose "
-                f"dtype {where.dtype!r} is not a NumPy dtype; convert it first, such as "
-                "with `list(...)` for field names or `numpy.asarray(...)` for an "
-                "integer or boolean array"
-            )
-
         elif is_sized_iterable(where):
             # Do we have an array
             nplike = nplike_of_obj(where, default=None)
+            check_index_dtype(where, nplike)
             # We can end up with non-array objects associated with an nplike
             if nplike is not None and nplike.is_own_array(where):
-                if where.dtype.kind in ("O", "T"):
-                    raise TypeError(
-                        f"cannot slice with an array of dtype {where.dtype!r}; to "
-                        "select fields, pass a `list` of str or an array of dtype 'U'"
-                    )
                 layout = ak.operations.ak_to_layout._impl(
                     where,
                     allow_record=False,

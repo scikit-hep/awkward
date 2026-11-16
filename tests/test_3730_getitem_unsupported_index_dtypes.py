@@ -45,3 +45,39 @@ def test_pandas_extension_dtype(make_where):
 def test_pandas_object_index_still_works():
     pd = pytest.importorskip("pandas")
     assert array[pd.Index(["b"], dtype=object)].to_list() == [{"b": 1}, {"b": 2}]
+
+
+nested = ak.Array([[1, 2, 3], [4, 5, 6]])
+
+
+def test_numpy_string_dtype_in_tuple():
+    if not hasattr(np.dtypes, "StringDType"):
+        pytest.skip("NumPy has no StringDType")
+    with pytest.raises(TypeError, match=r"cannot slice with an array of dtype"):
+        nested[:, np.array(["a"], dtype=np.dtypes.StringDType())]
+
+
+@pytest.mark.parametrize(
+    "make_where",
+    [
+        lambda pd: (slice(None), pd.array([0, 1], dtype="Int64")),
+        lambda pd: (pd.array([0, 1], dtype="Int64"),),
+    ],
+    ids=["second-axis", "one-item-tuple"],
+)
+def test_pandas_extension_dtype_in_tuple(make_where):
+    pd = pytest.importorskip("pandas")
+    with pytest.raises(TypeError, match=r"is not a NumPy dtype"):
+        nested[make_where(pd)]
+
+
+def test_pandas_extension_dtype_fields_in_tuple():
+    pd = pytest.importorskip("pandas")
+    with pytest.raises(TypeError, match=r"is not a NumPy dtype"):
+        array[(pd.Index(["b"], dtype="string"),)]
+
+
+def test_supported_indexes_in_tuple_still_work():
+    assert nested[:, np.array([0, 1])].to_list() == [[1, 2], [4, 5]]
+    assert nested[:, [0, 1]].to_list() == [[1, 2], [4, 5]]
+    assert array[(["b"],)].to_list() == [{"b": 1}, {"b": 2}]
