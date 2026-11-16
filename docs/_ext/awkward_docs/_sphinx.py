@@ -33,7 +33,9 @@ def _awkward_to_ak(name):
     name = re.sub(r"^awkward\.operations\.ak_\w+\.", "ak.", name)
     name = re.sub(r"^awkward\.operations\.", "ak.", name)
     name = re.sub(r"^awkward\.highlevel\.", "ak.", name)
-    name = re.sub(r"^awkward\.(contents|types|forms|index|record)\.\w+\.", r"ak.\1.", name)
+    name = re.sub(
+        r"^awkward\.(contents|types|forms|index|record)\.\w+\.", r"ak.\1.", name
+    )
     name = re.sub(r"^awkward\.", "ak.", name)
     return name
 
@@ -94,15 +96,21 @@ _resolve_xref = PythonDomain.resolve_xref
 _find_obj = PythonDomain.find_obj
 
 
-def _resolve_xref_without_data_fallback(self, env, fromdocname, builder, type, target, node, contnode):
+def _resolve_xref_without_data_fallback(
+    self, env, fromdocname, builder, type, target, node, contnode
+):
     self._awkward_resolving_class = type == "class"
     try:
-        return _resolve_xref(self, env, fromdocname, builder, type, target, node, contnode)
+        return _resolve_xref(
+            self, env, fromdocname, builder, type, target, node, contnode
+        )
     finally:
         self._awkward_resolving_class = False
 
 
-def _find_obj_without_data_fallback(self, env, modname, classname, name, type, searchmode=0):
+def _find_obj_without_data_fallback(
+    self, env, modname, classname, name, type, searchmode=0
+):
     if getattr(self, "_awkward_resolving_class", False) and type in ("data", "attr"):
         return []
     return _find_obj(self, env, modname, classname, name, type, searchmode)
@@ -125,7 +133,11 @@ def _github_source_link(obj):
     # Get file_path from the source object or its parent module
     file_path = source_obj.obj.get("file_path")
     if not file_path:
-        module_name = source_obj.id[: -(len("." + source_obj.qual_name))] if source_obj.qual_name else source_obj.id
+        module_name = (
+            source_obj.id[: -(len("." + source_obj.qual_name))]
+            if source_obj.qual_name
+            else source_obj.id
+        )
         module_obj = all_objects.get(module_name)
         if module_obj:
             file_path = module_obj.obj.get("file_path")
@@ -161,11 +173,13 @@ def _process_docstring_filter(docstring, obj):
             line,
         )
         if member_names:
+
             def _replace_member(m, _members=member_names, _qn=qualname):
                 member = m.group(1)
                 if member in _members:
                     return f":py:meth:`{member} <{_qn}.{member}>`"
                 return m.group(0)
+
             line = re.sub(r"#([A-Za-z_][A-Za-z0-9_]*)", _replace_member, line)
         # Only URLs and relative .html paths are link targets; this leaves
         # code such as ``class GenProto[T](Protocol):`` unchanged
@@ -221,7 +235,10 @@ def _skip_member(app, what, name, obj, skip, options):
         parent_child = name.rsplit(".", 1)
         if len(parent_child) == 2:
             _parent, child = parent_child
-            if re.match(r"awkward\.(contents|types|forms)\.\w+$", name) and child.islower():
+            if (
+                re.match(r"awkward\.(contents|types|forms)\.\w+$", name)
+                and child.islower()
+            ):
                 return True
     return skip
 
@@ -270,6 +287,7 @@ def setup(app):
     _latest_commit = (
         subprocess.run(
             ["git", "rev-parse", "HEAD"],
+            check=False,
             stdout=subprocess.PIPE,
             cwd=app.confdir,
         )
