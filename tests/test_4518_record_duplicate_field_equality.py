@@ -32,6 +32,12 @@ CASES = [
     ),
     ((["a", "b"], ["int64", "float64"]), (["b", "a"], ["float64", "int64"]), True),
     ((["a", "b"], ["int64", "float64"]), (["a", "b"], ["float64", "int64"]), False),
+    ((["a", "b"], ["int64", "int64"]), (["a", "c"], ["int64", "int64"]), False),
+    (
+        (["a", "a", "b"], ["int64", "int64", "bool"]),
+        (["a", "a", "c"], ["int64", "int64", "bool"]),
+        False,
+    ),
 ]
 
 
