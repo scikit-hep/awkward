@@ -12,7 +12,7 @@ from autoapi._parser import Parser
 from docutils import nodes
 from sphinx.domains.python import PythonDomain
 
-from awkward_docs import naming
+from awkward_docs import docstrings, naming
 
 # -- Monkey-patch autoapi to produce ak.* file names -------------------------
 # autoapi generates paths from Python module structure (awkward.operations.ak_flatten.flatten).
@@ -120,41 +120,10 @@ def _github_source_link(obj):
 
 def _process_docstring_filter(docstring, obj):
     """Process docstring markup: backticks, cross-refs, member links."""
-    member_names = set()
-    if hasattr(obj, "children"):
-        for child in obj.children:
-            member_names.add(child.name)
-    qualname = naming.public_name(obj.id)
-
-    lines = docstring.split("\n")
-    for i, line in enumerate(lines):
-        # Promote single backticks to double-backtick inline literals, but leave
-        # already-doubled backticks untouched (``write(str)`` must stay a pair).
-        line = re.sub(r"(?<!`)`(?!`)", "``", line)
-        line = re.sub(r"<<<([^>]+)>>>", r"`\1`_", line)
-        line = re.sub(
-            r"#(ak\.[A-Za-z0-9_\.]*[A-Za-z0-9_])",
-            r":py:obj:`\1`",
-            line,
-        )
-        if member_names:
-
-            def _replace_member(m, _members=member_names, _qn=qualname):
-                member = m.group(1)
-                if member in _members:
-                    return f":py:meth:`{member} <{_qn}.{member}>`"
-                return m.group(0)
-
-            line = re.sub(r"#([A-Za-z_][A-Za-z0-9_]*)", _replace_member, line)
-        # Only URLs and relative .html paths are link targets; this leaves
-        # code such as ``class GenProto[T](Protocol):`` unchanged
-        line = re.sub(
-            r"\[([^\]]*)\]\(((?:https?://|\.\.?/)[^\)]*|[^\)\s]*\.html(?:#[^\)]*)?)\)",
-            r"`\1 <\2>`__",
-            line,
-        )
-        lines[i] = line
-    return "\n".join(lines)
+    member_names = {child.name for child in getattr(obj, "children", ())}
+    return docstrings.process_docstring(
+        docstring, member_names, naming.public_name(obj.id)
+    )
 
 
 def _is_internal_module(obj):
