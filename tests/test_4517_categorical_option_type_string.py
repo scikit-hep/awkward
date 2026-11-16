@@ -81,7 +81,7 @@ def test_from_datashape(type_, text):
 def test_nullable_categorical_array():
     layout = ak.contents.IndexedOptionArray(
         ak.index.Index64(np.array([0, -1, 0])),
-        ak.contents.NumpyArray(np.array([7])),
+        ak.contents.NumpyArray(np.array([7], dtype=np.int64)),
         parameters={"__array__": "categorical"},
     )
     assert str(ak.Array(layout).type) == "3 * categorical[type=?int64]"
