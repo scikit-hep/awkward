@@ -16,7 +16,8 @@ updates:
       default-days: 7
 
   # Bump hypothesis-awkward, which is pinned to an exact version in
-  # requirements-test-full.txt. Newer versions produce more varied test
+  # requirements-test-full.txt, requirements-test-gpu.txt, and the dev
+  # dependency group in pyproject.toml. Newer versions produce more varied test
   # samples, so existing tests might fail. Pinning + dependabot ensures
   # those failures surface in a dedicated upgrade PR rather than
   # randomly in unrelated CI runs.
