@@ -43,3 +43,15 @@ def test_sort_strings_embedded_nul(values, sliced, nested, as_bytes, stable, asc
             assert result == sorted(
                 range(len(group)), key=group.__getitem__, reverse=not ascending
             )
+
+
+@pytest.mark.parametrize("prefix_size", [0, 10, 11, 12, 13, 32])
+@pytest.mark.parametrize("ascending", [True, False])
+def test_argsort_unsigned_bytes_across_short_prefix_cutoff(prefix_size, ascending):
+    prefix = b"a" * prefix_size
+    values = [prefix + b"\0\xff", prefix + b"\0\x80", prefix, prefix + b"\0\xff"]
+    expected = sorted(range(len(values)), key=values.__getitem__, reverse=not ascending)
+    assert (
+        ak.argsort(ak.Array(values), ascending=ascending, stable=True).to_list()
+        == expected
+    )
