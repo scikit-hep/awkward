@@ -143,8 +143,9 @@ jobs:
 
     - name: Install dependencies
       working-directory: docs
-      # cppyy has no wheels on PyPI, so pip builds it from the source distribution
-      run: python -m pip install /tmp/wheels/*.whl -r requirements.txt cppyy
+      # CPyCppyy and cppyy-backend have no wheels on PyPI, so pip builds them
+      # from the source distributions. cppyy pins its dependencies exactly
+      run: python -m pip install /tmp/wheels/*.whl -r requirements.txt cppyy==3.5.0
 
     - name: Execute cppyy notebook
       working-directory: docs
