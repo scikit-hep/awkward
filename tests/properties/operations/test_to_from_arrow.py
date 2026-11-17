@@ -101,8 +101,6 @@ def has_issues(a: ak.Array) -> bool:
         return True
     if _has_issue_4228(a.layout):
         return True
-    if _has_issue_4229(a.layout):
-        return True
     if _has_issue_4255(a.layout):
         return True
     return False
@@ -193,14 +191,6 @@ def _has_issue_4228(
             child_sliced = True
         return _has_issue_4228(layout.content, False, child_sliced)
     return False
-
-
-def _has_issue_4229(layout: ak.contents.Content) -> bool:
-    """`from_arrow` loses the length of a size-0 fixed-size list (a
-    `3 * 0 * float64` array reads back with length 0, #4229)."""
-    if layout.is_regular and layout.size == 0:
-        return True
-    return any(_has_issue_4229(x) for x in _children(layout))
 
 
 def _has_issue_4255(layout: ak.contents.Content, nullable: bool = False) -> bool:

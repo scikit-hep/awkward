@@ -306,6 +306,8 @@ def popbuffers(paarray, awkwardarrow_type, storage_type, buffers, generate_bitma
         out = ak.contents.RegularArray(
             akcontent,
             storage_type.list_size,
+            # only used when list_size == 0; popbuffers_finalize applies the offset
+            zeros_length=paarray.offset + len(paarray),
             parameters=node_parameters(awkwardarrow_type),
         )
         return popbuffers_finalize(
