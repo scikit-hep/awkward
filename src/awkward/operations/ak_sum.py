@@ -278,7 +278,9 @@ def nansum(
 
     # Implementation
     return _impl(
-        ak.operations.ak_nan_to_none._impl(array, True, behavior, attrs),
+        ak.operations.ak_nan_to_none._impl(
+            array, True, behavior, attrs, optimize_all_valid=True
+        ),
         axis,
         keepdims,
         mask_identity,

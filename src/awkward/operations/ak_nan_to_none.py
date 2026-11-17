@@ -7,6 +7,7 @@ from awkward._backends.typetracer import TypeTracerBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import Mapping
 
 __all__ = ("nan_to_none",)
@@ -48,7 +49,14 @@ def nan_to_none(
     return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | None):
+def _impl(
+    array,
+    highlevel: bool,
+    behavior: Mapping | None,
+    attrs: Mapping | None,
+    *,
+    optimize_all_valid: bool = False,
+):
     def supports_nan_mask(layout, backend):
         return layout.is_numpy and (
             np.issubdtype(layout.dtype, np.floating)
@@ -61,6 +69,17 @@ def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | Non
     def action(layout, continuation, backend, **kwargs):
         if supports_nan_mask(layout, backend):
             mask = backend.nplike.isnan(layout.data)
+            if (
+                optimize_all_valid
+                and backend is NumpyBackend.instance()
+                and layout.dtype.kind == "c"
+                and not isinstance(mask, VirtualNDArray)
+                and mask.size != 0
+                and not mask.any()
+            ):
+                # Keep option semantics while allowing reductions to skip
+                # mask projection and its carry of every valid value.
+                return ak.contents.UnmaskedArray(layout)
             return ak.contents.ByteMaskedArray(
                 ak.index.Index8(mask, nplike=backend.nplike),
                 layout,
