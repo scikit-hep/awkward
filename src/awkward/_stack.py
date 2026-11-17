@@ -84,7 +84,7 @@ def field_lists(layout):
             layout.index,
             [field_lists(content) for content in layout.contents],
         )
-    return ak.contents.RegularArray(layout, 1).to_ListOffsetArray64(True)
+    return ak.contents.RegularArray(layout, 1)
 
 
 def simplify_union(tags, index, contents, *, parameters=None):
