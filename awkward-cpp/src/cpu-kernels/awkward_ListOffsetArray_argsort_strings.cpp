@@ -5,15 +5,14 @@
 #include <algorithm>
 #include <cstring>
 #include <numeric>
-#include <vector>
 
 #include "awkward/kernels.h"
 
 template <bool is_stable, bool is_ascending, bool is_local>
 ERROR awkward_ListOffsetArray_argsort_strings_impl(
   int64_t* __restrict__ tocarry,
-  const int64_t* __restrict__ fromparents,
-  int64_t length,
+  const int64_t* __restrict__ offsets,
+  int64_t outlength,
   const char* __restrict__ stringdata,
   const int64_t* __restrict__ stringstarts,
   const int64_t* __restrict__ stringstops) {
@@ -24,7 +23,21 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
           size_t right_n = stringstops[right] - stringstarts[right];
           const char* left_str = &stringdata[stringstarts[left]];
           const char* right_str = &stringdata[stringstarts[right]];
-          int cmp = strncmp(left_str, right_str, std::min(left_n, right_n));
+          const size_t shared = std::min(left_n, right_n);
+          int cmp = 0;
+          // Avoid an out-of-line call for short prefixes. Compare unsigned
+          // bytes so embedded NULs and high bytes match memcmp's ordering.
+          if (shared <= 12) {
+            const auto* a = reinterpret_cast<const unsigned char*>(left_str);
+            const auto* b = reinterpret_cast<const unsigned char*>(right_str);
+            for (size_t i = 0; i < shared; ++i) {
+              cmp = static_cast<int>(a[i]) - static_cast<int>(b[i]);
+              if (cmp != 0) break;
+            }
+          }
+          else {
+            cmp = memcmp(left_str, right_str, shared);
+          }
           if (cmp == 0) {
             return is_ascending ? left_n < right_n : left_n > right_n;
           }
@@ -33,34 +46,25 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
           }
         };
 
-  int64_t firstindex = 0;
-  int64_t lastparent = -1;
-  std::vector<int64_t> index;
-  for (int64_t i = 0;  i < length + 1;  i++) {
-    if (i == length  ||  fromparents[i] != lastparent) {
-      if (is_stable) {
-        std::stable_sort(index.begin(), index.end(), sorter);
-      }
-      else {
-        std::sort(index.begin(), index.end(), sorter);
-      }
-      for (int64_t j = 0;  j < (int64_t)index.size();  j++) {
-        if (is_local) {
-          tocarry[firstindex + j] = index[j] - firstindex;
-        }
-        else {
-          tocarry[firstindex + j] = index[j];
-        }
-      }
-      index.clear();
+  for (int64_t i = 0; i < outlength; i++) {
+    int64_t start = offsets[i];
+    int64_t stop = offsets[i + 1];
+    if (start == stop) {
+      continue;
     }
-
-    if (i != length) {
-      if (index.empty()) {
-        firstindex = i;
+    int64_t* segment_start = tocarry + start;
+    int64_t* segment_stop = tocarry + stop;
+    std::iota(segment_start, segment_stop, start);
+    if (is_stable) {
+      std::stable_sort(segment_start, segment_stop, sorter);
+    }
+    else {
+      std::sort(segment_start, segment_stop, sorter);
+    }
+    if (is_local) {
+      for (int64_t j = start; j < stop; j++) {
+        tocarry[j] -= start;
       }
-      index.push_back(i);
-      lastparent = fromparents[i];
     }
   }
 
@@ -69,8 +73,8 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
 
 ERROR awkward_ListOffsetArray_argsort_strings(
   int64_t* __restrict__ tocarry,
-  const int64_t* __restrict__ fromparents,
-  int64_t length,
+  const int64_t* __restrict__ offsets,
+  int64_t outlength,
   const uint8_t* __restrict__ stringdata,
   const int64_t* __restrict__ stringstarts,
   const int64_t* __restrict__ stringstops,
@@ -81,21 +85,21 @@ ERROR awkward_ListOffsetArray_argsort_strings(
     if (is_ascending) {
       if (is_local) {
         return awkward_ListOffsetArray_argsort_strings_impl<true, true, true>(
-          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+          tocarry, offsets, outlength, (char*)stringdata, stringstarts, stringstops);
       }
       else {
         return awkward_ListOffsetArray_argsort_strings_impl<true, true, false>(
-          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+          tocarry, offsets, outlength, (char*)stringdata, stringstarts, stringstops);
       }
     }
     else {
       if (is_local) {
         return awkward_ListOffsetArray_argsort_strings_impl<true, false, true>(
-          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+          tocarry, offsets, outlength, (char*)stringdata, stringstarts, stringstops);
       }
       else {
         return awkward_ListOffsetArray_argsort_strings_impl<true, false, false>(
-          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+          tocarry, offsets, outlength, (char*)stringdata, stringstarts, stringstops);
       }
     }
   }
@@ -103,21 +107,21 @@ ERROR awkward_ListOffsetArray_argsort_strings(
     if (is_ascending) {
       if (is_local) {
         return awkward_ListOffsetArray_argsort_strings_impl<false, true, true>(
-          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+          tocarry, offsets, outlength, (char*)stringdata, stringstarts, stringstops);
       }
       else {
         return awkward_ListOffsetArray_argsort_strings_impl<false, true, false>(
-          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+          tocarry, offsets, outlength, (char*)stringdata, stringstarts, stringstops);
       }
     }
     else {
       if (is_local) {
         return awkward_ListOffsetArray_argsort_strings_impl<false, false, true>(
-          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+          tocarry, offsets, outlength, (char*)stringdata, stringstarts, stringstops);
       }
       else {
         return awkward_ListOffsetArray_argsort_strings_impl<false, false, false>(
-          tocarry, fromparents, length, (char*)stringdata, stringstarts, stringstops);
+          tocarry, offsets, outlength, (char*)stringdata, stringstarts, stringstops);
       }
     }
   }
