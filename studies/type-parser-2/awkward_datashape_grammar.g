@@ -95,8 +95,10 @@ json_pair:   ESCAPED_STRING ":" json
 
 %import common.INT
 %import common.CNAME
-%import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER
 %import common.WS
+
+// A JSON string. common.ESCAPED_STRING also matches control characters and unknown escapes.
+ESCAPED_STRING: /"(?:[^"\\\x00-\x1f]|\\["\\\/bfnrt]|\\u[0-9a-fA-F]{4})*"/
 
 %ignore WS
