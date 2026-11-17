@@ -2260,7 +2260,7 @@ kernels:
           - {name: maxcount, type: "int64_t", dir: in, role: reducer-maxcount}
           - {name: nextlen, type: "int64_t", dir: in, role: reducer-nextlen}
           - {name: nextcarry, type: "Const[List[int64_t]]", dir: in, role: reducer-nextcarry}
-    description: null
+    description: "Counts preceding rows missing each column independently per outer group, then gathers through nextcarry. nummissing retains the final group's totals (zeros for an empty final group); with no outer groups it is untouched. length and starts are unused."
     definition: |
       def awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64(
           nummissing, missing, nextshifts, offsets, length, starts,
@@ -4170,22 +4170,26 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: >-
+      For normalized, nondecreasing offsets in [0, length], sort each segment
+      and return segment-local indices. Only the first offsetslength entries
+      of the offsets buffer are used. Offsets may cover less than length;
+      uncovered carry entries retain their initial global identity indices.
+      Empty or zero-coverage offsets still initialize the full carry.
     definition: |
       def awkward_argsort(
         toptr, fromptr, length, offsets, offsetslength, ascending, stable
       ):
-          result = []
-          indices = list(range(length))
+          result = list(range(length))
           for i in range(offsetslength - 1):
-              sub_indices = indices[offsets[i]:offsets[i+1]]
+              sub_indices = result[offsets[i]:offsets[i+1]]
               sorted_indices = sorted(
                   sub_indices,
                   key=lambda x: fromptr[x],
                   reverse=not ascending
               )
               local_sorted_indices = [idx - offsets[i] for idx in sorted_indices]
-              result.extend(local_sorted_indices)
+              result[offsets[i]:offsets[i+1]] = local_sorted_indices
           for i in range(length):
               toptr[i] = result[i]
     automatic-tests: false
@@ -4942,13 +4946,24 @@ kernels:
           - {name: fromptr, type: "Const[List[uint32_t]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    reference-output-type: true
+    description: >-
+      Integer outputs wrap modulo 2**N at the output width N. Signed outputs
+      interpret the result in [-2**(N-1), 2**(N-1)-1]. Floating outputs retain
+      serial accumulation. The generated reference binds output_type from the
+      specialization signature; this is not a kernel argument.
     definition: |
-      def awkward_reduce_prod(toptr, fromptr, offsets, outlength):
+      def awkward_reduce_prod(toptr, fromptr, offsets, outlength, output_type=None):
           for bin in range(outlength):
               acc = 1
               for i in range(offsets[bin], offsets[bin + 1]):
                   acc *= fromptr[i]
+              if output_type in ("int32_t", "uint32_t", "int64_t", "uint64_t"):
+                  bits = 32 if "32" in output_type else 64
+                  modulus = 1 << bits
+                  acc = int(acc) % modulus
+                  if output_type.startswith("int") and acc >= modulus // 2:
+                      acc -= modulus
               toptr[bin] = acc
     automatic-tests: true
   - name: awkward_reduce_prod_complex
@@ -5237,13 +5252,24 @@ kernels:
           - {name: fromptr, type: "Const[List[float]]", dir: in, role: reducer-fromptr}
           - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: reducer-offsets}
           - {name: outlength, type: "int64_t", dir: in, role: reducer-outlength}
-    description: null
+    reference-output-type: true
+    description: >-
+      Integer outputs wrap modulo 2**N at the output width N. Signed outputs
+      interpret the result in [-2**(N-1), 2**(N-1)-1]. Floating outputs retain
+      serial accumulation. The generated reference binds output_type from the
+      specialization signature; this is not a kernel argument.
     definition: |
-      def awkward_reduce_sum(toptr, fromptr, offsets, outlength):
+      def awkward_reduce_sum(toptr, fromptr, offsets, outlength, output_type=None):
           for bin in range(outlength):
               acc = 0
               for i in range(offsets[bin], offsets[bin + 1]):
                   acc += fromptr[i]
+              if output_type in ("int32_t", "uint32_t", "int64_t", "uint64_t"):
+                  bits = 32 if "32" in output_type else 64
+                  modulus = 1 << bits
+                  acc = int(acc) % modulus
+                  if output_type.startswith("int") and acc >= modulus // 2:
+                      acc -= modulus
               toptr[bin] = acc
     automatic-tests: true
   - name: awkward_reduce_sumofsquares
@@ -5768,7 +5794,12 @@ kernels:
           - {name: offsetslength, type: "int64_t", dir: in, role: default}
           - {name: ascending, type: "bool", dir: in, role: ListArray-replacement}
           - {name: stable, type: "bool", dir: in, role: ListArray-replacement}
-    description: null
+    description: >-
+      For normalized, nondecreasing offsets in [0, length], sort each segment.
+      Only the first offsetslength entries of the offsets buffer are used.
+      Write only the covered prefix ending at offsets[offsetslength - 1];
+      the destination suffix remains untouched. Empty or zero-coverage offsets
+      perform no writes.
     definition: |
       def awkward_sort(
           toptr, fromptr, length, offsets, offsetslength, ascending, stable
