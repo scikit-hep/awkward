@@ -128,7 +128,6 @@ def test_strings_and_heterogeneous_fields():
     assert ak.unstack(ak.stack(array)).to_list() == array.to_list()
     with pytest.raises(ak.errors.AxisError):
         ak.unstack(["ab", "c"])
-    assert ak.stack(["ab", "c"]).to_list() == ["ab", "c"]
     array = ak.Array([({"x": 1}, {"x": 2})])
     assert ak.stack(array).to_list() == [[{"x": 1}, {"x": 2}]]
 

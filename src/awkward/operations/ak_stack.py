@@ -30,7 +30,8 @@ def stack(array, axis=-1, *, dropna=True, highlevel=True, behavior=None, attrs=N
         axis (int or str): The array axis containing the tuples. Flat arrays of
             tuples use axis=0; tuples inside one level of lists use axis=1.
             Negative axes count from the innermost array dimension. The new
-            list dimension is inserted immediately after this axis.
+            list dimension is inserted immediately after this axis. Raises
+            AxisError if the axis selects no tuple records.
         dropna (bool): If True, omit missing tuple fields. If False, retain
             missing fields and pad shorter tuple types with None to the largest
             number of fields at this axis. Padding is independent for each
@@ -57,6 +58,9 @@ def stack(array, axis=-1, *, dropna=True, highlevel=True, behavior=None, attrs=N
     This operation preserves the order of tuple fields and does not convert
     the array to Python objects. To stack tuples whose fields themselves
     contain lists, select their position with an explicit non-negative axis.
+    Tuple fields share the enclosing tuple's array depth. When tuples are
+    nested directly, the axis selects the outer tuple and leaves inner tuples
+    as elements of the resulting lists.
     """
     yield (array,)
     return _impl(array, axis, dropna, highlevel, behavior, attrs)
@@ -86,6 +90,8 @@ def _impl(array, axis, dropna, highlevel, behavior, attrs):
             return node
 
     walk(layout, collect, rebuild=False)
+    if not widths:
+        raise AxisError(f"no tuple records at axis={axis} to stack")
 
     def action(node, depth, path):
         if not selected(node, depth):
@@ -124,8 +130,7 @@ def _impl(array, axis, dropna, highlevel, behavior, attrs):
         return out.copy(parameters=parameters(node))
 
     out = walk(layout, action)
-    if widths:
-        named_axis = _add_named_axis(
-            named_axis, axis + 1 if axis >= 0 else axis, layout.minmax_depth[1]
-        )
+    named_axis = _add_named_axis(
+        named_axis, axis + 1 if axis >= 0 else axis, layout.minmax_depth[1]
+    )
     return ctx.with_attr(NAMED_AXIS_KEY, named_axis).wrap(out, highlevel=highlevel)
