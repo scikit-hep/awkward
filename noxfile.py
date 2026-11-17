@@ -79,7 +79,7 @@ def coverage(session):
     )
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python="3.13", reuse_venv=True)
 def docs(session):
     """
     Build the docs.
