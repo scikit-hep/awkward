@@ -3,6 +3,7 @@
 
 import awkward as ak
 from awkward._attrs import attrs_of_obj
+from awkward._complex_nan import try_reduce_dense
 from awkward._connect.numpy import UNSUPPORTED
 from awkward._dispatch import high_level_function
 from awkward._layout import (
@@ -177,6 +178,13 @@ def nanmean(
     """
     # Dispatch
     yield x, weight
+
+    if weight is None:
+        out = try_reduce_dense(
+            x, axis, keepdims, mask_identity, highlevel, behavior, attrs, mean=True
+        )
+        if out is not None:
+            return out
 
     if weight is not None:
         weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
