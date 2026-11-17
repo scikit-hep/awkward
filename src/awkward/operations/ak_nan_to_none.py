@@ -2,6 +2,8 @@
 
 
 import awkward as ak
+from awkward._backends.numpy import NumpyBackend
+from awkward._backends.typetracer import TypeTracerBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -21,6 +23,8 @@ def nan_to_none(
     attrs: Mapping | None = None,
 ):
     """Converts NaN ("not a number") into None, i.e. missing values with option-type.
+
+    On CPU, a complex value is missing if either component is NaN.
 
     See also #ak.nan_to_num to convert NaN or infinity to specified values.
 
@@ -45,8 +49,17 @@ def nan_to_none(
 
 
 def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | None):
+    def supports_nan_mask(layout, backend):
+        return layout.is_numpy and (
+            np.issubdtype(layout.dtype, np.floating)
+            or (
+                backend in (NumpyBackend.instance(), TypeTracerBackend.instance())
+                and np.issubdtype(layout.dtype, np.complexfloating)
+            )
+        )
+
     def action(layout, continuation, backend, **kwargs):
-        if layout.is_numpy and np.issubdtype(layout.dtype, np.floating):
+        if supports_nan_mask(layout, backend):
             mask = backend.nplike.isnan(layout.data)
             return ak.contents.ByteMaskedArray(
                 ak.index.Index8(mask, nplike=backend.nplike),
@@ -55,7 +68,7 @@ def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | Non
             )
 
         elif (layout.is_option or layout.is_indexed) and (
-            layout.content.is_numpy and np.issubdtype(layout.content.dtype, np.floating)
+            supports_nan_mask(layout.content, backend)
         ):
             return continuation()
 
