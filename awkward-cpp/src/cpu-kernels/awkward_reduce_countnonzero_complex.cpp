@@ -27,3 +27,5 @@ ERROR awkward_reduce_countnonzero_complex(
 
 WRAPPER(awkward_reduce_countnonzero_complex64_64, float)
 WRAPPER(awkward_reduce_countnonzero_complex128_64, double)
+
+WRAPPER(awkward_reduce_countnonzero_complex256_64, long double)

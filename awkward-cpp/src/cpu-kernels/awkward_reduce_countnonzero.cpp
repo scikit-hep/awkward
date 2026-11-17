@@ -54,3 +54,5 @@ REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_int64_64, int64_t)
 REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_uint64_64, uint64_t)
 REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_float32_64, float)
 REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_float64_64, double)
+
+REDUCE_COUNTNONZERO(awkward_reduce_countnonzero_float128_64, long double)

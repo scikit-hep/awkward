@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see
 # https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-cmake_minimum_required(VERSION 3.15...3.24)
+cmake_minimum_required(VERSION 3.20...3.24)
 
 project(
   awkward-headers
@@ -24,7 +24,7 @@ macro(add_component name)
   target_include_directories(
     ${name} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${name}>
                       $<INSTALL_INTERFACE:include/${name}>)
-  target_compile_features(${name} INTERFACE cxx_std_17)
+  target_compile_features(${name} INTERFACE cxx_std_23)
 
   install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${name}/awkward"
           DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${name}")

@@ -86,6 +86,7 @@ class NumpyMetadata(PublicSingleton):
 
     datetime_data = staticmethod(numpy.datetime_data)
     issubdtype = staticmethod(numpy.issubdtype)
+    result_type = staticmethod(numpy.result_type)
 
     AxisError = AxisError
 
