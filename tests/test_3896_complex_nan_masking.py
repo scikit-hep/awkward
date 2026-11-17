@@ -72,3 +72,36 @@ def test_all_valid_complex_reduction_preserves_masked_semantics(
         assert traced.layout.form == actual.layout.form
     else:
         assert actual == expected
+
+
+@pytest.mark.parametrize("operation", [ak.nansum, ak.nanmean])
+@pytest.mark.parametrize("dtype", [np.complex64, np.complex128])
+@pytest.mark.parametrize("keepdims", [False, True])
+@pytest.mark.parametrize("mask_identity", [False, True])
+def test_dense_complex_reduction_without_compaction(
+    operation, dtype, keepdims, mask_identity
+):
+    array = ak.Array(
+        np.tile(
+            np.array(
+                [[1j, 2j], [complex(3, np.nan), 4j], [complex(np.nan, 2)] * 2],
+                dtype=dtype,
+            ),
+            (1, 64),
+        )
+    )
+    options = {"axis": -1, "keepdims": keepdims, "mask_identity": mask_identity}
+    ordinary = ak.sum if operation is ak.nansum else ak.mean
+    actual = operation(array, **options)
+    expected = ordinary(ak.nan_to_none(array), **options)
+    traced = operation(
+        ak.Array(array.layout.to_typetracer(forget_length=True)), **options
+    )
+    assert actual.layout.form == expected.layout.form == traced.layout.form
+    actual_numpy, expected_numpy = ak.to_numpy(actual), ak.to_numpy(expected)
+    np.testing.assert_array_equal(
+        np.ma.getmaskarray(actual_numpy), np.ma.getmaskarray(expected_numpy)
+    )
+    np.testing.assert_allclose(
+        np.ma.compressed(actual_numpy), np.ma.compressed(expected_numpy)
+    )
