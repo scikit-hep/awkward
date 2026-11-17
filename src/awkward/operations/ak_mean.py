@@ -182,7 +182,9 @@ def nanmean(
         weight = ak.operations.ak_nan_to_none._impl(weight, True, behavior, attrs)
 
     return _impl(
-        ak.operations.ak_nan_to_none._impl(x, True, behavior, attrs),
+        ak.operations.ak_nan_to_none._impl(
+            x, True, behavior, attrs, optimize_all_valid=weight is None
+        ),
         weight,
         axis,
         keepdims,

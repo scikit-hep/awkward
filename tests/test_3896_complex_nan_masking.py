@@ -43,3 +43,32 @@ def test_complex_nan_reducers_match_numpy(dtype, axis, operation):
     expected = getattr(np, operation)(data, axis=axis)
     actual = getattr(ak, operation)(data, axis=axis)
     np.testing.assert_allclose(np.asarray(actual), expected, rtol=1e-6)
+
+
+@pytest.mark.parametrize("operation", [ak.nansum, ak.nanmean])
+@pytest.mark.parametrize("mask_identity", [False, True])
+@pytest.mark.parametrize("keepdims", [False, True])
+@pytest.mark.parametrize("axis", [0, -1, None])
+def test_all_valid_complex_reduction_preserves_masked_semantics(
+    operation, mask_identity, keepdims, axis
+):
+    array = ak.Array([[1 + 2j, 3j], [], [5 + 2j]])
+    options = {"axis": axis, "mask_identity": mask_identity, "keepdims": keepdims}
+    ordinary = ak.sum if operation is ak.nansum else ak.mean
+    expected = ordinary(ak.nan_to_none(array), **options)
+    actual = operation(array, **options)
+    if isinstance(actual, ak.Array):
+        assert actual.layout.form == expected.layout.form
+        actual_numpy, expected_numpy = ak.to_numpy(actual), ak.to_numpy(expected)
+        np.testing.assert_array_equal(
+            np.ma.getmaskarray(actual_numpy), np.ma.getmaskarray(expected_numpy)
+        )
+        np.testing.assert_allclose(
+            np.ma.compressed(actual_numpy), np.ma.compressed(expected_numpy)
+        )
+        traced = operation(
+            ak.Array(array.layout.to_typetracer(forget_length=True)), **options
+        )
+        assert traced.layout.form == actual.layout.form
+    else:
+        assert actual == expected
