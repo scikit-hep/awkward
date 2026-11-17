@@ -4160,9 +4160,8 @@ kernels:
         toptr, fromptr, length, offsets, offsetslength, ascending, stable
       ):
           result = list(range(length))
-          indices = list(range(length))
           for i in range(offsetslength - 1):
-              sub_indices = indices[offsets[i]:offsets[i+1]]
+              sub_indices = result[offsets[i]:offsets[i+1]]
               sorted_indices = sorted(
                   sub_indices,
                   key=lambda x: fromptr[x],

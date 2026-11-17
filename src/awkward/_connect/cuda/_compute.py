@@ -407,7 +407,7 @@ def segmented_sort(
     # (correct NaN placement, -0.0 == +0.0) while carrying the *original* values,
     # so the output keeps real NaNs but positions everything as the CPU does.
     # Non-float dtypes sort natively (CCCL handles signed integers correctly).
-    if num_items > 0 and fromptr.dtype.kind == "f":
+    if fromptr.dtype.kind == "f":
         keys = _float_order_keys(cp, fromptr, ascending)
         keys_out = cp.empty_like(keys)
         segmented_sort(
@@ -479,16 +479,15 @@ def segmented_argsort(
     if offsets.dtype != cp.int64:
         offsets = offsets.astype(cp.int64, copy=False)
 
-    # CPU argsort initializes every carry entry, even with no covered items.
-    values_in = cp.arange(length, dtype=cp.int64)
-    toptr[:length] = values_in
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
+    # CPU argsort initializes every carry entry, even with no covered items;
+    # the uncovered suffix keeps its global identity indices.
+    toptr[num_items:length] = cp.arange(num_items, length, dtype=cp.int64)
     if num_items == 0:
         return
     fromptr = fromptr[:num_items]
     toptr = toptr[:num_items]
-    values_in = values_in[:num_items]
 
     start_o, end_o = make_segment_views(offsets)
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
@@ -504,6 +503,9 @@ def segmented_argsort(
         keys_in = keys_in.view(cp.int64)
     elif keys_in.dtype.kind == "f":
         keys_in = _float_order_keys(cp, keys_in, ascending)
+
+    # Values = global indices; after the sort these are the argsort carry.
+    values_in = cp.arange(num_items, dtype=cp.int64)
 
     # segmented_sort also emits sorted keys, which we discard; the API still
     # requires an output buffer, so hand it scratch.
