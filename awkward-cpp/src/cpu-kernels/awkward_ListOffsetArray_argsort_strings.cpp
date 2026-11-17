@@ -24,7 +24,21 @@ ERROR awkward_ListOffsetArray_argsort_strings_impl(
           size_t right_n = stringstops[right] - stringstarts[right];
           const char* left_str = &stringdata[stringstarts[left]];
           const char* right_str = &stringdata[stringstarts[right]];
-          int cmp = memcmp(left_str, right_str, std::min(left_n, right_n));
+          const size_t shared = std::min(left_n, right_n);
+          int cmp = 0;
+          // Avoid an out-of-line call for short prefixes. Compare unsigned
+          // bytes so embedded NULs and high bytes match memcmp's ordering.
+          if (shared <= 12) {
+            const auto* a = reinterpret_cast<const unsigned char*>(left_str);
+            const auto* b = reinterpret_cast<const unsigned char*>(right_str);
+            for (size_t i = 0; i < shared; ++i) {
+              cmp = static_cast<int>(a[i]) - static_cast<int>(b[i]);
+              if (cmp != 0) break;
+            }
+          }
+          else {
+            cmp = memcmp(left_str, right_str, shared);
+          }
           if (cmp == 0) {
             return is_ascending ? left_n < right_n : left_n > right_n;
           }
