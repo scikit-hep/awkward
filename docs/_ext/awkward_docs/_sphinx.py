@@ -196,10 +196,14 @@ def setup(app):
     app.connect("autoapi-skip-member", _skip_member)
     app.connect("build-finished", _add_awkward_inventory_aliases)
     # Sphinx 9 wraps the ``*`` and ``/`` separators in signatures in
-    # abbreviation nodes, which sphinx-markdown-builder would otherwise drop
+    # abbreviation nodes, which sphinx-markdown-builder would otherwise drop.
+    # Sphinx uses the handlers of the builder's format ("markdown") only if
+    # none are registered under the builder's name, which for sphinx-llm's
+    # sub-build is "llms-markdown"
+    handlers = (_visit_abbreviation_markdown, _depart_abbreviation_markdown)
     app.add_node(
         nodes.abbreviation,
         override=True,
-        markdown=(_visit_abbreviation_markdown, _depart_abbreviation_markdown),
+        **{"llms-markdown": handlers, "markdown": handlers},
     )
     return {"parallel_read_safe": True, "parallel_write_safe": True}
