@@ -1,6 +1,6 @@
 name: C++23 evaluation
 
-# Evaluation only: production targets and release wheels continue to require C++17.
+# Evaluate C++23 builds across compiler families. Release wheels are tested separately.
 on:
   workflow_dispatch:
   pull_request:
@@ -13,6 +13,7 @@ on:
       - kernel-test-data.json
       - pyproject.toml
       - tests/*forth*
+      - tests/test_4467_extended_reduction_edges.py
   push:
     branches:
       - main
@@ -27,6 +28,7 @@ on:
       - kernel-test-data.json
       - pyproject.toml
       - tests/*forth*
+      - tests/test_4467_extended_reduction_edges.py
 
 permissions:
   contents: read
@@ -115,6 +117,7 @@ jobs:
           tests/test_4270_float16_float128_complex256_reducers.py
           tests/test_4270_complex_nan_reducers.py
           tests/test_4270_fused_statistics.py
+          tests/test_4467_extended_reduction_edges.py
 
       - name: Configure header-only tests in C++23 mode
         shell: python {0}
