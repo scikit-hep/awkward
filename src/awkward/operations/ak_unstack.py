@@ -82,18 +82,6 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
     if axis >= layout.minmax_depth[1] or axis < -layout.minmax_depth[1]:
         raise AxisError(f"axis={axis} exceeds the depth of this array")
 
-    # Width inference must not include unreachable backing data in sliced or
-    # indexed inputs. Explicit sizes and regular typetracer sizes need no scan.
-    if size is None and layout.backend.name == "cpu":
-
-        def normalize_options(node, depth, path):
-            if node.is_option and not isinstance(node, ak.contents.IndexedOptionArray):
-                option = node.to_IndexedOptionArray64()
-                return option.copy(
-                    content=walk(option.content, normalize_options, depth, path)
-                )
-
-        layout = walk(layout, normalize_options).to_packed()
     widths = {}
 
     def selected(node, depth):
@@ -104,6 +92,29 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
         )
 
     def collect(node, depth, path):
+        # Project only the inference traversal. Transform the original buffers.
+        if size is None and node.backend.name == "cpu":
+            if node.is_union:
+                for tag in range(len(node.contents)):
+                    walk(node.project(tag), collect, depth, path, rebuild=False)
+                return node
+            if node.is_option or node.is_indexed:
+                walk(node.project(), collect, depth, path, rebuild=False)
+                return node
+            if node.is_record:
+                for field in node.fields:
+                    walk(
+                        node.content(field)[: node.length],
+                        collect,
+                        depth,
+                        (*path, field),
+                        rebuild=False,
+                    )
+                return node
+            if node.is_list and not selected(node, depth) and not is_string(node):
+                packed = node.to_packed()
+                walk(packed.content, collect, depth + 1, path, rebuild=False)
+                return node
         if selected(node, depth):
             if size is not None:
                 width = size
@@ -128,9 +139,12 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
         if not selected(node, depth):
             return None
         width = widths[path]
-        padded = ak.operations.ak_pad_none._impl(
-            node, width, 1, True, False, None, None
-        )
+        if node.is_regular and node.size >= width:
+            padded = node
+        else:
+            padded = ak.operations.ak_pad_none._impl(
+                node, width, 1, True, False, None, None
+            )
         return ak.contents.RecordArray(
             [padded[:, i] for i in range(width)],
             None,
