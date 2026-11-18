@@ -29,43 +29,51 @@ def walk(layout, action, depth=1, path=(), *, rebuild=True):
         return layout
     if layout.is_list:
         content = walk(layout.content, action, depth + 1, path, rebuild=rebuild)
-        return layout.copy(content=content) if rebuild else layout
+        return (
+            layout.copy(content=content)
+            if rebuild and content is not layout.content
+            else layout
+        )
     if layout.is_record:
         contents = [
             walk(layout.content(field), action, depth, (*path, field), rebuild=rebuild)
             for field in layout.fields
         ]
-        return layout.copy(contents=contents) if rebuild else layout
+        if rebuild and any(
+            content is not original
+            for content, original in zip(contents, layout.contents, strict=True)
+        ):
+            return layout.copy(contents=contents)
+        return layout
     if layout.is_union:
         contents = [
             walk(content, action, depth, path, rebuild=rebuild)
             for content in layout.contents
         ]
-        return (
-            simplify_union(
-                layout.tags, layout.index, contents, parameters=layout._parameters
-            )
-            if rebuild
-            else layout
+        if not rebuild or all(
+            content is original
+            for content, original in zip(contents, layout.contents, strict=True)
+        ):
+            return layout
+        return simplify_union(
+            layout.tags, layout.index, contents, parameters=layout._parameters
         )
     if layout.is_option:
-        if not rebuild:
-            walk(layout.content, action, depth, path, rebuild=False)
+        content = walk(layout.content, action, depth, path, rebuild=rebuild)
+        if not rebuild or content is layout.content:
             return layout
+        if not content.is_option and not content.is_indexed and not content.is_union:
+            return layout.copy(content=content)
         option = layout.to_IndexedOptionArray64()
         return ak.contents.IndexedOptionArray.simplified(
-            option.index,
-            walk(option.content, action, depth, path),
-            parameters=layout._parameters,
+            option.index, content, parameters=layout._parameters
         )
     if layout.is_indexed:
         content = walk(layout.content, action, depth, path, rebuild=rebuild)
-        return (
-            ak.contents.IndexedArray.simplified(
-                layout.index, content, parameters=layout._parameters
-            )
-            if rebuild
-            else layout
+        if not rebuild or content is layout.content:
+            return layout
+        return ak.contents.IndexedArray.simplified(
+            layout.index, content, parameters=layout._parameters
         )
     return layout
 

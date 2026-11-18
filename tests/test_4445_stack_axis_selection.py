@@ -111,3 +111,35 @@ def test_boolean_numeric_fields_promote():
     result = ak.tuples_to_lists([(True, 2), (False, 3)])
     assert result.to_list() == [[1, 2], [0, 3]]
     assert str(result.type) == "2 * 2 * int64"
+
+
+@pytest.mark.parametrize("operation", ["tuples_to_lists", "lists_to_tuples"])
+@pytest.mark.parametrize("mask_kind", ["byte", "bit", "unmasked"])
+def test_conversion_preserves_mask_wrappers(operation, mask_kind):
+    import numpy as np
+
+    convert = getattr(ak, operation)
+    content = (
+        ak.to_layout([(1, 2), (3, 4)])
+        if operation == "tuples_to_lists"
+        else ak.to_layout([[1, 2], [3, 4]])
+    )
+    if mask_kind == "byte":
+        layout = ak.contents.ByteMaskedArray(
+            ak.index.Index8(np.array([1, 0], dtype=np.int8)), content, True
+        )
+    elif mask_kind == "bit":
+        layout = ak.contents.BitMaskedArray(
+            ak.index.IndexU8(np.array([1], dtype=np.uint8)), content, True, 2, True
+        )
+    else:
+        layout = ak.contents.UnmaskedArray(content)
+    kwargs = {} if operation == "tuples_to_lists" else {"size": 2}
+    result = convert(ak.Array(layout), **kwargs)
+    assert type(result.layout) is type(layout)
+    expected = [[1, 2], [3, 4]] if operation == "tuples_to_lists" else [(1, 2), (3, 4)]
+    if mask_kind != "unmasked":
+        expected[1] = None
+    assert result.to_list() == expected
+    tracer = ak.Array(layout.to_typetracer(forget_length=True))
+    assert convert(tracer, **kwargs).layout.form == result.layout.form

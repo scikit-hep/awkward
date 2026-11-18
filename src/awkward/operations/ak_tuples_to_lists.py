@@ -104,13 +104,15 @@ def _impl(array, axis, drop_none, pad, highlevel, behavior, attrs):
             widths[path] = max(widths.get(path, 0), len(node.fields))
             return node
 
-    walk(layout, collect, rebuild=False)
-    if not widths:
-        raise AxisError(f"no tuple records at axis={axis} to tuples_to_lists")
+    if pad:
+        walk(layout, collect, rebuild=False)
+    converted = False
 
     def action(node, depth, path):
+        nonlocal converted
         if not selected(node, depth):
             return None
+        converted = True
         width = len(node.fields) if not pad else widths[path]
         contents = [node.content(i) for i in range(len(node.fields))]
         for _ in range(len(contents), width):
@@ -145,6 +147,8 @@ def _impl(array, axis, drop_none, pad, highlevel, behavior, attrs):
         return out.copy(parameters=parameters(node))
 
     out = walk(layout, action)
+    if not converted:
+        raise AxisError(f"no tuple records at axis={axis} to tuples_to_lists")
     named_axis = _add_named_axis(
         named_axis, axis + 1 if axis >= 0 else axis, layout.minmax_depth[1]
     )
