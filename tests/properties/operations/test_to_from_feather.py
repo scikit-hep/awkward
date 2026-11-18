@@ -12,6 +12,7 @@ from hypothesis import strategies as st
 from packaging.version import parse as parse_version
 
 import awkward as ak
+from tests.properties.operations import util
 
 pyarrow = pytest.importorskip("pyarrow")
 pytest.importorskip("pyarrow.feather")
@@ -126,6 +127,10 @@ def has_issues(a: ak.Array) -> bool:
         return True
     if _has_issue_4229(a.layout):
         return True
+    if _has_issue_4554(a.layout):
+        return True
+    if _has_issue_4555(a.layout):
+        return True
     return False
 
 
@@ -224,6 +229,37 @@ def _has_issue_4229(layout: ak.contents.Content) -> bool:
     return any(_has_issue_4229(x) for x in _children(layout))
 
 
+def _has_issue_4554(layout: ak.contents.Content, under_option: bool = False) -> bool:
+    """`from_arrow` raises `TypeError` on an option-type categorical
+    array: with the default `categorical_as_dictionary=False`, `to_arrow`
+    writes the projected values but keeps `__array__: "categorical"` in
+    the extension type's `mask_parameters`, and the `BitMaskedArray` (or
+    `UnmaskedArray`) that `from_arrow` builds with them rejects it
+    (#4554). A table conversion moves an option over a record into each
+    field, so a categorical node below any option is affected too.
+
+    `under_option` tracks whether an option node encloses this node.
+    """
+    if layout.parameter("__array__") == "categorical" and (
+        under_option or layout.is_option
+    ):
+        return True
+    under_option = under_option or layout.is_option
+    return any(_has_issue_4554(x, under_option) for x in _children(layout))
+
+
+def _has_issue_4555(layout: ak.contents.Content) -> bool:
+    """`to_arrow` raises `TypeError` on an indexed node with parameters
+    over a zero-length content: `IndexedArray._to_arrow` then converts
+    only the content and copies the node's parameters onto it, and the
+    content rejects them (an `EmptyArray` accepts no parameters, and a
+    `ListOffsetArray` or `NumpyArray` rejects `__array__: "categorical"`,
+    so every categorical array with no categories fails; #4555)."""
+    if layout.is_indexed and layout.content.length == 0 and layout.parameters:
+        return True
+    return any(_has_issue_4555(x) for x in _children(layout))
+
+
 def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
     """The direct child layouts of a node."""
     if layout.is_record or layout.is_union:
@@ -261,7 +297,6 @@ def _strip_options(
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=feather_dtypes(),
         # a bare unknown type crashes `from_feather` (AttributeError in
         # `form_remove_optiontype`, #4230), and one nested in a record
@@ -279,13 +314,12 @@ def test_roundtrip(feather_dir, a: ak.Array) -> None:
     path = feather_path(feather_dir)
     ak.to_feather(a, path)
     returned = ak.from_feather(path)
-    assert ak.array_equal(a, returned, equal_nan=True)
+    assert ak.array_equal(util.without_categorical(a), returned, equal_nan=True)
 
 
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=feather_dtypes(),
         allow_empty=False,
         allow_union=ALLOW_UNION,
@@ -300,7 +334,9 @@ def test_roundtrip_masked(feather_dir, a: ak.Array) -> None:
     path = feather_path(feather_dir)
     ak.to_feather(a, path)
     returned = ak.from_feather(path)
-    assert ak.array_equal(a, returned, equal_nan=True, same_content_types=False)
+    assert ak.array_equal(
+        util.without_categorical(a), returned, equal_nan=True, same_content_types=False
+    )
 
 
 def feather_stable(a: ak.Array) -> bool:
@@ -332,7 +368,6 @@ def feather_stable(a: ak.Array) -> bool:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=feather_dtypes(),
         # pyarrow table equality counts NaN as unequal to itself and has
         # no `equal_nan` option; NaN coverage lives in the tests above
