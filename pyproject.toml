@@ -335,7 +335,7 @@ mccabe.max-complexity = 100
 
 [dependency-groups]
 dev = [
-    "hypothesis-awkward==0.20.3",
+    "hypothesis-awkward==0.22.0",
     "numba; sys_platform != 'win32'",
     "numexpr",
     "pandas; sys_platform != 'win32'",
