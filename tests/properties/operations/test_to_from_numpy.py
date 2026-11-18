@@ -6,11 +6,11 @@ import numpy as np
 from hypothesis import given
 
 import awkward as ak
+from tests.properties.operations import util
 
 
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         allow_empty=False,
         allow_string=False,
         allow_bytestring=False,
@@ -28,7 +28,7 @@ def test_roundtrip(a: ak.Array) -> None:
     """`to_numpy` followed by `from_numpy` reconstructs the array."""
     n = ak.to_numpy(a)
     returned = ak.from_numpy(n)
-    assert ak.array_equal(a, returned, equal_nan=True)
+    assert ak.array_equal(util.without_categorical(a), returned, equal_nan=True)
 
 
 @given(
@@ -70,7 +70,6 @@ def test_roundtrip_stable(a: ak.Array) -> None:
 
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         # to_numpy(allow_missing=True) raises on timedelta64 with missing
         # values (create_missing_data calls np.iinfo on the "m8" dtype)
         dtypes=st_ak.numpy.supported_dtypes().filter(lambda d: d.kind != "m"),
@@ -93,4 +92,9 @@ def test_roundtrip_masked(a: ak.Array) -> None:
     """
     n = ak.to_numpy(a, allow_missing=True)
     returned = ak.from_numpy(n)
-    assert ak.array_equal(a, returned, equal_nan=True, same_content_types=False)
+    assert ak.array_equal(
+        util.without_categorical(a),
+        returned,
+        equal_nan=True,
+        same_content_types=False,
+    )
