@@ -155,8 +155,6 @@ def _nodes_writable(layout: ak.contents.Content) -> bool:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=parquet_dtypes(),
         # a bare unknown type cannot be written ("A null type field may
@@ -182,8 +180,6 @@ def test_roundtrip(a: ak.Array) -> None:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=parquet_dtypes(),
         allow_empty=False,

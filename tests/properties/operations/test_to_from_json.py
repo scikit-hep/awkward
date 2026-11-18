@@ -183,8 +183,6 @@ def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
 
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=inferred_json_dtypes(),
         # json.dumps raises ValueError on NaN
@@ -212,8 +210,6 @@ def test_roundtrip(a: ak.Array) -> None:
 
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=inferred_json_dtypes(),
         allow_nan=False,

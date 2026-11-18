@@ -292,8 +292,6 @@ def _strip_options(
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=arrow_dtypes(),
         allow_indexed_option=False,
@@ -319,8 +317,6 @@ def test_roundtrip(a: ak.Array) -> None:
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=arrow_dtypes(),
         # a union with an option-type child that is longer than its last
@@ -367,8 +363,6 @@ def table_compatible(a: ak.Array) -> bool:
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=arrow_dtypes(),
         # a bare unknown type crashes `from_arrow` (AttributeError in
@@ -396,8 +390,6 @@ def test_roundtrip_table(a: ak.Array) -> None:
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=arrow_dtypes(),
         # pyarrow's `Array.equals` counts NaN as unequal to itself and has

@@ -261,8 +261,6 @@ def _strip_options(
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=feather_dtypes(),
         # a bare unknown type crashes `from_feather` (AttributeError in
@@ -287,8 +285,6 @@ def test_roundtrip(feather_dir, a: ak.Array) -> None:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=feather_dtypes(),
         allow_empty=False,
@@ -336,8 +332,6 @@ def feather_stable(a: ak.Array) -> bool:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         dtypes=feather_dtypes(),
         # pyarrow table equality counts NaN as unequal to itself and has

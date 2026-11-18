@@ -10,8 +10,6 @@ import awkward as ak
 
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         allow_empty=False,
         allow_string=False,
@@ -72,8 +70,6 @@ def test_roundtrip_stable(a: ak.Array) -> None:
 
 @given(
     a=st_ak.constructors.arrays(
-        # categorical arrays (generated since hypothesis-awkward 0.22.0)
-        # fail this roundtrip; not yet triaged
         allow_categorical=False,
         # to_numpy(allow_missing=True) raises on timedelta64 with missing
         # values (create_missing_data calls np.iinfo on the "m8" dtype)
