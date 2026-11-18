@@ -25,6 +25,35 @@ import numpy as np
 import awkward as ak
 
 
+def has_issue_2853(a: ak.Array) -> bool:
+    """Return `True` if a record or union of two or more contents holds categorical data.
+
+    Merging a categorical array only with other categorical arrays
+    raises `NotImplementedError` ("merging categorical arrays is
+    currently not implemented") in `IndexedArray._mergemany`, and an
+    `EmptyArray` partner is skipped before that check, so a categorical
+    array next to unknown-type contents raises too. `ak.ravel` merges
+    the leaves of all record fields and union contents; the
+    `to_buffers`/`from_buffers` roundtrip and `ak.array_equal` raise
+    on a union of categorical and unknown-type contents. The trigger is
+    any record or union of two or more contents with a categorical node
+    below it. Reported:
+    https://github.com/scikit-hep/awkward/issues/2853
+    """
+    stack = [a.layout.form]
+    while stack:
+        node = stack.pop()
+        if node.is_record or node.is_union:
+            if len(node.contents) >= 2 and any(
+                _contains_categorical(x) for x in node.contents
+            ):
+                return True
+            stack.extend(node.contents)
+        elif not (node.is_numpy or node.is_unknown):
+            stack.append(node.content)
+    return False
+
+
 def has_issue_4260(a: ak.Array) -> bool:
     """Return `True` if a record spanning more than one depth is in the array.
 
@@ -318,6 +347,20 @@ def _is_variable_length_list(form: ak.forms.Form) -> bool:
     if node.parameter("__array__") in ("string", "bytestring"):
         return False
     return node.is_list and not node.is_regular
+
+
+def _contains_categorical(form: ak.forms.Form) -> bool:
+    """Return `True` if a node labeled `"categorical"` is in the tree."""
+    stack = [form]
+    while stack:
+        node = stack.pop()
+        if node.parameter("__array__") == "categorical":
+            return True
+        if node.is_record or node.is_union:
+            stack.extend(node.contents)
+        elif not (node.is_numpy or node.is_unknown):
+            stack.append(node.content)
+    return False
 
 
 def _contains_record_or_union(form: ak.forms.Form) -> bool:
