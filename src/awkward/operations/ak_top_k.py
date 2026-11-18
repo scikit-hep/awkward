@@ -39,7 +39,8 @@ def top_k(
 
     Returns:
         A namedtuple with fields `values` and `indices`. The values retain the
-        input dtype; indices are local to the searched axis, as in #ak.argsort.
+        input dtype; indices refer to original positions along the searched
+        axis, including positions occupied by missing rows.
 
     This follows the Array API `top_k` signature and namedtuple result, with
     Awkward's usual output options. Lists shorter than `k` return all their
@@ -100,7 +101,12 @@ def _impl(array, k, axis, mode, highlevel, behavior, attrs, output):
             raise TypeError("top_k requires real numeric or boolean values")
         if node.is_numpy and node.dtype.kind not in "biuf":
             raise TypeError("top_k requires real numeric or boolean values")
-        if node.is_list and not node.is_regular and depth > posaxis:
+        if depth > posaxis and (
+            (node.is_list and not node.is_regular)
+            or (node.is_option and node.minmax_depth[1] > 1)
+        ):
+            # Missing list rows must retain their original axis positions,
+            # including when their content has a regular inner dimension.
             needs_alignment = True
 
     ak._do.recursively_apply(layout, validate, return_array=False)

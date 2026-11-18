@@ -107,3 +107,16 @@ def test_deep_alignment_keeps_cuda_backend(axis):
         assert actual.form == reference.form
         assert ak.to_list(actual) == ak.to_list(reference)
     ak._connect.cuda.synchronize_cuda()
+
+
+@pytest.mark.parametrize("k", [1, 3])
+def test_regular_missing_rows_match_ragged(k):
+    ragged = ak.Array([None, [1, 9], [5, 6]])
+    regular = ak.to_regular(ragged, axis=1)
+    expected = ak.top_k(ragged, k, axis=0)
+    for source in (ragged, regular):
+        result = ak.top_k(ak.to_backend(source, "cuda"), k, axis=0)
+        for actual, reference in zip(result, expected, strict=True):
+            assert ak.to_backend(actual, "cpu").to_list() == reference.to_list()
+            assert actual.layout.form == reference.layout.form
+    ak._connect.cuda.synchronize_cuda()
