@@ -10,6 +10,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
+from tests.properties.operations import util
 
 pytest.importorskip("pyarrow.parquet")
 
@@ -70,7 +71,11 @@ def parquet_writable(a: ak.Array) -> bool:
             # a valid row whose fields are all null reads back as a null
             # row (outermost struct validity is not stored)
             return False
-    return _nodes_writable(a.layout)
+    return (
+        _nodes_writable(a.layout)
+        and not _has_issue_4554(a.layout)
+        and not _has_issue_4555(a.layout)
+    )
 
 
 def _nodes_writable(layout: ak.contents.Content, nullable: bool = False) -> bool:
@@ -152,10 +157,49 @@ def _nodes_writable(layout: ak.contents.Content) -> bool:
     return True
 
 
+def _has_issue_4554(layout: ak.contents.Content, under_option: bool = False) -> bool:
+    """`from_arrow` raises `TypeError` on an option-type categorical
+    array: with the default `categorical_as_dictionary=False`, `to_arrow`
+    writes the projected values but keeps `__array__: "categorical"` in
+    the extension type's `mask_parameters`, and the `BitMaskedArray` (or
+    `UnmaskedArray`) that `from_arrow` builds with them rejects it
+    (#4554). A table conversion moves an option over a record into each
+    field, so a categorical node below any option is affected too.
+
+    `under_option` tracks whether an option node encloses this node.
+    """
+    if layout.parameter("__array__") == "categorical" and (
+        under_option or layout.is_option
+    ):
+        return True
+    under_option = under_option or layout.is_option
+    return any(_has_issue_4554(x, under_option) for x in _children(layout))
+
+
+def _has_issue_4555(layout: ak.contents.Content) -> bool:
+    """`to_arrow` raises `TypeError` on an indexed node with parameters
+    over a zero-length content: `IndexedArray._to_arrow` then converts
+    only the content and copies the node's parameters onto it, and the
+    content rejects them (an `EmptyArray` accepts no parameters, and a
+    `ListOffsetArray` or `NumpyArray` rejects `__array__: "categorical"`,
+    so every categorical array with no categories fails; #4555)."""
+    if layout.is_indexed and layout.content.length == 0 and layout.parameters:
+        return True
+    return any(_has_issue_4555(x) for x in _children(layout))
+
+
+def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
+    """The direct child layouts of a node."""
+    if layout.is_record or layout.is_union:
+        return list(layout.contents)
+    if layout.is_option or layout.is_indexed or layout.is_list:
+        return [layout.content]
+    return []
+
+
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=parquet_dtypes(),
         # a bare unknown type cannot be written ("A null type field may
         # not be non-nullable"), and one nested in a record or regular
@@ -174,13 +218,12 @@ def test_roundtrip(a: ak.Array) -> None:
     path = parquet_path()
     ak.to_parquet(a, path)
     returned = ak.from_parquet(path)
-    assert ak.array_equal(a, returned, equal_nan=True)
+    assert ak.array_equal(util.without_categorical(a), returned, equal_nan=True)
 
 
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=parquet_dtypes(),
         allow_empty=False,
         # an option directly over a `RegularArray` cannot be written
@@ -199,7 +242,9 @@ def test_roundtrip_masked(a: ak.Array) -> None:
     path = parquet_path()
     ak.to_parquet(a, path)
     returned = ak.from_parquet(path)
-    assert ak.array_equal(a, returned, equal_nan=True, same_content_types=False)
+    assert ak.array_equal(
+        util.without_categorical(a), returned, equal_nan=True, same_content_types=False
+    )
 
 
 @no_deadline

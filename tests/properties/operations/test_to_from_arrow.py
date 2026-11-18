@@ -10,6 +10,7 @@ from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
+from tests.properties.operations import util
 
 pytest.importorskip("pyarrow")
 
@@ -100,6 +101,10 @@ def has_issues(a: ak.Array) -> bool:
     if _has_issue_4229(a.layout):
         return True
     if _has_issue_4255(a.layout):
+        return True
+    if _has_issue_4554(a.layout):
+        return True
+    if _has_issue_4555(a.layout):
         return True
     return False
 
@@ -224,6 +229,37 @@ def _has_issue_4255(layout: ak.contents.Content, nullable: bool = False) -> bool
     return False
 
 
+def _has_issue_4554(layout: ak.contents.Content, under_option: bool = False) -> bool:
+    """`from_arrow` raises `TypeError` on an option-type categorical
+    array: with the default `categorical_as_dictionary=False`, `to_arrow`
+    writes the projected values but keeps `__array__: "categorical"` in
+    the extension type's `mask_parameters`, and the `BitMaskedArray` (or
+    `UnmaskedArray`) that `from_arrow` builds with them rejects it
+    (#4554). A table conversion moves an option over a record into each
+    field, so a categorical node below any option is affected too.
+
+    `under_option` tracks whether an option node encloses this node.
+    """
+    if layout.parameter("__array__") == "categorical" and (
+        under_option or layout.is_option
+    ):
+        return True
+    under_option = under_option or layout.is_option
+    return any(_has_issue_4554(x, under_option) for x in _children(layout))
+
+
+def _has_issue_4555(layout: ak.contents.Content) -> bool:
+    """`to_arrow` raises `TypeError` on an indexed node with parameters
+    over a zero-length content: `IndexedArray._to_arrow` then converts
+    only the content and copies the node's parameters onto it, and the
+    content rejects them (an `EmptyArray` accepts no parameters, and a
+    `ListOffsetArray` or `NumpyArray` rejects `__array__: "categorical"`,
+    so every categorical array with no categories fails; #4555)."""
+    if layout.is_indexed and layout.content.length == 0 and layout.parameters:
+        return True
+    return any(_has_issue_4555(x) for x in _children(layout))
+
+
 def _has_issue_4316(layout: ak.contents.Content) -> bool:
     """`ak.array_equal`, the roundtrip's oracle, returns `False` for two
     equal unions when one side's index into a list child is a permutation
@@ -292,7 +328,6 @@ def _strip_options(
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=arrow_dtypes(),
         allow_indexed_option=False,
         allow_byte_masked=False,
@@ -311,13 +346,12 @@ def test_roundtrip(a: ak.Array) -> None:
     """`to_arrow` followed by `from_arrow` reconstructs the array."""
     arr = ak.to_arrow(a)
     returned = ak.from_arrow(arr)
-    assert ak.array_equal(a, returned, equal_nan=True)
+    assert ak.array_equal(util.without_categorical(a), returned, equal_nan=True)
 
 
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=arrow_dtypes(),
         # a union with an option-type child that is longer than its last
         # index reference crashes `to_arrow` (IndexError in
@@ -333,7 +367,9 @@ def test_roundtrip_masked(a: ak.Array) -> None:
     """
     arr = ak.to_arrow(a)
     returned = ak.from_arrow(arr)
-    assert ak.array_equal(a, returned, equal_nan=True, same_content_types=False)
+    assert ak.array_equal(
+        util.without_categorical(a), returned, equal_nan=True, same_content_types=False
+    )
 
 
 def table_compatible(a: ak.Array) -> bool:
@@ -363,7 +399,6 @@ def table_compatible(a: ak.Array) -> bool:
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=arrow_dtypes(),
         # a bare unknown type crashes `from_arrow` (AttributeError in
         # `form_remove_optiontype`, #4230), and a nested one breaks the
@@ -383,14 +418,15 @@ def test_roundtrip_table(a: ak.Array) -> None:
     """
     table = ak.to_arrow_table(a)
     returned = ak.from_arrow(table, generate_bitmasks=True)
-    assert ak.array_equal(a, returned, equal_nan=True, same_content_types=False)
+    assert ak.array_equal(
+        util.without_categorical(a), returned, equal_nan=True, same_content_types=False
+    )
     assert ak.from_arrow_schema(table.schema) == returned.layout.form
 
 
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=arrow_dtypes(),
         # pyarrow's `Array.equals` counts NaN as unequal to itself and has
         # no `equal_nan` option; NaN coverage lives in the tests above
