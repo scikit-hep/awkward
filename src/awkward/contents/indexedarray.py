@@ -861,10 +861,27 @@ class IndexedArray(IndexedMeta[Content], Content):
             # every masked value is self._content[0], unless self._content.length == 0.
             # In that case, don't call self._content[index]; it's empty anyway.
             next = self._content
+            next_parameters = self._parameters
+            if self.parameter("__array__") == "categorical":
+                next_parameters = dict(self._parameters)
+                del next_parameters["__array__"]
             next2 = next.copy(
-                parameters=parameters_union(next._parameters, self._parameters)
+                parameters=parameters_union(next._parameters, next_parameters)
             )
-            return next2._to_arrow(pyarrow, mask_node, validbytes, length, options)
+            if length != 0 and (
+                validbytes is None
+                or len(validbytes) < length
+                or self._backend.nplike.any(validbytes[:length])
+            ):
+                raise ValueError(
+                    "cannot convert an indexed array with non-null indices into empty content"
+                )
+            if length == 0:
+                return next2._to_arrow(pyarrow, mask_node, validbytes, 0, options)
+            empty = next2._to_arrow(pyarrow, mask_node, None, 0, options)
+            # The mask supplies the outer length; the empty content supplies
+            # only the type, including any Awkward extension metadata.
+            return pyarrow.nulls(length, type=empty.type)
 
         if (
             not options["categorical_as_dictionary"]
