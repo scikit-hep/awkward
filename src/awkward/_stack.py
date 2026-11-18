@@ -55,7 +55,7 @@ def walk(layout, action, depth=1, path=(), *, rebuild=True):
             for content, original in zip(contents, layout.contents, strict=True)
         ):
             return layout
-        return simplify_union(
+        return ak.contents.UnionArray.simplified(
             layout.tags, layout.index, contents, parameters=layout._parameters
         )
     if layout.is_option:
@@ -81,29 +81,9 @@ def walk(layout, action, depth=1, path=(), *, rebuild=True):
 def field_lists(layout):
     """Wrap each field value atomically, using an empty list for missing values."""
     if layout.is_union:
-        return simplify_union(
+        return ak.contents.UnionArray.simplified(
             layout.tags,
             layout.index,
             [field_lists(content) for content in layout.contents],
         )
     return ak.operations.ak_singletons._wrap_singletons(layout, regular=True)
-
-
-def simplify_union(tags, index, contents, *, parameters=None):
-    # Merging a later branch can make an earlier pair mergeable (for example,
-    # lists of integers become compatible with lists of strings once another
-    # branch contributes a union of both). Canonicalize until no further
-    # branches merge. The number of branches bounds the number of passes.
-    previous = len(contents) + 1
-    result = ak.contents.UnionArray.simplified(
-        tags, index, contents, parameters=parameters
-    )
-    while result.is_union and len(result.contents) < previous:
-        previous = len(result.contents)
-        result = ak.contents.UnionArray.simplified(
-            result.tags,
-            result.index,
-            result.contents,
-            parameters=result._parameters,
-        )
-    return result
