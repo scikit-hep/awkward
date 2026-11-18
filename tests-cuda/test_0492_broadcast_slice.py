@@ -45,3 +45,15 @@ def test_bounds(first, index):
     )
     assert ak.to_list(valid) == [[[20, 10]], [[30]]]
     ak._connect.cuda.synchronize_cuda()
+
+
+def test_record_list_fields():
+    source = ak.zip({"a": [[1, 2], [3]], "b": [[10, 20], [30]]}, depth_limit=1)
+    indices = ak.Array([[[1, 0]], [[0]]])
+    result = ak.broadcast_slice(
+        ak.to_backend(source, "cuda"), ak.to_backend(indices, "cuda")
+    )
+    expected = ak.broadcast_slice(source, indices)
+    assert ak.to_backend(result, "cpu").to_list() == expected.to_list()
+    assert result.layout.form == expected.layout.form
+    ak._connect.cuda.synchronize_cuda()

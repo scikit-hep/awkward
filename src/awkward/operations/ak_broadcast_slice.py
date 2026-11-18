@@ -52,7 +52,10 @@ def broadcast_slice(
     selected values (including records or lists). At axis=0, indices select from
     the entire array. Otherwise the outer lengths must match; deeper prefix
     dimensions follow Awkward's left-broadcasting rules. Missing values in either
-    input propagate to the output. Named axis metadata is not propagated.
+    input propagate to the output. At the selected axis, records containing
+    list fields are sliced field by field, preserving the record structure
+    and checking bounds independently for each field. Named axis metadata is
+    not propagated.
     """
     yield array, indices
     return _impl(array, indices, axis, highlevel, behavior, attrs)
@@ -135,9 +138,32 @@ def _impl(array, indices, axis, highlevel, behavior, attrs):
         wrapped = ak.contents.RecordArray([collections], ["collection"])
         return broadcast([wrapped, positions], gather)
 
+    def select_fields(inputs, depth=1, **kwargs):
+        if depth != 1:
+            return None
+        collections, positions = inputs
+        if collections.is_list:
+            return (select(collections, positions),)
+        if collections.is_record:
+            return (
+                collections.copy(
+                    contents=[
+                        broadcast(
+                            [
+                                collections.content(field)[: collections.length],
+                                positions,
+                            ],
+                            select_fields,
+                        )
+                        for field in collections.fields
+                    ]
+                ),
+            )
+        return None
+
     def action(inputs, depth, **kwargs):
-        if depth == axis and inputs[0].is_list:
-            return (select(*inputs),)
+        if depth == axis:
+            return select_fields(inputs)
         return None
 
     if axis == 0:
