@@ -168,3 +168,17 @@ def test_direct_field_carries_preserve_nested_values(values):
         (None, None, None, None),
         (*reversed(values), None),
     ]
+
+
+def test_dropping_missing_fields_keeps_nested_lists_atomic():
+    array = ak.Array([([1, 2], None), ([], [3]), (None, [])])
+    result = ak.tuples_to_lists(array, axis=1, drop_none=True)
+    assert result.to_list() == [[[1, 2]], [[], [3]], [[]]]
+    tracer = ak.Array(array.layout.to_typetracer(forget_length=True))
+    assert (
+        ak.tuples_to_lists(tracer, axis=1, drop_none=True).layout.form
+        == result.layout.form
+    )
+    first_field = array["0"]
+    assert ak.singletons(first_field).to_list() == [[[1, 2]], [[]], []]
+    assert ak.singletons(first_field).layout.is_list

@@ -80,19 +80,13 @@ def walk(layout, action, depth=1, path=(), *, rebuild=True):
 
 def field_lists(layout):
     """Wrap each field value atomically, using an empty list for missing values."""
-    if layout.is_option:
-        nplike = layout.backend.nplike
-        offsets = nplike.empty(layout.length + 1, dtype="int64")
-        offsets[0] = 0
-        nplike.cumsum(layout.mask_as_bool(valid_when=True), maybe_out=offsets[1:])
-        return ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout.project())
     if layout.is_union:
         return simplify_union(
             layout.tags,
             layout.index,
             [field_lists(content) for content in layout.contents],
         )
-    return ak.contents.RegularArray(layout, 1)
+    return ak.operations.ak_singletons._wrap_singletons(layout, regular=True)
 
 
 def simplify_union(tags, index, contents, *, parameters=None):
