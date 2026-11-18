@@ -21,8 +21,14 @@ def to_dense(array, *, fill_value=0, clip=False, dtype=None):
         clip (bool): If False, pad each list axis to its longest list. If True,
             truncate each list axis to its shortest list. Empty lists participate
             in this minimum; missing lists do not.
-        dtype: Optional NumPy numeric dtype for the result. By default, use a
-            common dtype for the data and `fill_value`.
+        dtype: Optional NumPy numeric dtype for the result. By default, use
+            NumPy result_type promotion for the data and fill_value. NumPy
+            scalar and zero-dimensional array fills contribute their declared
+            dtype; Python scalars follow NumPy's scalar promotion rules.
+            An explicit dtype casts data using NumPy's unsafe casting rules,
+            which can truncate fractions, overflow, or discard imaginary parts
+            with a ComplexWarning. The fill value must be convertible to the
+            result dtype even when no entries require filling.
 
     Unlike #ak.to_numpy, this operation can change data: lists are padded or
     truncated and missing values are replaced. The outer array length is
@@ -171,13 +177,30 @@ def _impl(array, fill_value, clip, dtype):
         arrays.append(ak.to_numpy(column, allow_missing=True))
 
     if dtype is None:
-        dtype = numpy.result_type(
-            *(x.dtype for x in arrays), numpy.min_scalar_type(fill_value)
+        fill_type = (
+            fill.dtype
+            if isinstance(fill_value, numpy.generic | numpy.ndarray)
+            else fill_value
         )
+        dtype = numpy.result_type(*(x.dtype for x in arrays), fill_type)
+
+    # Check the fill even for complete inputs. Converting a NumPy scalar to a
+    # Python scalar also preserves range checking for integer destinations.
+    if dtype.kind in "iu":
+        bounds = numpy.iinfo(dtype)
+        if (
+            fill.dtype.kind == "c"
+            or not numpy.isfinite(fill)
+            or not bounds.min <= fill.item() <= bounds.max
+        ):
+            raise TypeError(
+                f"Cannot convert fill_value {fill_value!r} to dtype {dtype}"
+            )
+    validated_fill = numpy.ma.masked_all((), dtype=dtype).filled(fill.item()).item()
     filled = []
     shape = (layout.length, *sizes)
     for numpy_array, column_rank in zip(arrays, ranks, strict=True):
-        values = numpy.ma.asarray(numpy_array, dtype=dtype).filled(fill_value)
+        values = numpy.ma.asarray(numpy_array, dtype=dtype).filled(validated_fill)
         if column_rank < rank:
             values = numpy.broadcast_to(
                 values.reshape((*values.shape, *((1,) * (rank - column_rank)))), shape
