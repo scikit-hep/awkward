@@ -9,8 +9,6 @@ import awkward as ak
 
 @given(
     a=st_ak.constructors.arrays(
-        # merging categorical arrays (generated since hypothesis-awkward
-        # 0.22.0) raises NotImplementedError; not yet triaged
         allow_categorical=False,
     )
 )

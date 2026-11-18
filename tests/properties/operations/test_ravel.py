@@ -91,8 +91,6 @@ def test_properties(data: st.DataObject) -> None:
     """Assert `ak.ravel` does not raise on a draw expected to succeed."""
     a = data.draw(
         st_ak.constructors.arrays(
-            # merging categorical arrays (generated since hypothesis-awkward
-            # 0.22.0) raises NotImplementedError; not yet triaged
             allow_categorical=False,
         ),
         label="a",
