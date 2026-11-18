@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-import numpy as np  # noqa: TID251 - CPU-only path uses ufunc reduction with where
-
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
 from awkward._layout import HighLevelContext
 from awkward._namedaxis import _get_named_axis
+from awkward._nplikes.numpy import Numpy
+
+# CPU ufunc reductions with where are not exposed by NumpyLike.
+np = Numpy.instance()._module
 
 
 def try_reduce_dense(
@@ -18,38 +20,91 @@ def try_reduce_dense(
         return None
 
     candidate = array.layout if isinstance(array, ak.Array) else array
-    if type(candidate) not in (np.ndarray, ak.contents.NumpyArray):
+    if type(candidate) not in (
+        np.ndarray,
+        ak.contents.NumpyArray,
+        ak.contents.RegularArray,
+        ak.contents.ListOffsetArray,
+    ):
+        return None
+
+    if type(candidate) in (np.ndarray, ak.contents.NumpyArray):
+        dtype = candidate.dtype
+    elif type(candidate.content) is ak.contents.NumpyArray:
+        dtype = candidate.content.dtype
+    else:
+        return None
+    if dtype not in (np.dtype(np.complex64), np.dtype(np.complex128)):
         return None
 
     with HighLevelContext(behavior=behavior, attrs=attrs) as ctx:
         layout = ctx.unwrap(array, allow_record=False, primitive_policy="error")
 
     if (
-        type(layout) is not ak.contents.NumpyArray
-        or layout.backend is not NumpyBackend.instance()
+        layout.backend is not NumpyBackend.instance()
         or layout._parameters
         or _get_named_axis(ctx)
-        or type(layout.data) is not np.ndarray
     ):
         return None
-    data = layout.data
+    if type(layout) is ak.contents.NumpyArray:
+        data = layout.data
+    else:
+        content = layout.content
+        if (
+            type(content) is not ak.contents.NumpyArray
+            or content._parameters
+            or type(content.data) is not np.ndarray
+            or content.data.ndim != 1
+            or not content.data.flags.c_contiguous
+        ):
+            return None
+        if layout.is_regular:
+            width = layout.size
+            data = content.data[: layout.length * width].reshape(layout.length, width)
+        else:
+            offsets = layout.offsets.data
+            if type(offsets) is not np.ndarray or len(offsets) < 2:
+                return None
+            width = int(offsets[1] - offsets[0])
+            if (
+                width < 0
+                or offsets[0] < 0
+                or offsets[-1] > content.length
+                or not np.all(np.diff(offsets) == width)
+            ):
+                return None
+            data = content.data[offsets[0] : offsets[-1]].reshape(layout.length, width)
     if (
-        data.ndim != 2
-        # On short rows, masked ufunc setup can cost more than the existing reducer.
-        or data.shape[1] < 128
+        type(data) is not np.ndarray
+        or data.ndim != 2
         or not data.size
-        or data.dtype not in (np.dtype(np.complex64), np.dtype(np.complex128))
         or not data.flags.c_contiguous
     ):
         return None
 
-    valid = np.isnan(data)
-    np.logical_not(valid, out=valid)
-    with np.errstate(invalid="ignore", over="ignore"):
-        sums = np.add.reduce(data, axis=-1, where=valid)
+    # Addition propagates either NaN component. A NaN-free row sum proves
+    # that all inputs in that row were valid, avoiding a full input-mask scan.
+    # Infinities can also produce NaN sums; those rows take the masked path.
+    if data.shape[1] < 128 and data.size >= 4096:
+        sums = ak.operations.ak_sum._impl(
+            layout, axis, False, False, False, ctx.behavior, ctx.attrs
+        ).data
+    else:
+        with np.errstate(invalid="ignore", over="ignore"):
+            sums = np.add.reduce(data, axis=-1)
+    all_valid = not np.isnan(sums).any()
+    if not all_valid:
+        valid = np.isnan(data)
+        np.logical_not(valid, out=valid)
+        with np.errstate(invalid="ignore", over="ignore"):
+            sums = np.add.reduce(data, axis=-1, where=valid)
 
     if mean:
-        counts = np.count_nonzero(valid, axis=-1)
+        counts = (
+            np.full(len(sums), data.shape[1], dtype=np.int64)
+            if all_valid
+            else np.count_nonzero(valid, axis=-1)
+        )
         empty = counts == 0
         values = np.full(len(sums), np.nan, dtype=np.complex128)
         with np.errstate(invalid="ignore", divide="ignore"):
@@ -66,7 +121,13 @@ def try_reduce_dense(
         out = ak.contents.NumpyArray(sums)
         if mask_identity:
             out = ak.contents.ByteMaskedArray(
-                ak.index.Index8(~valid.any(axis=-1)), out, valid_when=False
+                ak.index.Index8(
+                    np.zeros(len(sums), dtype=np.int8)
+                    if all_valid
+                    else ~valid.any(axis=-1)
+                ),
+                out,
+                valid_when=False,
             )
 
     if keepdims:

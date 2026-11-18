@@ -281,12 +281,7 @@ class Count(JAXReducer):
         )
         result = jax.numpy.asarray(result, dtype=self.preferred_dtype)
 
-        if np.issubdtype(array.dtype, np.complexfloating):
-            return ak.contents.NumpyArray(
-                result.view(array.dtype), backend=array.backend
-            )
-        else:
-            return ak.contents.NumpyArray(result, backend=array.backend)
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 def segment_count_nonzero(data, segment_ids, num_segments):
@@ -529,6 +524,10 @@ def segment_prod_with_negatives(data, segment_ids, num_segments):
             data.astype(jax.numpy.int32), segment_ids, num_segments
         )
 
+    # Complex multiplication must retain phase; the real sign/log path cannot.
+    if np.issubdtype(data.dtype, np.complexfloating):
+        return jax.ops.segment_prod(data, segment_ids, num_segments)
+
     # For numeric arrays, handle negative values and zeros
     # Track zeros to set product to zero if any segment has zeros
     is_zero = data == 0
@@ -589,12 +588,7 @@ class Prod(JAXReducer):
             *maybe_materialize(array.data, parents_data), outlength
         )
 
-        if np.issubdtype(array.dtype, np.complexfloating):
-            return ak.contents.NumpyArray(
-                result.view(array.dtype), backend=array.backend
-            )
-        else:
-            return ak.contents.NumpyArray(result, backend=array.backend)
+        return ak.contents.NumpyArray(result, backend=array.backend)
 
 
 @overloads(_reducers.Any)
