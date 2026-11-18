@@ -45,3 +45,11 @@ def test_regular_width_uses_metadata():
         (4, 5, 6, 7),
         (8, 9, 10, 11),
     ]
+
+
+@pytest.mark.parametrize("size", [0, 1, 3, 6])
+def test_regular_field_carries_after_slicing(size):
+    source = ak.Array(cp.arange(20).reshape(5, 4))[1:4]
+    result = ak.lists_to_tuples(source, size=size)
+    expected = ak.lists_to_tuples(ak.to_backend(source, "cpu"), size=size)
+    assert ak.to_backend(result, "cpu").to_list() == expected.to_list()

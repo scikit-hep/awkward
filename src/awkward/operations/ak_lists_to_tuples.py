@@ -147,8 +147,19 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
             padded = ak.operations.ak_pad_none._impl(
                 node, width, 1, True, False, None, None
             )
+        contents = []
+        if width:
+            nplike = node.backend.nplike
+            starts = (
+                nplike.arange(nplike.shape_item_as_index(node.length), dtype="int64")
+                * padded.size
+            )
+            contents = [
+                padded.content._carry(ak.index.Index64(starts + i), True)
+                for i in range(width)
+            ]
         return ak.contents.RecordArray(
-            [padded[:, i] for i in range(width)],
+            contents,
             None,
             node.length,
             parameters=parameters(node),
