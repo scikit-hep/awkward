@@ -118,9 +118,7 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
                 walk(packed.content, collect, depth + 1, path, rebuild=False)
                 return node
         if selected(node, depth):
-            if size is not None:
-                width = size
-            elif node.is_regular and node.size is not unknown_length:
+            if node.is_regular and node.size is not unknown_length:
                 width = node.size
             elif node.backend.name != "cpu":
                 raise ValueError(
@@ -133,14 +131,16 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
             widths[path] = max(widths.get(path, 0), width)
             return node
 
-    walk(layout, collect, rebuild=False)
-    if not widths:
-        raise AxisError(f"no list dimension at axis={axis} to lists_to_tuples")
+    if size is None:
+        walk(layout, collect, rebuild=False)
+    converted = False
 
     def action(node, depth, path):
+        nonlocal converted
         if not selected(node, depth):
             return None
-        width = widths[path]
+        converted = True
+        width = widths[path] if size is None else size
         if node.is_regular and node.size >= width:
             padded = node
         else:
@@ -156,5 +156,7 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
         )
 
     out = walk(layout, action)
+    if not converted:
+        raise AxisError(f"no list dimension at axis={axis} to lists_to_tuples")
     named_axis = _remove_named_axis(named_axis, axis, layout.minmax_depth[1])
     return ctx.with_attr(NAMED_AXIS_KEY, named_axis).wrap(out, highlevel=highlevel)
