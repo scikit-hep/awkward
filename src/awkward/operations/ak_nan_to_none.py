@@ -3,7 +3,6 @@
 
 import awkward as ak
 from awkward._backends.numpy import NumpyBackend
-from awkward._backends.typetracer import TypeTracerBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
@@ -26,6 +25,9 @@ def nan_to_none(
     """Converts NaN ("not a number") into None, i.e. missing values with option-type.
 
     On CPU, a complex value is missing if either component is NaN.
+
+    For complex values, either a real or imaginary NaN makes the entire value
+    missing. This rule is the same for NumPy, CuPy, JAX and typetracer layouts.
 
     See also #ak.nan_to_num to convert NaN or infinity to specified values.
 
@@ -57,17 +59,14 @@ def _impl(
     *,
     optimize_all_valid: bool = False,
 ):
-    def supports_nan_mask(layout, backend):
+    def supports_nan_mask(layout):
         return layout.is_numpy and (
             np.issubdtype(layout.dtype, np.floating)
-            or (
-                backend in (NumpyBackend.instance(), TypeTracerBackend.instance())
-                and np.issubdtype(layout.dtype, np.complexfloating)
-            )
+            or np.issubdtype(layout.dtype, np.complexfloating)
         )
 
     def action(layout, continuation, backend, **kwargs):
-        if supports_nan_mask(layout, backend):
+        if supports_nan_mask(layout):
             mask = backend.nplike.isnan(layout.data)
             if (
                 optimize_all_valid
@@ -87,7 +86,7 @@ def _impl(
             )
 
         elif (layout.is_option or layout.is_indexed) and (
-            supports_nan_mask(layout.content, backend)
+            supports_nan_mask(layout.content)
         ):
             return continuation()
 
