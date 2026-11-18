@@ -143,3 +143,28 @@ def test_conversion_preserves_mask_wrappers(operation, mask_kind):
     assert result.to_list() == expected
     tracer = ak.Array(layout.to_typetracer(forget_length=True))
     assert convert(tracer, **kwargs).layout.form == result.layout.form
+
+
+@pytest.mark.parametrize("width", [0, 1, 3, 7])
+def test_direct_field_carries_respect_regular_stride_and_slices(width):
+    import numpy as np
+
+    source = ak.Array(np.arange(30).reshape(5, 6))[1:4]
+    result = ak.lists_to_tuples(source, size=width)
+    expected = [
+        (*range(start, start + min(width, 6)), *([None] * max(0, width - 6)))
+        for start in (6, 12, 18)
+    ]
+    assert result.to_list() == expected
+    tracer = ak.Array(source.layout.to_typetracer(forget_length=True))
+    assert ak.lists_to_tuples(tracer, size=width).layout.form == result.layout.form
+
+
+@pytest.mark.parametrize("values", [["a", None, "b"], [{"x": 1}, None, {"x": 2}]])
+def test_direct_field_carries_preserve_nested_values(values):
+    source = ak.Array([values, [], list(reversed(values))])
+    assert ak.lists_to_tuples(source, size=4).to_list() == [
+        (*values, None),
+        (None, None, None, None),
+        (*reversed(values), None),
+    ]
