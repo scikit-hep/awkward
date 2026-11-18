@@ -329,7 +329,7 @@ class LazyAwkwardArray:
             return value.ir_node
         elif isinstance(value, ak.Array):
             return InputNode(value)
-        elif isinstance(value, (int, float, np.ndarray)) or (
+        elif isinstance(value, (int, float, complex, np.generic, np.ndarray)) or (
             cp is not None and isinstance(value, cp.ndarray)
         ):
             return ConstantNode(value)
