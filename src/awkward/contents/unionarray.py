@@ -284,6 +284,7 @@ class UnionArray(UnionMeta[Content], Content):
         tags = ak.index.Index8.empty(length, backend.nplike)
         index = ak.index.Index64.empty(length, backend.nplike)
         contents = []
+        merged_contents = False
 
         # For each outer union content
         for i, self_cont in enumerate(self_contents):
@@ -330,6 +331,7 @@ class UnionArray(UnionMeta[Content], Content):
                                 )
                             )
                             contents[k] = contents[k]._mergemany([inner_cont])
+                            merged_contents = True
                             unmerged = False
                             break
 
@@ -411,6 +413,7 @@ class UnionArray(UnionMeta[Content], Content):
                             )
                         )
                         contents[k] = contents[k]._mergemany([self_cont])
+                        merged_contents = True
                         unmerged = False
                         break
 
@@ -483,6 +486,24 @@ class UnionArray(UnionMeta[Content], Content):
                 else ak.contents.UnmaskedArray(c)
                 for c in contents
             ]
+
+        # Mergeability can broaden after merging (for example, a list's
+        # content becomes a union). Reconsider earlier groups only when this
+        # pass merged contents. A further pass is needed only if it will reduce
+        # the number of branches, bounding the number of retries.
+        if merged_contents and any(
+            left._mergeable_next(right, mergebool, mergecastable)
+            for i, left in enumerate(contents)
+            for right in contents[i + 1 :]
+        ):
+            return cls.simplified(
+                tags,
+                index,
+                contents,
+                parameters=parameters,
+                mergebool=mergebool,
+                mergecastable=mergecastable,
+            )
 
         if len(contents) == 1:
             next = contents[0]._carry(index, True)
