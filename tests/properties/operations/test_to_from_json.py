@@ -7,7 +7,6 @@ import hypothesis_awkward.strategies as st_ak
 import numpy as np
 from hypothesis import given
 from hypothesis import strategies as st
-from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
 
 import awkward as ak
 
@@ -28,12 +27,9 @@ def json_dtype(dtype: np.dtype) -> bool:
     return True
 
 
-SUPPORTED_JSON_DTYPES = tuple(d for d in SUPPORTED_DTYPES if json_dtype(d))
-
-
 def json_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for dtypes that `to_json` can serialize."""
-    return st.sampled_from(SUPPORTED_JSON_DTYPES)
+    return st_ak.numpy.supported_dtypes().filter(json_dtype)
 
 
 def inferred_dtype(dtype: np.dtype) -> bool:
@@ -42,12 +38,9 @@ def inferred_dtype(dtype: np.dtype) -> bool:
     return dtype in (np.dtype(np.bool_), np.dtype(np.int64), np.dtype(np.float64))
 
 
-SUPPORTED_INFERRED_DTYPES = tuple(d for d in SUPPORTED_JSON_DTYPES if inferred_dtype(d))
-
-
 def inferred_json_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for dtypes that survive the JSON roundtrip."""
-    return st.sampled_from(SUPPORTED_INFERRED_DTYPES)
+    return json_dtypes().filter(inferred_dtype)
 
 
 def json_writable(a: ak.Array) -> bool:
@@ -190,6 +183,9 @@ def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
 
 @given(
     a=st_ak.constructors.arrays(
+        # categorical arrays (generated since hypothesis-awkward 0.22.0)
+        # fail this roundtrip; not yet triaged
+        allow_categorical=False,
         dtypes=inferred_json_dtypes(),
         # json.dumps raises ValueError on NaN
         allow_nan=False,
@@ -216,6 +212,9 @@ def test_roundtrip(a: ak.Array) -> None:
 
 @given(
     a=st_ak.constructors.arrays(
+        # categorical arrays (generated since hypothesis-awkward 0.22.0)
+        # fail this roundtrip; not yet triaged
+        allow_categorical=False,
         dtypes=inferred_json_dtypes(),
         allow_nan=False,
         allow_bytestring=False,

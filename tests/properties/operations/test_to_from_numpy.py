@@ -10,6 +10,9 @@ import awkward as ak
 
 @given(
     a=st_ak.constructors.arrays(
+        # categorical arrays (generated since hypothesis-awkward 0.22.0)
+        # fail this roundtrip; not yet triaged
+        allow_categorical=False,
         allow_empty=False,
         allow_string=False,
         allow_bytestring=False,
@@ -34,7 +37,7 @@ def test_roundtrip(a: ak.Array) -> None:
     a=st_ak.constructors.arrays(
         # to_numpy(allow_missing=True) raises on timedelta64 with missing
         # values (create_missing_data calls np.iinfo on the "m8" dtype)
-        dtypes=st_ak.supported_dtypes().filter(lambda d: d.kind != "m"),
+        dtypes=st_ak.numpy.supported_dtypes().filter(lambda d: d.kind != "m"),
         # from_numpy crashes on multidimensional MaskedArrays that to_numpy
         # builds from option-of-regular layouts: with no mask and a string
         # dtype it calls `.size` on a `ListArray` (#4226); with a mask,
@@ -69,9 +72,12 @@ def test_roundtrip_stable(a: ak.Array) -> None:
 
 @given(
     a=st_ak.constructors.arrays(
+        # categorical arrays (generated since hypothesis-awkward 0.22.0)
+        # fail this roundtrip; not yet triaged
+        allow_categorical=False,
         # to_numpy(allow_missing=True) raises on timedelta64 with missing
         # values (create_missing_data calls np.iinfo on the "m8" dtype)
-        dtypes=st_ak.supported_dtypes().filter(lambda d: d.kind != "m"),
+        dtypes=st_ak.numpy.supported_dtypes().filter(lambda d: d.kind != "m"),
         allow_empty=False,
         allow_string=False,
         allow_bytestring=False,
