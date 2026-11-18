@@ -1,5 +1,5 @@
 fsspec>=2022.11.0;sys_platform != "win32"
-hypothesis-awkward==0.20.3
+hypothesis-awkward==0.22.0
 jax[cpu]>=0.4.18;sys_platform != "win32"
 numba>=0.57.0;sys_platform != "win32"
 numexpr>=2.8.4;python_version < "3.15"
