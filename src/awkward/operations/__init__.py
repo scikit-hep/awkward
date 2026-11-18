@@ -59,6 +59,7 @@ from awkward.operations.ak_is_tuple import *
 from awkward.operations.ak_is_valid import *
 from awkward.operations.ak_isclose import *
 from awkward.operations.ak_linear_fit import *
+from awkward.operations.ak_lists_to_tuples import *
 from awkward.operations.ak_local_index import *
 from awkward.operations.ak_mask import *
 from awkward.operations.ak_materialize import *
@@ -84,7 +85,6 @@ from awkward.operations.ak_run_lengths import *
 from awkward.operations.ak_singletons import *
 from awkward.operations.ak_softmax import *
 from awkward.operations.ak_sort import *
-from awkward.operations.ak_stack import *
 from awkward.operations.ak_std import *
 from awkward.operations.ak_strings_astype import *
 from awkward.operations.ak_sum import *
@@ -117,9 +117,9 @@ from awkward.operations.ak_top_k import *
 from awkward.operations.ak_top_k_indices import *
 from awkward.operations.ak_top_k_values import *
 from awkward.operations.ak_transform import *
+from awkward.operations.ak_tuples_to_lists import *
 from awkward.operations.ak_type import *
 from awkward.operations.ak_unflatten import *
-from awkward.operations.ak_unstack import *
 from awkward.operations.ak_unzip import *
 from awkward.operations.ak_validity_error import *
 from awkward.operations.ak_values_astype import *

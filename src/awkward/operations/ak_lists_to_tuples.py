@@ -15,15 +15,17 @@ from awkward._regularize import is_integer, regularize_axis
 from awkward._stack import is_string, parameters, walk
 from awkward.errors import AxisError
 
-__all__ = ("unstack",)
+__all__ = ("lists_to_tuples",)
 
 
 @high_level_function()
 @experimental
-def unstack(array, axis=-1, *, size=None, highlevel=True, behavior=None, attrs=None):
+def lists_to_tuples(
+    array, axis=-1, *, size=None, highlevel=True, behavior=None, attrs=None
+):
     """Converts lists to tuple records, padding shorter lists with None.
 
-    See #ak.stack for the reverse tuple/list structure conversion. Unlike
+    See #ak.tuples_to_lists for the reverse tuple/list structure conversion. Unlike
     #ak.unzip, the result is one array, rather than a Python tuple of arrays.
 
     Args:
@@ -50,9 +52,9 @@ def unstack(array, axis=-1, *, size=None, highlevel=True, behavior=None, attrs=N
 
     Examples:
         >>> a = ak.Array([[[1, 2], [1, 3], [2, 3]], [], [[4, 5], [6]]])
-        >>> ak.unstack(a).to_list()
+        >>> ak.lists_to_tuples(a).to_list()
         [[(1, 2), (1, 3), (2, 3)], [], [(4, 5), (6, None)]]
-        >>> ak.unstack([[1], [], [2, 3]], size=2).to_list()
+        >>> ak.lists_to_tuples([[1], [], [2, 3]], size=2).to_list()
         [(1, None), (None, None), (2, 3)]
 
     Tuple width is part of the output type. An explicit size is therefore
@@ -122,7 +124,7 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
                 width = node.size
             elif node.backend.name != "cpu":
                 raise ValueError(
-                    "unstack requires an explicit size for ragged lists on "
+                    "lists_to_tuples requires an explicit size for ragged lists on "
                     "typetracer and non-CPU backends"
                 )
             else:
@@ -133,7 +135,7 @@ def _impl(array, axis, size, highlevel, behavior, attrs):
 
     walk(layout, collect, rebuild=False)
     if not widths:
-        raise AxisError(f"no list dimension at axis={axis} to unstack")
+        raise AxisError(f"no list dimension at axis={axis} to lists_to_tuples")
 
     def action(node, depth, path):
         if not selected(node, depth):
