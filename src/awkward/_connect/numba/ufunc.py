@@ -1,6 +1,16 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-"""NumPy ufunc conversion for flat Awkward views in Numba."""
+"""NumPy ufunc conversion for flat Awkward views in Numba.
+
+Overloads convert standalone calls, including compilation with rewrites disabled.
+Fused array expressions follow Numba's separate native-array lowering path,
+which consumes operand array types directly instead of lowering the ufunc
+overload. The after-inference rewrite inserts the same np.asarray conversion
+into those operands. Both paths reuse the existing zero-copy view conversion.
+
+Registration runs through Awkward's numba_extensions entry point. The rewrite
+is process-wide and skips block inspection for functions without flat views.
+"""
 
 import numba
 import numpy

@@ -184,6 +184,12 @@ Other multi-output ufuncs and generalized ufuncs are not enabled by this
 integration. Explicit `out=None` is rejected, as it is for NumPy inputs in
 Numba. Other keyword arguments and signatures remain limited by Numba.
 
+Numba discovers this integration through Awkward's installed
+`numba_extensions` entry point, so registration can occur during compilation
+without an explicit call to `ak.numba.register_and_check()`. The registered
+array-expression rewrite skips block inspection for functions without
+eligible Awkward views.
+
 This does not implicitly convert whole ragged arrays, optional arrays,
 records, or strings. It also does not introduce arithmetic operators on
 Awkward views inside Numba: use `np.add(a, b)`, for example, or cast explicitly.
