@@ -30,18 +30,16 @@ def main(argv: list[str]) -> int:
         if path.is_file()
     }
     pages = {
-        rel: path.read_text(encoding="utf-8", errors="replace")
+        rel: site_checks.decode(path.read_bytes())
         for rel, path in files.items()
         if rel.endswith(".html") and not rel.startswith(_NOT_CHECKED)
     }
     other_files = frozenset(rel for rel in files if rel not in pages)
-    known = {
-        line.strip()
-        for line in (pathlib.Path(__file__).parent / "known-broken-links.txt")
-        .read_text()
-        .splitlines()
-        if line.strip() and not line.startswith("#")
-    }
+    known = site_checks.known_broken_links(
+        (pathlib.Path(__file__).parent / "known-broken-links.txt").read_text(
+            encoding="utf-8"
+        )
+    )
 
     problems = []
     broken = site_checks.broken_links(pages, other_files)
@@ -58,7 +56,7 @@ def main(argv: list[str]) -> int:
     for rel, path in files.items():
         if rel.endswith(".html.md"):
             for line in site_checks.signatures_with_empty_parameters(
-                path.read_text(encoding="utf-8")
+                site_checks.decode(path.read_bytes())
             ):
                 problems.append(f"{rel}: signature with an empty parameter: {line}")
     for name in site_checks.missing_awkward_aliases(

@@ -7,6 +7,8 @@ from awkward_docs.site_checks import (
     BUILTIN_TYPES,
     broken_links,
     builtin_type_links,
+    decode,
+    known_broken_links,
     link_target,
     missing_awkward_aliases,
     signatures_with_empty_parameters,
@@ -35,6 +37,12 @@ from strategies import dotted_names, identifiers
         ("a.html", "https://docs.python.org/3/", None),
         ("a.html", "mailto:someone@example.com", None),
         ("a.html", "//cdn.example.com/x.js", None),
+        # Absolute paths are outside the site of one version
+        ("a/b.html", "/doc/main/index.html", None),
+        # Links to a directory without a trailing slash
+        ("a/b.html", "..", ("index.html", "")),
+        ("a/b.html", ".", ("a/index.html", "")),
+        ("a/b/c.html", "../..#top", ("index.html", "top")),
         ("a.html", "#", None),
         ("a.html", "", None),
     ],
@@ -104,6 +112,21 @@ def test_broken_links_only_follows_a_elements():
 def test_broken_links_ignores_anchors_into_other_files():
     pages = {"a.html": html('<a href="_static/doxygen/x.html#abc">x</a>')}
     assert broken_links(pages, frozenset({"_static/doxygen/x.html"})) == {}
+
+
+def test_broken_links_finds_named_anchors():
+    pages = {"x.html": html('<a name="foo"></a><a href="#foo">l</a>')}
+    assert broken_links(pages) == {}
+
+
+def test_broken_links_names_only_count_on_a_elements():
+    pages = {"x.html": html('<input name="foo"><a href="#foo">l</a>')}
+    assert broken_links(pages) == {"x.html#foo": "x.html"}
+
+
+def test_broken_links_ignores_absolute_paths():
+    pages = {"a/b.html": html('<a href="/doc/main/index.html">m</a>')}
+    assert broken_links(pages) == {}
 
 
 def test_broken_links_of_a_consistent_site():
@@ -226,3 +249,21 @@ def test_missing_awkward_aliases_are_the_ak_names_without_an_alias(
     names = [f"ak.{n}" for n in ak_names] + [f"awkward.{n}" for n in alias_names]
     expected = sorted(f"ak.{n}" for n in ak_names - alias_names)
     assert missing_awkward_aliases(inventory(names)) == expected
+
+
+def test_known_broken_links():
+    text = (
+        "# A comment\n"
+        "\n"
+        "reference/a.html#id1\n"
+        "  # An indented comment\n"
+        "  reference/b.html#x.html#y  \n"
+    )
+    assert known_broken_links(text) == {
+        "reference/a.html#id1",
+        "reference/b.html#x.html#y",
+    }
+
+
+def test_decode_replaces_bytes_that_are_not_utf8():
+    assert decode("é".encode() + b"\xff") == "é\ufffd"

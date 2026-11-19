@@ -47,6 +47,10 @@ class _Page(HTMLParser):
         element_id = attributes.get("id")
         if element_id:
             self.ids.add(element_id)
+        # Older HTML, e.g., in notebook output, names anchors instead
+        name = attributes.get("name")
+        if tag == "a" and name:
+            self.ids.add(name)
         href = attributes.get("href")
         if tag == "a" and href is not None:
             self.hrefs.append(href)
@@ -76,17 +80,19 @@ def link_target(page: str, href: str) -> tuple[str, str] | None:
     """Return the file and anchor that a link on ``page`` points to.
 
     ``page`` is the path of the page within the site, e.g.
-    ``user-guide/how-to-convert.html``. Links to other sites, and links
-    without a file and anchor, return ``None``.
+    ``user-guide/how-to-convert.html``. Links to other sites, absolute paths,
+    which are outside the site of one version, and links without a file and
+    anchor return ``None``. A link to a directory points to its
+    ``index.html``.
     """
-    if re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:|^//", href):
+    if re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:|^/", href):
         return None
     path, fragment = urldefrag(href)
     path = path.split("?", 1)[0]
     if not path:
         return (page, unquote(fragment)) if fragment else None
     resolved = posixpath.join(posixpath.dirname(page), unquote(path))
-    if path.endswith("/"):
+    if path.endswith("/") or posixpath.basename(path) in (".", ".."):
         resolved = posixpath.join(resolved, "index.html")
     return posixpath.normpath(resolved), unquote(fragment)
 
@@ -114,6 +120,21 @@ def broken_links(
             elif path not in other_files:
                 missing.setdefault(path, page)
     return missing
+
+
+def known_broken_links(text: str) -> frozenset[str]:
+    """Return the link targets listed in ``known-broken-links.txt``.
+
+    Empty lines and lines that start with ``#``, after any indentation, are
+    not targets.
+    """
+    lines = (line.strip() for line in text.splitlines())
+    return frozenset(line for line in lines if line and not line.startswith("#"))
+
+
+def decode(data: bytes) -> str:
+    """Return the text of a file of the site, replacing bytes that are not UTF-8."""
+    return data.decode("utf-8", errors="replace")
 
 
 def builtin_type_links(html: str) -> list[tuple[str, str]]:
