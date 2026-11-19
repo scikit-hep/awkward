@@ -1,6 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+import sys
+
 import numpy as np
 import pytest
 
@@ -36,7 +38,7 @@ def test_UnknownType():
 
 
 @pytest.mark.skipif(
-    ak._util.win,
+    sys.platform == "win32",
     reason="NumPy does not have float16, float128, and complex256 -- on Windows",
 )
 def test_NumpyType():
@@ -1216,7 +1218,7 @@ def test_EmptyForm():
 
 
 @pytest.mark.skipif(
-    ak._util.win,
+    sys.platform == "win32",
     reason="NumPy does not have float16, float128, and complex256 -- on Windows",
 )
 def test_NumpyForm():

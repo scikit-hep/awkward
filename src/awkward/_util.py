@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import base64
 import numbers
-import os
 import re
 import struct
 import sys
@@ -12,10 +11,6 @@ from collections.abc import Collection
 
 import awkward as ak
 from awkward._typing import TypeVar
-
-win = os.name == "nt"
-bits32 = struct.calcsize("P") * 8 == 32
-
 
 # matches include/awkward/common.h
 kMaxInt8 = 127  # 2**7  - 1
