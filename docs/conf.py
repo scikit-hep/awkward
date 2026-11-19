@@ -15,6 +15,7 @@ import subprocess
 
 import awkward
 import datetime
+from docutils import nodes
 import os
 import pathlib
 
@@ -159,6 +160,36 @@ def _parse_functiondef_with_experimental(self, node):
 
 Parser.parse_functiondef = _parse_functiondef_with_experimental
 
+
+# -- Keep class references from resolving to attributes ----------------------
+# Since Sphinx 9, a class reference that matches no class is retried as data or
+# an attribute, with suffix matching for type fields. ``bool`` in a parameter
+# type would then link to ``ak.prettyprint.FormatterOptions.bool`` instead of
+# the Python documentation through intersphinx. Skip that retry.
+
+from sphinx.domains.python import PythonDomain  # noqa: E402
+
+_resolve_xref = PythonDomain.resolve_xref
+_find_obj = PythonDomain.find_obj
+
+
+def _resolve_xref_without_data_fallback(self, env, fromdocname, builder, type, target, node, contnode):
+    self._awkward_resolving_class = type == "class"
+    try:
+        return _resolve_xref(self, env, fromdocname, builder, type, target, node, contnode)
+    finally:
+        self._awkward_resolving_class = False
+
+
+def _find_obj_without_data_fallback(self, env, modname, classname, name, type, searchmode=0):
+    if getattr(self, "_awkward_resolving_class", False) and type in ("data", "attr"):
+        return []
+    return _find_obj(self, env, modname, classname, name, type, searchmode)
+
+
+PythonDomain.resolve_xref = _resolve_xref_without_data_fallback
+PythonDomain.find_obj = _find_obj_without_data_fallback
+
 autoapi_template_dir = "_autoapi_templates"
 
 _latest_commit = (
@@ -225,8 +256,10 @@ def _process_docstring_filter(docstring, obj):
                     return f":py:meth:`{member} <{_qn}.{member}>`"
                 return m.group(0)
             line = re.sub(r"#([A-Za-z_][A-Za-z0-9_]*)", _replace_member, line)
+        # Only URLs and relative .html paths are link targets; this leaves
+        # code such as ``class GenProto[T](Protocol):`` unchanged
         line = re.sub(
-            r"\[([^\]]*)\]\(([^\)]*)\)",
+            r"\[([^\]]*)\]\(((?:https?://|\.\.?/)[^\)]*|[^\)\s]*\.html(?:#[^\)]*)?)\)",
             r"`\1 <\2>`__",
             line,
         )
@@ -476,6 +509,21 @@ def _add_awkward_inventory_aliases(app, exception):
             f.write(zlib.compress(new_body.encode("utf-8")))
 
 
+def _visit_abbreviation_markdown(self, node):
+    """Write the text of an abbreviation; the title has no Markdown form."""
+
+
+def _depart_abbreviation_markdown(self, node):
+    pass
+
+
 def setup(app):
     app.connect("autoapi-skip-member", _skip_member)
     app.connect("build-finished", _add_awkward_inventory_aliases)
+    # Sphinx 9 wraps the ``*`` and ``/`` separators in signatures in
+    # abbreviation nodes, which sphinx-markdown-builder would otherwise drop
+    app.add_node(
+        nodes.abbreviation,
+        override=True,
+        markdown=(_visit_abbreviation_markdown, _depart_abbreviation_markdown),
+    )
