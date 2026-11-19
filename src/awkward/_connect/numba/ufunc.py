@@ -88,7 +88,9 @@ def _register_binary(function):
 def _register_binary_two_outputs(function):
     @numba.extending.overload(function)
     def overload(a, b, *outputs):
-        if not (is_flat_numpy_view(a) or is_flat_numpy_view(b)):
+        if not (is_flat_numpy_view(a) or is_flat_numpy_view(b)) or not all(
+            isinstance(output, numba.types.Array) for output in outputs
+        ):
             return None
         if len(outputs) == 0:
 
@@ -96,9 +98,7 @@ def _register_binary_two_outputs(function):
                 return function(_as_numpy(a), _as_numpy(b))
 
             return impl
-        if not all(isinstance(output, numba.types.Array) for output in outputs):
-            return None
-        if len(outputs) == 1:
+        elif len(outputs) == 1:
 
             def impl(a, b, *outputs):
                 return function(_as_numpy(a), _as_numpy(b), outputs[0])
