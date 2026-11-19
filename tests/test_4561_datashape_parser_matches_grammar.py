@@ -15,14 +15,22 @@ GRAMMAR = "studies/type-parser-2/awkward_datashape_grammar.g"
 PARSER = "src/awkward/types/_awkward_datashape_parser.py"
 
 
-def test_parser_matches_grammar():
+def test_parser_matches_grammar(tmp_path):
     committed = (ROOT / PARSER).read_text(encoding="utf-8")
-    generated = subprocess.run(
-        [sys.executable, "-m", "lark.tools.standalone", str(ROOT / GRAMMAR)],
-        capture_output=True,
+    # -o writes UTF-8; stdout would use the locale encoding (cp1252 on Windows)
+    out = tmp_path / "parser.py"
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "lark.tools.standalone",
+            str(ROOT / GRAMMAR),
+            "-o",
+            str(out),
+        ],
         check=True,
-        encoding="utf-8",
-    ).stdout
+    )
+    generated = out.read_text(encoding="utf-8")
     assert _normalize(committed) == _normalize(generated), (
         f"{PARSER} does not match {GRAMMAR}. "
         "Regenerate it from the repository root with\n\n"
