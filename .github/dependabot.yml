@@ -35,9 +35,9 @@ updates:
     cooldown:
       default-days: 0 # zizmor: ignore[dependabot-cooldown]
 
-  # Bump the packages that build the docs and the tools of the docs/_ext unit
-  # tests, which are pinned to exact versions in docs/requirements.txt and
-  # docs/_ext/requirements-test.txt. Pinning keeps a new release from changing
+  # Bump the packages that build the docs and the tools of the docs/_ext
+  # checks, which are pinned to exact versions in docs/requirements.txt,
+  # docs/_ext/requirements-test.txt, and docs/_ext/requirements-check.txt. Pinning keeps a new release from changing
   # the rendered docs unnoticed; in the upgrade PR, the docs build and its site
   # check show what an update changes.
   - package-ecosystem: "pip"
@@ -52,6 +52,7 @@ updates:
       - dependency-name: "hypothesis"
       - dependency-name: "myst-nb"
       - dependency-name: "myst-parser"
+      - dependency-name: "playwright"
       - dependency-name: "pydata-sphinx-theme"
       - dependency-name: "pytest"
       - dependency-name: "pytest-cov"

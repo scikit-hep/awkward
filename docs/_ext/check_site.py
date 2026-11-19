@@ -10,11 +10,12 @@ targets fail the check.
 """
 
 import pathlib
+import posixpath
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
-from awkward_docs import site_checks
+from awkward_docs import shared_sidebar, site_checks
 
 _NOT_CHECKED = ("_static/doxygen/", "_downloads/")
 
@@ -34,6 +35,18 @@ def main(argv: list[str]) -> int:
         for rel, path in files.items()
         if rel.endswith(".html") and not rel.startswith(_NOT_CHECKED)
     }
+    # Check the links in the sidebar as each page shows it
+    for rel, html in pages.items():
+        found = shared_sidebar.find_script_tag(html)
+        if found is not None:
+            page, src = found
+            script = files[
+                posixpath.normpath(posixpath.join(posixpath.dirname(rel), src))
+            ]
+            tree = shared_sidebar.tree_from_script(script.read_text(encoding="utf-8"))
+            pages[rel] = html.replace(
+                shared_sidebar.script_tag(src, page), shared_sidebar.mark(tree, page)
+            )
     other_files = frozenset(rel for rel in files if rel not in pages)
     known = {
         line.strip()

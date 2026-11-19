@@ -299,9 +299,40 @@ jobs:
         name: pr_number
         path: pr/
 
+  check-sidebar:
+    needs: [build-docs]
+    runs-on: ubuntu-24.04
+    name: Check sidebar in a browser
+    permissions:
+      contents: read # This job runs code from the pull request.
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Setup Python
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: "${{ env.X86_64_PYTHON_VERSION }}"
+
+    - name: Install dependencies
+      run: python -m pip install -r docs/_ext/requirements-check.txt
+
+    - name: Install Chromium
+      run: python -m playwright install --with-deps --only-shell chromium
+
+    - name: Download docs artefact
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: docs
+        path: site
+
+    - name: Check the sidebar of each page
+      run: python docs/_ext/check_sidebar.py site
+
   deploy:
     runs-on: ubuntu-slim
-    needs: [ build-docs ]
+    needs: [ build-docs, check-sidebar ]
     # We can only deploy for PRs on host repo
     if: github.event_name == 'push' || github.event_name == 'release'
     name: Deploy

@@ -9,6 +9,7 @@ from autoapi._objects import PythonObject, TopLevelPythonObject
 from autoapi._parser import Parser
 from docutils import nodes
 from sphinx.domains.python import PythonDomain
+from sphinx.util import logging
 
 from awkward_docs import (
     docstrings,
@@ -16,8 +17,11 @@ from awkward_docs import (
     inventory,
     members,
     naming,
+    shared_sidebar,
     source_links,
 )
+
+logger = logging.getLogger(__name__)
 
 # -- Monkey-patch autoapi to produce ak.* file names -------------------------
 # autoapi generates paths from Python module structure (awkward.operations.ak_flatten.flatten).
@@ -164,6 +168,48 @@ def _add_awkward_inventory_aliases(app, exception):
             f.write(new_data)
 
 
+def _share_sidebar(app, pagename, templatename, context, doctree):
+    """Replace the sidebar tree in the page with a script that inserts it.
+
+    The tree is written once to ``_static/sidebar/<hash>.js`` for all pages
+    that show it. A page keeps its own copy of the tree if adding the markers
+    of the page to the shared tree does not give back its sidebar exactly.
+    """
+    generate_toctree_html = context.get("generate_toctree_html")
+    if generate_toctree_html is None:
+        return
+    page = app.builder.get_target_uri(pagename)
+
+    def generate_shared_toctree_html(kind, *args, **kwargs):
+        result = generate_toctree_html(kind, *args, **kwargs)
+        if kind != "sidebar" or not str(result).strip():
+            return result
+        sidebar = str(result)
+        tree = shared_sidebar.unmark(sidebar, page)
+        if shared_sidebar.mark(tree, page) != sidebar:
+            logger.warning(
+                "the sidebar of %s is not shared: the markers of the page cannot be restored",
+                pagename,
+                location=pagename,
+            )
+            return result
+        text = shared_sidebar.script(tree)
+        name = shared_sidebar.file_name(text)
+        directory = pathlib.Path(app.outdir, "_static", "sidebar")
+        path = directory / name
+        if not path.exists():
+            directory.mkdir(parents=True, exist_ok=True)
+            # Parallel writers may write the same file at the same time
+            temporary = path.with_suffix(f".{os.getpid()}.tmp")
+            temporary.write_text(text, encoding="utf-8")
+            os.replace(temporary, path)
+        return shared_sidebar.script_tag(
+            context["pathto"](f"_static/sidebar/{name}", 1), page
+        )
+
+    context["generate_toctree_html"] = generate_shared_toctree_html
+
+
 def _visit_abbreviation_markdown(self, node):
     """Write the text of an abbreviation; the title has no Markdown form."""
 
@@ -195,6 +241,8 @@ def setup(app):
 
     app.connect("autoapi-skip-member", _skip_member)
     app.connect("build-finished", _add_awkward_inventory_aliases)
+    # After pydata-sphinx-theme adds generate_toctree_html to the context
+    app.connect("html-page-context", _share_sidebar, priority=900)
     # Sphinx 9 wraps the ``*`` and ``/`` separators in signatures in
     # abbreviation nodes, which sphinx-markdown-builder would otherwise drop.
     # Sphinx uses the handlers of the builder's format ("markdown") only if
