@@ -96,9 +96,15 @@ def _register_binary_two_outputs(function):
                 return function(_as_numpy(a), _as_numpy(b))
 
             return impl
-        elif len(outputs) == 2 and all(
-            isinstance(output, numba.types.Array) for output in outputs
-        ):
+        if not all(isinstance(output, numba.types.Array) for output in outputs):
+            return None
+        if len(outputs) == 1:
+
+            def impl(a, b, *outputs):
+                return function(_as_numpy(a), _as_numpy(b), outputs[0])
+
+            return impl
+        elif len(outputs) == 2:
 
             def impl(a, b, *outputs):
                 return function(_as_numpy(a), _as_numpy(b), outputs[0], outputs[1])

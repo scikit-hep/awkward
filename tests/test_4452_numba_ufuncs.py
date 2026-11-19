@@ -266,14 +266,16 @@ def test_explicit_none_output_is_rejected(function, keyword):
             evaluate(value)
 
 
-@pytest.mark.parametrize("explicit_outputs", [False, True])
+@pytest.mark.parametrize("explicit_outputs", [0, 1, 2])
 @pytest.mark.parametrize("no_rewrites", [False, True])
 @pytest.mark.parametrize("kind", ["left", "right", "both", "numpy_left", "numpy_right"])
 def test_divmod_outputs(explicit_outputs, no_rewrites, kind):
     @numba.njit(no_rewrites=no_rewrites)
     def evaluate(a, b, quotient, remainder):
-        if explicit_outputs:
+        if explicit_outputs == 2:
             return np.divmod(a, b, quotient, remainder)
+        if explicit_outputs == 1:
+            return np.divmod(a, b, quotient)
         return np.divmod(a, b)
 
     values = np.array([-3.5, 1.5, 8.0])
@@ -292,8 +294,9 @@ def test_divmod_outputs(explicit_outputs, no_rewrites, kind):
     actual = evaluate(a, b, quotient, remainder)
     for result, reference in zip(actual, expected, strict=True):
         np.testing.assert_array_equal(result, reference)
-    if explicit_outputs:
+    if explicit_outputs >= 1:
         assert np.shares_memory(actual[0], quotient)
+    if explicit_outputs == 2:
         assert np.shares_memory(actual[1], remainder)
 
 
@@ -379,16 +382,16 @@ def test_rewrite_preserves_input_ir_and_definitions(monkeypatch):
     assert checked
 
 
-@pytest.mark.parametrize("awkward_output", [False, True])
-def test_divmod_invalid_outputs(awkward_output):
+@pytest.mark.parametrize("output_count", [1, 2])
+def test_divmod_invalid_outputs(output_count):
     @numba.njit
     def evaluate(a, output):
-        if awkward_output:
+        if output_count == 2:
             return np.divmod(a, 2.0, output, np.empty(2))
         return np.divmod(a, 2.0, output)
 
     values = ak.Array([1.0, 2.0])
-    output = ak.Array(np.empty(2)) if awkward_output else np.empty(2)
+    output = ak.Array(np.empty(2))
     with pytest.raises(numba.core.errors.TypingError):
         evaluate(values, output)
 

@@ -178,8 +178,8 @@ subarrays inside ragged data. Numba's fused array expressions and
 `parallel=True` are supported. Results are NumPy arrays. Explicit output
 arrays must be NumPy arrays; their buffers are updated in place. Supported
 single-output unary and binary ufuncs accept positional outputs or `out=`.
-The native two-output binary ufunc `np.divmod` also accepts two positional
-NumPy output arrays, or returns two new arrays when outputs are omitted.
+The native two-output binary ufunc `np.divmod` also accepts one or two
+positional NumPy output arrays; omitted outputs are returned as new arrays.
 Other multi-output ufuncs and generalized ufuncs are not enabled by this
 integration. Explicit `out=None` is rejected, as it is for NumPy inputs in
 Numba. Other keyword arguments and signatures remain limited by Numba.
