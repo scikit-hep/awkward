@@ -21,7 +21,12 @@ _GRAMMAR_PATH = (
     Path(__file__).parents[3] / "studies/type-parser-2/awkward_datashape_grammar.g"
 )
 
-_GRAMMAR = lark.Lark(_GRAMMAR_PATH.read_text(encoding="utf-8"), parser="lalr")
+# Without placeholders, an empty `json_object` has no children.
+_GRAMMAR = lark.Lark(
+    _GRAMMAR_PATH.read_text(encoding="utf-8"),
+    parser="lalr",
+    maybe_placeholders=False,
+)
 
 
 @given(s=from_lark(_GRAMMAR))
