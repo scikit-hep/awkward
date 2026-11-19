@@ -3,7 +3,7 @@ ci:
   autofix_commit_msg: "style: pre-commit fixes"
   autoupdate_schedule: monthly
 
-exclude: ^(docs|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
+exclude: ^(docs(?!/_ext/)|studies|tests/samples|src/awkward/_typeparser/generated_parser.py)
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
@@ -20,7 +20,7 @@ repos:
   - id: trailing-whitespace
   - id: name-tests-test
     args: ["--pytest-test-first"]
-    exclude: ^tests/properties/
+    exclude: ^(tests/properties/|docs/_ext/tests/strategies\.py$)
 
 - repo: https://github.com/cheshirekow/cmake-format-precommit
   rev: e2c2116d86a80e72e7146a06e68b7c228afc6319  # frozen: v0.6.13
@@ -39,7 +39,7 @@ repos:
   rev: 57b21406f092110c18776e39b0bda50d37c945c8  # frozen: v2.4.3
   hooks:
   - id: codespell
-    args: ["-L", "ue,subjet,parms,fo,numer,thre,nin,nout"]
+    args: ["-L", "ue,subjet,parms,fo,numer,thre,nin,nout,astroid"]
 
 - repo: local
   hooks:

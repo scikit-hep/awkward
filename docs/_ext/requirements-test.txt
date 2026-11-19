@@ -1,0 +1,4 @@
+# Unit tests of docs/_ext: python -m pytest docs/_ext/tests --cov --cov-config=docs/_ext/.coveragerc
+hypothesis==6.170.15
+pytest==9.2.0
+pytest-cov==7.1.0

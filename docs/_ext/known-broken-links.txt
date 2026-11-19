@@ -1,0 +1,14 @@
+# Link targets in the built site that are known to be missing; see check_site.py.
+# Remove a line when the link is fixed; the check reports lines that no longer apply.
+
+# Anchors for reST problems in docstrings
+reference/generated/ak.moment.html#id1
+reference/generated/ak.prettyprint.FormatterOptions.html#id1
+reference/generated/ak.typetracer.TypeTracerArray.html#id1
+reference/generated/awkward.html#id1
+
+# MyST links written as a file name in the anchor
+user-guide/how-to-create-arraybuilder.html#how-to-convert-numpy.html#mutability-of-awkward-arrays-from-numpy
+user-guide/how-to-create-lists.html#how-to-convert-numpy.html#mutability-of-awkward-arrays-from-numpy
+user-guide/how-to-restructure-flatten.html#../reference/generated/ak.Array.html#nested-projection
+user-guide/how-to-restructure-flatten.html#../reference/generated/ak.Array.html#projection

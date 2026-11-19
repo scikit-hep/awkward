@@ -1,0 +1,13 @@
+# Coverage of the docs/_ext unit tests:
+# python -m pytest docs/_ext/tests --cov --cov-config=docs/_ext/.coveragerc
+[run]
+branch = True
+source = awkward_docs
+# Connected to Sphinx; tested by the documentation build
+omit =
+    */awkward_docs/__init__.py
+    */awkward_docs/_sphinx.py
+
+[report]
+fail_under = 100
+show_missing = True
