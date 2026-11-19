@@ -9,6 +9,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 import awkward as ak
+from tests.properties.operations import util
 
 
 def json_dtype(dtype: np.dtype) -> bool:
@@ -183,7 +184,6 @@ def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
 
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=inferred_json_dtypes(),
         # json.dumps raises ValueError on NaN
         allow_nan=False,
@@ -205,12 +205,11 @@ def _children(layout: ak.contents.Content) -> list[ak.contents.Content]:
 def test_roundtrip(a: ak.Array) -> None:
     """`to_json` followed by `from_json` reconstructs the array."""
     returned = ak.from_json(ak.to_json(a))
-    assert ak.array_equal(a, returned)
+    assert ak.array_equal(util.without_categorical(a), returned)
 
 
 @given(
     a=st_ak.constructors.arrays(
-        allow_categorical=False,
         dtypes=inferred_json_dtypes(),
         allow_nan=False,
         allow_bytestring=False,
@@ -228,7 +227,9 @@ def test_roundtrip_masked(a: ak.Array) -> None:
     so content classes are not compared.
     """
     returned = ak.from_json(ak.to_json(a))
-    assert ak.array_equal(a, returned, same_content_types=False)
+    assert ak.array_equal(
+        util.without_categorical(a), returned, same_content_types=False
+    )
 
 
 def tolist_comparable(a: ak.Array) -> bool:
