@@ -174,16 +174,17 @@ def _depart_abbreviation_markdown(self, node):
 
 def setup(app):
     global _latest_commit
-    _latest_commit = (
-        subprocess.run(
+    try:
+        result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             check=False,
             stdout=subprocess.PIPE,
             cwd=app.confdir,
         )
-        .stdout.decode("utf-8")
-        .strip()
-    )
+        returncode, stdout = result.returncode, result.stdout
+    except OSError:  # git is not installed
+        returncode, stdout = 1, b""
+    _latest_commit = source_links.commit_from_git(returncode, stdout)
 
     PythonObject.output_dir = _flat_output_dir
     PythonObject.output_filename = _ak_output_filename

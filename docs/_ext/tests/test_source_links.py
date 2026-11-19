@@ -1,7 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 import pytest
-from awkward_docs.source_links import source_link
+from awkward_docs.source_links import commit_from_git, source_link
 from hypothesis import given
 from hypothesis import strategies as st
 from strategies import identifiers
@@ -39,6 +39,20 @@ BLOB = f"https://github.com/scikit-hep/awkward/blob/{COMMIT}"
                 f" on `line 1 <{BLOB}/src/awkward/__init__.py#L1>`__."
             ),
         ),
+        # A directory whose name starts with "py", and "src" within a name
+        (
+            "src/awkward/_connect/pyarrow/conversions.py",
+            None,
+            (
+                "Defined in `awkward._connect.pyarrow.conversions"
+                f" <{BLOB}/src/awkward/_connect/pyarrow/conversions.py>`__."
+            ),
+        ),
+        (
+            "src/awkward/_connect/jax/xsrc/a.py",
+            None,
+            f"Defined in `awkward._connect.jax.xsrc.a <{BLOB}/src/awkward/_connect/jax/xsrc/a.py>`__.",
+        ),
     ],
 )
 def test_source_link(rel_path, line, expected):
@@ -60,3 +74,17 @@ def test_source_link_links_the_file_and_line(rel_path, line):
 @given(module_paths)
 def test_source_link_without_line_links_the_file(rel_path):
     assert source_link(rel_path, None, COMMIT).endswith(f"<{BLOB}/{rel_path}>`__.")
+
+
+@pytest.mark.parametrize(
+    ("returncode", "stdout", "expected"),
+    [
+        (0, f"{COMMIT}\n".encode(), COMMIT),
+        # Not a git repository, or git refuses the repository
+        (128, b"", "main"),
+        (0, b"\n", "main"),
+        (1, f"{COMMIT}\n".encode(), "main"),
+    ],
+)
+def test_commit_from_git(returncode, stdout, expected):
+    assert commit_from_git(returncode, stdout) == expected
