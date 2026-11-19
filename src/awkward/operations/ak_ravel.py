@@ -79,7 +79,7 @@ def _impl(array, highlevel, behavior, attrs):
         # A zero-field record or a union that no values reach
         result = ak.contents.EmptyArray(backend=layout.backend)
     else:
-        result = ak._do.mergemany(out)
+        result = ak._do.merge_leaves(out)
 
     wrapped_out = ctx.wrap(result, highlevel=highlevel)
 

@@ -227,6 +227,30 @@ def mergemany(contents: list[Content]) -> Content:
     return contents[0]._mergemany(contents[1:])
 
 
+def merge_leaves(contents: list[Content]) -> Content:
+    if len(contents) == 1:
+        return contents[0]
+    # an unknown type merges with anything so it cannot be the reference
+    known = [
+        x
+        for x in contents
+        if not (x.is_unknown or (x.is_option and x.content.is_unknown))
+    ]
+    # remove_structure drops NumpyArray parameters, so the dtype decides
+    checked = set()
+    for content in known[1:]:
+        if content.is_numpy:
+            if content.dtype in checked:
+                continue
+            checked.add(content.dtype)
+        if not mergeable(known[0], content):
+            raise ValueError(
+                f"cannot merge types {known[0].form.type} and "
+                f"{content.form.type} into a single flat array"
+            )
+    return mergemany(contents)
+
+
 def reduce(
     layout: Content,
     reducer: ak._reducers.Reducer,
