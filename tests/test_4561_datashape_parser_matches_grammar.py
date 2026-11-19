@@ -13,10 +13,6 @@ pytest.importorskip("lark")
 ROOT = Path(__file__).parents[1]
 GRAMMAR = "studies/type-parser-2/awkward_datashape_grammar.g"
 PARSER = "src/awkward/types/_awkward_datashape_parser.py"
-COMMAND = (
-    "uv run --no-project --with lark python -m lark.tools.standalone "
-    f"{GRAMMAR} -o {PARSER}"
-)
 
 
 def test_parser_matches_grammar():
@@ -28,7 +24,9 @@ def test_parser_matches_grammar():
         encoding="utf-8",
     ).stdout
     assert _normalize(committed) == _normalize(generated), (
-        f"{PARSER} does not match {GRAMMAR}; regenerate it with\n\n    {COMMAND}"
+        f"{PARSER} does not match {GRAMMAR}. "
+        "Regenerate it from the repository root with\n\n"
+        f"    python -m lark.tools.standalone {GRAMMAR} -o {PARSER}"
     )
 
 
