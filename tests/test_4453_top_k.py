@@ -53,11 +53,9 @@ def test_rectangular(axis, mode, k):
     check(array, k, axis, values.tolist(), indices.tolist(), mode)
     # Regular dimensions stay regular, as in the Array API.
     result = ak.top_k(array, k, axis=axis, mode=mode)
-    assert (
-        str(result.values.type)
-        == f"{values.shape[0]} * {values.shape[1]} * {values.shape[2]} * int64"
-    )
-    assert str(result.indices.type) == str(result.values.type)
+    shape = " * ".join(map(str, values.shape))
+    assert str(result.values.type) == f"{shape} * {array.dtype}"
+    assert str(result.indices.type) == f"{shape} * int64"
 
 
 def test_ragged_outer_axes():
