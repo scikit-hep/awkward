@@ -336,6 +336,7 @@ mccabe.max-complexity = 100
 [dependency-groups]
 dev = [
     "hypothesis-awkward",
+    "lark-parser==0.12.0",
     "numba; sys_platform != 'win32'",
     "numexpr",
     "pandas; sys_platform != 'win32'",
