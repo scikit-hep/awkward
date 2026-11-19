@@ -191,9 +191,8 @@ python -m pytest tests-cuda-kernels-explicit
 `src/awkward/types/_awkward_datashape_parser.py` is generated from `studies/type-parser-2/awkward_datashape_grammar.g` by the [Lark](https://github.com/lark-parser/lark) standalone tool, and the generated file is committed. After editing the grammar, regenerate it:
 
 ```bash
-uv run --no-project --with lark python -m lark.tools.standalone \
-    studies/type-parser-2/awkward_datashape_grammar.g \
-    -o src/awkward/types/_awkward_datashape_parser.py
+python -m pip install lark
+python -m lark.tools.standalone studies/type-parser-2/awkward_datashape_grammar.g -o src/awkward/types/_awkward_datashape_parser.py
 ```
 
 Do not edit the generated file by hand.
