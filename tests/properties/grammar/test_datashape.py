@@ -50,6 +50,8 @@ def _would_raise_from_known_issue(tree: lark.Tree) -> bool:
         return True
     if _has_datetime_count_over_int32(tree):
         return True
+    if _has_datetime_count_zero(tree):
+        return True
     return False
 
 
@@ -124,5 +126,26 @@ def _has_datetime_count_over_int32(tree: lark.Tree) -> bool:
         if token.type in ("DATETIME64", "TIMEDELTA64"):
             match = _DATETIME_COUNT.search(token)
             if match is not None and int(match.group(1)) > _MAX_DATETIME_COUNT:
+                return True
+    return False
+
+
+def _has_datetime_count_zero(tree: lark.Tree) -> bool:
+    """Return `True` if a `datetime64` or `timedelta64` count is 0.
+
+    The `DATETIME64` and `TIMEDELTA64` terminals accept the count 0,
+    as in `datetime64[0s]`, and `from_datashape` reads it. On x86-64,
+    NumPy stops the process with `SIGFPE` when it compares such a
+    dtype with one of the same unit and no count, such as
+    `datetime64[s]`. `from_datashape` makes this comparison when the
+    other dtype is in the same string or was read earlier in the
+    process, so the predicate skips every count of 0. A field name is
+    not affected.
+    """
+    for name in tree.find_data("numpytype_name"):
+        (token,) = name.children
+        if token.type in ("DATETIME64", "TIMEDELTA64"):
+            match = _DATETIME_COUNT.search(token)
+            if match is not None and int(match.group(1)) == 0:
                 return True
     return False
