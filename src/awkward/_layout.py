@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from math import prod
 from typing import Literal
 
 import awkward as ak
@@ -353,7 +354,7 @@ def from_arraylib(
                 parameters={"__array__": "bytestring"},
             )
             for i in range(len(array.shape) - 1, 0, -1):
-                data = RegularArray(data, array.shape[i], array.shape[i - 1])
+                data = RegularArray(data, array.shape[i], prod(array.shape[:i]))
 
         elif array.dtype.kind == "U":
             assert nplike is numpy
@@ -372,7 +373,7 @@ def from_arraylib(
                 parameters={"__array__": "string"},
             )
             for i in range(len(array.shape) - 1, 0, -1):
-                data = RegularArray(data, array.shape[i], array.shape[i - 1])
+                data = RegularArray(data, array.shape[i], prod(array.shape[:i]))
 
         else:
             data = NumpyArray(array)
@@ -387,10 +388,10 @@ def from_arraylib(
             else:
 
                 def attach(x):
-                    if isinstance(x, NumpyArray):
-                        return UnmaskedArray(x)
-                    else:
+                    if isinstance(x, RegularArray):
                         return RegularArray(attach(x.content), x.size, len(x))
+                    else:
+                        return UnmaskedArray(x)
 
                 return attach(data.to_RegularArray())
 
