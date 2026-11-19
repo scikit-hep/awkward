@@ -5,12 +5,11 @@ import hypothesis_awkward.strategies as st_ak
 from hypothesis import given
 
 import awkward as ak
+from tests.properties.operations import known_issues
 
 
 @given(
-    a=st_ak.constructors.arrays(
-        allow_categorical=False,
-    )
+    a=st_ak.constructors.arrays().filter(lambda a: not known_issues.has_issue_2853(a))
 )
 def test_reflexivity(a: ak.Array) -> None:
     """An array must be equal to itself."""
@@ -18,8 +17,8 @@ def test_reflexivity(a: ak.Array) -> None:
 
 
 @given(
-    a1=st_ak.constructors.arrays(),
-    a2=st_ak.constructors.arrays(),
+    a1=st_ak.constructors.arrays().filter(lambda a: not known_issues.has_issue_2853(a)),
+    a2=st_ak.constructors.arrays().filter(lambda a: not known_issues.has_issue_2853(a)),
 )
 def test_symmetry(a1: ak.Array, a2: ak.Array) -> None:
     """Argument order must not affect the result."""

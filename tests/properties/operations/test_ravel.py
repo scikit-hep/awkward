@@ -89,12 +89,7 @@ def st_kwargs(draw: st.DrawFn, array: ak.Array) -> Kwargs:
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert `ak.ravel` does not raise on a draw expected to succeed."""
-    a = data.draw(
-        st_ak.constructors.arrays(
-            allow_categorical=False,
-        ),
-        label="a",
-    )
+    a = data.draw(st_ak.constructors.arrays(), label="a")
     kwargs = data.draw(st_kwargs(a), label="kwargs")
 
     assume(_should_not_raise(a.layout.form, kwargs))
@@ -126,6 +121,8 @@ def _would_raise_from_known_issue(a: ak.Array, kwargs: Kwargs) -> bool:
     in `known_issues`, and this function applies any option
     conditions — for `ak.ravel`, none.
     """
+    if known_issues.has_issue_2853(a):
+        return True
     if known_issues.has_issue_4261(a):
         return True
     if known_issues.has_issue_4278(a):
