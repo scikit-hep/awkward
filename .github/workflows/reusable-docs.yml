@@ -301,7 +301,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-slim
-    needs: [ build-docs ]
+    needs: [ build-docs, test-docs-extension ]
     # We can only deploy for PRs on host repo
     if: github.event_name == 'push' || github.event_name == 'release'
     name: Deploy
