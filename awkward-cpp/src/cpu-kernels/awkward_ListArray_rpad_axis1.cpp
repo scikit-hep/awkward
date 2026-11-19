@@ -3,6 +3,7 @@
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_ListArray_rpad_axis1.cpp", line)
 
 #include "awkward/kernels.h"
+#include <algorithm>
 
 template <typename T, typename C>
 ERROR awkward_ListArray_rpad_axis1(
@@ -16,11 +17,12 @@ ERROR awkward_ListArray_rpad_axis1(
   int64_t offset = 0;
   for (int64_t i = 0; i < length; i++) {
     tostarts[i] = offset;
-    int64_t rangeval = fromstops[i] - fromstarts[i];
+    int64_t rangeval =
+      static_cast<int64_t>(fromstops[i]) - static_cast<int64_t>(fromstarts[i]);
     for (int64_t j = 0; j < rangeval; j++) {
      toindex[offset + j] = fromstarts[i] + j;
     }
-    for (int64_t j = rangeval; j < target; j++) {
+    for (int64_t j = std::max(int64_t(0), rangeval); j < target; j++) {
      toindex[offset + j] = -1;
     }
     offset = (target > rangeval) ? tostarts[i] + target : tostarts[i] + rangeval;
