@@ -345,10 +345,27 @@ jobs:
             echo "::error::Could not read a version from ${GITHUB_REF_NAME}"
             exit 1
           fi
-          rclone copyto --checksum \
-            docs/switcher.json "r2:${S3_BUCKET}/doc/switcher.json"
+          # A patch release of an older line, e.g., 2.15.1 after 2.16.0, updates
+          # only its own version. The shallow checkout has no tags, so list them
+          # from the remote. Release candidate tags are left out because
+          # `sort -V` can place them after the final release
+          latest=$(git ls-remote --tags --refs origin 'v*' \
+            | sed 's|.*refs/tags/||' \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -V | tail -n 1)
+          if [ -z "$latest" ]; then
+            echo "::error::Could not list the release tags"
+            exit 1
+          fi
           rclone sync --checksum --transfers 16 \
             built-docs/ "r2:${S3_BUCKET}/doc/$version/"
+          if [ "${GITHUB_REF_NAME}" != "$latest" ]; then
+            echo "${GITHUB_REF_NAME} is not the highest release (${latest}); not updating \`stable\`"
+            echo "path=/doc/$version/" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          rclone copyto --checksum \
+            docs/switcher.json "r2:${S3_BUCKET}/doc/switcher.json"
           rclone sync --checksum --transfers 16 \
             built-docs/ "r2:${S3_BUCKET}/doc/stable/"
           echo "path=/doc/stable/" >> $GITHUB_OUTPUT

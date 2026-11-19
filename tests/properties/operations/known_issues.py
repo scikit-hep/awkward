@@ -359,26 +359,6 @@ def has_issue_4264(a: ak.Array) -> bool:
     return False
 
 
-def has_issue_4274(a: ak.Array) -> bool:
-    """Return `True` if a root `UnmaskedArray` over a record has a uint32-indexed field.
-
-    `to_arrow_table` (which `to_feather` and `to_parquet` call) projects
-    each record field through a root `UnmaskedArray` with
-    `to_IndexedOptionArray64`, which passes an `IndexedArray`'s uint32
-    index into `IndexedOptionArray` unconverted (`TypeError`). Only the
-    root takes this path: nested layouts convert through `_to_arrow`,
-    which projects the indexed node away. Reported:
-    https://github.com/scikit-hep/awkward/issues/4274
-    """
-    layout = a.layout
-    if not (isinstance(layout, ak.contents.UnmaskedArray) and layout.content.is_record):
-        return False
-    return any(
-        isinstance(x, ak.contents.IndexedArray) and x.index.dtype == np.dtype(np.uint32)
-        for x in layout.content.contents
-    )
-
-
 def has_issue_4278(a: ak.Array) -> bool:
     """Return `True` if one family's temporal units need an overflowing conversion.
 

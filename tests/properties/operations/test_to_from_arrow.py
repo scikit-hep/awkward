@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
-from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
 
 import awkward as ak
 from tests.properties.operations import known_issues
@@ -40,12 +39,9 @@ def arrow_dtype(dtype: np.dtype) -> bool:
     return True
 
 
-SUPPORTED_ARROW_DTYPES = tuple(d for d in SUPPORTED_DTYPES if arrow_dtype(d))
-
-
 def arrow_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for dtypes that survive the Arrow roundtrip."""
-    return st.sampled_from(SUPPORTED_ARROW_DTYPES)
+    return st_ak.numpy.supported_dtypes().filter(arrow_dtype)
 
 
 def arrow_compatible(a: ak.Array) -> bool:
@@ -106,8 +102,6 @@ def has_issues(a: ak.Array) -> bool:
         return True
     if known_issues.has_issue_4255(a):
         return True
-    if known_issues.has_issue_4274(a):
-        return True
     return False
 
 
@@ -126,6 +120,7 @@ def _strip_options(
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=arrow_dtypes(),
         allow_indexed_option=False,
         allow_byte_masked=False,
@@ -152,6 +147,7 @@ def test_roundtrip(a: ak.Array) -> None:
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=arrow_dtypes(),
         # a union with an option-type child that is longer than its last
         # index reference crashes `to_arrow` (IndexError in
@@ -197,6 +193,7 @@ def table_compatible(a: ak.Array) -> bool:
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=arrow_dtypes(),
         # a bare unknown type crashes `from_arrow` (AttributeError in
         # `form_remove_optiontype`, #4230), and a nested one breaks the
@@ -223,6 +220,7 @@ def test_roundtrip_table(a: ak.Array) -> None:
 @suppress_too_slow
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=arrow_dtypes(),
         # pyarrow's `Array.equals` counts NaN as unequal to itself and has
         # no `equal_nan` option; NaN coverage lives in the tests above

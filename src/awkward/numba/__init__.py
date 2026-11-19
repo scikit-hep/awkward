@@ -30,9 +30,9 @@ conda install numba"""
         ) from err
 
     if not _has_checked_version:
-        if parse_version(numba.__version__) < parse_version("0.50"):
+        if parse_version(numba.__version__) < parse_version("0.57"):
             raise ImportError(
-                "Awkward Array can only work with numba 0.50 or later "
+                "Awkward Array can only work with numba 0.57 or later "
                 f"(you have version {numba.__version__})"
             )
         _has_checked_version = True
@@ -176,6 +176,7 @@ def _register():
     import awkward._connect.numba.growablebuffer
     import awkward._connect.numba.layout
     import awkward._connect.numba.layoutbuilder
+    import awkward._connect.numba.numpy
 
     n = ak.numba
     n.ArrayViewType = awkward._connect.numba.arrayview.ArrayViewType

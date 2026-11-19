@@ -8,7 +8,6 @@ import numpy as np
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
 
 import awkward as ak
 from tests.properties.operations import known_issues
@@ -53,12 +52,9 @@ def parquet_dtype(dtype: np.dtype) -> bool:
     return True
 
 
-SUPPORTED_PARQUET_DTYPES = tuple(d for d in SUPPORTED_DTYPES if parquet_dtype(d))
-
-
 def parquet_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for dtypes that survive the parquet roundtrip."""
-    return st.sampled_from(SUPPORTED_PARQUET_DTYPES)
+    return st_ak.numpy.supported_dtypes().filter(parquet_dtype)
 
 
 def parquet_writable(a: ak.Array) -> bool:
@@ -108,14 +104,13 @@ def has_issues(a: ak.Array) -> bool:
     """
     if known_issues.has_issue_4221(a):
         return True
-    if known_issues.has_issue_4274(a):
-        return True
     return False
 
 
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=parquet_dtypes(),
         # a bare unknown type cannot be written ("A null type field may
         # not be non-nullable"), and one nested in a record or regular
@@ -140,6 +135,7 @@ def test_roundtrip(a: ak.Array) -> None:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=parquet_dtypes(),
         allow_empty=False,
         # an option directly over a `RegularArray` cannot be written

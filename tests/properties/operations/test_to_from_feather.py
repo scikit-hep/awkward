@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from hypothesis_awkward.util.dtype import SUPPORTED_DTYPES
 from packaging.version import parse as parse_version
 
 import awkward as ak
@@ -73,12 +72,9 @@ def feather_dtype(dtype: np.dtype) -> bool:
     return True
 
 
-SUPPORTED_FEATHER_DTYPES = tuple(d for d in SUPPORTED_DTYPES if feather_dtype(d))
-
-
 def feather_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for dtypes that survive the feather roundtrip."""
-    return st.sampled_from(SUPPORTED_FEATHER_DTYPES)
+    return st_ak.numpy.supported_dtypes().filter(feather_dtype)
 
 
 def feather_compatible(a: ak.Array) -> bool:
@@ -131,8 +127,6 @@ def has_issues(a: ak.Array) -> bool:
         return True
     if known_issues.has_issue_4229(a):
         return True
-    if known_issues.has_issue_4274(a):
-        return True
     return False
 
 
@@ -160,6 +154,7 @@ def _strip_options(
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=feather_dtypes(),
         # a bare unknown type crashes `from_feather` (AttributeError in
         # `form_remove_optiontype`, #4230), and one nested in a record
@@ -183,6 +178,7 @@ def test_roundtrip(feather_dir, a: ak.Array) -> None:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=feather_dtypes(),
         allow_empty=False,
         allow_union=ALLOW_UNION,
@@ -229,6 +225,7 @@ def feather_stable(a: ak.Array) -> bool:
 @no_deadline
 @given(
     a=st_ak.constructors.arrays(
+        allow_categorical=False,
         dtypes=feather_dtypes(),
         # pyarrow table equality counts NaN as unequal to itself and has
         # no `equal_nan` option; NaN coverage lives in the tests above
