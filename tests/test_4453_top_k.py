@@ -51,6 +51,13 @@ def test_rectangular(axis, mode, k):
     indices = order[selection]
     values = np.take_along_axis(array, indices, axis=axis)
     check(array, k, axis, values.tolist(), indices.tolist(), mode)
+    # Regular dimensions stay regular, as in the Array API.
+    result = ak.top_k(array, k, axis=axis, mode=mode)
+    assert (
+        str(result.values.type)
+        == f"{values.shape[0]} * {values.shape[1]} * {values.shape[2]} * int64"
+    )
+    assert str(result.indices.type) == str(result.values.type)
 
 
 def test_ragged_outer_axes():
@@ -161,12 +168,33 @@ def test_named_axis_and_metadata():
     assert all(isinstance(value, ak.contents.Content) for value in result)
 
 
-def test_nan_values_indices_correspond():
-    array = np.array([1.0, np.nan, 3.0, -np.inf, np.inf])
-    result = ak.top_k(array, 5)
-    np.testing.assert_allclose(
-        result.values, array[ak.to_numpy(result.indices)], equal_nan=True
+@pytest.mark.parametrize("dtype", [np.float16, np.float32, np.float64])
+def test_nan_values_indices_correspond(dtype):
+    # NaN ranks as the largest value in both modes, as in NumPy.
+    array = np.array([1.0, np.nan, 3.0, -np.inf, np.inf, -0.0, 0.0], dtype=dtype)
+    for mode, expected in [
+        ("largest", [1, 4, 2, 0, 6, 5, 3]),
+        ("smallest", [3, 5, 6, 0, 2, 4, 1]),
+    ]:
+        result = ak.top_k(array, 7, mode=mode)
+        assert result.indices.to_list() == expected
+        assert ak.to_numpy(result.values).dtype == dtype
+        np.testing.assert_array_equal(result.values, array[expected])
+        assert (
+            np.signbit(ak.to_numpy(result.values)).tolist()
+            == np.signbit(array[expected]).tolist()
+        )
+
+
+@pytest.mark.parametrize("axis", [-1, 0])
+def test_list_parameters(axis):
+    array = ak.with_parameter([[3, None, 1], [2]], "__list__", "custom")
+    result = ak.top_k(array, 2, axis=axis)
+    assert (
+        result.values.to_list()
+        == ak.top_k([[3, None, 1], [2]], 2, axis=axis).values.to_list()
     )
+    assert ak.top_k_indices(array, 2, axis=axis).to_list() == result.indices.to_list()
 
 
 def test_unsigned_extremes():

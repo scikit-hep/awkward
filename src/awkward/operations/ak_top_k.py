@@ -7,12 +7,15 @@ from awkward._dispatch import high_level_function
 from awkward._experimental import experimental
 from awkward._layout import HighLevelContext, maybe_posaxis
 from awkward._namedaxis import _get_named_axis, _named_axis_to_positional_axis
+from awkward._nplikes.numpy_like import NumpyMetadata
 from awkward._nplikes.shape import unknown_length
 from awkward._regularize import is_integer, regularize_axis
 from awkward._typing import Any, NamedTuple
 from awkward.errors import AxisError
 
 __all__ = ("top_k",)
+
+np = NumpyMetadata.instance()
 
 
 class TopKResult(NamedTuple):
@@ -46,8 +49,14 @@ def top_k(
     Awkward's usual output options. Lists shorter than `k` return all their
     entries. Results are sorted from largest to smallest in "largest" mode,
     or smallest to largest in "smallest" mode. Equal values retain input order.
-    Missing values follow #ak.sort and occur after present values; they are
-    retained if the selected range reaches them. NaNs follow #ak.sort as well.
+    Missing values occur after present values; they are retained if the
+    selected range reaches them. Floating-point values are ranked by IEEE 754
+    total order with NaN as the largest value, as in NumPy: NaNs come first in
+    "largest" mode and last in "smallest" mode, and -0.0 ranks below 0.0. NaNs
+    are returned with their sign and payload normalized.
+
+    Regular dimensions of the input remain regular in the output, with the
+    searched dimension having size `k` (or its original size, if smaller).
 
     For ragged outer-axis selection, entries at matching inner coordinates are
     compared, as in Awkward reductions. The result retains each group's union of
@@ -93,10 +102,19 @@ def _impl(array, k, axis, mode, highlevel, behavior, attrs, output):
 
     needs_alignment = False
     has_option = False
+    regular_sizes = {}
+    leaf_dtypes = set()
 
     def validate(node, depth, **kwargs):
         nonlocal needs_alignment, has_option
         has_option = has_option or node.is_option
+        if node.is_numpy:
+            leaf_dtypes.add(node.dtype)
+        if node.is_list:
+            size = node.size if node.is_regular else None
+            regular_sizes[depth] = (
+                size if regular_sizes.get(depth, size) == size else None
+            )
         if node.is_record or node.parameter("__array__") in ("string", "bytestring"):
             raise TypeError("top_k requires real numeric or boolean values")
         if node.is_numpy and node.dtype.kind not in "biuf":
@@ -115,6 +133,12 @@ def _impl(array, k, axis, mode, highlevel, behavior, attrs, output):
     if needs_alignment:
         layout, counts, widths = _align(layout, posaxis)
     ascending = mode == "smallest"
+    # Without records or unions, there is at most one numeric leaf.
+    float_dtype = next(iter(leaf_dtypes)) if len(leaf_dtypes) == 1 else None
+    if float_dtype is not None and _float_key_dtype(float_dtype) is None:
+        float_dtype = None
+    if float_dtype is not None:
+        layout = _floats_to_keys(layout)
     values = None
     if output != "indices" or has_option or needs_alignment:
         values = _select(layout, posaxis, k, ascending, indices=False)
@@ -122,12 +146,24 @@ def _impl(array, k, axis, mode, highlevel, behavior, attrs, output):
     if output != "values":
         indices = _select(layout, posaxis, k, ascending, indices=True)
         if has_option or needs_alignment:
-            present = ~ak.is_none(values, axis=-1)
-            indices = ak.mask(indices, present, highlevel=False)
+            # Strip parameters so that `~` does not dispatch to behaviors.
+            missing = ak.without_parameters(ak.is_none(values, axis=-1))
+            indices = ak.mask(indices, ~missing, highlevel=False)
+    if values is not None and float_dtype is not None:
+        values = _keys_to_floats(values, float_dtype)
     if needs_alignment:
         values = _trim_alignment(values, counts, widths, posaxis)
         if indices is not None:
             indices = _trim_alignment(indices, counts, widths, posaxis)
+    else:
+        # Sorting returns variable-length lists; restore regular dimensions.
+        sizes = {
+            depth: min(k, size) if depth == posaxis else size
+            for depth, size in regular_sizes.items()
+            if size is not None
+        }
+        values = _restore_regular(values, sizes)
+        indices = _restore_regular(indices, sizes)
     if output == "values":
         return ctx.wrap(values, highlevel=highlevel)
     if output == "indices":
@@ -135,6 +171,75 @@ def _impl(array, k, axis, mode, highlevel, behavior, attrs, output):
     return TopKResult(
         ctx.wrap(values, highlevel=highlevel), ctx.wrap(indices, highlevel=highlevel)
     )
+
+
+def _float_key_dtype(dtype):
+    if dtype.kind == "f" and dtype.itemsize in (2, 4, 8):
+        return np.dtype(f"i{dtype.itemsize}")
+    return None
+
+
+def _flip_negative(nplike, bits):
+    # Involution mapping IEEE 754 bit patterns (viewed as signed integers) to
+    # integers with the same total order as the floats, and back again.
+    int_min = np.iinfo(bits.dtype).min
+    return nplike.where(bits < 0, int_min - (bits + 1), bits)
+
+
+def _floats_to_keys(layout):
+    # The sort kernels place NaN first in both directions. Sorting integer
+    # keys instead ranks NaN as the largest value in both modes.
+    def action(node, **kwargs):
+        if node.is_numpy and _float_key_dtype(node.dtype) is not None:
+            nplike = node.backend.nplike
+            data = node.data
+            data = nplike.where(
+                nplike.isnan(data), nplike.full_like(data, np.nan), data
+            )
+            return ak.contents.NumpyArray(
+                _flip_negative(nplike, data.view(_float_key_dtype(node.dtype))),
+                parameters=node.parameters,
+                backend=node.backend,
+            )
+        return None
+
+    return ak._do.recursively_apply(layout, action)
+
+
+def _keys_to_floats(layout, dtype):
+    def action(node, **kwargs):
+        if node.is_numpy:
+            return ak.contents.NumpyArray(
+                _flip_negative(node.backend.nplike, node.data).view(dtype),
+                parameters=node.parameters,
+                backend=node.backend,
+            )
+        return None
+
+    return ak._do.recursively_apply(layout, action)
+
+
+def _restore_regular(layout, sizes):
+    if layout is None:
+        return None
+    for target in sorted(sizes, reverse=True):
+        size = sizes[target]
+
+        def action(node, depth, target=target, size=size, **kwargs):
+            if node.is_list and depth == target:
+                if node.is_regular:
+                    return node
+                node = node.to_ListOffsetArray64(True)
+                return ak.contents.RegularArray(
+                    node.content[: node.length * size],
+                    size,
+                    zeros_length=node.length,
+                    parameters=node.parameters,
+                )
+            return None
+
+        layout = ak._do.recursively_apply(layout, action)
+    return layout
 
 
 def _select(layout, axis, k, ascending, *, indices):
