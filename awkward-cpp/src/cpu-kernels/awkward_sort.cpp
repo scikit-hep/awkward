@@ -4,6 +4,7 @@
 
 #include "awkward/kernels.h"
 #include "awkward/numeric-sort.h"
+#include "awkward/kernel-utils.h"
 
 #include <algorithm>
 #include <numeric>
@@ -18,17 +19,24 @@ ERROR awkward_sort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
-  std::vector<int64_t> index(length);
+  bool only_trivial;
+  const auto error = awkward::kernel::validate_sort_offsets(
+      offsets, offsetslength, length, FILENAME(__LINE__), &only_trivial);
+  if (error.str != nullptr) {
+    return error;
+  }
+  const int64_t covered = offsetslength > 0 ? offsets[offsetslength - 1] : 0;
+  if (only_trivial) {
+    if (covered != 0) std::copy_n(fromptr, covered, toptr);
+    return success();
+  }
+  std::vector<int64_t> index(covered);
   std::iota(index.begin(), index.end(), int64_t{0});
 
   // Each segment of `index` is sorted independently.
   for (int64_t i = 0; i < offsetslength - 1; i++) {
-    // Clamp against `length` so malformed offsets cannot index past the end
-    // of `index` (well-formed offsets satisfy offsets[last] <= length).
     int64_t start_off = static_cast<int64_t>(offsets[i]);
     int64_t stop_off = static_cast<int64_t>(offsets[i + 1]);
-    if (start_off > length) start_off = length;
-    if (stop_off > length) stop_off = length;
     if (start_off >= stop_off) continue;
     auto start = index.begin() + start_off;
     auto stop = index.begin() + stop_off;
@@ -60,9 +68,7 @@ ERROR awkward_sort(
   // In the offsets representation, the number of elements to copy out is
   // simply the end of the last bin (offsets[0] == 0 by contract).
   // The output suffix beyond that boundary is intentionally left untouched.
-  int64_t total = (offsetslength > 0) ? offsets[offsetslength - 1] : 0;
-  int64_t copy_length = (total < length) ? total : length;
-  for (int64_t i = 0; i < copy_length; i++) {
+  for (int64_t i = 0; i < covered; i++) {
     toptr[i] = fromptr[index[i]];
   }
   return success();
