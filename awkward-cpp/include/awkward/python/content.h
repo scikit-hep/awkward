@@ -26,7 +26,7 @@ namespace {
     }
 
     void*
-      empty_buffer(const std::string& name, int64_t num_bytes) override {
+      empty_buffer(const std::string& name, std::int64_t num_bytes) override {
         py::object pyarray = py::module::import("numpy").attr("empty")(num_bytes, "u1");
         py::array_t<uint8_t> rawarray = pyarray.cast<py::array_t<uint8_t>>();
         py::buffer_info rawinfo = rawarray.request();
@@ -35,7 +35,7 @@ namespace {
       }
 
     void
-      copy_buffer(const std::string& name, const void* source, int64_t num_bytes) override {
+      copy_buffer(const std::string& name, const void* source, std::int64_t num_bytes) override {
         py::object pyarray = py::module::import("numpy").attr("empty")(num_bytes, "u1");
         py::array_t<uint8_t> rawarray = pyarray.cast<py::array_t<uint8_t>>();
         py::buffer_info rawinfo = rawarray.request();
@@ -44,7 +44,7 @@ namespace {
       }
 
     void
-      full_buffer(const std::string& name, int64_t length, int64_t value, const std::string& dtype) override {
+      full_buffer(const std::string& name, std::int64_t length, std::int64_t value, const std::string& dtype) override {
         py::object pyarray = py::module::import("numpy").attr("full")(py::int_(length), py::int_(value), py::str(dtype));
         container_[py::str(name)] = pyarray;
       }
@@ -56,15 +56,15 @@ namespace {
   class EmptyBuffersContainer: public ak::BuffersContainer {
   public:
     void*
-      empty_buffer(const std::string& /* name */, int64_t /* num_bytes */) override {
+      empty_buffer(const std::string& /* name */, std::int64_t /* num_bytes */) override {
         return nullptr;
       }
 
     void
-      copy_buffer(const std::string& /* name */, const void* /* source */, int64_t /* num_bytes */) override { }
+      copy_buffer(const std::string& /* name */, const void* /* source */, std::int64_t /* num_bytes */) override { }
 
     void
-      full_buffer(const std::string& /* name */, int64_t /* length */, int64_t /* value */, const std::string& /* dtype */) override { }
+      full_buffer(const std::string& /* name */, std::int64_t /* length */, std::int64_t /* value */, const std::string& /* dtype */) override { }
   };
 }
 

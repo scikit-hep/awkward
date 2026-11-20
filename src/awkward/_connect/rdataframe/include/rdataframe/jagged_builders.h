@@ -18,14 +18,14 @@ namespace awkward {
     ~CppBuffers() = default;
 
     template<class BUILDER>
-    const std::map<std::string, size_t>&
+    const std::map<std::string, std::size_t>&
     names_nbytes(BUILDER& builder) {
       builder.buffer_nbytes(map_names_nbytes_);
       return map_names_nbytes_;
     }
 
     void
-    append(const std::string& key, uint8_t* ptr) {
+    append(const std::string& key, std::uint8_t* ptr) {
       buffers_uint8_ptr_[key] = ptr;
     }
 
@@ -43,9 +43,9 @@ namespace awkward {
     }
 
     template<class BUILDER>
-    size_t
+    std::size_t
     to_char_buffers(BUILDER& builder) {
-      size_t length = builder.length();
+      std::size_t length = builder.length();
 
       builder.to_char_buffers(buffers_uint8_ptr_);
       builder.clear();
@@ -55,8 +55,8 @@ namespace awkward {
     }
 
   private:
-    std::map<std::string, size_t> map_names_nbytes_;
-    std::map<std::string, uint8_t*> buffers_uint8_ptr_;
+    std::map<std::string, std::size_t> map_names_nbytes_;
+    std::map<std::string, std::uint8_t*> buffers_uint8_ptr_;
   };
 
 }  // namespace awkward
