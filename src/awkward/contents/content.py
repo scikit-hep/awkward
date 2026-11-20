@@ -41,7 +41,7 @@ from awkward._regularize import (
     is_integer_like,
     is_sized_iterable,
 )
-from awkward._slicing import normalize_slice
+from awkward._slicing import check_index_dtype, normalize_slice
 from awkward._typing import (
     TYPE_CHECKING,
     Any,
@@ -743,6 +743,7 @@ class Content(Meta):
         elif is_sized_iterable(where):
             # Do we have an array
             nplike = nplike_of_obj(where, default=None)
+            check_index_dtype(where, nplike)
             # We can end up with non-array objects associated with an nplike
             if nplike is not None and nplike.is_own_array(where):
                 layout = ak.operations.ak_to_layout._impl(
