@@ -108,10 +108,10 @@ def has_datetime_count_zero(tree: lark.Tree) -> bool:
     as in `datetime64[0s]`, and `from_datashape` reads it. On x86-64,
     NumPy stops the process with `SIGFPE` when it compares such a
     dtype with one of the same unit and no count, such as
-    `datetime64[s]`. `from_datashape` makes this comparison when the
-    other dtype is in the same string or was read earlier in the
-    process, so the predicate skips every count of 0. A field name is
-    not affected.
+    `datetime64[s]` (#4569). `from_datashape` makes this comparison
+    when the other dtype is in the same string or was read earlier in
+    the process, so the predicate skips every count of 0. A field name
+    is not affected.
     """
     return any(count == 0 for count in _datetime_counts(tree))
 
@@ -132,7 +132,7 @@ def has_infinite_parameter(type_: ak.types.Type) -> bool:
     `SIGNED_NUMBER` accepts a number beyond the range of a float, such
     as `1e400`, and `from_datashape` reads it as `inf`. `str` prints it
     as `Infinity`, which is not JSON and not in the grammar, so reading
-    the printed string raises `UnexpectedToken`.
+    the printed string raises `UnexpectedToken` (#4567).
     """
     return any(
         _has_infinity(value)
@@ -157,7 +157,7 @@ def has_empty_union_with_parameters(type_: ak.types.Type) -> bool:
 
     `str` prints such a union as `union[, parameters={...}]`, which is
     not in the grammar, so reading the printed string raises
-    `UnexpectedToken`.
+    `UnexpectedToken` (#4568).
     """
     return any(
         isinstance(node, ak.types.UnionType)
@@ -175,8 +175,8 @@ def has_string_with_parameters(type_: ak.types.Type) -> bool:
 
     `str` prints a type whose `__array__` parameter is `"string"`,
     `"bytestring"`, `"char"`, or `"byte"` as the keyword for it, such
-    as `string`, and drops its other parameters. For `string` and
-    `bytes`, it also drops the content. Reading the printed string
+    as `string`, and drops its other parameters (#4566). For `string`
+    and `bytes`, it also drops the content. Reading the printed string
     gives a type without them. Any type with these values counts,
     unless it is the type that the keyword reads as.
     """
