@@ -151,6 +151,7 @@ py-version = "3.11"
 jobs = "0"
 ignore-paths = [
     "src/awkward/_typeparser/generated_parser.py",
+    "src/awkward/types/_awkward_datashape_parser.py",
 ]
 
 [tool.pylint.reports]
