@@ -91,22 +91,22 @@ def parameters_intersect(
         right: second parameters mapping
         exclude: collection of keys to exclude
 
-    Returns the intersected key-value pairs of `left` and `right` as a dictionary.
+    Returns the intersected key-value pairs of `left` and `right` as a dictionary,
+    in `left`'s key order.
     """
     if left is None or right is None:
         return None
 
-    # left's order, not a set's: a set's order follows PYTHONHASHSEED
-    common_keys = (key for key in left if key in right)
     has_exclusions = exclude is not None and len(exclude) > 0
 
     # Avoid creating `result` unless we have to
     result = None
-    for key in common_keys:
-        left_value = left[key]
+    # left's order, not a set's: a set's order follows PYTHONHASHSEED
+    for key, left_value in left.items():
         # Do our keys match?
         if (
             left_value is not None
+            and key in right
             and left_value == right[key]
             and not (
                 has_exclusions and any(pair == (key, left_value) for pair in exclude)
