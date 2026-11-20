@@ -11,7 +11,7 @@ from awkward._behavior import find_record_typestr
 from awkward._parameters import parameters_are_equal, type_parameters_equal
 from awkward._regularize import is_integer
 from awkward._typing import Any, JSONMapping, Self, cast, final
-from awkward._util import UNSET, Sentinel
+from awkward._util import UNSET, Sentinel, contents_by_field
 from awkward.errors import FieldNotFoundError
 from awkward.types.type import Type
 
@@ -206,16 +206,36 @@ class RecordType(Type):
             )
         # Both records
         elif not (self.is_tuple or other.is_tuple):
-            if set(self._fields) != set(other._fields):
+            if len(self._contents) != len(other._contents):
                 return False
 
             # Build a field->content dict for other to avoid O(n²) list.index lookups
             other_field_to_content = dict(
                 zip(other._fields, other._contents, strict=True)
             )
+            if len(other_field_to_content) == len(other._contents):
+                # The fields of other are unique, so those of self are unique
+                # if they are the same set.
+                if set(self._fields) != other_field_to_content.keys():
+                    return False
+                return all(
+                    content._is_equal_to(other_field_to_content[field], all_parameters)
+                    for field, content in zip(self._fields, self._contents, strict=True)
+                )
+
+            # Duplicate fields: a field name selects its first occurrence, so
+            # fields with the same name are compared in order.
+            self_by_field = contents_by_field(self._fields, self._contents)
+            other_by_field = contents_by_field(other._fields, other._contents)
+            if self_by_field.keys() != other_by_field.keys():
+                return False
             return all(
-                content._is_equal_to(other_field_to_content[field], all_parameters)
-                for field, content in zip(self._fields, self._contents, strict=True)
+                len(these) == len(other_by_field[field])
+                and all(
+                    this._is_equal_to(that, all_parameters)
+                    for this, that in zip(these, other_by_field[field], strict=True)
+                )
+                for field, these in self_by_field.items()
             )
 
         # Mixed
