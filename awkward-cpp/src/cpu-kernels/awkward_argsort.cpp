@@ -19,10 +19,17 @@ ERROR awkward_argsort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
+  bool only_trivial;
   const auto error = awkward::kernel::validate_sort_offsets(
-      offsets, offsetslength, length, FILENAME(__LINE__));
+      offsets, offsetslength, length, FILENAME(__LINE__), &only_trivial);
   if (error.str != nullptr) {
     return error;
+  }
+  if (only_trivial) {
+    const int64_t covered = offsetslength > 0 ? static_cast<int64_t>(offsets[offsetslength - 1]) : 0;
+    if (covered != 0) std::fill_n(toptr, covered, int64_t{0});
+    if (covered < length) std::iota(toptr + covered, toptr + length, covered);
+    return success();
   }
   // The uncovered suffix retains global identity indices, including zero coverage.
   std::iota(toptr, toptr + length, int64_t{0});

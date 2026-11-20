@@ -19,12 +19,18 @@ ERROR awkward_sort(
   int64_t offsetslength,
   bool ascending,
   bool stable) {
+  bool only_trivial;
   const auto error = awkward::kernel::validate_sort_offsets(
-      offsets, offsetslength, length, FILENAME(__LINE__));
+      offsets, offsetslength, length, FILENAME(__LINE__), &only_trivial);
   if (error.str != nullptr) {
     return error;
   }
-  std::vector<int64_t> index(length);
+  const int64_t covered = offsetslength > 0 ? offsets[offsetslength - 1] : 0;
+  if (only_trivial) {
+    if (covered != 0) std::copy_n(fromptr, covered, toptr);
+    return success();
+  }
+  std::vector<int64_t> index(covered);
   std::iota(index.begin(), index.end(), int64_t{0});
 
   // Each segment of `index` is sorted independently.
@@ -62,9 +68,7 @@ ERROR awkward_sort(
   // In the offsets representation, the number of elements to copy out is
   // simply the end of the last bin (offsets[0] == 0 by contract).
   // The output suffix beyond that boundary is intentionally left untouched.
-  int64_t total = (offsetslength > 0) ? offsets[offsetslength - 1] : 0;
-  int64_t copy_length = (total < length) ? total : length;
-  for (int64_t i = 0; i < copy_length; i++) {
+  for (int64_t i = 0; i < covered; i++) {
     toptr[i] = fromptr[index[i]];
   }
   return success();

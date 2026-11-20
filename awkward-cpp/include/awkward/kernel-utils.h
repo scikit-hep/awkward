@@ -13,7 +13,8 @@ namespace awkward::kernel {
   // logical offsets before narrowing them or forming any buffer pointers.
   template <typename Offset>
   Error validate_sort_offsets(const Offset* offsets, int64_t count,
-                              int64_t length, const char* filename) {
+                              int64_t length, const char* filename,
+                              bool* only_trivial = nullptr) {
     if (length < 0) {
       return failure("length must be non-negative", kSliceNone, kSliceNone, filename);
     }
@@ -21,6 +22,7 @@ namespace awkward::kernel {
       return failure("offsetslength must be non-negative", kSliceNone, kSliceNone, filename);
     }
     if (count == 0) {
+      if (only_trivial != nullptr) *only_trivial = true;
       return success();
     }
     if constexpr (std::is_signed_v<Offset>) {
@@ -37,12 +39,17 @@ namespace awkward::kernel {
     // A branch-free block scan can vectorize on the valid-input path. Casting
     // negative signed offsets to uint64 also marks them out of range. Replay
     // only the first failing block to preserve position and error precedence.
+    bool nontrivial = false;
     for (int64_t begin = 1; begin < count;) {
       const int64_t end = begin + std::min<int64_t>(256, count - begin);
       bool invalid = false;
       for (int64_t i = begin; i < end; ++i) {
         invalid |= (static_cast<uint64_t>(offsets[i]) > static_cast<uint64_t>(length))
                    | (offsets[i] < offsets[i - 1]);
+        if (only_trivial != nullptr) {
+          nontrivial |= (static_cast<uint64_t>(offsets[i])
+                        - static_cast<uint64_t>(offsets[i - 1])) > 1;
+        }
       }
       if (invalid) {
         for (int64_t i = begin; i < end; ++i) {
@@ -61,6 +68,7 @@ namespace awkward::kernel {
       }
       begin = end;
     }
+    if (only_trivial != nullptr) *only_trivial = !nontrivial;
     return success();
   }
 
