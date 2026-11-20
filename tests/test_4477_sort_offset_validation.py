@@ -73,3 +73,43 @@ def test_reference_invalid_offsets_do_not_write(reference, op, offset_dtype, cas
         )
     assert str(err.value) == message
     assert output == [-99] * 7
+
+
+@pytest.mark.parametrize(
+    "op,offset_dtype",
+    [
+        ("sort", np.int64),
+        ("argsort", np.int32),
+        ("argsort", np.uint32),
+        ("argsort", np.int64),
+        ("argsort", np.uint64),
+    ],
+)
+@pytest.mark.parametrize("position", [1, 255, 256, 257, 511, 512, 513, 1024])
+@pytest.mark.parametrize("kind", ["oversized", "decreasing", "negative"])
+def test_first_error_across_validation_blocks(op, offset_dtype, position, kind):
+    if kind == "negative" and np.dtype(offset_dtype).kind == "u":
+        pytest.skip("unsigned offsets cannot be negative")
+    offsets = np.zeros(position + 258, dtype=offset_dtype)
+    if kind == "decreasing":
+        if position == 1:
+            pytest.skip("a decrease from zero is negative")
+        offsets[position - 1] = 3
+        offsets[position] = 2
+        message = b"offsets must be nondecreasing"
+    elif kind == "negative":
+        offsets[position] = -1
+        message = b"offsets must be non-negative"
+    else:
+        offsets[position] = 6
+        message = b"offsets exceed length"
+    # A later invalid offset must never change the first error's classification.
+    offsets[position + 1] = 7
+    values = np.asarray([3, 1, 2, 0, 9], dtype=np.int64)
+    output = np.full(7, -99, dtype=np.int64)
+    error = NumpyBackend.instance()[
+        (f"awkward_{op}", np.int64, np.int64, offset_dtype)
+    ](output, values, len(values), offsets, len(offsets), True, True)
+    assert error.str == message
+    assert error.id == position
+    np.testing.assert_array_equal(output, np.full(7, -99))
