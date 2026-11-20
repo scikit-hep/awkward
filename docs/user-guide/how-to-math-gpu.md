@@ -137,3 +137,17 @@ type: 50000 * var * float64
 ## JIT-compilation in Numba
 
 Just as Awkward Arrays in main memory can be iterated over in functions that have been JIT-compiled by [Numba](https://numba.pydata.org/), Awkward Arrays on GPUs can be iterated over in functions JIT-compiled by `@numba.cuda.jit`. The same restrictions apply (iteration only; no `ak.*` functions); see {doc}`how-to-use-in-numba-cuda.md`.
+
+## IndexedArray fill preparation
+
+`IndexedArray_fill` reuses a prepared cuda.compute transform while keeping its
+base-offset parameter in invocation-local device storage. Changing the offset,
+input buffer or length does not require another prepared transform for the same
+device, CUDA context and input/output dtypes.
+
+This optimization retains the existing cuda.compute legacy-default-stream
+policy. The parameter upload and fill run on that stream, including when a
+non-blocking CuPy stream is current. Applications using non-blocking streams must
+explicitly order their producers and consumers with the legacy stream; this
+does not introduce backend-wide support for such streams. Disk artifact caching
+is developed separately.
