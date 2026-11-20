@@ -132,25 +132,13 @@ def awkward_ListOffsetArray_reduce_nonlocal_preparenext_64(
 
 
 def segmented_reduce(*, max_segment_size=None, **kwargs):
-    """Thin wrapper over ``cuda.compute.segmented_reduce`` that supplies the
-    ``max_segment_size`` hint (number of elements in the largest segment) when a
-    caller doesn't pass one. cuda.compute uses it to dispatch to the
-    block/warp/thread implementation, which removes the segmented-reduce
-    slowness that originally motivated the ``unary_transform`` workarounds.
+    """Forward an optional host-known segment-size hint without reading offsets.
 
-    The hint only affects performance, never the result. It's derived from the
-    array-backed offset views; if a caller passes iterators (no cheap max), we
-    leave it ``None`` and let cuda.compute choose.
+    ``max_segment_size`` selects a CCCL dispatch strategy; it is not required
+    for correctness. Computing it from device offsets would add a reduction
+    and synchronize every call to obtain a Python integer. Leave it ``None``
+    unless the caller already has the largest segment size on the host.
     """
-    if max_segment_size is None:
-        n = kwargs.get("num_segments", 0)
-        start = kwargs.get("start_offsets_in")
-        stop = kwargs.get("end_offsets_in")
-        if n and start is not None and stop is not None:
-            try:
-                max_segment_size = int((stop[:n] - start[:n]).max())
-            except (TypeError, AttributeError, ValueError):
-                max_segment_size = None
     return _segmented_reduce_raw(**kwargs, max_segment_size=max_segment_size)
 
 
