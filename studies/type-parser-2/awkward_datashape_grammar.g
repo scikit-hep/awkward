@@ -28,10 +28,10 @@ numpytype_name: DTYPE
 
 DTYPE.2: /(bool|int8|uint8|int16|uint16|int32|uint32|int64|uint64|float16|float32|float64|float128|complex64|complex128|complex256)(?![A-Za-z0-9_])/
 
-DATETIME64:  /datetime64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?(?![A-Za-z0-9_])/
-TIMEDELTA64: /timedelta64(\[(\s*-?[0-9]*)?(Y|M|W|D|h|m|s|ms|us|\u03bc|ns|ps|fs|as)\])?(?![A-Za-z0-9_])/
+DATETIME64:  /datetime64(\[([ \t\n\r\f\v]*[0-9]+)?(Y|M|W|D|h|m|s|ms|us|\u03bcs|ns|ps|fs|as)\])?(?![A-Za-z0-9_])/
+TIMEDELTA64: /timedelta64(\[([ \t\n\r\f\v]*[0-9]+)?(Y|M|W|D|h|m|s|ms|us|\u03bcs|ns|ps|fs|as)\])?(?![A-Za-z0-9_])/
 
-unknowntype: "unknown" ("[" "parameters" "=" json_object "]")?
+unknowntype: "unknown" ("[" "parameters" "=" "{" "}" "]")?
 
 regulartype: INT "*" type
 
@@ -95,8 +95,10 @@ json_pair:   ESCAPED_STRING ":" json
 
 %import common.INT
 %import common.CNAME
-%import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER
 %import common.WS
+
+// A JSON string. common.ESCAPED_STRING also matches control characters and unknown escapes.
+ESCAPED_STRING: /"(?:[^"\\\x00-\x1f]|\\["\\\/bfnrt]|\\u[0-9a-fA-F]{4})*"/
 
 %ignore WS

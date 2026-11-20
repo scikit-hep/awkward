@@ -1,4 +1,4 @@
-sphinx~=7.0
+sphinx~=9.2
 PyYAML
 black
 pycparser
@@ -9,7 +9,7 @@ sphinx-sitemap
 pydata-sphinx-theme
 myst-nb~=1.0
 nbconvert
-myst-parser~=2.0
+myst-parser~=5.2
 sphinx-external-toc
 sphinx-autoapi
 sphinx-llm>=1.1.0
@@ -17,8 +17,8 @@ ipyleaflet
 
 numpy
 scipy
-numba>=0.50.0;python_version<"3.11"
-pandas>=0.24.0
+numba
+pandas>=1.5.0
 numexpr
 pyarrow>=17.0.0
 fsspec
@@ -33,5 +33,5 @@ h5py
 matplotlib
 awkward
 uproot
-jax>=0.2.7;python_version>="3.6" and sys_platform != "win32"
-jaxlib>=0.1.57;python_version>="3.6" and sys_platform != "win32"
+jax>=0.4.18;sys_platform != "win32"
+jaxlib>=0.4.18;sys_platform != "win32"
