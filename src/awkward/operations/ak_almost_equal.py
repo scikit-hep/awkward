@@ -1,6 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+import awkward as ak
 from awkward._backends.dispatch import backend_of
 from awkward._backends.numpy import NumpyBackend
 from awkward._behavior import behavior_of, get_array_class, get_record_class
@@ -113,12 +114,56 @@ def _impl(
                     return np.issubdtype(right, family)
         return left == right
 
+    def eager_carry(layout, carry):
+        # Carry eagerly so that same_content_types sees the packed classes. A lazy
+        # carry wraps a RecordArray in an IndexedArray and an UnmaskedArray above
+        # it then becomes an IndexedOptionArray
+        return layout._carry(ak.index.Index64(carry, nplike=backend.nplike), False)
+
+    def project_union(layout, tag):
+        tags = layout.tags.data
+        return eager_carry(
+            layout.contents[tag], layout.index.data[: tags.shape[0]][tags == tag]
+        )
+
+    def project_option(layout):
+        layout = layout.to_IndexedOptionArray64()
+        index = layout.index.data
+        return eager_carry(layout.content, index[index >= 0])
+
+    def to_list_offset_array(layout):
+        if not isinstance(layout, ak.contents.ListArray):
+            return layout.to_ListOffsetArray64(False)
+        offsets = layout._compact_offsets64(True)
+        # repeat needs counts it can cast to intp which is 32-bit on 32-bit platforms
+        counts = backend.nplike.astype(offsets.data[1:] - offsets.data[:-1], np.intp)
+        shifts = backend.nplike.repeat(layout.starts.data - offsets.data[:-1], counts)
+        carry = backend.nplike.arange(offsets[-1], dtype=np.int64) + shifts
+        return ak.contents.ListOffsetArray(
+            offsets, eager_carry(layout.content, carry), parameters=layout.parameters
+        )
+
     def packed_list_content(layout):
-        layout = layout.to_ListOffsetArray64(False)
+        layout = to_list_offset_array(layout)
         return layout.content[layout.offsets[0] : layout.offsets[-1]]
 
+    def packed_node(layout):
+        # Packed layouts have no ListArray and no IndexedArray (except categorical)
+        # but carrying can create them so convert them back
+        if (
+            isinstance(layout, ak.contents.IndexedArray)
+            and layout.parameter("__array__") != "categorical"
+        ):
+            layout = layout.project()
+        if isinstance(layout, ak.contents.ListArray):
+            layout = to_list_offset_array(layout)
+        return layout
+
     def visitor(left, right) -> bool:
-        # Most firstly, check same_content_types before any transformations
+        left = packed_node(left)
+        right = packed_node(right)
+
+        # Most firstly, check same_content_types before any further transformations
         if same_content_types and left.__class__ is not right.__class__:
             return False
 
@@ -256,7 +301,7 @@ def _impl(
         elif left.is_option and right.is_option:
             return backend.nplike.array_equal(
                 left.mask_as_bool(True), right.mask_as_bool(True)
-            ) and visitor(left.project(), right.project())
+            ) and visitor(project_option(left), project_option(right))
         elif left.is_union and right.is_union:
             # After simplification, both unions should have the same number of contents
             if len(left.contents) != len(right.contents):
@@ -293,7 +338,7 @@ def _impl(
 
             # Now project out the contents, and check for equality
             for i, j in zip(left_tag_order, right_tag_order, strict=True):
-                if not visitor(left.project(i), right.project(j)):
+                if not visitor(project_union(left, i), project_union(right, j)):
                     return False
             return True
 
