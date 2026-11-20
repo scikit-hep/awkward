@@ -96,7 +96,8 @@ def parameters_intersect(
     if left is None or right is None:
         return None
 
-    common_keys = iter(left.keys() & right.keys())
+    # left's order, not a set's: a set's order follows PYTHONHASHSEED
+    common_keys = (key for key in left if key in right)
     has_exclusions = exclude is not None and len(exclude) > 0
 
     # Avoid creating `result` unless we have to
