@@ -245,7 +245,7 @@ def test_option_enum_string():
     assert result.to_list() == ["three", "two", None, "one", "one", "two", "three"]
     assert isinstance(result.layout, ak.contents.IndexedOptionArray)
     assert result.layout.index.data.tolist() == [2, 1, -1, 0, 0, 1, 2]
-    assert str(result.type) == "7 * ?categorical[type=string]"
+    assert str(result.type) == "7 * categorical[type=?string]"
 
     result = ak.operations.from_json(
         r'["three", "two", null, "one", "one", "two", "three"]' * 2,
@@ -258,7 +258,7 @@ def test_option_enum_string():
     assert result.to_list() == ["three", "two", None, "one", "one", "two", "three"] * 2
     assert isinstance(result.layout, ak.contents.IndexedOptionArray)
     assert result.layout.index.data.tolist() == [2, 1, -1, 0, 0, 1, 2] * 2
-    assert str(result.type) == "14 * ?categorical[type=string]"
+    assert str(result.type) == "14 * categorical[type=?string]"
 
     result = ak.operations.from_json(
         r"[]",
@@ -270,7 +270,7 @@ def test_option_enum_string():
     assert result.to_list() == []
     assert isinstance(result.layout, ak.contents.IndexedOptionArray)
     assert result.layout.index.data.tolist() == []
-    assert str(result.type) == "0 * ?categorical[type=string]"
+    assert str(result.type) == "0 * categorical[type=?string]"
 
 
 def test_array_integer():

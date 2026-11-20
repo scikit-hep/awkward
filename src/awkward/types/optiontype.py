@@ -77,11 +77,11 @@ class OptionType(Type):
                 tail = [f", {params}]"]
 
         return [
-            *head,
             self._str_categorical_begin(),
+            *head,
             *content_out,
-            self._str_categorical_end(),
             *tail,
+            self._str_categorical_end(),
         ]
 
     def __repr__(self) -> str:
