@@ -112,6 +112,27 @@ jobs:
         name: awkward
         path: dist/awkward*.whl
 
+  test-docs-extension:
+    runs-on: ubuntu-24.04
+    name: Test docs extension
+    permissions:
+      contents: read # This job runs code from the pull request.
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Setup Python
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: "${{ env.X86_64_PYTHON_VERSION }}"
+
+    - name: Install dependencies
+      run: python -m pip install -r docs/_ext/requirements-test.txt
+
+    - name: Run the unit tests
+      run: python -m pytest docs/_ext/tests --cov --cov-config=docs/_ext/.coveragerc
+
   execute-cppyy:
     needs: [awkward-cpp-x86-64, awkward]
     runs-on: ubuntu-24.04
@@ -244,6 +265,10 @@ jobs:
       run: sphinx-build -M html . _build/ -T
       working-directory: docs
 
+    - name: Check the built site
+      run: python _ext/check_site.py _build/html
+      working-directory: docs
+
     - name: Upload docs artefact
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
@@ -276,7 +301,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-slim
-    needs: [ build-docs ]
+    needs: [ build-docs, test-docs-extension ]
     # We can only deploy for PRs on host repo
     if: github.event_name == 'push' || github.event_name == 'release'
     name: Deploy
