@@ -2,9 +2,11 @@
 
 
 import awkward as ak
+from awkward._backends.numpy import NumpyBackend
 from awkward._dispatch import high_level_function
 from awkward._layout import HighLevelContext
 from awkward._nplikes.numpy_like import NumpyMetadata
+from awkward._nplikes.virtual import VirtualNDArray
 from awkward._typing import Mapping
 
 __all__ = ("nan_to_none",)
@@ -21,6 +23,11 @@ def nan_to_none(
     attrs: Mapping | None = None,
 ):
     """Converts NaN ("not a number") into None, i.e. missing values with option-type.
+
+    On CPU, a complex value is missing if either component is NaN.
+
+    For complex values, either a real or imaginary NaN makes the entire value
+    missing. This rule is the same for NumPy, CuPy, JAX and typetracer layouts.
 
     See also #ak.nan_to_num to convert NaN or infinity to specified values.
 
@@ -44,10 +51,34 @@ def nan_to_none(
     return _impl(array, highlevel, behavior, attrs)
 
 
-def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | None):
+def _impl(
+    array,
+    highlevel: bool,
+    behavior: Mapping | None,
+    attrs: Mapping | None,
+    *,
+    optimize_all_valid: bool = False,
+):
+    def supports_nan_mask(layout):
+        return layout.is_numpy and (
+            np.issubdtype(layout.dtype, np.floating)
+            or np.issubdtype(layout.dtype, np.complexfloating)
+        )
+
     def action(layout, continuation, backend, **kwargs):
-        if layout.is_numpy and np.issubdtype(layout.dtype, np.floating):
+        if supports_nan_mask(layout):
             mask = backend.nplike.isnan(layout.data)
+            if (
+                optimize_all_valid
+                and backend is NumpyBackend.instance()
+                and layout.dtype.kind == "c"
+                and not isinstance(mask, VirtualNDArray)
+                and mask.size != 0
+                and not mask.any()
+            ):
+                # Keep option semantics while allowing reductions to skip
+                # mask projection and its carry of every valid value.
+                return ak.contents.UnmaskedArray(layout)
             return ak.contents.ByteMaskedArray(
                 ak.index.Index8(mask, nplike=backend.nplike),
                 layout,
@@ -55,7 +86,7 @@ def _impl(array, highlevel: bool, behavior: Mapping | None, attrs: Mapping | Non
             )
 
         elif (layout.is_option or layout.is_indexed) and (
-            layout.content.is_numpy and np.issubdtype(layout.content.dtype, np.floating)
+            supports_nan_mask(layout.content)
         ):
             return continuation()
 
