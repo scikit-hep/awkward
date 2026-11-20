@@ -57,6 +57,7 @@ cuda_kernels_impl = [
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
     # The awkward_reduce_* value reducers (sum/prod/min/max/argmin/argmax/
     # count/countnonzero and their bool/complex variants) have no compiled
     # CUDA kernel: the CUDA backend dispatches them to the cuda.cccl-based
