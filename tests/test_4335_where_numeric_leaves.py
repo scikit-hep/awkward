@@ -53,7 +53,7 @@ _default_int = np.dtype(int).name
     ],
 )
 def test_scalar_branch_promotes_like_an_array(x_dtype, scalar, expected):
-    # NumPy 1.x promotes 0-d arrays by value, which must not leak into the result
+    # the scalar is promoted as a 0-d array of its default dtype, not as a weak Python scalar
     left = ak.values_astype(x, x_dtype)
     for result, tracer in [
         (

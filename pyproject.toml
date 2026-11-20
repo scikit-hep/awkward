@@ -43,7 +43,7 @@ classifiers = [
 ]
 dependencies = [
     "awkward_cpp==59",
-    "numpy>=1.23.2",
+    "numpy>=2.0.0",
     "packaging",
     "fsspec>=2022.11.0"
 ]
@@ -137,7 +137,6 @@ filterwarnings = [
     "error",
     "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning",
     "ignore:The NumPy module was reloaded:UserWarning",
-    "ignore:.*np\\.MachAr.*:DeprecationWarning",
     "ignore:module 'sre_.*' is deprecated:DeprecationWarning",
     "ignore:Jitify is performing a one-time only warm-up",
     "ignore:The JAX backend is deprecated:DeprecationWarning",

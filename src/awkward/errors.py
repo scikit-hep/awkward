@@ -15,4 +15,4 @@ class FieldNotFoundError(IndexError):
     pass
 
 
-AxisError = getattr(numpy, "exceptions", numpy).AxisError
+AxisError = numpy.exceptions.AxisError
