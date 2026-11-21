@@ -1111,7 +1111,7 @@ class RegularArray(RegularMeta[Content], Content):
                     outcontent = outcontent.to_ListOffsetArray64(False)
                     start, stop = (
                         outcontent.offsets[0],
-                        outcontent.offsets[outcontent.offsets.length - 1],
+                        outcontent.offsets[-1],
                     )
                     trimmed = outcontent.content._getitem_range(start, stop)
                     assert (
