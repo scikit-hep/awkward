@@ -1015,11 +1015,11 @@ class ByteMaskedArray(ByteMaskedMeta[Content], Content):
                 self._backend[
                     "awkward_IndexedOptionArray_rpad_and_clip_mask_axis1",
                     index.dtype.type,
-                    self._mask.dtype.type,
+                    mask.dtype.type,
                 ](
                     index.data,
-                    self._mask.data,
-                    self._mask.length,
+                    mask.data,
+                    mask.length,
                 )
             )
             next = self.project()._pad_none(target, axis, depth, clip)
