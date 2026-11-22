@@ -5,7 +5,7 @@ from collections import Counter
 from functools import cached_property
 
 from awkward._meta.meta import Meta
-from awkward._typing import Generic, JSONSerializable, TypeVar
+from awkward._typing import Generic, JSONSerializable, Literal, TypeVar
 
 T = TypeVar("T", bound=Meta)
 
@@ -14,6 +14,14 @@ class UnionMeta(Meta, Generic[T]):
     is_union = True
 
     _contents: list[T]
+
+    def _mergeable_next(
+        self,
+        other: Meta,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
+        return True
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         if self._parameters is not None:
