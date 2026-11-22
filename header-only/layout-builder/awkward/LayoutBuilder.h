@@ -7,6 +7,7 @@
 #include "awkward/GrowableBuffer.h"
 #include "awkward/utils.h"
 
+#include <concepts>
 #include <map>
 #include <algorithm>
 #include <tuple>
@@ -21,6 +22,39 @@
 namespace awkward {
 
   namespace LayoutBuilder {
+
+    /// Buffer element types supported by Numpy forms. Storage is mutable and
+    /// owned by the builder, so cv-qualified types and references are excluded.
+    template <typename T>
+    concept Primitive =
+        std::same_as<T, std::remove_cvref_t<T>> &&
+        ((std::integral<T> &&
+          (sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8)) ||
+         std::same_as<T, float> || std::same_as<T, double> ||
+         (std::same_as<T, long double> && (sizeof(T) == 8 || sizeof(T) == 16)) ||
+         std::same_as<T, std::complex<float>> ||
+         std::same_as<T, std::complex<double>> ||
+         (std::same_as<T, std::complex<long double>> &&
+          (sizeof(T) == 16 || sizeof(T) == 32))
+#ifdef AWKWARD_HAVE_FLOAT16
+         || std::same_as<T, awkward::float16>
+#endif
+        );
+
+    /// Index buffers have i32, u32 or i64 forms.
+    template <typename T>
+    concept Index = std::same_as<T, std::remove_cvref_t<T>> &&
+                    std::integral<T> && !std::same_as<T, bool> &&
+                    (sizeof(T) == 4 || (std::signed_integral<T> && sizeof(T) == 8));
+
+    /// Option indices require negative values to represent missing entries.
+    template <typename T>
+    concept SignedIndex = Index<T> && std::signed_integral<T>;
+
+    /// Union tags have the signed 8-bit form.
+    template <typename T>
+    concept UnionTag = std::same_as<T, std::remove_cvref_t<T>> &&
+                       std::signed_integral<T> && sizeof(T) == 1;
 
     /// @class BuilderSetId
     ///
@@ -68,7 +102,7 @@ namespace awkward {
     /// of `PRIMITIVE` type.
     ///
     /// @tparam PRIMITIVE The type of data in NumpyArray.
-    template <typename PRIMITIVE>
+    template <Primitive PRIMITIVE>
     class Numpy {
     public:
       /// @brief Creates a new Numpy layout builder by allocating a new buffer,
@@ -233,7 +267,7 @@ namespace awkward {
     ///
     /// @tparam PRIMITIVE The type of `offsets` buffer.
     /// @tparam BUILDER The type of builder content.
-    template <typename PRIMITIVE, typename BUILDER>
+    template <Index PRIMITIVE, typename BUILDER>
     class ListOffset {
     public:
       /// @brief Creates a new ListOffset layout builder by allocating a new `offset`
@@ -409,7 +443,7 @@ namespace awkward {
     ///
     /// @brief Helper for building an array of strings with a similar API as a
     /// Numpy builder.
-    template<class PRIMITIVE>
+    template<Index PRIMITIVE>
     class String : public ListOffset<PRIMITIVE, Numpy<uint8_t>> {
       public:
           String() : ListOffset<PRIMITIVE, Numpy<uint8_t>>() {
@@ -1170,7 +1204,7 @@ namespace awkward {
     ///
     /// @tparam PRIMITIVE The type of `index` buffer.
     /// @tparam BUILDER The type of builder content.
-    template <typename PRIMITIVE, typename BUILDER>
+    template <Index PRIMITIVE, typename BUILDER>
     class Indexed {
     public:
       /// @brief Creates a new Indexed layout builder by allocating a new `index`
@@ -1385,7 +1419,7 @@ namespace awkward {
     ///
     /// @tparam PRIMITIVE The type of `index` buffer.
     /// @tparam BUILDER The type of builder content.
-    template <typename PRIMITIVE, typename BUILDER>
+    template <SignedIndex PRIMITIVE, typename BUILDER>
     class IndexedOption {
     public:
       /// @brief Creates a new IndexedOption layout builder by allocating a new `index`
@@ -2291,7 +2325,7 @@ namespace awkward {
     /// @tparam TAGS The type of `tags` buffer.
     /// @tparam INDEX The type of `index` buffer.
     /// @tparam BUILDERS The types of builder contents.
-    template <typename TAGS, typename INDEX, typename... BUILDERS>
+    template <UnionTag TAGS, Index INDEX, typename... BUILDERS>
     class Union {
     public:
       using Contents = typename std::tuple<BUILDERS...>;
