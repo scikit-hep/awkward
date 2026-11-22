@@ -46,16 +46,8 @@ else:
 
 
 def reproducible_datetime():
-    import sys
-
     timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-
-    if sys.version_info >= (3, 11):
-        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
-    else:
-        build_date = datetime.datetime.utcfromtimestamp(
-            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-        )
+    build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 
@@ -903,6 +895,7 @@ cuda_kernels_tests = [
     "awkward_BitMaskedArray_to_ByteMaskedArray",
     "awkward_ListArray_broadcast_tooffsets",
     "awkward_ListArray_compact_offsets",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
     "awkward_ListOffsetArray_flatten_offsets",
     "awkward_IndexedArray_overlay_mask",
     "awkward_ByteMaskedArray_numnull",
