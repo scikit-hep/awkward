@@ -4,19 +4,13 @@
 
 from __future__ import annotations
 
-import sys
+import importlib.metadata
 import threading
 import warnings
 from collections.abc import Mapping
 from contextlib import contextmanager
 
 from awkward._typing import TYPE_CHECKING, Any, JSONMapping, Protocol, runtime_checkable
-
-if sys.version_info < (3, 12):
-    import importlib_metadata
-else:
-    import importlib.metadata as importlib_metadata
-
 
 if TYPE_CHECKING:
     from awkward._nplikes.shape import ShapeItem
@@ -36,7 +30,7 @@ _is_registered = False
 def _load_reduce_plugin():
     best_plugin = None
 
-    for entry_point in importlib_metadata.entry_points(group="awkward.pickle.reduce"):
+    for entry_point in importlib.metadata.entry_points(group="awkward.pickle.reduce"):
         plugin = entry_point.load()
 
         try:
