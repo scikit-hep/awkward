@@ -113,6 +113,9 @@ from awkward.operations.ak_to_regular import *
 from awkward.operations.ak_to_safetensors import *
 from awkward.operations.ak_to_tensorflow import *
 from awkward.operations.ak_to_torch import *
+from awkward.operations.ak_top_k import *
+from awkward.operations.ak_top_k_indices import *
+from awkward.operations.ak_top_k_values import *
 from awkward.operations.ak_transform import *
 from awkward.operations.ak_tuples_to_lists import *
 from awkward.operations.ak_type import *
