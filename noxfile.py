@@ -1,6 +1,7 @@
 #!/usr/bin/env -S uv run --script
 
 # /// script
+# requires-python = ">=3.11"
 # dependencies = ["nox>=2025.2.09"]
 # ///
 
@@ -24,7 +25,6 @@ requirements_dev = [
     "packaging",
     "PyYAML",
     "requests",
-    "tomli",
 ]
 
 PYPROJECT = nox.project.load_toml("pyproject.toml")
@@ -79,7 +79,7 @@ def coverage(session):
     )
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python="3.13", reuse_venv=True)
 def docs(session):
     """
     Build the docs.
