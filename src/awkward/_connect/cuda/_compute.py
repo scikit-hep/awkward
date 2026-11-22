@@ -176,8 +176,8 @@ def _make_widening_cast(in_type, out_type):
 
     Returned with a stable identity (cached per dtype pair) so cuda.compute
     builds one kernel per pair instead of recompiling a fresh closure each call.
-    The op only needs to widen; cuda.compute uses the return annotation to pick
-    the output type, so an `int()` / `float()` body suffices.
+    cuda.compute uses the return annotation to pick the output type. Explicit
+    integer casts preserve modular signed-to-unsigned conversion when widening.
     """
     if np.dtype(out_type).kind == "f":
 
@@ -187,7 +187,7 @@ def _make_widening_cast(in_type, out_type):
     else:
 
         def _cast(x):
-            return int(x)
+            return out_type(x)
 
     _cast.__annotations__ = {"x": in_type, "return": out_type}
     return _cast
@@ -759,6 +759,9 @@ def segmented_sort(
     cupy_nplike = Cupy.instance()
     cp = cupy_nplike._module
 
+    # Only the declared prefix of the offsets buffer belongs to this call.
+    offsets = offsets[:offsetslength]
+
     # Ensure offsets are int64 as expected by segmented_sort
     if offsets.dtype != cp.int64:
         offsets = offsets.astype(cp.int64, copy=False)
@@ -766,6 +769,12 @@ def segmented_sort(
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
 
+    if num_items == 0:
+        return
+
+    # Match CPU prefix-only writes; the destination suffix must stay untouched.
+    fromptr = fromptr[:num_items]
+    toptr = toptr[:num_items]
     start_o, end_o = make_segment_views(offsets)
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
@@ -774,7 +783,7 @@ def segmented_sort(
     # (correct NaN placement, -0.0 == +0.0) while carrying the *original* values,
     # so the output keeps real NaNs but positions everything as the CPU does.
     # Non-float dtypes sort natively (CCCL handles signed integers correctly).
-    if num_items > 0 and fromptr.dtype.kind == "f":
+    if fromptr.dtype.kind == "f":
         keys = _float_order_keys(cp, fromptr, ascending)
         keys_out = cp.empty_like(keys)
         segmented_sort(
@@ -839,14 +848,22 @@ def segmented_argsort(
     cupy_nplike = Cupy.instance()
     cp = cupy_nplike._module
 
+    # Only the declared prefix of the offsets buffer belongs to this call.
+    offsets = offsets[:offsetslength]
+
     # Ensure offsets are int64 as expected by segmented_sort
     if offsets.dtype != cp.int64:
         offsets = offsets.astype(cp.int64, copy=False)
 
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
+    # CPU argsort initializes every carry entry, even with no covered items;
+    # the uncovered suffix keeps its global identity indices.
+    toptr[num_items:length] = cp.arange(num_items, length, dtype=cp.int64)
     if num_items == 0:
         return
+    fromptr = fromptr[:num_items]
+    toptr = toptr[:num_items]
 
     start_o, end_o = make_segment_views(offsets)
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
@@ -1070,13 +1087,24 @@ def awkward_reduce_argmin_complex(
     )
 
 
+def _integer_reduction_buffers(input_data, result):
+    # cuda.compute must accumulate in an unsigned type, not just reinterpret
+    # the result after overflowing a signed accumulator. Views allocate no data.
+    if result.dtype.kind == "i":
+        unsigned = np.dtype(f"u{result.dtype.itemsize}")
+        result = result.view(unsigned)
+        if input_data.dtype.itemsize == unsigned.itemsize:
+            input_data = input_data.view(unsigned)
+    return _widen_for_reduce(input_data, result.dtype), result
+
+
 def awkward_reduce_sum(
     result,
     input_data,
     offsets_data,
     outlength,
 ):
-    d_input = _widen_for_reduce(input_data, result.dtype)
+    d_input, result = _integer_reduction_buffers(input_data, result)
     start_o, end_o = make_segment_views(offsets_data)
 
     h_init = np.asarray(0, dtype=result.dtype)
@@ -1335,7 +1363,7 @@ def awkward_reduce_prod(
     offsets_data,
     outlength,
 ):
-    d_input = _widen_for_reduce(input_data, result.dtype)
+    d_input, result = _integer_reduction_buffers(input_data, result)
 
     start_o, end_o = make_segment_views(offsets_data)
     h_init = np.asarray(1, dtype=result.dtype)

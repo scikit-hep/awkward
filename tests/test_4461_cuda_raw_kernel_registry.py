@@ -18,7 +18,6 @@ KERNEL = "awkward_ListOffsetArray_reduce_nonlocal_outstartsstops_64"
 # cuda.compute implementation. Shrink this set when one gains CUDA support.
 KNOWN_UNSUPPORTED_ON_CUDA = {
     "awkward_ListOffsetArray_getitem_boolmask",
-    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
     "awkward_NumpyArray_prepare_utf8_to_utf32_padded",
     "awkward_NumpyArray_utf8_to_utf32_padded",
 }
