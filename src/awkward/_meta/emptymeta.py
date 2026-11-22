@@ -2,12 +2,20 @@
 
 
 from awkward._meta.meta import Meta
-from awkward._typing import JSONSerializable
+from awkward._typing import JSONSerializable, Literal
 
 
 class EmptyMeta(Meta):
     is_unknown = True
     is_leaf = True
+
+    def _mergeable_next(
+        self,
+        other: Meta,
+        mergebool: bool,
+        mergecastable: Literal["same_kind", "equiv", "family"],
+    ) -> bool:
+        return True
 
     def purelist_parameters(self, *keys: str) -> JSONSerializable:
         return None
