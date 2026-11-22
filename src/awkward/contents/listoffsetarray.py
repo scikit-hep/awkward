@@ -17,9 +17,6 @@ from awkward._nplikes.placeholder import PlaceholderArray
 from awkward._nplikes.shape import ShapeItem, unknown_length
 from awkward._nplikes.typetracer import TypeTracer, is_unknown_scalar
 from awkward._nplikes.virtual import VirtualNDArray
-from awkward._parameters import (
-    type_parameters_equal,
-)
 from awkward._regularize import is_integer_like
 from awkward._slicing import NO_HEAD
 from awkward._typing import (
@@ -27,7 +24,6 @@ from awkward._typing import (
     Any,
     Callable,
     Final,
-    Literal,
     Self,
     SupportsIndex,
     final,
@@ -607,39 +603,6 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
                     ListOffsetArray(tooffsets, flattened, parameters=self._parameters),
                 )
 
-    def _mergeable_next(
-        self,
-        other: Content,
-        mergebool: bool,
-        mergecastable: Literal["same_kind", "equiv", "family"],
-    ) -> bool:
-        # Is the other content is an identity, or a union?
-        if other.is_identity_like or other.is_union:
-            return True
-        # Is the other array indexed or optional?
-        elif other.is_indexed or other.is_option:
-            return self._mergeable_next(other.content, mergebool, mergecastable)
-        # Otherwise, do the parameters match? If not, we can't merge.
-        elif not type_parameters_equal(self._parameters, other._parameters):
-            return False
-        elif isinstance(
-            other,
-            (
-                ak.contents.RegularArray,
-                ak.contents.ListArray,
-                ak.contents.ListOffsetArray,
-            ),
-        ):
-            return self._content._mergeable_next(
-                other.content, mergebool, mergecastable
-            )
-        elif isinstance(other, ak.contents.NumpyArray) and len(other.shape) > 1:
-            return self._mergeable_next(
-                other._to_regular_primitive(), mergebool, mergecastable
-            )
-        else:
-            return False
-
     def _mergemany(self, others: Sequence[Content]) -> Content:
         if len(others) == 0:
             return self
@@ -925,7 +888,9 @@ class ListOffsetArray(ListOffsetMeta[Content], Content):
             ) = self._rearrange_prepare_next(outlength, offsets)
 
             nummissing = Index64.empty(maxcount, self._backend.nplike)
-            missing = Index64.empty(self._offsets[-1], self._backend.nplike)
+            missing = Index64.empty(
+                nplike.index_as_shape_item(self._offsets[-1]), nplike
+            )
             nextshifts = Index64.empty(nextcarry.length, self._backend.nplike)
             assert (
                 nummissing.nplike is self._backend.nplike

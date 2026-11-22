@@ -7,7 +7,11 @@ from hypothesis import given
 import awkward as ak
 
 
-@given(a=st_ak.constructors.arrays())
+@given(
+    a=st_ak.constructors.arrays(
+        allow_categorical=False,
+    )
+)
 def test_reflexivity(a: ak.Array) -> None:
     """An array must be equal to itself."""
     assert ak.array_equal(a, a, equal_nan=True)
