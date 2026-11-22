@@ -1,5 +1,7 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
+from types import SimpleNamespace
+
 import numpy as np
 import pytest
 
@@ -33,6 +35,11 @@ def test_reuses_prepared_operation_when_base_pointer_and_length_change(
 
     monkeypatch.setattr(_indexed_fill, "make_op_adapter", unexpected)
     monkeypatch.setattr(_indexed_fill, "make_unary_transform", unexpected)
+    # Only the helper's CuPy entry points are replaced; test inputs are prepared
+    # with the real module. A warm call may neither allocate nor upload state.
+    monkeypatch.setattr(
+        _indexed_fill, "cp", SimpleNamespace(cuda=cp.cuda, empty=unexpected)
+    )
     for length, base in [
         (64, 11),
         (32, np.int64(12)),
@@ -96,3 +103,50 @@ def test_public_kernel_dispatch_matches_cpu(dtype):
         output = cp.full(11, 123, dtype=cp.int64)
         CupyBackend.instance()[key](output, 3, cp.asarray(source), len(source), base)
         np.testing.assert_array_equal(cp.asnumpy(output), reference)
+
+
+def test_queued_base_changes_without_intermediate_synchronization():
+    from awkward._connect.cuda import _indexed_fill
+
+    source = cp.arange(4096, dtype=cp.int64)
+    bases = (7, 7, -3, 0, 11, 11, 7)
+    outputs = [cp.full(source.size + 4, 99, dtype=cp.int64) for _ in bases]
+    cp.cuda.Stream.null.synchronize()
+    with cp.cuda.Stream(non_blocking=True):
+        for output, base in zip(outputs, bases, strict=True):
+            _indexed_fill.fill(output, 2, source, source.size, base)
+    # One final fence: a host-side overwrite of the shared parameter would make
+    # earlier operations observe a later base instead of their queued update.
+    cp.cuda.Stream.null.synchronize()
+    for output, base in zip(outputs, bases, strict=True):
+        expected = np.full(source.size + 4, 99, dtype=np.int64)
+        expected[2:-2] = np.arange(source.size) + base
+        np.testing.assert_array_equal(cp.asnumpy(output), expected)
+
+
+def test_concurrent_cold_fill_uses_one_parameter():
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    from awkward._connect.cuda import _indexed_fill
+
+    _indexed_fill._setup.cache_clear()
+    device = cp.cuda.runtime.getDevice()
+    source = cp.arange(4096, dtype=cp.int64)
+    bases = (7, -3, 0, 11)
+    outputs = [cp.full(source.size, 99, dtype=cp.int64) for _ in bases]
+    cp.cuda.Stream.null.synchronize()
+    barrier = Barrier(len(bases))
+
+    def run(pair):
+        output, base = pair
+        with cp.cuda.Device(device):
+            barrier.wait(timeout=30)
+            _indexed_fill.fill(output, 0, source, source.size, base)
+
+    with ThreadPoolExecutor(max_workers=len(bases)) as pool:
+        list(pool.map(run, zip(outputs, bases, strict=True)))
+    cp.cuda.Stream.null.synchronize()
+    assert _indexed_fill._setup.cache_info().currsize == 1
+    for output, base in zip(outputs, bases, strict=True):
+        np.testing.assert_array_equal(cp.asnumpy(output), np.arange(source.size) + base)

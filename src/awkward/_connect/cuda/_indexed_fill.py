@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-"""Prepared IndexedArray fill with an invocation-local runtime base."""
+"""Prepared IndexedArray fill with stream-ordered reusable runtime state."""
 
 from functools import lru_cache
 from threading import RLock
@@ -15,31 +15,12 @@ cp = Cupy.instance()._module
 np = Numpy.instance()._module
 
 
-class _BaseState:
-    # CCCL turns this captured CUDA-array-interface proxy into a device array.
-    # It retains metadata only, never an invocation's array owner.
-    dtype = np.dtype(np.int64)
-
-    def __init__(self):
-        self.clear()
-
-    def bind(self, array):
-        self.__cuda_array_interface__ = dict(array.__cuda_array_interface__)
-
-    def clear(self):
-        self.__cuda_array_interface__ = {
-            "shape": (1,),
-            "strides": None,
-            "typestr": self.dtype.str,
-            "data": (0, False),
-            "version": 3,
-        }
-
-
 class _PreparedFill:
     def __init__(self, output_dtype):
         self.lock = RLock()
-        self.base = _BaseState()
+        with cp.cuda.Stream.null:
+            self.base = cp.empty(1, dtype=cp.int64)
+        self.last_base = None
         base = self.base
         out_dtype = np.dtype(output_dtype).type
 
@@ -50,14 +31,18 @@ class _PreparedFill:
         self.transform = None
 
     def __call__(self, source, output, base):
-        # Keep the existing cuda.compute legacy-default-stream policy. Parameter
-        # upload and allocation must use that same stream, even if the caller's
-        # CuPy current stream is non-blocking. A backend-wide stream change is
-        # separate from runtime-state reuse.
+        # Both parameter updates and transforms use the legacy default stream.
+        # The lock keeps each update/transform pair together in its queue, so
+        # later calls cannot overwrite the parameter before earlier calls read it.
+        # This also holds when a non-blocking CuPy stream is current.
         with self.lock, cp.cuda.Stream.null:
-            parameter = cp.asarray([base], dtype=cp.int64)
-            self.base.bind(parameter)
             try:
+                base = np.int64(base)
+                if self.last_base is None or base != self.last_base:
+                    # CuPy passes the scalar as a kernel argument (or uses an
+                    # async memset for zero), without a host-to-device upload.
+                    self.base.fill(base)
+                    self.last_base = base
                 if self.transform is None:
                     self.transform = make_unary_transform(
                         d_in=source, d_out=output, op=self.operation
@@ -69,8 +54,14 @@ class _PreparedFill:
                     num_items=source.size,
                     stream=None,
                 )
-            finally:
-                self.base.clear()
+            except Exception:
+                self.last_base = None
+                raise
+
+
+# Only lookup/construction is serialized here, not compilation or submission.
+# lru_cache alone can construct duplicate objects on concurrent cold misses.
+_setup_lock = RLock()
 
 
 @lru_cache(maxsize=32)
@@ -81,10 +72,8 @@ def _setup(device, context, input_dtype, output_dtype):
 def fill(toindex, offset, fromindex, length, base):
     if length == 0:
         return
-    prepared = _setup(
-        cp.cuda.runtime.getDevice(),
-        cp.cuda.driver.ctxGetCurrent(),
-        fromindex.dtype.str,
-        toindex.dtype.str,
-    )
+    device = cp.cuda.runtime.getDevice()
+    context = cp.cuda.driver.ctxGetCurrent()
+    with _setup_lock:
+        prepared = _setup(device, context, fromindex.dtype.str, toindex.dtype.str)
     prepared(fromindex[:length], toindex[offset : offset + length], base)
