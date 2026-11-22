@@ -8,8 +8,6 @@
 
 
 namespace awkward {
-  #define NATIVELY_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
-
   /// @brief HERE
   template <typename T>
   void byteswap16(int64_t num_items, T& value);

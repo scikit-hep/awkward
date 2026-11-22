@@ -2,6 +2,7 @@
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS("src/libawkward/forth/ForthMachine.cpp", line)
 
+#include <bit>
 #include <sstream>
 #include <stdexcept>
 #include <chrono>
@@ -2621,7 +2622,7 @@ namespace awkward {
           }
 
           bool must_be_writable = ((bytecode & READ_REPEATED) != 0);
-          if (NATIVELY_BIG_ENDIAN) {
+          if constexpr (std::endian::native == std::endian::big) {
             must_be_writable &= ((bytecode & READ_BIGENDIAN) == 0);
           }
           else {
@@ -2969,7 +2970,7 @@ namespace awkward {
 
         if (bytecode < 0) {
           bool byteswap;
-          if (NATIVELY_BIG_ENDIAN) {
+          if constexpr (std::endian::native == std::endian::big) {
             byteswap = ((~bytecode & READ_BIGENDIAN) == 0);
           }
           else {
