@@ -7,9 +7,9 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "awkward_cpp"
-version = "58"
+version = "59"
 dependencies = [
-    "numpy>=1.21.3"
+    "numpy>=1.23.2"
 ]
 readme = "README.md"
 description = "CPU kernels and compiled extensions for Awkward Array"
@@ -31,7 +31,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -46,7 +45,7 @@ classifiers = [
 ]
 license = "BSD-3-Clause AND MIT"
 license-files = ["LICENSE", "rapidjson/license.txt"]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 [project.urls]
 Homepage = "https://github.com/scikit-hep/awkward"
@@ -114,9 +113,6 @@ pytest -p no:cacheprovider \
        {package}/tests-spec \
        {package}/tests-spec-explicit
 """]
-skip = [
-    "cp310-win_arm64",  # No numpy wheels
-]
 test-skip = [
     "*musllinux*",
 ]
@@ -136,9 +132,3 @@ repair-wheel-command = "delvewheel repair -w {dest_dir} -v --ignore-existing {wh
 [[tool.cibuildwheel.overrides]]
 select = "*pyodide*"
 build-frontend = {name = "build", args = ["--exports", "whole_archive"]}
-
-# C++23 requires a newer compiler than manylinux2014 provides.
-# Python 3.10 Linux wheels now use the same glibc 2.28 baseline as newer Python.
-[[tool.cibuildwheel.overrides]]
-select = "cp310-manylinux*"
-manylinux-x86_64-image = "manylinux_2_28"

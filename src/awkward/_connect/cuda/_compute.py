@@ -384,6 +384,9 @@ def segmented_sort(
     cupy_nplike = Cupy.instance()
     cp = cupy_nplike._module
 
+    # Only the declared prefix of the offsets buffer belongs to this call.
+    offsets = offsets[:offsetslength]
+
     # Ensure offsets are int64 as expected by segmented_sort
     if offsets.dtype != cp.int64:
         offsets = offsets.astype(cp.int64, copy=False)
@@ -391,6 +394,12 @@ def segmented_sort(
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
 
+    if num_items == 0:
+        return
+
+    # Match CPU prefix-only writes; the destination suffix must stay untouched.
+    fromptr = fromptr[:num_items]
+    toptr = toptr[:num_items]
     start_o, end_o = make_segment_views(offsets)
 
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
@@ -399,7 +408,7 @@ def segmented_sort(
     # (correct NaN placement, -0.0 == +0.0) while carrying the *original* values,
     # so the output keeps real NaNs but positions everything as the CPU does.
     # Non-float dtypes sort natively (CCCL handles signed integers correctly).
-    if num_items > 0 and fromptr.dtype.kind == "f":
+    if fromptr.dtype.kind == "f":
         keys = _float_order_keys(cp, fromptr, ascending)
         keys_out = cp.empty_like(keys)
         segmented_sort(
@@ -464,14 +473,22 @@ def segmented_argsort(
     cupy_nplike = Cupy.instance()
     cp = cupy_nplike._module
 
+    # Only the declared prefix of the offsets buffer belongs to this call.
+    offsets = offsets[:offsetslength]
+
     # Ensure offsets are int64 as expected by segmented_sort
     if offsets.dtype != cp.int64:
         offsets = offsets.astype(cp.int64, copy=False)
 
     num_segments = offsetslength - 1
     num_items = int(offsets[-1]) if len(offsets) > 0 else 0
+    # CPU argsort initializes every carry entry, even with no covered items;
+    # the uncovered suffix keeps its global identity indices.
+    toptr[num_items:length] = cp.arange(num_items, length, dtype=cp.int64)
     if num_items == 0:
         return
+    fromptr = fromptr[:num_items]
+    toptr = toptr[:num_items]
 
     start_o, end_o = make_segment_views(offsets)
     order = SortOrder.ASCENDING if ascending else SortOrder.DESCENDING
