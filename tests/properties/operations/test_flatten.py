@@ -71,14 +71,14 @@ def st_kwargs(draw: st.DrawFn, array: ak.Array) -> Kwargs:
                 # inert unless its key matches a lookup for the drawn
                 # array; `ak.flatten`'s observed lookups select only
                 # output classes, without affecting what raises.
-                ret["behavior"] = draw(st_ak.none_or(st.builds(dict)))
+                ret["behavior"] = draw(st_ak.misc.none_or(st.builds(dict)))
             if draw(st.booleans()):
                 # TODO: generate non-empty `attrs`. Any value is inert
                 # except under the reserved `__named_axis__` key
                 # (`awkward._namedaxis.NAMED_AXIS_KEY`), which holds
                 # the named-axis mapping: generate that key only with
                 # a valid mapping, or not at all.
-                ret["attrs"] = draw(st_ak.none_or(st.builds(dict)))
+                ret["attrs"] = draw(st_ak.misc.none_or(st.builds(dict)))
         return ret
 
     def _st_axes() -> st.SearchStrategy[int | None]:
@@ -89,7 +89,7 @@ def st_kwargs(draw: st.DrawFn, array: ak.Array) -> Kwargs:
         drawn form is left to `_should_not_raise`.
         """
         depth = array.layout.minmax_depth[1]
-        return st_ak.none_or(st.integers(min_value=-depth, max_value=depth - 1))
+        return st_ak.misc.none_or(st.integers(min_value=-depth, max_value=depth - 1))
 
     related = draw(_st_related_kwargs())
 
