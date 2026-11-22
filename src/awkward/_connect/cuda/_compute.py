@@ -3573,7 +3573,7 @@ def awkward_ListArray_getitem_jagged_numvalid(
 
 # Counts the number of null (missing) entries in an indexed array.
 def awkward_IndexedArray_numnull(numnull, fromindex, lenindex):
-    from awkward._connect.cuda._listoffsetarray import _Stream
+    from awkward._connect.cuda._indexedarray import _Stream
 
     index_dtype = numnull.dtype
     scalar_type = index_dtype.type
