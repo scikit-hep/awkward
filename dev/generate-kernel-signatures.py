@@ -54,20 +54,15 @@ cuda_kernels_impl = [
     "awkward_ListOffsetArray_rpad_axis1",
     "awkward_ListOffsetArray_drop_none_indexes",
     "awkward_ListOffsetArray_reduce_local_nextparents_64",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
+    # Numeric value reducers without compiled CUDA sources are emitted as None
+    # and dispatched through the canonical table to cuda.compute.
 ]
 
 
 def reproducible_datetime():
-    import sys
-
     timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-
-    if sys.version_info >= (3, 11):
-        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
-    else:
-        build_date = datetime.datetime.utcfromtimestamp(
-            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-        )
+    build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 
