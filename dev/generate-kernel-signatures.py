@@ -57,6 +57,7 @@ cuda_kernels_impl = [
     "awkward_UnionArray_flatten_length",
     "awkward_UnionArray_flatten_combine",
     "awkward_UnionArray_nestedfill_tags_index",
+    "awkward_ListOffsetArray_reduce_nonlocal_nextshifts_64",
     # The awkward_reduce_* value reducers (sum/prod/min/max/argmin/argmax/
     # count/countnonzero and their bool/complex variants) have no compiled
     # CUDA kernel: the CUDA backend dispatches them to the cuda.cccl-based
@@ -67,16 +68,8 @@ cuda_kernels_impl = [
 
 
 def reproducible_datetime():
-    import sys
-
     timestamp = int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-
-    if sys.version_info >= (3, 11):
-        build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
-    else:
-        build_date = datetime.datetime.utcfromtimestamp(
-            int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
-        )
+    build_date = datetime.datetime.fromtimestamp(timestamp, tz=datetime.UTC)
     return build_date.isoformat().replace("T", " AT ")[:22]
 
 
