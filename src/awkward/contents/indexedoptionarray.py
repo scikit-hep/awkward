@@ -1848,7 +1848,9 @@ def create_missing_data(dtype, backend):
         dtype.type, np.timedelta64
     ):
         # Must precede np.integer because np.timedelta64 subclasses np.signedinteger.
-        return backend.nplike.asarray([np.iinfo(np.int64).max], dtype=dtype)[0]
+        return backend.nplike.asarray([np.iinfo(np.int64).max], dtype=np.int64).view(
+            dtype
+        )[0]
     elif np.issubdtype(dtype, np.integer):
         return np.iinfo(dtype).max
     elif np.issubdtype(dtype, np.str_):

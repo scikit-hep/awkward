@@ -39,7 +39,7 @@ def test_unitless_and_all_missing_timedelta64_to_numpy():
     unitless = ak.Array(
         ak.contents.IndexedOptionArray(
             ak.index.Index64(np.array([0, -1], dtype=np.int64)),
-            ak.contents.NumpyArray(np.array([5], dtype="timedelta64")),
+            ak.contents.NumpyArray(np.array([5], dtype=np.int64).view("timedelta64")),
         )
     )
     res_unitless = ak.to_numpy(unitless, allow_missing=True)
