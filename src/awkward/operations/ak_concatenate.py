@@ -524,6 +524,10 @@ def enforce_concatenated_form(layout, form):
                 mergeable(content_form, layout_to_merge)
                 for content_form in form.contents
             ]
+        if not any(matches):
+            raise AssertionError(
+                "merge result should have a union content mergeable with the layout"
+            )
 
         contents = []
         for content_form, matches_layout in zip(form.contents, matches, strict=True):

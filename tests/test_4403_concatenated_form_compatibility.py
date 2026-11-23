@@ -10,24 +10,20 @@ from awkward._nplikes.numpy import Numpy
 from awkward._nplikes.virtual import VirtualNDArray
 from awkward.operations.ak_concatenate import enforce_concatenated_form
 
-
-@pytest.fixture
-def empty_layouts(monkeypatch):
-    allocated = []
-    original = ak.forms.Form.length_zero_array
-
-    def track(form, *args, **kwargs):
-        allocated.append(form)
-        return original(form, *args, **kwargs)
-
-    monkeypatch.setattr(ak.forms.Form, "length_zero_array", track)
-    return allocated
+INCOMPATIBLE = ak.forms.UnionForm(
+    "i8",
+    "i64",
+    [
+        ak.forms.NumpyForm("float64"),
+        ak.forms.RecordForm([ak.forms.NumpyForm("int64")], ["x"]),
+    ],
+)
 
 
 @pytest.mark.parametrize("backend", ["cpu", "typetracer"])
 @pytest.mark.parametrize("primitive", ["int64", "float64"])
 @pytest.mark.parametrize("reverse", [False, True])
-def test_add_union(backend, primitive, reverse, empty_layouts):
+def test_add_union(backend, primitive, reverse):
     layout = ak.to_layout([1, 2, 3]).to_backend(backend)
     number = ak.forms.NumpyForm(primitive)
     string = ak.to_layout(["text"]).form
@@ -36,9 +32,6 @@ def test_add_union(backend, primitive, reverse, empty_layouts):
 
     result = enforce_concatenated_form(layout, target)
 
-    # Only the absent output branch needs an empty layout. Both exact-type
-    # matching and the int-to-float compatibility fallback use metadata.
-    assert empty_layouts == [string]
     assert result.contents[0].form == number
     assert result.contents[1].form == string
     assert result.backend is layout.backend
@@ -48,7 +41,7 @@ def test_add_union(backend, primitive, reverse, empty_layouts):
 
 @pytest.mark.parametrize("backend", ["cpu", "typetracer"])
 @pytest.mark.parametrize("grow", [False, True])
-def test_preserve_union(backend, grow, empty_layouts):
+def test_preserve_union(backend, grow):
     layout = ak.to_layout([1, "two", 3]).to_backend(backend)
     number = ak.forms.NumpyForm("float64")
     string = layout.contents[1].form
@@ -59,7 +52,6 @@ def test_preserve_union(backend, grow, empty_layouts):
 
     result = enforce_concatenated_form(layout, target)
 
-    assert empty_layouts == ([record] if grow else [])
     assert result.contents[0].form == number
     assert result.contents[1].form == string
     assert result.backend is layout.backend
@@ -71,7 +63,7 @@ def test_preserve_union(backend, grow, empty_layouts):
         np.testing.assert_array_equal(result.index.data, layout.index.data)
 
 
-def test_exact_type_takes_precedence(empty_layouts):
+def test_exact_type_takes_precedence():
     layout = ak.to_layout([True, False])
     integer = ak.forms.NumpyForm("int64")
     boolean = ak.forms.NumpyForm("bool")
@@ -80,29 +72,45 @@ def test_exact_type_takes_precedence(empty_layouts):
 
     result = enforce_concatenated_form(layout, target)
 
-    assert empty_layouts == [integer]
     assert result.contents[0].form == boolean
     assert result.to_list() == [True, False]
 
 
-def test_incompatible_union_does_not_allocate(empty_layouts):
-    layout = ak.to_layout([1, "two"])
-    target = ak.forms.UnionForm(
-        "i8",
-        "i64",
-        [
-            ak.forms.NumpyForm("float64"),
-            ak.forms.RecordForm([ak.forms.NumpyForm("int64")], ["x"]),
-        ],
-    )
+def test_add_union_incompatible_raises():
+    # Previously returned a UnionArray whose index pointed past the end of an
+    # empty content (https://github.com/scikit-hep/awkward/issues/4576).
+    with pytest.raises(AssertionError, match="mergeable with the layout"):
+        enforce_concatenated_form(ak.to_layout(["a"]), INCOMPATIBLE)
+
+
+def test_preserve_union_incompatible_raises():
     with pytest.raises(AssertionError, match="some permutation"):
-        enforce_concatenated_form(layout, target)
-    assert not empty_layouts
+        enforce_concatenated_form(ak.to_layout([1, "two"]), INCOMPATIBLE)
+
+
+def test_only_absent_branches_allocate_empty_layouts(monkeypatch):
+    # Compatibility is checked on forms; empty layouts are built only for
+    # target branches that the layout does not fill.
+    allocated = []
+    original = ak.forms.Form.length_zero_array
+
+    def track(form, *args, **kwargs):
+        allocated.append(form)
+        return original(form, *args, **kwargs)
+
+    monkeypatch.setattr(ak.forms.Form, "length_zero_array", track)
+
+    number = ak.forms.NumpyForm("float64")
+    string = ak.to_layout(["text"]).form
+    enforce_concatenated_form(
+        ak.to_layout([1, 2, 3]), ak.forms.UnionForm("i8", "i64", [string, number])
+    )
+    assert allocated == [string]
 
 
 @pytest.mark.parametrize("preserve_union", [False, True])
 @pytest.mark.parametrize("promote_option", [False, True])
-def test_virtual_data_stays_lazy(preserve_union, promote_option, empty_layouts):
+def test_virtual_data_stays_lazy(preserve_union, promote_option):
     def forbidden():
         pytest.fail("compatibility matching must not materialize virtual data")
 
@@ -131,4 +139,3 @@ def test_virtual_data_stays_lazy(preserve_union, promote_option, empty_layouts):
 
     assert not buffer.is_materialized
     assert result.contents[0].form == numeric_form
-    assert empty_layouts == ([] if preserve_union else [record_form])
