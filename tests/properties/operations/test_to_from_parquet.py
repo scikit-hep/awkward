@@ -10,7 +10,6 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-from tests.properties.operations import known_issues
 
 pytest.importorskip("pyarrow.parquet")
 
