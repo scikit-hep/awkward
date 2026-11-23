@@ -32,11 +32,11 @@ def test_add_union(backend, primitive, reverse):
 
     result = enforce_concatenated_form(layout, target)
 
-    assert result.contents[0].form == number
-    assert result.contents[1].form == string
+    assert result.form == target
     assert result.backend is layout.backend
     if backend == "cpu":
         assert result.to_list() == [1, 2, 3]
+        assert result.contents[result.tags[0]].form == number
 
 
 @pytest.mark.parametrize("backend", ["cpu", "typetracer"])
@@ -52,28 +52,26 @@ def test_preserve_union(backend, grow):
 
     result = enforce_concatenated_form(layout, target)
 
-    assert result.contents[0].form == number
-    assert result.contents[1].form == string
+    assert result.form == target
     assert result.backend is layout.backend
-    if grow:
-        assert result.contents[2].form == record
     if backend == "cpu":
         assert result.to_list() == [1, "two", 3]
-        np.testing.assert_array_equal(result.tags.data, layout.tags.data)
-        np.testing.assert_array_equal(result.index.data, layout.index.data)
 
 
-def test_exact_type_takes_precedence():
+@pytest.mark.parametrize("reverse", [False, True])
+def test_exact_type_takes_precedence(reverse):
     layout = ak.to_layout([True, False])
     integer = ak.forms.NumpyForm("int64")
     boolean = ak.forms.NumpyForm("bool")
     # Such a union can result from concatenation with mergebool=False.
-    target = ak.forms.UnionForm("i8", "i64", [integer, boolean])
+    forms = [integer, boolean] if not reverse else [boolean, integer]
+    target = ak.forms.UnionForm("i8", "i64", forms)
 
     result = enforce_concatenated_form(layout, target)
 
-    assert result.contents[0].form == boolean
+    assert result.form == target
     assert result.to_list() == [True, False]
+    assert result.contents[result.tags[0]].form == boolean
 
 
 def test_add_union_incompatible_raises():
@@ -138,4 +136,30 @@ def test_virtual_data_stays_lazy(preserve_union, promote_option):
     result = enforce_concatenated_form(layout, target)
 
     assert not buffer.is_materialized
-    assert result.contents[0].form == numeric_form
+    assert result.form == target
+
+
+@pytest.mark.parametrize(
+    "arrays",
+    [
+        [[1, 2], ["a"]],
+        [[1, 2], [1.5]],
+        [[[1]], [None]],
+        [[{"x": 1}], [{"x": 1.5}]],
+        [[1, "a"], [{"x": 1}]],
+        [[1, "a"], [2.5]],
+    ],
+    ids=["add-union", "promote", "option", "record", "grow-union", "merge-in-union"],
+)
+def test_matches_concatenated_typetracer_form(arrays):
+    # The contract relied on by dask-awkward: every input, enforced to the form
+    # of the concatenated typetracers, has that form and keeps its values.
+    arrays = [ak.Array(x) for x in arrays]
+    form = ak.concatenate(
+        [ak.Array(x.layout.to_typetracer(forget_length=True)) for x in arrays]
+    ).layout.form
+
+    for array in arrays:
+        result = enforce_concatenated_form(array.layout, form)
+        assert result.form.is_equal_to(form, all_parameters=True, form_key=False)
+        assert result.to_list() == array.to_list()
