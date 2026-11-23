@@ -138,3 +138,12 @@ def test_flat_optional(values, expected, axis):
 )
 def test_nested_missing_lists(values, expected):
     assert ak._do.is_unique(ak.Array(values).layout, axis=-1) is expected
+
+
+@pytest.mark.parametrize("forget_length", [False, True])
+@pytest.mark.parametrize("axis", [-1, None])
+def test_typetracer(forget_length, axis):
+    layout = ak.Array([[1, 2], [], [3]]).layout.to_typetracer(
+        forget_length=forget_length
+    )
+    assert ak._do.is_unique(layout, axis=axis) is False
