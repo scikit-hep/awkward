@@ -84,27 +84,14 @@ def _impl(array, axis, highlevel, behavior, attrs):
         named_axis, (axis + 1) if axis >= 0 else axis, layout.minmax_depth[1]
     )
 
-    def action(layout, depth, backend, **kwargs):
+    def action(layout, depth, **kwargs):
         posaxis = maybe_posaxis(layout, axis, depth)
 
         if posaxis is not None and posaxis + 1 == depth:
             if layout.is_union or layout.is_record:
                 return None
 
-            elif layout.is_option:
-                offsets = backend.nplike.empty(layout.length + 1, dtype=np.int64)
-                offsets[0] = 0
-
-                backend.nplike.cumsum(
-                    layout.mask_as_bool(valid_when=True), maybe_out=offsets[1:]
-                )
-
-                return ak.contents.ListOffsetArray(
-                    ak.index.Index64(offsets), layout.project()
-                )
-
-            else:
-                return ak.contents.RegularArray(layout, 1).to_ListOffsetArray64(True)
+            return _wrap_singletons(layout, regular=False)
 
         elif layout.is_leaf:
             raise AxisError(f"axis={axis} exceeds the depth of this array ({depth})")
@@ -124,3 +111,16 @@ def _impl(array, axis, highlevel, behavior, attrs):
         behavior=ctx.behavior,
         attrs=ctx.attrs,
     )
+
+
+def _wrap_singletons(layout, *, regular):
+    """Wrap values atomically, omitting missing values inside each list."""
+    if layout.is_option:
+        nplike = layout.backend.nplike
+        offsets = nplike.empty(layout.length + 1, dtype=np.int64)
+        offsets[0] = 0
+        nplike.cumsum(layout.mask_as_bool(valid_when=True), maybe_out=offsets[1:])
+        return ak.contents.ListOffsetArray(ak.index.Index64(offsets), layout.project())
+
+    out = ak.contents.RegularArray(layout, 1)
+    return out if regular else out.to_ListOffsetArray64(True)
