@@ -8,6 +8,9 @@ numexpr>=2.8.4;python_version < "3.15"
 pandas>=1.5.0;sys_platform != "win32" or python_version >= "3.12"
 pyarrow>=17.0.0;sys_platform != "win32" and python_version < "3.15"
 pytest>=6
+# Numba JIT coverage needs Collector.lock_data/unlock_data, removed in 7.17.5.
+# Remove this cap after numba/numba#11012 is fixed in a supported release.
+coverage<7.17.5
 pytest-cov
 pytest-xdist
 PyYAML
