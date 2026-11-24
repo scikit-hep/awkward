@@ -1,7 +1,8 @@
 fsspec>=2022.11.0;sys_platform != "win32"
 numpy==1.23.2
 pandas==1.5.0
-pyarrow==17.0.0
+# First patched release for CVE-2026-25087 (GHSA-rgxp-2hwp-jwgg).
+pyarrow==23.0.1
 pytest>=6
 pytest-cov
 pytest-xdist
