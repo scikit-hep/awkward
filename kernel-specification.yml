@@ -1380,7 +1380,7 @@ kernels:
           - {name: fromstarts, type: "Const[List[uint32_t]]", dir: in, role: ListArray2-starts}
           - {name: fromstops, type: "Const[List[uint32_t]]", dir: in, role: ListArray2-stops}
           - {name: contentlen, type: "int64_t", dir: in, role: ListArray2-length}
-    description: null
+    description: Each index must satisfy -count <= index < count for its own source list, including empty lists.
     definition: |
       def awkward_ListArray_getitem_jagged_apply(
           tooffsets,
