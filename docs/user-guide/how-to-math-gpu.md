@@ -140,8 +140,8 @@ Just as Awkward Arrays in main memory can be iterated over in functions that hav
 
 ## Reusing CUDA compilation
 
-Repeated concatenation and indexing can reuse compiled CUDA operations even
-when offsets, buffer addresses or input lengths change. Compatible device,
+Some operations can reuse compiled CUDA code even when offsets, buffer
+addresses or input lengths change. Compatible device,
 CUDA context and input/output dtypes are still required; the first use of a new
 signature can incur compilation cost.
 
