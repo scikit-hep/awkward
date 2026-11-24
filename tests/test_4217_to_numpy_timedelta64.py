@@ -104,7 +104,7 @@ def test_option_record_with_timedelta64_to_numpy():
     )
     result = ak.to_numpy(arr, allow_missing=True)
     assert isinstance(result, np.ma.MaskedArray)
-    assert result.dtype == np.dtype([("dt", "<m8[s]"), ("x", "<i8")])
+    assert result.dtype == np.dtype([("dt", "m8[s]"), ("x", "i8")])
     np.testing.assert_array_equal(result["dt"].mask, [False, True])
     np.testing.assert_array_equal(result["x"].mask, [False, True])
     assert result["dt"][0] == np.timedelta64(2, "s")
@@ -113,7 +113,7 @@ def test_option_record_with_timedelta64_to_numpy():
     field_opt = ak.Array([{"dt": np.timedelta64(1, "s")}, {"dt": None}])
     field_res = ak.to_numpy(field_opt, allow_missing=True)
     assert isinstance(field_res, np.ma.MaskedArray)
-    assert field_res.dtype == np.dtype([("dt", "<m8[s]")])
+    assert field_res.dtype == np.dtype([("dt", "m8[s]")])
     np.testing.assert_array_equal(field_res["dt"].mask, [False, True])
     assert field_res["dt"][0] == np.timedelta64(1, "s")
 
@@ -141,7 +141,8 @@ def test_option_regular_timedelta64_to_numpy():
         [None, None],
     ]
     reconverted = ak.to_numpy(roundtrip, allow_missing=True)
-    np.testing.assert_array_equal(reconverted, result, strict=True)
+    assert reconverted.dtype == result.dtype
+    np.testing.assert_array_equal(reconverted, result)
     np.testing.assert_array_equal(
         np.ma.getmaskarray(reconverted), np.ma.getmaskarray(result)
     )
