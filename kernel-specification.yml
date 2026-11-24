@@ -1380,7 +1380,10 @@ kernels:
           - {name: fromstarts, type: "Const[List[uint32_t]]", dir: in, role: ListArray2-starts}
           - {name: fromstops, type: "Const[List[uint32_t]]", dir: in, role: ListArray2-stops}
           - {name: contentlen, type: "int64_t", dir: in, role: ListArray2-length}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
     definition: |
       def awkward_ListArray_getitem_jagged_apply(
           tooffsets,
@@ -1517,7 +1520,10 @@ kernels:
           - {name: fromstops, type: "Const[List[uint32_t]]", dir: in, role: ListArray-stops}
           - {name: jaggedsize, type: "int64_t", dir: in, role: ListArray-length}
           - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
     definition: |
       def awkward_ListArray_getitem_jagged_expand(
           multistarts,
@@ -1582,7 +1588,10 @@ kernels:
           - {name: slicestops, type: "Const[List[int64_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: missing, type: "Const[List[int64_t]]", dir: in, role: IndexedArray-index}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
     definition: |
       def awkward_ListArray_getitem_jagged_shrink(
           tocarry, tosmalloffsets, tolargeoffsets, slicestarts, slicestops, length, missing
@@ -1642,7 +1651,10 @@ kernels:
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
           - {name: lenarray, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: ListArray-length}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
     definition: |
       def awkward_ListArray_getitem_next_array(
           tocarry,
@@ -1702,7 +1714,10 @@ kernels:
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListOffsetArray2-offsets}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: ListArray-length}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
     definition: |
       def awkward_ListArray_getitem_next_array_advanced(
           tocarry,
@@ -1752,7 +1767,10 @@ kernels:
           - {name: fromstops, type: "Const[List[uint32_t]]", dir: in, role: ListArray-stops}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
           - {name: at, type: "int64_t", dir: in, role: ListArray-at}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
     definition: |
       def awkward_ListArray_getitem_next_at(tocarry, fromstarts, fromstops, lenstarts, at):
           for i in range(lenstarts):
@@ -1797,7 +1815,11 @@ kernels:
           - {name: start, type: "int64_t", dir: in, role: default}
           - {name: stop, type: "int64_t", dir: in, role: default}
           - {name: step, type: "int64_t", dir: in, role: default}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
+      The slice step must be nonzero.
     definition: |
       def awkward_ListArray_getitem_next_range(
           tooffsets, tocarry, fromstarts, fromstops, lenstarts, start, stop, step
@@ -1934,7 +1956,10 @@ kernels:
           - {name: fromadvanced, type: "Const[List[int64_t]]", dir: in, role: ListArray-starts}
           - {name: fromoffsets, type: "Const[List[uint32_t]]", dir: in, role: ListOffsetArray-offsets}
           - {name: lenstarts, type: "int64_t", dir: in, role: default}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
     definition: |
       def awkward_ListArray_getitem_next_range_spreadadvanced(
           toadvanced, fromadvanced, fromoffsets, lenstarts
@@ -2067,7 +2092,10 @@ kernels:
           - {name: tostops, type: "List[uint32_t]", dir: out}
           - {name: target, type: "int64_t", dir: in, role: default}
           - {name: length, type: "int64_t", dir: in, role: default}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
     definition: |
       def awkward_ListArray_rpad_axis1(
           toindex, fromstarts, fromstops, tostarts, tostops, target, length
@@ -2076,9 +2104,11 @@ kernels:
           for i in range(length):
               tostarts[i] = offset
               rangeval = fromstops[i] - fromstarts[i]
+              # Decreasing intervals contain no elements to copy. Padding
+              # starts at zero, never at a negative output index.
               for j in range(rangeval):
                   toindex[offset + j] = fromstarts[i] + j
-              for j in range(rangeval, target):
+              for j in range(max(0, rangeval), target):
                   toindex[offset + j] = -1
               offset = tostarts[i] + target if target > rangeval else tostarts[i] + rangeval
               tostops[i] = offset
@@ -2104,7 +2134,12 @@ kernels:
           - {name: stops, type: "Const[List[uint32_t]]", dir: in, role: ListArray-stops}
           - {name: length, type: "int64_t", dir: in, role: default}
           - {name: lencontent, type: "int64_t", dir: in, role: default}
-    description: null
+    description: |
+      CPU and CUDA preserve the canonical sequential result, including output
+      prefixes written before the first failure. Inputs and outputs must have
+      capacity for the declared lengths and all indices read by the reference.
+      Return an immediate error status for the first invalid row (condition
+      order within that row follows the reference). Empty rows skip checks.
     definition: |
       def awkward_ListArray_validity(starts, stops, length, lencontent):
           for i in range(length):
