@@ -1,3 +1,6 @@
+// After editing, regenerate src/awkward/types/_awkward_datashape_parser.py;
+// see "Changing the type-string grammar" in CONTRIBUTING.md.
+
 start: type
 
 type: numpytype
