@@ -34,3 +34,38 @@ updates:
       - dependency-name: "hypothesis-awkward"
     cooldown:
       default-days: 0 # zizmor: ignore[dependabot-cooldown]
+
+  # Bump the packages that build the docs and the tools of the docs/_ext unit
+  # tests, which are pinned to exact versions in docs/requirements.txt and
+  # docs/_ext/requirements-test.txt. Pinning keeps a new release from changing
+  # the rendered docs unnoticed; in the upgrade PR, the docs build and its site
+  # check show what an update changes.
+  - package-ecosystem: "pip"
+    directories:
+      - "/docs"
+      - "/docs/_ext"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "astroid"
+      - dependency-name: "docutils"
+      - dependency-name: "hypothesis"
+      - dependency-name: "myst-nb"
+      - dependency-name: "myst-parser"
+      - dependency-name: "pydata-sphinx-theme"
+      - dependency-name: "pytest"
+      - dependency-name: "pytest-cov"
+      - dependency-name: "sphinx"
+      - dependency-name: "sphinx-autoapi"
+      - dependency-name: "sphinx-copybutton"
+      - dependency-name: "sphinx-design"
+      - dependency-name: "sphinx-external-toc"
+      - dependency-name: "sphinx-llm"
+      - dependency-name: "sphinx-markdown-builder"
+      - dependency-name: "sphinx-sitemap"
+    groups:
+      docs:
+        patterns:
+          - "*"
+    cooldown:
+      default-days: 7

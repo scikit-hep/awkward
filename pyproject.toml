@@ -314,6 +314,7 @@ mccabe.max-complexity = 100
 
 [tool.ruff.lint.per-file-ignores]
 "dev/*" = ["T20", "TID251"]
+"docs/_ext/check_site.py" = ["T20"]
 "src/awkward/numba/*" = ["TID251"]
 "src/awkward/_typing.py" = ["TID251"]
 "src/awkward/_errors.py" = ["TID251"]
