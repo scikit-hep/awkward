@@ -1844,12 +1844,15 @@ def create_missing_data(dtype, backend):
         return np.nan
     elif np.issubdtype(dtype, np.complexfloating):
         return np.nan + np.nan * 1j
-    elif np.issubdtype(dtype, np.integer):
-        return np.iinfo(dtype).max
     elif np.issubdtype(dtype.type, np.datetime64) or np.issubdtype(
         dtype.type, np.timedelta64
     ):
-        return backend.nplike.asarray([np.iinfo(np.int64).max], dtype=dtype)[0]
+        # Must precede np.integer because np.timedelta64 subclasses np.signedinteger.
+        return backend.nplike.asarray([np.iinfo(np.int64).max], dtype=np.int64).view(
+            dtype
+        )[0]
+    elif np.issubdtype(dtype, np.integer):
+        return np.iinfo(dtype).max
     elif np.issubdtype(dtype, np.str_):
         return ""
     elif np.issubdtype(dtype, np.bytes_):
