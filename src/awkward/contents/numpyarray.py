@@ -819,10 +819,12 @@ class NumpyArray(NumpyMeta, Content):
         else:
             out = self._unique(negaxis, starts, offsets, outlength)
             if isinstance(out, ak.contents.ListOffsetArray):
-                return (
-                    out.content.length is not unknown_length
-                    and out.content.length == self.length
-                )
+                # Without known data (typetracer), uniqueness cannot be determined.
+                if not self._backend.nplike.known_data:
+                    return False
+                # The content buffer retains its original allocation after
+                # compaction; only the final offset counts the kept values.
+                return bool(out.offsets[-1] == offsets[-1] - offsets[0])
             else:
                 return out.length is not unknown_length and out.length == self.length
 
