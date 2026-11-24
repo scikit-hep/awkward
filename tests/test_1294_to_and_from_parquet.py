@@ -7,7 +7,6 @@ import threading
 import fsspec
 import numpy as np
 import pytest
-from packaging.version import parse as parse_version
 
 import awkward as ak
 
@@ -675,10 +674,6 @@ def test_recordarray(tmp_path, is_tuple, through, extensionarray):
     assert predicted_form == array_form
 
 
-@pytest.mark.skipif(
-    parse_version(np.__version__) < parse_version("1.20.0"),
-    reason="NumPy >= 1.20 required for dates",
-)
 @pytest.mark.parametrize("through", [through_arrow, through_parquet])
 @pytest.mark.parametrize("extensionarray", [False, True])
 def test_numpyarray_datetime(tmp_path, through, extensionarray):
