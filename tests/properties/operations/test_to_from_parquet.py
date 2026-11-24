@@ -10,7 +10,6 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-from tests.properties.operations import known_issues
 
 pytest.importorskip("pyarrow.parquet")
 
@@ -102,8 +101,6 @@ def has_issues(a: ak.Array) -> bool:
     released fix deletes it; with all of them gone the test filters
     reduce to `parquet_writable`.
     """
-    if known_issues.has_issue_4221(a):
-        return True
     return False
 
 

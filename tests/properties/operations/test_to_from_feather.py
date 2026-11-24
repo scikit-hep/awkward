@@ -121,8 +121,6 @@ def has_issues(a: ak.Array) -> bool:
     released fix deletes it; with all of them gone the test filters
     reduce to `feather_compatible` and `feather_stable`.
     """
-    if known_issues.has_issue_4221(a):
-        return True
     if known_issues.has_issue_4228(a):
         return True
     if known_issues.has_issue_4229(a):
@@ -243,8 +241,8 @@ def test_roundtrip_stable(feather_dir, a: ak.Array) -> None:
     record loses its length, and a valid all-null-fields row under an
     option reads back null. After one full roundtrip these normalizations
     have happened: converting the reconstruction again writes an identical
-    Arrow table. Layouts that the conversion crashes on or corrupts
-    (#4221) are still excluded: this test does not vouch for them.
+    Arrow table. Layouts affected by the remaining known conversion issues
+    are still excluded.
     """
     path = feather_path(feather_dir)
     ak.to_feather(a, path)

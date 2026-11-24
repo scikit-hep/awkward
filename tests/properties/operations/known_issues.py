@@ -27,26 +27,6 @@ import numpy as np
 import awkward as ak
 
 
-def has_issue_4221(a: ak.Array) -> bool:
-    """Return `True` if a non-empty `IndexedOptionArray` has empty content.
-
-    `to_arrow` crashes projecting nulls over a zero-length content
-    (`IndexError` in `ListOffsetArray._to_arrow`). Reported:
-    https://github.com/scikit-hep/awkward/issues/4221
-    """
-    stack = [a.layout]
-    while stack:
-        node = stack.pop()
-        if (
-            isinstance(node, ak.contents.IndexedOptionArray)
-            and node.length > 0
-            and node.content.length == 0
-        ):
-            return True
-        stack.extend(_children(node))
-    return False
-
-
 def has_issue_4228(a: ak.Array) -> bool:
     """Return `True` if a union's option-type children or incoming validity break `to_arrow`.
 

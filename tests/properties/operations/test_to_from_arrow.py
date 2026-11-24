@@ -94,8 +94,6 @@ def has_issues(a: ak.Array) -> bool:
     released fix deletes it; with all of them gone the test filters
     reduce to `arrow_compatible` and `table_compatible`.
     """
-    if known_issues.has_issue_4221(a):
-        return True
     if known_issues.has_issue_4228(a):
         return True
     if known_issues.has_issue_4229(a):
