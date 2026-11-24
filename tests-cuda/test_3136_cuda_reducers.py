@@ -232,11 +232,15 @@ def test_2020_reduce_axis_none_std(cuda_array, mask_templates):
     assert ak.almost_equal(
         ak.std(array, axis=None, keepdims=True, mask_identity=False),
         ak.to_regular(ak.Array([[3.139134700306227]], backend="cuda")),
+        rtol=1e-7,
+        atol=0,
     )
 
     arr = ak.Array([[3.139134700306227]], backend="cuda")
     assert ak.almost_equal(
         ak.std(array, axis=None, keepdims=True, mask_identity=True),
         ak.to_regular(arr.mask[mask_templates[True]]),
+        rtol=1e-7,
+        atol=0,
     )
     assert np.isnan(ak.std(array[2], axis=None, mask_identity=False))
