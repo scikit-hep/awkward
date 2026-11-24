@@ -195,7 +195,9 @@ python -m pip install lark
 python -m lark.tools.standalone studies/type-parser-2/awkward_datashape_grammar.g -o src/awkward/types/_awkward_datashape_parser.py
 ```
 
-Do not edit the generated file by hand.
+Do not edit the generated file by hand. `tests/test_4561_datashape_parser_matches_grammar.py` checks that it matches the grammar.
+
+If you regenerate it with a newer Lark, set the minimum `lark` version in `pyproject.toml`, `requirements-test-full.txt`, and `requirements-test-gpu.txt` to that version.
 
 
 ### Building wheels
