@@ -1,3 +1,6 @@
+# Numba JIT coverage needs Collector.lock_data/unlock_data, removed in 7.17.5.
+# Remove this cap after numba/numba#11012 is fixed in a supported release.
+coverage<7.17.5
 fsspec>=2022.11.0;sys_platform != "win32"
 hypothesis-awkward==0.22.0
 jax[cpu]>=0.4.18;sys_platform != "win32"
