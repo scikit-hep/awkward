@@ -20,7 +20,15 @@ parser.add_argument("--before-library", type=Path)
 parser.add_argument(
     "--patterns",
     nargs="+",
-    choices=["finite", "strided", "last", "all"],
+    choices=[
+        "finite",
+        "strided",
+        "last",
+        "all",
+        "first-row",
+        "last-row",
+        "sparse-rows",
+    ],
     default=["finite", "strided"],
 )
 parser.add_argument("--output", type=Path, default=Path("results/fused-complex-nansum"))
@@ -61,6 +69,12 @@ if args.worker:
                     data[:, -1] = complex(1, np.nan)
                 elif pattern == "all":
                     data[:] = complex(np.nan, 1)
+                elif pattern == "first-row":
+                    data[0, -1] = complex(1, np.nan)
+                elif pattern == "last-row":
+                    data[-1, -1] = complex(1, np.nan)
+                elif pattern == "sparse-rows":
+                    data[::100, -1] = complex(1, np.nan)
                 source = ak.Array(data)
                 for op in [ak.nansum, ak.nanmean]:
                     ordinary = ak.sum if op is ak.nansum else ak.mean
@@ -130,7 +144,7 @@ lines = [
         if args.before_library
         else "Baseline: PR #4549 helper at 82615e865"
     )
-    + "; candidate: current fused native sum/count kernel. Three alternating fresh-process pairs (B/C, C/B, B/C), seven batches of five calls, three warmups. Inputs and exact parity checks outside timing. No profiling. NumPy matrix inputs, axis=-1, default options. Strided NaNs: every 100th entry per row; last: only the final entry per row; all: every entry. All outputs checked exactly against ordinary masked sum/mean. Local CPU measurements; not against main.",
+    + "; candidate: current fused native sum/count kernel. Three alternating fresh-process pairs (B/C, C/B, B/C), seven batches of five calls, three warmups. Inputs and exact parity checks outside timing. No profiling. NumPy matrix inputs, axis=-1, default options. Strided NaNs: every 100th entry per row; last: only the final entry per row; all: every entry; first-row/last-row: one NaN in that row; sparse-rows: one NaN per 100 rows. All outputs checked exactly against ordinary masked sum/mean. Local CPU measurements; not against main.",
     "",
     "| Case | Baseline µs | Fused µs | Candidate / baseline |",
     "| --- | ---: | ---: | ---: |",

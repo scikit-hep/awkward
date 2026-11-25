@@ -124,3 +124,29 @@ def test_fused_preserves_zero_and_subnormal_bits(dtype, width):
     actual = ak.to_numpy(ak.nansum(data, axis=-1))
     integer = np.uint32 if dtype is np.complex64 else np.uint64
     np.testing.assert_array_equal(actual.view(integer), expected.view(integer))
+
+
+@pytest.mark.parametrize("dtype", [np.complex64, np.complex128])
+@pytest.mark.parametrize("bad_row", [None, 0, 2, 5])
+def test_fused_mixed_segments_and_per_call_state(dtype, bad_row):
+    widths = np.array([8, 16, 128, 129, 0, 17], dtype=np.int64)
+    offsets = np.concatenate(([1], 1 + np.cumsum(widths)))
+    backing = np.full(offsets[-1] + 1, 0.1 + 0.1j, dtype=dtype)
+    backing[[0, -1]] = complex(np.nan, np.nan)
+    if bad_row is not None:
+        backing[offsets[bad_row + 1] - 1] = complex(1, np.nan)
+    array = ak.contents.ListOffsetArray(
+        ak.index.Index64(offsets), ak.contents.NumpyArray(backing)
+    )
+    for operation, ordinary in [(ak.nansum, ak.sum), (ak.nanmean, ak.mean)]:
+        expected = ordinary(ak.nan_to_none(array), axis=-1, mask_identity=True)
+        # A preceding invalid call must not change the next call's result.
+        operation(np.full((2, 16), complex(1, np.nan), dtype=dtype), axis=-1)
+        actual = operation(array, axis=-1, mask_identity=True)
+        assert actual.layout.form == expected.layout.form
+        a, b = ak.to_numpy(actual), ak.to_numpy(expected)
+        np.testing.assert_array_equal(np.ma.getmaskarray(a), np.ma.getmaskarray(b))
+        integer = np.uint32 if a.dtype == np.complex64 else np.uint64
+        np.testing.assert_array_equal(
+            np.ma.compressed(a).view(integer), np.ma.compressed(b).view(integer)
+        )

@@ -8,9 +8,12 @@ either component is NaN, accumulates real and imaginary components separately
 in input order, and returns the number of valid values. The CPU implementation
 checks blocks of eight values in long segments (at least 128 values). Valid
 blocks use an unchecked addition loop; other blocks skip invalid values. Short
-segments substitute the additive identity for invalid values without a branch.
-There is no input-sized mask or copy, no regrouping of partial sums, and no
-whole-row replay. Block-local reads remain cache-local. Infinities are retained. Empty and all-NaN segments have zero sum
+segments start with ordinary summation: a NaN-free result proves all inputs
+were valid. The first short row with a NaN sum is replayed with checked
+additions; subsequent short rows in that invocation stay checked. The mode
+resets on every call and also handles infinity cancellation. At most one
+short row is replayed per call. No input-sized mask/copy or regrouping of
+partial sums is introduced; long-row block reads remain cache-local. Infinities are retained. Empty and all-NaN segments have zero sum
 and count. Both complex64 and complex128 use their ordinary accumulator dtype.
 
 The canonical signature and reference are in `kernel-specification.yml`.
@@ -72,19 +75,30 @@ Use `.dylib` on macOS or `.dll` on Windows. The saved library must expose the
 same generated signatures as the current library (the new fused symbols were
 introduced at `625dcf542`). This mode keeps the Python helper identical and
 loads the old native library only in baseline worker processes.
-`results-native-update.md` compares against the original fused kernel at
-`625dcf542`. `results-initial.md` retains the initial experiment for history.
+`results-native-update.md` compares the short-row update against the block
+kernel at `b1aa47fbe`. `results-block-update.md` and `results-block-vs-pr.md`
+retain the preceding block experiment; `results-initial.md` retains the first
+fused experiment. Include `--patterns finite strided all first-row last-row
+sparse-rows` to test NaNs scattered across rows as well as across elements.
 
 Local validation: Python 3.11.14, NumPy 2.4.6, macOS arm64, locally built
 awkward-cpp 59. Selected CPU/public, generated reference and generated native
-suites: 762 passed, 19 existing/platform skips. Ruff and diff checks pass.
+suites: 770 passed, 19 existing/platform skips. Ruff and diff checks pass.
 No GPU/JAX execution or GPU performance claim.
 
-The optimized kernel roughly halves the first fused kernel's wide-row cost.
-Against #4549 at `82615e865`, the latest paired complex128 finite nansum cases
-range from 7% faster (256 x 1024) to about 5% slower (16384 x 16); tiny matrices
-are substantially faster. Complex64 finite short rows remain 21% slower in
-this sample. Sparse-NaN inputs retain large gains. These are local results,
-not a universal speedup; validate on additional CPUs and GPU parity before
-proposing production dispatch. CUDA implementation and package versions are
-unchanged by this CPU optimization.
+The block optimization roughly halves the first fused kernel's wide-row cost.
+The subsequent per-call short-row mode reduces the measured complex64 finite
+16384 x 16 nansum from 147 to 83 us against `b1aa47fbe`; complex128 falls from
+135 to 87 us. These runs show substantial short-row timing variation (the
+complex64 candidate process medians ranged from 81 to 114 us).
+
+In the separate comparison with #4549 at `82615e865`, complex64 finite short
+rows are still 7.5% slower (108 vs 116 us), while complex128 is 20% faster
+(118 vs 94 us). Finite long rows remain about 8% slower for both dtypes in
+that comparison. Do not claim these remaining regressions are eliminated.
+Sparse-NaN inputs retain large gains. A first-row NaN can add a small replay
+cost; a last-row NaN allows earlier rows to remain on the fast path.
+
+These are local results, not a universal speedup; validate on additional CPUs
+and GPU parity before proposing production dispatch. CUDA implementation and
+package versions are unchanged by these CPU optimizations.

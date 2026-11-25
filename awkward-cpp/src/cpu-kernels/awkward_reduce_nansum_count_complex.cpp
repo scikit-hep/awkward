@@ -12,24 +12,44 @@ ERROR awkward_reduce_nansum_count_complex(
   const T* __restrict__ fromptr,
   const int64_t* __restrict__ offsets,
   int64_t outlength) {
+  // Per-invocation mode: never retain validity assumptions across calls.
+  bool checked_short_rows = false;
   for (int64_t bin = 0; bin < outlength; bin++) {
     T real = static_cast<T>(0);
     T imag = static_cast<T>(0);
     int64_t count = 0;
     const int64_t stop = offsets[bin + 1];
     // Long segments check cache-local blocks, allowing the all-valid addition
-    // loop to avoid a branch for every complex value. Short segments use
-    // conditional additive identities instead of the extra block scan.
+    // loop to avoid a branch for every complex value. Short segments start
+    // with ordinary summation: a NaN-free sum proves all inputs were valid.
+    // After the first NaN sum (including infinity cancellation), replay that
+    // row and use checked additions for subsequent short rows. At most one
+    // short row per invocation needs replaying.
     // Accumulators are never reset between blocks: input addition order is
     // unchanged, including across NaN values and infinity cancellation.
     if (stop - offsets[bin] < 128) {
-      for (int64_t i = offsets[bin]; i < stop; i++) {
-        const T re = fromptr[2 * i];
-        const T im = fromptr[2 * i + 1];
-        const bool valid = !std::isnan(re) && !std::isnan(im);
-        real += valid ? re : static_cast<T>(0);
-        imag += valid ? im : static_cast<T>(0);
-        count += valid;
+      if (!checked_short_rows) {
+        for (int64_t i = offsets[bin]; i < stop; i++) {
+          real += fromptr[2 * i];
+          imag += fromptr[2 * i + 1];
+        }
+        if (std::isnan(real) || std::isnan(imag)) {
+          checked_short_rows = true;
+          real = static_cast<T>(0);
+          imag = static_cast<T>(0);
+        } else {
+          count = stop > offsets[bin] ? stop - offsets[bin] : 0;
+        }
+      }
+      if (checked_short_rows) {
+        for (int64_t i = offsets[bin]; i < stop; i++) {
+          const T re = fromptr[2 * i];
+          const T im = fromptr[2 * i + 1];
+          const bool valid = !std::isnan(re) && !std::isnan(im);
+          real += valid ? re : static_cast<T>(0);
+          imag += valid ? im : static_cast<T>(0);
+          count += valid;
+        }
       }
     } else {
       for (int64_t start = offsets[bin]; start < stop; start += 8) {
