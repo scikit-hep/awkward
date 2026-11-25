@@ -1,3 +1,6 @@
+// Copyright (c) 2026, Ianna Osborne
+// All rights reserved.
+
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 #define FILENAME(line) FILENAME_FOR_EXCEPTIONS_C("src/cpu-kernels/awkward_reduce_nansum_count_complex.cpp", line)
