@@ -12289,6 +12289,137 @@
           "outputs": {
             "toindex": [6,4,2,0]
           }
+        },
+        {
+          "inputs": {
+            "outerindex": [
+              1,
+              -9,
+              0
+            ],
+            "innerindex": [
+              2,
+              -7,
+              1
+            ],
+            "outerlength": 3,
+            "innerlength": 3
+          },
+          "outputs": {
+            "toindex": [
+              -7,
+              -1,
+              2,
+              123,
+              123,
+              123
+            ]
+          },
+          "error": false,
+          "message": ""
+        },
+        {
+          "inputs": {
+            "outerindex": [
+              0,
+              2,
+              1
+            ],
+            "innerindex": [
+              9,
+              7
+            ],
+            "outerlength": 3,
+            "innerlength": 2
+          },
+          "outputs": {
+            "toindex": [
+              9,
+              123,
+              123,
+              123,
+              123,
+              123
+            ]
+          },
+          "error": true,
+          "message": "index out of range"
+        },
+        {
+          "inputs": {
+            "outerindex": [
+              -7,
+              1,
+              9,
+              0
+            ],
+            "innerindex": [
+              5,
+              8
+            ],
+            "outerlength": 4,
+            "innerlength": 2
+          },
+          "outputs": {
+            "toindex": [
+              -1,
+              8,
+              123,
+              123,
+              123,
+              123,
+              123
+            ]
+          },
+          "error": true,
+          "message": "index out of range"
+        },
+        {
+          "inputs": {
+            "outerindex": [
+              2,
+              0,
+              3
+            ],
+            "innerindex": [
+              4,
+              5,
+              6
+            ],
+            "outerlength": 3,
+            "innerlength": 2
+          },
+          "outputs": {
+            "toindex": [
+              123,
+              123,
+              123,
+              123,
+              123,
+              123
+            ]
+          },
+          "error": true,
+          "message": "index out of range"
+        },
+        {
+          "inputs": {
+            "outerindex": [
+              99
+            ],
+            "innerindex": [],
+            "outerlength": 0,
+            "innerlength": 0
+          },
+          "outputs": {
+            "toindex": [
+              123,
+              123,
+              123
+            ]
+          },
+          "error": false,
+          "message": ""
         }
       ]
     },

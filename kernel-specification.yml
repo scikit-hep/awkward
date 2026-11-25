@@ -953,7 +953,12 @@ kernels:
           - {name: outerlength, type: "int64_t", dir: in, role: default}
           - {name: innerindex, type: "Const[List[uint32_t]]", dir: in, role: IndexedArray2-index}
           - {name: innerlength, type: "int64_t", dir: in, role: IndexedArray-length}
-    description: null
+    description: |
+      Compose outer and inner indices into int64 output. Every negative outer
+      index maps to -1, while negative inner indices are copied unchanged.
+      On failure, report the first outer row and its original index, preserving
+      the already-written prefix and leaving the failing row and tail untouched.
+      Buffers must cover declared lengths; input and output do not overlap.
     definition: |
       def awkward_IndexedArray_simplify(
           toindex, outerindex, outerlength, innerindex, innerlength
