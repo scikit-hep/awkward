@@ -178,6 +178,7 @@ def test_parameter_is_invalidated_when_preparation_fails(implementation):
     assert setup.last_base is None
 
 
+@pytest.mark.skipif(sys.platform == "emscripten", reason="requires threads")
 def test_unrelated_prepared_objects_can_build_concurrently(implementation):
     from concurrent.futures import ThreadPoolExecutor
     from threading import Barrier
@@ -248,6 +249,7 @@ def test_queued_calls_read_their_own_base(implementation):
         np.testing.assert_array_equal(output, [99, -1, base, base + 2, base + 3, 99])
 
 
+@pytest.mark.skipif(sys.platform == "emscripten", reason="requires threads")
 def test_concurrent_cold_calls_share_ordered_parameter(implementation):
     from concurrent.futures import ThreadPoolExecutor
     from threading import Barrier
