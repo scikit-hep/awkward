@@ -1,8 +1,8 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
 
+import contextvars
 import glob
-import math
 import os
 
 import numpy
@@ -108,8 +108,30 @@ def populate_kernel_errors(kernel_name, cu_file):
     kernel_errors[kernel_name] = err_strings
 
 
+_active_invocation = contextvars.ContextVar("awkward_cuda_invocation", default=None)
+
+
+def defer_status(status, decode, *, stream, keepalive=()):
+    """Retain a device status until the owning compute invocation is drained.
+
+    ``decode(host_status)`` returns None on success or an exception containing
+    the canonical message, first failing position and attempted index. No host
+    read occurs here. The producer must enqueue on ``stream`` and guard unsafe
+    downstream reads/writes on device; registration alone does not do that.
+    Scratch must be private to the invocation and remain unmodified until drain.
+    """
+    active = _active_invocation.get()
+    if active is None:
+        raise RuntimeError("defer_status requires an active CUDA compute invocation")
+    invocation, stream_ptr, device_id = active
+    if stream.ptr != stream_ptr or status.device.id != device_id:
+        raise ValueError("deferred status must belong to the invocation stream/device")
+    invocation.deferred_statuses.append((status, decode, keepalive))
+
+
 class Invocation:
     def __init__(self, name, error_context):
+        self.deferred_statuses = []
         self._name = name
         self._error_context = error_context
 
@@ -188,33 +210,26 @@ def synchronize_cuda(stream=None):
     invocation_index = cuda_streamptr_to_contexts[stream.ptr][0].get().tolist()
     contexts = cuda_streamptr_to_contexts[stream.ptr][1]
 
-    if invocation_index == NO_ERROR:
-        # All kernels enqueued so far completed without error: drain the
-        # pending-invocation list. Each Invocation holds an ErrorContext,
-        # which (lazily) holds references to operation arguments — without
-        # this reset, a successful workload accumulates Invocations (and
-        # pins their referenced buffers) for the lifetime of the process.
-        cuda_streamptr_to_contexts[stream.ptr] = (
-            cupy.array(NO_ERROR),
-            [],
-        )
-    else:
-        invoked_kernel = contexts[int(invocation_index // math.pow(2, ERROR_BITS))]
-        cuda_streamptr_to_contexts[stream.ptr] = (
-            cupy.array(NO_ERROR),
-            [],
-        )
-        if invoked_kernel.error_context is None:
-            raise ValueError(
-                f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
+    # Detach the completed batch before decoding, including when decoding raises.
+    cuda_streamptr_to_contexts[stream.ptr] = (cupy.array(NO_ERROR), [])
+    legacy_index = (
+        None if invocation_index == NO_ERROR else int(invocation_index) >> ERROR_BITS
+    )
+    for index, invocation in enumerate(contexts):
+        error = None
+        for status, decode, _keepalive in invocation.deferred_statuses:
+            error = decode(status.get(stream=stream).tolist())
+            if error is not None:
+                break
+        if error is None and index == legacy_index:
+            code = int(invocation_index) & ((1 << ERROR_BITS) - 1)
+            error = ValueError(
+                f"{kernel_errors[invocation.name][code]} in compiled CUDA code ({invocation.name})"
             )
-        else:
-            raise invoked_kernel.error_context.decorate_exception(
-                ValueError,
-                ValueError(
-                    f"{kernel_errors[invoked_kernel.name][int(invocation_index % math.pow(2, ERROR_BITS))]} in compiled CUDA code ({invoked_kernel.name})"
-                ),
-            )
+        if error is not None:
+            if invocation.error_context is not None:
+                error = invocation.error_context.decorate_exception(type(error), error)
+            raise error
 
 
 def lazy(array):

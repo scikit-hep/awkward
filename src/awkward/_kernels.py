@@ -270,14 +270,18 @@ class CudaComputeKernel(BaseKernel):
         ):
             # See CupyKernel.__call__: bound the pending-invocation list.
             ak_cuda.synchronize_cuda(cupy.cuda.get_current_stream())
-        ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(
-            ak_cuda.Invocation(
-                name=self.key[0],
-                error_context=ak._errors.ErrorContext.frozen_primary(),
-            )
+        invocation = ak_cuda.Invocation(
+            name=self.key[0],
+            error_context=ak._errors.ErrorContext.frozen_primary(),
         )
-
-        return self._impl(*args)
+        ak_cuda.cuda_streamptr_to_contexts[cupy_stream_ptr][1].append(invocation)
+        token = ak_cuda._active_invocation.set(
+            (invocation, cupy_stream_ptr, cupy.cuda.Device().id)
+        )
+        try:
+            return self._impl(*args)
+        finally:
+            ak_cuda._active_invocation.reset(token)
 
 
 class TypeTracerKernelError(KernelError):
