@@ -49,3 +49,4 @@ REDUCE_CENTERED_SUMSQ(awkward_reduce_centered_sumofsquares_float64_uint64_64, do
 REDUCE_CENTERED_SUMSQ(awkward_reduce_centered_sumofsquares_float64_bool_64, double, bool)
 REDUCE_CENTERED_SUMSQ(awkward_reduce_centered_sumofsquares_float64_float32_64, double, float)
 REDUCE_CENTERED_SUMSQ(awkward_reduce_centered_sumofsquares_float64_float64_64, double, double)
+REDUCE_CENTERED_SUMSQ(awkward_reduce_centered_sumofsquares_float128_float128_64, long double, long double)

@@ -29,8 +29,10 @@ cpp_type_of = {
     "uint64": "uint64_t",
     "float32": "float",
     "float64": "double",
+    "float128": "long double",
     "complex64": "std::complex<float>",
     "complex128": "std::complex<double>",
+    "complex256": "std::complex<long double>",
     "datetime64": "std::time_t",
     "timedelta64": "std::difftime",
 }

@@ -37,3 +37,5 @@ ERROR awkward_reduce_max_complex(
 
 WRAPPER(awkward_reduce_max_complex64_complex64_64, float, float)
 WRAPPER(awkward_reduce_max_complex128_complex128_64, double, double)
+
+WRAPPER(awkward_reduce_max_complex256_complex256_64, long double, long double)

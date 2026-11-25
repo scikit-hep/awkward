@@ -1,6 +1,6 @@
 # BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 
-cmake_minimum_required(VERSION 3.15...3.30)
+cmake_minimum_required(VERSION 3.20...3.30)
 
 if(NOT DEFINED SKBUILD)
   set(SKBUILD_PROJECT_NAME awkward_cpp)
@@ -123,7 +123,7 @@ file(GLOB_RECURSE LIBAWKWARD_SOURCES CONFIGURE_DEPENDS "src/libawkward/*.cpp")
 add_library(awkward-parent INTERFACE)
 target_compile_definitions(awkward-parent INTERFACE VERSION_INFO="${SKBUILD_PROJECT_VERSION}")
 target_include_directories(awkward-parent INTERFACE include)
-target_compile_features(awkward-parent INTERFACE cxx_std_17)
+target_compile_features(awkward-parent INTERFACE cxx_std_23)
 
 # C++ dependencies (header-only): RapidJSON
 target_include_directories(awkward-parent INTERFACE rapidjson/include)
@@ -132,16 +132,14 @@ target_include_directories(awkward-parent INTERFACE rapidjson/include)
 add_subdirectory(header-only EXCLUDE_FROM_ALL)
 target_link_libraries(awkward-parent INTERFACE awkward::growable-buffer)
 
-# WASM needs exceptions enabled
-if(CMAKE_SYSTEM_NAME MATCHES Emscripten)
-  set_property(
-    TARGET awkward-parent
-    APPEND
-    PROPERTY INTERFACE_LINK_OPTIONS -fexceptions)
-  set_property(
-    TARGET awkward-parent
-    APPEND
-    PROPERTY INTERFACE_COMPILE_OPTIONS -fexceptions)
+# Legacy Emscripten builds need JavaScript exception handling enabled explicitly. Modern Pyodide
+# supplies native WebAssembly exception flags for compilation and linking. Do not append
+# -fexceptions: it selects an incompatible unwinding ABI.
+if(CMAKE_SYSTEM_NAME MATCHES Emscripten
+   AND NOT CMAKE_CXX_FLAGS MATCHES "(^|[ ;])-fwasm-exceptions($|[ ;])"
+   AND NOT "$ENV{CXXFLAGS}" MATCHES "(^|[ ;])-fwasm-exceptions($|[ ;])")
+  target_compile_options(awkward-parent INTERFACE -fexceptions)
+  target_link_options(awkward-parent INTERFACE -fexceptions)
 endif()
 
 # First tier: cpu-kernels

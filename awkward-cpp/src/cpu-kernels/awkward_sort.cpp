@@ -89,3 +89,5 @@ SORT(awkward_sort_int64, int64_t)
 SORT(awkward_sort_uint64, uint64_t)
 SORT(awkward_sort_float32, float)
 SORT(awkward_sort_float64, double)
+
+SORT(awkward_sort_float128, long double)

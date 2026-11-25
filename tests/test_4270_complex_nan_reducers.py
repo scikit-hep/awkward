@@ -9,7 +9,6 @@ import pytest
 
 import awkward as ak
 from awkward import _reducers
-from awkward.contents.numpyarray import _reduce_extended
 
 VALUES = [
     -1 + 0j,
@@ -43,8 +42,8 @@ def assert_same_components(actual, expected):
     ],
 )
 @pytest.mark.parametrize("shifted", [False, True])
-def test_extended_complex_nan_path_matches_complex_kernels(reducer, shifted):
-    # Exercise the extended reducer helper even on platforms without complex256.
+def test_longdouble_complex_nan_matches_complex_kernels(reducer, shifted):
+    # Exercise native long-double kernels even where it aliases binary64.
     layout = ak.Array(ROWS).layout
     array = layout.content
     offsets = layout.offsets
@@ -53,10 +52,10 @@ def test_extended_complex_nan_path_matches_complex_kernels(reducer, shifted):
         ak.index.Index64(np.arange(array.length, dtype=np.int64)) if shifted else None
     )
     expected = reducer.apply(array, offsets, starts, shifts, layout.length).data
-    actual = _reduce_extended(
-        reducer, array, offsets, starts, shifts, layout.length
-    ).data
-    assert actual.dtype == expected.dtype
+    extended = ak.contents.NumpyArray(array.data.astype(np.clongdouble))
+    actual = reducer.apply(extended, offsets, starts, shifts, layout.length).data
+    assert actual.dtype.kind == expected.dtype.kind
+    assert actual.dtype.itemsize >= expected.dtype.itemsize
     assert_same_components(actual, expected)
 
 

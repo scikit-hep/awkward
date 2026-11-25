@@ -52,3 +52,5 @@ WRAPPER(awkward_NumpyArray_subrange_equal_int64, int64_t)
 WRAPPER(awkward_NumpyArray_subrange_equal_uint64, uint64_t)
 WRAPPER(awkward_NumpyArray_subrange_equal_float32, float)
 WRAPPER(awkward_NumpyArray_subrange_equal_float64, double)
+
+WRAPPER(awkward_NumpyArray_subrange_equal_float128, long double)
