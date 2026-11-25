@@ -24,8 +24,6 @@ def nan_to_none(
 ):
     """Converts NaN ("not a number") into None, i.e. missing values with option-type.
 
-    On CPU, a complex value is missing if either component is NaN.
-
     For complex values, either a real or imaginary NaN makes the entire value
     missing. This rule is the same for NumPy, CuPy, JAX and typetracer layouts.
 

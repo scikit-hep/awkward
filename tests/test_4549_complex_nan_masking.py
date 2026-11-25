@@ -180,3 +180,41 @@ def test_short_row_sum_validation(kind, operation, pattern):
         np.ma.compressed(actual_numpy), np.ma.compressed(expected_numpy), equal_nan=True
     )
     assert result.layout.form == expected.layout.form
+
+
+@pytest.mark.parametrize("dtype", [np.complex64, np.complex128])
+@pytest.mark.parametrize("kind", ["numpy", "regular", "offsets"])
+@pytest.mark.parametrize("shape", [(2, 127), (2, 128), (63, 64), (64, 64), (2, 100000)])
+@pytest.mark.parametrize("operation", [ak.nansum, ak.nanmean])
+@pytest.mark.parametrize("has_nan", [False, True])
+@pytest.mark.parametrize("mask_identity", [False, True])
+@pytest.mark.parametrize("keepdims", [False, True])
+def test_matrix_accumulation_matches_masked_reduction(
+    dtype, kind, shape, operation, has_nan, mask_identity, keepdims
+):
+    data = np.full(shape, 0.1 + 0.1j, dtype=dtype)
+    if has_nan:
+        data[0, ::3] = complex(1, np.nan)
+        data[1] = complex(np.nan, 1)
+    if kind == "numpy":
+        array = ak.Array(data)
+    else:
+        # Exercise a nonzero offset and unused prefix/tail as well.
+        backing = np.concatenate(([999j], data.ravel(), [999j])).astype(dtype)
+        layout = ak.contents.ListOffsetArray(
+            ak.index.Index64(np.arange(1, data.size + 2, shape[1])),
+            ak.contents.NumpyArray(backing),
+        )
+        array = ak.Array(layout.to_RegularArray() if kind == "regular" else layout)
+    options = {"axis": -1, "keepdims": keepdims, "mask_identity": mask_identity}
+    ordinary = ak.sum if operation is ak.nansum else ak.mean
+    expected = ordinary(ak.nan_to_none(array), **options)
+    actual = operation(array, **options)
+    assert actual.layout.form == expected.layout.form
+    actual_np, expected_np = ak.to_numpy(actual), ak.to_numpy(expected)
+    np.testing.assert_array_equal(
+        np.ma.getmaskarray(actual_np), np.ma.getmaskarray(expected_np)
+    )
+    np.testing.assert_array_equal(
+        np.ma.compressed(actual_np), np.ma.compressed(expected_np)
+    )

@@ -8,8 +8,19 @@ from awkward._layout import HighLevelContext
 from awkward._namedaxis import _get_named_axis
 from awkward._nplikes.numpy import Numpy
 
-# CPU ufunc reductions with where are not exposed by NumpyLike.
+# This fast path only operates on ordinary CPU NumPy buffers.
 np = Numpy.instance()._module
+
+
+def _row_sums(data, ctx):
+    layout = ak.contents.RegularArray(
+        ak.contents.NumpyArray(data.reshape(-1)),
+        data.shape[1],
+        zeros_length=data.shape[0],
+    )
+    return ak.operations.ak_sum._impl(
+        layout, -1, False, False, False, ctx.behavior, ctx.attrs
+    ).data
 
 
 def try_reduce_dense(
@@ -85,19 +96,14 @@ def try_reduce_dense(
     # Addition propagates either NaN component. A NaN-free row sum proves
     # that all inputs in that row were valid, avoiding a full input-mask scan.
     # Infinities can also produce NaN sums; those rows take the masked path.
-    if data.shape[1] < 128 and data.size >= 4096:
-        sums = ak.operations.ak_sum._impl(
-            layout, axis, False, False, False, ctx.behavior, ctx.attrs
-        ).data
-    else:
-        with np.errstate(invalid="ignore", over="ignore"):
-            sums = np.add.reduce(data, axis=-1)
+    # Keep the accumulation order of ordinary Awkward reductions for all shapes.
+    sums = _row_sums(data, ctx)
     all_valid = not np.isnan(sums).any()
     if not all_valid:
         valid = np.isnan(data)
         np.logical_not(valid, out=valid)
-        with np.errstate(invalid="ignore", over="ignore"):
-            sums = np.add.reduce(data, axis=-1, where=valid)
+        # Replace missing values by the additive identity before the same kernel.
+        sums = _row_sums(np.where(valid, data, 0), ctx)
 
     if mean:
         counts = (
