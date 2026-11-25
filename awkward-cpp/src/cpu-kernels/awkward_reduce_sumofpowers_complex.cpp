@@ -1,3 +1,6 @@
+// Copyright (c) 2026, Ianna Osborne
+// All rights reserved.
+
 // BSD 3-Clause License; see https://github.com/scikit-hep/awkward/blob/main/LICENSE
 #include "awkward/kernels.h"
 #include <cmath>
