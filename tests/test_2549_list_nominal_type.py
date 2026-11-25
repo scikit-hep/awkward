@@ -83,7 +83,11 @@ def test_string_ufuncs():
 
     # Implement gt for a custom string type
     def string_greater(left, right):
-        return ak.num(left) > ak.num(right)
+        # ak.num does not count the characters of strings (#2555), so view
+        # them as plain lists of characters first
+        return ak.num(ak.without_parameters(left), axis=1) > ak.num(
+            ak.without_parameters(right), axis=1
+        )
 
     behavior = {(np.greater, "stringy", "stringy"): string_greater}
     result = np.greater(
