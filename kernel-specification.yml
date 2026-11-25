@@ -5532,6 +5532,40 @@ kernels:
               toptr[bin * 2] = re
               toptr[bin * 2 + 1] = im
     automatic-tests: true
+  - name: awkward_reduce_nansum_count_complex
+    specializations:
+      - name: awkward_reduce_nansum_count_complex64_complex64_64
+        args:
+          - {name: toptr, type: "List[float]", dir: out}
+          - {name: counts, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[float]]", dir: in, role: complexnansum-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: complexnansum-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: complexnansum-outlength}
+      - name: awkward_reduce_nansum_count_complex128_complex128_64
+        args:
+          - {name: toptr, type: "List[double]", dir: out}
+          - {name: counts, type: "List[int64_t]", dir: out}
+          - {name: fromptr, type: "Const[List[double]]", dir: in, role: complexnansum-fromptr}
+          - {name: offsets, type: "Const[List[int64_t]]", dir: in, role: complexnansum-offsets}
+          - {name: outlength, type: "int64_t", dir: in, role: complexnansum-outlength}
+    description: Sum and count complex values whose real and imaginary components are both non-NaN, in offset order. Input and output complex buffers use interleaved components. Empty segments have zero sum and count. Values outside the offset range are ignored.
+    definition: |
+      def awkward_reduce_nansum_count_complex(toptr, counts, fromptr, offsets, outlength):
+          for bin in range(outlength):
+              re = 0
+              im = 0
+              count = 0
+              for i in range(offsets[bin], offsets[bin + 1]):
+                  real = fromptr[i * 2]
+                  imag = fromptr[i * 2 + 1]
+                  if real == real and imag == imag:
+                      re += real
+                      im += imag
+                      count += 1
+              toptr[bin * 2] = re
+              toptr[bin * 2 + 1] = im
+              counts[bin] = count
+    automatic-tests: true
   - name: awkward_reduce_sum_bool
     specializations:
       - name: awkward_reduce_sum_bool_bool_64
