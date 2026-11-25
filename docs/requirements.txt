@@ -2,7 +2,6 @@ sphinx~=9.2
 PyYAML
 black
 pycparser
-lark-parser
 sphinx-copybutton
 sphinx-design
 sphinx-sitemap
