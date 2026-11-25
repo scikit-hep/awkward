@@ -946,6 +946,36 @@ def awkward_reduce_sum_int64_bool_64(
     )
 
 
+def awkward_reduce_nansum_count_complex(
+    result, counts, input_data, offsets_data, outlength
+):
+    if outlength == 0:
+        return
+    dtype = input_data.dtype.type
+
+    def sum_row(row):
+        real = dtype(0)
+        imag = dtype(0)
+        count = np.int64(0)
+        for i in range(offsets_data[row], offsets_data[row + 1]):
+            re = input_data[2 * i]
+            im = input_data[2 * i + 1]
+            if re == re and im == im:
+                real += re
+                imag += im
+                count += 1
+        result[2 * row] = real
+        result[2 * row + 1] = imag
+        return count
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=counts,
+        op=sum_row,
+        num_items=outlength,
+    )
+
+
 def awkward_reduce_sum_complex(
     result,
     input_data,

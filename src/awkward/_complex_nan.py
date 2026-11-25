@@ -12,17 +12,6 @@ from awkward._nplikes.numpy import Numpy
 np = Numpy.instance()._module
 
 
-def _row_sums(data, ctx):
-    layout = ak.contents.RegularArray(
-        ak.contents.NumpyArray(data.reshape(-1)),
-        data.shape[1],
-        zeros_length=data.shape[0],
-    )
-    return ak.operations.ak_sum._impl(
-        layout, -1, False, False, False, ctx.behavior, ctx.attrs
-    ).data
-
-
 def try_reduce_dense(
     array, axis, keepdims, mask_identity, highlevel, behavior, attrs, *, mean
 ):
@@ -93,24 +82,27 @@ def try_reduce_dense(
     ):
         return None
 
-    # Addition propagates either NaN component. A NaN-free row sum proves
-    # that all inputs in that row were valid, avoiding a full input-mask scan.
-    # Infinities can also produce NaN sums; those rows take the masked path.
-    # Keep the accumulation order of ordinary Awkward reductions for all shapes.
-    sums = _row_sums(data, ctx)
-    all_valid = not np.isnan(sums).any()
-    if not all_valid:
-        valid = np.isnan(data)
-        np.logical_not(valid, out=valid)
-        # Replace missing values by the additive identity before the same kernel.
-        sums = _row_sums(np.where(valid, data, 0), ctx)
+    sums = np.empty(data.shape[0], dtype=data.dtype)
+    counts = np.empty(data.shape[0], dtype=np.int64)
+    offsets = np.arange(data.shape[0] + 1, dtype=np.int64) * data.shape[1]
+    component = np.float32 if data.dtype == np.dtype(np.complex64) else np.float64
+    layout.backend.maybe_kernel_error(
+        layout.backend[
+            "awkward_reduce_nansum_count_complex",
+            component,
+            np.int64,
+            component,
+            np.int64,
+        ](
+            sums.view(component),
+            counts,
+            data.reshape(-1).view(component),
+            offsets,
+            data.shape[0],
+        )
+    )
 
     if mean:
-        counts = (
-            np.full(len(sums), data.shape[1], dtype=np.int64)
-            if all_valid
-            else np.count_nonzero(valid, axis=-1)
-        )
         empty = counts == 0
         values = np.full(len(sums), np.nan, dtype=np.complex128)
         with np.errstate(invalid="ignore", divide="ignore"):
@@ -127,11 +119,7 @@ def try_reduce_dense(
         out = ak.contents.NumpyArray(sums)
         if mask_identity:
             out = ak.contents.ByteMaskedArray(
-                ak.index.Index8(
-                    np.zeros(len(sums), dtype=np.int8)
-                    if all_valid
-                    else ~valid.any(axis=-1)
-                ),
+                ak.index.Index8(counts == 0),
                 out,
                 valid_when=False,
             )

@@ -1004,6 +1004,7 @@ cuda_kernels_tests = [
     "awkward_reduce_sum_bool",
     "awkward_reduce_sum_bool_complex",
     "awkward_reduce_sum_complex",
+    "awkward_reduce_nansum_count_complex",
     "awkward_reduce_sum_int32_bool_64",
     "awkward_reduce_sum_int64_bool_64",
     "awkward_reduce_prod",
