@@ -16,13 +16,33 @@ from awkward.operations import ak_mean, ak_sum
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--worker", choices=["baseline", "fused"])
+parser.add_argument("--before-library", type=Path)
+parser.add_argument(
+    "--patterns",
+    nargs="+",
+    choices=["finite", "strided", "last", "all"],
+    default=["finite", "strided"],
+)
 parser.add_argument("--output", type=Path, default=Path("results/fused-complex-nansum"))
 args = parser.parse_args()
 out = args.output
 out.mkdir(parents=True, exist_ok=True)
 if args.worker:
     variant = args.worker
-    if variant == "baseline":
+    if variant == "baseline" and args.before_library:
+        import ctypes
+
+        import awkward_cpp._kernel_signatures
+        import awkward_cpp.cpu_kernels
+
+        from awkward._backends.numpy import NumpyBackend
+
+        library = ctypes.CDLL(str(args.before_library.resolve()))
+        awkward_cpp.cpu_kernels.kernel = awkward_cpp._kernel_signatures.by_signature(
+            library
+        )
+        NumpyBackend.instance()._kernels.clear()
+    elif variant == "baseline":
         source = subprocess.check_output(
             ["git", "show", "82615e865:src/awkward/_complex_nan.py"], text=True
         )
@@ -33,14 +53,20 @@ if args.worker:
     rows = []
     for shape in [(4, 8), (16384, 16), (256, 1024), (16, 100000)]:
         for dtype in [np.complex64, np.complex128]:
-            for bad in [False, True]:
+            for pattern in args.patterns:
                 data = np.full(shape, 0.1 + 0.1j, dtype=dtype)
-                if bad:
+                if pattern == "strided":
                     data[:, ::100] = complex(1, np.nan)
+                elif pattern == "last":
+                    data[:, -1] = complex(1, np.nan)
+                elif pattern == "all":
+                    data[:] = complex(np.nan, 1)
                 source = ak.Array(data)
                 for op in [ak.nansum, ak.nanmean]:
                     ordinary = ak.sum if op is ak.nansum else ak.mean
-                    expected = ordinary(ak.nan_to_none(source), axis=-1)
+                    expected = ordinary(
+                        ak.nan_to_none(source), axis=-1, mask_identity=op is ak.nanmean
+                    )
                     np.testing.assert_array_equal(
                         ak.to_numpy(op(source, axis=-1)), ak.to_numpy(expected)
                     )
@@ -54,7 +80,7 @@ if args.worker:
                         samples.append((time.perf_counter_ns() - t) / 5000)
                     rows.append(
                         {
-                            "case": f"{shape[0]}x{shape[1]}-{np.dtype(dtype).name}-{'nan' if bad else 'finite'}-{op.__name__}",
+                            "case": f"{shape[0]}x{shape[1]}-{np.dtype(dtype).name}-{pattern}-{op.__name__}",
                             "us": statistics.median(samples),
                             "samples": samples,
                         }
@@ -76,7 +102,21 @@ for pair in range(3):
     for variant in ["baseline", "fused"] if pair % 2 == 0 else ["fused", "baseline"]:
         r = json.loads(
             subprocess.check_output(
-                [sys.executable, __file__, "--worker", variant, "--output", str(out)],
+                [
+                    sys.executable,
+                    __file__,
+                    "--worker",
+                    variant,
+                    "--output",
+                    str(out),
+                    "--patterns",
+                    *args.patterns,
+                ]
+                + (
+                    ["--before-library", str(args.before_library)]
+                    if args.before_library
+                    else []
+                ),
                 text=True,
             )
         )
@@ -85,7 +125,12 @@ for pair in range(3):
 lines = [
     "# Fused native complex NaN prototype",
     "",
-    "Baseline: PR #4549 at 82615e865; candidate: fused native sum/count kernel. Three alternating fresh-process pairs (B/C, C/B, B/C), seven batches of five calls, three warmups. Inputs and exact parity checks outside timing. No profiling. NumPy matrix inputs, axis=-1, default options. NaN pattern: every 100th entry in each row. All outputs checked exactly against ordinary masked sum/mean. Local CPU measurements; not against main.",
+    (
+        "Baseline: previous native library " + str(args.before_library)
+        if args.before_library
+        else "Baseline: PR #4549 helper at 82615e865"
+    )
+    + "; candidate: current fused native sum/count kernel. Three alternating fresh-process pairs (B/C, C/B, B/C), seven batches of five calls, three warmups. Inputs and exact parity checks outside timing. No profiling. NumPy matrix inputs, axis=-1, default options. Strided NaNs: every 100th entry per row; last: only the final entry per row; all: every entry. All outputs checked exactly against ordinary masked sum/mean. Local CPU measurements; not against main.",
     "",
     "| Case | Baseline µs | Fused µs | Candidate / baseline |",
     "| --- | ---: | ---: | ---: |",

@@ -3,10 +3,14 @@
 Branch: `ianna/fused-complex-nansum`, based on PR #4549 at `82615e865`.
 This is a prototype, not a replacement proposed for the main branch yet.
 
-`awkward_reduce_nansum_count_complex` traverses each offset segment once,
-ignores an entire complex value if either component is NaN, accumulates real
-and imaginary components separately in input order, and returns the number of
-valid values. Infinities are retained. Empty and all-NaN segments have zero sum
+`awkward_reduce_nansum_count_complex` ignores an entire complex value if
+either component is NaN, accumulates real and imaginary components separately
+in input order, and returns the number of valid values. The CPU implementation
+checks blocks of eight values in long segments (at least 128 values). Valid
+blocks use an unchecked addition loop; other blocks skip invalid values. Short
+segments substitute the additive identity for invalid values without a branch.
+There is no input-sized mask or copy, no regrouping of partial sums, and no
+whole-row replay. Block-local reads remain cache-local. Infinities are retained. Empty and all-NaN segments have zero sum
 and count. Both complex64 and complex128 use their ordinary accumulator dtype.
 
 The canonical signature and reference are in `kernel-specification.yml`.
@@ -15,7 +19,7 @@ correctness-oriented transform with one thread per segment; its callback state
 is not prepared/reused yet, and long-list parallelism is not optimized.
 CUDA parity tests and generated tests require a GPU and have not run locally.
 
-The CPU matrix helper in #4549 uses the kernel for both nansum and unweighted
+The CPU matrix helper on this experimental branch uses the kernel for both nansum and unweighted
 nanmean. It avoids the input-sized mask, zero-filled complex copy, and second
 reduction. Counts preserve mask_identity and mean behavior. General ragged,
 virtual, parameterized and other-backend paths are unchanged.
@@ -54,12 +58,33 @@ seven batches of five calls and three warmups; parity checks outside timing.
 This isolates the helper change, not a whole-checkout comparison against main.
 See `results-local.md`. Raw process samples are written under `--output`.
 
+To compare native kernels before and after an update, first save the old
+`awkward_cpp/lib/libawkward-cpu-kernels` shared library, rebuild/install the new
+library, then run:
+
+```bash
+python studies/fused_complex_nansum/compare.py \
+  --before-library /absolute/path/to/old/libawkward-cpu-kernels.so \
+  --patterns finite strided last all --output results/fused-native-update
+```
+
+Use `.dylib` on macOS or `.dll` on Windows. The saved library must expose the
+same generated signatures as the current library (the new fused symbols were
+introduced at `625dcf542`). This mode keeps the Python helper identical and
+loads the old native library only in baseline worker processes.
+`results-native-update.md` compares against the original fused kernel at
+`625dcf542`. `results-initial.md` retains the initial experiment for history.
+
 Local validation: Python 3.11.14, NumPy 2.4.6, macOS arm64, locally built
 awkward-cpp 59. Selected CPU/public, generated reference and generated native
-suites: 680 passed, 19 existing/platform skips. Ruff and diff checks pass.
+suites: 762 passed, 19 existing/platform skips. Ruff and diff checks pass.
 No GPU/JAX execution or GPU performance claim.
 
-The prototype is faster on tiny matrices and NaN-containing matrices, but
-finite large matrices regress (up to about 2x in this sample). Do not promote it
-as a universal optimization. Investigate the added per-element validity/count
-cost while preserving summation order before proposing production dispatch.
+The optimized kernel roughly halves the first fused kernel's wide-row cost.
+Against #4549 at `82615e865`, the latest paired complex128 finite nansum cases
+range from 7% faster (256 x 1024) to about 5% slower (16384 x 16); tiny matrices
+are substantially faster. Complex64 finite short rows remain 21% slower in
+this sample. Sparse-NaN inputs retain large gains. These are local results,
+not a universal speedup; validate on additional CPUs and GPU parity before
+proposing production dispatch. CUDA implementation and package versions are
+unchanged by this CPU optimization.
