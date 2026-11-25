@@ -369,6 +369,123 @@ def _float_order_keys(cp, values, ascending):
     return _float_order_key_kernel(cp, width)(u, nan_sentinel)
 
 
+def _string_order(stringdata, stringstarts, stringstops, run_starts, length, ascending):
+    from cuda.compute import merge_sort
+
+    order = cp.empty(length, dtype=cp.int64)
+    if length == 0:
+        return order
+
+    def less(left, right):
+        # Group runs by position, not parent value: a parent may reappear later.
+        if run_starts[left] != run_starts[right]:
+            return np.int8(run_starts[left] < run_starts[right])
+        left_start = stringstarts[left]
+        right_start = stringstarts[right]
+        left_length = stringstops[left] - left_start
+        right_length = stringstops[right] - right_start
+        common = min(left_length, right_length)
+        i = 0
+        while i < common:
+            a = stringdata[left_start + i]
+            b = stringdata[right_start + i]
+            if a != b:
+                return np.int8(a < b if ascending else a > b)
+            i += 1
+        if left_length != right_length:
+            return np.int8(
+                left_length < right_length if ascending else left_length > right_length
+            )
+        # A total order makes ties stable even if the underlying sort is not.
+        # Providing stable ties also satisfies the unstable kernel contract.
+        return np.int8(left < right)
+
+    merge_sort(
+        d_in_keys=CountingIterator(np.int64(0)),
+        d_out_keys=order,
+        num_items=length,
+        op=less,
+    )
+    return order
+
+
+def awkward_ListOffsetArray_argsort_strings(
+    tocarry,
+    fromparents,
+    length,
+    stringdata,
+    stringstarts,
+    stringstops,
+    is_stable,
+    is_ascending,
+    is_local,
+):
+    if length == 0:
+        return
+    indices = cp.arange(length, dtype=cp.int64)
+    boundaries = cp.empty(length, dtype=cp.bool_)
+    boundaries[0] = True
+    boundaries[1:] = fromparents[1:length] != fromparents[: length - 1]
+    markers = cp.where(boundaries, indices, np.int64(0))
+    run_starts = cp.empty(length, dtype=cp.int64)
+    inclusive_scan(
+        d_in=markers,
+        d_out=run_starts,
+        op=OpKind.MAXIMUM,
+        init_value=np.asarray(0, dtype=np.int64),
+        num_items=length,
+    )
+    order = _string_order(
+        stringdata, stringstarts, stringstops, run_starts, length, is_ascending
+    )
+    tocarry[:length] = order - run_starts if is_local else order
+
+
+def awkward_NumpyArray_sort_asstrings_uint8(
+    toptr,
+    fromptr,
+    offsets,
+    offsetslength,
+    outoffsets,
+    ascending,
+    stable,
+):
+    outoffsets[0] = 0
+    length = max(0, offsetslength - 1)
+    if length == 0:
+        return
+    starts = offsets[:length]
+    stops = offsets[1:offsetslength]
+    run_starts = cp.zeros(length, dtype=cp.int64)
+    order = _string_order(fromptr, starts, stops, run_starts, length, ascending)
+    lengths = (stops - starts)[order]
+    inclusive_scan(
+        d_in=lengths,
+        d_out=outoffsets[1:offsetslength],
+        op=OpKind.PLUS,
+        init_value=np.asarray(0, dtype=np.int64),
+        num_items=length,
+    )
+
+    def copy_string(i):
+        source = order[i]
+        start = starts[source]
+        stop = stops[source]
+        destination = outoffsets[i]
+        j = start
+        while j < stop:
+            toptr[destination + j - start] = fromptr[j]
+            j += 1
+        return np.int8(0)
+
+    unary_transform(
+        d_in=CountingIterator(np.int64(0)),
+        d_out=DiscardIterator(),
+        op=copy_string,
+        num_items=length,
+    )
+
+
 def segmented_sort(
     toptr,
     fromptr,
