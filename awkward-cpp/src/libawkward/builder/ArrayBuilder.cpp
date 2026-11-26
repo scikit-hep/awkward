@@ -16,11 +16,11 @@ namespace awkward {
       : builder_(UnknownBuilder::fromempty(options)) { }
 
   const std::string
-  ArrayBuilder::to_buffers(BuffersContainer& container, int64_t& form_key_id) const {
+  ArrayBuilder::to_buffers(BuffersContainer& container, std::int64_t& form_key_id) const {
     return builder_.get()->to_buffers(container, form_key_id);
   }
 
-  int64_t
+  std::int64_t
   ArrayBuilder::length() const {
     return builder_.get()->length();
   }
@@ -43,7 +43,7 @@ namespace awkward {
   }
 
   void
-  ArrayBuilder::integer(int64_t x) {
+  ArrayBuilder::integer(std::int64_t x) {
     maybeupdate(builder_.get()->integer(x));
   }
 
@@ -58,12 +58,12 @@ namespace awkward {
   }
 
   void
-  ArrayBuilder::datetime(int64_t x, const std::string& unit) {
+  ArrayBuilder::datetime(std::int64_t x, const std::string& unit) {
     maybeupdate(builder_.get()->datetime(x, unit));
   }
 
   void
-  ArrayBuilder::timedelta(int64_t x, const std::string& unit) {
+  ArrayBuilder::timedelta(std::int64_t x, const std::string& unit) {
     maybeupdate(builder_.get()->timedelta(x, unit));
   }
 
@@ -73,13 +73,13 @@ namespace awkward {
   }
 
   void
-  ArrayBuilder::bytestring(const char* x, int64_t length) {
+  ArrayBuilder::bytestring(const char* x, std::int64_t length) {
     maybeupdate(builder_.get()->string(x, length, no_encoding));
   }
 
   void
   ArrayBuilder::bytestring(const std::string& x) {
-    bytestring(x.c_str(), (int64_t)x.length());
+    bytestring(x.c_str(), (std::int64_t)x.length());
   }
 
   void
@@ -88,13 +88,13 @@ namespace awkward {
   }
 
   void
-  ArrayBuilder::string(const char* x, int64_t length) {
+  ArrayBuilder::string(const char* x, std::int64_t length) {
     maybeupdate(builder_.get()->string(x, length, utf8_encoding));
   }
 
   void
   ArrayBuilder::string(const std::string& x) {
-    string(x.c_str(), (int64_t)x.length());
+    string(x.c_str(), (std::int64_t)x.length());
   }
 
   void
@@ -114,12 +114,12 @@ namespace awkward {
   }
 
   void
-  ArrayBuilder::begintuple(int64_t numfields) {
+  ArrayBuilder::begintuple(std::int64_t numfields) {
     maybeupdate(builder_.get()->begintuple(numfields));
   }
 
   void
-  ArrayBuilder::index(int64_t index) {
+  ArrayBuilder::index(std::int64_t index) {
     maybeupdate(builder_.get()->index(index));
   }
 
@@ -182,7 +182,7 @@ namespace awkward {
 ////////// extern C interface
 
 uint8_t awkward_ArrayBuilder_length(void* arraybuilder,
-                                    int64_t* result) {
+                                    std::int64_t* result) {
   awkward::ArrayBuilder* obj =
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
@@ -232,7 +232,7 @@ uint8_t awkward_ArrayBuilder_boolean(void* arraybuilder,
 }
 
 uint8_t awkward_ArrayBuilder_integer(void* arraybuilder,
-                                     int64_t x) {
+                                     std::int64_t x) {
   awkward::ArrayBuilder* obj =
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
@@ -272,7 +272,7 @@ uint8_t awkward_ArrayBuilder_complex(void* arraybuilder,
 }
 
 uint8_t awkward_ArrayBuilder_datetime(void* arraybuilder,
-                                      int64_t x,
+                                      std::int64_t x,
                                       const char* unit) {
   awkward::ArrayBuilder* obj =
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
@@ -287,7 +287,7 @@ uint8_t awkward_ArrayBuilder_datetime(void* arraybuilder,
 }
 
 uint8_t awkward_ArrayBuilder_timedelta(void* arraybuilder,
-                                       int64_t x,
+                                       std::int64_t x,
                                        const char* unit) {
   awkward::ArrayBuilder* obj =
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
@@ -316,7 +316,7 @@ uint8_t awkward_ArrayBuilder_bytestring(void* arraybuilder,
 
 uint8_t awkward_ArrayBuilder_bytestring_length(void* arraybuilder,
                                                const char* x,
-                                               int64_t length) {
+                                               std::int64_t length) {
   awkward::ArrayBuilder* obj =
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
@@ -343,7 +343,7 @@ uint8_t awkward_ArrayBuilder_string(void* arraybuilder,
 
 uint8_t awkward_ArrayBuilder_string_length(void* arraybuilder,
                                            const char* x,
-                                           int64_t length) {
+                                           std::int64_t length) {
   awkward::ArrayBuilder* obj =
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
@@ -380,7 +380,7 @@ uint8_t awkward_ArrayBuilder_endlist(void* arraybuilder) {
 }
 
 uint8_t awkward_ArrayBuilder_begintuple(void* arraybuilder,
-                                        int64_t numfields) {
+                                        std::int64_t numfields) {
   awkward::ArrayBuilder* obj =
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
@@ -393,7 +393,7 @@ uint8_t awkward_ArrayBuilder_begintuple(void* arraybuilder,
 }
 
 uint8_t awkward_ArrayBuilder_index(void* arraybuilder,
-                                   int64_t index) {
+                                   std::int64_t index) {
   awkward::ArrayBuilder* obj =
     reinterpret_cast<awkward::ArrayBuilder*>(arraybuilder);
   try {
