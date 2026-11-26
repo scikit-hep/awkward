@@ -137,3 +137,14 @@ type: 50000 * var * float64
 ## JIT-compilation in Numba
 
 Just as Awkward Arrays in main memory can be iterated over in functions that have been JIT-compiled by [Numba](https://numba.pydata.org/), Awkward Arrays on GPUs can be iterated over in functions JIT-compiled by `@numba.cuda.jit`. The same restrictions apply (iteration only; no `ak.*` functions); see {doc}`how-to-use-in-numba-cuda.md`.
+
+## Reusing CUDA compilation
+
+Some operations can reuse compiled CUDA code even when offsets, buffer
+addresses or input lengths change. Compatible device,
+CUDA context and input/output dtypes are still required; the first use of a new
+signature can incur compilation cost.
+
+The cuda.compute backend uses the legacy default stream. Applications using
+non-blocking CuPy streams must explicitly order their producers and consumers
+with that stream.
