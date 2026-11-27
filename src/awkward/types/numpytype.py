@@ -48,8 +48,8 @@ def dtype_to_primitive(dtype):
     out = _dtype_to_primitive_dict.get(dtype)
     if out is not None:
         return out
-    if dtype.kind in "mM" and dtype == dtype.newbyteorder("="):
-        return str(dtype)
+    if dtype.kind in "mM" and dtype.isnative:
+        return _time_dtype_to_primitive(dtype.str)
     else:
         raise TypeError(
             "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
@@ -57,6 +57,12 @@ def dtype_to_primitive(dtype):
                 repr(dtype), ", ".join(_primitive_to_dtype_dict)
             )
         )
+
+
+# keyed by dtype.str because time dtypes share a hash and compare unreliably
+@lru_cache
+def _time_dtype_to_primitive(typestr):
+    return str(np.dtype(typestr))
 
 
 _primitive_to_dtype_datetime = re.compile(
