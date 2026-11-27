@@ -44,20 +44,25 @@ def primitive_to_dtype(primitive):
         return out
 
 
-@lru_cache
 def dtype_to_primitive(dtype):
-    if dtype.kind in "mM" and dtype == dtype.newbyteorder("="):
-        return str(dtype)
-    else:
-        out = _dtype_to_primitive_dict.get(dtype)
-        if out is None:
-            raise TypeError(
-                "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
-                "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
-                    repr(dtype), ", ".join(_primitive_to_dtype_dict)
-                )
-            )
+    out = _dtype_to_primitive_dict.get(dtype)
+    if out is not None:
         return out
+    if dtype.kind in "mM" and dtype.isnative:
+        return _time_dtype_to_primitive(dtype.str)
+    else:
+        raise TypeError(
+            "unsupported dtype: {}. Must be one of\n\n    {}\n\nor a "
+            "datetime64/timedelta64 with units (e.g. 'datetime64[15us]')".format(
+                repr(dtype), ", ".join(_primitive_to_dtype_dict)
+            )
+        )
+
+
+# keyed by dtype.str because time dtypes share a hash and compare unreliably
+@lru_cache
+def _time_dtype_to_primitive(typestr):
+    return str(np.dtype(typestr))
 
 
 _primitive_to_dtype_datetime = re.compile(
@@ -93,7 +98,9 @@ if hasattr(np, "complex256"):
 
 _dtype_to_primitive_dict = {}
 for primitive, dtype in _primitive_to_dtype_dict.items():
-    _dtype_to_primitive_dict[dtype] = primitive
+    # time dtypes share a hash and compare unreliably
+    if dtype.kind not in "mM":
+        _dtype_to_primitive_dict[dtype] = primitive
 
 
 @final
