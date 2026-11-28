@@ -44,7 +44,12 @@ def is_integer_like(x) -> bool:
         return not isinstance(x, bool)
     # Scalar arrays
     elif is_array_like(x):
-        return np.issubdtype(x.dtype, np.integer) and x.ndim == 0
+        # dtypes that NumPy does not know, like pandas extension dtypes, are not integers
+        return (
+            isinstance(x.dtype, np.dtype)
+            and np.issubdtype(x.dtype, np.integer)
+            and x.ndim == 0
+        )
     # Other things that support lossless integer conversion (__index__ protocol)
     else:
         return hasattr(x, "__index__")
