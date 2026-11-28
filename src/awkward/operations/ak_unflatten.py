@@ -242,6 +242,25 @@ def _impl(array, counts, axis, highlevel, behavior, attrs):
                         options,
                     )
                 )
+            elif (
+                layout.is_union
+                and current_offsets is not None
+                and layout.backend.nplike.known_data
+                and layout.length != 0
+            ):
+                # Consume counts in logical order, including repeated union indices.
+                contents = []
+                for i in range(layout.length):
+                    content = layout.contents[layout.tags[i]]
+                    index = layout.index[i]
+                    contents.append(
+                        content[index : index + 1]._recursively_apply(
+                            action, depth, depth_context, lateral_context, options
+                        )
+                    )
+                return ak.operations.concatenate(contents, highlevel=False).copy(
+                    parameters=layout.parameters
+                )
             elif layout.is_union or layout.is_record:
                 return layout.copy(
                     contents=[
